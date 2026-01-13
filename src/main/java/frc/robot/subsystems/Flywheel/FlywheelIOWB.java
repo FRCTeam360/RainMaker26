@@ -4,14 +4,16 @@
 
 package frc.robot.subsystems.Flywheel;
 
+import com.revrobotics.spark.SparkMax;
+
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class FlywheelIOWB extends SubsystemBase {
-  /** Creates a new FlywheelIOWB. */
-  public FlywheelIOWB() {}
+public class FlywheelIOWB implements FlywheelIO {
 
-  @Override
-  public void periodic() {
-    // This method will be called once per scheduler run
+  // need motor vvvvvv
+  private final SparkMax motor = new SparkMax(0, null);
+
+  public void setDutyCycle(double dutyCycle) {
+    motor.set(dutyCycle);
   }
 }
