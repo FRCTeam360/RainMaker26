@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -65,7 +66,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             .withDeadband(maxSpeed.in(MetersPerSecond) * 0.01)
             .withRotationalDeadband(maxAngularVelocity.in(RadiansPerSecond) * 0.01);
     // .withDriveRequestType(DriveRequestType.Velocity); // Use closed-loop control for drive motors
-
+        System.out.println("runnn");
     return this.applyRequest(
             () ->
                 drive
@@ -84,7 +85,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             // counterclockwise
             // with negative X
             // (left)
-        );
+        ).alongWith(new InstantCommand(() -> System.out.println("running")));
   }
 
     /* SysId routine for characterizing translation. This is used to find PID gains for the drive motors. */
