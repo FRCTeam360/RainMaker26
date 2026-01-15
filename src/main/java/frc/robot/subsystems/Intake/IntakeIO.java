@@ -6,12 +6,20 @@ package frc.robot.subsystems.Intake;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class IntakeIO extends SubsystemBase {
+public interface IntakeIO  {
   /** Creates a new IntakeIO. */
-  public IntakeIO() {}
-
-  @Override
-  public void periodic() {
-    // This method will be called once per scheduler run
+  
+  public static class IntakeIOInputs {
+    public double statorCurrent = 0.0;
+    public double supplyCurrent = 0.0;
+    public double voltage = 0.0;
+    public double velocity = 0.0;
+    public double position = 0.0;
+    public boolean sensor = false;
+    // insert inputs
   }
+
+  public void setDutyCycle(double value);
+
+  public void stop();
 }
