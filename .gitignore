@@ -188,3 +188,6 @@ compile_commands.json
 
 # temp files
 .~lock.*
+
+# claude files
+.claude/
