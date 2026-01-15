@@ -4,14 +4,6 @@
 
 package frc.robot.subsystems.Flywheel;
 
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
-public class FlywheelIO extends SubsystemBase {
-  /** Creates a new FlywheelIO. */
-  public FlywheelIO() {}
-
-  @Override
-  public void periodic() {
-    // This method will be called once per scheduler run
-  }
+public interface FlywheelIO {
+  public void setDutyCycle(double duty);
 }

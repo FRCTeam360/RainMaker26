@@ -1,0 +1,171 @@
+# GitHub Issues CSV Import using GitHub CLI
+
+This package includes everything you need to import issues from a spreadsheet into GitHub using the GitHub CLI.
+
+## Files Included
+
+- `github_issues_template.csv` - Template CSV file with example issues
+- `import_issues.sh` - Bash script to import issues from CSV (Mac/Linux)
+- `import_issues.ps1` - PowerShell script to import issues from CSV (Windows)
+- `README.md` - This file
+
+## Prerequisites
+
+1. **Install GitHub CLI** (if not already installed):
+   - **Windows (Chocolatey)**: `choco install gh`
+   - **Windows (WinGet)**: `winget install --id GitHub.cli`
+   - **Windows (Manual)**: Download from https://cli.github.com/
+   - **macOS**: `brew install gh`
+   - **Linux**: See https://github.com/cli/cli#installation
+
+2. **Authenticate with GitHub**:
+   ```bash
+   gh auth login
+   ```
+   Follow the prompts to authenticate.
+
+## CSV Format
+
+Your CSV file should have these columns (header row required):
+
+| Column    | Required | Description            | Example                       |
+| --------- | -------- | ---------------------- | ----------------------------- |
+| title     | Yes      | Issue title            | "Fix login bug"               |
+| body      | No       | Issue description      | "Users can't login on mobile" |
+| labels    | No       | Comma-separated labels | "bug,high-priority"           |
+| assignee  | No       | GitHub username        | "johndoe"                     |
+| milestone | No       | Milestone name         | "Sprint 1"                    |
+
+**Important Notes:**
+
+- Fields with commas must be wrapped in quotes
+- Labels within a field are separated by commas without spaces: `"bug,feature"`
+- Leave fields empty if not needed (but keep the commas)
+- Milestones must already exist in your repository
+
+## Usage
+
+### Windows (PowerShell)
+
+#### Option 1: From within your repository directory
+
+```powershell
+cd C:\path\to\your\repo
+.\import_issues.ps1 github_issues_template.csv
+```
+
+#### Option 2: Specify repository explicitly
+
+```powershell
+.\import_issues.ps1 github_issues_template.csv owner/repo-name
+```
+
+#### Option 3: Use a custom CSV file
+
+```powershell
+.\import_issues.ps1 my_custom_issues.csv owner/repo-name
+```
+
+## Step-by-Step Instructions
+
+1. **Edit the CSV template** with your issues:
+   - Open `github_issues_template.csv` in Excel, Google Sheets, or any spreadsheet app
+   - Replace the example issues with your own
+   - Save as CSV
+
+2. **Make sure you're authenticated**:
+
+   ```bash
+   gh auth status
+   ```
+
+3. **Run the import script**:
+
+   **Windows (PowerShell):**
+
+   ```powershell
+   .\import_issues.ps1 github_issues_template.csv owner/repo-name
+   ```
+
+   **Mac/Linux (Bash):**
+
+   ```bash
+   ./import_issues.sh github_issues_template.csv owner/repo-name
+   ```
+
+4. **Check your repository** - issues should now appear!
+
+## Adding Issues to a Project Board
+
+After creating issues, you can add them to a project board:
+
+### Using GitHub CLI:
+
+```bash
+# List your projects
+gh project list --owner FRCTeam360
+
+# Add issues to a project (requires project number)
+gh project item-add PROJECT_NUMBER --owner FRCTeam360 --url ISSUE_URL
+```
+
+### Using the GitHub Web Interface:
+
+1. Go to your repository's "Projects" tab
+2. Open your project board
+3. Click "+ Add item" and search for your newly created issues
+4. Add them to the appropriate columns
+
+## Troubleshooting
+
+**"gh: command not found" or "gh is not recognized"**
+
+- GitHub CLI is not installed. See prerequisites above.
+- On Windows, you may need to restart PowerShell after installation.
+
+**"Error: not authorized"**
+
+- Run `gh auth login` to authenticate
+
+**PowerShell Execution Policy Error (Windows)**
+
+- If you get "cannot be loaded because running scripts is disabled":
+  ```powershell
+  Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+  ```
+
+**"Error: milestone not found"**
+
+- Create the milestone in your repository first, or remove milestone values from CSV
+
+**"Error: label not found"**
+
+- Labels are auto-created, but if you have label restrictions, create them first
+
+**Rate limiting**
+
+- The script includes a 1-second delay between issues
+- For large imports (100+ issues), consider breaking into smaller batches
+
+## Tips
+
+- **Test first**: Create a test repository and import a few sample issues to verify
+- **Backup**: Keep your CSV file as a backup/record
+- **Labels**: Use consistent label names across issues for better organization
+- **Assignees**: Make sure usernames exist and have access to the repository
+- **Bulk editing**: After import, you can bulk-edit issues in the GitHub web interface
+
+## Example CSV Content
+
+```csv
+title,body,labels,assignee,milestone
+"Setup CI/CD","Configure GitHub Actions","devops,automation",,Sprint 1
+"Fix mobile bug","Login fails on iOS","bug,high-priority",johndoe,Sprint 1
+"Add docs","Write API documentation","documentation",,Sprint 2
+```
+
+## Need Help?
+
+- GitHub CLI Docs: https://cli.github.com/manual/
+- GitHub Issues Docs: https://docs.github.com/en/issues
+- GitHub Projects Docs: https://docs.github.com/en/issues/planning-and-tracking-with-projects
