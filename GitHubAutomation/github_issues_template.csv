@@ -1,11 +1,1 @@
-title,body,labels,assignee,milestone
-"Setup project repository","Create initial repository structure with README and basic configuration files","setup,infrastructure",,
-"Design database schema","Design and document the database schema for the application","database,design",,Sprint 1
-"Implement user authentication","Build login and registration functionality with JWT tokens","feature,backend,security",johndoe,Sprint 1
-"Create homepage UI","Design and implement the landing page interface","frontend,ui",,Sprint 1
-"Write API documentation","Document all REST API endpoints with examples","documentation",,Sprint 2
-"Setup CI/CD pipeline","Configure GitHub Actions for automated testing and deployment","devops,automation",,Sprint 2
-"Bug: Login fails on mobile","Users report login button not responding on mobile devices","bug,high-priority",janedoe,Sprint 1
-"Add unit tests","Write comprehensive unit tests for core modules","testing,quality",,Sprint 2
-"Performance optimization","Optimize database queries and API response times","performance,enhancement",,Sprint 3
-"User feedback form","Create a feedback form for users to submit suggestions","feature,frontend",,Sprint 3
+title,body,labels,assignee,milestone,epic

@@ -35,6 +35,7 @@ Your CSV file should have these columns (header row required):
 | labels    | No       | Comma-separated labels | "bug,high-priority"           |
 | assignee  | No       | GitHub username        | "johndoe"                     |
 | milestone | No       | Milestone name         | "Sprint 1"                    |
+| epic      | No       | Project board Epic     | "Subsystems"                  |
 
 **Important Notes:**
 
@@ -42,6 +43,7 @@ Your CSV file should have these columns (header row required):
 - Labels within a field are separated by commas without spaces: `"bug,feature"`
 - Leave fields empty if not needed (but keep the commas)
 - Milestones must already exist in your repository
+- Epic must match one of: `Architecture`, `Subsystems`, `Automation`, `Autos`, `Tooling`, `Testing/Prototyping`, `Logging`, `Simulations`, `Vision`, `Administration`
 
 ## Usage
 
@@ -97,19 +99,56 @@ cd C:\path\to\your\repo
 
 ## Adding Issues to a Project Board
 
-After creating issues, you can add them to a project board:
+The PowerShell script automatically adds created issues to the **2026 Rebuilt Season** project board and sets the **Epic** field if specified. You'll see confirmation in the output:
 
-### Using GitHub CLI:
+```
+Creating issue: Some Task
+[OK] Created successfully
+  -> Added to Rebuilt board
+  -> Epic set to: Subsystems
+```
+
+### Changing the Project Board
+
+To use a different project board, first list available projects:
 
 ```bash
-# List your projects
 gh project list --owner FRCTeam360
+```
 
-# Add issues to a project (requires project number)
+This outputs something like:
+
+```
+NUMBER  NAME                  STATE  ID
+2       2026 Rebuilt Season   open   PVT_kwDOAKOwYc4BMevW
+1       Preseason Kanban      open   PVT_kwDOAKOwYc4BCH01
+```
+
+Then update the project configuration variables at the top of `import_issues.ps1`:
+
+```powershell
+$ProjectOwner = "FRCTeam360"
+$ProjectNumber = 2
+$ProjectId = "PVT_kwDOAKOwYc4BMevW"
+```
+
+To update Epic options for a different project, run:
+
+```bash
+gh project field-list PROJECT_NUMBER --owner FRCTeam360 --format json
+```
+
+### Manual Addition (Alternative)
+
+You can also manually add issues to a project board:
+
+**Using GitHub CLI:**
+
+```bash
 gh project item-add PROJECT_NUMBER --owner FRCTeam360 --url ISSUE_URL
 ```
 
-### Using the GitHub Web Interface:
+**Using the GitHub Web Interface:**
 
 1. Go to your repository's "Projects" tab
 2. Open your project board
@@ -158,10 +197,10 @@ gh project item-add PROJECT_NUMBER --owner FRCTeam360 --url ISSUE_URL
 ## Example CSV Content
 
 ```csv
-title,body,labels,assignee,milestone
-"Setup CI/CD","Configure GitHub Actions","devops,automation",,Sprint 1
-"Fix mobile bug","Login fails on iOS","bug,high-priority",johndoe,Sprint 1
-"Add docs","Write API documentation","documentation",,Sprint 2
+title,body,labels,assignee,milestone,epic
+"Setup CI/CD","Configure GitHub Actions","devops,automation",,Sprint 1,Tooling
+"Fix mobile bug","Login fails on iOS","bug,high-priority",johndoe,Sprint 1,Subsystems
+"Add docs","Write API documentation","documentation",,Sprint 2,Administration
 ```
 
 ## Need Help?
