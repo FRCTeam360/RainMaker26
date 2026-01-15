@@ -83,48 +83,54 @@ foreach ($issue in $issues) {
     
     Write-Host "Creating issue: $($issue.title)" -ForegroundColor Yellow
     
-    # Build gh issue create command arguments
-    $args = @("issue", "create", "--title", $issue.title)
-    
+    # Build gh issue create command arguments using ArrayList for better control
+    $ghArgs = [System.Collections.ArrayList]@()
+    [void]$ghArgs.Add("issue")
+    [void]$ghArgs.Add("create")
+    [void]$ghArgs.Add("--title")
+    [void]$ghArgs.Add($issue.title)
+
     # Add repository if specified
     if (-not [string]::IsNullOrWhiteSpace($Repo)) {
-        $args += "--repo"
-        $args += $Repo
+        [void]$ghArgs.Add("--repo")
+        [void]$ghArgs.Add($Repo)
     }
-    
-    # Add body if present
+
+    # Add body (required for non-interactive mode, use space if empty)
+    [void]$ghArgs.Add("--body")
     if (-not [string]::IsNullOrWhiteSpace($issue.body)) {
-        $args += "--body"
-        $args += $issue.body
+        [void]$ghArgs.Add($issue.body)
+    } else {
+        [void]$ghArgs.Add(" ")
     }
-    
+
     # Add labels if present
     if (-not [string]::IsNullOrWhiteSpace($issue.labels)) {
         # Split labels by comma and add each one
         $labels = $issue.labels -split ',' | ForEach-Object { $_.Trim() }
         foreach ($label in $labels) {
             if (-not [string]::IsNullOrWhiteSpace($label)) {
-                $args += "--label"
-                $args += $label
+                [void]$ghArgs.Add("--label")
+                [void]$ghArgs.Add($label)
             }
         }
     }
-    
+
     # Add assignee if present
     if (-not [string]::IsNullOrWhiteSpace($issue.assignee)) {
-        $args += "--assignee"
-        $args += $issue.assignee
+        [void]$ghArgs.Add("--assignee")
+        [void]$ghArgs.Add($issue.assignee)
     }
-    
+
     # Add milestone if present
     if (-not [string]::IsNullOrWhiteSpace($issue.milestone)) {
-        $args += "--milestone"
-        $args += $issue.milestone
+        [void]$ghArgs.Add("--milestone")
+        [void]$ghArgs.Add($issue.milestone)
     }
     
     # Execute command
     try {
-        $output = & gh @args 2>&1
+        $output = & gh @ghArgs 2>&1
         if ($LASTEXITCODE -eq 0) {
             Write-Host "[OK] Created successfully" -ForegroundColor Green
             $issuesCreated++
