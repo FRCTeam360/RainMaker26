@@ -16,12 +16,15 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 import frc.robot.generated.TunerConstants.TunerSwerveDrivetrain;
@@ -49,6 +52,40 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private final SwerveRequest.SysIdSwerveTranslation m_translationCharacterization = new SwerveRequest.SysIdSwerveTranslation();
     private final SwerveRequest.SysIdSwerveSteerGains m_steerCharacterization = new SwerveRequest.SysIdSwerveSteerGains();
     private final SwerveRequest.SysIdSwerveRotation m_rotationCharacterization = new SwerveRequest.SysIdSwerveRotation();
+
+    //TODO refactor into a constants file
+    public static final LinearVelocity maxSpeed = MetersPerSecond.of(5.12);
+    public static final AngularVelocity maxAngularVelocity = RevolutionsPerSecond.of(2.0);
+
+
+    public final Command fieldOrientedDrive(
+      CommandXboxController driveCont) { // field oriented drive command!
+    SwerveRequest.FieldCentric drive =
+        new SwerveRequest.FieldCentric() // creates a fieldcentric drive
+            .withDeadband(maxSpeed.in(MetersPerSecond) * 0.01)
+            .withRotationalDeadband(maxAngularVelocity.in(RadiansPerSecond) * 0.01);
+    // .withDriveRequestType(DriveRequestType.Velocity); // Use closed-loop control for drive motors
+
+    return this.applyRequest(
+            () ->
+                drive
+                    .withVelocityX(
+                        Math.pow(driveCont.getLeftY(), 3)
+                            * maxSpeed.in(MetersPerSecond)
+                            * -1.0) // Drive forward with negative Y (forward)
+                    .withVelocityY(
+                        Math.pow(driveCont.getLeftX(), 3)
+                            * maxSpeed.in(MetersPerSecond)
+                            * -1.0) // Drive left with negative X (left)
+                    .withRotationalRate(
+                        Math.pow(driveCont.getRightX(), 2)
+                            * (maxAngularVelocity.in(RadiansPerSecond) / 2.0)
+                            * -Math.signum(driveCont.getRightX())) // Drive
+            // counterclockwise
+            // with negative X
+            // (left)
+        );
+  }
 
     /* SysId routine for characterizing translation. This is used to find PID gains for the drive motors. */
     private final SysIdRoutine m_sysIdRoutineTranslation = new SysIdRoutine(

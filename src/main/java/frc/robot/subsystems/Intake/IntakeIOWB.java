@@ -27,6 +27,10 @@ public class IntakeIOWB extends SubsystemBase {
     intakeMotor.stopMotor();
   }
 
+  public void setEncoder(double value) {
+    intakeMotor.setPosition(value);
+  }
+
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
