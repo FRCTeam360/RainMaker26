@@ -26,6 +26,9 @@ public class Hood extends SubsystemBase {
     io.setPosition(position);
   }
 
+  public void stop() {
+    io.setDutyCycle(0);
+  }
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
