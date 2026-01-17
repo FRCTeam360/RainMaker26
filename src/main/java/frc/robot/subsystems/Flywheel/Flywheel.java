@@ -37,23 +37,7 @@ public class Flywheel extends SubsystemBase {
   }
 
   public void stop() {
-    io.setDutyCycle(0.0);
-  }
-  public double getPower(){
-    return io.getPower();
-  }
-  public double getVelocity(){
-    return io.getVelocity();
-  }
-   public boolean isAtSetpoint() {
-    return Math.abs(this.getVelocity() - rpmSetpoint) < 215.0;
-  }
-   public boolean isAboveSetpoint() {
-    return this.getVelocity() >= rpmSetpoint-100.0;
-  }
-
-  public boolean isBelowSetpoint() {
-    return this.getVelocity() <= rpmSetpoint - 30.0;
+    io.stop();
   }
 
     public Command setDutyCycleCmd(double duty) {

@@ -6,24 +6,24 @@ package frc.robot.subsystems.Flywheel;
 
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
+import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.revrobotics.spark.SparkBase.ControlType;
 
+import edu.wpi.first.wpilibj.motorcontrol.Talon;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.WoodBotConstants;
 public class FlywheelIOWB implements FlywheelIO {
 
   // need motor vvvvvv
-  private final TalonFX leftMotor = new TalonFX(0);//need valid id for motor
-  private final TalonFX rightMotor = new TalonFX(0);//need valid id for motor
+  private final TalonFX leftMotor = new TalonFX(WoodBotConstants.FLYWHEEL_LEFT_ID, WoodBotConstants.CANBUS_NAME);
+  private final TalonFX rightMotor = new TalonFX(WoodBotConstants.FLYWHEEL_RIGHT_ID, WoodBotConstants.CANBUS_NAME);
   private TalonFXConfiguration config = new TalonFXConfiguration();
-
   private MotorOutputConfigs outputConfigs = new MotorOutputConfigs();
-
-  public FlywheelIOWB(){
-
-  }
 
   public void setDutyCycle(double dutyCycle) {
     leftMotor.set(dutyCycle);
@@ -32,13 +32,21 @@ public class FlywheelIOWB implements FlywheelIO {
 
   @Override
   public void setRPM(double rpm, ControlType kvelocity) 
-    final double kA = 0.0;
-    final double kD = 0.0;
-    final double kG = 0.0;
-    final double kI = 0.0;
-    final double kP = 0.0;
-    final double kS = 0.0;
-
+    double kP = 0.0;
+    double kI = 0.0;
+    double kD = 0.0;
+    double kA = 0.0;
+    double kG = 0.0;
+    double kS = 0.0;
+    double kV = 0.0;
+    Slot0Configs slot0Configs = config.Slot0;
+    slot0Configs.kA = kA;
+    slot0Configs.kD = kD;
+    slot0Configs.kG = kG;
+    slot0Configs.kI = kI;
+    slot0Configs.kP = kP;
+    slot0Configs.kS = kS;
+    slot0Configs.kV = kV;
     final double motionMagicCruiseVelocity = 0.0;
     final double motionMagicAcceleration = 0.0; 
     final double motionMagicCruiseJerk = 0.0;
@@ -48,15 +56,20 @@ public class FlywheelIOWB implements FlywheelIO {
     motionMagicConfigs.MotionMagicCruiseVelocity = motionMagicCruiseVelocity;
     motionMagicConfigs.MotionMagicAcceleration = motionMagicAcceleration;
     motionMagicConfigs.MotionMagicJerk = motionMagicCruiseJerk;
-    config
+     config
         .MotionMagic
         .withMotionMagicAcceleration(motionMagicAcceleration)
         .withMotionMagicCruiseVelocity(motionMagicCruiseVelocity)
         .withMotionMagicJerk(motionMagicCruiseJerk);
-    config.MotorOutput = outputConfigs;
-
+        config.MotorOutput = outputConfigs;
+      leftMotor.setNeutralMode(NeutralModeValue.Brake);
+    config.MotorOutput.withInverted(InvertedValue.CounterClockwise_Positive);
     leftMotor.getConfigurator().apply(config, 0.0);
+
+    rightMotor.setNeutralMode(NeutralModeValue.Brake);
+    config.MotorOutput.withInverted(InvertedValue.CounterClockwise_Positive);
     rightMotor.getConfigurator().apply(config, 0.0);
+    
   }
 
   @Override
@@ -67,20 +80,18 @@ public class FlywheelIOWB implements FlywheelIO {
 
   @Override
   public void stop() {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'stop'");
+    leftMotor.stopMotor();
+    rightMotor.stopMotor();
   }
-
-  @Override
-  public double getPower() {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'getPower'");
-  }
-
-  @Override
-  public double getVelocity() {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'getVelocity'");
+  public void updateInputs(FlywheelIOInputs inputs){
+    inputs.flywheelStatorCurrents[0] = leftMotor.getStatorCurrent().getValueAsDouble();
+    inputs.flywheelStatorCurrents[1] = rightMotor.getStatorCurrent().getValueAsDouble();
+    inputs.flywheelPositions[0] = leftMotor.getPosition().getValueAsDouble();
+    inputs.flywheelPositions[1] = rightMotor.getPosition().getValueAsDouble();
+    inputs.flywheelVelocitys[0] = leftMotor.getVelocity().getValueAsDouble();
+    inputs.flywheelVelocitys[1] = rightMotor.getVelocity().getValueAsDouble();
+    inputs.flywheelVoltages[0] = leftMotor.getMotorVoltage().getValueAsDouble();
+    inputs.flywheelVoltages[1] = rightMotor.getMotorVoltage().getValueAsDouble();
   }
   
 }
