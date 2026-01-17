@@ -6,12 +6,22 @@ package frc.robot.subsystems.IntakePivot;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class IntakePivotIO extends SubsystemBase {
-  /** Creates a new IntakePivotIO. */
-  public IntakePivotIO() {}
-
-  @Override
-  public void periodic() {
-    // This method will be called once per scheduler run
+public interface IntakePivotIO  {
+  
+  public static class IntakePivotIOInputs {
+    public double statorCurrent = 0.0;
+    public double supplyCurrent = 0.0;
+    public double voltage = 0.0;
+    public double velocity = 0.0;
+    public double position = 0.0;
+    public boolean sensor = false;
+    // insert inputs
   }
+
+  public void setPosition(double position);
+
+  public void stop();
+
+  public void setEncoder(double value);
+
 }
