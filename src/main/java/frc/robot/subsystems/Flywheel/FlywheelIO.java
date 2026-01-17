@@ -9,18 +9,23 @@ import org.littletonrobotics.junction.AutoLog;
 import com.revrobotics.spark.SparkBase.ControlType;
 
 public interface FlywheelIO {
-  public static final int MAX_MOTORS = 2;//might become 3 might become 4
+  public static final int MAX_MOTORS = 2;// might become 3 might become 4
+
   @AutoLog
-  public static class FlywheelIOInputs{
-    public double[] flywheelStatorCurrents = new double[MAX_MOTORS];
-    public double[] flywheelVoltages = new double[MAX_MOTORS];
-    public double[] flywheelVelocitys = new double[MAX_MOTORS];
-    public double[] flywheelPositions = new double[MAX_MOTORS];
+  public static class FlywheelIOInputs {
+    public double[] statorCurrents = new double[MAX_MOTORS];
+    public double[] voltages = new double[MAX_MOTORS];
+    public double[] velocitys = new double[MAX_MOTORS];
+    public double[] positions = new double[MAX_MOTORS];
   }
+
   public void setDutyCycle(double duty);
-  public void setSpeed(double speed);
+
   public void setRPM(double rpm, ControlType kvelocity);
+
   public void stop();
-  public default void updateInputs(FlywheelIOInputs inputs) {}
+
+  public default void updateInputs(FlywheelIOInputs inputs) {
+  }
 
 }
