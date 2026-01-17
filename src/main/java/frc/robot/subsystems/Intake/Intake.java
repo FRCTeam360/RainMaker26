@@ -21,6 +21,10 @@ public class Intake extends SubsystemBase {
     io.setDutyCycle(value);
   }
 
+  public void stop() {
+    this.setDutyCycle(0.0);
+  }
+
   @Override
   public void periodic() {
     io.updateInputs(inputs);

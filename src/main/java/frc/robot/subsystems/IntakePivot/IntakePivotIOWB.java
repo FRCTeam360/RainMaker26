@@ -4,18 +4,24 @@
 
 package frc.robot.subsystems.IntakePivot;
 
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.subsystems.IntakePivot.IntakePivotIO.IntakePivotIOInputs;
 
-public class IntakePivotIOWB extends SubsystemBase {
-  private final TalonFX intakePivot = new TalonFX(1, "intakePivot");
+public class IntakePivotIOWB implements IntakePivotIO {
+  private final TalonFX intakePivot = new TalonFX(Constants.WoodBotConstants.INTAKE_PIVOT_PORT, "intakePivot");
   private final TalonFXConfiguration config = new TalonFXConfiguration();
+  private final CurrentLimitsConfigs currentLimitConfig = new CurrentLimitsConfigs();
 
   /** Creates a new IntakePivotIOWB. */
   public IntakePivotIOWB() {
+    intakePivot.getConfigurator().apply(config);
+    intakePivot.setNeutralMode(NeutralModeValue.Brake);
     
   }
 
@@ -23,8 +29,8 @@ public class IntakePivotIOWB extends SubsystemBase {
     intakePivot.setPosition(value);
   }
 
-  public void stop() {
-    intakePivot.stopMotor();
+  public void setDutyCycle(double value) {
+    intakePivot.set(value);
   }
 
   public void updateInputs(IntakePivotIOInputs inputs) {
@@ -35,8 +41,4 @@ public class IntakePivotIOWB extends SubsystemBase {
     inputs.supplyCurrent = intakePivot.getSupplyCurrent().getValueAsDouble();
   }
 
-  @Override
-  public void periodic() {
-    // This method will be called once per scheduler run
-  }
 }
