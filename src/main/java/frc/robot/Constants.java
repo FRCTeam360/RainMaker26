@@ -21,8 +21,11 @@ public final class Constants {
   }
 
   public static class WoodBotConstants {
+    public static final int INTAKE_ID = 0;
     public static final int INTAKE_PORT = 0;
+    public static final int INTAKE_SENSOR_PORT = 0;
     public static final int INTAKE_PIVOT_PORT = 0;
+
     public static final int INDEXER_SENSOR_PORT = 0;
     public static final int INDEXER_ID = 1;
 
