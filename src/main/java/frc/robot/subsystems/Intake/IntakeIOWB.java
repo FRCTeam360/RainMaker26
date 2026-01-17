@@ -21,6 +21,7 @@ import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 import frc.robot.Constants.WoodBotConstants;
+import frc.robot.generated.WoodbotConstants;
 
 public class IntakeIOWB implements IntakeIO {
   private final SparkFlex motor = new SparkFlex(WoodBotConstants.INTAKE_ID, MotorType.kBrushless);
