@@ -131,10 +131,6 @@ public class Vision extends SubsystemBase {
 
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
-    if (DriverStation.isDisabled()) {
-      turnOffLights(WoodBotConstants.LIMELIGHT_NAME);
-    }
 
     long periodicStartTime = HALUtil.getFPGATime();
 
@@ -157,31 +153,27 @@ public class Vision extends SubsystemBase {
     Pose2d pose = input.estimatedPose;
     double timestamp = input.timestampSeconds;
 
-    // if(pose.getX() < 0.0
-    // || pose.getX() > Constants.FIELD_LAYOUT.getFieldLength())
+    if(pose.getX() < 0.0
+    || pose.getX() > Constants.FIELD_LAYOUT.getFieldLength())
 
-    // OptionalDouble closestTagDistance =
-    // Arrays.stream(input.distanceToTargets).min();
+    OptionalDouble closestTagDistance =
+    Arrays.stream(input.distanceToTargets).min();
 
-    // Matrix<N3, N1> cprStdDevs =
-    // MEASUREMENT_STD_DEV_DISTANCE_MAP.get(closestTagDistance.orElse(Double.MAX_VALUE));
+    Matrix<N3, N1> cprStdDevs =
+    MEASUREMENT_STD_DEV_DISTANCE_MAP.get(closestTagDistance.orElse(Double.MAX_VALUE));
 
-    // acceptedMeasurements.add(new VisionMeasurement(timestamp, pose, cprStdDevs));
-    // }
-    // this.acceptedMeasurements = acceptedMeasurements;
-    // long periodicLoopTime = HALUtil.getFPGATime() - periodicStartTime;
-    // Logger.recordOutput(VISION_LOGGING_PREFIX + "periodic loop time",
-    // (periodicLoopTime / 1000.0));
-    // }
+    acceptedMeasurements.add(new VisionMeasurement(timestamp, pose, cprStdDevs));
+    this.acceptedMeasurements = acceptedMeasurements;
+    long periodicLoopTime = HALUtil.getFPGATime() - periodicStartTime;
+    Logger.recordOutput(VISION_LOGGING_PREFIX + "periodic loop time",
+    (periodicLoopTime / 1000.0));
+  }
 
-    // public Command consumeVisionMeasurements(
-    // Consumer<List<VisionMeasurement>> visionMeasurementConsumer) {
-    // return CommandLogger.logCommand(
-    // run(() -> visionMeasurementConsumer.accept(acceptedMeasurements)),
-    // "Consume Vision Measurements");
-    // }
-
-    // i dont know what most of the above code does so I'm going to comment it out
-    // for now until the basics are done
+  public Command consumeVisionMeasurements(
+    Consumer<List<VisionMeasurement>> visionMeasurementConsumer) {
+    return
+    run(() -> visionMeasurementConsumer.accept(acceptedMeasurements),
+    "Consume Vision Measurements");
+    }
   }
 }
