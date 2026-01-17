@@ -15,6 +15,7 @@ import com.revrobotics.spark.SparkBase.ResetMode;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.Constants.WoodBotConstants;
 
 public class IndexerIOWB implements IndexerIO {
   /** Creates a new IndexerIOWB. */
@@ -23,7 +24,7 @@ public class IndexerIOWB implements IndexerIO {
   private final RelativeEncoder encoder = indexerMotor.getEncoder();
   private final SparkMaxConfig sparkMaxConfig = new SparkMaxConfig();
 
-  private final DigitalInput sensor = new DigitalInput(Constants.INDEXER_SENSOR_PORT);
+  private final DigitalInput sensor = new DigitalInput(WoodBotConstants.INDEXER_SENSOR_PORT);
 
   public IndexerIOWB() {
     sparkMaxConfig.idleMode(IdleMode.kBrake);
