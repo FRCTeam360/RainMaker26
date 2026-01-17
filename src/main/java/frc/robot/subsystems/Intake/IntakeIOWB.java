@@ -15,10 +15,6 @@ public class IntakeIOWB extends SubsystemBase {
   private final TalonFX intakeMotor = new TalonFX(0, WoodBotConstants.CANBUS_NAME);
   private final TalonFXConfiguration talonFXconfigs = new TalonFXConfiguration();
   private final MotorOutputConfigs motorOutputConfigs = new MotorOutputConfigs();
-  /** Creates a new IntakeIOWB. */
-  public IntakeIOWB() {
-
-  }
 
   public void setDutyCycle(double duty) {
     intakeMotor.set(duty);
@@ -34,6 +30,6 @@ public class IntakeIOWB extends SubsystemBase {
 
   @Override
   public void periodic() {
-    
+
   }
 }

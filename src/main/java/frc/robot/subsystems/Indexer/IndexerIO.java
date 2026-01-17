@@ -6,8 +6,6 @@ package frc.robot.subsystems.Indexer;
 
 import org.littletonrobotics.junction.AutoLog;
 
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
 public interface IndexerIO {
   /** Creates a new IndexerIO. */
   @AutoLog
@@ -20,7 +18,8 @@ public interface IndexerIO {
     public boolean indexerSensor = false;
   }
 
-  public default void updateInputs(IndexerIOInputs inputs) {}
+  public default void updateInputs(IndexerIOInputs inputs) {
+  }
 
   public void setDutyCycle(double dutyCycle);
 }
