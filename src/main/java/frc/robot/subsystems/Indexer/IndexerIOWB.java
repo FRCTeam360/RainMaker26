@@ -5,21 +5,21 @@
 package frc.robot.subsystems.Indexer;
 
 import com.revrobotics.RelativeEncoder;
-import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-import com.revrobotics.spark.config.SparkMaxConfig;
-import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
-
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.wpilibj.DigitalInput;
 import frc.robot.Constants;
 import frc.robot.Constants.WoodBotConstants;
 
 public class IndexerIOWB implements IndexerIO {
   /** Creates a new IndexerIOWB. */
+  private final SparkMax indexerMotor =
+      new SparkMax(Constants.WoodBotConstants.INDEXER_ID, MotorType.kBrushless);
 
-  private final SparkMax indexerMotor = new SparkMax(Constants.WoodBotConstants.INDEXER_ID, MotorType.kBrushless);
   private final RelativeEncoder encoder = indexerMotor.getEncoder();
   private final SparkMaxConfig sparkMaxConfig = new SparkMaxConfig();
 
@@ -29,14 +29,16 @@ public class IndexerIOWB implements IndexerIO {
     sparkMaxConfig.idleMode(IdleMode.kBrake);
     sparkMaxConfig.inverted(false);
 
-    indexerMotor.configure(sparkMaxConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    indexerMotor.configure(
+        sparkMaxConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 
   public void updateInputs(IndexerIOInputs inputs) {
     inputs.indexerPosition = encoder.getPosition();
     inputs.indexerStatorCurrent = indexerMotor.getOutputCurrent();
-    inputs.indexerSupplyCurrent = indexerMotor.getOutputCurrent() * indexerMotor.getAppliedOutput(); // TODO: check if
-                                                                                                     // this is right
+    inputs.indexerSupplyCurrent =
+        indexerMotor.getOutputCurrent() * indexerMotor.getAppliedOutput(); // TODO: check if
+    // this is right
     inputs.indexerVelocity = encoder.getVelocity();
     inputs.indexerVoltage = indexerMotor.getBusVoltage() * indexerMotor.getAppliedOutput();
     inputs.indexerSensor = sensor.get();
@@ -45,6 +47,4 @@ public class IndexerIOWB implements IndexerIO {
   public void setDutyCycle(double dutyCycle) {
     indexerMotor.set(dutyCycle);
   }
-
 }
-

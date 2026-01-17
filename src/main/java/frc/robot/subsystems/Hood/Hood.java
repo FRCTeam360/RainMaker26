@@ -4,10 +4,8 @@
 
 package frc.robot.subsystems.Hood;
 
-import org.littletonrobotics.junction.Logger;
-
-import edu.wpi.first.wpilibj.DutyCycle;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import org.littletonrobotics.junction.Logger;
 
 public class Hood extends SubsystemBase {
   private final HoodIO io;
@@ -29,6 +27,7 @@ public class Hood extends SubsystemBase {
   public void stop() {
     io.setDutyCycle(0);
   }
+
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
