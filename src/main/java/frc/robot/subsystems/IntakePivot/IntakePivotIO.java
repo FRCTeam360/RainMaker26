@@ -24,6 +24,6 @@ public interface IntakePivotIO  {
 
   public void stop();
 
-  public void updateInputs(IntakePivotIOInputs inputs);
+  public default void updateInputs(IntakePivotIOInputs inputs) {}
 
 }
