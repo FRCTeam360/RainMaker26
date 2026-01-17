@@ -34,14 +34,14 @@ public class IndexerIOWB implements IndexerIO {
   }
 
   public void updateInputs(IndexerIOInputs inputs) {
-    inputs.indexerPosition = encoder.getPosition();
-    inputs.indexerStatorCurrent = indexerMotor.getOutputCurrent();
-    inputs.indexerSupplyCurrent =
+    inputs.position = encoder.getPosition();
+    inputs.statorCurrent = indexerMotor.getOutputCurrent();
+    inputs.supplyCurrent =
         indexerMotor.getOutputCurrent() * indexerMotor.getAppliedOutput(); // TODO: check if
     // this is right
-    inputs.indexerVelocity = encoder.getVelocity();
-    inputs.indexerVoltage = indexerMotor.getBusVoltage() * indexerMotor.getAppliedOutput();
-    inputs.indexerSensor = sensor.get();
+    inputs.velocity = encoder.getVelocity();
+    inputs.voltage = indexerMotor.getBusVoltage() * indexerMotor.getAppliedOutput();
+    inputs.sensor = sensor.get();
   }
 
   public void setDutyCycle(double dutyCycle) {
