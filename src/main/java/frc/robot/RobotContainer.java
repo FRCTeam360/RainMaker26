@@ -20,7 +20,7 @@ import frc.robot.subsystems.Indexer.IndexerIOWB;
 import frc.robot.subsystems.Intake.Intake;
 import frc.robot.subsystems.Intake.IntakeIOWB;
 import frc.robot.subsystems.IntakePivot.IntakePivot;
-import frc.robot.subsystems.IntakePivot.IntakePivotIOWB;
+import frc.robot.subsystems.IntakePivot.IntakePivotIOPB;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -59,7 +59,7 @@ public class RobotContainer {
     hood = new Hood(new HoodIOWB());
     indexer = new Indexer(new IndexerIOWB());
     intake = new Intake(new IntakeIOWB());
-    intakePivot = new IntakePivot(new IntakePivotIOWB());
+    intakePivot = new IntakePivot(new IntakePivotIOPB());
     // break;
     // }
     // Configure the trigger bindings
