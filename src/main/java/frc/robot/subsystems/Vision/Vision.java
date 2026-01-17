@@ -142,7 +142,7 @@ public class Vision extends SubsystemBase {
       Logger.processInputs("Limelight: " + key, input);
     }
 
-    // List<VisionMeasurement> acceptedMeasurements = new ArrayList<>();
+    List<VisionMeasurement> acceptedMeasurements = new ArrayList<>();
 
     for (String key : visionInputs.keySet()) {
       VisionIOInputsAutoLogged input = visionInputs.get(key);
