@@ -4,14 +4,22 @@
 
 package frc.robot.subsystems.Indexer;
 
+import org.littletonrobotics.junction.AutoLog;
+
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class IndexerIO extends SubsystemBase {
+public interface IndexerIO {
   /** Creates a new IndexerIO. */
-  public IndexerIO() {}
-
-  @Override
-  public void periodic() {
-    // This method will be called once per scheduler run
+  @AutoLog
+  public static class IndexerIOInputs {
+    public double indexerVoltage = 0.0;
+    public double indexerSupplyCurrent = 0.0;
+    public double indexerStatorCurrent = 0.0;
+    public double indexerVelocity = 0.0;
+    public double indexerPosition = 0.0;
   }
+
+  public default void updateInputs(IndexerIOInputs inputs) {}
+
+  public void setDutyCycle(double dutyCycle);
 }
