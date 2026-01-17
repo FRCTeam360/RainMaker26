@@ -10,16 +10,15 @@ public interface IndexerIO {
   /** Creates a new IndexerIO. */
   @AutoLog
   public static class IndexerIOInputs {
-    public double indexerVoltage = 0.0;
-    public double indexerSupplyCurrent = 0.0;
-    public double indexerStatorCurrent = 0.0;
-    public double indexerVelocity = 0.0;
-    public double indexerPosition = 0.0;
-    public boolean indexerSensor = false;
+    public double voltage = 0.0;
+    public double supplyCurrent = 0.0;
+    public double statorCurrent = 0.0;
+    public double velocity = 0.0;
+    public double position = 0.0;
+    public boolean sensor = false;
   }
 
-  public default void updateInputs(IndexerIOInputs inputs) {
-  }
+  public default void updateInputs(IndexerIOInputs inputs) {}
 
   public void setDutyCycle(double dutyCycle);
 }

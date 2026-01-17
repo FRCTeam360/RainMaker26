@@ -4,10 +4,8 @@
 
 package frc.robot.subsystems.Hood;
 
-import org.littletonrobotics.junction.Logger;
-
-import edu.wpi.first.wpilibj.DutyCycle;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import org.littletonrobotics.junction.Logger;
 
 public class Hood extends SubsystemBase {
   private final HoodIO io;
@@ -24,6 +22,14 @@ public class Hood extends SubsystemBase {
 
   public void setPosition(double position) {
     io.setPosition(position);
+  }
+
+  public void setEncoder(double position) {
+    io.setEncoder(position);
+  }
+
+  public void stop() {
+    io.setDutyCycle(0);
   }
 
   @Override

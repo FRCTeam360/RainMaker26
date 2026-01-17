@@ -18,9 +18,7 @@ public class IntakeIOWB implements IntakeIO {
   private final TalonFXConfiguration talonFXconfigs = new TalonFXConfiguration();
   private final MotorOutputConfigs motorOutputConfigs = new MotorOutputConfigs();
 
-  public IntakeIOWB() {
-
-  }
+  public IntakeIOWB() {}
 
   public void setDutyCycle(double duty) {
     intakeMotor.set(duty);

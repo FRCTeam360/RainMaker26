@@ -6,10 +6,8 @@ package frc.robot.subsystems.IntakePivot;
 
 import org.littletonrobotics.junction.AutoLog;
 
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+public interface IntakePivotIO {
 
-public interface IntakePivotIO  {
-  
   @AutoLog
   public static class IntakePivotIOInputs {
     public double statorCurrent = 0.0;
@@ -25,5 +23,4 @@ public interface IntakePivotIO  {
   public void setDutyCycle(double value);
 
   public default void updateInputs(IntakePivotIOInputs inputs) {}
-
 }

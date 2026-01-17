@@ -16,7 +16,7 @@ import frc.robot.Constants;
 import frc.robot.subsystems.IntakePivot.IntakePivotIO.IntakePivotIOInputs;
 
 public class IntakePivotIOWB implements IntakePivotIO {
-  private final TalonFX intakePivot = new TalonFX(Constants.WoodBotConstants.INTAKE_PIVOT_PORT, Constants.WoodBotConstants.CANBUS_NAME);
+  private final TalonFX intakePivot = new TalonFX(Constants.WoodBotConstants.INTAKE_PIVOT_ID, Constants.WoodBotConstants.CANBUS_NAME);
   private final TalonFXConfiguration config = new TalonFXConfiguration();
   private final CurrentLimitsConfigs currentLimitConfig = new CurrentLimitsConfigs();
   private final SoftLimitConfig softLimitConfig = new SoftLimitConfig();
@@ -43,7 +43,6 @@ public class IntakePivotIOWB implements IntakePivotIO {
     final double kFF = 0.0;
 
     intakePivot.getConfigurator().apply(currentLimitConfig);
-    
   }
 
   public void setPosition(double value) {
