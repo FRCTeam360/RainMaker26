@@ -16,10 +16,6 @@ public class Flywheel extends SubsystemBase {
     this.io = io;
   }
 
-  public void setDutyCycke(double duty) {
-    io.setDutyCycle(duty);
-  }
-
   public void setRPM(double rpm) {
     io.setRPM(rpm);
   }

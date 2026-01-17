@@ -55,7 +55,8 @@ public class FlywheelIOWB implements FlywheelIO {
 
   @Override
   public void setRPM(double rpm) {
-    motors[0].setControl(velocityDutyCycle.withVelocity(rpm));
+    double rps = rpm/60.0;
+    motors[0].setControl(velocityDutyCycle.withVelocity(rps));
   }
 
   @Override
@@ -67,7 +68,7 @@ public class FlywheelIOWB implements FlywheelIO {
     for (int i = 0; i < motors.length; i++) {
       inputs.statorCurrents[i] = motors[i].getStatorCurrent().getValueAsDouble();
       inputs.positions[i] = motors[i].getPosition().getValueAsDouble();
-      inputs.velocitys[i] = motors[i].getVelocity().getValueAsDouble();
+      inputs.velocities[i] = motors[i].getVelocity().getValueAsDouble();
       inputs.voltages[i] = motors[i].getMotorVoltage().getValueAsDouble();
     }
   }

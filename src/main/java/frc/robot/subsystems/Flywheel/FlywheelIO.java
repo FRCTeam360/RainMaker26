@@ -13,7 +13,7 @@ public interface FlywheelIO {
   public static class FlywheelIOInputs {
     public double[] statorCurrents = new double[MAX_MOTORS];
     public double[] voltages = new double[MAX_MOTORS];
-    public double[] velocitys = new double[MAX_MOTORS];
+    public double[] velocities = new double[MAX_MOTORS];
     public double[] positions = new double[MAX_MOTORS];
   }
 
