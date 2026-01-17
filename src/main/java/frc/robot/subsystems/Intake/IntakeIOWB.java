@@ -30,7 +30,7 @@ public class IntakeIOWB implements IntakeIO {
   private final DigitalInput sensor = new DigitalInput(WoodBotConstants.INTAKE_SENSOR_PORT);
 
   public IntakeIOWB() {
-    config.idleMode(IdleMode.kCoast);
+    config.idleMode(IdleMode.kBrake);
     config.inverted(false);
     config.smartCurrentLimit(40);
 
