@@ -17,6 +17,7 @@ import com.revrobotics.spark.SparkBase.ControlType;
 import edu.wpi.first.wpilibj.motorcontrol.Talon;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.WoodBotConstants;
+
 public class FlywheelIOWB implements FlywheelIO {
 
   // need motor vvvvvv
@@ -31,7 +32,7 @@ public class FlywheelIOWB implements FlywheelIO {
   }
 
   @Override
-  public void setRPM(double rpm, ControlType kvelocity) 
+  public void setRPM(double rpm, ControlType kvelocity) {
     double kP = 0.0;
     double kI = 0.0;
     double kD = 0.0;
@@ -48,7 +49,7 @@ public class FlywheelIOWB implements FlywheelIO {
     slot0Configs.kS = kS;
     slot0Configs.kV = kV;
     final double motionMagicCruiseVelocity = 0.0;
-    final double motionMagicAcceleration = 0.0; 
+    final double motionMagicAcceleration = 0.0;
     final double motionMagicCruiseJerk = 0.0;
     leftMotor.getConfigurator().apply(new TalonFXConfiguration());
     rightMotor.getConfigurator().apply(new TalonFXConfiguration());
@@ -56,20 +57,19 @@ public class FlywheelIOWB implements FlywheelIO {
     motionMagicConfigs.MotionMagicCruiseVelocity = motionMagicCruiseVelocity;
     motionMagicConfigs.MotionMagicAcceleration = motionMagicAcceleration;
     motionMagicConfigs.MotionMagicJerk = motionMagicCruiseJerk;
-     config
-        .MotionMagic
+    config.MotionMagic
         .withMotionMagicAcceleration(motionMagicAcceleration)
         .withMotionMagicCruiseVelocity(motionMagicCruiseVelocity)
         .withMotionMagicJerk(motionMagicCruiseJerk);
-        config.MotorOutput = outputConfigs;
-      leftMotor.setNeutralMode(NeutralModeValue.Brake);
+    config.MotorOutput = outputConfigs;
+    leftMotor.setNeutralMode(NeutralModeValue.Brake);
     config.MotorOutput.withInverted(InvertedValue.CounterClockwise_Positive);
     leftMotor.getConfigurator().apply(config, 0.0);
 
     rightMotor.setNeutralMode(NeutralModeValue.Brake);
     config.MotorOutput.withInverted(InvertedValue.CounterClockwise_Positive);
     rightMotor.getConfigurator().apply(config, 0.0);
-    
+
   }
 
   @Override
@@ -83,7 +83,8 @@ public class FlywheelIOWB implements FlywheelIO {
     leftMotor.stopMotor();
     rightMotor.stopMotor();
   }
-  public void updateInputs(FlywheelIOInputs inputs){
+
+  public void updateInputs(FlywheelIOInputs inputs) {
     inputs.flywheelStatorCurrents[0] = leftMotor.getStatorCurrent().getValueAsDouble();
     inputs.flywheelStatorCurrents[1] = rightMotor.getStatorCurrent().getValueAsDouble();
     inputs.flywheelPositions[0] = leftMotor.getPosition().getValueAsDouble();
@@ -93,5 +94,5 @@ public class FlywheelIOWB implements FlywheelIO {
     inputs.flywheelVoltages[0] = leftMotor.getMotorVoltage().getValueAsDouble();
     inputs.flywheelVoltages[1] = rightMotor.getMotorVoltage().getValueAsDouble();
   }
-  
+
 }
