@@ -21,17 +21,21 @@ public class IndexerIOWB implements IndexerIO {
       new SparkMax(Constants.WoodBotConstants.INDEXER_ID, MotorType.kBrushless);
 
   private final RelativeEncoder encoder = indexerMotor.getEncoder();
-  private final SparkMaxConfig sparkMaxConfig = new SparkMaxConfig();
+  private final SparkMaxConfig config = new SparkMaxConfig();
 
   private final DigitalInput sensor = new DigitalInput(WoodBotConstants.INDEXER_SENSOR_ID);
 
+  private final double CONVERSION_FACTOR = 1.0;
+
   public IndexerIOWB() {
-    sparkMaxConfig.idleMode(IdleMode.kBrake);
-    sparkMaxConfig.inverted(false);
-    sparkMaxConfig.smartCurrentLimit(40);
+    config.idleMode(IdleMode.kBrake);
+    config.inverted(false);
+    config.smartCurrentLimit(40);
+    config.analogSensor.positionConversionFactor(CONVERSION_FACTOR).velocityConversionFactor(CONVERSION_FACTOR);
+
 
     indexerMotor.configure(
-        sparkMaxConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 
   public void updateInputs(IndexerIOInputs inputs) {

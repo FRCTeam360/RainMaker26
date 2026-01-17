@@ -24,21 +24,24 @@ public class HoodIOWB implements HoodIO {
   // /** Creates a new HoodIOWB. */
   private final SparkMax hoodMotor = new SparkMax(Constants.WoodBotConstants.HOOD_ID, MotorType.kBrushless);
   private final RelativeEncoder encoder = hoodMotor.getEncoder();
-  private final SparkMaxConfig sparkMaxConfig = new SparkMaxConfig();
+  private final SparkMaxConfig config = new SparkMaxConfig();
   SparkClosedLoopController controller = hoodMotor.getClosedLoopController();
+  private static final double CONVERSION_FACTOR = 1.0;
+
 
   public void setEncoder(double position) {
     encoder.setPosition(position);
   }
 
   public HoodIOWB() {
-    sparkMaxConfig.idleMode(IdleMode.kBrake);
-    sparkMaxConfig.inverted(false);
+    config.idleMode(IdleMode.kBrake);
+    config.inverted(false);
+    config.analogSensor.positionConversionFactor(CONVERSION_FACTOR).velocityConversionFactor(CONVERSION_FACTOR);
     // CAD doesn't know what motor type it is, we set to assume sparkmax.
 
-    hoodMotor.configure(sparkMaxConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    hoodMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-    sparkMaxConfig.softLimit
+    config.softLimit
         .forwardSoftLimitEnabled(true)
         .forwardSoftLimit(0)
         .reverseSoftLimitEnabled(true)
