@@ -22,7 +22,7 @@ public interface IntakePivotIO  {
 
   public void setPosition(double position);
 
-  public void stop();
+  public void setDutyCycle(double value);
 
   public default void updateInputs(IntakePivotIOInputs inputs) {}
 

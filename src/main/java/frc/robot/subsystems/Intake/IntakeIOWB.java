@@ -11,11 +11,11 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.WoodBotConstants;
 
-public class IntakeIOWB extends SubsystemBase {
+public class IntakeIOWB implements IntakeIO {
   private final TalonFX intakeMotor = new TalonFX(0, WoodBotConstants.CANBUS_NAME);
   private final TalonFXConfiguration talonFXconfigs = new TalonFXConfiguration();
   private final MotorOutputConfigs motorOutputConfigs = new MotorOutputConfigs();
-  /** Creates a new IntakeIOWB. */
+
   public IntakeIOWB() {
 
   }
@@ -25,15 +25,10 @@ public class IntakeIOWB extends SubsystemBase {
   }
 
   public void stop() {
-    intakeMotor.stopMotor();
+    this.setDutyCycle(0.0);
   }
 
   public void setEncoder(double value) {
     intakeMotor.setPosition(value);
-  }
-
-  @Override
-  public void periodic() {
-    
   }
 }

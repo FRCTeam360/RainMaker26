@@ -10,8 +10,24 @@ import frc.robot.commands.ExampleCommand;
 import frc.robot.generated.WoodbotConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.ExampleSubsystem;
+import frc.robot.subsystems.Flywheel.Flywheel;
+import frc.robot.subsystems.Flywheel.FlywheelIO;
+import frc.robot.subsystems.Flywheel.FlywheelIOWB;
+import frc.robot.subsystems.Hood.Hood;
+import frc.robot.subsystems.Hood.HoodIO;
+import frc.robot.subsystems.Hood.HoodIOWB;
+import frc.robot.subsystems.Indexer.Indexer;
+import frc.robot.subsystems.Indexer.IndexerIOWB;
+import frc.robot.subsystems.Intake.Intake;
+import frc.robot.subsystems.Intake.IntakeIO;
+import frc.robot.subsystems.Intake.IntakeIOWB;
+import frc.robot.subsystems.IntakePivot.IntakePivot;
+import frc.robot.subsystems.IntakePivot.IntakePivotIO;
+import frc.robot.subsystems.IntakePivot.IntakePivotIOWB;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
+
+import java.util.Map;
 
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 
@@ -28,10 +44,15 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
-
+  private final CommandSwerveDrivetrain drivetrain;
+  private final Flywheel flywheel;
+  private final Hood hood;
+  private final Indexer indexer;
+  private final Intake intake;
+  private final IntakePivot intakePivot;
 
   //TODO: refactor to allow for more than 1 drivetrain type 
-  private CommandSwerveDrivetrain drivetrain = WoodbotConstants.createDrivetrain();
+
   private Telemetry logger = new Telemetry(WoodbotConstants.kSpeedAt12Volts.in(MetersPerSecond));
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
@@ -44,6 +65,16 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+    //  switch (Constants.getRobotType()) {
+    //   case WOODBOT:
+        drivetrain = WoodbotConstants.createDrivetrain();
+        flywheel = new Flywheel(new FlywheelIOWB() );
+        hood = new Hood(new HoodIOWB());
+        indexer = new Indexer(new IndexerIOWB());
+        intake = new Intake(new IntakeIOWB());
+        intakePivot = new IntakePivot(new IntakePivotIOWB());
+    //     break;
+    //  }
     // Configure the trigger bindings
     configureBindings();
     configureTestBindings1();

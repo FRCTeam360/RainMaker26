@@ -13,7 +13,6 @@ import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 
 import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.WoodBotConstants;
 
@@ -36,13 +35,16 @@ public class IndexerIOWB implements IndexerIO {
   public void updateInputs(IndexerIOInputs inputs) {
     inputs.indexerPosition = encoder.getPosition();
     inputs.indexerStatorCurrent = indexerMotor.getOutputCurrent();
-    inputs.indexerSupplyCurrent = indexerMotor.getOutputCurrent() * indexerMotor.getAppliedOutput(); // TODO: check if this is right
+    inputs.indexerSupplyCurrent = indexerMotor.getOutputCurrent() * indexerMotor.getAppliedOutput(); // TODO: check if
+                                                                                                     // this is right
     inputs.indexerVelocity = encoder.getVelocity();
     inputs.indexerVoltage = indexerMotor.getBusVoltage() * indexerMotor.getAppliedOutput();
     inputs.indexerSensor = sensor.get();
   }
-  
+
   public void setDutyCycle(double dutyCycle) {
     indexerMotor.set(dutyCycle);
   }
+
 }
+
