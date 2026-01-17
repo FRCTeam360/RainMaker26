@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems.Intake;
 
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
 
@@ -28,5 +29,9 @@ public class Intake extends SubsystemBase {
   public void periodic() {
     io.updateInputs(inputs);
     Logger.processInputs("Intake", inputs);
+  }
+
+  public Command setDutyCycleCommand(double duty){
+    return this.runEnd(()-> this.setDutyCycle(duty), ()->this.stop());
   }
 }
