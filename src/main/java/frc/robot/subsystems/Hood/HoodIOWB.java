@@ -46,15 +46,14 @@ public class HoodIOWB implements HoodIO {
   }
 
   public void setPosition(double position) {
-    // encoder.setPosition(position);
+    // old:encoder.setPosition(position);
     controller.setSetpoint(position, ControlType.kPosition);
   }
 
   public void updateInputs(HoodIOInputs inputs) {
     inputs.position = encoder.getPosition();
     inputs.statorCurrent = hoodMotor.getOutputCurrent();
-    inputs.supplyCurrent = hoodMotor.getOutputCurrent() * hoodMotor.getAppliedOutput(); // TODO: check if this is
-                                                                                        // right
+    inputs.supplyCurrent = hoodMotor.getOutputCurrent() * hoodMotor.getAppliedOutput();
     inputs.velocity = encoder.getVelocity();
     inputs.voltage = hoodMotor.getBusVoltage() * hoodMotor.getAppliedOutput();
   }
