@@ -26,7 +26,11 @@ public class HoodIOWB implements HoodIO {
   private final RelativeEncoder encoder = hoodMotor.getEncoder();
   private final SparkMaxConfig sparkMaxConfig = new SparkMaxConfig();
   private final double LIMIT = 0; // temporary limit for softLimit.
-  SparkClosedLoopController m_controller = hoodMotor.getClosedLoopController();
+  SparkClosedLoopController controller = hoodMotor.getClosedLoopController();
+
+  public void setEncoder(double position) {
+    encoder.setPosition(position);
+  }
 
   public HoodIOWB() {
     sparkMaxConfig.idleMode(IdleMode.kBrake);
@@ -46,7 +50,7 @@ public class HoodIOWB implements HoodIO {
   
   public void setPosition(double position) {
     // encoder.setPosition(position);
-    m_controller.setSetpoint(position, ControlType.kPosition);
+    controller.setSetpoint(position, ControlType.kPosition);
   }
 
   public void updateInputs(HoodIOInputs inputs) {
@@ -61,4 +65,5 @@ public class HoodIOWB implements HoodIO {
   public void setDutyCycle(double dutyCycle) {
     hoodMotor.set(dutyCycle);
   }
+
 }
