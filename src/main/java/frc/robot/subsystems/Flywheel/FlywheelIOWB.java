@@ -8,20 +8,21 @@ import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.controls.VelocityDutyCycle;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
-import com.revrobotics.spark.SparkBase.ControlType;
 import frc.robot.Constants.WoodBotConstants;
 
 public class FlywheelIOWB implements FlywheelIO {
 
-  private final TalonFX[] motors = { new TalonFX(WoodBotConstants.FLYWHEEL0_ID, WoodBotConstants.CANBUS_NAME),
-      new TalonFX(WoodBotConstants.FLYWHEEL1_ID, WoodBotConstants.CANBUS_NAME) };
+  private final TalonFX[] motors = {
+    new TalonFX(WoodBotConstants.FLYWHEEL0_ID, WoodBotConstants.CANBUS_NAME),
+    new TalonFX(WoodBotConstants.FLYWHEEL1_ID, WoodBotConstants.CANBUS_NAME)
+  };
   private TalonFXConfiguration config = new TalonFXConfiguration();
   private MotorOutputConfigs motorOutputConfigs = new MotorOutputConfigs();
 
-  @Override
-  public void setRPM(double rpm, ControlType kvelocity) {
+  public FlywheelIOWB() {
     double kP = 0.0;
     double kI = 0.0;
     double kD = 0.0;
@@ -38,40 +39,39 @@ public class FlywheelIOWB implements FlywheelIO {
     slot0Configs.kS = kS;
     slot0Configs.kV = kV;
 
-    config.MotionMagic
-        .withMotionMagicAcceleration(0.0)
+    config.MotionMagic.withMotionMagicAcceleration(0.0)
         .withMotionMagicCruiseVelocity(0.0)
         .withMotionMagicJerk(0.0);
     config.MotorOutput = motorOutputConfigs;
 
     for (int i = 1; i < motors.length; i++) {
-      motors[i].setControl(new Follower(WoodBotConstants.FLYWHEEL0_ID, MotorAlignmentValue.Aligned));
+      motors[i].setControl(
+          new Follower(WoodBotConstants.FLYWHEEL0_ID, MotorAlignmentValue.Aligned));
     }
     motors[0].getConfigurator().apply(config);
 
     // config.MotorOutput.withInverted(InvertedValue.CounterClockwise_Positive);
+  }
 
+  VelocityDutyCycle velocityDutyCycle = new VelocityDutyCycle(0);
+
+  @Override
+  public void setRPM(double rpm) {
+    double rps = rpm/60.0;
+    motors[0].setControl(velocityDutyCycle.withVelocity(rps));
   }
 
   @Override
   public void setDutyCycle(double duty) {
-    for (TalonFX i : motors)
-      i.set(duty);
-  }
-
-  @Override
-  public void stop() {
-    for (TalonFX i : motors)
-      i.stopMotor();
+    motors[0].set(duty);
   }
 
   public void updateInputs(FlywheelIOInputs inputs) {
     for (int i = 0; i < motors.length; i++) {
       inputs.statorCurrents[i] = motors[i].getStatorCurrent().getValueAsDouble();
       inputs.positions[i] = motors[i].getPosition().getValueAsDouble();
-      inputs.velocitys[i] = motors[i].getVelocity().getValueAsDouble();
+      inputs.velocities[i] = motors[i].getVelocity().getValueAsDouble();
       inputs.voltages[i] = motors[i].getMotorVoltage().getValueAsDouble();
     }
   }
-
 }

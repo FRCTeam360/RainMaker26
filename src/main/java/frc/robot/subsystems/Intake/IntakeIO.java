@@ -8,7 +8,6 @@ import org.littletonrobotics.junction.AutoLog;
 
 public interface IntakeIO {
   /** Creates a new IntakeIO. */
-
   @AutoLog
   public static class IntakeIOInputs {
     public double statorCurrent = 0.0;
@@ -24,6 +23,5 @@ public interface IntakeIO {
 
   public void stop();
 
-  public default void updateInputs(IntakeIOInputs inputs) {
-  }
+  public default void updateInputs(IntakeIOInputs inputs) {}
 }

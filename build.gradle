@@ -1,11 +1,19 @@
 plugins {
     id "java"
     id "edu.wpi.first.GradleRIO" version "2026.1.1"
+    id 'com.diffplug.spotless' version '6.25.0'
 }
 
 java {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
+}
+
+spotless {
+    java {
+        googleJavaFormat()
+    }
+    enforceCheck false  // Don't automatically run spotlessCheck during build
 }
 
 def ROBOT_MAIN_CLASS = "frc.robot.Main"

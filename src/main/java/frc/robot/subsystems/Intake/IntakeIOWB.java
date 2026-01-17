@@ -7,8 +7,6 @@ package frc.robot.subsystems.Intake;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
-
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.WoodBotConstants;
 
 public class IntakeIOWB implements IntakeIO {
@@ -16,9 +14,7 @@ public class IntakeIOWB implements IntakeIO {
   private final TalonFXConfiguration talonFXconfigs = new TalonFXConfiguration();
   private final MotorOutputConfigs motorOutputConfigs = new MotorOutputConfigs();
 
-  public IntakeIOWB() {
-
-  }
+  public IntakeIOWB() {}
 
   public void setDutyCycle(double duty) {
     intakeMotor.set(duty);

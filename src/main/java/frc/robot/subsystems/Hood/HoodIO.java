@@ -6,8 +6,6 @@ package frc.robot.subsystems.Hood;
 
 import org.littletonrobotics.junction.AutoLog;
 
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
 public interface HoodIO {
   /** Creates a new HoodIO. */
   @AutoLog
@@ -19,8 +17,7 @@ public interface HoodIO {
     public double hoodPosition = 0.0;
   }
 
-  public default void updateInputs(HoodIOInputs inputs) {
-  }
+  public default void updateInputs(HoodIOInputs inputs) {}
 
   public void setDutyCycle(double dutyCycle);
 
