@@ -18,8 +18,7 @@ public interface IndexerIO {
     public boolean indexerSensor = false;
   }
 
-  public default void updateInputs(IndexerIOInputs inputs) {
-  }
+  public default void updateInputs(IndexerIOInputs inputs) {}
 
   public void setDutyCycle(double dutyCycle);
 }

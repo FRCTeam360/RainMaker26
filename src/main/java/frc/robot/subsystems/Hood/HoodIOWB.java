@@ -5,20 +5,19 @@
 package frc.robot.subsystems.Hood;
 
 import com.revrobotics.RelativeEncoder;
-import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-import com.revrobotics.spark.config.SparkMaxConfig;
-import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
-
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkMaxConfig;
 import frc.robot.Constants;
 
 public class HoodIOWB implements HoodIO {
   /** Creates a new HoodIOWB. */
+  private final SparkMax hoodMotor =
+      new SparkMax(Constants.WoodBotConstants.HOOD_ID, MotorType.kBrushless);
 
-  private final SparkMax hoodMotor = new SparkMax(Constants.WoodBotConstants.HOOD_ID, MotorType.kBrushless);
   private final RelativeEncoder encoder = hoodMotor.getEncoder();
   private final SparkMaxConfig sparkMaxConfig = new SparkMaxConfig();
 
@@ -27,18 +26,23 @@ public class HoodIOWB implements HoodIO {
     sparkMaxConfig.inverted(false);
     // CAD doesn't know what motor type it is, we set to assume sparkmax.
 
-    hoodMotor.configure(sparkMaxConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    hoodMotor.configure(
+        sparkMaxConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 
-  public void setPosition(double position) {
+  public void setEncoder(double position) {
     encoder.setPosition(position);
   }
 
   public void updateInputs(HoodIOInputs inputs) {
     inputs.hoodPosition = encoder.getPosition();
     inputs.hoodStatorCurrent = hoodMotor.getOutputCurrent();
-    inputs.hoodSupplyCurrent = hoodMotor.getOutputCurrent() * hoodMotor.getAppliedOutput(); // TODO: check if this is
-                                                                                            // right
+    inputs.hoodSupplyCurrent = hoodMotor.getOutputCurrent() * hoodMotor.getAppliedOutput(); // TODO:
+    // check
+    // if
+    // this
+    // is
+    // right
     inputs.hoodVelocity = encoder.getVelocity();
     inputs.hoodVoltage = hoodMotor.getBusVoltage() * hoodMotor.getAppliedOutput();
   }

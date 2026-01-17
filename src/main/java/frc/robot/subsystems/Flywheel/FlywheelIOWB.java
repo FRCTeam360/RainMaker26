@@ -15,8 +15,10 @@ import frc.robot.Constants.WoodBotConstants;
 
 public class FlywheelIOWB implements FlywheelIO {
 
-  private final TalonFX[] motors = { new TalonFX(WoodBotConstants.FLYWHEEL0_ID, WoodBotConstants.CANBUS_NAME),
-      new TalonFX(WoodBotConstants.FLYWHEEL1_ID, WoodBotConstants.CANBUS_NAME) };
+  private final TalonFX[] motors = {
+    new TalonFX(WoodBotConstants.FLYWHEEL0_ID, WoodBotConstants.CANBUS_NAME),
+    new TalonFX(WoodBotConstants.FLYWHEEL1_ID, WoodBotConstants.CANBUS_NAME)
+  };
   private TalonFXConfiguration config = new TalonFXConfiguration();
   private MotorOutputConfigs motorOutputConfigs = new MotorOutputConfigs();
 
@@ -37,14 +39,14 @@ public class FlywheelIOWB implements FlywheelIO {
     slot0Configs.kS = kS;
     slot0Configs.kV = kV;
 
-    config.MotionMagic
-        .withMotionMagicAcceleration(0.0)
+    config.MotionMagic.withMotionMagicAcceleration(0.0)
         .withMotionMagicCruiseVelocity(0.0)
         .withMotionMagicJerk(0.0);
     config.MotorOutput = motorOutputConfigs;
 
     for (int i = 1; i < motors.length; i++) {
-      motors[i].setControl(new Follower(WoodBotConstants.FLYWHEEL0_ID, MotorAlignmentValue.Aligned));
+      motors[i].setControl(
+          new Follower(WoodBotConstants.FLYWHEEL0_ID, MotorAlignmentValue.Aligned));
     }
     motors[0].getConfigurator().apply(config);
 
@@ -72,5 +74,4 @@ public class FlywheelIOWB implements FlywheelIO {
       inputs.voltages[i] = motors[i].getMotorVoltage().getValueAsDouble();
     }
   }
-
 }
