@@ -30,6 +30,10 @@ public class HoodIOWB implements HoodIO {
     hoodMotor.configure(sparkMaxConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 
+  public void setPosition(double position) {
+    encoder.setPosition(position);
+  }
+
   public void updateInputs(HoodIOInputs inputs) {
     inputs.hoodPosition = encoder.getPosition();
     inputs.hoodStatorCurrent = hoodMotor.getOutputCurrent();
