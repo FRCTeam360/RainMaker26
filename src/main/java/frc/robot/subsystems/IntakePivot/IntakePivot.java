@@ -5,13 +5,27 @@
 package frc.robot.subsystems.IntakePivot;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.Intake.Intake;
+import frc.robot.subsystems.IntakePivot.IntakePivotIO.IntakePivotIOInputs;
 
 public class IntakePivot extends SubsystemBase {
+  public final IntakePivotIOInputsAutoLogged inputs = new IntakePivotIOInputsAutoLogged();
+  public final IntakePivotIO io;
   /** Creates a new IntakePivot. */
-  public IntakePivot() {}
+  public IntakePivot(IntakePivotIO io) {
+    this.io = io;
+  }
+
+  public void setPosition(double value) {
+    io.setPosition(value);
+  }
+
+  public void stop() {
+    io.stop();
+  }
 
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
+    io.updateInputs(inputs);
   }
 }
