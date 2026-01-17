@@ -23,6 +23,7 @@ import frc.robot.subsystems.Intake.IntakeIO;
 import frc.robot.subsystems.Intake.IntakeIOWB;
 import frc.robot.subsystems.IntakePivot.IntakePivot;
 import frc.robot.subsystems.IntakePivot.IntakePivotIO;
+import frc.robot.subsystems.IntakePivot.IntakePivotIOWB;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
@@ -64,17 +65,16 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-     switch (Constants.getRobotType()) {
-      case WOODBOT:
+    //  switch (Constants.getRobotType()) {
+    //   case WOODBOT:
         drivetrain = WoodbotConstants.createDrivetrain();
         flywheel = new Flywheel(new FlywheelIOWB() );
         hood = new Hood(new HoodIOWB());
         indexer = new Indexer(new IndexerIOWB());
         intake = new Intake(new IntakeIOWB());
         intakePivot = new IntakePivot(new IntakePivotIOWB());
-        
-        break;
-     }
+    //     break;
+    //  }
     // Configure the trigger bindings
     configureBindings();
     configureTestBindings1();
