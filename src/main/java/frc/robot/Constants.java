@@ -16,6 +16,11 @@ public final class Constants {
 
   public static class WoodBotConstants {
     public static final int INDEXER_ID = 1;
+
+    public static final int FLYWHEEL_LEFT_ID = 0;
+    public static final int FLYWHEEL_RIGHT_ID = 0;
+
+    public static final String CANBUS_NAME = "";
   }
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
