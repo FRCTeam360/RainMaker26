@@ -4,11 +4,14 @@
 
 package frc.robot.subsystems.Intake;
 
+import org.littletonrobotics.junction.AutoLog;
+
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public interface IntakeIO  {
   /** Creates a new IntakeIO. */
   
+  @AutoLog
   public static class IntakeIOInputs {
     public double statorCurrent = 0.0;
     public double supplyCurrent = 0.0;
@@ -22,4 +25,6 @@ public interface IntakeIO  {
   public void setDutyCycle(double value);
 
   public void stop();
+
+  public default void updateInputs(IntakeIOInputs inputs) {}
 }
