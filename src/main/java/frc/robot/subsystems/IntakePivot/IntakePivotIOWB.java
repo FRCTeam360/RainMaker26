@@ -8,13 +8,12 @@ import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.subsystems.IntakePivot.IntakePivotIO.IntakePivotIOInputs;
 
 public class IntakePivotIOWB implements IntakePivotIO {
-  private final TalonFX intakePivot = new TalonFX(Constants.WoodBotConstants.INTAKE_PIVOT_PORT, "intakePivot");
+  private final TalonFX intakePivot =
+      new TalonFX(Constants.WoodBotConstants.INTAKE_PIVOT_PORT, "intakePivot");
   private final TalonFXConfiguration config = new TalonFXConfiguration();
   private final CurrentLimitsConfigs currentLimitConfig = new CurrentLimitsConfigs();
 
@@ -22,7 +21,6 @@ public class IntakePivotIOWB implements IntakePivotIO {
   public IntakePivotIOWB() {
     intakePivot.getConfigurator().apply(config);
     intakePivot.setNeutralMode(NeutralModeValue.Brake);
-    
   }
 
   public void setPosition(double value) {
@@ -40,5 +38,4 @@ public class IntakePivotIOWB implements IntakePivotIO {
     inputs.voltage = intakePivot.getMotorVoltage().getValueAsDouble();
     inputs.supplyCurrent = intakePivot.getSupplyCurrent().getValueAsDouble();
   }
-
 }

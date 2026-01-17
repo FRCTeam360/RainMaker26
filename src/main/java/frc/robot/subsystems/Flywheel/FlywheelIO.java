@@ -7,13 +7,14 @@ package frc.robot.subsystems.Flywheel;
 import org.littletonrobotics.junction.AutoLog;
 
 public interface FlywheelIO {
-  public static final int MAX_MOTORS = 2;// might become 3 might become 4
+  public static final int MAX_MOTORS = 2; // might become 3 might become 4
 
   @AutoLog
   public static class FlywheelIOInputs {
     public double[] statorCurrents = new double[MAX_MOTORS];
+    public double[] supplyCurrents = new double[MAX_MOTORS];
     public double[] voltages = new double[MAX_MOTORS];
-    public double[] velocitys = new double[MAX_MOTORS];
+    public double[] velocities = new double[MAX_MOTORS];
     public double[] positions = new double[MAX_MOTORS];
   }
 
@@ -21,7 +22,5 @@ public interface FlywheelIO {
 
   public void setRPM(double rpm);
 
-  public default void updateInputs(FlywheelIOInputs inputs) {
-  }
-
+  public default void updateInputs(FlywheelIOInputs inputs) {}
 }

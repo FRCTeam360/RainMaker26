@@ -4,8 +4,8 @@
 
 package frc.robot.subsystems.Flywheel;
 
-import org.littletonrobotics.junction.Logger;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import org.littletonrobotics.junction.Logger;
 
 public class Flywheel extends SubsystemBase {
   private final FlywheelIO io;
@@ -14,10 +14,6 @@ public class Flywheel extends SubsystemBase {
   /** Creates a new Flywheel. */
   public Flywheel(FlywheelIO io) {
     this.io = io;
-  }
-
-  public void setDutyCycke(double duty) {
-    io.setDutyCycle(duty);
   }
 
   public void setRPM(double rpm) {
@@ -37,5 +33,4 @@ public class Flywheel extends SubsystemBase {
   public void stop() {
     io.setDutyCycle(0.0);
   }
-
 }
