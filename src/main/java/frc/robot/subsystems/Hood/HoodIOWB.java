@@ -25,7 +25,6 @@ public class HoodIOWB implements HoodIO {
   private final SparkMax hoodMotor = new SparkMax(Constants.WoodBotConstants.HOOD_ID, MotorType.kBrushless);
   private final RelativeEncoder encoder = hoodMotor.getEncoder();
   private final SparkMaxConfig sparkMaxConfig = new SparkMaxConfig();
-  private final double LIMIT = 0; // temporary limit for softLimit.
   SparkClosedLoopController controller = hoodMotor.getClosedLoopController();
 
   public void setEncoder(double position) {
@@ -38,16 +37,14 @@ public class HoodIOWB implements HoodIO {
     // CAD doesn't know what motor type it is, we set to assume sparkmax.
 
     hoodMotor.configure(sparkMaxConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    // Closedloopcontroller.setposiution(position, k)
 
-    sparkMaxConfig
-      .softLimit
-      .forwardSoftLimitEnabled(true)
-      .forwardSoftLimit(LIMIT)
-      .reverseSoftLimitEnabled(true)
-      .reverseSoftLimit(LIMIT);
+    sparkMaxConfig.softLimit
+        .forwardSoftLimitEnabled(true)
+        .forwardSoftLimit(0)
+        .reverseSoftLimitEnabled(true)
+        .reverseSoftLimit(0);
   }
-  
+
   public void setPosition(double position) {
     // encoder.setPosition(position);
     controller.setSetpoint(position, ControlType.kPosition);
@@ -57,7 +54,7 @@ public class HoodIOWB implements HoodIO {
     inputs.position = encoder.getPosition();
     inputs.statorCurrent = hoodMotor.getOutputCurrent();
     inputs.supplyCurrent = hoodMotor.getOutputCurrent() * hoodMotor.getAppliedOutput(); // TODO: check if this is
-                                                                                            // right
+                                                                                        // right
     inputs.velocity = encoder.getVelocity();
     inputs.voltage = hoodMotor.getBusVoltage() * hoodMotor.getAppliedOutput();
   }
