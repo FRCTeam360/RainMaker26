@@ -24,6 +24,10 @@ public class Hood extends SubsystemBase {
     io.setPosition(position);
   }
 
+  public void setEncoder(double position) {
+    io.setEncoder(position);
+  }
+
   public void stop() {
     io.setDutyCycle(0);
   }
