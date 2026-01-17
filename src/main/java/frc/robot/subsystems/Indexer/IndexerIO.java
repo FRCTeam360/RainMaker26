@@ -17,6 +17,7 @@ public interface IndexerIO {
     public double indexerStatorCurrent = 0.0;
     public double indexerVelocity = 0.0;
     public double indexerPosition = 0.0;
+    public boolean indexerSensor = false;
   }
 
   public default void updateInputs(IndexerIOInputs inputs) {}
