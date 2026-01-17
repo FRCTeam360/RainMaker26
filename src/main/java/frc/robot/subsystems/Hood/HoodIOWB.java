@@ -6,7 +6,7 @@ package frc.robot.subsystems.Hood;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class HoodIOWB extends SubsystemBase {
+public class HoodIOWB {
   /** Creates a new HoodIOWB. */
   public HoodIOWB() {}
 

@@ -4,14 +4,25 @@
 
 package frc.robot.subsystems.Hood;
 
+import org.littletonrobotics.junction.AutoLog;
+
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class HoodIO extends SubsystemBase {
+public interface HoodIO {
   /** Creates a new HoodIO. */
-  public HoodIO() {}
-
-  @Override
-  public void periodic() {
-    // This method will be called once per scheduler run
+  @AutoLog
+  public static class HoodIOInputs {
+    public double hoodVoltage = 0.0;
+    public double hoodSupplyCurrent = 0.0;
+    public double hoodStatorCurrent = 0.0;
+    public double hoodVelocity = 0.0;
+    public double hoodPosition = 0.0;
   }
+
+  public default void updateInputs(HoodIOInputs inputs) {
+  }
+
+  public void setDutyCycle(double dutyCycle);
+
+  public void setPosition(double position);
 }

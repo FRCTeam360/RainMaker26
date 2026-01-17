@@ -4,14 +4,32 @@
 
 package frc.robot.subsystems.Hood;
 
+import org.littletonrobotics.junction.Logger;
+
+import edu.wpi.first.wpilibj.DutyCycle;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Hood extends SubsystemBase {
+  private final HoodIO io;
+  private final HoodIOInputsAutoLogged inputs = new HoodIOInputsAutoLogged();
+
   /** Creates a new Hood. */
-  public Hood() {}
+  public Hood(HoodIO io) {
+    this.io = io;
+  }
+
+  public void setDutyCycle(double dutyCycle) {
+    io.setDutyCycle(dutyCycle);
+  }
+
+  public void setPosition(double position) {
+    io.setPosition(position);
+  }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    io.updateInputs(inputs);
+    Logger.processInputs("Hood", inputs);
   }
 }
