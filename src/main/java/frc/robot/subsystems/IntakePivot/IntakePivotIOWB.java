@@ -5,22 +5,44 @@
 package frc.robot.subsystems.IntakePivot;
 
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.revrobotics.spark.config.SoftLimitConfig;
+
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.subsystems.IntakePivot.IntakePivotIO.IntakePivotIOInputs;
 
 public class IntakePivotIOWB implements IntakePivotIO {
-  private final TalonFX intakePivot =
-      new TalonFX(Constants.WoodBotConstants.INTAKE_PIVOT_PORT, "intakePivot");
+  private final TalonFX intakePivot = new TalonFX(Constants.WoodBotConstants.INTAKE_PIVOT_ID, Constants.WoodBotConstants.CANBUS_NAME);
   private final TalonFXConfiguration config = new TalonFXConfiguration();
   private final CurrentLimitsConfigs currentLimitConfig = new CurrentLimitsConfigs();
+  private final SoftLimitConfig softLimitConfig = new SoftLimitConfig();
 
   /** Creates a new IntakePivotIOWB. */
   public IntakePivotIOWB() {
+    MotionMagicConfigs motionMagic = new MotionMagicConfigs();
     intakePivot.getConfigurator().apply(config);
     intakePivot.setNeutralMode(NeutralModeValue.Brake);
+
+    currentLimitConfig.StatorCurrentLimit = 120.0;
+    currentLimitConfig.SupplyCurrentLimit = 60.0;
+
+    softLimitConfig.forwardSoftLimitEnabled(true);
+    softLimitConfig.forwardSoftLimit(0.0);
+    softLimitConfig.reverseSoftLimitEnabled(true);
+    softLimitConfig.reverseSoftLimit(50.0);
+
+    final double kP = 0.0;
+    final double kI = 0.0;
+    final double kD = 0.0;
+    final double kA = 0.0;
+    final double kG = 0.0;
+    final double kFF = 0.0;
+
+    intakePivot.getConfigurator().apply(currentLimitConfig);
   }
 
   public void setPosition(double value) {
@@ -38,4 +60,5 @@ public class IntakePivotIOWB implements IntakePivotIO {
     inputs.voltage = intakePivot.getMotorVoltage().getValueAsDouble();
     inputs.supplyCurrent = intakePivot.getSupplyCurrent().getValueAsDouble();
   }
+
 }
