@@ -53,8 +53,7 @@ public class HoodIOWB implements HoodIO {
   public void updateInputs(HoodIOInputs inputs) {
     inputs.position = encoder.getPosition();
     inputs.statorCurrent = hoodMotor.getOutputCurrent();
-    inputs.supplyCurrent = hoodMotor.getOutputCurrent() * hoodMotor.getAppliedOutput(); // TODO: check if this is
-                                                                                        // right
+    inputs.supplyCurrent = hoodMotor.getOutputCurrent() * hoodMotor.getAppliedOutput();
     inputs.velocity = encoder.getVelocity();
     inputs.voltage = hoodMotor.getBusVoltage() * hoodMotor.getAppliedOutput();
   }
