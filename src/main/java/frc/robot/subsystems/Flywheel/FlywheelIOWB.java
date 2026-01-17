@@ -8,9 +8,13 @@ import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
+
 import frc.robot.Constants.WoodBotConstants;
 
 public class FlywheelIOWB implements FlywheelIO {
@@ -30,7 +34,8 @@ public class FlywheelIOWB implements FlywheelIO {
     double kG = 0.0;
     double kS = 0.0;
     double kV = 0.0;
-    Slot0Configs slot0Configs = config.Slot0;
+
+      Slot0Configs slot0Configs = config.Slot0;
     slot0Configs.kA = kA;
     slot0Configs.kD = kD;
     slot0Configs.kG = kG;
@@ -38,7 +43,17 @@ public class FlywheelIOWB implements FlywheelIO {
     slot0Configs.kP = kP;
     slot0Configs.kS = kS;
     slot0Configs.kV = kV;
+    
+    TalonFXConfiguration defaultConfig = new TalonFXConfiguration();
+    for(TalonFX i : motors){
+      i.getConfigurator().apply(defaultConfig);
+    }
 
+    config.CurrentLimits.StatorCurrentLimit = 160.0;
+    config.CurrentLimits.StatorCurrentLimitEnable = true;
+    config.CurrentLimits.SupplyCurrentLimit = 80.0;
+    config.CurrentLimits.SupplyCurrentLimitEnable = true;
+    
     config.MotionMagic.withMotionMagicAcceleration(0.0)
         .withMotionMagicCruiseVelocity(0.0)
         .withMotionMagicJerk(0.0);
@@ -48,17 +63,19 @@ public class FlywheelIOWB implements FlywheelIO {
       motors[i].setControl(
           new Follower(WoodBotConstants.FLYWHEEL0_ID, MotorAlignmentValue.Aligned));
     }
-    motors[0].getConfigurator().apply(config);
+    for(TalonFX i : motors){
+      i.getConfigurator().apply(config);
+      i.setNeutralMode(NeutralModeValue.Coast);
+    }
 
-    // config.MotorOutput.withInverted(InvertedValue.CounterClockwise_Positive);
   }
 
-  VelocityDutyCycle velocityDutyCycle = new VelocityDutyCycle(0);
+  MotionMagicVelocityVoltage velocityVoltage = new MotionMagicVelocityVoltage(0);
 
   @Override
   public void setRPM(double rpm) {
     double rps = rpm/60.0;
-    motors[0].setControl(velocityDutyCycle.withVelocity(rps));
+    motors[0].setControl(velocityVoltage.withVelocity(rps));
   }
 
   @Override
@@ -69,6 +86,7 @@ public class FlywheelIOWB implements FlywheelIO {
   public void updateInputs(FlywheelIOInputs inputs) {
     for (int i = 0; i < motors.length; i++) {
       inputs.statorCurrents[i] = motors[i].getStatorCurrent().getValueAsDouble();
+      inputs.supplyCurrents[i] = motors[i].getStatorCurrent().getValueAsDouble();
       inputs.positions[i] = motors[i].getPosition().getValueAsDouble();
       inputs.velocities[i] = motors[i].getVelocity().getValueAsDouble();
       inputs.voltages[i] = motors[i].getMotorVoltage().getValueAsDouble();
