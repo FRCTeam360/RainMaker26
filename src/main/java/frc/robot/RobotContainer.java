@@ -46,6 +46,8 @@ public class RobotContainer {
   public RobotContainer() {
     // Configure the trigger bindings
     configureBindings();
+    configureTestBindings1();
+    configureTestBindings2();
   }
 
   /**
@@ -61,6 +63,14 @@ public class RobotContainer {
     System.out.println("fieldoriented drive calleddd");
     drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
 
+  }
+
+  private void configureTestBindings1() {
+    drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(testCont1));
+  }
+
+  private void configureTestBindings2() {
+    drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(testCont2));
   }
 
   /**

@@ -12,8 +12,10 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.Constants.WoodBotConstants;
 
 public class IndexerIOWB implements IndexerIO {
   /** Creates a new IndexerIOWB. */
@@ -21,6 +23,8 @@ public class IndexerIOWB implements IndexerIO {
   private final SparkMax indexerMotor = new SparkMax(Constants.WoodBotConstants.INDEXER_ID, MotorType.kBrushless);
   private final RelativeEncoder encoder = indexerMotor.getEncoder();
   private final SparkMaxConfig sparkMaxConfig = new SparkMaxConfig();
+
+  private final DigitalInput sensor = new DigitalInput(WoodBotConstants.INDEXER_SENSOR_PORT);
 
   public IndexerIOWB() {
     sparkMaxConfig.idleMode(IdleMode.kBrake);
@@ -35,6 +39,7 @@ public class IndexerIOWB implements IndexerIO {
     inputs.indexerSupplyCurrent = indexerMotor.getOutputCurrent() * indexerMotor.getAppliedOutput(); // TODO: check if this is right
     inputs.indexerVelocity = encoder.getVelocity();
     inputs.indexerVoltage = indexerMotor.getBusVoltage() * indexerMotor.getAppliedOutput();
+    inputs.indexerSensor = sensor.get();
   }
   
   public void setDutyCycle(double dutyCycle) {

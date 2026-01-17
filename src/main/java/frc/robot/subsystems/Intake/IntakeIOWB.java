@@ -9,9 +9,10 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.WoodBotConstants;
 
 public class IntakeIOWB extends SubsystemBase {
-  private final TalonFX intakeMotor = new TalonFX(0, "default name");
+  private final TalonFX intakeMotor = new TalonFX(0, WoodBotConstants.CANBUS_NAME);
   private final TalonFXConfiguration talonFXconfigs = new TalonFXConfiguration();
   private final MotorOutputConfigs motorOutputConfigs = new MotorOutputConfigs();
   /** Creates a new IntakeIOWB. */

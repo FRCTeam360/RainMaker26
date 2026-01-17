@@ -8,9 +8,11 @@ import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.revrobotics.spark.SparkBase.ControlType;
 
@@ -20,16 +22,10 @@ import frc.robot.Constants.WoodBotConstants;
 
 public class FlywheelIOWB implements FlywheelIO {
 
-  // need motor vvvvvv
-  private final TalonFX leftMotor = new TalonFX(WoodBotConstants.FLYWHEEL_LEFT_ID, WoodBotConstants.CANBUS_NAME);
-  private final TalonFX rightMotor = new TalonFX(WoodBotConstants.FLYWHEEL_RIGHT_ID, WoodBotConstants.CANBUS_NAME);
+  private final TalonFX[] motors = { new TalonFX(WoodBotConstants.FLYWHEEL0_ID, WoodBotConstants.CANBUS_NAME),
+      new TalonFX(WoodBotConstants.FLYWHEEL1_ID, WoodBotConstants.CANBUS_NAME) };
   private TalonFXConfiguration config = new TalonFXConfiguration();
-  private MotorOutputConfigs outputConfigs = new MotorOutputConfigs();
-
-  public void setDutyCycle(double dutyCycle) {
-    leftMotor.set(dutyCycle);
-    rightMotor.set(dutyCycle);
-  }
+  private MotorOutputConfigs motorOutputConfigs = new MotorOutputConfigs();
 
   @Override
   public void setRPM(double rpm, ControlType kvelocity) {
@@ -48,51 +44,41 @@ public class FlywheelIOWB implements FlywheelIO {
     slot0Configs.kP = kP;
     slot0Configs.kS = kS;
     slot0Configs.kV = kV;
-    final double motionMagicCruiseVelocity = 0.0;
-    final double motionMagicAcceleration = 0.0;
-    final double motionMagicCruiseJerk = 0.0;
-    leftMotor.getConfigurator().apply(new TalonFXConfiguration());
-    rightMotor.getConfigurator().apply(new TalonFXConfiguration());
-    MotionMagicConfigs motionMagicConfigs = config.MotionMagic;
-    motionMagicConfigs.MotionMagicCruiseVelocity = motionMagicCruiseVelocity;
-    motionMagicConfigs.MotionMagicAcceleration = motionMagicAcceleration;
-    motionMagicConfigs.MotionMagicJerk = motionMagicCruiseJerk;
-    config.MotionMagic
-        .withMotionMagicAcceleration(motionMagicAcceleration)
-        .withMotionMagicCruiseVelocity(motionMagicCruiseVelocity)
-        .withMotionMagicJerk(motionMagicCruiseJerk);
-    config.MotorOutput = outputConfigs;
-    leftMotor.setNeutralMode(NeutralModeValue.Brake);
-    config.MotorOutput.withInverted(InvertedValue.CounterClockwise_Positive);
-    leftMotor.getConfigurator().apply(config, 0.0);
 
-    rightMotor.setNeutralMode(NeutralModeValue.Brake);
-    config.MotorOutput.withInverted(InvertedValue.CounterClockwise_Positive);
-    rightMotor.getConfigurator().apply(config, 0.0);
+    config.MotionMagic
+        .withMotionMagicAcceleration(0.0)
+        .withMotionMagicCruiseVelocity(0.0)
+        .withMotionMagicJerk(0.0);
+    config.MotorOutput = motorOutputConfigs;
+
+    for (int i = 1; i < motors.length; i++) {
+      motors[i].setControl(new Follower(WoodBotConstants.FLYWHEEL0_ID, MotorAlignmentValue.Aligned));
+    }
+    motors[0].getConfigurator().apply(config);
+
+    // config.MotorOutput.withInverted(InvertedValue.CounterClockwise_Positive);
 
   }
 
   @Override
-  public void setSpeed(double speed) {
-    leftMotor.set(speed);
-    rightMotor.set(speed);
+  public void setDutyCycle(double duty) {
+    for (TalonFX i : motors)
+      i.set(duty);
   }
 
   @Override
   public void stop() {
-    leftMotor.stopMotor();
-    rightMotor.stopMotor();
+    for (TalonFX i : motors)
+      i.stopMotor();
   }
 
   public void updateInputs(FlywheelIOInputs inputs) {
-    inputs.flywheelStatorCurrents[0] = leftMotor.getStatorCurrent().getValueAsDouble();
-    inputs.flywheelStatorCurrents[1] = rightMotor.getStatorCurrent().getValueAsDouble();
-    inputs.flywheelPositions[0] = leftMotor.getPosition().getValueAsDouble();
-    inputs.flywheelPositions[1] = rightMotor.getPosition().getValueAsDouble();
-    inputs.flywheelVelocitys[0] = leftMotor.getVelocity().getValueAsDouble();
-    inputs.flywheelVelocitys[1] = rightMotor.getVelocity().getValueAsDouble();
-    inputs.flywheelVoltages[0] = leftMotor.getMotorVoltage().getValueAsDouble();
-    inputs.flywheelVoltages[1] = rightMotor.getMotorVoltage().getValueAsDouble();
+    for (int i = 0; i < motors.length; i++) {
+      inputs.statorCurrents[i] = motors[i].getStatorCurrent().getValueAsDouble();
+      inputs.positions[i] = motors[i].getPosition().getValueAsDouble();
+      inputs.velocitys[i] = motors[i].getVelocity().getValueAsDouble();
+      inputs.voltages[i] = motors[i].getMotorVoltage().getValueAsDouble();
+    }
   }
 
 }

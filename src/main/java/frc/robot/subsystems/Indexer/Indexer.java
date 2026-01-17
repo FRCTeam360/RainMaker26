@@ -23,6 +23,7 @@ public class Indexer extends SubsystemBase {
   public void stop() {
     io.setDutyCycle(0.0);
   }
+
   @Override
   public void periodic() {
     io.updateInputs(inputs);
