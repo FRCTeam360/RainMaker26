@@ -31,7 +31,7 @@ public class FlywheelIOWB implements FlywheelIO {
   }
 
   @Override
-  public void setRPM(double rpm, ControlType kvelocity) 
+  public void setRPM(double rpm, ControlType kvelocity) {
     final double kA = 0.0;
     final double kD = 0.0;
     final double kG = 0.0;
