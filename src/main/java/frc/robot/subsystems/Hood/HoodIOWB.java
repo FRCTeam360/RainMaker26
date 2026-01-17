@@ -25,8 +25,11 @@ public class HoodIOWB implements HoodIO {
   private final SparkMax hoodMotor = new SparkMax(Constants.WoodBotConstants.HOOD_ID, MotorType.kBrushless);
   private final RelativeEncoder encoder = hoodMotor.getEncoder();
   private final SparkMaxConfig sparkMaxConfig = new SparkMaxConfig();
-  private final double LIMIT = 0; // temporary limit for softLimit.
-  SparkClosedLoopController m_controller = hoodMotor.getClosedLoopController();
+  SparkClosedLoopController controller = hoodMotor.getClosedLoopController();
+
+  public void setEncoder(double position) {
+    encoder.setPosition(position);
+  }
 
   public HoodIOWB() {
     sparkMaxConfig.idleMode(IdleMode.kBrake);
@@ -34,26 +37,23 @@ public class HoodIOWB implements HoodIO {
     // CAD doesn't know what motor type it is, we set to assume sparkmax.
 
     hoodMotor.configure(sparkMaxConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    // Closedloopcontroller.setposiution(position, k)
 
-    sparkMaxConfig
-      .softLimit
-      .forwardSoftLimitEnabled(true)
-      .forwardSoftLimit(LIMIT)
-      .reverseSoftLimitEnabled(true)
-      .reverseSoftLimit(LIMIT);
+    sparkMaxConfig.softLimit
+        .forwardSoftLimitEnabled(true)
+        .forwardSoftLimit(0)
+        .reverseSoftLimitEnabled(true)
+        .reverseSoftLimit(0);
   }
-  
+
   public void setPosition(double position) {
-    // encoder.setPosition(position);
-    m_controller.setSetpoint(position, ControlType.kPosition);
+    // old:encoder.setPosition(position);
+    controller.setSetpoint(position, ControlType.kPosition);
   }
 
   public void updateInputs(HoodIOInputs inputs) {
     inputs.position = encoder.getPosition();
     inputs.statorCurrent = hoodMotor.getOutputCurrent();
-    inputs.supplyCurrent = hoodMotor.getOutputCurrent() * hoodMotor.getAppliedOutput(); // TODO: check if this is
-                                                                                            // right
+    inputs.supplyCurrent = hoodMotor.getOutputCurrent() * hoodMotor.getAppliedOutput();
     inputs.velocity = encoder.getVelocity();
     inputs.voltage = hoodMotor.getBusVoltage() * hoodMotor.getAppliedOutput();
   }
@@ -61,4 +61,5 @@ public class HoodIOWB implements HoodIO {
   public void setDutyCycle(double dutyCycle) {
     hoodMotor.set(dutyCycle);
   }
+
 }
