@@ -32,13 +32,12 @@ public class IndexerIOWB implements IndexerIO {
   public void updateInputs(IndexerIOInputs inputs) {
     inputs.indexerPosition = encoder.getPosition();
     inputs.indexerStatorCurrent = indexerMotor.getOutputCurrent();
-    inputs.indexerSupplyCurrent = indexerMotor.get;
-    inputs.indexerVelocity;
-    inputs.indexerVoltage;
+    inputs.indexerSupplyCurrent = indexerMotor.getOutputCurrent() * indexerMotor.getAppliedOutput(); // TODO: check if this is right
+    inputs.indexerVelocity = encoder.getVelocity();
+    inputs.indexerVoltage = indexerMotor.getBusVoltage() * indexerMotor.getAppliedOutput();
   }
   
   public void setDutyCycle(double dutyCycle) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'setDutyCycle'");
+    indexerMotor.set(dutyCycle);
   }
 }
