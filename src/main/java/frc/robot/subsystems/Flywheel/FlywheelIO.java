@@ -6,8 +6,6 @@ package frc.robot.subsystems.Flywheel;
 
 import org.littletonrobotics.junction.AutoLog;
 
-import com.revrobotics.spark.SparkBase.ControlType;
-
 public interface FlywheelIO {
   public static final int MAX_MOTORS = 2;// might become 3 might become 4
 
@@ -21,9 +19,7 @@ public interface FlywheelIO {
 
   public void setDutyCycle(double duty);
 
-  public void setRPM(double rpm, ControlType kvelocity);
-
-  public void stop();
+  public void setRPM(double rpm);
 
   public default void updateInputs(FlywheelIOInputs inputs) {
   }

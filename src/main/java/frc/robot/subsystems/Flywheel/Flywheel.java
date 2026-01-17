@@ -5,9 +5,6 @@
 package frc.robot.subsystems.Flywheel;
 
 import org.littletonrobotics.junction.Logger;
-
-import com.revrobotics.spark.SparkBase.ControlType;
-
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Flywheel extends SubsystemBase {
@@ -24,7 +21,7 @@ public class Flywheel extends SubsystemBase {
   }
 
   public void setRPM(double rpm) {
-    io.setRPM(rpm, ControlType.kVelocity);
+    io.setRPM(rpm);
   }
 
   @Override
@@ -38,7 +35,7 @@ public class Flywheel extends SubsystemBase {
   }
 
   public void stop() {
-    io.stop();
+    io.setDutyCycle(0.0);
   }
 
 }

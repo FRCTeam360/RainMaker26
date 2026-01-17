@@ -8,9 +8,9 @@ import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.controls.VelocityDutyCycle;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
-import com.revrobotics.spark.SparkBase.ControlType;
 import frc.robot.Constants.WoodBotConstants;
 
 public class FlywheelIOWB implements FlywheelIO {
@@ -20,8 +20,7 @@ public class FlywheelIOWB implements FlywheelIO {
   private TalonFXConfiguration config = new TalonFXConfiguration();
   private MotorOutputConfigs motorOutputConfigs = new MotorOutputConfigs();
 
-  @Override
-  public void setRPM(double rpm, ControlType kvelocity) {
+  public FlywheelIOWB() {
     double kP = 0.0;
     double kI = 0.0;
     double kD = 0.0;
@@ -50,19 +49,18 @@ public class FlywheelIOWB implements FlywheelIO {
     motors[0].getConfigurator().apply(config);
 
     // config.MotorOutput.withInverted(InvertedValue.CounterClockwise_Positive);
+  }
 
+  VelocityDutyCycle velocityDutyCycle = new VelocityDutyCycle(0);
+
+  @Override
+  public void setRPM(double rpm) {
+    motors[0].setControl(velocityDutyCycle.withVelocity(rpm));
   }
 
   @Override
   public void setDutyCycle(double duty) {
-    for (TalonFX i : motors)
-      i.set(duty);
-  }
-
-  @Override
-  public void stop() {
-    for (TalonFX i : motors)
-      i.stopMotor();
+    motors[0].set(duty);
   }
 
   public void updateInputs(FlywheelIOInputs inputs) {
