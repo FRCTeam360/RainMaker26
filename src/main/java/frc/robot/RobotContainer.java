@@ -28,16 +28,16 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
-  private Telemetry logger = new Telemetry(WoodbotConstants.kSpeedAt12Volts.in(MetersPerSecond));
 
 
   //TODO: refactor to allow for more than 1 drivetrain type 
-  private final CommandSwerveDrivetrain drivetrain = WoodbotConstants.createDrivetrain();
+  private CommandSwerveDrivetrain drivetrain = WoodbotConstants.createDrivetrain();
+  private Telemetry logger = new Telemetry(WoodbotConstants.kSpeedAt12Volts.in(MetersPerSecond));
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
 
   private final CommandXboxController driverCont = new CommandXboxController(0);
-  private final CommandXboxController operatorCont = new CommandXboxController(1);
+  //private final CommandXboxController operatorCont = new CommandXboxController(1);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
