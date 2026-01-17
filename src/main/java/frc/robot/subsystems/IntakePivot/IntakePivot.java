@@ -20,8 +20,12 @@ public class IntakePivot extends SubsystemBase {
     io.setPosition(value);
   }
 
+  public void setDutyCycle(double value) {
+    io.setDutyCycle(value);
+  }
+
   public void stop() {
-    io.stop();
+    this.setDutyCycle(0.0);
   }
 
   @Override

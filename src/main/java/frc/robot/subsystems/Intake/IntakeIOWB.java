@@ -16,20 +16,19 @@ public class IntakeIOWB implements IntakeIO {
   private final TalonFXConfiguration talonFXconfigs = new TalonFXConfiguration();
   private final MotorOutputConfigs motorOutputConfigs = new MotorOutputConfigs();
 
+  public IntakeIOWB() {
+
+  }
+
   public void setDutyCycle(double duty) {
     intakeMotor.set(duty);
   }
 
   public void stop() {
-    intakeMotor.stopMotor();
+    this.setDutyCycle(0.0);
   }
 
   public void setEncoder(double value) {
     intakeMotor.setPosition(value);
-  }
-
-  @Override
-  public void periodic() {
-
   }
 }
