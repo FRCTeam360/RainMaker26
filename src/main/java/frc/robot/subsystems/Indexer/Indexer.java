@@ -4,14 +4,28 @@
 
 package frc.robot.subsystems.Indexer;
 
+import org.littletonrobotics.junction.Logger;
+
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Indexer extends SubsystemBase {
+  private final IndexerIO io;
+  private final IndexerIOInputsAutoLogged inputs = new IndexerIOInputsAutoLogged();
   /** Creates a new Indexer. */
-  public Indexer() {}
+  public Indexer(IndexerIO io) {
+    this.io = io;
+  }
 
+  public void setDutyCycle(double dutyCycle) {
+    io.setDutyCycle(dutyCycle);
+  }
+
+  public void stop() {
+    io.setDutyCycle(0.0);
+  }
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
+    io.updateInputs();
+    Logger.processInputs("Indexer", inputs);
   }
 }
