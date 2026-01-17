@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import edu.wpi.first.hal.HALUtil;
+
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide
  * numerical or boolean
@@ -17,6 +19,10 @@ package frc.robot;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
+  public static enum RobotType {
+    SIM,
+    WOODBOT
+  }
 
   public static class WoodBotConstants {
     public static final int INTAKE_PORT = 0;
@@ -34,6 +40,22 @@ public final class Constants {
 
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
+  }
+
+  public static final class SerialAddressConstants {
+    public static String WOOD_SERIAL_ADDRESS = "";
+  }
+
+  public static RobotType getRobotType() {
+    String serialAddress = HALUtil.getSerialNumber();
+
+    if (serialAddress.equals(SerialAddressConstants.WOOD_SERIAL_ADDRESS)) {
+      return Constants.RobotType.WOODBOT;
+    }
+    // else if (!Robot.isReal()) { // KEEP AT BOTTOM
+    // return Constants.RobotType.SIM;
+    // }
+    return Constants.RobotType.SIM;
   }
 
 }
