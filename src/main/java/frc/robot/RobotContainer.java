@@ -20,7 +20,6 @@ import frc.robot.subsystems.Indexer.IndexerIOWB;
 import frc.robot.subsystems.Intake.Intake;
 import frc.robot.subsystems.Intake.IntakeIOWB;
 import frc.robot.subsystems.IntakePivot.IntakePivot;
-import frc.robot.subsystems.IntakePivot.IntakePivotIOWB;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -35,7 +34,6 @@ public class RobotContainer {
   private final Hood hood;
   private final Indexer indexer;
   private final Intake intake;
-  private final IntakePivot intakePivot;
 
   // TODO: refactor to allow for more than 1 drivetrain type
 
@@ -59,7 +57,6 @@ public class RobotContainer {
     hood = new Hood(new HoodIOWB());
     indexer = new Indexer(new IndexerIOWB());
     intake = new Intake(new IntakeIOWB());
-    intakePivot = new IntakePivot(new IntakePivotIOWB());
     // break;
     // }
     // Configure the trigger bindings
