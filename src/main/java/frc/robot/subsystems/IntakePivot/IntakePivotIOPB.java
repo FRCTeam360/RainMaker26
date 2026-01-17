@@ -15,14 +15,14 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.subsystems.IntakePivot.IntakePivotIO.IntakePivotIOInputs;
 
-public class IntakePivotIOWB implements IntakePivotIO {
+public class IntakePivotIOPB implements IntakePivotIO {
   private final TalonFX intakePivot = new TalonFX(Constants.WoodBotConstants.INTAKE_PIVOT_ID, Constants.WoodBotConstants.CANBUS_NAME);
   private final TalonFXConfiguration config = new TalonFXConfiguration();
   private final CurrentLimitsConfigs currentLimitConfig = new CurrentLimitsConfigs();
   private final SoftLimitConfig softLimitConfig = new SoftLimitConfig();
 
   /** Creates a new IntakePivotIOWB. */
-  public IntakePivotIOWB() {
+  public IntakePivotIOPB() {
     MotionMagicConfigs motionMagic = new MotionMagicConfigs();
     intakePivot.getConfigurator().apply(config);
     intakePivot.setNeutralMode(NeutralModeValue.Brake);
