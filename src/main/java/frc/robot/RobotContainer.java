@@ -104,7 +104,7 @@ public class RobotContainer {
     // driverCont.leftBumper().whileTrue(basicIntakeCommand);
     drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
     // driverCont.a().whileTrue(flywheel.setDutyCycleCommand(() -> driverCont.getRightTriggerAxis()));
-    driverCont.a().whileTrue(intakePivot.setDutyCycleCommand(() -> driverCont.getRightTriggerAxis()));
+    driverCont.a().whileTrue(intakePivot.setDutyCycleCommand(() -> driverCont.getLeftY() ));
 
   }
 
