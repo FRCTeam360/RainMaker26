@@ -52,7 +52,7 @@ public class VisionIOLimelight implements VisionIO {
     inputs.tv = getTV();
     inputs.tx = getTXRaw();
     inputs.ty = getTYRaw();
-    inputs.pipeline = getPipeline();
+    inputs.pipeline = (int) getPipeline();
     inputs.tagID = getAprilTagID();
 
     if (acceptMeasurements == false) {

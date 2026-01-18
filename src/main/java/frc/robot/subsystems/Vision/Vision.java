@@ -13,7 +13,6 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import java.util.ArrayList;
@@ -23,12 +22,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.OptionalDouble;
+import java.util.Optional;
 import java.util.function.Consumer;
 import org.littletonrobotics.junction.Logger;
 
 public class Vision extends SubsystemBase {
-  private VisionIOInputsAutoLogged inputs = new VisionIOInputsAutoLogged();
-  // private final VisionIO[] ios;
   private final Map<String, VisionIO> ios;
 
   private final Map<String, VisionIOInputsAutoLogged> visionInputs;
@@ -58,92 +56,55 @@ public class Vision extends SubsystemBase {
   }
 
   public void turnOnLights(String name) {
-    ios.get(name).setLEDMode(3);
+    Optional.ofNullable(ios.get(name)).ifPresent(io -> io.setLEDMode(3));
   }
 
   public void turnOffLights(String name) {
-    ios.get(name).setLEDMode(1);
+    Optional.ofNullable(ios.get(name)).ifPresent(io -> io.setLEDMode(1));
   }
 
   public void blinkLights(String name) {
-    ios.get(name).setLEDMode(2);
-  }
-
-  public int getAprilTagID(String name) {
-    return ios.get(name).getAprilTagID();
-  }
-
-  public double getTXRaw(String name) {
-    // TODO: replace with more robust code
-    return ios.get(name).getTXRaw();
-  }
-
-  public double getTYRaw(String name) {
-    // TODO: replace with more robust code
-    return ios.get(name).getTYRaw();
-  }
-
-  public double getTV(String name) {
-    // TODO: replace with more robust code
-    return ios.get(name).getTV();
-  }
-
-  public double getPipeline(String name) {
-    // TODO: replace with more robust code
-    return ios.get(name).getPipeline();
-  }
-
-  public void setPipeline(String name, int pipeline) {
-    // TODO: replace with more robust code
-    if (ios.get(name).getPipeline() != pipeline) {
-      ios.get(name).setPipeline(pipeline);
-    }
-  }
-
-  public void takeSnapshot(String name) {
-    // TODO: replace with more robust code
-    ios.get(name).takeSnapshot();
-    Logger.recordOutput(VISION_LOGGING_PREFIX + "snapshot", true);
-    snapshotTimer.stop();
-    snapshotTimer.reset();
-    snapshotTimer.start();
-  }
-
-  public void resetSnapshot(String name) {
-    // TODO: replace with more robust code
-    ios.get(name).resetSnapshot();
-    Logger.recordOutput(VISION_LOGGING_PREFIX + "snapshot", false);
-    snapshotTimer.stop();
-  }
-
-  public boolean isOnTargetTX(String name, double goal) {
-    if (Math.abs(visionInputs.get(name).tx - goal) < 1.0) {
-      return true;
-    }
-    return false;
-  }
-
-  public boolean isOnTargetTY(String name, double goal) {
-    if (Math.abs(getTYRaw(name) - goal) < 1.0) {
-      return true;
-    }
-    return false;
+    Optional.ofNullable(ios.get(name)).ifPresent(io -> io.setLEDMode(2));
   }
 
   public boolean isTargetInView(String name) {
-    // TODO: replace with more robust code
-    return getTV(name) == 1;
+    return Optional.ofNullable(visionInputs.get(name))
+        .map(input -> input.tv == 1.0)
+        .orElse(false);
   }
 
-  public Command waitUntilTargetTxTy(String name, double goalTX, double goalTY) {
-    return Commands.waitUntil(
-        () -> isTargetInView(name) && isOnTargetTX(name, goalTX) && isOnTargetTY(name, goalTY));
+  public int getPipeline(String name) {
+    return Optional.ofNullable(visionInputs.get(name))
+        .map(input -> input.pipeline)
+        .orElse(0);
+  }
+
+  public void setPipeline(String name, int pipeline) {
+    Optional.ofNullable(ios.get(name)).ifPresent(io -> {
+      io.setPipeline(pipeline);
+    });
+  }
+
+  public void takeSnapshot(String name) {
+    Optional.ofNullable(ios.get(name)).ifPresent(io -> {
+      io.takeSnapshot();
+      Logger.recordOutput(VISION_LOGGING_PREFIX + "snapshot", true);
+      snapshotTimer.stop();
+      snapshotTimer.reset();
+      snapshotTimer.start();
+    });
+  }
+
+  public void resetSnapshot(String name) {
+    Optional.ofNullable(ios.get(name)).ifPresent(io -> {
+      io.resetSnapshot();
+      Logger.recordOutput(VISION_LOGGING_PREFIX + "snapshot", false);
+      snapshotTimer.stop();
+    });
   }
 
   @Override
   public void periodic() {
-    long periodicStartTime = HALUtil.getFPGATime();
-
     for (String key : ios.keySet()) {
       VisionIO io = ios.get(key);
       VisionIOInputsAutoLogged input = visionInputs.get(key);

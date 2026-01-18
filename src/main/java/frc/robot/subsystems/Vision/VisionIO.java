@@ -17,7 +17,7 @@ public interface VisionIO {
     public double ty;
     public double tyAdjusted;
     public double tv;
-    public double pipeline;
+    public int pipeline;
     public double tagID;
     public Pose2d estimatedPose;
     public double timestampSeconds;
