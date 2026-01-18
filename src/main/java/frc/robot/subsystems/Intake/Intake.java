@@ -31,7 +31,7 @@ public class Intake extends SubsystemBase {
     Logger.processInputs("Intake", inputs);
   }
 
-  public Command setDutyCycleCommand(double duty){
-    return this.runEnd(()-> this.setDutyCycle(duty), ()->this.stop());
+  public Command setDutyCycleCommand(double duty) {
+    return this.runEnd(() -> this.setDutyCycle(duty), () -> this.stop());
   }
 }

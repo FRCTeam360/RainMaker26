@@ -3,21 +3,22 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot.subsystems.Hood;
+
 import com.revrobotics.RelativeEncoder;
-import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-import com.revrobotics.spark.config.SparkMaxConfig;
-import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkClosedLoopController;
-
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkMaxConfig;
 import frc.robot.Constants;
 
 public class HoodIOWB implements HoodIO {
   // /** Creates a new HoodIOWB. */
-  private final SparkMax hoodMotor = new SparkMax(Constants.WoodBotConstants.HOOD_ID, MotorType.kBrushless);
+  private final SparkMax hoodMotor =
+      new SparkMax(Constants.WoodBotConstants.HOOD_ID, MotorType.kBrushless);
   private final RelativeEncoder encoder = hoodMotor.getEncoder();
   private final SparkMaxConfig sparkMaxConfig = new SparkMaxConfig();
   private final SparkClosedLoopController controller;
@@ -37,13 +38,15 @@ public class HoodIOWB implements HoodIO {
     sparkMaxConfig.closedLoop.p(0.1).i(0.0).d(0.0);
 
     // Soft limits
-    sparkMaxConfig.softLimit
+    sparkMaxConfig
+        .softLimit
         .forwardSoftLimitEnabled(true)
         .forwardSoftLimit(10.0)
         .reverseSoftLimitEnabled(true)
         .reverseSoftLimit(0.0);
 
-    hoodMotor.configure(sparkMaxConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    hoodMotor.configure(
+        sparkMaxConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
     controller = hoodMotor.getClosedLoopController();
   }
@@ -64,5 +67,4 @@ public class HoodIOWB implements HoodIO {
   public void setDutyCycle(double dutyCycle) {
     hoodMotor.set(dutyCycle);
   }
-
 }

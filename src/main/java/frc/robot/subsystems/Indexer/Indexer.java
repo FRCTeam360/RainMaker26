@@ -31,7 +31,7 @@ public class Indexer extends SubsystemBase {
     Logger.processInputs("Indexer", inputs);
   }
 
-  public Command setDutyCycleCommand(double duty){
-    return this.runEnd(()-> this.setDutyCycle(duty), () -> this.stop());
+  public Command setDutyCycleCommand(double duty) {
+    return this.runEnd(() -> this.setDutyCycle(duty), () -> this.stop());
   }
 }

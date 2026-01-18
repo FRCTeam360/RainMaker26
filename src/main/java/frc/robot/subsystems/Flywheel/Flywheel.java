@@ -35,7 +35,7 @@ public class Flywheel extends SubsystemBase {
     io.setDutyCycle(0.0);
   }
 
-  public Command setDutyCycleCommand(double duty){
+  public Command setDutyCycleCommand(double duty) {
     return this.runEnd(() -> this.setDutyCycle(duty), () -> this.stop());
   }
 }

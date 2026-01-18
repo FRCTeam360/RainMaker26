@@ -4,7 +4,6 @@
 
 package frc.robot.subsystems.Vision;
 
-import edu.wpi.first.hal.HALUtil;
 import edu.wpi.first.math.InterpolatingMatrixTreeMap;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
@@ -21,8 +20,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.OptionalDouble;
 import java.util.Optional;
+import java.util.OptionalDouble;
 import java.util.function.Consumer;
 import org.littletonrobotics.junction.Logger;
 
@@ -68,39 +67,41 @@ public class Vision extends SubsystemBase {
   }
 
   public boolean isTargetInView(String name) {
-    return Optional.ofNullable(visionInputs.get(name))
-        .map(input -> input.tv == 1.0)
-        .orElse(false);
+    return Optional.ofNullable(visionInputs.get(name)).map(input -> input.tv == 1.0).orElse(false);
   }
 
   public int getPipeline(String name) {
-    return Optional.ofNullable(visionInputs.get(name))
-        .map(input -> input.pipeline)
-        .orElse(0);
+    return Optional.ofNullable(visionInputs.get(name)).map(input -> input.pipeline).orElse(0);
   }
 
   public void setPipeline(String name, int pipeline) {
-    Optional.ofNullable(ios.get(name)).ifPresent(io -> {
-      io.setPipeline(pipeline);
-    });
+    Optional.ofNullable(ios.get(name))
+        .ifPresent(
+            io -> {
+              io.setPipeline(pipeline);
+            });
   }
 
   public void takeSnapshot(String name) {
-    Optional.ofNullable(ios.get(name)).ifPresent(io -> {
-      io.takeSnapshot();
-      Logger.recordOutput(VISION_LOGGING_PREFIX + "snapshot", true);
-      snapshotTimer.stop();
-      snapshotTimer.reset();
-      snapshotTimer.start();
-    });
+    Optional.ofNullable(ios.get(name))
+        .ifPresent(
+            io -> {
+              io.takeSnapshot();
+              Logger.recordOutput(VISION_LOGGING_PREFIX + "snapshot", true);
+              snapshotTimer.stop();
+              snapshotTimer.reset();
+              snapshotTimer.start();
+            });
   }
 
   public void resetSnapshot(String name) {
-    Optional.ofNullable(ios.get(name)).ifPresent(io -> {
-      io.resetSnapshot();
-      Logger.recordOutput(VISION_LOGGING_PREFIX + "snapshot", false);
-      snapshotTimer.stop();
-    });
+    Optional.ofNullable(ios.get(name))
+        .ifPresent(
+            io -> {
+              io.resetSnapshot();
+              Logger.recordOutput(VISION_LOGGING_PREFIX + "snapshot", false);
+              snapshotTimer.stop();
+            });
   }
 
   @Override
@@ -145,6 +146,6 @@ public class Vision extends SubsystemBase {
    */
   public Command consumeVisionMeasurements(
       Consumer<List<VisionMeasurement>> visionMeasurementConsumer) {
-        return run(() -> visionMeasurementConsumer.accept(acceptedMeasurements));
+    return run(() -> visionMeasurementConsumer.accept(acceptedMeasurements));
   }
 }

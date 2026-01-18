@@ -38,7 +38,8 @@ public class FlywheelKickerIOWB implements FlywheelKickerIO {
     inputs.position = encoder.getPosition();
     inputs.statorCurrent = flywheelkickerMotor.getOutputCurrent();
     inputs.supplyCurrent =
-        flywheelkickerMotor.getOutputCurrent() * flywheelkickerMotor.getAppliedOutput(); // TODO: check if
+        flywheelkickerMotor.getOutputCurrent()
+            * flywheelkickerMotor.getAppliedOutput(); // TODO: check if
     // this is right
     inputs.velocity = encoder.getVelocity();
     inputs.voltage = flywheelkickerMotor.getBusVoltage() * flywheelkickerMotor.getAppliedOutput();
