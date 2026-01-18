@@ -21,7 +21,7 @@ public class VisionIOLimelight implements VisionIO {
   private final DoubleSupplier gyroAngleSupplier;
   private final DoubleSupplier gyroAngleRateSupplier;
 
-  private boolean acceptMeasurements = false;
+  private boolean acceptMeasurements;
 
   /**
    * Creates a new Limelight hardware layer.
@@ -38,19 +38,6 @@ public class VisionIOLimelight implements VisionIO {
     this.gyroAngleSupplier = gyroAngleSupplier;
     this.gyroAngleRateSupplier = gyroAngleRateSupplier;
     this.acceptMeasurements = acceptMeasurements;
-  }
-
-  /**
-   * Creates a new Limelight hardware layer.
-   *
-   * @param name the name of the limelight
-   */
-  public VisionIOLimelight(
-      String name, DoubleSupplier gyroAngleSupplier, DoubleSupplier gyroAngleRateSupplier) {
-    table = NetworkTableInstance.getDefault().getTable(name);
-    this.name = name;
-    this.gyroAngleSupplier = gyroAngleSupplier;
-    this.gyroAngleRateSupplier = gyroAngleRateSupplier;
   }
 
   public void setLEDMode(int mode) {
