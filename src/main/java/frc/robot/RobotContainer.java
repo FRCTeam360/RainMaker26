@@ -14,6 +14,7 @@ import frc.robot.generated.WoodBotDrivetrain;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Flywheel.Flywheel;
 import frc.robot.subsystems.Flywheel.FlywheelIOWB;
+import frc.robot.subsystems.FlywheelKicker.FlywheelKicker;
 import frc.robot.subsystems.Hood.Hood;
 import frc.robot.subsystems.Hood.HoodIOWB;
 import frc.robot.subsystems.Indexer.Indexer;
@@ -37,6 +38,7 @@ public class RobotContainer {
   private  Indexer indexer;
   private  Intake intake;
   private  IntakePivot intakePivot;
+  private FlywheelKicker flywheelKicker;
 
   // TODO: refactor to allow for more than 1 drivetrain type
 
@@ -62,6 +64,7 @@ public class RobotContainer {
     // hood = new Hood(new HoodIOWB());
     indexer = new Indexer(new IndexerIOWB());
     intake = new Intake(new IntakeIOWB());
+    flywheelKicker = new FlywheelKicker(new FlywheelKickerIOWB());
     // intakePivot = new IntakePivot(new IntakePivotIOPB());
     // break;
     // }

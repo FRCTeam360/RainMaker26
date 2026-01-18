@@ -33,6 +33,8 @@ public final class Constants {
     public static final int INTAKE_PIVOT_ID = 0;
     public static final int INDEXER_SENSOR_ID = 0;
     public static final int INDEXER_ID = 16;
+    public static final int FLYWHEEL_KICKER_ID = 0;
+    public static final int FLYWHEEL_KICKER_SENSOR_ID = 0;
 
     public static final int FLYWHEEL0_ID = 0;
     public static final int FLYWHEEL1_ID = 0;
