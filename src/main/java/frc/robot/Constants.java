@@ -22,7 +22,8 @@ public final class Constants {
 
   public static enum RobotType {
     SIM,
-    WOODBOT
+    WOODBOT,
+    REPLAY
   }
 
   public static class WoodBotConstants {
@@ -62,5 +63,6 @@ public final class Constants {
     // return Constants.RobotType.SIM;
     // }
     return Constants.RobotType.SIM;
+
   }
 }

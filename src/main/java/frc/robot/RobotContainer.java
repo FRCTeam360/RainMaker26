@@ -13,13 +13,16 @@ import frc.robot.commands.BasicIntakeCommand;
 import frc.robot.generated.WoodBotDrivetrain;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Flywheel.Flywheel;
+import frc.robot.subsystems.Flywheel.FlywheelIOSim;
 import frc.robot.subsystems.Flywheel.FlywheelIOWB;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKicker;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKickerIOWB;
 import frc.robot.subsystems.Hood.Hood;
 import frc.robot.subsystems.Indexer.Indexer;
+import frc.robot.subsystems.Indexer.IndexerIOSim;
 import frc.robot.subsystems.Indexer.IndexerIOWB;
 import frc.robot.subsystems.Intake.Intake;
+import frc.robot.subsystems.Intake.IntakeIOSim;
 import frc.robot.subsystems.Intake.IntakeIOWB;
 import frc.robot.subsystems.IntakePivot.IntakePivot;
 
@@ -41,7 +44,7 @@ public class RobotContainer {
 
   // TODO: refactor to allow for more than 1 drivetrain type
 
-  private Telemetry logger = new Telemetry(WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
+  private Telemetry logger;
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
 
@@ -56,17 +59,30 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    // switch (Constants.getRobotType()) {
-    // case WOODBOT:
+    switch (Constants.getRobotType()) {
+    case WOODBOT:
     drivetrain = WoodBotDrivetrain.createDrivetrain();
+    logger = new Telemetry(WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
     flywheel = new Flywheel(new FlywheelIOWB());
     // hood = new Hood(new HoodIOWB());
     indexer = new Indexer(new IndexerIOWB());
     intake = new Intake(new IntakeIOWB());
     flywheelKicker = new FlywheelKicker(new FlywheelKickerIOWB());
     // intakePivot = new IntakePivot(new IntakePivotIOPB());
-    // break;
-    // }
+    break;
+    case SIM:
+    drivetrain = WoodBotDrivetrain.createDrivetrain();
+    logger = new Telemetry(WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
+    //flywheel = new Flywheel(new FlywheelIOSim());
+    // hood = new Hood(new HoodIOWB());
+    //indexer = new Indexer(new IndexerIOSim());
+    //intake = new Intake(new IntakeIOSim());
+    //flywheelKicker = new FlywheelKicker(new FlywheelKickerIOWB());
+    break;
+    default:
+      throw new IllegalStateException("Unexpected value: " + Constants.getRobotType()); 
+  
+  }
     // Configure the trigger bindings
     configureBindings();
   }
@@ -81,10 +97,10 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    basicIntakeCommand = new BasicIntakeCommand(intake, indexer);
-    driverCont.leftBumper().whileTrue(basicIntakeCommand);
+    // basicIntakeCommand = new BasicIntakeCommand(intake, indexer);
+    // driverCont.leftBumper().whileTrue(basicIntakeCommand);
     drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
-    driverCont.a().whileTrue(flywheel.setDutyCycleCommand(() -> driverCont.getRightTriggerAxis()));
+    // driverCont.a().whileTrue(flywheel.setDutyCycleCommand(() -> driverCont.getRightTriggerAxis()));
   }
 
   /**
