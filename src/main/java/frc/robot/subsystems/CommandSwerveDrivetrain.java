@@ -23,7 +23,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.robot.generated.WoodbotConstants.TunerSwerveDrivetrain;
+import frc.robot.generated.WoodBotDrivetrain.TunerSwerveDrivetrain;
 import java.util.Optional;
 import java.util.function.Supplier;
 

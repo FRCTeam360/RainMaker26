@@ -1,0 +1,32 @@
+// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
+package frc.robot.subsystems.FlywheelKicker;
+
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import org.littletonrobotics.junction.Logger;
+
+public class FlywheelKicker extends SubsystemBase {
+  private final FlywheelKickerIO io;
+  private final FlywheelKickerIOInputsAutoLogged inputs = new FlywheelKickerIOInputsAutoLogged();
+
+  /** Creates a new FlywheelKicker. */
+  public FlywheelKicker(FlywheelKickerIO io) {
+    this.io = io;
+  }
+
+  public void setDutyCycle(double dutyCycle) {
+    io.setDutyCycle(dutyCycle);
+  }
+
+  public void stop() {
+    io.setDutyCycle(0.0);
+  }
+
+  @Override
+  public void periodic() {
+    io.updateInputs(inputs);
+    Logger.processInputs("FlywheelKicker", inputs);
+  }
+}

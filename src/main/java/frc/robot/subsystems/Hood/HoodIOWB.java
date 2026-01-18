@@ -3,51 +3,66 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot.subsystems.Hood;
-
 import com.revrobotics.RelativeEncoder;
-import com.revrobotics.spark.SparkBase.PersistMode;
-import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkBase.ControlType;
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.spark.SparkClosedLoopController;
+
 import frc.robot.Constants;
 
 public class HoodIOWB implements HoodIO {
-  /** Creates a new HoodIOWB. */
-  private final SparkMax hoodMotor =
-      new SparkMax(Constants.WoodBotConstants.HOOD_ID, MotorType.kBrushless);
-
+  // /** Creates a new HoodIOWB. */
+  private final SparkMax hoodMotor = new SparkMax(Constants.WoodBotConstants.HOOD_ID, MotorType.kBrushless);
   private final RelativeEncoder encoder = hoodMotor.getEncoder();
   private final SparkMaxConfig sparkMaxConfig = new SparkMaxConfig();
-
-  public HoodIOWB() {
-    sparkMaxConfig.idleMode(IdleMode.kBrake);
-    sparkMaxConfig.inverted(false);
-    // CAD doesn't know what motor type it is, we set to assume sparkmax.
-
-    hoodMotor.configure(
-        sparkMaxConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-  }
+  private final SparkClosedLoopController controller;
 
   public void setEncoder(double position) {
     encoder.setPosition(position);
   }
 
+  public HoodIOWB() {
+    sparkMaxConfig.idleMode(IdleMode.kBrake);
+    sparkMaxConfig.inverted(false);
+
+    // Smart current limit
+    sparkMaxConfig.smartCurrentLimit(40);
+
+    // PID gains
+    sparkMaxConfig.closedLoop.p(0.1).i(0.0).d(0.0);
+
+    // Soft limits
+    sparkMaxConfig.softLimit
+        .forwardSoftLimitEnabled(true)
+        .forwardSoftLimit(10.0)
+        .reverseSoftLimitEnabled(true)
+        .reverseSoftLimit(0.0);
+
+    hoodMotor.configure(sparkMaxConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
+    controller = hoodMotor.getClosedLoopController();
+  }
+
+  public void setPosition(double position) {
+    // old:encoder.setPosition(position);
+    controller.setSetpoint(position, ControlType.kPosition);
+  }
+
   public void updateInputs(HoodIOInputs inputs) {
-    inputs.hoodPosition = encoder.getPosition();
-    inputs.hoodStatorCurrent = hoodMotor.getOutputCurrent();
-    inputs.hoodSupplyCurrent = hoodMotor.getOutputCurrent() * hoodMotor.getAppliedOutput(); // TODO:
-    // check
-    // if
-    // this
-    // is
-    // right
-    inputs.hoodVelocity = encoder.getVelocity();
-    inputs.hoodVoltage = hoodMotor.getBusVoltage() * hoodMotor.getAppliedOutput();
+    inputs.position = encoder.getPosition();
+    inputs.statorCurrent = hoodMotor.getOutputCurrent();
+    inputs.supplyCurrent = hoodMotor.getOutputCurrent() * hoodMotor.getAppliedOutput();
+    inputs.velocity = encoder.getVelocity();
+    inputs.voltage = hoodMotor.getBusVoltage() * hoodMotor.getAppliedOutput();
   }
 
   public void setDutyCycle(double dutyCycle) {
     hoodMotor.set(dutyCycle);
   }
+
 }
