@@ -13,6 +13,7 @@ import frc.robot.commands.BasicIntakeCommand;
 import frc.robot.generated.WoodBotDrivetrain;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Flywheel.Flywheel;
+import frc.robot.subsystems.Flywheel.FlywheelIOWB;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKicker;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKickerIOWB;
 import frc.robot.subsystems.Hood.Hood;
@@ -57,7 +58,7 @@ public class RobotContainer {
     // switch (Constants.getRobotType()) {
     // case WOODBOT:
     drivetrain = WoodBotDrivetrain.createDrivetrain();
-    // flywheel = new Flywheel(new FlywheelIOWB());
+    flywheel = new Flywheel(new FlywheelIOWB());
     // hood = new Hood(new HoodIOWB());
     indexer = new Indexer(new IndexerIOWB());
     intake = new Intake(new IntakeIOWB());
@@ -82,6 +83,7 @@ public class RobotContainer {
     basicIntakeCommand = new BasicIntakeCommand(intake, indexer);
     driverCont.leftBumper().whileTrue(basicIntakeCommand);
     drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
+    driverCont.a().whileTrue(flywheel.setDutyCycleCommand(() -> driverCont.getRightTriggerAxis()));
   }
 
   /**
