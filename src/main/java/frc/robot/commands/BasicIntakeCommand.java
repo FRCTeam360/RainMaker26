@@ -5,14 +5,17 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.subsystems.Indexer.Indexer;
 import frc.robot.subsystems.Intake.Intake;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class BasicIntakeCommand extends Command {
   public Intake intake;
+  public Indexer indexer;
   /** Creates a new BasicIntakeCommand. */
-  public BasicIntakeCommand(Intake intake) {
+  public BasicIntakeCommand(Intake intake, Indexer indexer) {
     this.intake = intake;
+    this.indexer = indexer;
   }
 
   // Called when the command is initially scheduled.
@@ -24,12 +27,14 @@ public class BasicIntakeCommand extends Command {
   @Override
   public void execute() {
     intake.setDutyCycle(0.5);
+    indexer.setDutyCycle(0.5);
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
     intake.stop();
+    indexer.stop();
   }
 
   // Returns true when the command should end.

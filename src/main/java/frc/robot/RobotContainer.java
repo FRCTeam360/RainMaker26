@@ -9,6 +9,7 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.commands.BasicIntakeCommand;
 import frc.robot.generated.WoodbotConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.SuperStructure;
@@ -51,6 +52,8 @@ public class RobotContainer {
   private final CommandXboxController testCont1 = new CommandXboxController(5);
   private final CommandXboxController testCont2 = new CommandXboxController(6);
 
+  private BasicIntakeCommand basicIntakeCommand; 
+
   // private final CommandXboxController operatorCont = new CommandXboxController(1);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
@@ -82,7 +85,7 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    System.out.println("fieldoriented drive calleddd");
+    driverCont.leftBumper().whileTrue(basicIntakeCommand);
     drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
   }
 
