@@ -6,7 +6,10 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -39,6 +42,8 @@ public class RobotContainer {
   private final Intake intake;
   private final IntakePivot intakePivot;
 
+
+
   // TODO: refactor to allow for more than 1 drivetrain type
 
   private Telemetry logger = new Telemetry(WoodbotConstants.kSpeedAt12Volts.in(MetersPerSecond));
@@ -49,7 +54,6 @@ public class RobotContainer {
 
   private final CommandXboxController testCont1 = new CommandXboxController(5);
   private final CommandXboxController testCont2 = new CommandXboxController(6);
-
   // private final CommandXboxController operatorCont = new CommandXboxController(1);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
@@ -68,9 +72,8 @@ public class RobotContainer {
     configureBindings();
     configureTestBindings1();
     configureTestBindings2();
-  }
 
-   autoChooser = AutoBuilder.buildAutoChooser();
+    autoChooser = AutoBuilder.buildAutoChooser();
     SmartDashboard.putData("Auto Chooser", autoChooser);
 
   /**
@@ -82,8 +85,9 @@ public class RobotContainer {
    * PS4} controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
    * joysticks}.
    */
+  }
+
   private void configureBindings() {
-    System.out.println("fieldoriented drive calleddd");
     drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
   }
 
@@ -105,3 +109,4 @@ public class RobotContainer {
     return null;
   }
 }
+
