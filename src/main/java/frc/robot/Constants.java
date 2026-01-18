@@ -41,19 +41,19 @@ public final class Constants {
 
     public static final int HOOD_ENCODER1 = 3;
     public static final int HOOD_ENCODER2 = 4;
-    public static final int HOOD_MOTOR = 2;
+    public static final int HOOD_MOTOR = 5;
 
-    public static final int INDEXER_ENCODER1 = 0;
-    public static final int INDEXER_ENCODER2 = 1;
-    public static final int INDEXER_MOTOR = 2;
+    public static final int INDEXER_ENCODER1 = 6;
+    public static final int INDEXER_ENCODER2 = 7;
+    public static final int INDEXER_MOTOR = 8;
 
-    public static final int INTAKE_ENCODER1 = 0;
-    public static final int INTAKE_ENCODER2 = 1;
-    public static final int INTAKE_MOTOR = 2;
+    public static final int INTAKE_ENCODER1 = 9;
+    public static final int INTAKE_ENCODER2 = 10;
+    public static final int INTAKE_MOTOR = 11;
 
-    public static final int INTAKE_PIVOT_ENCODER1 = 0;
-    public static final int INTAKE_PIVOT_ENCODER2 = 1;
-    public static final int INTAKE_PIVOT_MOTOR = 2;
+    public static final int INTAKE_PIVOT_ENCODER1 = 12;
+    public static final int INTAKE_PIVOT_ENCODER2 = 13;
+    public static final int INTAKE_PIVOT_MOTOR = 14;
   }
 
   public static class OperatorConstants {
