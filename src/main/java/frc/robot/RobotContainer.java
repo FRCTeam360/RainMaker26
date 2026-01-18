@@ -47,7 +47,8 @@ public class RobotContainer {
 
   private final CommandXboxController driverCont = new CommandXboxController(0);
 
-  private final CommandXboxController testCont1 = new CommandXboxController(5);
+  private final CommandXboxController testCont1 = new CommandXboxController(4);
+  private final CommandXboxController testCont2 = new CommandXboxController(5);
 
   private BasicIntakeCommand basicIntakeCommand;
 
