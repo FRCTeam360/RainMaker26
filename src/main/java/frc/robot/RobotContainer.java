@@ -6,6 +6,7 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -31,6 +32,7 @@ import frc.robot.subsystems.IntakePivot.IntakePivotIOPB;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final CommandSwerveDrivetrain drivetrain;
+  private  SendableChooser<Command> autoChooser;
   private final Flywheel flywheel;
   private final Hood hood;
   private final Indexer indexer;
@@ -67,6 +69,9 @@ public class RobotContainer {
     configureTestBindings1();
     configureTestBindings2();
   }
+
+   autoChooser = AutoBuilder.buildAutoChooser();
+    SmartDashboard.putData("Auto Chooser", autoChooser);
 
   /**
    * Use this method to define your trigger->command mappings. Triggers can be created via the
