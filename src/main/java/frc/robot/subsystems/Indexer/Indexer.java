@@ -6,6 +6,7 @@ package frc.robot.subsystems.Indexer;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
 public class Indexer extends SubsystemBase {
@@ -31,7 +32,7 @@ public class Indexer extends SubsystemBase {
     Logger.processInputs("Indexer", inputs);
   }
 
-  public Command setDutyCycleCommand(double duty) {
-    return this.runEnd(() -> this.setDutyCycle(duty), () -> this.stop());
+  public Command setDutyCycleCommand(DoubleSupplier dutySupplier) {
+    return this.runEnd(() -> this.setDutyCycle(dutySupplier.getAsDouble()), () -> this.stop());
   }
 }
