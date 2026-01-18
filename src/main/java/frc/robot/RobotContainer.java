@@ -47,7 +47,6 @@ public class RobotContainer {
   private final CommandXboxController driverCont = new CommandXboxController(0);
 
   private final CommandXboxController testCont1 = new CommandXboxController(5);
-  private final CommandXboxController testCont2 = new CommandXboxController(6);
 
   private BasicIntakeCommand basicIntakeCommand; 
 
@@ -67,8 +66,6 @@ public class RobotContainer {
     // }
     // Configure the trigger bindings
     configureBindings();
-    configureTestBindings1();
-    configureTestBindings2();
   }
 
   /**
@@ -84,14 +81,6 @@ public class RobotContainer {
     basicIntakeCommand = new BasicIntakeCommand(intake, indexer);
     driverCont.leftBumper().whileTrue(basicIntakeCommand);
     drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
-  }
-
-  private void configureTestBindings1() {
-    drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(testCont1));
-  }
-
-  private void configureTestBindings2() {
-    drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(testCont2));
   }
 
   /**
