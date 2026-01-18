@@ -69,7 +69,7 @@ public class RobotContainer {
     // break;
     // }
     // Configure the trigger bindings
-    superStructure = new SuperStructure();
+    superStructure = new SuperStructure(intake);
     configureBindings();
     configureTestBindings1();
     configureTestBindings2();

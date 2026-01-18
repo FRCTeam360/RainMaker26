@@ -11,6 +11,13 @@ public class Intake extends SubsystemBase {
   private final IntakeIO io;
   private final IntakeIOInputsAutoLogged inputs = new IntakeIOInputsAutoLogged();
 
+  public enum States{
+    OFF
+  }
+   private States WantedState= States.OFF;
+
+    private States currentState = States.OFF;
+
   /** Creates a new Intake. */
   public Intake(IntakeIO io) {
     this.io = io;

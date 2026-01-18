@@ -3,8 +3,10 @@ package frc.robot.subsystems;
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.Intake.Intake;
 
 public class SuperStructure extends SubsystemBase {
+    private final Intake intake;
 
     public enum SuperStates {
         STOPPED
@@ -37,8 +39,8 @@ public class SuperStructure extends SubsystemBase {
         //setWantedState(stoped)
     }
 
-    public SuperStructure() {
-
+    public SuperStructure(Intake intake) {
+        this.intake = intake;
     }
     @Override
     public void periodic(){
