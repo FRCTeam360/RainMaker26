@@ -25,7 +25,6 @@ import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 public class IntakePivotIOSim implements IntakePivotIO {
-  /** Creates a new IntakePivtoIOSim. */
 
   // Motor constants
   private double gearRatio = 10.0;
@@ -61,7 +60,7 @@ public class IntakePivotIOSim implements IntakePivotIO {
     configureMotor();
     
     // Initialize motor sim state to match arm sim initial position 
-    // full disclosure this was an AI troubleshooting addition and I don't fully understand why it's necessary or what it does.
+    // // full disclosure this was an AI troubleshooting addition and I don't know it's necessary.
 
     motor.getSimState().setRawRotorPosition(
         Radians.of(intakePivotSim.getAngleRads() * gearRatio).in(Rotations));
