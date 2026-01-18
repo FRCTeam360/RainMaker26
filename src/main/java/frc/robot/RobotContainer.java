@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.generated.WoodbotConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.SuperStructure;
 import frc.robot.subsystems.Flywheel.Flywheel;
 import frc.robot.subsystems.Flywheel.FlywheelIOWB;
 import frc.robot.subsystems.Hood.Hood;
@@ -36,6 +37,8 @@ public class RobotContainer {
   private final Indexer indexer;
   private final Intake intake;
   private final IntakePivot intakePivot;
+
+  private final SuperStructure superStructure;
 
   // TODO: refactor to allow for more than 1 drivetrain type
 
@@ -63,6 +66,7 @@ public class RobotContainer {
     // break;
     // }
     // Configure the trigger bindings
+    superStructure = new SuperStructure();
     configureBindings();
     configureTestBindings1();
     configureTestBindings2();
