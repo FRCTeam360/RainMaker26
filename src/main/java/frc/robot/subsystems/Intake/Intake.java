@@ -12,11 +12,12 @@ public class Intake extends SubsystemBase {
   private final IntakeIOInputsAutoLogged inputs = new IntakeIOInputsAutoLogged();
 
   public enum States{
-    OFF
+    OFF,
+    COLLECTING_FUEL
   }
-   private States WantedState= States.OFF;
+   private States wantedState= States.OFF;
 
-    private States currentState = States.OFF;
+  private States currentState = States.OFF;
 
   /** Creates a new Intake. */
   public Intake(IntakeIO io) {
@@ -31,9 +32,37 @@ public class Intake extends SubsystemBase {
     this.setDutyCycle(0.0);
   }
 
+  private States transition(){
+     return switch (wantedState) {
+      case COLLECTING_FUEL:
+        break;
+      default:
+        yield States.OFF;
+        break;
+     }
+  }
+
+  private void applyState() {
+        switch (currentState) {
+          case COLLECTING_FUEL:
+
+            break;
+          case OFF:
+          default:
+            break;
+
+        }
+      }
+
   @Override
   public void periodic() {
-    io.updateInputs(inputs);
-    Logger.processInputs("Intake", inputs);
-  }
+    applyState();
+        currentState = transition();
+        io.updateInputs(inputs);
+        Logger.processInputs("Intake", inputs);
+    
+        Logger.recordOutput("Subsystems/Intake/SystemState", currentState);
+        Logger.recordOutput("Subsystems/Intake/WantedState", wantedState);
+      }
+    
 }
