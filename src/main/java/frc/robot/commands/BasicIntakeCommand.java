@@ -12,6 +12,7 @@ import frc.robot.subsystems.Intake.Intake;
 public class BasicIntakeCommand extends Command {
   public Intake intake;
   public Indexer indexer;
+
   /** Creates a new BasicIntakeCommand. */
   public BasicIntakeCommand(Intake intake, Indexer indexer) {
     this.intake = intake;
@@ -20,14 +21,13 @@ public class BasicIntakeCommand extends Command {
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {
-  }
+  public void initialize() {}
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    intake.setDutyCycle(0.5);
-    indexer.setDutyCycle(0.5);
+    intake.setDutyCycle(-0.65);
+    indexer.setDutyCycle(0.3);
   }
 
   // Called once the command ends or is interrupted.

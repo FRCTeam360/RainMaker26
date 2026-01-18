@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.hal.HALUtil;
 
 /**
@@ -15,26 +17,31 @@ import edu.wpi.first.hal.HALUtil;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
+  public static final AprilTagFieldLayout FIELD_LAYOUT =
+      AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
+
   public static enum RobotType {
     SIM,
     WOODBOT
   }
 
   public static class WoodBotConstants {
-    public static final int INTAKE_ID = 0;
+    public static final int INTAKE_ID = 15;
     public static final int INTAKE_SENSOR_PORT = 0;
 
-    public static final int INDEXER_SENSOR_PORT = 0;
+    public static final int INDEXER_SENSOR_PORT = 1;
     public static final int INTAKE_PIVOT_ID = 0;
     public static final int INDEXER_SENSOR_ID = 0;
-    public static final int INDEXER_ID = 1;
+    public static final int INDEXER_ID = 16;
+    public static final int FLYWHEEL_KICKER_ID = 17;
+    public static final int FLYWHEEL_KICKER_SENSOR_ID = 0;
 
-    public static final int FLYWHEEL0_ID = 0;
-    public static final int FLYWHEEL1_ID = 0;
+    public static final int FLYWHEEL_RIGHT_ID = 18;
+    public static final int FLYWHEEL_LEFT_ID = 19;
 
     public static final int HOOD_ID = 0;
 
-    public static final String CANBUS_NAME = "";
+    public static final String CANBUS_NAME = "Default Name";
   }
 
   public static class OperatorConstants {
@@ -42,7 +49,7 @@ public final class Constants {
   }
 
   public static final class SerialAddressConstants {
-    public static String WOOD_SERIAL_ADDRESS = "";
+    public static String WOOD_SERIAL_ADDRESS = "032BE44A";
   }
 
   public static RobotType getRobotType() {

@@ -4,7 +4,9 @@
 
 package frc.robot.subsystems.Intake;
 
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
 public class Intake extends SubsystemBase {
@@ -57,12 +59,15 @@ public class Intake extends SubsystemBase {
   @Override
   public void periodic() {
     applyState();
-        currentState = transition();
-        io.updateInputs(inputs);
-        Logger.processInputs("Intake", inputs);
-    
-        Logger.recordOutput("Subsystems/Intake/SystemState", currentState);
-        Logger.recordOutput("Subsystems/Intake/WantedState", wantedState);
-      }
-    
+    currentState = transition();
+    io.updateInputs(inputs);
+    Logger.processInputs("Intake", inputs);
+
+    Logger.recordOutput("Subsystems/Intake/SystemState", currentState);
+    Logger.recordOutput("Subsystems/Intake/WantedState", wantedState);
+  }
+
+  public Command setDutyCycleCommand(DoubleSupplier dutySupplier) {
+    return this.runEnd(() -> this.setDutyCycle(dutySupplier.getAsDouble()), () -> this.stop());
+  }
 }
