@@ -4,22 +4,14 @@
 
 package frc.robot.subsystems.Intake;
 
-import com.ctre.phoenix6.configs.MotorOutputConfigs;
-import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.hardware.TalonFX;
-import com.revrobotics.spark.SparkFlex;
-import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.config.SparkFlexConfig;
-import com.revrobotics.spark.config.SparkMaxConfig;
-
-import edu.wpi.first.wpilibj.DigitalInput;
-
-import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
+import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkFlexConfig;
+import edu.wpi.first.wpilibj.DigitalInput;
 import frc.robot.Constants.WoodBotConstants;
 
 public class IntakeIOWB implements IntakeIO {
@@ -56,6 +48,5 @@ public class IntakeIOWB implements IntakeIO {
     // this is right
     inputs.velocity = encoder.getVelocity();
     inputs.voltage = motor.getBusVoltage() * motor.getAppliedOutput();
-
   }
 }

@@ -13,16 +13,14 @@ import frc.robot.commands.BasicIntakeCommand;
 import frc.robot.generated.WoodBotDrivetrain;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Flywheel.Flywheel;
-import frc.robot.subsystems.Flywheel.FlywheelIOWB;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKicker;
+import frc.robot.subsystems.FlywheelKicker.FlywheelKickerIOWB;
 import frc.robot.subsystems.Hood.Hood;
-import frc.robot.subsystems.Hood.HoodIOWB;
 import frc.robot.subsystems.Indexer.Indexer;
 import frc.robot.subsystems.Indexer.IndexerIOWB;
 import frc.robot.subsystems.Intake.Intake;
 import frc.robot.subsystems.Intake.IntakeIOWB;
 import frc.robot.subsystems.IntakePivot.IntakePivot;
-import frc.robot.subsystems.IntakePivot.IntakePivotIOPB;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -32,12 +30,12 @@ import frc.robot.subsystems.IntakePivot.IntakePivotIOPB;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-  private  CommandSwerveDrivetrain drivetrain;
-  private  Flywheel flywheel;
-  private  Hood hood;
-  private  Indexer indexer;
-  private  Intake intake;
-  private  IntakePivot intakePivot;
+  private CommandSwerveDrivetrain drivetrain;
+  private Flywheel flywheel;
+  private Hood hood;
+  private Indexer indexer;
+  private Intake intake;
+  private IntakePivot intakePivot;
   private FlywheelKicker flywheelKicker;
 
   // TODO: refactor to allow for more than 1 drivetrain type
@@ -50,7 +48,7 @@ public class RobotContainer {
 
   private final CommandXboxController testCont1 = new CommandXboxController(5);
 
-  private BasicIntakeCommand basicIntakeCommand; 
+  private BasicIntakeCommand basicIntakeCommand;
 
   // private final CommandXboxController operatorCont = new CommandXboxController(1);
 

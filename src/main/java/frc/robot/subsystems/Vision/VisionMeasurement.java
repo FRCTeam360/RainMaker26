@@ -12,4 +12,3 @@ import edu.wpi.first.math.numbers.N3;
 /** Add your docs here. */
 public record VisionMeasurement(
     double timestamp, Pose2d estimatedPose, Matrix<N3, N1> standardDeviation) {}
-
