@@ -21,13 +21,12 @@ import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 import frc.robot.Constants.WoodBotConstants;
-import frc.robot.generated.WoodbotConstants;
 
 public class IntakeIOWB implements IntakeIO {
   private final SparkFlex motor = new SparkFlex(WoodBotConstants.INTAKE_ID, MotorType.kBrushless);
   private final RelativeEncoder encoder = motor.getEncoder();
   private final SparkFlexConfig config = new SparkFlexConfig();
-  private final DigitalInput sensor = new DigitalInput(WoodBotConstants.INTAKE_SENSOR_PORT);
+  private final DigitalInput sensor = new DigitalInput(WoodBotConstants.INDEXER_SENSOR_PORT);
 
   public IntakeIOWB() {
     config.idleMode(IdleMode.kBrake);

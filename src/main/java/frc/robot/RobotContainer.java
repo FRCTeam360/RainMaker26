@@ -10,7 +10,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.BasicIntakeCommand;
-import frc.robot.generated.WoodbotConstants;
+import frc.robot.generated.WoodBotDrivetrain;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Flywheel.Flywheel;
 import frc.robot.subsystems.Flywheel.FlywheelIOWB;
@@ -31,16 +31,16 @@ import frc.robot.subsystems.IntakePivot.IntakePivotIOPB;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-  private final CommandSwerveDrivetrain drivetrain;
-  private final Flywheel flywheel;
-  private final Hood hood;
-  private final Indexer indexer;
-  private final Intake intake;
-  private final IntakePivot intakePivot;
+  private  CommandSwerveDrivetrain drivetrain;
+  private  Flywheel flywheel;
+  private  Hood hood;
+  private  Indexer indexer;
+  private  Intake intake;
+  private  IntakePivot intakePivot;
 
   // TODO: refactor to allow for more than 1 drivetrain type
 
-  private Telemetry logger = new Telemetry(WoodbotConstants.kSpeedAt12Volts.in(MetersPerSecond));
+  private Telemetry logger = new Telemetry(WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
 
@@ -57,12 +57,12 @@ public class RobotContainer {
   public RobotContainer() {
     // switch (Constants.getRobotType()) {
     // case WOODBOT:
-    drivetrain = WoodbotConstants.createDrivetrain();
-    flywheel = new Flywheel(new FlywheelIOWB());
-    hood = new Hood(new HoodIOWB());
+    drivetrain = WoodBotDrivetrain.createDrivetrain();
+    // flywheel = new Flywheel(new FlywheelIOWB());
+    // hood = new Hood(new HoodIOWB());
     indexer = new Indexer(new IndexerIOWB());
     intake = new Intake(new IntakeIOWB());
-    intakePivot = new IntakePivot(new IntakePivotIOPB());
+    // intakePivot = new IntakePivot(new IntakePivotIOPB());
     // break;
     // }
     // Configure the trigger bindings
@@ -81,6 +81,7 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
+    basicIntakeCommand = new BasicIntakeCommand(intake, indexer);
     driverCont.leftBumper().whileTrue(basicIntakeCommand);
     drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
   }
