@@ -4,6 +4,11 @@
 
 package frc.robot.subsystems.IntakePivot;
 
+import java.util.function.DoubleSupplier;
+
+import org.littletonrobotics.junction.Logger;
+
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class IntakePivot extends SubsystemBase {
@@ -27,8 +32,14 @@ public class IntakePivot extends SubsystemBase {
     this.setDutyCycle(0.0);
   }
 
+  public Command setDutyCycleCommand(DoubleSupplier dutySupplier) {
+  return this.runEnd(() -> this.setDutyCycle(dutySupplier.getAsDouble()), () -> this.stop());
+  }
+
   @Override
   public void periodic() {
     io.updateInputs(inputs);
+    Logger.processInputs("IntakePivot", inputs);
+
   }
 }

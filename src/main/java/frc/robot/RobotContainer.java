@@ -25,6 +25,7 @@ import frc.robot.subsystems.Intake.Intake;
 import frc.robot.subsystems.Intake.IntakeIOSim;
 import frc.robot.subsystems.Intake.IntakeIOWB;
 import frc.robot.subsystems.IntakePivot.IntakePivot;
+import frc.robot.subsystems.IntakePivot.IntakePivotIOSim;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -73,6 +74,8 @@ public class RobotContainer {
     case SIM:
     drivetrain = WoodBotDrivetrain.createDrivetrain();
     logger = new Telemetry(WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
+    intakePivot = new IntakePivot(new IntakePivotIOSim());
+
     //flywheel = new Flywheel(new FlywheelIOSim());
     // hood = new Hood(new HoodIOWB());
     //indexer = new Indexer(new IndexerIOSim());
@@ -101,6 +104,8 @@ public class RobotContainer {
     // driverCont.leftBumper().whileTrue(basicIntakeCommand);
     drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
     // driverCont.a().whileTrue(flywheel.setDutyCycleCommand(() -> driverCont.getRightTriggerAxis()));
+    driverCont.a().whileTrue(intakePivot.setDutyCycleCommand(() -> driverCont.getRightTriggerAxis()));
+
   }
 
   /**
