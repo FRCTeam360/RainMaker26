@@ -47,7 +47,7 @@ public final class Constants {
   }
 
   public static final class SerialAddressConstants {
-    public static String WOOD_SERIAL_ADDRESS = "";
+    public static String WOOD_SERIAL_ADDRESS = "032BE44A";
   }
 
   public static RobotType getRobotType() {
