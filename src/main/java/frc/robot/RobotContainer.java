@@ -13,6 +13,7 @@ import frc.robot.commands.BasicIntakeCommand;
 import frc.robot.generated.WoodBotDrivetrain;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.SuperStructure;
+import frc.robot.subsystems.SuperStructure.SuperStates;
 import frc.robot.subsystems.Flywheel.Flywheel;
 import frc.robot.subsystems.Flywheel.FlywheelIOWB;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKicker;
@@ -88,7 +89,11 @@ public class RobotContainer {
     basicIntakeCommand = new BasicIntakeCommand(intake, indexer);
     driverCont.leftBumper().whileTrue(basicIntakeCommand);
     drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
-    driverCont.a().whileTrue(flywheel.setDutyCycleCommand(() -> driverCont.getRightTriggerAxis()));
+    //driverCont.a().whileTrue(flywheel.setDutyCycleCommand(() -> driverCont.getRightTriggerAxis()));
+    driverCont.a()
+    .onTrue(superStructure.setStateCommand(SuperStates.COLLECTING_FUEL));
+    driverCont.a()
+    .onFalse(superStructure.setStateCommand(SuperStates.STOPPED));
   }
 
   /**

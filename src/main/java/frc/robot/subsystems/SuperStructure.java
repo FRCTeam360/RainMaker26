@@ -17,54 +17,61 @@ public class SuperStructure extends SubsystemBase {
 
     private SuperStates wantedSuperState = SuperStates.STOPPED;
     private SuperStates currentSuperState = SuperStates.STOPPED;
-    private SuperStates previousSuperState;
+    private SuperStates previousSuperState = SuperStates.STOPPED;
 
-    private SuperStates setCurrentState() {
+    public SuperStructure(Intake intake) {
+        this.intake = intake;
+    }
+    private void updateState() {
         previousSuperState = currentSuperState;
-        switch (currentSuperState) {
+
+        switch (wantedSuperState) {
+            case COLLECTING_FUEL:
+                currentSuperState = SuperStates.COLLECTING_FUEL;
+                break;
+
+            case STOPPED:
             default:
                 currentSuperState = SuperStates.STOPPED;
                 break;
         }
-        return currentSuperState;
     }
-
-    public Command setStateCommand(SuperStates superState) {
-       Command commandToReturn = new InstantCommand(() -> setWantedSuperState(superState));
-        return commandToReturn;
-    }
-    private void intakeFuel(){
-
-    }
-
     private void applyStates() {
         switch (currentSuperState) {
             case COLLECTING_FUEL:
                 intakeFuel();
                 break;
+
             case STOPPED:
                 stopped();
                 break;
         }
     }
 
-    private void stopped() {
-        // setWantedState(stoped)
+    private void intakeFuel() {
+        intake.setWantedState(Intake.States.COLLECTING_FUEL);
     }
 
-    public SuperStructure(Intake intake) {
-        this.intake = intake;
+    private void stopped() {
+        intake.setWantedState(Intake.States.OFF);
     }
-       public void setWantedSuperState(SuperStates superState) {
+    public Command setStateCommand(SuperStates superState) {
+        return new InstantCommand(
+            () -> setWantedSuperState(superState),
+            this
+        );
+    }
+
+    public void setWantedSuperState(SuperStates superState) {
         this.wantedSuperState = superState;
     }
-
     @Override
     public void periodic() {
-        Logger.recordOutput("Superstructure/WantedSuperState", wantedSuperState);
-        Logger.recordOutput("Superstructure/CurrentSuperState", currentSuperState);
-        Logger.recordOutput("Superstructure/PreviousSuperState", previousSuperState);
-        currentSuperState = setCurrentState();
-    }
+        updateState();
+        applyStates();
 
+        Logger.recordOutput("Superstructure/WantedSuperState", wantedSuperState.toString());
+        Logger.recordOutput("Superstructure/CurrentSuperState", currentSuperState.toString());
+        Logger.recordOutput("Superstructure/PreviousSuperState", previousSuperState.toString());
+    }
 }
