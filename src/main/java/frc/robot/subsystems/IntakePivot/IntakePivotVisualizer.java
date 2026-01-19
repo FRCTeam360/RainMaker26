@@ -28,10 +28,10 @@ public class IntakePivotVisualizer {
    */
   public IntakePivotVisualizer(double armLength) {
     // Create mechanism on a 3x3 canvas with white background
-    mechanism = new LoggedMechanism2d(3.0, 3.0, new Color8Bit(Color.kWhite));
+    mechanism = new LoggedMechanism2d(1.0, 0.5, new Color8Bit(Color.kWhite));
     
     // Create pivot root at center of canvas
-    LoggedMechanismRoot2d pivotRoot = mechanism.getRoot("pivot", 1.5, 1.0);
+    LoggedMechanismRoot2d pivotRoot = mechanism.getRoot("pivot", 1.0, 0.25);
     
     // Create arm ligament (lime green, 6 pixel thickness)
     armLigament = pivotRoot.append(new LoggedMechanismLigament2d(
