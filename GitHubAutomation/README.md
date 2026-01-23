@@ -4,7 +4,7 @@ This package includes everything you need to import issues from a spreadsheet in
 
 ## Files Included
 
-- `github_issues_template.csv` - Template CSV file with example issues
+- `github_issues_to_add.csv` - Template CSV file with example issues
 - `import_issues.sh` - Bash script to import issues from CSV (Mac/Linux)
 - `import_issues.ps1` - PowerShell script to import issues from CSV (Windows)
 - `export_issues.ps1` - PowerShell script to export current issues to CSV (Windows)
@@ -83,13 +83,13 @@ To include epic information from the project board:
 
 ```powershell
 cd C:\path\to\your\repo
-.\import_issues.ps1 github_issues_template.csv
+.\import_issues.ps1 github_issues_to_add.csv
 ```
 
 #### Option 2: Specify repository explicitly
 
 ```powershell
-.\import_issues.ps1 github_issues_template.csv owner/repo-name
+.\import_issues.ps1 github_issues_to_add.csv owner/repo-name
 ```
 
 #### Option 3: Use a custom CSV file
@@ -101,7 +101,7 @@ cd C:\path\to\your\repo
 ## Step-by-Step Instructions
 
 1. **Edit the CSV template** with your issues:
-   - Open `github_issues_template.csv` in Excel, Google Sheets, or any spreadsheet app
+   - Open `github_issues_to_add.csv` in Excel, Google Sheets, or any spreadsheet app
    - Replace the example issues with your own
    - Save as CSV
 
@@ -116,13 +116,13 @@ cd C:\path\to\your\repo
    **Windows (PowerShell):**
 
    ```powershell
-   .\import_issues.ps1 github_issues_template.csv owner/repo-name
+   .\import_issues.ps1 github_issues_to_add.csv owner/repo-name
    ```
 
    **Mac/Linux (Bash):**
 
    ```bash
-   ./import_issues.sh github_issues_template.csv owner/repo-name
+   ./import_issues.sh github_issues_to_add.csv owner/repo-name
    ```
 
 4. **Check your repository** - issues should now appear!

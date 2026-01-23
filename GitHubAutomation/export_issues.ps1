@@ -95,10 +95,18 @@ foreach ($item in $projectItems.items) {
         if ($item.epic) {
             $epicMap[$issueNumber] = $item.epic
         }
+    } else {
+      # print out the issue number of missing issues
+      Write-Host "Warning: Issue not found in Rebuilt board: $($item.content.number.ToString())" -ForegroundColor Yellow
     }
 }
 
 Write-Host "Found $($issueNumbers.Count) issues in the Rebuilt board" -ForegroundColor Cyan
+
+# Find and output missing issues (in repo but not in Rebuilt board)
+$missingIssues = $issues | Where-Object { $_.number.ToString() -notin $issueNumbers }
+Write-Host "Missing issues (not in Rebuilt board):" -ForegroundColor Yellow
+$missingIssues | ForEach-Object { Write-Host "Issue #$($_.number): $($_.title)" -ForegroundColor Yellow }
 
 # Fetch full issue details for each issue number
 $issues = @()
