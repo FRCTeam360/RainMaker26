@@ -4,10 +4,9 @@ This package includes everything you need to import issues from a spreadsheet in
 
 ## Files Included
 
-- `github_issues_to_add.csv` - Template CSV file with example issues
-- `import_issues.sh` - Bash script to import issues from CSV (Mac/Linux)
-- `import_issues.ps1` - PowerShell script to import issues from CSV (Windows)
-- `export_issues.ps1` - PowerShell script to export current issues to CSV (Windows)
+- `github_issues_to_add.csv` - Template CSV file for importing issues
+- `import_issues.ps1` - PowerShell script to import issues from CSV
+- `export_issues.ps1` - PowerShell script to export current issues to CSV
 - `README.md` - This file
 
 ## Prerequisites
@@ -50,8 +49,6 @@ Your CSV file should have these columns (header row required):
 
 ### Exporting Issues
 
-#### Windows (PowerShell)
-
 To export current open issues from your repository to a CSV file:
 
 ```powershell
@@ -76,8 +73,6 @@ To include epic information from the project board:
 **Note:** Epic information requires the script to be configured for the correct project board (currently set to FRCTeam360's 2026 Rebuilt Season board).
 
 ### Importing Issues
-
-#### Windows (PowerShell)
 
 #### Option 1: From within your repository directory
 
@@ -113,16 +108,8 @@ cd C:\path\to\your\repo
 
 3. **Run the import script**:
 
-   **Windows (PowerShell):**
-
    ```powershell
    .\import_issues.ps1 github_issues_to_add.csv owner/repo-name
-   ```
-
-   **Mac/Linux (Bash):**
-
-   ```bash
-   ./import_issues.sh github_issues_to_add.csv owner/repo-name
    ```
 
 4. **Check your repository** - issues should now appear!
