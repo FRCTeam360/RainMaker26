@@ -1,0 +1,23 @@
+%% SuperStructure State Diagram (Intake/Shooter systems)
+stateDiagram-v2
+    [*] --> IDLE
+
+    %% Intake flow
+    IDLE --> INTAKING : Driver holds<br>intake button
+    INTAKING --> IDLE : Driver releases<br>intake button
+
+    %% Shooting flow
+    IDLE --> PREPARING : Driver holds<br>shoot button
+    PREPARING --> READY_TO_FIRE : Robot aligned
+    PREPARING --> IDLE : Driver releases<br>shoot button
+
+    %% Ready to fire
+    READY_TO_FIRE --> SHOOTING : Aligned for<br>100ms (debounce)
+    READY_TO_FIRE --> PREPARING : Alignment lost
+
+    %% Shooting
+    SHOOTING --> IDLE : Kicker fires<br>OR timeout
+
+    %% Ejecting (from any state)
+    IDLE --> EJECTING : Driver holds<br>eject button
+    EJECTING --> IDLE : Driver releases<br>eject button
