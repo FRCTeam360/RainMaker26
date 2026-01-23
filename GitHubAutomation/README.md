@@ -1,12 +1,13 @@
-# GitHub Issues CSV Import using GitHub CLI
+# GitHub Issues CSV Import/Export using GitHub CLI
 
-This package includes everything you need to import issues from a spreadsheet into GitHub using the GitHub CLI.
+This package includes everything you need to import issues from a spreadsheet into GitHub and export current issues to CSV using the GitHub CLI.
 
 ## Files Included
 
 - `github_issues_template.csv` - Template CSV file with example issues
 - `import_issues.sh` - Bash script to import issues from CSV (Mac/Linux)
 - `import_issues.ps1` - PowerShell script to import issues from CSV (Windows)
+- `export_issues.ps1` - PowerShell script to export current issues to CSV (Windows)
 - `README.md` - This file
 
 ## Prerequisites
@@ -47,7 +48,36 @@ Your CSV file should have these columns (header row required):
 
 ## Usage
 
-### Windows (PowerShell)
+### Exporting Issues
+
+#### Windows (PowerShell)
+
+To export current open issues from your repository to a CSV file:
+
+```powershell
+cd C:\path\to\your\repo
+.\export_issues.ps1
+```
+
+This will create `github_issues_export.csv` with all open issues.
+
+To specify a custom filename or repository:
+
+```powershell
+.\export_issues.ps1 my_export.csv owner/repo-name
+```
+
+To include epic information from the project board:
+
+```powershell
+.\export_issues.ps1 -IncludeEpic
+```
+
+**Note:** Epic information requires the script to be configured for the correct project board (currently set to FRCTeam360's 2026 Rebuilt Season board).
+
+### Importing Issues
+
+#### Windows (PowerShell)
 
 #### Option 1: From within your repository directory
 
