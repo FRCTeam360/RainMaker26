@@ -40,4 +40,7 @@ public class Flywheel extends SubsystemBase {
     return this.runEnd(
         () -> this.setDutyCycle(dutySupplier.getAsDouble() / 1.0), () -> this.stop());
   }
+  public Command setRPMCommand(double rpm){
+    return this.runEnd(()->io.setRPM(rpm), () ->this.stop());
+  }
 }

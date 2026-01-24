@@ -13,19 +13,21 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+
+import frc.robot.Constants.TemporaryBotConstants;
 import frc.robot.Constants.WoodBotConstants;
 
-public class FlywheelIOWB implements FlywheelIO {
+public class FlywheelIOProto implements FlywheelIO {
 
   private final TalonFX[] motors = {
-    new TalonFX(WoodBotConstants.FLYWHEEL_RIGHT_ID, WoodBotConstants.CANBUS_NAME),
-    new TalonFX(WoodBotConstants.FLYWHEEL_LEFT_ID, WoodBotConstants.CANBUS_NAME)
+    new TalonFX(TemporaryBotConstants.FLYWHEEL_RIGHT_ID, TemporaryBotConstants.CANBUS_NAME),
+    new TalonFX(TemporaryBotConstants.FLYWHEEL_LEFT_ID, TemporaryBotConstants.CANBUS_NAME)
   };
   private TalonFXConfiguration rightConfig = new TalonFXConfiguration();
   private TalonFXConfiguration leftConfig = new TalonFXConfiguration();
   private MotorOutputConfigs motorOutputConfigs = new MotorOutputConfigs();
 
-  public FlywheelIOWB() {
+  public FlywheelIOProto() {
     double kP = 0.0;
     double kI = 0.0;
     double kD = 0.0;

@@ -43,6 +43,14 @@ public final class Constants {
 
     public static final String CANBUS_NAME = "Default Name";
   }
+  public static class TemporaryBotConstants{
+    public static final int FLYWHEEL_KICKER_ID = 0;
+    public static final int FLYWHEEL_KICKER_SENSOR_ID = 0;
+
+    public static final int FLYWHEEL_RIGHT_ID = 0;
+    public static final int FLYWHEEL_LEFT_ID =0;
+    public static final String CANBUS_NAME = "Default Name";
+  }
 
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;

@@ -6,6 +6,8 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
+import java.util.function.DoubleSupplier;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -14,7 +16,7 @@ import frc.robot.commands.BasicShootCommand;
 import frc.robot.generated.WoodBotDrivetrain;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Flywheel.Flywheel;
-import frc.robot.subsystems.Flywheel.FlywheelIOWB;
+import frc.robot.subsystems.Flywheel.FlywheelIOProto;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKicker;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKickerIOWB;
 import frc.robot.subsystems.Hood.Hood;
@@ -34,13 +36,13 @@ import frc.robot.subsystems.IntakePivot.IntakePivotIOPB;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-  private CommandSwerveDrivetrain drivetrain;
+  //private CommandSwerveDrivetrain drivetrain;
   private Flywheel flywheel;
-  private Hood hood;
-  private Indexer indexer;
-  private Intake intake;
-  private IntakePivot intakePivot;
-  private FlywheelKicker flywheelKicker;
+  // private Hood hood;
+  // private Indexer indexer;
+  // private Intake intake;
+  // private IntakePivot intakePivot;
+  // private FlywheelKicker flywheelKicker;
 
   // TODO: refactor to allow for more than 1 drivetrain type
 
@@ -61,12 +63,12 @@ public class RobotContainer {
   public RobotContainer() {
     // switch (Constants.getRobotType()) {
     // case WOODBOT:
-    drivetrain = WoodBotDrivetrain.createDrivetrain();
-    flywheel = new Flywheel(new FlywheelIOWB());
+   // drivetrain = WoodBotDrivetrain.createDrivetrain();
+    flywheel = new Flywheel(new FlywheelIOProto());
     // hood = new Hood(new HoodIOWB());
-    indexer = new Indexer(new IndexerIOWB());
-    intake = new Intake(new IntakeIOWB());
-    flywheelKicker = new FlywheelKicker(new FlywheelKickerIOWB());
+    // indexer = new Indexer(new IndexerIOWB());
+    // intake = new Intake(new IntakeIOWB());
+    // flywheelKicker = new FlywheelKicker(new FlywheelKickerIOWB());
     // intakePivot = new IntakePivot(new IntakePivotIOPB());
     // break;
     // }
@@ -84,11 +86,14 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    basicIntakeCommand = new BasicIntakeCommand(intake, indexer, flywheelKicker);
-    basicShootCommand = new BasicShootCommand(flywheel);
-    driverCont.leftBumper().whileTrue(basicIntakeCommand);
-    driverCont.rightBumper().whileTrue(basicShootCommand);
-    drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
+    // basicIntakeCommand = new BasicIntakeCommand(intake, indexer, flywheelKicker);
+    // basicShootCommand = new BasicShootCommand(flywheel);
+    // driverCont.leftBumper().whileTrue(basicIntakeCommand);
+    // driverCont.rightBumper().whileTrue(basicShootCommand);
+    // drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
+    driverCont.leftBumper().whileTrue(flywheel.setDutyCycleCommand( ()-> 0.5));
+    driverCont.a().onTrue(flywheel.setRPMCommand(1000));
+    driverCont.b().onTrue(flywheel.setRPMCommand(1500));
   }
 
   public void onDisable() {
