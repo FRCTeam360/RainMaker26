@@ -109,8 +109,8 @@ public class RobotContainer {
     }
     // Configure the trigger bindings
     configureBindings();
-    configureTestBindings1();
-    configureTestBindings2();
+    // configureTestBindings1();
+    // configureTestBindings2();
 
     // sorry for the weird placements, feel free to reorganize - Pathplanner logging
     PathPlannerLogging.setLogActivePathCallback(
