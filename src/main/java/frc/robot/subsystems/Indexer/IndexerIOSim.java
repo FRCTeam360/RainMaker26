@@ -4,6 +4,13 @@
 
 package frc.robot.subsystems.Indexer;
 
+import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
+
+import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.VelocityVoltage;
+import com.ctre.phoenix6.hardware.TalonFX;
+
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.system.LinearSystem;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -25,15 +32,22 @@ import frc.robot.Constants.SimulationConstants;
 public class IndexerIOSim implements IndexerIO {
   /** Creates a new IndexerIOSim. */
 
+  private double gearRatio = 10.0;
   private DCMotor gearbox = DCMotor.getNeo550(1);
-  private Encoder encoder = new Encoder(SimulationConstants.INDEXER_ENCODER1, SimulationConstants.INDEXER_ENCODER2);
-  private DigitalInput sensor = new DigitalInput(0);
-  
-  private final PWMSparkMax indexerMotor = new PWMSparkMax(SimulationConstants.INDEXER_MOTOR);
+   private final double kS = 0.0;
+  private final double kV = 0.0;
+  private final double kA = 0.0;
+  private final double kG = 0.75;  // Gravity compensation
 
-  private PWMSim simMotor = new PWMSim(indexerMotor);
-  private EncoderSim simEncoder = new EncoderSim(encoder);
+  private DigitalInput sensor = new DigitalInput(0);
   private DIOSim sensorSim = new DIOSim(sensor);
+
+  private final LoggedNetworkNumber tunableSetpoint = new LoggedNetworkNumber("/Tuning/Indexer/SetpointRotations", 0.0);
+  private final LoggedNetworkBoolean tuningEnabled = new LoggedNetworkBoolean("/Tuning/Indexer/Enabled", false);
+
+  private final TalonFX motorControllerSim = new TalonFX(SimulationConstants.INTAKE_PIVOT_MOTOR);
+  private final PositionVoltage positionRequest = new PositionVoltage(0).withSlot(0);
+  private final VelocityVoltage velocityRequest = new VelocityVoltage(0).withSlot(0);
 
   private final LinearSystem<N1, N1, N1> plant =
     LinearSystemId.createFlywheelSystem(gearbox, 0.00113951385, 1.0); // TODO : MOI is last year's but i don't think that one was correct either
