@@ -64,12 +64,15 @@ public class FlywheelIOWB implements FlywheelIO {
     boolean odd = false;
     for (TalonFX i : motors) {
       i.getConfigurator().apply(odd ? leftConfig : rightConfig);
+      odd = !odd;
       i.setNeutralMode(NeutralModeValue.Coast);
     }
 
+    boolean oddFollower = true;
     for (int i = 1; i < motors.length; i++) {
       motors[i].setControl(
-          new Follower(WoodBotConstants.FLYWHEEL_RIGHT_ID, MotorAlignmentValue.Aligned));
+          new Follower(WoodBotConstants.FLYWHEEL_RIGHT_ID, (oddFollower ? MotorAlignmentValue.Opposed : MotorAlignmentValue.Aligned)));
+        oddFollower = !oddFollower;
     }
   }
 

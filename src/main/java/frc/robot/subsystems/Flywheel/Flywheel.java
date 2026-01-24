@@ -37,6 +37,6 @@ public class Flywheel extends SubsystemBase {
   }
 
   public Command setDutyCycleCommand(DoubleSupplier dutySupplier) {
-    return this.runEnd(() -> this.setDutyCycle(dutySupplier.getAsDouble()), () -> this.stop());
+    return this.runEnd(() -> this.setDutyCycle(dutySupplier.getAsDouble() / 1.0), () -> this.stop());
   }
 }
