@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj.simulation.PWMSim;
 import edu.wpi.first.wpilibj.simulation.RoboRioSim;
 
 public class IndexerIOSim implements IndexerIO {
+  // TODO: revamp this sim class
   /** Creates a new IndexerIOSim. */
   private DCMotor gearbox = DCMotor.getNeo550(1);
 
