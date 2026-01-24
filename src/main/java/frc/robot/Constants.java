@@ -22,7 +22,8 @@ public final class Constants {
 
   public static enum RobotType {
     SIM,
-    WOODBOT
+    WOODBOT,
+    REPLAY
   }
 
   public static class WoodBotConstants {
