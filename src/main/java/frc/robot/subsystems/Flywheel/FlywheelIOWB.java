@@ -9,6 +9,7 @@ import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
+import com.ctre.phoenix6.controls.VelocityDutyCycle;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
@@ -26,13 +27,13 @@ public class FlywheelIOWB implements FlywheelIO {
   private MotorOutputConfigs motorOutputConfigs = new MotorOutputConfigs();
 
   public FlywheelIOWB() {
-    double kP = 0.0;
+    double kP = 0.025;
     double kI = 0.0;
     double kD = 0.0;
     double kA = 0.0;
     double kG = 0.0;
-    double kS = 0.0;
-    double kV = 0.0;
+    double kS = 0.07;
+    double kV = 0.008;
 
     Slot0Configs slot0Configs = rightConfig.Slot0;
     slot0Configs.kA = kA;
@@ -60,6 +61,8 @@ public class FlywheelIOWB implements FlywheelIO {
         .withMotionMagicJerk(0.0);
     rightConfig.MotorOutput.withInverted(InvertedValue.Clockwise_Positive);
 
+    
+
     leftConfig = rightConfig.clone();
     leftConfig.MotorOutput.withInverted(InvertedValue.CounterClockwise_Positive);
 
@@ -81,11 +84,12 @@ public class FlywheelIOWB implements FlywheelIO {
   }
 
   MotionMagicVelocityVoltage velocityVoltage = new MotionMagicVelocityVoltage(0);
+  VelocityDutyCycle velocityDutyCycle = new VelocityDutyCycle(0.0);
 
   @Override
   public void setRPM(double rpm) {
     double rps = rpm / 60.0;
-    motors[0].setControl(velocityVoltage.withVelocity(rps));
+    motors[0].setControl(velocityDutyCycle.withVelocity(rps));
   }
 
   @Override
