@@ -18,6 +18,7 @@ import frc.robot.subsystems.Flywheel.FlywheelIOWB;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKicker;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKickerIOWB;
 import frc.robot.subsystems.Hood.Hood;
+import frc.robot.subsystems.Hood.HoodIOWB;
 import frc.robot.subsystems.Indexer.Indexer;
 import frc.robot.subsystems.Indexer.IndexerIOSim;
 import frc.robot.subsystems.Indexer.IndexerIOWB;
@@ -26,6 +27,7 @@ import frc.robot.subsystems.Intake.IntakeIOSim;
 import frc.robot.subsystems.Intake.IntakeIOWB;
 import frc.robot.subsystems.IntakePivot.IntakePivot;
 import frc.robot.subsystems.IntakePivot.IntakePivotIOSim;
+import frc.robot.subsystems.IntakePivot.IntakePivotIOPB;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -51,10 +53,9 @@ public class RobotContainer {
 
   private final CommandXboxController driverCont = new CommandXboxController(0);
 
-  private final CommandXboxController testCont1 = new CommandXboxController(4);
-  private final CommandXboxController testCont2 = new CommandXboxController(5);
+  private final CommandXboxController testCont1 = new CommandXboxController(5);
 
-  private BasicIntakeCommand basicIntakeCommand;
+  private BasicIntakeCommand basicIntakeCommand; 
 
   // private final CommandXboxController operatorCont = new CommandXboxController(1);
 
@@ -100,12 +101,13 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    // basicIntakeCommand = new BasicIntakeCommand(intake, indexer);
-    // driverCont.leftBumper().whileTrue(basicIntakeCommand);
+    basicIntakeCommand = new BasicIntakeCommand(intake, indexer, flywheelKicker);
+    driverCont.leftBumper().whileTrue(basicIntakeCommand);
     drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
-    // driverCont.a().whileTrue(flywheel.setDutyCycleCommand(() -> driverCont.getRightTriggerAxis()));
-    driverCont.a().whileTrue(intakePivot.setDutyCycleCommand(() -> driverCont.getLeftY() ));
+  }
 
+  public void onDisable() {
+    flywheel.stop();
   }
 
   /**

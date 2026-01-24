@@ -6,7 +6,7 @@ Use this prompt when adding new tasks to our GitHub issues tracker.
 
 ## Context
 
-I'm on an FRC robotics team. I need you to convert my planned tasks into a GitHub issues CSV file.
+I'm on an FRC robotics team. I need you to convert my planned tasks into a GitHub issues CSV file. I've also included a sheet with our current tasks so we don't make redundant tasks.
 
 ## CSV Format
 
