@@ -82,9 +82,13 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    basicIntakeCommand = new BasicIntakeCommand(intake, indexer);
+    basicIntakeCommand = new BasicIntakeCommand(intake, indexer, flywheelKicker);
     driverCont.leftBumper().whileTrue(basicIntakeCommand);
     drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
+  }
+
+  public void onDisable() {
+    flywheel.stop();
   }
 
   /**
