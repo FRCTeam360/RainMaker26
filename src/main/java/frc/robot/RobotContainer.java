@@ -9,8 +9,6 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.commands.BasicIntakeCommand;
-import frc.robot.commands.BasicShootCommand;
 import frc.robot.generated.WoodBotDrivetrain;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Flywheel.Flywheel;
@@ -41,6 +39,7 @@ public class RobotContainer {
   private Intake intake;
   private IntakePivot intakePivot;
   private FlywheelKicker flywheelKicker;
+  private CommandFactory commandFactory;
 
   // TODO: refactor to allow for more than 1 drivetrain type
 
@@ -51,13 +50,6 @@ public class RobotContainer {
   private final CommandXboxController driverCont = new CommandXboxController(0);
 
   private final CommandXboxController testCont1 = new CommandXboxController(5);
-
-  private BasicIntakeCommand basicIntakeCommand;
-
-  private BasicShootCommand basicShootCommand;
-
-  // private final CommandXboxController operatorCont = new
-  // CommandXboxController(1);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -107,11 +99,9 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    basicIntakeCommand = new BasicIntakeCommand(intake, indexer, flywheelKicker);
-    basicShootCommand = new BasicShootCommand(flywheel);
-    driverCont.leftBumper().whileTrue(basicIntakeCommand);
-    driverCont.rightBumper().whileTrue(basicShootCommand);
-    driverCont.a().whileTrue(intake.setDutyCycleCommand(()-> 1.0));
+    driverCont.leftBumper().whileTrue(commandFactory.basicIntakeCmd());
+    driverCont.rightBumper().whileTrue(commandFactory.basicShootCmd());
+    driverCont.a().whileTrue(intake.setDutyCycleCommand(1.0));
     drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
   }
 
