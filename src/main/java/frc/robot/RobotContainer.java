@@ -60,7 +60,7 @@ public class RobotContainer {
         drivetrain = WoodBotDrivetrain.createDrivetrain();
         logger = new Telemetry(WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
         flywheel = new Flywheel(new FlywheelIOWB());
-        hood = new Hood(new HoodIOWB());
+        // hood = new Hood(new HoodIOWB());
         indexer = new Indexer(new IndexerIOWB());
         intake = new Intake(new IntakeIOWB());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOWB());
