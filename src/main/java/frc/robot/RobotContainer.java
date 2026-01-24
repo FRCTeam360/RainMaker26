@@ -45,6 +45,7 @@ import java.util.Objects;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
+  private final Field2d field = new Field2d();
   private CommandSwerveDrivetrain drivetrain;
   private  SendableChooser<Command> autoChooser;
   private Flywheel flywheel;
