@@ -16,6 +16,7 @@ import frc.robot.subsystems.Flywheel.FlywheelIOWB;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKicker;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKickerIOWB;
 import frc.robot.subsystems.Hood.Hood;
+import frc.robot.subsystems.Hood.HoodIOWB;
 import frc.robot.subsystems.Indexer.Indexer;
 import frc.robot.subsystems.Indexer.IndexerIOWB;
 import frc.robot.subsystems.Intake.Intake;
@@ -50,16 +51,7 @@ public class RobotContainer {
   private final CommandXboxController driverCont = new CommandXboxController(0);
 
   private final CommandXboxController testCont1 = new CommandXboxController(5);
-  commandFactory = new CommandFactory(
-      intake,
-       flywheel,
-       flyWheelKicker,
-       hood,
-       indexer,
-       intakePivot,
-       vision,
-       drivetrain
-  );
+
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -68,7 +60,7 @@ public class RobotContainer {
         drivetrain = WoodBotDrivetrain.createDrivetrain();
         logger = new Telemetry(WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
         flywheel = new Flywheel(new FlywheelIOWB());
-        // hood = new Hood(new HoodIOWB());
+        hood = new Hood(new HoodIOWB());
         indexer = new Indexer(new IndexerIOWB());
         intake = new Intake(new IntakeIOWB());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOWB());
@@ -96,7 +88,14 @@ public class RobotContainer {
         // intakePivot = new IntakePivot(new IntakePivotIOPB());
     }
     // Configure the trigger bindings
-    configureBindings();
+      commandFactory = new CommandFactory(
+      intake,
+       flywheel,
+       flywheelKicker,
+       indexer,
+       drivetrain
+  );
+  configureBindings();
   }
 
   /**

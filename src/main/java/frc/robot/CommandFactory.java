@@ -20,10 +20,9 @@ public class CommandFactory {
   private final Intake intake;
   private final Flywheel flywheel;
   private final FlywheelKicker flyWheelKicker;
-  private final Hood hood;
+  // private final Hood hood;
   private final Indexer indexer;
-  private final IntakePivot intakePivot;
-  private final Vision vision;
+  // private final Vision vision;
   private final CommandSwerveDrivetrain drivetrain;
 
   // Contructor
@@ -31,18 +30,16 @@ public class CommandFactory {
       Intake intake,
       Flywheel flywheel,
       FlywheelKicker flyWheelKicker,
-      Hood hood,
+      // Hood hood,
       Indexer indexer,
-      IntakePivot intakePivot,
-      Vision vision,
+      // Vision vision,
       CommandSwerveDrivetrain drivetrain) {
     this.intake = intake;
     this.flywheel = flywheel;
     this.flyWheelKicker = flyWheelKicker;
-    this.hood = hood;
+    // this.hood = hood;
     this.indexer = indexer;
-    this.intakePivot = intakePivot;
-    this.vision = vision;
+    // this.vision = vision;
     this.drivetrain = drivetrain;
   }
 
