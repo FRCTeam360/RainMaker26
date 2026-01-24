@@ -41,6 +41,7 @@ public class RobotContainer {
   private Intake intake;
   private IntakePivot intakePivot;
   private FlywheelKicker flywheelKicker;
+  private CommandFactory commandFactory;
 
   // TODO: refactor to allow for more than 1 drivetrain type
 
@@ -51,9 +52,6 @@ public class RobotContainer {
   private final CommandXboxController driverCont = new CommandXboxController(0);
 
   private final CommandXboxController testCont1 = new CommandXboxController(5);
-
-  private BasicIntakeCommand basicIntakeCommand;
-  private BasicShootCommand basicShootCommand;
 
   // private final CommandXboxController operatorCont = new CommandXboxController(1);
 
@@ -84,10 +82,8 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    basicIntakeCommand = new BasicIntakeCommand(intake, indexer, flywheelKicker);
-    basicShootCommand = new BasicShootCommand(flywheel);
-    driverCont.leftBumper().whileTrue(basicIntakeCommand);
-    driverCont.rightBumper().whileTrue(basicShootCommand);
+    driverCont.leftBumper().whileTrue(commandFactory.basicIntakeCmd());
+    driverCont.rightBumper().whileTrue(commandFactory.basicShootCmd());
     drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
   }
 
