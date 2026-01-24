@@ -9,20 +9,20 @@ public class Intake extends SubsystemBase {
   private final IntakeIO io;
   private final IntakeIOInputsAutoLogged inputs = new IntakeIOInputsAutoLogged();
 
-  public enum States {
+  public enum IntakeStates {
     OFF,
     COLLECTING_FUEL
   }
 
-  private States wantedState = States.OFF;
-  private States currentState = States.OFF;
-  private States previousState = States.OFF;
+  private IntakeStates wantedState = IntakeStates.OFF;
+  private IntakeStates currentState = IntakeStates.OFF;
+  private IntakeStates previousState = IntakeStates.OFF;
 
   public Intake(IntakeIO io) {
     this.io = io;
   }
 
-  public void setWantedState(States state) {
+  public void setWantedState(IntakeStates state) {
     wantedState = state;
   }
 
@@ -31,12 +31,12 @@ public class Intake extends SubsystemBase {
 
     switch (wantedState) {
       case COLLECTING_FUEL:
-        currentState = States.COLLECTING_FUEL;
+        currentState = IntakeStates.COLLECTING_FUEL;
         break;
 
       case OFF:
       default:
-        currentState = States.OFF;
+        currentState = IntakeStates.OFF;
         break;
     }
   }
@@ -44,17 +44,20 @@ public class Intake extends SubsystemBase {
   private void applyState() {
     switch (currentState) {
       case COLLECTING_FUEL:
-        collectingFuel();
+        setDutyCycle(-0.65);
         break;
       case OFF:
       default:
-        io.setDutyCycle(0.0);
+        stop();
         break;
     }
   }
-
-  private void collectingFuel(){
-    io.setDutyCycle(1.0);
+  
+  public void setDutyCycle(double duty){
+    io.setDutyCycle(duty);
+  }
+  public void stop(){
+    io.setDutyCycle(0.0);
   }
 
   @Override

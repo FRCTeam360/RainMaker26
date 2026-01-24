@@ -5,10 +5,12 @@ import org.littletonrobotics.junction.Logger;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.Indexer.Indexer;
 import frc.robot.subsystems.Intake.Intake;
 
 public class SuperStructure extends SubsystemBase {
     private final Intake intake;
+    private final Indexer indexer;
 
     public enum SuperStates {
         STOPPED,
@@ -19,8 +21,9 @@ public class SuperStructure extends SubsystemBase {
     private SuperStates currentSuperState = SuperStates.STOPPED;
     private SuperStates previousSuperState = SuperStates.STOPPED;
 
-    public SuperStructure(Intake intake) {
+    public SuperStructure(Intake intake, Indexer indexer) {
         this.intake = intake;
+        this.indexer = indexer;
     }
     private void updateState() {
         previousSuperState = currentSuperState;
@@ -49,11 +52,12 @@ public class SuperStructure extends SubsystemBase {
     }
 
     private void intakeFuel() {
-        intake.setWantedState(Intake.States.COLLECTING_FUEL);
+        intake.setWantedState(Intake.IntakeStates.COLLECTING_FUEL);
+        indexer.setWantedState(Indexer.IndexerStates.COLLECTING_FUEL);
     }
 
     private void stopped() {
-        intake.setWantedState(Intake.States.OFF);
+        intake.setWantedState(Intake.IntakeStates.OFF);
     }
     public Command setStateCommand(SuperStates superState) {
         return new InstantCommand(
