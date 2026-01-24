@@ -27,7 +27,7 @@ public class IndexerIOWB implements IndexerIO {
 
   public IndexerIOWB() {
     sparkMaxConfig.idleMode(IdleMode.kBrake);
-    sparkMaxConfig.inverted(false);
+    sparkMaxConfig.inverted(true);
     // sparkMaxConfig.smartCurrentLimit(40);
 
     indexerMotor.configure(

@@ -22,7 +22,7 @@ public class IntakeIOWB implements IntakeIO {
 
   public IntakeIOWB() {
     config.idleMode(IdleMode.kBrake);
-    config.inverted(false);
+    config.inverted(true);
     config.smartCurrentLimit(40);
 
     motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
