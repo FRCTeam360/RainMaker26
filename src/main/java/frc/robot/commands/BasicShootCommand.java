@@ -5,21 +5,17 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.FlywheelKicker.FlywheelKicker;
-import frc.robot.subsystems.Indexer.Indexer;
-import frc.robot.subsystems.Intake.Intake;
+import frc.robot.subsystems.Flywheel.Flywheel;
+import frc.robot.subsystems.Hood.Hood;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
-public class BasicIntakeCommand extends Command {
-  public Intake intake;
-  public Indexer indexer;
-  private FlywheelKicker kicker;
-
-  /** Creates a new BasicIntakeCommand. */
-  public BasicIntakeCommand(Intake intake, Indexer indexer, FlywheelKicker kicker) {
-    this.intake = intake;
-    this.indexer = indexer;
-    this.kicker = kicker;
+public class BasicShootCommand extends Command {
+  public Flywheel flywheel;
+  public Hood hood;
+  /** Creates a new BasicShootCommand. */
+  // TODO: turn this command into an in-line command
+  public BasicShootCommand(Flywheel flywheel) {
+    this.flywheel = flywheel;
   }
 
   // Called when the command is initially scheduled.
@@ -29,17 +25,13 @@ public class BasicIntakeCommand extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    // intake.setDutyCycle(-0.65);
-    indexer.setDutyCycle(1);
-    kicker.setDutyCycle(1);
+    flywheel.setDutyCycle(0.75);
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    // intake.stop();
-    indexer.stop();
-    kicker.stop();
+    flywheel.stop();
   }
 
   // Returns true when the command should end.
