@@ -13,21 +13,16 @@ import frc.robot.commands.BasicIntakeCommand;
 import frc.robot.generated.WoodBotDrivetrain;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Flywheel.Flywheel;
-import frc.robot.subsystems.Flywheel.FlywheelIOSim;
 import frc.robot.subsystems.Flywheel.FlywheelIOWB;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKicker;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKickerIOWB;
 import frc.robot.subsystems.Hood.Hood;
-import frc.robot.subsystems.Hood.HoodIOWB;
 import frc.robot.subsystems.Indexer.Indexer;
-import frc.robot.subsystems.Indexer.IndexerIOSim;
 import frc.robot.subsystems.Indexer.IndexerIOWB;
 import frc.robot.subsystems.Intake.Intake;
-import frc.robot.subsystems.Intake.IntakeIOSim;
 import frc.robot.subsystems.Intake.IntakeIOWB;
 import frc.robot.subsystems.IntakePivot.IntakePivot;
 import frc.robot.subsystems.IntakePivot.IntakePivotIOSim;
-import frc.robot.subsystems.IntakePivot.IntakePivotIOPB;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -55,38 +50,45 @@ public class RobotContainer {
 
   private final CommandXboxController testCont1 = new CommandXboxController(5);
 
-  private BasicIntakeCommand basicIntakeCommand; 
+  private BasicIntakeCommand basicIntakeCommand;
 
-  // private final CommandXboxController operatorCont = new CommandXboxController(1);
+  // private final CommandXboxController operatorCont = new
+  // CommandXboxController(1);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     switch (Constants.getRobotType()) {
-    case WOODBOT:
-    drivetrain = WoodBotDrivetrain.createDrivetrain();
-    logger = new Telemetry(WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
-    flywheel = new Flywheel(new FlywheelIOWB());
-    // hood = new Hood(new HoodIOWB());
-    indexer = new Indexer(new IndexerIOWB());
-    intake = new Intake(new IntakeIOWB());
-    flywheelKicker = new FlywheelKicker(new FlywheelKickerIOWB());
-    // intakePivot = new IntakePivot(new IntakePivotIOPB());
-    break;
-    case SIM:
-    drivetrain = WoodBotDrivetrain.createDrivetrain();
-    logger = new Telemetry(WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
-    intakePivot = new IntakePivot(new IntakePivotIOSim());
+      case WOODBOT:
+        drivetrain = WoodBotDrivetrain.createDrivetrain();
+        logger = new Telemetry(WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
+        flywheel = new Flywheel(new FlywheelIOWB());
+        // hood = new Hood(new HoodIOWB());
+        indexer = new Indexer(new IndexerIOWB());
+        intake = new Intake(new IntakeIOWB());
+        flywheelKicker = new FlywheelKicker(new FlywheelKickerIOWB());
+        // intakePivot = new IntakePivot(new IntakePivotIOPB());
+        break;
+      case SIM:
+        drivetrain = WoodBotDrivetrain.createDrivetrain();
+        logger = new Telemetry(WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
+        intakePivot = new IntakePivot(new IntakePivotIOSim());
 
-    //flywheel = new Flywheel(new FlywheelIOSim());
-    // hood = new Hood(new HoodIOWB());
-    //indexer = new Indexer(new IndexerIOSim());
-    //intake = new Intake(new IntakeIOSim());
-    //flywheelKicker = new FlywheelKicker(new FlywheelKickerIOWB());
-    break;
-    default:
-      throw new IllegalStateException("Unexpected value: " + Constants.getRobotType()); 
-  
-  }
+        // flywheel = new Flywheel(new FlywheelIOSim());
+        // hood = new Hood(new HoodIOWB());
+        // indexer = new Indexer(new IndexerIOSim());
+        // intake = new Intake(new IntakeIOSim());
+        // flywheelKicker = new FlywheelKicker(new FlywheelKickerIOWB());
+        break;
+      default:
+        drivetrain = WoodBotDrivetrain.createDrivetrain();
+        logger = new Telemetry(WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
+        flywheel = new Flywheel(new FlywheelIOWB());
+        // hood = new Hood(new HoodIOWB());
+        indexer = new Indexer(new IndexerIOWB());
+        intake = new Intake(new IntakeIOWB());
+        flywheelKicker = new FlywheelKicker(new FlywheelKickerIOWB());
+        // intakePivot = new IntakePivot(new IntakePivotIOPB());
+    }
     // Configure the trigger bindings
     configureBindings();
   }
