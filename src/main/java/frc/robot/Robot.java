@@ -16,6 +16,8 @@ import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
+import com.ctre.phoenix6.HootAutoReplay;
+
 /**
  * The methods in this class are called automatically corresponding to each mode, as described in
  * the TimedRobot documentation. If you change the name of this class or the package after creating
@@ -26,6 +28,11 @@ public class Robot extends LoggedRobot {
 
   private final RobotContainer m_robotContainer;
 
+
+    /* log and replay timestamp and joystick data */
+  private final HootAutoReplay m_timeAndJoystickReplay = new HootAutoReplay()
+      .withTimestampReplay()
+      .withJoystickReplay();
   /**
    * This function is run when the robot is first started up and should be used for any
    * initialization code.
@@ -77,6 +84,8 @@ public class Robot extends LoggedRobot {
     // commands, running already-scheduled commands, removing finished or interrupted commands,
     // and running subsystem periodic() methods.  This must be called from the robot's periodic
     // block in order for anything in the Command-based framework to work.
+    m_timeAndJoystickReplay.update();
+
     CommandScheduler.getInstance().run();
   }
 

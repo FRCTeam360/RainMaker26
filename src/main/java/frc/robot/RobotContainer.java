@@ -8,6 +8,7 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 
 import org.littletonrobotics.junction.Logger;
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
@@ -121,6 +122,7 @@ public class RobotContainer {
     autoChooser = AutoBuilder.buildAutoChooser();
     SmartDashboard.putData("Auto Chooser", autoChooser);
     // separator
+    FollowPathCommand.warmupCommand().schedule();
 
   /**
    * Use this method to define your trigger->command mappings. Triggers can be
@@ -139,12 +141,17 @@ public class RobotContainer {
   }
 
   private void configureBindings() {
-    basicIntakeCommand = new BasicIntakeCommand(intake, indexer, flywheelKicker);
-    basicShootCommand = new BasicShootCommand(flywheel);
-    driverCont.leftBumper().whileTrue(basicIntakeCommand);
-    driverCont.rightBumper().whileTrue(basicShootCommand);
-    driverCont.a().whileTrue(intake.setDutyCycleCommand(()-> 1.0));
+
+    //FIXME: DO NOT UPDATE THIS IN MAIN, THIS WAS DONE TO MAKE TESTING PP EASIER.
+    // basicIntakeCommand = new BasicIntakeCommand(intake, indexer, flywheelKicker);
+    // basicShootCommand = new BasicShootCommand(flywheel);
+    // driverCont.leftBumper().whileTrue(basicIntakeCommand);
+    // driverCont.rightBumper().whileTrue(basicShootCommand);
+    // driverCont.a().whileTrue(intake.setDutyCycleCommand(()-> 1.0));
+
     drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
+    drivetrain.registerTelemetry(logger::telemeterize);
+
   }
 
   public void onDisable() {
@@ -158,7 +165,7 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
-    return null;
+    return autoChooser.getSelected();
   }
 }
 
