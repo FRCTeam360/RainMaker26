@@ -8,7 +8,15 @@ public class IndexerIOSim implements IndexerIO {
   /** Creates a new IndexerIOSim. */
   public IndexerIOSim() {}
 
-  public void updateInputs(IndexerIOInputs inputs) {}
+  @Override
+  public void updateInputs(IndexerIOInputs inputs) {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'updateInputs'");
+  }
 
-  public void setDutyCycle(double dutyCycle) {}
+  @Override
+  public void setDutyCycle(double dutyCycle) {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'setDutyCycle'");
+  }
 }
