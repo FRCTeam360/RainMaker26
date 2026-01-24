@@ -66,7 +66,6 @@ public class RobotContainer {
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
-
     // switch (Constants.getRobotType()) {
     // case WOODBOT:
     drivetrain = WoodbotConstants.createDrivetrain();
@@ -83,11 +82,10 @@ public class RobotContainer {
     configureTestBindings2();
 
     // sorry for the weird placements, feel free to reorganize - Pathplanner logging
+    PathPlannerLogging.setLogActivePathCallback(
+        (poses -> Logger.recordOutput("Swerve/ActivePath", poses.toArray(new Pose2d[0]))));
 
-
-   // PathPlannerLogging.setLogCurrentPoseCallback((poses) -> Logger.recordOutput("Swerve/ActivePath", poses.toArray(new Pose2d[0])));
-
-    PathPlannerLogging.setLogTargetPoseCallback((pose) -> Logger.recordOutput("Swerve/TargetPathPose", pose));
+    PathPlannerLogging.setLogTargetPoseCallback(pose -> Logger.recordOutput("Swerve/TargetPathPose", pose));
 
     autoChooser = AutoBuilder.buildAutoChooser();
     SmartDashboard.putData("Auto Chooser", autoChooser);
