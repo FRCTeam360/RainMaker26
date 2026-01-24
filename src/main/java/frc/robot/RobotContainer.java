@@ -52,9 +52,8 @@ public class RobotContainer {
 
   private final CommandXboxController testCont1 = new CommandXboxController(5);
 
-  private BasicIntakeCommand basicIntakeCommand; 
+  private BasicIntakeCommand basicIntakeCommand;
   private BasicShootCommand basicShootCommand;
-  
 
   // private final CommandXboxController operatorCont = new CommandXboxController(1);
 

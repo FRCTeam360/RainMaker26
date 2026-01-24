@@ -12,6 +12,7 @@ import frc.robot.subsystems.Hood.Hood;
 public class BasicShootCommand extends Command {
   public Flywheel flywheel;
   public Hood hood;
+
   /** Creates a new BasicShootCommand. */
   // TODO: turn this command into an in-line command
   public BasicShootCommand(Flywheel flywheel) {
