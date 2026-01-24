@@ -4,8 +4,6 @@
 
 package frc.robot.subsystems.Intake;
 
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
 public class IntakeIOSim implements IntakeIO {
   /** Creates a new IntakeIOSim. */
   public IntakeIOSim() {}
@@ -21,5 +19,4 @@ public class IntakeIOSim implements IntakeIO {
     // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'stop'");
   }
-
 }

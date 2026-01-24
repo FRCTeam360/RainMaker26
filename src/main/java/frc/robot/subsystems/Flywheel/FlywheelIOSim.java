@@ -4,8 +4,6 @@
 
 package frc.robot.subsystems.Flywheel;
 
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
 public class FlywheelIOSim implements FlywheelIO {
   /** Creates a new FlywheelIOSim. */
   public FlywheelIOSim() {}

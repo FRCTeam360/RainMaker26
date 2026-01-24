@@ -6,8 +6,6 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
-import java.util.Objects;
-
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -26,6 +24,7 @@ import frc.robot.subsystems.Intake.Intake;
 import frc.robot.subsystems.Intake.IntakeIOWB;
 import frc.robot.subsystems.IntakePivot.IntakePivot;
 import frc.robot.subsystems.IntakePivot.IntakePivotIOSim;
+import java.util.Objects;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -54,6 +53,8 @@ public class RobotContainer {
   private final CommandXboxController testCont1 = new CommandXboxController(5);
 
   private BasicIntakeCommand basicIntakeCommand;
+
+  private BasicShootCommand basicShootCommand;
 
   // private final CommandXboxController operatorCont = new
   // CommandXboxController(1);
@@ -114,7 +115,7 @@ public class RobotContainer {
   }
 
   public void onDisable() {
-    if(Objects.nonNull(flywheel)) flywheel.stop();
+    if (Objects.nonNull(flywheel)) flywheel.stop();
   }
 
   /**
