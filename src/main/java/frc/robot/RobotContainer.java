@@ -111,6 +111,7 @@ public class RobotContainer {
     basicShootCommand = new BasicShootCommand(flywheel);
     driverCont.leftBumper().whileTrue(basicIntakeCommand);
     driverCont.rightBumper().whileTrue(basicShootCommand);
+    driverCont.a().whileTrue(intake.setDutyCycleCommand(()-> 1.0));
     drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
   }
 

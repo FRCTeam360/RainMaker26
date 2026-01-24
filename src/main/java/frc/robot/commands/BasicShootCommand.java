@@ -26,7 +26,7 @@ public class BasicShootCommand extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    flywheel.setDutyCycle(0.75);
+    flywheel.setDutyCycle(1.0);
   }
 
   // Called once the command ends or is interrupted.
