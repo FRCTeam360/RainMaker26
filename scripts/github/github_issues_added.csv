@@ -55,3 +55,6 @@ title,body,labels,assignee,milestone,epic
 "Present localization implementation writeup","Create and present documentation on the localization implementation.","documentation","","Week 3","Vision"
 "Test localization code","Verify localization code works as expected with real hardware.","enhancement","","Week 3","Vision"
 "Set up AprilTags on field","Install AprilTag markers on the practice field for vision testing.","enhancement","","Week 2","Vision"
+"Port CommandLogger utility from RainMaker25","Port the CommandLogger utility class from RainMaker25 to RainMaker26 for logging command start and end events.","good first issue,enhancement","","Week 2","Tooling"
+"Port RobotUtils utility from RainMaker25","Port the RobotUtils utility class from RainMaker25 to RainMaker26 for USB writability checks.","good first issue,enhancement","","Week 2","Tooling"
+"Add JavaDoc comments to Intake subsystem","Add proper JavaDoc comments to all public methods in the Intake.java class.","good first issue,documentation","","Week 2","Subsystems"
