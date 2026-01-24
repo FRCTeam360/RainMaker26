@@ -123,6 +123,7 @@ public class IndexerIOSim implements IndexerIO {
   public void setPosition(double positionRotations) {
     // For SparkMax, we use the built-in PID controller reference
     motorControllerSim.getCANSparkMax().getPIDController().setReference(positionRotations, com.revrobotics.CANSparkMax.ControlType.kPosition);
+    motorControllerSim.getClosedLoopController().setSetpoint(positionRotations, )
   }
 
   /**
