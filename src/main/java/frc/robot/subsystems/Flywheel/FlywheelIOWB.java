@@ -9,21 +9,20 @@ import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
-import com.ctre.phoenix6.controls.VelocityDutyCycle;
-import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-
 import frc.robot.Constants.WoodBotConstants;
 
 public class FlywheelIOWB implements FlywheelIO {
 
   private final TalonFX[] motors = {
-    new TalonFX(WoodBotConstants.FLYWHEEL0_ID, WoodBotConstants.CANBUS_NAME),
-    new TalonFX(WoodBotConstants.FLYWHEEL1_ID, WoodBotConstants.CANBUS_NAME)
+    new TalonFX(WoodBotConstants.FLYWHEEL_RIGHT_ID, WoodBotConstants.CANBUS_NAME),
+    new TalonFX(WoodBotConstants.FLYWHEEL_LEFT_ID, WoodBotConstants.CANBUS_NAME)
   };
-  private TalonFXConfiguration config = new TalonFXConfiguration();
+  private TalonFXConfiguration rightConfig = new TalonFXConfiguration();
+  private TalonFXConfiguration leftConfig = new TalonFXConfiguration();
   private MotorOutputConfigs motorOutputConfigs = new MotorOutputConfigs();
 
   public FlywheelIOWB() {
@@ -35,7 +34,7 @@ public class FlywheelIOWB implements FlywheelIO {
     double kS = 0.0;
     double kV = 0.0;
 
-      Slot0Configs slot0Configs = config.Slot0;
+    Slot0Configs slot0Configs = rightConfig.Slot0;
     slot0Configs.kA = kA;
     slot0Configs.kD = kD;
     slot0Configs.kG = kG;
@@ -43,38 +42,49 @@ public class FlywheelIOWB implements FlywheelIO {
     slot0Configs.kP = kP;
     slot0Configs.kS = kS;
     slot0Configs.kV = kV;
-    
+
     TalonFXConfiguration defaultConfig = new TalonFXConfiguration();
-    for(TalonFX i : motors){
+    for (TalonFX i : motors) {
       i.getConfigurator().apply(defaultConfig);
     }
 
-    config.CurrentLimits.StatorCurrentLimit = 160.0;
-    config.CurrentLimits.StatorCurrentLimitEnable = true;
-    config.CurrentLimits.SupplyCurrentLimit = 80.0;
-    config.CurrentLimits.SupplyCurrentLimitEnable = true;
-    
-    config.MotionMagic.withMotionMagicAcceleration(0.0)
+    rightConfig.CurrentLimits.StatorCurrentLimit = 160.0;
+    rightConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+    rightConfig.CurrentLimits.SupplyCurrentLimit = 80.0;
+    rightConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+
+    rightConfig
+        .MotionMagic
+        .withMotionMagicAcceleration(0.0)
         .withMotionMagicCruiseVelocity(0.0)
         .withMotionMagicJerk(0.0);
-    config.MotorOutput = motorOutputConfigs;
+    rightConfig.MotorOutput.withInverted(InvertedValue.Clockwise_Positive);
 
-    for (int i = 1; i < motors.length; i++) {
-      motors[i].setControl(
-          new Follower(WoodBotConstants.FLYWHEEL0_ID, MotorAlignmentValue.Aligned));
-    }
-    for(TalonFX i : motors){
-      i.getConfigurator().apply(config);
+    leftConfig = rightConfig.clone();
+    leftConfig.MotorOutput.withInverted(InvertedValue.CounterClockwise_Positive);
+
+    boolean odd = false;
+    for (TalonFX i : motors) {
+      i.getConfigurator().apply(odd ? leftConfig : rightConfig);
+      odd = !odd;
       i.setNeutralMode(NeutralModeValue.Coast);
     }
 
+    boolean oddFollower = true;
+    for (int i = 1; i < motors.length; i++) {
+      motors[i].setControl(
+          new Follower(
+              WoodBotConstants.FLYWHEEL_RIGHT_ID,
+              (oddFollower ? MotorAlignmentValue.Opposed : MotorAlignmentValue.Aligned)));
+      oddFollower = !oddFollower;
+    }
   }
 
   MotionMagicVelocityVoltage velocityVoltage = new MotionMagicVelocityVoltage(0);
 
   @Override
   public void setRPM(double rpm) {
-    double rps = rpm/60.0;
+    double rps = rpm / 60.0;
     motors[0].setControl(velocityVoltage.withVelocity(rps));
   }
 

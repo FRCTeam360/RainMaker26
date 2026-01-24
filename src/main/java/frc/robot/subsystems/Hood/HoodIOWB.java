@@ -5,55 +5,61 @@
 package frc.robot.subsystems.Hood;
 
 import com.revrobotics.RelativeEncoder;
-import com.revrobotics.sim.SparkMaxSim;
-import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-import com.revrobotics.spark.config.SoftLimitConfig;
-import com.revrobotics.spark.config.SparkMaxConfig;
-import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkClosedLoopController;
-
-import edu.wpi.first.wpilibj.motorcontrol.MotorController;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkMaxConfig;
 import frc.robot.Constants;
 
 public class HoodIOWB implements HoodIO {
   // /** Creates a new HoodIOWB. */
-  private final SparkMax hoodMotor = new SparkMax(Constants.WoodBotConstants.HOOD_ID, MotorType.kBrushless);
+  private final SparkMax hoodMotor =
+      new SparkMax(Constants.WoodBotConstants.HOOD_ID, MotorType.kBrushless);
   private final RelativeEncoder encoder = hoodMotor.getEncoder();
   private final SparkMaxConfig sparkMaxConfig = new SparkMaxConfig();
-  private final double LIMIT = 0; // temporary limit for softLimit.
-  SparkClosedLoopController m_controller = hoodMotor.getClosedLoopController();
+  private final SparkClosedLoopController controller;
+
+  public void setEncoder(double position) {
+    encoder.setPosition(position);
+  }
 
   public HoodIOWB() {
     sparkMaxConfig.idleMode(IdleMode.kBrake);
     sparkMaxConfig.inverted(false);
-    // CAD doesn't know what motor type it is, we set to assume sparkmax.
 
-    hoodMotor.configure(sparkMaxConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    // Closedloopcontroller.setposiution(position, k)
+    // Smart current limit
+    sparkMaxConfig.smartCurrentLimit(40);
 
+    // PID gains
+    sparkMaxConfig.closedLoop.p(0.1).i(0.0).d(0.0);
+
+    // Soft limits
     sparkMaxConfig
-      .softLimit
-      .forwardSoftLimitEnabled(true)
-      .forwardSoftLimit(LIMIT)
-      .reverseSoftLimitEnabled(true)
-      .reverseSoftLimit(LIMIT);
+        .softLimit
+        .forwardSoftLimitEnabled(true)
+        .forwardSoftLimit(10.0)
+        .reverseSoftLimitEnabled(true)
+        .reverseSoftLimit(0.0);
+
+    hoodMotor.configure(
+        sparkMaxConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
+    controller = hoodMotor.getClosedLoopController();
   }
-  
+
   public void setPosition(double position) {
-    // encoder.setPosition(position);
-    m_controller.setSetpoint(position, ControlType.kPosition);
+    // old:encoder.setPosition(position);
+    controller.setSetpoint(position, ControlType.kPosition);
   }
 
   public void updateInputs(HoodIOInputs inputs) {
     inputs.position = encoder.getPosition();
     inputs.statorCurrent = hoodMotor.getOutputCurrent();
-    inputs.supplyCurrent = hoodMotor.getOutputCurrent() * hoodMotor.getAppliedOutput(); // TODO: check if this is
-                                                                                            // right
+    inputs.supplyCurrent = hoodMotor.getOutputCurrent() * hoodMotor.getAppliedOutput();
     inputs.velocity = encoder.getVelocity();
     inputs.voltage = hoodMotor.getBusVoltage() * hoodMotor.getAppliedOutput();
   }

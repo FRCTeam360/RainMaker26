@@ -5,6 +5,7 @@ import static edu.wpi.first.units.Units.*;
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
+import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.math.Matrix;
@@ -23,9 +24,11 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.robot.generated.WoodbotConstants.TunerSwerveDrivetrain;
+import frc.robot.generated.WoodBotDrivetrain.TunerSwerveDrivetrain;
 import java.util.Optional;
 import java.util.function.Supplier;
+
+import org.littletonrobotics.junction.Logger;
 
 /**
  * Class that extends the Phoenix 6 SwerveDrivetrain class and implements Subsystem so it can easily
@@ -38,6 +41,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   private static final double kSimLoopPeriod = 0.004; // 4 ms
   private Notifier m_simNotifier = null;
   private double m_lastSimTime;
+  private final String CMD_NAME = "Swerve: ";
 
   /* Blue alliance sees forward as 0 degrees (toward red alliance wall) */
   private static final Rotation2d kBlueAlliancePerspectiveRotation = Rotation2d.kZero;
@@ -64,8 +68,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         new SwerveRequest.FieldCentric() // creates a fieldcentric drive
             .withDeadband(maxSpeed.in(MetersPerSecond) * 0.01)
             .withRotationalDeadband(maxAngularVelocity.in(RadiansPerSecond) * 0.01);
-    // .withDriveRequestType(DriveRequestType.Velocity); // Use closed-loop control for drive motors
-    System.out.println("runnn");
     return this.applyRequest(
             () ->
                 drive
@@ -244,6 +246,15 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
   @Override
   public void periodic() {
+
+
+    Logger.recordOutput(CMD_NAME + " Current Pose", this.getStateCopy().Pose);
+    // Logger.recordOutput("Swerve: Rotation", this.getRotation2d());
+    // Logger.recordOutput("Swerve: Angle", this.getAngle());
+    // Logger.recordOutput("swerve: pithc", this.isFlat());
+    Logger.recordOutput(CMD_NAME + " Rotation2d", this.getStateCopy().RawHeading);
+    Logger.recordOutput(CMD_NAME + " CurrentState", this.getStateCopy().ModuleStates);
+    Logger.recordOutput(CMD_NAME + " TargetState", this.getStateCopy().ModuleTargets);
     /*
      * Periodically try to apply the operator perspective.
      * If we haven't applied the operator perspective before, then we should apply it regardless of DS state.
@@ -251,6 +262,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
      * Otherwise, only check and apply the operator perspective if the DS is disabled.
      * This ensures driving behavior doesn't change until an explicit disable event occurs during testing.
      */
+    
     if (!m_hasAppliedOperatorPerspective || DriverStation.isDisabled()) {
       DriverStation.getAlliance()
           .ifPresent(

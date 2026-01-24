@@ -4,11 +4,9 @@
 
 package frc.robot.subsystems.Vision;
 
-import org.littletonrobotics.junction.AutoLog;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import org.littletonrobotics.junction.AutoLog;
 
 public interface VisionIO {
   /** Creates a new VisionIO. */
@@ -19,7 +17,7 @@ public interface VisionIO {
     public double ty;
     public double tyAdjusted;
     public double tv;
-    public double pipeline;
+    public int pipeline;
     public double tagID;
     public Pose2d estimatedPose;
     public double timestampSeconds;
@@ -29,19 +27,9 @@ public interface VisionIO {
     public Pose3d[] tagPoses;
   }
 
-  public default void updateInputs(VisionIOInputs inputs) {}
+  public void updateInputs(VisionIOInputs inputs);
 
   public void setLEDMode(int mode);
-
-  public int getAprilTagID();
-
-  public double getTXRaw();
-
-  public double getTYRaw();
-
-  public double getTVRaw();
-
-  public double getPipeline();
 
   public void setPipeline(int pipeline);
 
