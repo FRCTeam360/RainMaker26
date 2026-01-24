@@ -50,6 +50,16 @@ public class RobotContainer {
   private final CommandXboxController driverCont = new CommandXboxController(0);
 
   private final CommandXboxController testCont1 = new CommandXboxController(5);
+  commandFactory = new CommandFactory(
+      intake,
+       flywheel,
+       flyWheelKicker,
+       hood,
+       indexer,
+       intakePivot,
+       vision,
+       drivetrain
+  );
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -100,8 +110,11 @@ public class RobotContainer {
    */
   private void configureBindings() {
     driverCont.leftBumper().whileTrue(commandFactory.basicIntakeCmd());
-    driverCont.rightBumper().whileTrue(commandFactory.basicShootCmd());
-    driverCont.a().whileTrue(intake.setDutyCycleCommand(1.0));
+    driverCont.rightBumper().whileTrue(commandFactory.setFlywheelKickerDutyCycle(1.0));
+    driverCont.a().whileTrue(commandFactory.shootWithRPM(100));
+    driverCont.x().whileTrue(commandFactory.shootWithRPM(1000));
+    driverCont.b().whileTrue(commandFactory.shootWithRPM(2000));
+    driverCont.y().whileTrue(commandFactory.shootWithRPM(4000));
     drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
   }
 

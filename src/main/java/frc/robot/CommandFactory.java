@@ -56,4 +56,12 @@ public class CommandFactory {
   public Command basicShootCmd() {
     return flywheel.setDutyCycleCommand(0.75);
   }
+
+  public Command shootWithRPM(double rpm) {
+    return flywheel.setRPMCommand(rpm);
+  }
+
+  public Command setFlywheelKickerDutyCycle(double value) {
+    return flyWheelKicker.setDutyCycleCommand(value);
+  }
 }

@@ -91,7 +91,7 @@ public class FlywheelIOWB implements FlywheelIO {
     double rps = rpm / 60.0;
     motors[0].setControl(velocityDutyCycle.withVelocity(rps));
   }
-
+  
   @Override
   public void setDutyCycle(double duty) {
     motors[0].set(duty);
