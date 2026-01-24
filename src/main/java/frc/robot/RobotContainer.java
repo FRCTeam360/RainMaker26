@@ -101,7 +101,7 @@ public class RobotContainer {
   private void configureBindings() {
     driverCont.leftBumper().whileTrue(commandFactory.basicIntakeCmd());
     driverCont.rightBumper().whileTrue(commandFactory.basicShootCmd());
-    driverCont.a().whileTrue(intake.setDutyCycleCommand(()-> 1.0));
+    driverCont.a().whileTrue(intake.setDutyCycleCommand(() -> 1.0));
     drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
   }
 
