@@ -26,14 +26,14 @@ public class BasicIntakeCommand extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    intake.setDutyCycle(-0.65);
-    indexer.setDutyCycle(0.3);
+    // intake.setDutyCycle(-0.65);
+    indexer.setDutyCycle(1.0);
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    intake.stop();
+    // intake.stop();
     indexer.stop();
   }
 
