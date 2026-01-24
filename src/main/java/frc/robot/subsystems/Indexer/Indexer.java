@@ -22,6 +22,10 @@ public class Indexer extends SubsystemBase {
     io.setDutyCycle(dutyCycle);
   }
 
+  public Command setDutyCycleCommand(double value) {
+    return this.runEnd(() -> io.setDutyCycle(value), () -> io.setDutyCycle(0.0));
+  }
+
   public void stop() {
     io.setDutyCycle(0.0);
   }

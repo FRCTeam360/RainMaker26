@@ -22,6 +22,10 @@ public class Intake extends SubsystemBase {
     io.setDutyCycle(value);
   }
 
+  public Command setDutyCycleCommand(double value) {
+    return this.runEnd(() -> io.setDutyCycle(value), () -> io.setDutyCycle(0.0));
+  }
+
   public void stop() {
     this.setDutyCycle(0.0);
   }
@@ -30,9 +34,5 @@ public class Intake extends SubsystemBase {
   public void periodic() {
     io.updateInputs(inputs);
     Logger.processInputs("Intake", inputs);
-  }
-
-  public Command setDutyCycleCommand(DoubleSupplier dutySupplier) {
-    return this.runEnd(() -> this.setDutyCycle(dutySupplier.getAsDouble()), () -> this.stop());
   }
 }

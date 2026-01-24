@@ -4,7 +4,11 @@
 
 package frc.robot.subsystems.FlywheelKicker;
 
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
+import java.util.function.DoubleSupplier;
+
 import org.littletonrobotics.junction.Logger;
 
 public class FlywheelKicker extends SubsystemBase {
@@ -18,6 +22,10 @@ public class FlywheelKicker extends SubsystemBase {
 
   public void setDutyCycle(double dutyCycle) {
     io.setDutyCycle(dutyCycle);
+  }
+
+  public Command setDutyCycleCommand(Double value){
+    return this.runEnd(() -> io.setDutyCycle(value), () -> io.setDutyCycle(0.0));
   }
 
   public void stop() {
