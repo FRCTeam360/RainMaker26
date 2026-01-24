@@ -4,7 +4,11 @@
 
 package frc.robot.subsystems.Hood;
 
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
+import java.util.function.DoubleSupplier;
+
 import org.littletonrobotics.junction.Logger;
 
 public class Hood extends SubsystemBase {
@@ -41,5 +45,12 @@ public class Hood extends SubsystemBase {
     // This method will be called once per scheduler run
     io.updateInputs(inputs);
     Logger.processInputs("Hood", inputs);
+  }
+
+  public Command setDutyCycleCommand(double value) {
+    return this.setDutyCycleCommand(() -> value);
+  }
+  public Command setDutyCycleCommand(DoubleSupplier valueSup) {
+    return this.runEnd(() -> io.setDutyCycle(valueSup.getAsDouble()), () -> io.setDutyCycle(0.0));
   }
 }
