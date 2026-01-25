@@ -77,7 +77,7 @@ case SIM:
     logger = new Telemetry(WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
     intakePivot = new IntakePivot(new IntakePivotIOSim());
 
-    //flywheel = new Flywheel(new FlywheelIOSim());
+    flywheel = new Flywheel(new FlywheelIOSim());
     // hood = new Hood(new HoodIOWB());
     indexer = new Indexer(new IndexerIOSim());
     //intake = new Intake(new IntakeIOSim());
