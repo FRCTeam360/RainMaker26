@@ -53,6 +53,7 @@ public class RobotContainer {
   private Intake intake;
   private IntakePivot intakePivot;
   private FlywheelKicker flywheelKicker;
+  private CommandFactory commandFactory;
 
 
 
