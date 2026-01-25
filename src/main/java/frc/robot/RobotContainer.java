@@ -72,14 +72,14 @@ public class RobotContainer {
     flywheelKicker = new FlywheelKicker(new FlywheelKickerIOWB());
     // intakePivot = new IntakePivot(new IntakePivotIOPB());
     break;
-    case SIM:
+case SIM:
     drivetrain = WoodBotDrivetrain.createDrivetrain();
     logger = new Telemetry(WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
     intakePivot = new IntakePivot(new IntakePivotIOSim());
 
     //flywheel = new Flywheel(new FlywheelIOSim());
     // hood = new Hood(new HoodIOWB());
-    //indexer = new Indexer(new IndexerIOSim());
+    indexer = new Indexer(new IndexerIOSim());
     //intake = new Intake(new IntakeIOSim());
     //flywheelKicker = new FlywheelKicker(new FlywheelKickerIOWB());
     break;
@@ -107,7 +107,7 @@ public class RobotContainer {
   }
 
   public void onDisable() {
-    flywheel.stop();
+    if(flywheel != null) flywheel.stop();
   }
 
   /**

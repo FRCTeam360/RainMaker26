@@ -135,20 +135,6 @@ public class IntakePivotIOSim implements IntakePivotIO {
         BatterySim.calculateDefaultBatteryLoadedVoltage(
             intakePivotSim.getCurrentDrawAmps()));
 
-  //   motor.getSimState().setRawRotorPosition(Radians.of(intakePivotSim.getAngleRads() * gearRatio).in(Rotations));
-  //   motor.getSimState().setRotorVelocity(RadiansPerSecond.of(
-  //       intakePivotSim.getVelocityRadPerSec() * gearRatio).in(RotationsPerSecond));
-
-  //   inputs.position = motor.getPosition().getValueAsDouble();
-  //   inputs.velocity = motor.getVelocity().getValueAsDouble();
-  //   inputs.voltage = motor.getMotorVoltage().getValueAsDouble();
-  //   inputs.statorCurrent = motor.getStatorCurrent().getValueAsDouble();
-  //   inputs.supplyCurrent = motor.getSupplyCurrent().getValueAsDouble();
-  // }
-
-  // public void setPosition(double position) {
-  //   motor.setPosition(position);
-  
     // Step 5: Read all inputs from the SIMULATED VALUES (source of truth)
     inputs.position = Radians.of(intakePivotSim.getAngleRads()).in(Rotations);
     inputs.velocity = RadiansPerSecond.of(intakePivotSim.getVelocityRadPerSec()).in(RotationsPerSecond);
