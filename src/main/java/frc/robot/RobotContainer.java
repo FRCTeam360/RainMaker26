@@ -141,18 +141,11 @@ public class RobotContainer {
   }
 
   private void configureBindings() {
-    /*
-
-    //FIXME: DO NOT UPDATE THIS IN MAIN, THIS WAS DONE TO MAKE TESTING PP EASIER.
-    // basicIntakeCommand = new BasicIntakeCommand(intake, indexer, flywheelKicker);
-    // basicShootCommand = new BasicShootCommand(flywheel);
-    // driverCont.leftBumper().whileTrue(basicIntakeCommand);
-    // driverCont.rightBumper().whileTrue(basicShootCommand);
-    // driverCont.a().whileTrue(intake.setDutyCycleCommand(()-> 1.0));
-    */
-
-    drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
+    driverCont.leftBumper().whileTrue(commandFactory.basicIntakeCmd());
+    driverCont.rightBumper().whileTrue(commandFactory.basicShootCmd());
+    driverCont.a().whileTrue(intake.setDutyCycleCommand(1.0));
     
+    drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
     drivetrain.registerTelemetry(logger::telemeterize);
 
   }
