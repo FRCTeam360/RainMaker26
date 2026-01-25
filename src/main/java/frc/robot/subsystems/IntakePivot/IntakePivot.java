@@ -4,12 +4,10 @@
 
 package frc.robot.subsystems.IntakePivot;
 
-import java.util.function.DoubleSupplier;
-
-import org.littletonrobotics.junction.Logger;
-
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import java.util.function.DoubleSupplier;
+import org.littletonrobotics.junction.Logger;
 
 public class IntakePivot extends SubsystemBase {
   public final IntakePivotIOInputsAutoLogged inputs = new IntakePivotIOInputsAutoLogged();
@@ -36,19 +34,18 @@ public class IntakePivot extends SubsystemBase {
   }
 
   public Command setDutyCycleCommand(DoubleSupplier dutySupplier) {
-  return this.runEnd(() -> this.setDutyCycle(dutySupplier.getAsDouble()), () -> this.stop());
+    return this.runEnd(() -> this.setDutyCycle(dutySupplier.getAsDouble()), () -> this.stop());
   }
 
   public Command setPosition(DoubleSupplier positionSupplier) {
-  return this.runEnd(() -> this.setPosition(positionSupplier.getAsDouble()), () -> this.stop());
+    return this.runEnd(() -> this.setPosition(positionSupplier.getAsDouble()), () -> this.stop());
   }
-
 
   @Override
   public void periodic() {
     io.updateInputs(inputs);
     Logger.processInputs("IntakePivot", inputs);
-    
+
     // Update visualization with current arm angle (convert rotations to radians)
     visualizer.update(inputs.position * 2.0 * Math.PI);
   }
