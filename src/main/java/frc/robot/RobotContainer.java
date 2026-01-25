@@ -16,7 +16,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
+//import frc.robot.commands.BasicIntakeCommand; //uncomment
+//import frc.robot.commands.BasicShootCommand; //uncomment
 import frc.robot.generated.WoodBotDrivetrain;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Flywheel.Flywheel;
@@ -66,10 +67,10 @@ public class RobotContainer {
 
   private final CommandXboxController testCont1 = new CommandXboxController(5);
 
-  private BasicIntakeCommand basicIntakeCommand;
+  //private BasicIntakeCommand basicIntakeCommand;
 
-  private BasicShootCommand basicShootCommand;
-  // private final CommandXboxController operatorCont = new
+  //private BasicShootCommand basicShootCommand; //uncomment
+  // private final CommandXboxController operatorCont = new //uncomment
   // CommandXboxController(1);
 
   /**
