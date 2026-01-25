@@ -22,6 +22,10 @@ import frc.robot.subsystems.Intake.Intake;
 import frc.robot.subsystems.Intake.IntakeIOWB;
 import frc.robot.subsystems.IntakePivot.IntakePivot;
 import frc.robot.subsystems.IntakePivot.IntakePivotIOSim;
+import frc.robot.subsystems.Vision.Vision;
+import frc.robot.subsystems.Vision.VisionIOPhotonSim;
+
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -39,6 +43,7 @@ public class RobotContainer {
   private Intake intake;
   private IntakePivot intakePivot;
   private FlywheelKicker flywheelKicker;
+  private Vision vision;
   private CommandFactory commandFactory;
 
   // TODO: refactor to allow for more than 1 drivetrain type
@@ -68,7 +73,8 @@ public class RobotContainer {
         drivetrain = WoodBotDrivetrain.createDrivetrain();
         logger = new Telemetry(WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
         intakePivot = new IntakePivot(new IntakePivotIOSim());
-
+        vision = new Vision(
+            Map.of("photonSim", new VisionIOPhotonSim(() -> drivetrain.getState().Pose)));
         // flywheel = new Flywheel(new FlywheelIOSim());
         // hood = new Hood(new HoodIOWB());
         // indexer = new Indexer(new IndexerIOSim());
@@ -99,10 +105,19 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    driverCont.leftBumper().whileTrue(commandFactory.basicIntakeCmd());
-    driverCont.rightBumper().whileTrue(commandFactory.basicShootCmd());
-    driverCont.a().whileTrue(intake.setDutyCycleCommand(1.0));
-    drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
+    // Only bind commands if the required subsystems/factories exist
+
+    // TODO: this is a weird way to circumvent null pointer exceptions, refactor later. Done for Vision sim.
+    if (Objects.nonNull(commandFactory)) {
+      driverCont.leftBumper().whileTrue(commandFactory.basicIntakeCmd());
+      driverCont.rightBumper().whileTrue(commandFactory.basicShootCmd());
+    }
+    if (Objects.nonNull(intake)) {
+      driverCont.a().whileTrue(intake.setDutyCycleCommand(1.0));
+    }
+    if (Objects.nonNull(drivetrain)) {
+      drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
+    }
   }
 
   public void onDisable() {
