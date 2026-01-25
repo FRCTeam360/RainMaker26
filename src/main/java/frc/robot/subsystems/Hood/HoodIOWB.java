@@ -35,15 +35,13 @@ public class HoodIOWB implements HoodIO {
     sparkMaxConfig.smartCurrentLimit(40);
 
     // PID gains
-    sparkMaxConfig.closedLoop.p(0.2).i(0.0).d(0.0);
+    sparkMaxConfig.closedLoop.p(0.21).i(0.0).d(0.0);
 
     // Soft limits
     sparkMaxConfig
         .softLimit
         .forwardSoftLimitEnabled(true)
-        .forwardSoftLimit(-15.0)
-        .reverseSoftLimitEnabled(true)
-        .reverseSoftLimit(9.0);
+        .forwardSoftLimit(24.0);
 
     hoodMotor.configure(
         sparkMaxConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);

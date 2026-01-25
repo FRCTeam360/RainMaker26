@@ -52,4 +52,8 @@ public class Hood extends SubsystemBase {
   public Command setDutyCycleCommand(DoubleSupplier valueSup) {
     return this.runEnd(() -> io.setDutyCycle(valueSup.getAsDouble()), () -> io.setDutyCycle(0.0));
   }
+
+  public Command zero() {
+    return this.setPositionCmd(0.0);
+  }
 }

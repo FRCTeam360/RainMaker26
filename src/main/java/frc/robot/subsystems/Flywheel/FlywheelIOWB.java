@@ -49,9 +49,9 @@ public class FlywheelIOWB implements FlywheelIO {
       i.getConfigurator().apply(defaultConfig);
     }
 
-    rightConfig.CurrentLimits.StatorCurrentLimit = 160.0;
+    rightConfig.CurrentLimits.StatorCurrentLimit = 200.0;
     rightConfig.CurrentLimits.StatorCurrentLimitEnable = true;
-    rightConfig.CurrentLimits.SupplyCurrentLimit = 80.0;
+    rightConfig.CurrentLimits.SupplyCurrentLimit = 100.0;
     rightConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
 
     rightConfig
@@ -102,7 +102,7 @@ public class FlywheelIOWB implements FlywheelIO {
       inputs.statorCurrents[i] = motors[i].getStatorCurrent().getValueAsDouble();
       inputs.supplyCurrents[i] = motors[i].getStatorCurrent().getValueAsDouble();
       inputs.positions[i] = motors[i].getPosition().getValueAsDouble();
-      inputs.velocities[i] = motors[i].getVelocity().getValueAsDouble();
+      inputs.velocities[i] = motors[i].getVelocity().getValueAsDouble() * 60.0;
       inputs.voltages[i] = motors[i].getMotorVoltage().getValueAsDouble();
     }
   }

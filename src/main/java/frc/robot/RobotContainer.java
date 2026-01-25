@@ -6,6 +6,7 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
+import edu.wpi.first.wpilibj.internal.DriverStationModeThread;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -110,16 +111,17 @@ public class RobotContainer {
    */
   private void configureBindings() {
     driverCont.leftBumper().whileTrue(commandFactory.basicIntakeCmd());
-    // driverCont.rightBumper().whileTrue(commandFactory.setFlywheelKickerDutyCycle(1.0));
-    driverCont.pov(0).onTrue(commandFactory.setHoodPosition(-15.0));
-    driverCont.pov(90).onTrue(commandFactory.setHoodPosition(-5.0));
-    driverCont.pov(180).onTrue(commandFactory.setHoodPosition(0.0));
-    driverCont.pov(270).onTrue(commandFactory.setHoodPosition(9.0));
-    driverCont.a().whileTrue(commandFactory.shootWithRPM(100));
-    driverCont.x().whileTrue(commandFactory.shootWithRPM(1000));
-    driverCont.b().whileTrue(commandFactory.shootWithRPM(2000));
-    driverCont.y().whileTrue(commandFactory.shootWithRPM(4000));
+    driverCont.rightBumper().whileTrue(commandFactory.setFlywheelKickerDutyCycle(1.0));
+    driverCont.pov(0).onTrue(commandFactory.setHoodPosition(0.0));
+    driverCont.pov(90).onTrue(commandFactory.setHoodPosition(8.0));
+    driverCont.pov(180).onTrue(commandFactory.setHoodPosition(16.0));
+    driverCont.pov(270).onTrue(commandFactory.setHoodPosition(23.0));
+    driverCont.a().whileTrue(commandFactory.shootWithRPM(1000));
+    driverCont.x().whileTrue(commandFactory.shootWithRPM(1500));
+    driverCont.b().whileTrue(commandFactory.shootWithRPM(3000));
+    driverCont.y().whileTrue(commandFactory.shootWithRPM(4500));
     drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
+    driverCont.start().onTrue(hood.zero());
   }
 
   public void onDisable() {
