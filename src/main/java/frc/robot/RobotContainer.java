@@ -60,7 +60,7 @@ public class RobotContainer {
         drivetrain = WoodBotDrivetrain.createDrivetrain();
         logger = new Telemetry(WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
         flywheel = new Flywheel(new FlywheelIOWB());
-        // hood = new Hood(new HoodIOWB());
+        hood = new Hood(new HoodIOWB());
         indexer = new Indexer(new IndexerIOWB());
         intake = new Intake(new IntakeIOWB());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOWB());
@@ -81,7 +81,7 @@ public class RobotContainer {
         drivetrain = WoodBotDrivetrain.createDrivetrain();
         logger = new Telemetry(WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
         flywheel = new Flywheel(new FlywheelIOWB());
-        // hood = new Hood(new HoodIOWB());
+        hood = new Hood(new HoodIOWB());
         indexer = new Indexer(new IndexerIOWB());
         intake = new Intake(new IntakeIOWB());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOWB());
@@ -92,6 +92,7 @@ public class RobotContainer {
       intake,
        flywheel,
        flywheelKicker,
+       hood,
        indexer,
        drivetrain
   );
@@ -109,7 +110,11 @@ public class RobotContainer {
    */
   private void configureBindings() {
     driverCont.leftBumper().whileTrue(commandFactory.basicIntakeCmd());
-    driverCont.rightBumper().whileTrue(commandFactory.setFlywheelKickerDutyCycle(1.0));
+    // driverCont.rightBumper().whileTrue(commandFactory.setFlywheelKickerDutyCycle(1.0));
+    driverCont.pov(0).onTrue(commandFactory.setHoodPosition(-15.0));
+    driverCont.pov(90).onTrue(commandFactory.setHoodPosition(-5.0));
+    driverCont.pov(180).onTrue(commandFactory.setHoodPosition(0.0));
+    driverCont.pov(270).onTrue(commandFactory.setHoodPosition(9.0));
     driverCont.a().whileTrue(commandFactory.shootWithRPM(100));
     driverCont.x().whileTrue(commandFactory.shootWithRPM(1000));
     driverCont.b().whileTrue(commandFactory.shootWithRPM(2000));

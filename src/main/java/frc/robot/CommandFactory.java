@@ -20,7 +20,7 @@ public class CommandFactory {
   private final Intake intake;
   private final Flywheel flywheel;
   private final FlywheelKicker flyWheelKicker;
-  // private final Hood hood;
+  private final Hood hood;
   private final Indexer indexer;
   // private final Vision vision;
   private final CommandSwerveDrivetrain drivetrain;
@@ -30,14 +30,14 @@ public class CommandFactory {
       Intake intake,
       Flywheel flywheel,
       FlywheelKicker flyWheelKicker,
-      // Hood hood,
+      Hood hood,
       Indexer indexer,
       // Vision vision,
       CommandSwerveDrivetrain drivetrain) {
     this.intake = intake;
     this.flywheel = flywheel;
     this.flyWheelKicker = flyWheelKicker;
-    // this.hood = hood;
+    this.hood = hood;
     this.indexer = indexer;
     // this.vision = vision;
     this.drivetrain = drivetrain;
@@ -60,5 +60,9 @@ public class CommandFactory {
 
   public Command setFlywheelKickerDutyCycle(double value) {
     return flyWheelKicker.setDutyCycleCommand(value);
+  }
+
+  public Command setHoodPosition(double position) {
+    return hood.setPositionCmd(position);
   }
 }
