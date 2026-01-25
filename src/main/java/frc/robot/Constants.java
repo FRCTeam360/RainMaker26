@@ -69,6 +69,7 @@ public final class Constants {
     public static final int FLYWHEEL_KICKER_ENCODER1 = 15;
     public static final int FLYWHEEL_KICKER_ENCODER2 = 16;
     public static final int FLYWHEEL_KICKER_MOTOR = 17;
+    public static final int FLYWHEEL_KICKER_SENSOR_ID = 3;
   }
 
   public static class OperatorConstants {
