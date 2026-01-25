@@ -65,6 +65,10 @@ public final class Constants {
     public static final int INTAKE_PIVOT_ENCODER1 = 12;
     public static final int INTAKE_PIVOT_ENCODER2 = 13;
     public static final int INTAKE_PIVOT_MOTOR = 14;
+
+    public static final int FLYWHEEL_KICKER_ENCODER1 = 15;
+    public static final int FLYWHEEL_KICKER_ENCODER2 = 16;
+    public static final int FLYWHEEL_KICKER_MOTOR = 17;
   }
 
   public static class OperatorConstants {
