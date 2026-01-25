@@ -15,6 +15,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.commands.BasicIntakeCommand;
+import frc.robot.commands.BasicShootCommand;
 import frc.robot.generated.WoodBotDrivetrain;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Flywheel.Flywheel;
@@ -49,7 +51,8 @@ public class RobotContainer {
   private Intake intake;
   private IntakePivot intakePivot;
   private FlywheelKicker flywheelKicker;
-  private CommandFactory commandFactory;
+
+
 
   // TODO: refactor to allow for more than 1 drivetrain type
 
@@ -136,9 +139,12 @@ public class RobotContainer {
   }
 
   private void configureBindings() {
-    driverCont.leftBumper().whileTrue(commandFactory.basicIntakeCmd());
-    driverCont.rightBumper().whileTrue(commandFactory.basicShootCmd());
-    driverCont.a().whileTrue(intake.setDutyCycleCommand(1.0));
+    basicIntakeCommand = new BasicIntakeCommand(intake, indexer, flywheelKicker);
+    basicShootCommand = new BasicShootCommand(flywheel);
+    driverCont.leftBumper().whileTrue(basicIntakeCommand);
+    driverCont.rightBumper().whileTrue(basicShootCommand);
+    driverCont.a().whileTrue(intake.setDutyCycleCommand(()-> 1.0));
+
     drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
     
     drivetrain.registerTelemetry(logger::telemeterize);
