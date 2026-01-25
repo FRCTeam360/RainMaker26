@@ -67,10 +67,10 @@ public class VisionIOPhotonSim implements VisionIO {
     // Create simulated camera properties to mimic actual camera behavior
     SimCameraProperties cameraProp = new SimCameraProperties();
     cameraProp.setCalibration(960, 720, Rotation2d.fromDegrees(90));  // Resolution and FOV
-    cameraProp.setCalibError(0.35, 0.10);                             // Calibration noise
-    cameraProp.setFPS(15);                                            // Framerate
-    cameraProp.setAvgLatencyMs(50);                                   // Average latency
-    cameraProp.setLatencyStdDevMs(15);                                // Latency variation
+    cameraProp.setCalibError(0.15, 0.05);                             // Reduced calibration noise
+    cameraProp.setFPS(30);                                            // Higher FPS to match robot loop better
+    cameraProp.setAvgLatencyMs(30);                                   // Reduced average latency
+    cameraProp.setLatencyStdDevMs(5);                                 // Reduced latency variation
     
     // Create a PhotonCameraSim which will update the linked PhotonCamera's values
     cameraSim = new PhotonCameraSim(camera, cameraProp);
@@ -97,7 +97,12 @@ public class VisionIOPhotonSim implements VisionIO {
     
     // Process all unread camera results
     var results = camera.getAllUnreadResults();
-    if (results.isEmpty()) {
+    
+    // Check if we have new results OR get the latest result even if it's old
+    var latestResult = results.isEmpty() ? camera.getLatestResult() : results.get(results.size() - 1);
+    
+    // If we have no result at all (not even a cached one)
+    if (latestResult == null) {
       inputs.tv = 0.0;
       inputs.tx = 0.0;
       inputs.ty = 0.0;
@@ -105,8 +110,6 @@ public class VisionIOPhotonSim implements VisionIO {
       return;
     }
     
-    // Process the most recent result
-    var latestResult = results.get(results.size() - 1);
     List<PhotonTrackedTarget> targets = latestResult.getTargets();
     
     // If no targets detected
@@ -157,9 +160,9 @@ public class VisionIOPhotonSim implements VisionIO {
         if (tagPose.isPresent()) {
           targetIdsList.add(tagId);
           
-          // Calculate distance from robot to tag
-          double distance = tagPose.get().toPose2d().getTranslation()
-              .getDistance(est.estimatedPose.toPose2d().getTranslation());
+          // Use PhotonVision's calculated distance to match real hardware behavior
+          // This avoids replicating distance calculation that's already done by PhotonVision
+          double distance = target.getBestCameraToTarget().getTranslation().getNorm();
           distancesList.add(distance);
           
           tagPosesList.add(tagPose.get());
