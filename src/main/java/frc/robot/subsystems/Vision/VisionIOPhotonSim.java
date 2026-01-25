@@ -107,6 +107,10 @@ public class VisionIOPhotonSim implements VisionIO {
       inputs.tx = 0.0;
       inputs.ty = 0.0;
       inputs.tagID = -1;
+      // Clear target arrays
+      inputs.targetIds = new int[0];
+      inputs.distancesToTargets = new double[0];
+      inputs.tagPoses = new Pose3d[0];
       return;
     }
     
@@ -118,6 +122,10 @@ public class VisionIOPhotonSim implements VisionIO {
       inputs.tx = 0.0;
       inputs.ty = 0.0;
       inputs.tagID = -1;
+      // Clear target arrays
+      inputs.targetIds = new int[0];
+      inputs.distancesToTargets = new double[0];
+      inputs.tagPoses = new Pose3d[0];
       return;
     }
     
@@ -160,9 +168,9 @@ public class VisionIOPhotonSim implements VisionIO {
         if (tagPose.isPresent()) {
           targetIdsList.add(tagId);
           
-          // Use PhotonVision's calculated distance to match real hardware behavior
-          // This avoids replicating distance calculation that's already done by PhotonVision
-          double distance = target.getBestCameraToTarget().getTranslation().getNorm();
+          // Calculate distance from robot to tag
+          double distance = tagPose.get().toPose2d().getTranslation()
+              .getDistance(est.estimatedPose.toPose2d().getTranslation());
           distancesList.add(distance);
           
           tagPosesList.add(tagPose.get());
