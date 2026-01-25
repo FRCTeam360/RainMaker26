@@ -38,10 +38,11 @@ public class Vision extends SubsystemBase {
       new InterpolatingMatrixTreeMap<>();
 
   static {
+    // Very low standard deviations = high confidence = vision dominates pose estimation
+    // X and Y in meters, rotation in radians
     MEASUREMENT_STD_DEV_DISTANCE_MAP.put(
-        0.5, VecBuilder.fill(1.0, 1.0, 999999.0)); // n1 and n2 are for x and y, n3
-    // is for angle
-    MEASUREMENT_STD_DEV_DISTANCE_MAP.put(5.0, VecBuilder.fill(10.0, 10.0, 999999.0));
+        0.5, VecBuilder.fill(0.01, 0.01, 999999.0)); // Close tags: very high confidence (1cm std dev)
+    MEASUREMENT_STD_DEV_DISTANCE_MAP.put(5.0, VecBuilder.fill(0.05, 0.05, 999999.0)); // Far tags: still high confidence (5cm std dev)
   }
 
   /** Creates a new Vision. */
@@ -115,11 +116,22 @@ public class Vision extends SubsystemBase {
     }
 
     List<VisionMeasurement> acceptedMeasurements = new ArrayList<>();
+    int totalDetections = 0;
+    int rejectedMeasurements = 0;
 
     for (String key : visionInputs.keySet()) {
       VisionIOInputsAutoLogged input = visionInputs.get(key);
+      
+      // Count total detections (pose updates attempted)
+      if (input.poseUpdated) {
+        totalDetections++;
+      }
+      
       // skip input if not updated
-      if (!input.poseUpdated) continue;
+      if (!input.poseUpdated) {
+        rejectedMeasurements++;
+        continue;
+      }
 
       Pose2d pose = input.estimatedPose;
       double timestamp = input.timestampSeconds;
@@ -128,7 +140,10 @@ public class Vision extends SubsystemBase {
       if (pose.getX() < 0.0
           || pose.getX() > Constants.FIELD_LAYOUT.getFieldLength()
           || pose.getY() < 0.0
-          || pose.getY() > Constants.FIELD_LAYOUT.getFieldWidth()) continue;
+          || pose.getY() > Constants.FIELD_LAYOUT.getFieldWidth()) {
+        rejectedMeasurements++;
+        continue;
+      }
 
       // get standard deviation based on distance to nearest tag
       OptionalDouble closestTagDistance = Arrays.stream(input.distancesToTargets).min();
@@ -138,6 +153,14 @@ public class Vision extends SubsystemBase {
 
       acceptedMeasurements.add(new VisionMeasurement(timestamp, pose, cprStdDevs));
     }
+    
+    // Log rejection statistics
+    Logger.recordOutput(VISION_LOGGING_PREFIX + "Total Detections", totalDetections);
+    Logger.recordOutput(VISION_LOGGING_PREFIX + "Accepted Measurements", acceptedMeasurements.size());
+    Logger.recordOutput(VISION_LOGGING_PREFIX + "Rejected Measurements", rejectedMeasurements);
+    Logger.recordOutput(VISION_LOGGING_PREFIX + "Rejection Rate", 
+        totalDetections > 0 ? (double) rejectedMeasurements / totalDetections : 0.0);
+    
     this.acceptedMeasurements = acceptedMeasurements;
   }
 

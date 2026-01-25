@@ -24,6 +24,9 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.generated.WoodBotDrivetrain.TunerSwerveDrivetrain;
+import frc.robot.subsystems.Vision.VisionMeasurement;
+
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
@@ -40,6 +43,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   private Notifier m_simNotifier = null;
   private double m_lastSimTime;
   private final String CMD_NAME = "Swerve: ";
+
+  // Keep track of when vision measurements are added for logging context
+  private boolean hasVisionMeasurements = false;
 
   /* Blue alliance sees forward as 0 degrees (toward red alliance wall) */
   private static final Rotation2d kBlueAlliancePerspectiveRotation = Rotation2d.kZero;
@@ -245,10 +251,15 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   @Override
   public void periodic() {
 
+    // Current pose includes vision fusion when vision measurements are added
     Logger.recordOutput(CMD_NAME + " Current Pose", this.getStateCopy().Pose);
     Logger.recordOutput(CMD_NAME + " Rotation2d", this.getStateCopy().RawHeading);
     Logger.recordOutput(CMD_NAME + " CurrentState", this.getStateCopy().ModuleStates);
     Logger.recordOutput(CMD_NAME + " TargetState", this.getStateCopy().ModuleTargets);
+    Logger.recordOutput(CMD_NAME + " Using Vision", hasVisionMeasurements);
+
+
+    // Log whether vision measurements have been applied (useful for analysis)
     /*
      * Periodically try to apply the operator perspective.
      * If we haven't applied the operator perspective before, then we should apply it regardless of DS state.
@@ -287,38 +298,20 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     m_simNotifier.startPeriodic(kSimLoopPeriod);
   }
 
-  /**
-   * Adds a vision measurement to the Kalman Filter. This will correct the odometry pose estimate
-   * while still accounting for measurement noise.
-   *
-   * @param visionRobotPoseMeters The pose of the robot as measured by the vision camera.
-   * @param timestampSeconds The timestamp of the vision measurement in seconds.
-   */
-  @Override
-  public void addVisionMeasurement(Pose2d visionRobotPoseMeters, double timestampSeconds) {
-    super.addVisionMeasurement(visionRobotPoseMeters, Utils.fpgaToCurrentTime(timestampSeconds));
-  }
 
-  /**
-   * Adds a vision measurement to the Kalman Filter. This will correct the odometry pose estimate
-   * while still accounting for measurement noise.
-   *
-   * <p>Note that the vision measurement standard deviations passed into this method will continue
-   * to apply to future measurements until a subsequent call to {@link
-   * #setVisionMeasurementStdDevs(Matrix)} or this method.
-   *
-   * @param visionRobotPoseMeters The pose of the robot as measured by the vision camera.
-   * @param timestampSeconds The timestamp of the vision measurement in seconds.
-   * @param visionMeasurementStdDevs Standard deviations of the vision pose measurement in the form
-   *     [x, y, theta]ᵀ, with units in meters and radians.
-   */
-  @Override
-  public void addVisionMeasurement(
-      Pose2d visionRobotPoseMeters,
-      double timestampSeconds,
-      Matrix<N3, N1> visionMeasurementStdDevs) {
-    super.addVisionMeasurement(
-        visionRobotPoseMeters, Utils.fpgaToCurrentTime(timestampSeconds), visionMeasurementStdDevs);
+  public void addVisionMeasurements(List<VisionMeasurement> measurements) {
+    // Update vision status based on whether we have measurements this cycle
+    hasVisionMeasurements = !measurements.isEmpty();
+    
+    // Log how many measurements we received from Vision subsystem
+    Logger.recordOutput(CMD_NAME + " Vision Measurements Received", measurements.size());
+    
+    for (VisionMeasurement measurement : measurements) {
+      this.addVisionMeasurement(
+          measurement.estimatedPose(),
+          Utils.fpgaToCurrentTime(measurement.timestamp()),
+          measurement.standardDeviation());
+    }
   }
 
   /**

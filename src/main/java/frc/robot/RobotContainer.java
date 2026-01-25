@@ -106,6 +106,12 @@ public class RobotContainer {
    */
   private void configureBindings() {
     // Only bind commands if the required subsystems/factories exist
+    if (Objects.nonNull(vision)) {
+      Command consumeVisionMeasurements = vision.consumeVisionMeasurements(measurements -> {
+        drivetrain.addVisionMeasurements(measurements);
+      });
+      vision.setDefaultCommand(consumeVisionMeasurements.ignoringDisable(true));
+    }
 
     // TODO: this is a weird way to circumvent null pointer exceptions, refactor later. Done for Vision sim.
     if (Objects.nonNull(commandFactory)) {
