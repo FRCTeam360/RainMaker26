@@ -123,6 +123,9 @@ public class RobotContainer {
     }
     if (Objects.nonNull(drivetrain)) {
       drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
+      driverCont.rightTrigger().whileTrue(
+      drivetrain.faceHubWhileDriving(driverCont)
+);
     }
   }
 

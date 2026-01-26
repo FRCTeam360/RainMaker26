@@ -25,8 +25,12 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.generated.WoodBotDrivetrain.TunerSwerveDrivetrain;
 import frc.robot.subsystems.Vision.VisionMeasurement;
+import frc.robot.utils.FieldConstants;
+import frc.robot.utils.FieldVisualizer;
 
+import edu.wpi.first.math.geometry.Translation2d;
 import java.util.List;
+import java.util.function.DoubleSupplier;
 import java.util.Optional;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
@@ -66,6 +70,18 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   public static final LinearVelocity maxSpeed = MetersPerSecond.of(5.12);
   public static final AngularVelocity maxAngularVelocity = RevolutionsPerSecond.of(2.0);
 
+  // Heading controller PID gains (from example code)
+  private static final double HEADING_KP = 10.0;
+  private static final double HEADING_KI = 0.2;
+  private static final double HEADING_KD = 0.069;
+  private static final double HEADING_I_ZONE = 0.17;
+
+  // Field-centric facing angle request for hub tracking
+  private final SwerveRequest.FieldCentricFacingAngle m_faceHubRequest =
+      new SwerveRequest.FieldCentricFacingAngle()
+          .withDeadband(maxSpeed.in(MetersPerSecond) * 0.01)
+          .withRotationalDeadband(0.0); // No deadband for rotation when facing point
+
   public final Command fieldOrientedDrive(
       CommandXboxController driveCont) { // field oriented drive command!
     SwerveRequest.FieldCentric drive =
@@ -92,6 +108,60 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             // (left)
             )
         .alongWith(new InstantCommand(() -> System.out.println("running")));
+  }
+
+  /**
+   * Creates a command that drives the robot in field-centric mode while continuously
+   * rotating to face the hub center. The heading controller automatically adjusts
+   * the robot's rotation to always point toward the hub as the robot moves around the field.
+   *
+   * @param velocityXSupplier Supplier for X velocity (field-relative, forward positive) in m/s
+   * @param velocityYSupplier Supplier for Y velocity (field-relative, left positive) in m/s
+   * @return Command that drives while facing the hub
+   */
+  public Command faceHubWhileDriving(
+      DoubleSupplier velocityXSupplier, DoubleSupplier velocityYSupplier) {
+    
+    // Configure the heading controller with PID values
+    m_faceHubRequest.HeadingController.setPID(HEADING_KP, HEADING_KI, HEADING_KD);
+    m_faceHubRequest.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
+    m_faceHubRequest.HeadingController.setIZone(HEADING_I_ZONE);
+
+    return run(() -> {
+      // Get the hub center position
+      Translation2d hubCenter = FieldConstants.Hub.topCenterPoint.toTranslation2d();
+      
+      // Get current robot position
+      Translation2d robotPosition = this.getStateCopy().Pose.getTranslation();
+      
+      // Calculate the angle from robot to hub
+      Rotation2d angleToHub = hubCenter.minus(robotPosition).getAngle();
+      
+      // Log the target angle for debugging
+      Logger.recordOutput(CMD_NAME + "FaceHub/TargetAngle", angleToHub.getDegrees());
+      Logger.recordOutput(CMD_NAME + "FaceHub/DistanceToHub", 
+          robotPosition.getDistance(hubCenter));
+      
+      // Apply the field-centric facing angle request
+      this.setControl(
+          m_faceHubRequest
+              .withVelocityX(velocityXSupplier.getAsDouble())
+              .withVelocityY(velocityYSupplier.getAsDouble())
+              .withTargetDirection(angleToHub));
+    });
+  }
+
+  /**
+   * Creates a command that drives the robot in field-centric mode while continuously
+   * rotating to face the hub center, using controller input with cubic response curve.
+   *
+   * @param driveCont The Xbox controller for driver input
+   * @return Command that drives while facing the hub
+   */
+  public Command faceHubWhileDriving(CommandXboxController driveCont) {
+    return faceHubWhileDriving(
+        () -> Math.pow(driveCont.getLeftY(), 3) * maxSpeed.in(MetersPerSecond) * -1.0,
+        () -> Math.pow(driveCont.getLeftX(), 3) * maxSpeed.in(MetersPerSecond) * -1.0);
   }
 
   /* SysId routine for characterizing translation. This is used to find PID gains for the drive motors. */
@@ -258,6 +328,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     Logger.recordOutput(CMD_NAME + " TargetState", this.getStateCopy().ModuleTargets);
     Logger.recordOutput(CMD_NAME + " Using Vision", hasVisionMeasurements);
 
+    // Update field visualizations (hub points, line from robot to hub, etc.)
+    FieldVisualizer.update(this.getStateCopy().Pose);
 
     // Log whether vision measurements have been applied (useful for analysis)
     /*
