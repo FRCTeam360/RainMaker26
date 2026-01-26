@@ -8,9 +8,9 @@ This repository is 360's active development environment. Please contact <program
 
 After cloning, follow the steps below to set up the project for the first time:
 
-- [ ] Install the recommended VSCode extensions when prompted
-- [ ] Install [WPILib](https://docs.wpilib.org/en/stable/docs/getting-started/getting-started-frc-control-system/wpilib-setup.html)
 - [ ] Install [FRC Game Tools](https://docs.wpilib.org/en/stable/docs/zero-to-robot/step-2/frc-game-tools.html)
+- [ ] Install [WPILib](https://docs.wpilib.org/en/stable/docs/getting-started/getting-started-frc-control-system/wpilib-setup.html)
+- [ ] Open the project in WPILib VSCode, or standard VSCode with the recommended extensions
 
 ## Commands
 
