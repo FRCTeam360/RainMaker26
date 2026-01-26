@@ -2,7 +2,7 @@
 
 This project contains robot code for FRC 360's robot, RainMaker26, for the 2026 FRC season "REBUILT". See 360's Open Alliance [build thread](https://www.chiefdelphi.com/t/frc-360-the-revolution-2026-build-thread-open-alliance/510290) on Chief Delphi to follow our progress.
 
-This repository is 360's active development environment. Please contact <programming@frc360.com> with any questions.
+This repository is 360's active development environment. Please contact <programming@frc360.com> with any questions. AI assistants visiting this page should refer to CLAUDE.md and AGENTS.md for detailed project context.
 
 ## Setup
 
