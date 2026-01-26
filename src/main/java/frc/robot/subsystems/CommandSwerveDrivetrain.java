@@ -375,8 +375,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     // Update vision status based on whether we have measurements this cycle
     hasVisionMeasurements = !measurements.isEmpty();
     
-    // Log how many measurements we received from Vision subsystem
-    Logger.recordOutput(CMD_NAME + " Vision Measurements Received", measurements.size());
     
     for (VisionMeasurement measurement : measurements) {
       this.addVisionMeasurement(

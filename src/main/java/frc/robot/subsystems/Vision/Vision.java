@@ -16,7 +16,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,10 +26,11 @@ import org.littletonrobotics.junction.Logger;
 
 public class Vision extends SubsystemBase {
   private final Map<String, VisionIO> ios;
-
+  private int totalDetections = 0;
+  private int rejectedMeasurements = 0;
   private final Map<String, VisionIOInputsAutoLogged> visionInputs;
   private Timer snapshotTimer = new Timer();
-  List<VisionMeasurement> acceptedMeasurements = Collections.emptyList();
+  List<VisionMeasurement> acceptedMeasurements = new ArrayList<>();
 
   private final String VISION_LOGGING_PREFIX = "Vision: ";
 
@@ -107,6 +107,9 @@ public class Vision extends SubsystemBase {
 
   @Override
   public void periodic() {
+    // Clear previous measurements to prevent unbounded growth
+    acceptedMeasurements.clear();
+    
     for (String key : ios.keySet()) {
       VisionIO io = ios.get(key);
       VisionIOInputsAutoLogged input = visionInputs.get(key);
@@ -115,9 +118,7 @@ public class Vision extends SubsystemBase {
       Logger.processInputs("Limelight: " + key, input);
     }
 
-    List<VisionMeasurement> acceptedMeasurements = new ArrayList<>();
-    int totalDetections = 0;
-    int rejectedMeasurements = 0;
+
 
     for (String key : visionInputs.keySet()) {
       VisionIOInputsAutoLogged input = visionInputs.get(key);
@@ -156,12 +157,10 @@ public class Vision extends SubsystemBase {
     
     // Log rejection statistics
     Logger.recordOutput(VISION_LOGGING_PREFIX + "Total Detections", totalDetections);
-    Logger.recordOutput(VISION_LOGGING_PREFIX + "Accepted Measurements", acceptedMeasurements.size());
     Logger.recordOutput(VISION_LOGGING_PREFIX + "Rejected Measurements", rejectedMeasurements);
     Logger.recordOutput(VISION_LOGGING_PREFIX + "Rejection Rate", 
         totalDetections > 0 ? (double) rejectedMeasurements / totalDetections : 0.0);
     
-    this.acceptedMeasurements = acceptedMeasurements;
   }
 
   /**
