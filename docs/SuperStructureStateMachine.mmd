@@ -6,18 +6,12 @@ stateDiagram-v2
     IDLE --> INTAKING : Driver holds<br>intake button
     INTAKING --> IDLE : Driver releases<br>intake button
 
-    %% Shooting flow
-    IDLE --> PREPARING : Driver holds<br>shoot button
-    PREPARING --> READY_TO_FIRE : Robot aligned
-    PREPARING --> IDLE : Driver releases<br>shoot button
+    %% Shooting flow (toggleable)
+    IDLE --> SHOOTING : Driver presses<br>shoot button (toggle on)
+    SHOOTING --> IDLE : Driver presses<br>shoot button (toggle off)
+    SHOOTING --> IDLE : Hopper empty
 
-    %% Ready to fire
-    READY_TO_FIRE --> SHOOTING : Aligned for<br>100ms (debounce)
-    READY_TO_FIRE --> PREPARING : Alignment lost
-
-    %% Shooting
-    SHOOTING --> IDLE : Hopper empty or commanded to stop shooting
-    SHOOTING --> PREPARING : Alignment lost
+    note right of SHOOTING : See ShootingStateMachine<br>for internal states
 
     %% Ejecting (from any state)
     IDLE --> EJECTING : Driver holds<br>eject button

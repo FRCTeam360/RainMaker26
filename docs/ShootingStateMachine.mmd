@@ -1,0 +1,17 @@
+%% Shooting State Diagram (internal states while SHOOTING is active)
+stateDiagram-v2
+    [*] --> PREPARING
+
+    %% Preparing to shoot
+    PREPARING --> READY_TO_FIRE : Robot aligned<br>to target
+
+    %% Ready to fire
+    READY_TO_FIRE --> FIRING : Aligned for<br>100ms (debounce)
+    READY_TO_FIRE --> PREPARING : Alignment lost
+
+    %% Firing
+    FIRING --> PREPARING : Alignment lost
+    FIRING --> [*] : Hopper empty
+
+    note right of PREPARING : Spins up flywheel<br>Drivetrain aligns to target
+    note right of FIRING : Feeds balls into shooter
