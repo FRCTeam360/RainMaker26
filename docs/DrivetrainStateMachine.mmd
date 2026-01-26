@@ -5,7 +5,7 @@ stateDiagram-v2
     %% Normal driving
     DRIVER_CONTROL --> DEFENSE : Driver holds<br>defense button
     DRIVER_CONTROL --> X_OUT : Driver holds<br>x-out button
-    DRIVER_CONTROL --> AUTO_ALIGN : Shoot button held<br>(from SuperStructure)
+    DRIVER_CONTROL --> AUTO_ALIGN : SHOOTING (from SuperStructure)
 
     %% Defense mode (rotation priority)
     DEFENSE --> DRIVER_CONTROL : Driver releases<br>defense button
@@ -15,10 +15,10 @@ stateDiagram-v2
 
     %% Auto-align for shooting
     AUTO_ALIGN --> X_OUT_SHOOTING : Robot aligned
-    AUTO_ALIGN --> DRIVER_CONTROL : Shoot button released
+    AUTO_ALIGN --> DRIVER_CONTROL : SHOOTING (from SuperStructure) toggled off
 
     %% X-out while shooting
-    X_OUT_SHOOTING --> DRIVER_CONTROL : Shot complete
+    X_OUT_SHOOTING --> DRIVER_CONTROL : Shot complete OR<br>SHOOTING (from SuperStructure) toggled off
 
     note right of DEFENSE : Rotation priority increased
     note right of X_OUT : Wheels locked in X pattern
