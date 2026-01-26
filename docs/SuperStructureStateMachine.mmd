@@ -16,7 +16,8 @@ stateDiagram-v2
     READY_TO_FIRE --> PREPARING : Alignment lost
 
     %% Shooting
-    SHOOTING --> IDLE : Kicker fires<br>OR timeout
+    SHOOTING --> IDLE : Hopper empty or commanded to stop shooting
+    SHOOTING --> PREPARING : Alignment lost
 
     %% Ejecting (from any state)
     IDLE --> EJECTING : Driver holds<br>eject button
