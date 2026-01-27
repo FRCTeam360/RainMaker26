@@ -42,16 +42,14 @@ import java.util.Objects;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-  private final Field2d field = new Field2d();
   private CommandSwerveDrivetrain drivetrain;
-  private  SendableChooser<Command> autoChooser;
+  private SendableChooser<Command> autoChooser;
   private Flywheel flywheel;
   private Hood hood;
   private Indexer indexer;
   private Intake intake;
   private IntakePivot intakePivot;
   private FlywheelKicker flywheelKicker;
-
 
   private CommandFactory commandFactory;
 
@@ -62,11 +60,6 @@ public class RobotContainer {
   // Replace with CommandPS4Controller or CommandJoystick if needed
 
   private final CommandXboxController driverCont = new CommandXboxController(0);
-
-  private final CommandXboxController testCont1 = new CommandXboxController(5);
-
-  private final CommandXboxController operatorCont = new;
-  // CommandXboxController(1);
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -106,8 +99,6 @@ public class RobotContainer {
     }
     // Configure the trigger bindings
     configureBindings();
-    // configureTestBindings1();
-    // configureTestBindings2();
 
     PathPlannerLogging.setLogActivePathCallback(
         (poses -> Logger.recordOutput("Swerve/ActivePath", poses.toArray(new Pose2d[0]))));
@@ -118,21 +109,6 @@ public class RobotContainer {
     SmartDashboard.putData("Auto Chooser", autoChooser);
 
     FollowPathCommand.warmupCommand().schedule();
-
-  /**
-   * Use this method to define your trigger->command mappings. Triggers can be
-   * created via the
-   * {@link Trigger#Trigger(java.util.function.BooleanSupplier)} constructor with
-   * an arbitrary
-   * predicate, or via the named factories in {@link
-   * edu.wpi.first.wpilibj2.command.button.CommandGenericHID}'s subclasses for
-   * {@link
-   * CommandXboxController
-   * Xbox}/{@link edu.wpi.first.wpilibj2.command.button.CommandPS4Controller
-   * PS4} controllers or
-   * {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
-   * joysticks}.
-   */
   }
 
   private void configureBindings() {
@@ -140,13 +116,14 @@ public class RobotContainer {
     driverCont.rightBumper().whileTrue(commandFactory.basicShootCmd());
     driverCont.a().whileTrue(intake.setDutyCycleCommand(1.0));
     drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
-    
+
     drivetrain.registerTelemetry(logger::telemeterize);
 
   }
 
   public void onDisable() {
-    if (Objects.nonNull(flywheel)) flywheel.stop();
+    if (Objects.nonNull(flywheel))
+      flywheel.stop();
   }
 
   /**
@@ -159,4 +136,3 @@ public class RobotContainer {
     return autoChooser.getSelected();
   }
 }
-
