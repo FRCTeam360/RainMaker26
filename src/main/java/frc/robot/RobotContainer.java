@@ -104,19 +104,41 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    driverCont.leftBumper().whileTrue(commandFactory.basicIntakeCmd());
-    driverCont.rightBumper().whileTrue(commandFactory.basicShootCmd());
-    //driverCont.a().whileTrue(intake.setDutyCycleCommand(()->1.0));
-    drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
-    //driverCont.a().whileTrue(flywheel.setDutyCycleCommand(() -> driverCont.getRightTriggerAxis()));
     driverCont.a()
     .onTrue(superStructure.setStateCommand(SuperStates.COLLECTING_FUEL));
     driverCont.a()
     .onFalse(superStructure.setStateCommand(SuperStates.STOPPED));
+    // Null checks for subsystem-dependent command bindings
+    if (Objects.nonNull(intake) && Objects.nonNull(flywheelKicker) && Objects.nonNull(indexer)) {
+      driverCont.leftBumper().whileTrue(commandFactory.basicIntakeCmd());
+    }
+
+    if (Objects.nonNull(flywheel)) {
+      driverCont.rightBumper().whileTrue(commandFactory.basicShootCmd());
+    }
+
+    if (Objects.nonNull(intake)) {
+      // driverCont.a().whileTrue(intake.setDutyCycleCommand(1.0));
+    }
+
+    if (Objects.nonNull(drivetrain)) {
+      drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
+    }
   }
 
   public void onDisable() {
-    if (Objects.nonNull(flywheel)) flywheel.stop();
+    if (Objects.nonNull(flywheel)) {
+      flywheel.stop();
+    }
+    if (Objects.nonNull(intake)) {
+      intake.stop();
+    }
+    if (Objects.nonNull(indexer)) {
+      indexer.stop();
+    }
+    if (Objects.nonNull(flywheelKicker)) {
+      flywheelKicker.stop();
+    }
   }
 
   /**
