@@ -21,12 +21,19 @@ public class VisionIOWB implements VisionIO {
   private final DoubleSupplier gyroAngleRateSupplier;
 
   private boolean acceptMeasurements = false;
+  private final SparkMaxConfig config = new SparkMaxConfig();
+  private static final double CONVERSION_FACTOR = 1.0;
 
   // private RawFiducial[] fiducials = LimelightHelpers.getRawFiducials("");
 
   /** Creates a new VisionIOWB. */
   public VisionIOWB(String name, DoubleSupplier gyroAngleSupplier, DoubleSupplier gyroAngleRateSupplier,
       boolean acceptMeasurements) {
+
+    config.idleMode(IdleMode.kBrake);
+    config.inverted(false);
+    config.analogSensor.positionConversionFactor(CONVERSION_FACTOR).velocityConversionFactor(CONVERSION_FACTOR);
+
     table = NetworkTableInstance.getDefault().getTable(name);
     this.name = name;
     this.gyroAngleSupplier = gyroAngleSupplier;

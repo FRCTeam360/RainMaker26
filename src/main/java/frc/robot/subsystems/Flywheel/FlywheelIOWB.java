@@ -25,6 +25,8 @@ public class FlywheelIOWB implements FlywheelIO {
   };
   private TalonFXConfiguration config = new TalonFXConfiguration();
   private MotorOutputConfigs motorOutputConfigs = new MotorOutputConfigs();
+  private final SparkMaxConfig config = new SparkMaxConfig();
+  private static final double CONVERSION_FACTOR = 1.0;
 
   public FlywheelIOWB() {
     double kP = 0.0;
@@ -34,6 +36,10 @@ public class FlywheelIOWB implements FlywheelIO {
     double kG = 0.0;
     double kS = 0.0;
     double kV = 0.0;
+
+    config.idleMode(IdleMode.kBrake);
+    config.inverted(false);
+    config.analogSensor.positionConversionFactor(CONVERSION_FACTOR).velocityConversionFactor(CONVERSION_FACTOR);
 
       Slot0Configs slot0Configs = config.Slot0;
     slot0Configs.kA = kA;
