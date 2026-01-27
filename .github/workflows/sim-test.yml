@@ -5,11 +5,6 @@ on:
     branches: [main]
   workflow_dispatch: # Allows manual trigger from Actions tab
 
-on:
-  pull_request:
-    branches: [main]
-  workflow_dispatch: # Allows manual trigger from Actions tab
-
 jobs:
   build:
     name: Build
