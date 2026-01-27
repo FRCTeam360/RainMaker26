@@ -153,7 +153,9 @@ public class IntakePivotIOSim implements IntakePivotIO {
     inputs.voltage = motorControllerSim.getSimState().getMotorVoltage();
     inputs.statorCurrent = motorControllerSim.getStatorCurrent().getValueAsDouble();
     inputs.supplyCurrent = motorControllerSim.getSupplyCurrent().getValueAsDouble();
-  }
+    inputs.setpoint = motorControllerSim.getClosedLoopReference().getValueAsDouble();  }
+
+  
 
   /**
    * Set position using PID control with gravity compensation.

@@ -37,7 +37,7 @@ public class IntakePivot extends SubsystemBase {
     return this.runEnd(() -> this.setDutyCycle(dutySupplier.getAsDouble()), () -> this.stop());
   }
 
-  public Command setPosition(DoubleSupplier positionSupplier) {
+  public Command setPositionCmd(DoubleSupplier positionSupplier) {
     return this.runEnd(() -> this.setPosition(positionSupplier.getAsDouble()), () -> this.stop());
   }
 
@@ -49,4 +49,7 @@ public class IntakePivot extends SubsystemBase {
     // Update visualization with current arm angle (convert rotations to radians)
     visualizer.update(inputs.position * 2.0 * Math.PI);
   }
+  
+
+
 }
