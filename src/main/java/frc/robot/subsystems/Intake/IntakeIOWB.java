@@ -25,7 +25,10 @@ public class IntakeIOWB implements IntakeIO {
     config.idleMode(IdleMode.kBrake);
     config.inverted(true);
     config.smartCurrentLimit(40);
-    config.analogSensor.positionConversionFactor(CONVERSION_FACTOR).velocityConversionFactor(CONVERSION_FACTOR);
+    config
+        .analogSensor
+        .positionConversionFactor(CONVERSION_FACTOR)
+        .velocityConversionFactor(CONVERSION_FACTOR);
 
     motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }

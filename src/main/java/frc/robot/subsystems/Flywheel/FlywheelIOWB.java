@@ -15,7 +15,6 @@ import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
-
 import frc.robot.Constants.WoodBotConstants;
 
 public class FlywheelIOWB implements FlywheelIO {
@@ -33,7 +32,10 @@ public class FlywheelIOWB implements FlywheelIO {
   public FlywheelIOWB() {
     config.idleMode(IdleMode.kBrake);
     config.inverted(false);
-    config.analogSensor.positionConversionFactor(CONVERSION_FACTOR).velocityConversionFactor(CONVERSION_FACTOR);
+    config
+        .analogSensor
+        .positionConversionFactor(CONVERSION_FACTOR)
+        .velocityConversionFactor(CONVERSION_FACTOR);
     double kP = 0.0;
     double kI = 0.0;
     double kD = 0.0;

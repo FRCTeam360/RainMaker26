@@ -24,7 +24,6 @@ public class HoodIOWB implements HoodIO {
   SparkClosedLoopController controller = hoodMotor.getClosedLoopController();
   private static final double CONVERSION_FACTOR = 1.0;
 
-
   public void setEncoder(double position) {
     encoder.setPosition(position);
   }
@@ -33,7 +32,10 @@ public class HoodIOWB implements HoodIO {
 
     config.idleMode(IdleMode.kBrake);
     config.inverted(false);
-    config.analogSensor.positionConversionFactor(CONVERSION_FACTOR).velocityConversionFactor(CONVERSION_FACTOR);
+    config
+        .analogSensor
+        .positionConversionFactor(CONVERSION_FACTOR)
+        .velocityConversionFactor(CONVERSION_FACTOR);
 
     // Smart current limit
     config.smartCurrentLimit(40);
@@ -43,14 +45,13 @@ public class HoodIOWB implements HoodIO {
 
     // Soft limits
     config
-    .softLimit
+        .softLimit
         .forwardSoftLimitEnabled(true)
         .forwardSoftLimit(10.0)
         .reverseSoftLimitEnabled(true)
         .reverseSoftLimit(0.0);
 
-    hoodMotor.configure(
-        config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    hoodMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
     controller = hoodMotor.getClosedLoopController();
   }

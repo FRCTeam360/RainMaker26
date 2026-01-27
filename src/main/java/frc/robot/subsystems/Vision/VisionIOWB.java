@@ -4,15 +4,11 @@
 
 package frc.robot.subsystems.Vision;
 
-import java.util.Optional;
-import java.util.function.DoubleSupplier;
-
 import edu.wpi.first.math.estimator.PoseEstimator;
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import java.util.Optional;
+import java.util.function.DoubleSupplier;
 
 public class VisionIOWB implements VisionIO {
   private final NetworkTable table;
@@ -25,7 +21,10 @@ public class VisionIOWB implements VisionIO {
   // private RawFiducial[] fiducials = LimelightHelpers.getRawFiducials("");
 
   /** Creates a new VisionIOWB. */
-  public VisionIOWB(String name, DoubleSupplier gyroAngleSupplier, DoubleSupplier gyroAngleRateSupplier,
+  public VisionIOWB(
+      String name,
+      DoubleSupplier gyroAngleSupplier,
+      DoubleSupplier gyroAngleRateSupplier,
       boolean acceptMeasurements) {
 
     table = NetworkTableInstance.getDefault().getTable(name);
@@ -62,14 +61,16 @@ public class VisionIOWB implements VisionIO {
     // if (newPoseEstimate.isEmpty())
     //   return;
 
-    // if (inputs.tv == 0.0 || newPoseEstimate.isEmpty() || gyroAngleRateSupplier.getAsDouble() > 720.0)
+    // if (inputs.tv == 0.0 || newPoseEstimate.isEmpty() || gyroAngleRateSupplier.getAsDouble() >
+    // 720.0)
     //   return;
 
     // if (!newPoseEstimate.get().isMegaTag2)
     //   return;
 
     // if (Math.abs(
-    //     newPoseEstimate.get().pose.getRotation().minus(Rotation2d.fromDegrees(gyroAngleSupplier.getAsDouble()))
+    //
+    // newPoseEstimate.get().pose.getRotation().minus(Rotation2d.fromDegrees(gyroAngleSupplier.getAsDouble()))
     //         .getDegrees()) > 60.0)
     //   return;
 
