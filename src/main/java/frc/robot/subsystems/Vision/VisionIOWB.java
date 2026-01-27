@@ -19,6 +19,8 @@ public class VisionIOWB implements VisionIO {
   private final String name;
   private final DoubleSupplier gyroAngleSupplier;
   private final DoubleSupplier gyroAngleRateSupplier;
+  private final SparkMaxConfig config = new SparkMaxConfig();
+  private static final double CONVERSION_FACTOR = 1.0;
 
   private boolean acceptMeasurements = false;
 
@@ -27,6 +29,10 @@ public class VisionIOWB implements VisionIO {
   /** Creates a new VisionIOWB. */
   public VisionIOWB(String name, DoubleSupplier gyroAngleSupplier, DoubleSupplier gyroAngleRateSupplier,
       boolean acceptMeasurements) {
+
+    config.idleMode(IdleMode.kBrake);
+    config.inverted(false);
+    config.analogSensor.positionConversionFactor(CONVERSION_FACTOR).velocityConversionFactor(CONVERSION_FACTOR);    
     table = NetworkTableInstance.getDefault().getTable(name);
     this.name = name;
     this.gyroAngleSupplier = gyroAngleSupplier;
