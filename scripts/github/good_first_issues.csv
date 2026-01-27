@@ -1,0 +1,13 @@
+title,body,labels,assignee,milestone,epic
+Fix typo in LimelightHelpers.java,Fix the typo 'MGIHT' to 'MIGHT' in the TODO comment on line 1379.,good first issue,,Week 1,Tooling
+,,,,,
+,,,,,
+,,,,,
+Create a simple Flywheel run command,Create a command similar to BasicIntakeCommand that runs the Flywheel at a constant speed.,"good first issue,enhancement",,Week 1,Subsystems
+Investigate supplyCurrent calculation in IO classes,"Check the TODO comments in IntakeIOWB.java, IndexerIOWB.java, FlywheelKickerIOWB.java about the supplyCurrent calculation and fix if incorrect.","good first issue,bug",,Week 2,Subsystems
+Create project README with subsystem descriptions,Expand the README.md to include descriptions of each subsystem and their purposes.,"good first issue,documentation",,Week 1,Administration
+Add JavaDoc comments to Flywheel subsystem,Add proper JavaDoc comments to all public methods in the Flywheel.java class.,"good first issue,documentation",,Week 1,Subsystems
+Add JavaDoc comments to Hood subsystem,Add proper JavaDoc comments to all public methods in the Hood.java class.,"good first issue,documentation",,Week 1,Subsystems
+Add JavaDoc comments to Indexer subsystem,Add proper JavaDoc comments to all public methods in the Indexer.java class.,"good first issue,documentation",,Week 1,Subsystems
+Add JavaDoc comments to Vision subsystem,Add proper JavaDoc comments to all public methods in the Vision.java class.,"good first issue,documentation",,Week 1,Subsystems
+Create a simple utility for angle wrapping,"Create a utility method in utils package to wrap angles to -180 to 180 degrees, useful for drivetrain rotations.","good first issue,enhancement",,Week 1,Tooling

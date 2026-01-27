@@ -9,17 +9,20 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.generated.WoodbotConstants;
+import frc.robot.generated.WoodBotDrivetrain;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Flywheel.Flywheel;
 import frc.robot.subsystems.Flywheel.FlywheelIOWB;
+import frc.robot.subsystems.FlywheelKicker.FlywheelKicker;
+import frc.robot.subsystems.FlywheelKicker.FlywheelKickerIOWB;
 import frc.robot.subsystems.Hood.Hood;
-import frc.robot.subsystems.Hood.HoodIOWB;
 import frc.robot.subsystems.Indexer.Indexer;
 import frc.robot.subsystems.Indexer.IndexerIOWB;
 import frc.robot.subsystems.Intake.Intake;
 import frc.robot.subsystems.Intake.IntakeIOWB;
 import frc.robot.subsystems.IntakePivot.IntakePivot;
+import frc.robot.subsystems.IntakePivot.IntakePivotIOSim;
+import java.util.Objects;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -29,40 +32,61 @@ import frc.robot.subsystems.IntakePivot.IntakePivot;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-  private final CommandSwerveDrivetrain drivetrain;
-  private final Flywheel flywheel;
-  private final Hood hood;
-  private final Indexer indexer;
-  private final Intake intake;
+  private CommandSwerveDrivetrain drivetrain;
+  private Flywheel flywheel;
+  private Hood hood;
+  private Indexer indexer;
+  private Intake intake;
+  private IntakePivot intakePivot;
+  private FlywheelKicker flywheelKicker;
+  private CommandFactory commandFactory;
 
   // TODO: refactor to allow for more than 1 drivetrain type
 
-  private Telemetry logger = new Telemetry(WoodbotConstants.kSpeedAt12Volts.in(MetersPerSecond));
+  private Telemetry logger;
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
 
   private final CommandXboxController driverCont = new CommandXboxController(0);
 
   private final CommandXboxController testCont1 = new CommandXboxController(5);
-  private final CommandXboxController testCont2 = new CommandXboxController(6);
-
-  // private final CommandXboxController operatorCont = new CommandXboxController(1);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    // switch (Constants.getRobotType()) {
-    // case WOODBOT:
-    drivetrain = WoodbotConstants.createDrivetrain();
-    flywheel = new Flywheel(new FlywheelIOWB());
-    hood = new Hood(new HoodIOWB());
-    indexer = new Indexer(new IndexerIOWB());
-    intake = new Intake(new IntakeIOWB());
-    // break;
-    // }
+    switch (Constants.getRobotType()) {
+      case WOODBOT:
+        drivetrain = WoodBotDrivetrain.createDrivetrain();
+        logger = new Telemetry(WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
+        flywheel = new Flywheel(new FlywheelIOWB());
+        // hood = new Hood(new HoodIOWB());
+        indexer = new Indexer(new IndexerIOWB());
+        intake = new Intake(new IntakeIOWB());
+        flywheelKicker = new FlywheelKicker(new FlywheelKickerIOWB());
+        // intakePivot = new IntakePivot(new IntakePivotIOPB());
+        break;
+      case SIM:
+        drivetrain = WoodBotDrivetrain.createDrivetrain();
+        logger = new Telemetry(WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
+        intakePivot = new IntakePivot(new IntakePivotIOSim());
+
+        // flywheel = new Flywheel(new FlywheelIOSim());
+        // hood = new Hood(new HoodIOWB());
+        // indexer = new Indexer(new IndexerIOSim());
+        // intake = new Intake(new IntakeIOSim());
+        // flywheelKicker = new FlywheelKicker(new FlywheelKickerIOWB());
+        break;
+      default:
+        drivetrain = WoodBotDrivetrain.createDrivetrain();
+        logger = new Telemetry(WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
+        flywheel = new Flywheel(new FlywheelIOWB());
+        // hood = new Hood(new HoodIOWB());
+        indexer = new Indexer(new IndexerIOWB());
+        intake = new Intake(new IntakeIOWB());
+        flywheelKicker = new FlywheelKicker(new FlywheelKickerIOWB());
+        // intakePivot = new IntakePivot(new IntakePivotIOPB());
+    }
     // Configure the trigger bindings
     configureBindings();
-    configureTestBindings1();
-    configureTestBindings2();
   }
 
   /**
@@ -75,16 +99,37 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    System.out.println("fieldoriented drive calleddd");
-    drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
+    // Null checks for subsystem-dependent command bindings
+    if (Objects.nonNull(intake) && Objects.nonNull(flywheelKicker) && Objects.nonNull(indexer)) {
+      driverCont.leftBumper().whileTrue(commandFactory.basicIntakeCmd());
+    }
+
+    if (Objects.nonNull(flywheel)) {
+      driverCont.rightBumper().whileTrue(commandFactory.basicShootCmd());
+    }
+
+    if (Objects.nonNull(intake)) {
+      driverCont.a().whileTrue(intake.setDutyCycleCommand(1.0));
+    }
+
+    if (Objects.nonNull(drivetrain)) {
+      drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
+    }
   }
 
-  private void configureTestBindings1() {
-    drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(testCont1));
-  }
-
-  private void configureTestBindings2() {
-    drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(testCont2));
+  public void onDisable() {
+    if (Objects.nonNull(flywheel)) {
+      flywheel.stop();
+    }
+    if (Objects.nonNull(intake)) {
+      intake.stop();
+    }
+    if (Objects.nonNull(indexer)) {
+      indexer.stop();
+    }
+    if (Objects.nonNull(flywheelKicker)) {
+      flywheelKicker.stop();
+    }
   }
 
   /**

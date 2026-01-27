@@ -29,10 +29,9 @@ public class IndexerIOWB implements IndexerIO {
 
   public IndexerIOWB() {
     config.idleMode(IdleMode.kBrake);
-    config.inverted(false);
+    config.inverted(true);
     config.smartCurrentLimit(40);
     config.analogSensor.positionConversionFactor(CONVERSION_FACTOR).velocityConversionFactor(CONVERSION_FACTOR);
-
 
     indexerMotor.configure(
         config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
