@@ -14,7 +14,9 @@ public class SuperStructure extends SubsystemBase {
 
     public enum SuperStates {
         STOPPED,
-        COLLECTING_FUEL
+        COLLECTING_FUEL,
+           EJECTING,
+           AUTO_SHOOTING
     }
 
     private SuperStates wantedSuperState = SuperStates.STOPPED;
@@ -34,7 +36,6 @@ public class SuperStructure extends SubsystemBase {
                 break;
 
             case STOPPED:
-            default:
                 currentSuperState = SuperStates.STOPPED;
                 break;
         }

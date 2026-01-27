@@ -11,7 +11,7 @@ public class Intake extends SubsystemBase {
 
   public enum IntakeStates {
     OFF,
-    COLLECTING_FUEL
+    COLLECTING_FUEL,
   }
 
   private IntakeStates wantedState = IntakeStates.OFF;

@@ -31,9 +31,7 @@ public class Indexer extends SubsystemBase {
       case COLLECTING_FUEL:
         currentState = IndexerStates.COLLECTING_FUEL;
         break;
-
       case OFF:
-      default:
         currentState = IndexerStates.OFF;
         break;
     }
@@ -44,7 +42,6 @@ public class Indexer extends SubsystemBase {
         setDutyCycle(-0.65);
         break;
       case OFF:
-      default:
         stop();
         break;
     }
@@ -76,13 +73,13 @@ public class Indexer extends SubsystemBase {
 
   @Override
   public void periodic() {
-     updateState();
+    updateState();
     applyState();
 
     io.updateInputs(inputs);
     Logger.processInputs("Indexer", inputs);
-     Logger.recordOutput("Subsystems/Intake/WantedState", wantedState.toString());
-    Logger.recordOutput("Subsystems/Intake/CurrentState", currentState.toString());
-    Logger.recordOutput("Subsystems/Intake/PreviousState", previousState.toString());
+    Logger.recordOutput("Subsystems/Indexer/WantedState", wantedState.toString());
+    Logger.recordOutput("Subsystems/Indexer/CurrentState", currentState.toString());
+    Logger.recordOutput("Subsystems/Indexer/PreviousState", previousState.toString());
   }
 }
