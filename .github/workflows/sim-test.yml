@@ -25,26 +25,34 @@ jobs:
       - name: Install xvfb
         run: sudo apt-get update && sudo apt-get install -y xvfb
 
-      - name: Run simulation for 5 seconds
+      - name: Run simulation for 15 seconds
         run: |
-          # Start simulation in background with virtual display
-          xvfb-run -a ./gradlew simulateJava &
+          # Start simulation in background with virtual display, capture output
+          xvfb-run -a ./gradlew simulateJava 2>&1 | tee sim_output.log &
           SIM_PID=$!
 
-          # Wait for 5 seconds
-          sleep 5
+          # Wait for 15 seconds
+          sleep 15
 
           # Check if process is still running (good) or crashed (bad)
           if ! kill -0 $SIM_PID 2>/dev/null; then
-            echo "Simulation process crashed!"
-            wait $SIM_PID
+            echo "::error::Simulation process crashed!"
+            cat sim_output.log
             exit 1
           fi
-
-          echo "Simulation ran successfully for 5 seconds without crashing"
 
           # Gracefully terminate the simulation
           kill $SIM_PID 2>/dev/null || true
           wait $SIM_PID 2>/dev/null || true
 
+          # Check logs for robot program crash
+          echo "Checking simulation output for errors..."
+
+          if grep -q "The robot program quit unexpectedly" sim_output.log; then
+            echo "::error::Robot program crashed during simulation!"
+            cat sim_output.log
+            exit 1
+          fi
+
+          echo "Simulation ran successfully for 15 seconds with no errors detected"
           exit 0
