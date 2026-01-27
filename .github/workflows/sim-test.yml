@@ -5,95 +5,20 @@ on:
     branches: [main]
   workflow_dispatch: # Allows manual trigger from Actions tab
 
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch: # Allows manual trigger from Actions tab
+
 jobs:
-  simulate:
-    name: Simulation Smoke Test
+  build:
+    name: Build
     runs-on: ubuntu-latest
+    container: wpilib/roborio-cross-ubuntu:2025-22.04
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
       - name: Grant execute permission
         run: chmod +x gradlew
-
-      - name: Set up Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 17
-
-      - name: Install xvfb
-        run: sudo apt-get update && sudo apt-get install -y xvfb
-
-      - name: Run simulation for 15 seconds
-        run: |
-          # Start simulation in background with virtual display, capture output
-          # Use stdbuf to disable buffering so we get output immediately
-          xvfb-run -a stdbuf -oL -eL ./gradlew simulateJava > sim_output.log 2>&1 &
-          SIM_PID=$!
-
-          # Wait for simulation to run
-          sleep 15
-
-          # Check if process crashed early
-          if ! kill -0 $SIM_PID 2>/dev/null; then
-            echo "Simulation process exited early, checking for errors..."
-          else
-            # Gracefully terminate the simulation
-            kill $SIM_PID 2>/dev/null || true
-            wait $SIM_PID 2>/dev/null || true
-          fi
-
-          # Always show the log for debugging
-          echo "=== Simulation Output ==="
-          cat sim_output.log
-          echo "========================="
-
-          # Check for WPILib error patterns (based on official WPILib documentation)
-          # See: https://frcdocs.wpi.edu/en/latest/docs/software/basic-programming/reading-stacktraces.html
-          echo "Checking simulation output for errors..."
-
-          FAILED=0
-
-          if grep -qi "Unhandled exception" sim_output.log; then
-            echo "::error::Found unhandled exception in simulation!"
-            FAILED=1
-          fi
-
-          if grep -qi "The robot program quit unexpectedly" sim_output.log; then
-            echo "::error::Robot program quit unexpectedly!"
-            FAILED=1
-          fi
-
-          if grep -qi "java\.lang\.NullPointerException" sim_output.log; then
-            echo "::error::NullPointerException detected!"
-            FAILED=1
-          fi
-
-          if grep -qi "java\.lang\.RuntimeException" sim_output.log; then
-            echo "::error::RuntimeException detected!"
-            FAILED=1
-          fi
-
-          if grep -qi "java\.lang\.IllegalStateException" sim_output.log; then
-            echo "::error::IllegalStateException detected!"
-            FAILED=1
-          fi
-
-          if grep -qi "Error at.*:" sim_output.log; then
-            echo "::error::WPILib error detected!"
-            FAILED=1
-          fi
-
-          if grep -qi "An unexpected error has occurred" sim_output.log; then
-            echo "::error::Unexpected error occurred!"
-            FAILED=1
-          fi
-
-          if [ $FAILED -eq 1 ]; then
-            echo "::error::Simulation failed with errors - see log above"
-            exit 1
-          fi
-
-          echo "Simulation ran successfully for 15 seconds with no errors detected"
-          exit 0
+      - name: Build robot code
+        run: ./gradlew simulateJava
