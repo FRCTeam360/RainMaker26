@@ -27,7 +27,7 @@ public class FlywheelKickerIOWB implements FlywheelKickerIO {
 
   public FlywheelKickerIOWB() {
     sparkMaxConfig.idleMode(IdleMode.kBrake);
-    sparkMaxConfig.inverted(true);
+    sparkMaxConfig.inverted(false);
     sparkMaxConfig.smartCurrentLimit(40);
 
     flywheelkickerMotor.configure(

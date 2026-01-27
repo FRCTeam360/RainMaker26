@@ -53,9 +53,7 @@ public class FlywheelIOWB implements FlywheelIO {
     rightConfig.CurrentLimits.SupplyCurrentLimit = 80.0;
     rightConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
 
-    rightConfig
-        .MotionMagic
-        .withMotionMagicAcceleration(0.0)
+    rightConfig.MotionMagic.withMotionMagicAcceleration(0.0)
         .withMotionMagicCruiseVelocity(0.0)
         .withMotionMagicJerk(0.0);
     rightConfig.MotorOutput.withInverted(InvertedValue.Clockwise_Positive);
@@ -66,17 +64,12 @@ public class FlywheelIOWB implements FlywheelIO {
     boolean odd = false;
     for (TalonFX i : motors) {
       i.getConfigurator().apply(odd ? leftConfig : rightConfig);
-      odd = !odd;
       i.setNeutralMode(NeutralModeValue.Coast);
     }
 
-    boolean oddFollower = true;
     for (int i = 1; i < motors.length; i++) {
       motors[i].setControl(
-          new Follower(
-              WoodBotConstants.FLYWHEEL_RIGHT_ID,
-              (oddFollower ? MotorAlignmentValue.Opposed : MotorAlignmentValue.Aligned)));
-      oddFollower = !oddFollower;
+          new Follower(WoodBotConstants.FLYWHEEL_RIGHT_ID, MotorAlignmentValue.Aligned));
     }
   }
 

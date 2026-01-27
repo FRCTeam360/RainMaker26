@@ -8,7 +8,7 @@
 
 param(
     [Parameter(Position=0)]
-    [string]$CsvFile = "github_issues_to_add.csv",
+    [string]$CsvFile = "github_issues_template.csv",
     
     [Parameter(Position=1)]
     [string]$Repo = ""

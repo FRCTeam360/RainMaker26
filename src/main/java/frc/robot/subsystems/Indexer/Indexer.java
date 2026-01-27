@@ -62,14 +62,6 @@ public class Indexer extends SubsystemBase {
     io.setDutyCycle(dutyCycle);
   }
 
-  public Command setDutyCycleCommand(double value) {
-    return this.setDutyCycleCommand(() -> value);
-  }
-
-  public Command setDutyCycleCommand(DoubleSupplier valueSup) {
-    return this.runEnd(() -> io.setDutyCycle(valueSup.getAsDouble()), () -> io.setDutyCycle(0.0));
-  }
-
   public void stop() {
     io.setDutyCycle(0.0);
   }
@@ -84,5 +76,9 @@ public class Indexer extends SubsystemBase {
      Logger.recordOutput("Subsystems/Intake/WantedState", wantedState.toString());
     Logger.recordOutput("Subsystems/Intake/CurrentState", currentState.toString());
     Logger.recordOutput("Subsystems/Intake/PreviousState", previousState.toString());
+  }
+
+  public Command setDutyCycleCommand(DoubleSupplier dutySupplier) {
+    return this.runEnd(() -> this.setDutyCycle(dutySupplier.getAsDouble()), () -> this.stop());
   }
 }
