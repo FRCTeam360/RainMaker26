@@ -113,13 +113,13 @@ public class RobotContainer {
     driverCont.leftBumper().whileTrue(commandFactory.basicIntakeCmd());
     driverCont.rightBumper().whileTrue(commandFactory.setFlywheelKickerDutyCycle(1.0));
     driverCont.pov(0).onTrue(commandFactory.setHoodPosition(0.0));
-    driverCont.pov(90).onTrue(commandFactory.setHoodPosition(8.0));
+    driverCont.pov(90).onTrue(commandFactory.setHoodPosition(4.0));
     driverCont.pov(180).onTrue(commandFactory.setHoodPosition(16.0));
     driverCont.pov(270).onTrue(commandFactory.setHoodPosition(23.0));
-    driverCont.a().whileTrue(commandFactory.shootWithRPM(1000));
-    driverCont.x().whileTrue(commandFactory.shootWithRPM(1500));
+    driverCont.a().whileTrue(commandFactory.shootWithRPM(2000));
+    driverCont.x().whileTrue(commandFactory.shootWithRPM(2500));
     driverCont.b().whileTrue(commandFactory.shootWithRPM(3000));
-    driverCont.y().whileTrue(commandFactory.shootWithRPM(4500));
+    driverCont.y().whileTrue(commandFactory.shootWithRPM(3500));
     drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
     driverCont.start().onTrue(hood.zero());
   }
