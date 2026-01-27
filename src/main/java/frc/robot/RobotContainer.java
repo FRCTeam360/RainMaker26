@@ -123,6 +123,8 @@ public class RobotContainer {
     }
     if (Objects.nonNull(intake)) {
       intake.stop();
+    if (Objects.nonNull(hood)) {
+      hood.stop();
     }
     if (Objects.nonNull(indexer)) {
       indexer.stop();
