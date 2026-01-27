@@ -28,29 +28,70 @@ jobs:
       - name: Run simulation for 15 seconds
         run: |
           # Start simulation in background with virtual display, capture output
-          xvfb-run -a ./gradlew simulateJava 2>&1 | tee sim_output.log &
+          # Use stdbuf to disable buffering so we get output immediately
+          xvfb-run -a stdbuf -oL -eL ./gradlew simulateJava > sim_output.log 2>&1 &
           SIM_PID=$!
 
-          # Wait for 15 seconds
+          # Wait for simulation to run
           sleep 15
 
-          # Check if process is still running (good) or crashed (bad)
+          # Check if process crashed early
           if ! kill -0 $SIM_PID 2>/dev/null; then
-            echo "::error::Simulation process crashed!"
-            cat sim_output.log
-            exit 1
+            echo "Simulation process exited early, checking for errors..."
+          else
+            # Gracefully terminate the simulation
+            kill $SIM_PID 2>/dev/null || true
+            wait $SIM_PID 2>/dev/null || true
           fi
 
-          # Gracefully terminate the simulation
-          kill $SIM_PID 2>/dev/null || true
-          wait $SIM_PID 2>/dev/null || true
+          # Always show the log for debugging
+          echo "=== Simulation Output ==="
+          cat sim_output.log
+          echo "========================="
 
-          # Check logs for robot program crash
+          # Check for WPILib error patterns (based on official WPILib documentation)
+          # See: https://frcdocs.wpi.edu/en/latest/docs/software/basic-programming/reading-stacktraces.html
           echo "Checking simulation output for errors..."
 
-          if grep -q "The robot program quit unexpectedly" sim_output.log; then
-            echo "::error::Robot program crashed during simulation!"
-            cat sim_output.log
+          FAILED=0
+
+          if grep -qi "Unhandled exception" sim_output.log; then
+            echo "::error::Found unhandled exception in simulation!"
+            FAILED=1
+          fi
+
+          if grep -qi "The robot program quit unexpectedly" sim_output.log; then
+            echo "::error::Robot program quit unexpectedly!"
+            FAILED=1
+          fi
+
+          if grep -qi "java\.lang\.NullPointerException" sim_output.log; then
+            echo "::error::NullPointerException detected!"
+            FAILED=1
+          fi
+
+          if grep -qi "java\.lang\.RuntimeException" sim_output.log; then
+            echo "::error::RuntimeException detected!"
+            FAILED=1
+          fi
+
+          if grep -qi "java\.lang\.IllegalStateException" sim_output.log; then
+            echo "::error::IllegalStateException detected!"
+            FAILED=1
+          fi
+
+          if grep -qi "Error at.*:" sim_output.log; then
+            echo "::error::WPILib error detected!"
+            FAILED=1
+          fi
+
+          if grep -qi "An unexpected error has occurred" sim_output.log; then
+            echo "::error::Unexpected error occurred!"
+            FAILED=1
+          fi
+
+          if [ $FAILED -eq 1 ]; then
+            echo "::error::Simulation failed with errors - see log above"
             exit 1
           fi
 
