@@ -16,8 +16,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-//import frc.robot.commands.BasicIntakeCommand; //uncomment
-//import frc.robot.commands.BasicShootCommand; //uncomment
 import frc.robot.generated.WoodBotDrivetrain;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Flywheel.Flywheel;
@@ -67,10 +65,7 @@ public class RobotContainer {
 
   private final CommandXboxController testCont1 = new CommandXboxController(5);
 
-  //private BasicIntakeCommand basicIntakeCommand;
-
-  //private BasicShootCommand basicShootCommand; //uncomment
-  // private final CommandXboxController operatorCont = new //uncomment
+  private final CommandXboxController operatorCont = new;
   // CommandXboxController(1);
 
   /**
@@ -114,7 +109,6 @@ public class RobotContainer {
     // configureTestBindings1();
     // configureTestBindings2();
 
-    // sorry for the weird placements, feel free to reorganize - Pathplanner logging
     PathPlannerLogging.setLogActivePathCallback(
         (poses -> Logger.recordOutput("Swerve/ActivePath", poses.toArray(new Pose2d[0]))));
 
@@ -122,7 +116,7 @@ public class RobotContainer {
 
     autoChooser = AutoBuilder.buildAutoChooser();
     SmartDashboard.putData("Auto Chooser", autoChooser);
-    // separator
+
     FollowPathCommand.warmupCommand().schedule();
 
   /**
