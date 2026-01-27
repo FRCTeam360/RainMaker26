@@ -99,7 +99,7 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    // Null checks for subsystem-dependent command bindings
+    // TODO: make more elegant solution for null checking subsystems/commands
     if (Objects.nonNull(intake) && Objects.nonNull(flywheelKicker) && Objects.nonNull(indexer)) {
       driverCont.leftBumper().whileTrue(commandFactory.basicIntakeCmd());
     }
