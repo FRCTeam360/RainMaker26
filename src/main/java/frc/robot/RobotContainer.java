@@ -120,9 +120,9 @@ public class RobotContainer {
       driverCont.rightBumper().whileTrue(commandFactory.basicShootCmd());
     }
 
-    if (Objects.nonNull(intake)) {
-      driverCont.a().whileTrue(intake.setDutyCycleCommand(()->1.0));
-    }
+    // if (Objects.nonNull(intake)) {
+    //   driverCont.a().whileTrue(intake.setDutyCycleCommand(()->1.0));
+    // }
 
     if (Objects.nonNull(drivetrain)) {
       drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
