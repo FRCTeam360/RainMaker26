@@ -22,7 +22,6 @@ import frc.robot.subsystems.Intake.Intake;
 import frc.robot.subsystems.Intake.IntakeIOWB;
 import frc.robot.subsystems.IntakePivot.IntakePivot;
 import frc.robot.subsystems.IntakePivot.IntakePivotIOSim;
-import java.util.Objects;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -100,36 +99,20 @@ public class RobotContainer {
    */
   private void configureBindings() {
     // TODO: make more elegant solution for null checking subsystems/commands
-    if (Objects.nonNull(intake) && Objects.nonNull(flywheelKicker) && Objects.nonNull(indexer)) {
-      driverCont.leftBumper().whileTrue(commandFactory.basicIntakeCmd());
-    }
+    driverCont.leftBumper().whileTrue(commandFactory.basicIntakeCmd());
 
-    if (Objects.nonNull(flywheel)) {
-      driverCont.rightBumper().whileTrue(commandFactory.basicShootCmd());
-    }
+    driverCont.rightBumper().whileTrue(commandFactory.basicShootCmd());
 
-    if (Objects.nonNull(intake)) {
-      driverCont.a().whileTrue(intake.setDutyCycleCommand(1.0));
-    }
+    driverCont.a().whileTrue(intake.setDutyCycleCommand(1.0));
 
-    if (Objects.nonNull(drivetrain)) {
-      drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
-    }
+    drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
   }
 
   public void onDisable() {
-    if (Objects.nonNull(flywheel)) {
-      flywheel.stop();
-    }
-    if (Objects.nonNull(intake)) {
-      intake.stop();
-    }
-    if (Objects.nonNull(indexer)) {
-      indexer.stop();
-    }
-    if (Objects.nonNull(flywheelKicker)) {
-      flywheelKicker.stop();
-    }
+    flywheel.stop();
+    intake.stop();
+    indexer.stop();
+    flywheelKicker.stop();
   }
 
   /**
