@@ -4,11 +4,14 @@
 
 package frc.robot.subsystems.Intake;
 
+
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
+
+/**  extending Intake from Subsystem base */
 public class Intake extends SubsystemBase {
   private final IntakeIO io;
   private final IntakeIOInputsAutoLogged inputs = new IntakeIOInputsAutoLogged();
@@ -18,18 +21,28 @@ public class Intake extends SubsystemBase {
     this.io = io;
   }
 
+  /** Sets the intake speed
+   * takes a double value
+   * uses the taken value to set the speed of the intake
+   */
   public void setDutyCycle(double value) {
     io.setDutyCycle(value);
   }
 
+
+  /**  */
   public Command setDutyCycleCommand(double value) {
     return this.setDutyCycleCommand(() -> value);
   }
 
+
+  /** setDutyCycleCommand for DoubleSupplier values */
   public Command setDutyCycleCommand(DoubleSupplier valueSup) {
     return this.runEnd(() -> io.setDutyCycle(valueSup.getAsDouble()), () -> io.setDutyCycle(0.0));
   }
 
+
+  /** stops intake */
   public void stop() {
     this.setDutyCycle(0.0);
   }
