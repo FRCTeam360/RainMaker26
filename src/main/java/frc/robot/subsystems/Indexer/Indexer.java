@@ -42,6 +42,7 @@ public class Indexer extends SubsystemBase {
         setDutyCycle(-0.65);
         break;
       case OFF:
+      default:
         stop();
         break;
     }
@@ -51,7 +52,7 @@ public class Indexer extends SubsystemBase {
   public Indexer(IndexerIO io) {
     this.io = io;
   }
-    public void setWantedState(IndexerStates state) {
+ public void setWantedState(IndexerStates state) {
     wantedState = state;
   }
 

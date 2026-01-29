@@ -121,6 +121,8 @@ public class RobotContainer {
     // if (Objects.nonNull(intake)) {
     //   driverCont.a().whileTrue(intake.setDutyCycleCommand(()->1.0));
     // }
+    driverCont.a().onTrue(superStructure.setStateCommand(SuperStates.COLLECTING_FUEL));
+    driverCont.a().onFalse(superStructure.setStateCommand(SuperStates.STOPPED));
 
     if (Objects.nonNull(drivetrain)) {
       drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));

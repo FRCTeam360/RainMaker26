@@ -59,6 +59,7 @@ public class SuperStructure extends SubsystemBase {
 
     private void stopped() {
         intake.setWantedState(Intake.IntakeStates.OFF);
+        indexer.setWantedState(Indexer.IndexerStates.OFF);
     }
     public Command setStateCommand(SuperStates superState) {
         return new InstantCommand(
