@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.CANBus;
+
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.hal.HALUtil;
@@ -42,7 +44,7 @@ public final class Constants {
 
     public static final int HOOD_ID = 0;
 
-    public static final String CANBUS_NAME = "Default Name";
+    public static final CANBus CANBUS_NAME = new CANBus();
   }
 
   public static class OperatorConstants {
