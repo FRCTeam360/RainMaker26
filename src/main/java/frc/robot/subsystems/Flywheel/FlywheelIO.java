@@ -16,6 +16,7 @@ public interface FlywheelIO {
     public double[] voltages = new double[MAX_MOTORS];
     public double[] velocities = new double[MAX_MOTORS];
     public double[] positions = new double[MAX_MOTORS];
+    public double[] setpoint = new double[MAX_MOTORS];
   }
 
   public void setDutyCycle(double duty);
