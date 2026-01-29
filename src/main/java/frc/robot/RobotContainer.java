@@ -6,12 +6,10 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
-import org.littletonrobotics.junction.Logger;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -30,14 +28,12 @@ import frc.robot.subsystems.Intake.IntakeIOWB;
 import frc.robot.subsystems.IntakePivot.IntakePivot;
 import frc.robot.subsystems.IntakePivot.IntakePivotIOSim;
 import java.util.Objects;
+import org.littletonrobotics.junction.Logger;
 
 /**
- * This class is where the bulk of the robot should be declared. Since
- * Command-based is a
- * "declarative" paradigm, very little robot logic should actually be handled in
- * the {@link Robot}
- * periodic methods (other than the scheduler calls). Instead, the structure of
- * the robot (including
+ * This class is where the bulk of the robot should be declared. Since Command-based is a
+ * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
+ * periodic methods (other than the scheduler calls). Instead, the structure of the robot (including
  * subsystems, commands, and trigger mappings) should be declared here.
  */
 public class RobotContainer {
@@ -61,9 +57,7 @@ public class RobotContainer {
 
   private final CommandXboxController driverCont = new CommandXboxController(0);
 
-  /**
-   * The container for the robot. Contains subsystems, OI devices, and commands.
-   */
+  /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     switch (Constants.getRobotType()) {
       case WOODBOT:
@@ -103,7 +97,8 @@ public class RobotContainer {
     PathPlannerLogging.setLogActivePathCallback(
         (poses -> Logger.recordOutput("Swerve/ActivePath", poses.toArray(new Pose2d[0]))));
 
-    PathPlannerLogging.setLogTargetPoseCallback(pose -> Logger.recordOutput("Swerve/TargetPathPose", pose));
+    PathPlannerLogging.setLogTargetPoseCallback(
+        pose -> Logger.recordOutput("Swerve/TargetPathPose", pose));
 
     autoChooser = AutoBuilder.buildAutoChooser();
     SmartDashboard.putData("Auto Chooser", autoChooser);
@@ -118,12 +113,10 @@ public class RobotContainer {
     drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
 
     drivetrain.registerTelemetry(logger::telemeterize);
-
   }
 
   public void onDisable() {
-    if (Objects.nonNull(flywheel))
-      flywheel.stop();
+    if (Objects.nonNull(flywheel)) flywheel.stop();
   }
 
   /**
