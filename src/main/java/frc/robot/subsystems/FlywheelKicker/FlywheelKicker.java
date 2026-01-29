@@ -48,6 +48,8 @@ public enum FlywheelKickerStates {
   }
   public void setWantedState(FlywheelKickerStates state) {
     wantedState = state;
+    updateState();
+    applyState();
   }
   /** Creates a new FlywheelKicker. */
   public FlywheelKicker(FlywheelKickerIO io) {
@@ -72,8 +74,8 @@ public enum FlywheelKickerStates {
 
   @Override
   public void periodic() {
-    updateState();
-    applyState();
+    // updateState();
+    // applyState();
     io.updateInputs(inputs);
     Logger.processInputs("FlywheelKicker", inputs);
     Logger.recordOutput("Subsystems/FlywheelKicker/WantedState", wantedState.toString());

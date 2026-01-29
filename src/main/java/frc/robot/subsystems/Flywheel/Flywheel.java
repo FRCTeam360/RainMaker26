@@ -47,6 +47,8 @@ public class Flywheel extends SubsystemBase {
   }
    public void setWantedState(FlywheelStates state) {
     wantedState = state;
+    updateState();
+    applyState();
   }
 
   /** Creates a new Flywheel. */
@@ -60,8 +62,6 @@ public class Flywheel extends SubsystemBase {
 
   @Override
   public void periodic() {
-    updateState();
-    applyState();
     io.updateInputs(inputs);
     Logger.processInputs("Flywheel", inputs);
         Logger.processInputs("Flywheel", inputs);

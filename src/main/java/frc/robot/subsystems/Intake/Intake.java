@@ -24,6 +24,8 @@ public class Intake extends SubsystemBase {
 
   public void setWantedState(IntakeStates state) {
     wantedState = state;
+    updateState();
+    applyState();
   }
 
   private void updateState() {
@@ -62,8 +64,6 @@ public class Intake extends SubsystemBase {
 
   @Override
   public void periodic() {
-    updateState();
-    applyState();
 
     io.updateInputs(inputs);
     Logger.processInputs("Intake", inputs);
