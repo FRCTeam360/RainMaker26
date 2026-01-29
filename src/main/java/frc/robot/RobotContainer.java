@@ -7,6 +7,13 @@ package frc.robot;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
 import edu.wpi.first.wpilibj.internal.DriverStationModeThread;
+import com.ctre.phoenix6.swerve.SwerveRequest;
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.commands.FollowPathCommand;
+import com.pathplanner.lib.util.PathPlannerLogging;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -27,6 +34,7 @@ import frc.robot.subsystems.IntakePivot.IntakePivot;
 import com.pathplanner.lib.auto.NamedCommands;
 import frc.robot.subsystems.IntakePivot.IntakePivotIOSim;
 import java.util.Objects;
+import org.littletonrobotics.junction.Logger;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -37,12 +45,14 @@ import java.util.Objects;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private CommandSwerveDrivetrain drivetrain;
+  private SendableChooser<Command> autoChooser;
   private Flywheel flywheel;
   private Hood hood;
   private Indexer indexer;
   private Intake intake;
   private IntakePivot intakePivot;
   private FlywheelKicker flywheelKicker;
+
   private CommandFactory commandFactory;
 
   // TODO: refactor to allow for more than 1 drivetrain type
@@ -101,7 +111,18 @@ public class RobotContainer {
        indexer,
        drivetrain
   );
-  configureBindings();
+    configureBindings();
+
+    PathPlannerLogging.setLogActivePathCallback(
+        (poses -> Logger.recordOutput("Swerve/ActivePath", poses.toArray(new Pose2d[0]))));
+
+    PathPlannerLogging.setLogTargetPoseCallback(
+        pose -> Logger.recordOutput("Swerve/TargetPathPose", pose));
+
+    autoChooser = AutoBuilder.buildAutoChooser();
+    SmartDashboard.putData("Auto Chooser", autoChooser);
+
+    FollowPathCommand.warmupCommand().schedule();
   }
 
   public void registerPathplannerCommand(String name, Command command) {
@@ -123,6 +144,7 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
+    // TODO: make more elegant solution for null checking subsystems/commands
     driverCont.leftBumper().whileTrue(commandFactory.basicIntakeCmd());
     driverCont.rightBumper().whileTrue(commandFactory.setFlywheelKickerDutyCycle(1.0));
     driverCont.pov(0).onTrue(commandFactory.setHoodPosition(0.0));
@@ -133,12 +155,37 @@ public class RobotContainer {
     driverCont.x().whileTrue(commandFactory.shootWithRPM(2500));
     driverCont.b().whileTrue(commandFactory.shootWithRPM(3000));
     driverCont.y().whileTrue(commandFactory.shootWithRPM(3500));
-    drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
+    if (Objects.nonNull(drivetrain)) {
+      drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
+    }
     driverCont.start().onTrue(hood.zero());
+
+    drivetrain.registerTelemetry(logger::telemeterize);
   }
 
+  /** Stops all subsystems safely when the robot is disabled. */
   public void onDisable() {
-    if (Objects.nonNull(flywheel)) flywheel.stop();
+    if (Objects.nonNull(drivetrain)) {
+      drivetrain.setControl(new SwerveRequest.Idle());
+    }
+    if (Objects.nonNull(flywheel)) {
+      flywheel.stop();
+    }
+    if (Objects.nonNull(hood)) {
+      hood.stop();
+    }
+    if (Objects.nonNull(intake)) {
+      intake.stop();
+    }
+    if (Objects.nonNull(intakePivot)) {
+      intakePivot.stop();
+    }
+    if (Objects.nonNull(indexer)) {
+      indexer.stop();
+    }
+    if (Objects.nonNull(flywheelKicker)) {
+      flywheelKicker.stop();
+    }
   }
 
   /**
@@ -148,6 +195,6 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
-    return null;
+    return autoChooser.getSelected();
   }
 }

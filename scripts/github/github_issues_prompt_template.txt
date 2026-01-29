@@ -6,7 +6,7 @@ Use this prompt when adding new tasks to our GitHub issues tracker.
 
 ## Context
 
-I'm on an FRC robotics team. I need you to convert my planned tasks into a GitHub issues CSV file. I've also included a sheet with our current tasks so we don't make redundant tasks.
+I'm on an FRC robotics team. I need you to convert my planned tasks into a GitHub issues CSV file. I've also included a sheet with our current tasks so we don't make redundant tasks. If you're missing context, please ask clarifying questions.
 
 ## CSV Format
 
@@ -17,6 +17,7 @@ Output a CSV with these columns, with ALL fields quoted to escape commas:
 - assignee
 - milestone
 - epic
+- priority
 
 ## Available Labels
 
@@ -52,13 +53,22 @@ Output a CSV with these columns, with ALL fields quoted to escape commas:
 - Simulations
 - Vision
 - Administration
+- Commands
+
+## Priority (optional)
+
+- Number One Highest Priority
+- High Priority
+- Low Priority
+
+Leave blank for normal priority items.
 
 ## Formatting Rules
 
 1. **Rephrase questions as action items** (e.g., "What are the flywheel motors?" → "Determine flywheel motor type")
 2. **Use semicolons instead of commas** in body text to avoid CSV parsing issues
 3. **Add descriptions** where context is clear; leave blank otherwise
-4. **Mark emphasized items** (originally in __underscores__) with "Priority: High." at the start of the body
+4. **Mark emphasized items** (originally in __underscores__) with "High Priority" in the priority column
 5. **Assign labels** based on task type:
    - `enhancement` for new features/implementations
    - `question` for investigation items or things needing answers from others
