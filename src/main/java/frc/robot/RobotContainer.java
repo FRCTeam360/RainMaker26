@@ -145,22 +145,40 @@ public class RobotContainer {
    */
   private void configureBindings() {
     // TODO: make more elegant solution for null checking subsystems/commands
-    driverCont.leftBumper().whileTrue(commandFactory.basicIntakeCmd());
-    driverCont.rightBumper().whileTrue(commandFactory.setFlywheelKickerDutyCycle(1.0));
-    driverCont.pov(0).onTrue(commandFactory.setHoodPosition(0.0));
-    driverCont.pov(90).onTrue(commandFactory.setHoodPosition(4.0));
-    driverCont.pov(180).onTrue(commandFactory.setHoodPosition(16.0));
-    driverCont.pov(270).onTrue(commandFactory.setHoodPosition(23.0));
-    driverCont.a().whileTrue(commandFactory.shootWithRPM(2000));
-    driverCont.x().whileTrue(commandFactory.shootWithRPM(2500));
-    driverCont.b().whileTrue(commandFactory.shootWithRPM(3000));
-    driverCont.y().whileTrue(commandFactory.shootWithRPM(3500));
+
+    // Null checks based on subsystems used by each command
+    // basicIntakeCmd uses intake and indexer
+    if (Objects.nonNull(intake) && Objects.nonNull(indexer)) {
+      driverCont.leftBumper().whileTrue(commandFactory.basicIntakeCmd());
+    }
+
+    // setFlywheelKickerDutyCycle uses flywheelKicker
+    if (Objects.nonNull(flywheelKicker)) {
+      driverCont.rightBumper().whileTrue(commandFactory.setFlywheelKickerDutyCycle(1.0));
+    }
+
+    // setHoodPosition uses hood
+    if (Objects.nonNull(hood)) {
+      driverCont.pov(0).onTrue(commandFactory.setHoodPosition(0.0));
+      driverCont.pov(90).onTrue(commandFactory.setHoodPosition(4.0));
+      driverCont.pov(180).onTrue(commandFactory.setHoodPosition(16.0));
+      driverCont.pov(270).onTrue(commandFactory.setHoodPosition(23.0));
+      driverCont.start().onTrue(hood.zero());
+    }
+
+    // shootWithRPM uses flywheel
+    if (Objects.nonNull(flywheel)) {
+      driverCont.a().whileTrue(commandFactory.shootWithRPM(2000));
+      driverCont.x().whileTrue(commandFactory.shootWithRPM(2500));
+      driverCont.b().whileTrue(commandFactory.shootWithRPM(3000));
+      driverCont.y().whileTrue(commandFactory.shootWithRPM(3500));
+    }
+
+    // Drivetrain commands
     if (Objects.nonNull(drivetrain)) {
       drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
+      drivetrain.registerTelemetry(logger::telemeterize);
     }
-    driverCont.start().onTrue(hood.zero());
-
-    drivetrain.registerTelemetry(logger::telemeterize);
   }
 
   /** Stops all subsystems safely when the robot is disabled. */
