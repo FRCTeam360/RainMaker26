@@ -8,6 +8,7 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 
 import edu.wpi.first.wpilibj.internal.DriverStationModeThread;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.generated.WoodBotDrivetrain;
@@ -23,6 +24,7 @@ import frc.robot.subsystems.Indexer.IndexerIOWB;
 import frc.robot.subsystems.Intake.Intake;
 import frc.robot.subsystems.Intake.IntakeIOWB;
 import frc.robot.subsystems.IntakePivot.IntakePivot;
+import com.pathplanner.lib.auto.NamedCommands;
 import frc.robot.subsystems.IntakePivot.IntakePivotIOSim;
 import java.util.Objects;
 
@@ -89,6 +91,8 @@ public class RobotContainer {
         // intakePivot = new IntakePivot(new IntakePivotIOPB());
     }
     // Configure the trigger bindings
+      registerPathplannerCommand("basic intake", commandFactory.basicIntakeCmd());
+      registerPathplannerCommand("shoot at hub", commandFactory.shootWithSpinUp(3000.0, 4.0));
       commandFactory = new CommandFactory(
       intake,
        flywheel,
@@ -98,6 +102,15 @@ public class RobotContainer {
        drivetrain
   );
   configureBindings();
+  }
+
+  public void registerPathplannerCommand(String name, Command command) {
+    if (Objects.nonNull(command)) {
+      NamedCommands.registerCommand(name, command);
+    } else {
+      System.err.println(name + " is null");
+      NamedCommands.registerCommand(name, new InstantCommand(() -> System.err.println(name + " is null")));
+    }
   }
 
   /**

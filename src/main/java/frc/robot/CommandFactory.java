@@ -60,6 +60,13 @@ public class CommandFactory {
     return flywheel.setRPMCommand(rpm);
   }
 
+  public Command shootWithSpinUp(double rpm, double position) {
+    return Commands.waitUntil(() -> flywheel.atSetpoint(rpm, 100.0))
+    .deadlineFor(flywheel.setRPMCommand(rpm))
+    .andThen(hood.setPositionCmd(4.0))
+    .alongWith(flyWheelKicker.setDutyCycleCommand(1.0));
+   }
+
   public Command setFlywheelKickerDutyCycle(double value) {
     return flyWheelKicker.setDutyCycleCommand(value);
   }
@@ -68,9 +75,4 @@ public class CommandFactory {
     return hood.setPositionCmd(position);
   }
 
-  // public Command setHoodtoZeroAndZero() {
-  //   return hood.setDutyCycleCommand(() -> 0.1)
-  //   .until((() -> hood.getVelocity() < 0.05 && hood.getSupplyCurrent() > 10.0))
-  //   .andThen(hood.zero());
-  // }
 }
