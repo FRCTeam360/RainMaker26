@@ -13,6 +13,7 @@ import frc.robot.subsystems.Indexer.Indexer;
 import frc.robot.subsystems.Intake.Intake;
 import frc.robot.subsystems.IntakePivot.IntakePivot;
 import frc.robot.subsystems.Vision.Vision;
+import frc.robot.utils.CommandLogger;
 
 /** Add your docs here. */
 public class CommandFactory {
@@ -47,10 +48,14 @@ public class CommandFactory {
   }
 
   public Command basicIntakeCmd() {
-    return intake
-        .setDutyCycleCommand(0.65)
-        .alongWith(flyWheelKicker.setDutyCycleCommand(1.0))
-        .alongWith(indexer.setDutyCycleCommand(0.5));
+    /*return CommandLogger.logCommand(
+        SmartIntake.newCommand(coralShooter, funnel)
+            .andThen(this.intakeRumble(driverCont).withTimeout(0.2)),
+        "Smart Intake with Rumble");*/
+    return CommandLogger.logCommand(intake.newCommand(intake)
+      .andThen(this.setDutyCycleCommand(0.65))
+      .andThen(this.alongWith(flyWheelKicker.setDutyCycleCommand(1.0)))
+      .andThen(this.alongWith(indexer.setDutyCycleCommand(0.5))), "Intake");
   }
 
   public Command basicShootCmd() {
