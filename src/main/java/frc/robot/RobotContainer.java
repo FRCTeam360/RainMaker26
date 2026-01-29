@@ -6,6 +6,7 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
+import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.util.PathPlannerLogging;
@@ -136,12 +137,22 @@ public class RobotContainer {
     drivetrain.registerTelemetry(logger::telemeterize);
   }
 
+  /** Stops all subsystems safely when the robot is disabled. */
   public void onDisable() {
+    if (Objects.nonNull(drivetrain)) {
+      drivetrain.setControl(new SwerveRequest.Idle());
+    }
     if (Objects.nonNull(flywheel)) {
       flywheel.stop();
     }
+    if (Objects.nonNull(hood)) {
+      hood.stop();
+    }
     if (Objects.nonNull(intake)) {
       intake.stop();
+    }
+    if (Objects.nonNull(intakePivot)) {
+      intakePivot.stop();
     }
     if (Objects.nonNull(indexer)) {
       indexer.stop();
