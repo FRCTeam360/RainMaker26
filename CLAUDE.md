@@ -10,6 +10,16 @@ This is the robot code for RainMaker26 FRC 360's 26th robot for the 2026 season,
 - Build tool: Gradle (with GradleRIO plugin)
 - Frameworks/Libraries: WPILib, AdvantageKit, CTRE Phoenix, PathPlanner
 
+## Vendor Dependencies & Javadocs
+
+| Library        | Version  | Javadoc                                                                               | User Guide                                             |
+| -------------- | -------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------ |
+| WPILib         | 2026     | [Javadoc](https://github.wpilib.org/allwpilib/docs/release/java/index.html)           | [Docs](https://docs.wpilib.org/en/stable/)             |
+| CTRE Phoenix 6 | 26.1.0   | [Javadoc](https://api.ctr-electronics.com/phoenix6/stable/java/index.html)            | [Docs](https://v6.docs.ctr-electronics.com/en/stable/) |
+| REVLib         | 2026.0.1 | [Javadoc](https://codedocs.revrobotics.com/java/com/revrobotics/package-summary.html) | [Docs](https://docs.revrobotics.com/revlib)            |
+| PathplannerLib | 2026.1.2 | [Javadoc](https://pathplanner.dev/api/java/)                                          | [Docs](https://pathplanner.dev/home.html)              |
+| AdvantageKit   | 26.0.0   | [Javadoc](https://docs.advantagekit.org/javadoc/)                                     | [Docs](https://docs.advantagekit.org/)                 |
+
 ## Project Structure
 
 ```

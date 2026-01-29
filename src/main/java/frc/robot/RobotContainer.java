@@ -109,14 +109,7 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    //driverCont.a().whileTrue(intake.setDutyCycleCommand(()->1.0));
-    drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
-    //driverCont.a().whileTrue(flywheel.setDutyCycleCommand(() -> driverCont.getRightTriggerAxis()));
-    driverCont.a()
-    .onTrue(superStructure.setStateCommand(SuperStates.COLLECTING_FUEL));
-    driverCont.a()
-    .onFalse(superStructure.setStateCommand(SuperStates.STOPPED));
-    // Null checks for subsystem-dependent command bindings
+    // TODO: make more elegant solution for null checking subsystems/commands
     if (Objects.nonNull(intake) && Objects.nonNull(flywheelKicker) && Objects.nonNull(indexer)) {
       driverCont.leftBumper().whileTrue(commandFactory.basicIntakeCmd());
     }
