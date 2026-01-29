@@ -57,6 +57,8 @@ public class RobotContainer {
 
   private final CommandXboxController driverCont = new CommandXboxController(0);
 
+  private final CommandXboxController testCont1 = new CommandXboxController(5);
+
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     switch (Constants.getRobotType()) {
@@ -116,7 +118,18 @@ public class RobotContainer {
   }
 
   public void onDisable() {
-    if (Objects.nonNull(flywheel)) flywheel.stop();
+    if (Objects.nonNull(flywheel)) {
+      flywheel.stop();
+    }
+    if (Objects.nonNull(intake)) {
+      intake.stop();
+    }
+    if (Objects.nonNull(indexer)) {
+      indexer.stop();
+    }
+    if (Objects.nonNull(flywheelKicker)) {
+      flywheelKicker.stop();
+    }
   }
 
   /**
