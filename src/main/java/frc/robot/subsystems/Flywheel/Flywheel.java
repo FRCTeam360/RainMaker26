@@ -22,6 +22,17 @@ public class Flywheel extends SubsystemBase {
     io.setRPM(rpm);
   }
 
+  public double getVelocity() {
+    if (inputs.velocities.length > 0) {
+      return inputs.velocities[0];
+    }
+    return 0.0;
+  }
+
+  public boolean atSetpoint(double targetRPM, double tolerance) {
+    return Math.abs(getVelocity() - targetRPM) < tolerance;
+  }
+
   @Override
   public void periodic() {
     io.updateInputs(inputs);

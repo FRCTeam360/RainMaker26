@@ -5,6 +5,7 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Flywheel.Flywheel;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKicker;
@@ -43,7 +44,8 @@ public class CommandFactory {
     this.drivetrain = drivetrain;
   }
 
-  public Command basicIntakeCmd() {
+  public Command 
+  basicIntakeCmd() {
     return intake
         .setDutyCycleCommand(0.65)
         // .alongWith(flyWheelKicker.setDutyCycleCommand(1.0))
@@ -65,4 +67,10 @@ public class CommandFactory {
   public Command setHoodPosition(double position) {
     return hood.setPositionCmd(position);
   }
+
+  // public Command setHoodtoZeroAndZero() {
+  //   return hood.setDutyCycleCommand(() -> 0.1)
+  //   .until((() -> hood.getVelocity() < 0.05 && hood.getSupplyCurrent() > 10.0))
+  //   .andThen(hood.zero());
+  // }
 }
