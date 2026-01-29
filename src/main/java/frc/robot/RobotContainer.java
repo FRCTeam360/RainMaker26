@@ -123,7 +123,7 @@ public class RobotContainer {
     if (Objects.nonNull(intake) && Objects.nonNull(flywheelKicker) && Objects.nonNull(indexer)) {
       driverCont.leftBumper().whileTrue(commandFactory.basicIntakeCmd());
     }
-     if (Objects.nonNull(flywheel)) {
+    if (Objects.nonNull(flywheel)) {
       driverCont.rightBumper().whileTrue(commandFactory.basicShootCmd());
     }
     if (Objects.nonNull(intake)) {
