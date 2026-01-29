@@ -16,6 +16,5 @@ public class IntakeIOSim implements IntakeIO {
   @Override
   public void stop() {
     // TODO Auto-generated method stub
-    System.out.println("blah");
   }
 }

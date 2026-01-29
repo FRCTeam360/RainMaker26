@@ -11,7 +11,7 @@ public class Intake extends SubsystemBase {
 
   public enum IntakeStates {
     OFF,
-    COLLECTING_FUEL
+    INTAKING
   }
 
   private IntakeStates wantedState = IntakeStates.OFF;
@@ -30,8 +30,8 @@ public class Intake extends SubsystemBase {
     previousState = currentState;
 
     switch (wantedState) {
-      case COLLECTING_FUEL:
-        currentState = IntakeStates.COLLECTING_FUEL;
+      case INTAKING:
+        currentState = IntakeStates.INTAKING;
         break;
 
       case OFF:
@@ -43,8 +43,8 @@ public class Intake extends SubsystemBase {
 
   private void applyState() {
     switch (currentState) {
-      case COLLECTING_FUEL:
-        setDutyCycle(-0.65);
+      case INTAKING:
+        setDutyCycle(0.65);
         break;
       case OFF:
       default:

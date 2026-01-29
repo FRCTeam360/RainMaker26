@@ -14,8 +14,10 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.SuperStructure;
 import frc.robot.subsystems.SuperStructure.SuperStates;
 import frc.robot.subsystems.Flywheel.Flywheel;
+import frc.robot.subsystems.Flywheel.FlywheelIOSim;
 import frc.robot.subsystems.Flywheel.FlywheelIOWB;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKicker;
+import frc.robot.subsystems.FlywheelKicker.FlywheelKickerIOSim;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKickerIOWB;
 import frc.robot.subsystems.Hood.Hood;
 import frc.robot.subsystems.Indexer.Indexer;
@@ -76,6 +78,8 @@ public class RobotContainer {
         intakePivot = new IntakePivot(new IntakePivotIOSim());
         intake = new Intake(new IntakeIOSim());
         indexer = new Indexer(new IndexerIOSim());
+        flywheelKicker = new FlywheelKicker(new FlywheelKickerIOSim());
+        flywheel = new Flywheel(new  FlywheelIOSim());
 
 
         // flywheel = new Flywheel(new FlywheelIOSim());
@@ -95,7 +99,7 @@ public class RobotContainer {
         // intakePivot = new IntakePivot(new IntakePivotIOPB());
     }
     // Configure the trigger bindings
-    superStructure = new SuperStructure(intake, indexer);
+    superStructure = new SuperStructure(intake, indexer, flywheelKicker, flywheel);
     configureBindings();
   }
 
@@ -110,19 +114,22 @@ public class RobotContainer {
    */
   private void configureBindings() {
     // TODO: make more elegant solution for null checking subsystems/commands
-    if (Objects.nonNull(intake) && Objects.nonNull(flywheelKicker) && Objects.nonNull(indexer)) {
-      driverCont.leftBumper().whileTrue(commandFactory.basicIntakeCmd());
-    }
+    // if (Objects.nonNull(intake) && Objects.nonNull(flywheelKicker) && Objects.nonNull(indexer)) {
+    //   driverCont.leftBumper().whileTrue(commandFactory.basicIntakeCmd());
+    // }
 
-    if (Objects.nonNull(flywheel)) {
-      driverCont.rightBumper().whileTrue(commandFactory.basicShootCmd());
-    }
+    // if (Objects.nonNull(flywheel)) {
+    //   driverCont.rightBumper().whileTrue(commandFactory.basicShootCmd());
+    // }
 
     // if (Objects.nonNull(intake)) {
     //   driverCont.a().whileTrue(intake.setDutyCycleCommand(()->1.0));
     // }
-    driverCont.a().onTrue(superStructure.setStateCommand(SuperStates.COLLECTING_FUEL));
-    driverCont.a().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
+    driverCont.leftBumper().onTrue(superStructure.setStateCommand(SuperStates.INTAKING));
+    driverCont.leftBumper().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
+
+    driverCont.rightBumper().onTrue(superStructure.setStateCommand(SuperStates.SHOOTING));
+    driverCont.rightBumper().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
 
     if (Objects.nonNull(drivetrain)) {
       drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));

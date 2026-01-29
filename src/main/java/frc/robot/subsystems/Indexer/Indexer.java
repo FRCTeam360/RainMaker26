@@ -17,7 +17,7 @@ public class Indexer extends SubsystemBase {
 
   public enum IndexerStates {
     OFF,
-    COLLECTING_FUEL
+    INTAKING,
   }
 
   private IndexerStates wantedState = IndexerStates.OFF;
@@ -28,8 +28,8 @@ public class Indexer extends SubsystemBase {
     previousState = currentState;
 
     switch (wantedState) {
-      case COLLECTING_FUEL:
-        currentState = IndexerStates.COLLECTING_FUEL;
+      case INTAKING:
+        currentState = IndexerStates.INTAKING;
         break;
       case OFF:
         currentState = IndexerStates.OFF;
@@ -38,8 +38,8 @@ public class Indexer extends SubsystemBase {
   }
   private void applyState() {
     switch (currentState) {
-      case COLLECTING_FUEL:
-        setDutyCycle(-0.65);
+      case INTAKING:
+        setDutyCycle(0.5);
         break;
       case OFF:
       default:
