@@ -13,15 +13,22 @@ public class SuperStructure extends SubsystemBase {
     private final Indexer indexer;
 
     public enum SuperStates {
-        STOPPED,
-        COLLECTING_FUEL,
-           EJECTING,
-           AUTO_SHOOTING
+        IDLE, //everything is stopped when nothing else happens
+        DEFENSE, //driver holds defense button -> less desired velocitu moving latterally, more into rotation in drivetrain
+        X_OUT, //hold down button to x out wheels or press once and wheels stop X-ing out when moved
+        AUTO_ALIGHN,//aligns to a target
+        X_OUT_SHOOTING,//when robot is aligned, ends when toggled off or shooting stops
+        PREPAREING,//flywheel spins up and align to target
+        READY_2_FIRE,//if robot aligned and flywheel up to proper speed
+        FIRING,//while theres still fuel to shoot and ready to fire
+        COLLECTING_FUEL,//while intake button pressed
+           EJECTING// eject button
+           ,PASSING    //has current zone, makes check for !current zone then passes to zone
     }
 
-    private SuperStates wantedSuperState = SuperStates.STOPPED;
-    private SuperStates currentSuperState = SuperStates.STOPPED;
-    private SuperStates previousSuperState = SuperStates.STOPPED;
+    private SuperStates wantedSuperState = SuperStates.IDLE;
+    private SuperStates currentSuperState = SuperStates.IDLE;
+    private SuperStates previousSuperState = SuperStates.IDLE;
 
     public SuperStructure(Intake intake, Indexer indexer) {
         this.intake = intake;
@@ -35,8 +42,8 @@ public class SuperStructure extends SubsystemBase {
                 currentSuperState = SuperStates.COLLECTING_FUEL;
                 break;
 
-            case STOPPED:
-                currentSuperState = SuperStates.STOPPED;
+            case IDLE:
+                currentSuperState = SuperStates.IDLE;
                 break;
         }
     }
@@ -46,7 +53,7 @@ public class SuperStructure extends SubsystemBase {
                 intakeFuel();
                 break;
 
-            case STOPPED:
+            case IDLE:
                 stopped();
                 break;
         }
