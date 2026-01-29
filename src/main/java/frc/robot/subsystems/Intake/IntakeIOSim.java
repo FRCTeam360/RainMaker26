@@ -7,27 +7,22 @@ package frc.robot.subsystems.Intake;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
-import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkFlex;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
-
-import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
-import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
-
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.system.LinearSystem;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.simulation.BatterySim;
 import edu.wpi.first.wpilibj.simulation.DIOSim;
 import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 import edu.wpi.first.wpilibj.simulation.RoboRioSim;
-import edu.wpi.first.wpilibj.simulation.BatterySim;
 import frc.robot.Constants.SimulationConstants;
-
-import static edu.wpi.first.units.Units.Rotations;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
+import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 public class IntakeIOSim implements IntakeIO {
   // Motor constants
@@ -36,11 +31,14 @@ public class IntakeIOSim implements IntakeIO {
   private final double moi = 0.0008; // Moment of inertia in kg·m²
 
   // AdvantageScope tuning (sim-only, under /Tuning table)
-  private final LoggedNetworkNumber tunableSetpoint = new LoggedNetworkNumber("/Tuning/Intake/SetpointRPM", 0.0);
-  private final LoggedNetworkBoolean tuningEnabled = new LoggedNetworkBoolean("/Tuning/Intake/Enabled", false);
+  private final LoggedNetworkNumber tunableSetpoint =
+      new LoggedNetworkNumber("/Tuning/Intake/SetpointRPM", 0.0);
+  private final LoggedNetworkBoolean tuningEnabled =
+      new LoggedNetworkBoolean("/Tuning/Intake/Enabled", false);
 
   // Motor and control (using SparkFlex like the real hardware)
-  private final SparkFlex motorControllerSim = new SparkFlex(SimulationConstants.INTAKE_MOTOR, MotorType.kBrushless);
+  private final SparkFlex motorControllerSim =
+      new SparkFlex(SimulationConstants.INTAKE_MOTOR, MotorType.kBrushless);
   private final RelativeEncoder encoder = motorControllerSim.getEncoder();
   private final SparkFlexConfig motorConfig = new SparkFlexConfig();
 
@@ -49,7 +47,8 @@ public class IntakeIOSim implements IntakeIO {
   private final DIOSim sensorSim = new DIOSim(sensor);
 
   // Flywheel simulation
-  private final LinearSystem<N1, N1, N1> plant = LinearSystemId.createFlywheelSystem(gearbox, moi, gearRatio);
+  private final LinearSystem<N1, N1, N1> plant =
+      LinearSystemId.createFlywheelSystem(gearbox, moi, gearRatio);
   private final FlywheelSim intakeSim = new FlywheelSim(plant, gearbox, gearRatio);
 
   public IntakeIOSim() {
@@ -68,7 +67,8 @@ public class IntakeIOSim implements IntakeIO {
     motorConfig.smartCurrentLimit(30);
 
     // Apply configuration
-    motorControllerSim.configure(motorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    motorControllerSim.configure(
+        motorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 
   public void updateInputs(IntakeIOInputs inputs) {
@@ -91,7 +91,7 @@ public class IntakeIOSim implements IntakeIO {
     // Step 3: Get simulated values directly
     double velocityRPM = intakeSim.getAngularVelocityRPM();
     double velocityRPS = velocityRPM / 60.0;
-    
+
     // Integrate velocity to get position
     double currentPositionRotations = encoder.getPosition();
     double newPositionRotations = currentPositionRotations + velocityRPS * 0.02;
@@ -102,8 +102,7 @@ public class IntakeIOSim implements IntakeIO {
 
     // Step 5: Update battery voltage based on current draw
     RoboRioSim.setVInVoltage(
-        BatterySim.calculateDefaultBatteryLoadedVoltage(
-            intakeSim.getCurrentDrawAmps()));
+        BatterySim.calculateDefaultBatteryLoadedVoltage(intakeSim.getCurrentDrawAmps()));
 
     // Step 6: Set inputs
     inputs.position = newPositionRotations;

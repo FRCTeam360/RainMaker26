@@ -32,10 +32,9 @@ public class IndexerIOSim implements IndexerIO {
   private final SparkMax motorControllerSim =
       new SparkMax(SimulationConstants.INDEXER_MOTOR, MotorType.kBrushless);
   private final SparkMaxConfig motorConfig = new SparkMaxConfig();
-  
+
   // SparkMax simulation object
   private final SparkMaxSim sparkSim = new SparkMaxSim(motorControllerSim, gearbox);
-
 
   // Flywheel simulation
   private final LinearSystem<N1, N1, N1> plant =
@@ -79,8 +78,8 @@ public class IndexerIOSim implements IndexerIO {
     // Step 4: Use SparkMaxSim.iterate() to update the Spark MAX with simulated values
     sparkSim.iterate(
         indexerSim.getAngularVelocityRPM(), // Motor velocity in RPM
-        RoboRioSim.getVInVoltage(),         // Simulated battery voltage
-        0.02);                              // Time interval (20ms)
+        RoboRioSim.getVInVoltage(), // Simulated battery voltage
+        0.02); // Time interval (20ms)
     // Step 5: Update battery voltage based on current draw
     RoboRioSim.setVInVoltage(
         BatterySim.calculateDefaultBatteryLoadedVoltage(indexerSim.getCurrentDrawAmps()));
