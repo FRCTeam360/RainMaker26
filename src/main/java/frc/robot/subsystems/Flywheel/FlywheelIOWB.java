@@ -61,8 +61,6 @@ public class FlywheelIOWB implements FlywheelIO {
         .withMotionMagicJerk(0.0);
     rightConfig.MotorOutput.withInverted(InvertedValue.Clockwise_Positive);
 
-    
-
     leftConfig = rightConfig.clone();
     leftConfig.MotorOutput.withInverted(InvertedValue.CounterClockwise_Positive);
 
@@ -91,7 +89,7 @@ public class FlywheelIOWB implements FlywheelIO {
     double rps = rpm / 60.0;
     motors[0].setControl(velocityDutyCycle.withVelocity(rps));
   }
-  
+
   @Override
   public void setDutyCycle(double duty) {
     motors[0].set(duty);

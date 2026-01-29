@@ -6,9 +6,9 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
-import edu.wpi.first.wpilibj.internal.DriverStationModeThread;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -31,7 +31,6 @@ import frc.robot.subsystems.Indexer.IndexerIOWB;
 import frc.robot.subsystems.Intake.Intake;
 import frc.robot.subsystems.Intake.IntakeIOWB;
 import frc.robot.subsystems.IntakePivot.IntakePivot;
-import com.pathplanner.lib.auto.NamedCommands;
 import frc.robot.subsystems.IntakePivot.IntakePivotIOSim;
 import java.util.Objects;
 import org.littletonrobotics.junction.Logger;
@@ -64,7 +63,6 @@ public class RobotContainer {
   private final CommandXboxController driverCont = new CommandXboxController(0);
 
   private final CommandXboxController testCont1 = new CommandXboxController(5);
-
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -101,16 +99,10 @@ public class RobotContainer {
         // intakePivot = new IntakePivot(new IntakePivotIOPB());
     }
     // Configure the trigger bindings
-      registerPathplannerCommand("basic intake", commandFactory.basicIntakeCmd());
-      registerPathplannerCommand("shoot at hub", commandFactory.shootWithSpinUp(3000.0, 4.0));
-      commandFactory = new CommandFactory(
-      intake,
-       flywheel,
-       flywheelKicker,
-       hood,
-       indexer,
-       drivetrain
-  );
+    registerPathplannerCommand("basic intake", commandFactory.basicIntakeCmd());
+    registerPathplannerCommand("shoot at hub", commandFactory.shootWithSpinUp(3000.0, 4.0));
+    commandFactory =
+        new CommandFactory(intake, flywheel, flywheelKicker, hood, indexer, drivetrain);
     configureBindings();
 
     PathPlannerLogging.setLogActivePathCallback(
@@ -130,7 +122,8 @@ public class RobotContainer {
       NamedCommands.registerCommand(name, command);
     } else {
       System.err.println(name + " is null");
-      NamedCommands.registerCommand(name, new InstantCommand(() -> System.err.println(name + " is null")));
+      NamedCommands.registerCommand(
+          name, new InstantCommand(() -> System.err.println(name + " is null")));
     }
   }
 

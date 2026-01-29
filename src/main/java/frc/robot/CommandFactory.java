@@ -12,8 +12,6 @@ import frc.robot.subsystems.FlywheelKicker.FlywheelKicker;
 import frc.robot.subsystems.Hood.Hood;
 import frc.robot.subsystems.Indexer.Indexer;
 import frc.robot.subsystems.Intake.Intake;
-import frc.robot.subsystems.IntakePivot.IntakePivot;
-import frc.robot.subsystems.Vision.Vision;
 
 /** Add your docs here. */
 public class CommandFactory {
@@ -44,8 +42,7 @@ public class CommandFactory {
     this.drivetrain = drivetrain;
   }
 
-  public Command 
-  basicIntakeCmd() {
+  public Command basicIntakeCmd() {
     return intake
         .setDutyCycleCommand(0.65)
         // .alongWith(flyWheelKicker.setDutyCycleCommand(1.0))
@@ -62,10 +59,10 @@ public class CommandFactory {
 
   public Command shootWithSpinUp(double rpm, double position) {
     return Commands.waitUntil(() -> flywheel.atSetpoint(rpm, 100.0))
-    .deadlineFor(flywheel.setRPMCommand(rpm))
-    .andThen(hood.setPositionCmd(position))
-    .alongWith(this.setFlywheelKickerDutyCycle(1.0));
-   }
+        .deadlineFor(flywheel.setRPMCommand(rpm))
+        .andThen(hood.setPositionCmd(position))
+        .alongWith(this.setFlywheelKickerDutyCycle(1.0));
+  }
 
   public Command setFlywheelKickerDutyCycle(double value) {
     return flyWheelKicker.setDutyCycleCommand(value);
@@ -74,5 +71,4 @@ public class CommandFactory {
   public Command setHoodPosition(double position) {
     return hood.setPositionCmd(position);
   }
-
 }

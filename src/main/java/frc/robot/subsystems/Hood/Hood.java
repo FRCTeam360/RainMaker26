@@ -41,9 +41,9 @@ public class Hood extends SubsystemBase {
 
   public Command setHoodToZeroAndZero() {
     return Commands.waitUntil(
-    () -> Math.abs(inputs.supplyCurrent) >= 30.0 && Math.abs(inputs.velocity) == 0.0)
-    .deadlineFor(this.runEnd(() -> io.setDutyCycle(0.1), () -> io.setDutyCycle(0.0)))
-    .andThen(runOnce(() -> inputs.position = 0.0));
+            () -> Math.abs(inputs.supplyCurrent) >= 30.0 && Math.abs(inputs.velocity) == 0.0)
+        .deadlineFor(this.runEnd(() -> io.setDutyCycle(0.1), () -> io.setDutyCycle(0.0)))
+        .andThen(runOnce(() -> inputs.position = 0.0));
   }
 
   @Override

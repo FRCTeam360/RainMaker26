@@ -167,8 +167,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     configureAutoBuilder();
   }
 
-
-
   /**
    * Constructs a CTRE SwerveDrivetrain using the specified constants.
    *
