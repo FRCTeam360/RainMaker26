@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.generated.WoodBotDrivetrain;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Flywheel.Flywheel;
@@ -108,11 +109,29 @@ public class RobotContainer {
     FollowPathCommand.warmupCommand().schedule();
   }
 
+  /**
+   * Use this method to define your trigger->command mappings. Triggers can be created via the
+   * {@link Trigger#Trigger(java.util.function.BooleanSupplier)} constructor with an arbitrary
+   * predicate, or via the named factories in {@link
+   * edu.wpi.first.wpilibj2.command.button.CommandGenericHID}'s subclasses for {@link
+   * CommandXboxController Xbox}/{@link edu.wpi.first.wpilibj2.command.button.CommandPS4Controller
+   * PS4} controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
+   * joysticks}.
+   */
   private void configureBindings() {
-    driverCont.leftBumper().whileTrue(commandFactory.basicIntakeCmd());
-    driverCont.rightBumper().whileTrue(commandFactory.basicShootCmd());
-    driverCont.a().whileTrue(intake.setDutyCycleCommand(1.0));
-    drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
+    // TODO: make more elegant solution for null checking subsystems/commands
+    if (Objects.nonNull(intake) && Objects.nonNull(flywheelKicker) && Objects.nonNull(indexer)) {
+      driverCont.leftBumper().whileTrue(commandFactory.basicIntakeCmd());
+    }
+     if (Objects.nonNull(flywheel)) {
+      driverCont.rightBumper().whileTrue(commandFactory.basicShootCmd());
+    }
+    if (Objects.nonNull(intake)) {
+      driverCont.a().whileTrue(intake.setDutyCycleCommand(1.0));
+    }
+    if (Objects.nonNull(drivetrain)) {
+      drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
+    }
 
     drivetrain.registerTelemetry(logger::telemeterize);
   }
