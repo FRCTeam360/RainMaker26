@@ -5,6 +5,7 @@
 package frc.robot.subsystems.Hood;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
@@ -26,9 +27,9 @@ public class Hood extends SubsystemBase {
     io.setPosition(position);
   }
 
-  // public Command setPositionCmd(double position) {
-  //   return this.setPosition(() -> );
-  // }
+  public Command setPositionCmd(double position) {
+    return this.runEnd(() -> io.setPosition(position), () -> io.setPosition(position));
+  }
 
   public void setEncoder(double position) {
     io.setEncoder(position);
@@ -36,6 +37,13 @@ public class Hood extends SubsystemBase {
 
   public void stop() {
     io.setDutyCycle(0);
+  }
+
+  public Command setHoodToZeroAndZero() {
+    return Commands.waitUntil(
+            () -> Math.abs(inputs.supplyCurrent) >= 30.0 && Math.abs(inputs.velocity) == 0.0)
+        .deadlineFor(this.runEnd(() -> io.setDutyCycle(0.1), () -> io.setDutyCycle(0.0)))
+        .andThen(runOnce(() -> inputs.position = 0.0));
   }
 
   @Override
@@ -51,5 +59,9 @@ public class Hood extends SubsystemBase {
 
   public Command setDutyCycleCommand(DoubleSupplier valueSup) {
     return this.runEnd(() -> io.setDutyCycle(valueSup.getAsDouble()), () -> io.setDutyCycle(0.0));
+  }
+
+  public Command zero() {
+    return this.setPositionCmd(0.0);
   }
 }
