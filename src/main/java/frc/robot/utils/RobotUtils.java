@@ -32,12 +32,10 @@ public class RobotUtils {
           return Alliance.Red;
         default:
           // only called when there's an invalid character for the game specific message
-          throw new IllegalStateException(
-              "Invalid character for alliance configuration from game specific message: "
-                  + allianceChar);
+          break;
       }
     }
     // called when no data was received from driver station
-    throw new IllegalStateException("Driver station could not receive game specific message");
+    return null;
   }
 }
