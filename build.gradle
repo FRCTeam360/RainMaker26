@@ -16,7 +16,7 @@ spotless {
     java {
         target fileTree(".") {
             include "**/*.java"
-            exclude "**/build/**", "**/build-*/**", ".wpilib/**", ".vscode/**", ".claude/**", ".git/**", ".github/**", ".gradle/**", ".jj/**", ".settings/**", ".vscode/**"
+            exclude "**/build/**", "**/build-*/**", ".*/**"
         }
         toggleOffOn()
         googleJavaFormat()
@@ -24,7 +24,7 @@ spotless {
     groovyGradle {
         target fileTree(".") {
             include "**/*.gradle"
-            exclude "**/build/**", "**/build-*/**", ".wpilib/**", ".vscode/**", ".claude/**", ".git/**", ".github/**", ".gradle/**", ".jj/**", ".settings/**", ".vscode/**"
+            exclude "**/build/**", "**/build-*/**", ".*/**"
         }
         greclipse()
         indentWithSpaces(4)
@@ -34,14 +34,14 @@ spotless {
     json {
         target fileTree(".") {
             include "**/*.json"
-            exclude "**/build/**", "**/build-*/**", ".wpilib/**", ".vscode/**", ".claude/**", ".git/**", ".github/**", ".gradle/**", ".jj/**", ".settings/**", ".vscode/**"
+            exclude "**/build/**", "**/build-*/**", ".*/**"
         }
         gson().indentWithSpaces(2)
     }
     format "misc", {
         target fileTree(".") {
             include "**/*.md", "**/.gitignore"
-            exclude "**/build/**", "**/build-*/**", ".wpilib/**", ".vscode/**", ".claude/**", ".git/**", ".github/**", ".gradle/**", ".jj/**", ".settings/**", ".vscode/**"
+            exclude "**/build/**", "**/build-*/**", ".*/**"
         }
         trimTrailingWhitespace()
         indentWithSpaces(2)
