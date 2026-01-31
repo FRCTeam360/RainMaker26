@@ -1,5 +1,7 @@
 package frc.robot.subsystems.Shooter;
 
+import java.lang.System.Logger;
+
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -106,7 +108,7 @@ public class ShotCalculator {
 
     // Calculate parameters accounted for imparted velocity, not doing
 
-    Logger.recordOutput("ShotCalculator/LookaheadPose", lookaheadPose);
+    Logger.recordOutput("ShotCalculator/LookaheadPose", lookaheadPose); // i think something is incomplete somewhere else.
     Logger.recordOutput("ShotCalculator/ShooterToTargetDistance", lookaheadShooterToTargetDistance);
 
     return latestParameters;
