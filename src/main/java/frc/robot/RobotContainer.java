@@ -180,10 +180,10 @@ public class RobotContainer {
       drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
       drivetrain.registerTelemetry(logger::telemeterize);
     }
-    testCont1.a().whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
-    testCont1.b().whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
-    testCont1.x().whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
-    testCont1.y().whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
+    // testCont1.a().whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
+    // testCont1.b().whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
+    // testCont1.x().whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
+    // testCont1.y().whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
   }
 
   /** Stops all subsystems safely when the robot is disabled. */
