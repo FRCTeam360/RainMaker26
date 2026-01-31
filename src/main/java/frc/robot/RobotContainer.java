@@ -141,8 +141,6 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    // TODO: make more elegant solution for null checking subsystems/commands
-
     // Null checks based on subsystems used by each command
     // basicIntakeCmd uses intake and indexer
     if (Objects.nonNull(intake) && Objects.nonNull(indexer)) {
