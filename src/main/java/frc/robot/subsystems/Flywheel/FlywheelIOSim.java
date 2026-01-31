@@ -7,8 +7,8 @@ package frc.robot.subsystems.Flywheel;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
-import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.StrictFollower;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -38,6 +38,7 @@ public class FlywheelIOSim implements FlywheelIO {
   // Motor and control
   private final TalonFX motorControllerSim1 = new TalonFX(SimulationConstants.FLYWHEEL_MOTOR);
   private final TalonFX motorControllerSim2 = new TalonFX(SimulationConstants.FLYWHEEL_MOTOR + 1);
+
   private final VelocityVoltage velocityRequest = new VelocityVoltage(0).withSlot(0);
 
   // Simulation
@@ -58,6 +59,8 @@ public class FlywheelIOSim implements FlywheelIO {
         .setRotorVelocity(
             RotationsPerSecond.of(flywheelSim.getAngularVelocityRPM() / 60.0)
                 .in(RotationsPerSecond));
+
+    motorControllerSim2.setControl(new StrictFollower(SimulationConstants.FLYWHEEL_MOTOR));
   }
 
   private void configureMotor() {
@@ -82,16 +85,8 @@ public class FlywheelIOSim implements FlywheelIO {
   public void updateInputs(FlywheelIOInputs inputs) {
     // --- AdvantageScope tuning (sim-only) ---
     if (tuningEnabled.get()) {
-      // Apply tunable PID gains (simple: apply every loop when enabled)
-      Slot0Configs slot0 = new Slot0Configs();
-      motorControllerSim1.getConfigurator().refresh(slot0);
-      motorControllerSim1.getConfigurator().apply(slot0);
-      motorControllerSim2.getConfigurator().apply(slot0);
-
       // Command the tunable setpoint to both motors
-      double targetRPS = tunableSetpoint.get() / 60.0;
-      motorControllerSim1.setControl(velocityRequest.withVelocity(targetRPS));
-      motorControllerSim2.setControl(velocityRequest.withVelocity(targetRPS));
+      this.setRPM(tunableSetpoint.get());
     }
 
     // Step 1: Get the commanded voltage from motors and apply to simulation
@@ -132,12 +127,11 @@ public class FlywheelIOSim implements FlywheelIO {
   @Override
   public void setDutyCycle(double duty) {
     motorControllerSim1.set(duty);
-    motorControllerSim2.set(duty);
   }
 
   @Override
   public void setRPM(double rpm) {
+    rpm = rpm / 60;
     motorControllerSim1.setControl(velocityRequest.withVelocity(rpm));
-    motorControllerSim2.setControl(velocityRequest.withVelocity(rpm));
   }
 }
