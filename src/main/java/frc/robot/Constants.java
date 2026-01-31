@@ -47,6 +47,22 @@ public final class Constants {
     public static final String CANBUS_NAME = "Default Name";
   }
 
+  public static class SimulationConstants {
+    public static final int FLYWHEEL_MOTOR = 2;
+
+    public static final int HOOD_MOTOR = 6;
+
+    public static final int INDEXER_MOTOR = 9;
+
+    public static final int INTAKE_MOTOR = 12;
+    public static final int INTAKE_SENSOR_PORT = 10;
+
+    public static final int INTAKE_PIVOT_MOTOR = 15;
+
+    public static final int FLYWHEEL_KICKER_MOTOR = 18;
+    public static final int FLYWHEEL_KICKER_SENSOR_ID = 19;
+  }
+
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
   }
@@ -60,10 +76,9 @@ public final class Constants {
 
     if (serialAddress.equals(SerialAddressConstants.WOOD_SERIAL_ADDRESS)) {
       return Constants.RobotType.WOODBOT;
+    } else if (!Robot.isReal()) { // KEEP AT BOTTOM
+      return Constants.RobotType.SIM;
     }
-    // else if (!Robot.isReal()) { // KEEP AT BOTTOM
-    // return Constants.RobotType.SIM;
-    // }
-    return Constants.RobotType.SIM;
+    return Constants.RobotType.WOODBOT;
   }
 }

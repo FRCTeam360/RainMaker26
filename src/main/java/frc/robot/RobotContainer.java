@@ -21,14 +21,19 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.generated.WoodBotDrivetrain;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Flywheel.Flywheel;
+import frc.robot.subsystems.Flywheel.FlywheelIOSim;
 import frc.robot.subsystems.Flywheel.FlywheelIOWB;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKicker;
+import frc.robot.subsystems.FlywheelKicker.FlywheelKickerIOSim;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKickerIOWB;
 import frc.robot.subsystems.Hood.Hood;
+import frc.robot.subsystems.Hood.HoodIOSim;
 import frc.robot.subsystems.Hood.HoodIOWB;
 import frc.robot.subsystems.Indexer.Indexer;
+import frc.robot.subsystems.Indexer.IndexerIOSim;
 import frc.robot.subsystems.Indexer.IndexerIOWB;
 import frc.robot.subsystems.Intake.Intake;
+import frc.robot.subsystems.Intake.IntakeIOSim;
 import frc.robot.subsystems.Intake.IntakeIOWB;
 import frc.robot.subsystems.IntakePivot.IntakePivot;
 import frc.robot.subsystems.IntakePivot.IntakePivotIOSim;
@@ -75,12 +80,11 @@ public class RobotContainer {
         drivetrain = WoodBotDrivetrain.createDrivetrain();
         logger = new Telemetry(WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
         intakePivot = new IntakePivot(new IntakePivotIOSim());
-
-        // flywheel = new Flywheel(new FlywheelIOSim());
-        // hood = new Hood(new HoodIOWB());
-        // indexer = new Indexer(new IndexerIOSim());
-        // intake = new Intake(new IntakeIOSim());
-        // flywheelKicker = new FlywheelKicker(new FlywheelKickerIOWB());
+        flywheel = new Flywheel(new FlywheelIOSim());
+        hood = new Hood(new HoodIOSim());
+        indexer = new Indexer(new IndexerIOSim());
+        intake = new Intake(new IntakeIOSim());
+        flywheelKicker = new FlywheelKicker(new FlywheelKickerIOSim());
         break;
       case WOODBOT:
       default:
@@ -108,6 +112,7 @@ public class RobotContainer {
     registerPathplannerCommand("basic intake", commandFactory.basicIntakeCmd());
     registerPathplannerCommand("shoot at hub", commandFactory.shootWithSpinUp(3000.0, 4.0));
     configureBindings();
+    configureTestBindings();
 
     PathPlannerLogging.setLogActivePathCallback(
         (poses -> Logger.recordOutput("Swerve/ActivePath", poses.toArray(new Pose2d[0]))));
@@ -140,6 +145,27 @@ public class RobotContainer {
    * PS4} controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
    * joysticks}.
    */
+  private void configureTestBindings() {
+    if (Objects.nonNull(flywheel)) {
+      testCont1.a().whileTrue(flywheel.setDutyCycleCommand(() -> 0.5));
+    }
+    if (Objects.nonNull(flywheelKicker)) {
+      testCont1.b().whileTrue(flywheelKicker.setDutyCycleCommand(() -> 0.5));
+    }
+    if (Objects.nonNull(hood)) {
+      testCont1.x().whileTrue(hood.setDutyCycleCommand(() -> 0.5));
+    }
+    if (Objects.nonNull(indexer)) {
+      testCont1.y().whileTrue(indexer.setDutyCycleCommand(() -> 0.5));
+    }
+    if (Objects.nonNull(intake)) {
+      testCont1.leftBumper().whileTrue(intake.setDutyCycleCommand(() -> 0.5));
+    }
+    if (Objects.nonNull(intakePivot)) {
+      testCont1.rightBumper().whileTrue(intakePivot.setDutyCycleCommand(() -> 0.5));
+    }
+  }
+
   private void configureBindings() {
     // TODO: make more elegant solution for null checking subsystems/commands
 
