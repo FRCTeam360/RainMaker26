@@ -4,7 +4,6 @@
 
 package frc.robot;
 
-import com.ctre.phoenix6.HootAutoReplay;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -27,28 +26,12 @@ public class Robot extends LoggedRobot {
 
   private final RobotContainer m_robotContainer;
 
-  /* log and replay timestamp and joystick data */
-  private final HootAutoReplay m_timeAndJoystickReplay =
-      new HootAutoReplay().withTimestampReplay().withJoystickReplay();
-
   /**
    * This function is run when the robot is first started up and should be used for any
    * initialization code.
    */
   public Robot() {
-    // Record metadata
-    Logger.recordMetadata("ProjectName", BuildConstants.MAVEN_NAME);
-    Logger.recordMetadata("BuildDate", BuildConstants.BUILD_DATE);
-    Logger.recordMetadata("GitSHA", BuildConstants.GIT_SHA);
-    Logger.recordMetadata("GitDate", BuildConstants.GIT_DATE);
-    Logger.recordMetadata("GitBranch", BuildConstants.GIT_BRANCH);
-    Logger.recordMetadata(
-        "GitDirty",
-        switch (BuildConstants.DIRTY) {
-          case 0 -> "All changes committed";
-          case 1 -> "Uncommitted changes";
-          default -> "Unknown";
-        });
+    Logger.recordMetadata("ProjectName", "MyProject"); // Set a metadata value
 
     if (isReal()) {
       if (RobotUtils.isUsbWriteable()) {
@@ -94,8 +77,6 @@ public class Robot extends LoggedRobot {
     // commands, running already-scheduled commands, removing finished or interrupted commands,
     // and running subsystem periodic() methods.  This must be called from the robot's periodic
     // block in order for anything in the Command-based framework to work.
-    m_timeAndJoystickReplay.update();
-
     CommandScheduler.getInstance().run();
   }
 
