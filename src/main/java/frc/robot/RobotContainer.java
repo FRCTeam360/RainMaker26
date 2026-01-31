@@ -111,6 +111,7 @@ public class RobotContainer {
 
     registerPathplannerCommand("basic intake", commandFactory.basicIntakeCmd());
     registerPathplannerCommand("shoot at hub", commandFactory.shootWithSpinUp(3000.0, 4.0));
+    configureBindings();
     configureTestBindings();
 
     PathPlannerLogging.setLogActivePathCallback(
