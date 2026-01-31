@@ -31,7 +31,6 @@ import frc.robot.subsystems.Indexer.IndexerIOWB;
 import frc.robot.subsystems.Intake.Intake;
 import frc.robot.subsystems.Intake.IntakeIOWB;
 import frc.robot.subsystems.IntakePivot.IntakePivot;
-import frc.robot.subsystems.IntakePivot.IntakePivotIOPB;
 import frc.robot.subsystems.IntakePivot.IntakePivotIOSim;
 import frc.robot.subsystems.Vision.Vision;
 import frc.robot.subsystems.Vision.VisionIOLimelight;
@@ -91,7 +90,6 @@ public class RobotContainer {
         flywheel = new Flywheel(new FlywheelIOWB());
         hood = new Hood(new HoodIOWB());
         indexer = new Indexer(new IndexerIOWB());
-        intakePivot = new IntakePivot(new IntakePivotIOPB());
         vision =
             new Vision(
                 Map.ofEntries(
