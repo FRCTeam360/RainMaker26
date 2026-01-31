@@ -1,0 +1,48 @@
+name: Simulation Test
+
+on:
+  workflow_dispatch: # Allows manual trigger from Actions tab
+
+jobs:
+  simulate:
+    name: Simulation Smoke Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Grant execute permission
+        run: chmod +x gradlew
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Install xvfb
+        run: sudo apt-get update && sudo apt-get install -y xvfb
+
+      - name: Run simulation for 5 seconds
+        run: |
+          # Start simulation in background with virtual display
+          xvfb-run -a ./gradlew simulateJava &
+          SIM_PID=$!
+
+          # Wait for 5 seconds
+          sleep 5
+
+          # Check if process is still running (good) or crashed (bad)
+          if ! kill -0 $SIM_PID 2>/dev/null; then
+            echo "Simulation process crashed!"
+            wait $SIM_PID
+            exit 1
+          fi
+
+          echo "Simulation ran successfully for 5 seconds without crashing"
+
+          # Gracefully terminate the simulation
+          kill $SIM_PID 2>/dev/null || true
+          wait $SIM_PID 2>/dev/null || true
+
+          exit 0

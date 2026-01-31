@@ -56,6 +56,7 @@ public class IndexerIOSim implements IndexerIO {
     motorConfig.smartCurrentLimit(40);
   }
 
+  @Override
   public void updateInputs(IndexerIOInputs inputs) {
     // --- AdvantageScope tuning (sim-only) ---
     if (tuningEnabled.get()) {

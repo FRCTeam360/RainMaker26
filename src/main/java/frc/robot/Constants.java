@@ -40,7 +40,9 @@ public final class Constants {
     public static final int FLYWHEEL_RIGHT_ID = 18;
     public static final int FLYWHEEL_LEFT_ID = 19;
 
-    public static final int HOOD_ID = 0;
+    public static final int HOOD_ID = 20;
+
+    public static final String LIMELIGHT = "limelight";
 
     public static final String CANBUS_NAME = "Default Name";
   }
