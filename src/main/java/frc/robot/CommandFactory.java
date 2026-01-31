@@ -48,7 +48,7 @@ public class CommandFactory {
   }
 
   public Command basicIntakeCmd() {
-    return intake.setDutyCycleCommand(0.65).alongWith(indexer.setDutyCycleCommand(0.4));
+    return intake.setDutyCycleCommand(0.6).alongWith(indexer.setDutyCycleCommand(0.4));
   }
 
   public Command basicShootCmd() {
