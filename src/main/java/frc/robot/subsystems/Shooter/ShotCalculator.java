@@ -12,9 +12,12 @@ import edu.wpi.first.math.interpolation.InverseInterpolator;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.RobotState;
 import frc.robot.Constants;
+import frc.robot.subsystems.CommandSwerveDrivetrain;
+
 
 //@ExtensionMethod({GeomUtil.class})
 public class ShotCalculator {
+    private CommandSwerveDrivetrain drivetrain;
     private static ShotCalculator instance;
 
     private final LinearFilter turretAngleFilter = 
@@ -29,9 +32,12 @@ public class ShotCalculator {
     private double turretVelocity;
     private double hoodVelocity;
 
-    public static ShotCalculator getInstance() {
-        if (instance == null) instance = new ShotCalculator();
+    public static ShotCalculator getInstance(CommandSwerveDrivetrain drivetrain) {
+        if (instance == null) instance = new ShotCalculator(drivetrain);
         return instance;
+    }
+    public ShotCalculator(CommandSwerveDrivetrain drivetrain){
+        this.drivetrain = drivetrain;
     }
 
     public record ShootingParameters(
@@ -88,8 +94,8 @@ public class ShotCalculator {
         }
     }
 
-    Pose2d estimatedPose = RobotState.getInstance().getEstimatedPose();
-    ChassisSpeeds robotRelativeVelocity = RobotState.getInstance().getRobotVelocity();
+    Pose2d estimatedPose = drivetrain.getPosition();
+    ChassisSpeeds robotRelativeVelocity = drivetrain.getVelocity();
     estimatedPose =
         estimatedPose.exp(
             new Twist2d(

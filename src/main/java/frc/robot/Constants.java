@@ -55,6 +55,8 @@ public final class Constants {
     public static String WOOD_SERIAL_ADDRESS = "032BE44A";
   }
 
+  public static double loopPeriodSecs;// add value
+
   public static RobotType getRobotType() {
     String serialAddress = HALUtil.getSerialNumber();
 
