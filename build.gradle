@@ -112,6 +112,7 @@ deploy {
                 // First part is artifact name, 2nd is artifact type
                 // getTargetTypeClass is a shortcut to get the class type using a string
 
+                // Tuning the JVM to be more performant based on 6328's config
                 frcJava(getArtifactTypeClass('FRCJavaArtifact')) {
                     jvmArgs.add("-XX:+UnlockExperimentalVMOptions")
                     jvmArgs.add("-XX:GCTimeRatio=5")
