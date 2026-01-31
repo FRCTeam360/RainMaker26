@@ -33,6 +33,7 @@ public class FlywheelIOWB implements FlywheelIO {
   public FlywheelIOWB() {
     //need to find equivalent to "false" for invertedvalue on talonfx
     rightConfig.MotorOutput.withNeutralMode(NeutralModeValue.Brake).withInverted(InvertedValue.CounterClockwise_Positive);
+    //I don't know what this code does, but it needs to be converted to match with Talon FX. analogSensor is for Spark Max
     rightConfig
         .analogSensor
         .positionConversionFactor(CONVERSION_FACTOR)
