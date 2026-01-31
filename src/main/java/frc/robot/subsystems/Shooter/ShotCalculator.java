@@ -5,6 +5,7 @@ import java.lang.System.Logger;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
@@ -108,8 +109,10 @@ public class ShotCalculator {
     // Calculate distance from turret to target
     Translation2d target =
         AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint.toTranslation2d());
-    Pose2d turretPosition = estimatedPose.transformBy(drivetrain.toTransform2d());//get turrest from robot pos
-    double turretToTargetDistance = target.getDistance(turretPosition.getTranslation());
+    double turretToTargetDistance = target.getDistance(drivetrain.getPosition().getTranslation());//replace drivetrain pos with turret pos
+    Pose2d robotToTurret = drivetrain.getPosition();//change to turret pos
+    Transform2d transform = new Transform2d(robotToTurret, robotToTurret);
+    Pose2d turretPosition = estimatedPose.transformBy(transform);
 
     // Calculate field relative turret velocity
     ChassisSpeeds robotVelocity = drivetrain.getVelocity();
@@ -130,7 +133,7 @@ public class ShotCalculator {
     Pose2d lookaheadPose = turretPosition;
     double lookaheadTurretToTargetDistance = turretToTargetDistance;
     for (int i = 0; i < 20; i++) {
-      timeOfFlight = timeOfFlightMap.get(lookaheadTurretToTargetDistance);
+      timeOfFlight = timeOflightMap.get(lookaheadTurretToTargetDistance);
       double offsetX = turretVelocityX * timeOfFlight;
       double offsetY = turretVelocityY * timeOfFlight;
       lookaheadPose =
