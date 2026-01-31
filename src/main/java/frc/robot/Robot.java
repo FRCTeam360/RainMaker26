@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.HootAutoReplay;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -25,6 +26,10 @@ public class Robot extends LoggedRobot {
   private Command m_autonomousCommand;
 
   private final RobotContainer m_robotContainer;
+
+  /* log and replay timestamp and joystick data */
+  private final HootAutoReplay m_timeAndJoystickReplay =
+      new HootAutoReplay().withTimestampReplay().withJoystickReplay();
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -77,6 +82,8 @@ public class Robot extends LoggedRobot {
     // commands, running already-scheduled commands, removing finished or interrupted commands,
     // and running subsystem periodic() methods.  This must be called from the robot's periodic
     // block in order for anything in the Command-based framework to work.
+    m_timeAndJoystickReplay.update();
+
     CommandScheduler.getInstance().run();
   }
 
