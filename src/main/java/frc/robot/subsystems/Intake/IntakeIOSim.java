@@ -4,7 +4,6 @@
 
 package frc.robot.subsystems.Intake;
 
-import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkFlex;
@@ -39,11 +38,10 @@ public class IntakeIOSim implements IntakeIO {
   // Motor and control (using SparkFlex like the real hardware)
   private final SparkFlex motorControllerSim =
       new SparkFlex(SimulationConstants.INTAKE_MOTOR, MotorType.kBrushless);
-  private final RelativeEncoder encoder = motorControllerSim.getEncoder();
   private final SparkFlexConfig motorConfig = new SparkFlexConfig();
 
   // Sensor simulation
-  private final DigitalInput sensor = new DigitalInput(0);
+  private final DigitalInput sensor = new DigitalInput(SimulationConstants.INTAKE_SENSOR_PORT);
   private final DIOSim sensorSim = new DIOSim(sensor);
 
   // Flywheel simulation

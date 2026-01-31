@@ -4,8 +4,6 @@
 
 package frc.robot.subsystems.FlywheelKicker;
 
-import static edu.wpi.first.units.Units.Radians;
-import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
@@ -128,9 +126,7 @@ public class FlywheelKickerIOSim implements FlywheelKickerIO {
     angularPositionRotations += velocityRPS * 0.02; // Integrate velocity over time
 
     // Step 4: Update the motor sim state with the new simulated values
-    motorControllerSim
-        .getSimState()
-        .setRawRotorPosition(Radians.of(angularPositionRotations * gearRatio).in(Rotations));
+    motorControllerSim.getSimState().setRawRotorPosition(angularPositionRotations * gearRatio);
     motorControllerSim
         .getSimState()
         .setRotorVelocity(RotationsPerSecond.of(velocityRPS).in(RotationsPerSecond));
