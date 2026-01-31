@@ -15,13 +15,10 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.OptionalDouble;
 import java.util.function.Consumer;
 import org.littletonrobotics.junction.Logger;
 
@@ -30,9 +27,14 @@ public class Vision extends SubsystemBase {
 
   private final Map<String, VisionIOInputsAutoLogged> visionInputs;
   private Timer snapshotTimer = new Timer();
-  List<VisionMeasurement> acceptedMeasurements = Collections.emptyList();
 
-  private final String VISION_LOGGING_PREFIX = "Vision: ";
+  /** Pre-allocated list to avoid GC pressure in periodic loop. */
+  private final List<VisionMeasurement> acceptedMeasurements = new ArrayList<>();
+
+  /** Pre-computed log keys to avoid string concatenation in periodic loop. */
+  private final Map<String, String> limelightLogKeys = new HashMap<>();
+
+  private static final String LOG_SNAPSHOT = "Vision: snapshot";
 
   private static final InterpolatingMatrixTreeMap<Double, N3, N1> MEASUREMENT_STD_DEV_DISTANCE_MAP =
       new InterpolatingMatrixTreeMap<>();
@@ -51,6 +53,8 @@ public class Vision extends SubsystemBase {
     visionInputs = new HashMap<>();
     for (String key : visionIos.keySet()) {
       visionInputs.put(key, new VisionIOInputsAutoLogged());
+      // Pre-compute log keys to avoid string concatenation in periodic loop
+      limelightLogKeys.put(key, "Limelight: " + key);
     }
   }
 
@@ -87,7 +91,7 @@ public class Vision extends SubsystemBase {
         .ifPresent(
             io -> {
               io.takeSnapshot();
-              Logger.recordOutput(VISION_LOGGING_PREFIX + "snapshot", true);
+              Logger.recordOutput(LOG_SNAPSHOT, true);
               snapshotTimer.stop();
               snapshotTimer.reset();
               snapshotTimer.start();
@@ -99,7 +103,7 @@ public class Vision extends SubsystemBase {
         .ifPresent(
             io -> {
               io.resetSnapshot();
-              Logger.recordOutput(VISION_LOGGING_PREFIX + "snapshot", false);
+              Logger.recordOutput(LOG_SNAPSHOT, false);
               snapshotTimer.stop();
             });
   }
@@ -111,10 +115,11 @@ public class Vision extends SubsystemBase {
       VisionIOInputsAutoLogged input = visionInputs.get(key);
 
       io.updateInputs(input);
-      Logger.processInputs("Limelight: " + key, input);
+      Logger.processInputs(limelightLogKeys.get(key), input);
     }
 
-    List<VisionMeasurement> acceptedMeasurements = new ArrayList<>();
+    // Clear and reuse pre-allocated list to avoid GC pressure
+    acceptedMeasurements.clear();
 
     for (String key : visionInputs.keySet()) {
       VisionIOInputsAutoLogged input = visionInputs.get(key);
@@ -130,15 +135,18 @@ public class Vision extends SubsystemBase {
           || pose.getY() < 0.0
           || pose.getY() > Constants.FIELD_LAYOUT.getFieldWidth()) continue;
 
-      // get standard deviation based on distance to nearest tag
-      OptionalDouble closestTagDistance = Arrays.stream(input.distancesToTargets).min();
+      // Get minimum distance to targets without stream allocation
+      double closestTagDistance = Double.MAX_VALUE;
+      for (double dist : input.distancesToTargets) {
+        if (dist < closestTagDistance) {
+          closestTagDistance = dist;
+        }
+      }
 
-      Matrix<N3, N1> cprStdDevs =
-          MEASUREMENT_STD_DEV_DISTANCE_MAP.get(closestTagDistance.orElse(Double.MAX_VALUE));
+      Matrix<N3, N1> cprStdDevs = MEASUREMENT_STD_DEV_DISTANCE_MAP.get(closestTagDistance);
 
       acceptedMeasurements.add(new VisionMeasurement(timestamp, pose, cprStdDevs));
     }
-    this.acceptedMeasurements = acceptedMeasurements;
   }
 
   /**

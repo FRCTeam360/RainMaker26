@@ -62,6 +62,9 @@ public class RobotContainer {
 
   private Telemetry logger;
 
+  /** Pre-allocated array for PathPlanner path logging to avoid GC pressure. */
+  private Pose2d[] activePathArray = new Pose2d[0];
+
   // Replace with CommandPS4Controller or CommandJoystick if needed
 
   private final CommandXboxController driverCont = new CommandXboxController(0);
@@ -110,7 +113,14 @@ public class RobotContainer {
     configureBindings();
 
     PathPlannerLogging.setLogActivePathCallback(
-        (poses -> Logger.recordOutput("Swerve/ActivePath", poses.toArray(new Pose2d[0]))));
+        poses -> {
+          // Reuse array when size matches to avoid GC pressure during auto
+          int size = poses.size();
+          if (activePathArray.length != size) {
+            activePathArray = new Pose2d[size];
+          }
+          Logger.recordOutput("Swerve/ActivePath", poses.toArray(activePathArray));
+        });
 
     PathPlannerLogging.setLogTargetPoseCallback(
         pose -> Logger.recordOutput("Swerve/TargetPathPose", pose));

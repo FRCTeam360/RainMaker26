@@ -44,7 +44,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   private static final double kSimLoopPeriod = 0.004; // 4 ms
   private Notifier m_simNotifier = null;
   private double m_lastSimTime;
-  private final String CMD_NAME = "Swerve: ";
 
   /* Blue alliance sees forward as 0 degrees (toward red alliance wall) */
   private static final Rotation2d kBlueAlliancePerspectiveRotation = Rotation2d.kZero;
@@ -285,13 +284,20 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     return m_sysIdRoutineToApply.dynamic(direction);
   }
 
+  // Pre-computed log keys to avoid string concatenation in periodic loop
+  private static final String LOG_CURRENT_POSE = "Swerve: Current Pose";
+  private static final String LOG_ROTATION = "Swerve: Rotation2d";
+  private static final String LOG_CURRENT_STATE = "Swerve: CurrentState";
+  private static final String LOG_TARGET_STATE = "Swerve: TargetState";
+
   @Override
   public void periodic() {
-
-    Logger.recordOutput(CMD_NAME + " Current Pose", this.getStateCopy().Pose);
-    Logger.recordOutput(CMD_NAME + " Rotation2d", this.getStateCopy().RawHeading);
-    Logger.recordOutput(CMD_NAME + " CurrentState", this.getStateCopy().ModuleStates);
-    Logger.recordOutput(CMD_NAME + " TargetState", this.getStateCopy().ModuleTargets);
+    // Get state once to avoid multiple copy allocations
+    SwerveDriveState state = this.getStateCopy();
+    Logger.recordOutput(LOG_CURRENT_POSE, state.Pose);
+    Logger.recordOutput(LOG_ROTATION, state.RawHeading);
+    Logger.recordOutput(LOG_CURRENT_STATE, state.ModuleStates);
+    Logger.recordOutput(LOG_TARGET_STATE, state.ModuleTargets);
     /*
      * Periodically try to apply the operator perspective.
      * If we haven't applied the operator perspective before, then we should apply it regardless of DS state.
