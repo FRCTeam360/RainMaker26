@@ -146,12 +146,24 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureTestBindings() {
-    testCont1.a().whileTrue(flywheel.setDutyCycleCommand(() -> 0.5));
-    testCont1.b().whileTrue(flywheelKicker.setDutyCycleCommand(() -> 0.5));
-    testCont1.x().whileTrue(hood.setDutyCycleCommand(() -> 0.5));
-    testCont1.y().whileTrue(indexer.setDutyCycleCommand(() -> 0.5));
-    testCont1.leftBumper().whileTrue(intake.setDutyCycleCommand(() -> 0.5));
-    testCont1.rightBumper().whileTrue(intakePivot.setDutyCycleCommand(() -> 0.5));
+    if (Objects.nonNull(flywheel)) {
+      testCont1.a().whileTrue(flywheel.setDutyCycleCommand(() -> 0.5));
+    }
+    if (Objects.nonNull(flywheelKicker)) {
+      testCont1.b().whileTrue(flywheelKicker.setDutyCycleCommand(() -> 0.5));
+    }
+    if (Objects.nonNull(hood)) {
+      testCont1.x().whileTrue(hood.setDutyCycleCommand(() -> 0.5));
+    }
+    if (Objects.nonNull(indexer)) {
+      testCont1.y().whileTrue(indexer.setDutyCycleCommand(() -> 0.5));
+    }
+    if (Objects.nonNull(intake)) {
+      testCont1.leftBumper().whileTrue(intake.setDutyCycleCommand(() -> 0.5));
+    }
+    if (Objects.nonNull(intakePivot)) {
+      testCont1.rightBumper().whileTrue(intakePivot.setDutyCycleCommand(() -> 0.5));
+    }
   }
 
   private void configureBindings() {
