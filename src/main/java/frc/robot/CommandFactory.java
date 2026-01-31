@@ -7,12 +7,12 @@ package frc.robot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
-import frc.robot.subsystems.Flywheel.Flywheel;
+import frc.robot.subsystems.Shooter.Flywheel.Flywheel;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKicker;
-import frc.robot.subsystems.Hood.Hood;
 import frc.robot.subsystems.Indexer.Indexer;
 import frc.robot.subsystems.Intake.Intake;
 import frc.robot.subsystems.IntakePivot.IntakePivot;
+import frc.robot.subsystems.Shooter.Hood.Hood;
 import frc.robot.subsystems.Vision.Vision;
 
 /** Add your docs here. */

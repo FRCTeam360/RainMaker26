@@ -1,0 +1,19 @@
+DELETE THIS FILE BEFORE MERGE TO MAIN
+It is info and TODO stuff.
+
+*meant for me, may not make sense to anyone else.
+
+/////////////////////////////////////////////////
+
+flywheel, hood, turret
+
+shotcalculator, need hood angle map and speed map, 
+no time of flight map yet, dw about velocity, 
+shooterconstants, 
+setflywheelvision, vision, shotcalc repo, 
+swerverev instead of turret, point at the hub, 
+replace turret with shooter in totarget, 
+
+////////////////////////////////////////
+conversion factors gear ratio : temp
+
