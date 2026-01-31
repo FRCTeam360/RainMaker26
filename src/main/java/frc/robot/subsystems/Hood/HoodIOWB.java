@@ -21,7 +21,7 @@ public class HoodIOWB implements HoodIO {
       new SparkMax(Constants.WoodBotConstants.HOOD_ID, MotorType.kBrushless);
   private final RelativeEncoder encoder = hoodMotor.getEncoder();
   private final SparkMaxConfig config = new SparkMaxConfig();
-  SparkClosedLoopController controller = hoodMotor.getClosedLoopController();
+  private final SparkClosedLoopController controller;
   private static final double CONVERSION_FACTOR = 1.0;
 
   public void setEncoder(double position) {

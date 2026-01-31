@@ -6,6 +6,7 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -99,7 +100,7 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    // Null checks for subsystem-dependent command bindings
+    // TODO: make more elegant solution for null checking subsystems/commands
     if (Objects.nonNull(intake) && Objects.nonNull(flywheelKicker) && Objects.nonNull(indexer)) {
       driverCont.leftBumper().whileTrue(commandFactory.basicIntakeCmd());
     }
@@ -123,15 +124,12 @@ public class RobotContainer {
     }
     if (Objects.nonNull(intake)) {
       intake.stop();
-      if (Objects.nonNull(hood)) {
-        hood.stop();
-      }
-      if (Objects.nonNull(indexer)) {
-        indexer.stop();
-      }
-      if (Objects.nonNull(flywheelKicker)) {
-        flywheelKicker.stop();
-      }
+    }
+    if (Objects.nonNull(indexer)) {
+      indexer.stop();
+    }
+    if (Objects.nonNull(flywheelKicker)) {
+      flywheelKicker.stop();
     }
   }
 
