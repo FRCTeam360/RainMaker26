@@ -56,6 +56,6 @@ public class Flywheel extends SubsystemBase {
   }
 
   public Command setRPMCommand(double rpm) {
-    return this.runEnd(() -> io.setRPM(rpm), () -> this.stop());
+    return this.runOnce(() -> io.setRPM(rpm));
   }
 }

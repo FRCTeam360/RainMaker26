@@ -42,6 +42,8 @@ public final class Constants {
 
     public static final int HOOD_ID = 20;
 
+    public static final String LIMELIGHT = "limelight";
+
     public static final String CANBUS_NAME = "Default Name";
   }
 

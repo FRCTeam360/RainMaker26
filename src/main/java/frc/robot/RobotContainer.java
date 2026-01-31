@@ -31,7 +31,11 @@ import frc.robot.subsystems.Indexer.IndexerIOWB;
 import frc.robot.subsystems.Intake.Intake;
 import frc.robot.subsystems.Intake.IntakeIOWB;
 import frc.robot.subsystems.IntakePivot.IntakePivot;
+import frc.robot.subsystems.IntakePivot.IntakePivotIOPB;
 import frc.robot.subsystems.IntakePivot.IntakePivotIOSim;
+import frc.robot.subsystems.Vision.Vision;
+import frc.robot.subsystems.Vision.VisionIOLimelight;
+import java.util.Map;
 import java.util.Objects;
 import org.littletonrobotics.junction.Logger;
 
@@ -48,6 +52,7 @@ public class RobotContainer {
   private Flywheel flywheel;
   private Hood hood;
   private Indexer indexer;
+  private Vision vision;
   private Intake intake;
   private IntakePivot intakePivot;
   private FlywheelKicker flywheelKicker;
@@ -67,16 +72,6 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     switch (Constants.getRobotType()) {
-      case WOODBOT:
-        drivetrain = WoodBotDrivetrain.createDrivetrain();
-        logger = new Telemetry(WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
-        flywheel = new Flywheel(new FlywheelIOWB());
-        hood = new Hood(new HoodIOWB());
-        indexer = new Indexer(new IndexerIOWB());
-        intake = new Intake(new IntakeIOWB());
-        flywheelKicker = new FlywheelKicker(new FlywheelKickerIOWB());
-        // intakePivot = new IntakePivot(new IntakePivotIOPB());
-        break;
       case SIM:
         drivetrain = WoodBotDrivetrain.createDrivetrain();
         logger = new Telemetry(WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
@@ -88,19 +83,30 @@ public class RobotContainer {
         // intake = new Intake(new IntakeIOSim());
         // flywheelKicker = new FlywheelKicker(new FlywheelKickerIOWB());
         break;
+
+      case WOODBOT:
       default:
         drivetrain = WoodBotDrivetrain.createDrivetrain();
         logger = new Telemetry(WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
         flywheel = new Flywheel(new FlywheelIOWB());
         hood = new Hood(new HoodIOWB());
         indexer = new Indexer(new IndexerIOWB());
+        intakePivot = new IntakePivot(new IntakePivotIOPB());
+        vision =
+            new Vision(
+                Map.ofEntries(
+                    Map.entry(
+                        Constants.WoodBotConstants.LIMELIGHT,
+                        new VisionIOLimelight(
+                            Constants.WoodBotConstants.LIMELIGHT, () -> 0.0, () -> 0.0, true))));
         intake = new Intake(new IntakeIOWB());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOWB());
         // intakePivot = new IntakePivot(new IntakePivotIOPB());
     }
     // Configure the trigger bindings
     commandFactory =
-        new CommandFactory(intake, flywheel, flywheelKicker, hood, indexer, drivetrain);
+        new CommandFactory(
+            intake, flywheel, flywheelKicker, hood, indexer, intakePivot, vision, drivetrain);
 
     registerPathplannerCommand("basic intake", commandFactory.basicIntakeCmd());
     registerPathplannerCommand("shoot at hub", commandFactory.shootWithSpinUp(3000.0, 4.0));
