@@ -6,11 +6,11 @@ This document explains the complete simulation architecture used in our FRC robo
 
 The architecture provides:
 
-✅ **Identical control logic** between simulation and real hardware  
-✅ **Modular design** that scales to complex robots  
-✅ **Comprehensive logging** via AdvantageKit  
-✅ **Live tuning** capabilities for rapid iteration  
-✅ **Realistic constraints** (current limits, battery sag, joint limits)  
+✅ **Identical control logic** between simulation and real hardware
+✅ **Modular design** that scales to complex robots
+✅ **Comprehensive logging** via AdvantageKit
+✅ **Live tuning** capabilities for rapid iteration
+✅ **Realistic constraints** (current limits, battery sag, joint limits)
 
 By following these patterns and best practices, your simulation will be a reliable testing ground for mechanism behavior, PID tuning, and autonomous routines—before the robot is even built.
 
@@ -185,9 +185,9 @@ public class IntakePivotIOSim implements IntakePivotIO {
 
   // Control gains
   private final double kG = 0.75; // Gravity compensation
-  
+
   // Motor controller (Phoenix 6)
-  private final TalonFX motorControllerSim = 
+  private final TalonFX motorControllerSim =
       new TalonFX(SimulationConstants.INTAKE_PIVOT_MOTOR);
   private final PositionVoltage positionRequest = new PositionVoltage(0).withSlot(0);
   private final VelocityVoltage velocityRequest = new VelocityVoltage(0).withSlot(0);
@@ -368,10 +368,10 @@ public class IndexerIOSim implements IndexerIO {
   private final double moi = 0.0513951385; // Moment of inertia in kg·m²
 
   // Motor controller (REV SparkMax)
-  private final SparkMax motorControllerSim = 
+  private final SparkMax motorControllerSim =
       new SparkMax(SimulationConstants.INDEXER_MOTOR, MotorType.kBrushless);
   private final SparkMaxConfig motorConfig = new SparkMaxConfig();
-  
+
   // SparkMax simulation object
   private final SparkMaxSim sparkSim = new SparkMaxSim(motorControllerSim, gearbox);
 
@@ -395,10 +395,10 @@ private void configureMotor() {
   motorConfig.idleMode(IdleMode.kBrake);
   motorConfig.inverted(false);
   motorConfig.smartCurrentLimit(40);
-  
+
   // Apply configuration to motor controller
-  motorControllerSim.configure(motorConfig, 
-      SparkMax.ResetMode.kResetSafeParameters, 
+  motorControllerSim.configure(motorConfig,
+      SparkMax.ResetMode.kResetSafeParameters,
       SparkMax.PersistMode.kNoPersistParameters);
 }
 ```
@@ -454,7 +454,7 @@ public void updateInputs(IndexerIOInputs inputs) {
 1. **SparkMaxSim.iterate():** REV provides a helper that updates internal controller state
    - Takes velocity, voltage, and timestep
    - Simpler than manually setting rotor position/velocity
-   
+
 2. **Duty Cycle Control:** This example uses open-loop control (`motorControllerSim.get()`)
    - For closed-loop velocity control, you'd use PID configuration and velocity setpoints
 
@@ -478,7 +478,7 @@ For closed-loop control, you could add:
 public void setVelocity(double velocityRPM) {
   // Configure PID controller and use closed-loop control
   motorControllerSim.getPIDController().setReference(
-      velocityRPM, 
+      velocityRPM,
       ControlType.kVelocity);
 }
 ```
@@ -521,7 +521,7 @@ if (tuningEnabled.get()) {
   slot0.kP = tunableKp.get();
   // ... update other gains ...
   motorControllerSim.getConfigurator().apply(slot0);
-  
+
   motorControllerSim.setControl(
       positionRequest.withPosition(tunableSetpoint.get()));
 }
@@ -653,11 +653,11 @@ public void updateInputs(...) {
   voltage = motorController.getSimState().getMotorVoltage();
   physicsSim.setInput(voltage);
   physicsSim.update(0.02);
-  
+
   // Physics → Controller (CRITICAL!)
   motorController.getSimState().setRawRotorPosition(...);
   motorController.getSimState().setRotorVelocity(...);
-  
+
   // Physics → Inputs
   inputs.position = physicsSim.getPosition();
 }
@@ -669,10 +669,10 @@ public void updateInputs(...) {
   voltage = motorController.getSimState().getMotorVoltage();
   physicsSim.setInput(voltage);
   physicsSim.update(0.02);
-  
+
   // Missing: Writing state back to controller!
   // Controller's PID won't see mechanism moving
-  
+
   inputs.position = physicsSim.getPosition();
 }
 ```
@@ -726,12 +726,12 @@ Keep visualization **out of IO implementations**, in the subsystem:
 // ✅ CORRECT: Subsystem owns visualization
 public class IntakePivot extends SubsystemBase {
   private final IntakePivotVisualizer visualizer;
-  
+
   @Override
   public void periodic() {
     io.updateInputs(inputs);
     Logger.processInputs("IntakePivot", inputs);
-    
+
     // Update visualization from logged inputs
     visualizer.update(inputs.position * 2.0 * Math.PI);
   }
@@ -785,24 +785,24 @@ config.CurrentLimits.StatorCurrentLimitEnable = true;
 
 1. **Does it move?**
    - Command a setpoint and verify mechanism moves in Glass/AdvantageScope
-   
+
 2. **Correct direction?**
    - Positive command → expected direction
    - Check motor inversion
-   
+
 3. **Reaches setpoint?**
    - Closed-loop control converges to target
-   
+
 4. **Realistic dynamics?**
    - Check MOI, mass, gear ratio
-   
+
 5. **Respects limits?**
    - Mechanism stops at min/max angles
    - Doesn't go through hard stops
-   
+
 6. **Current draw reasonable?**
    - Check if current limiting works
-   
+
 7. **Battery voltage drops?**
    - High current → voltage sag
    - Multiple mechanisms → more sag
@@ -859,6 +859,6 @@ Possible causes:
 
 ---
 
-**Document Version:** 1.0  
-**Last Updated:** January 2026  
+**Document Version:** 1.0
+**Last Updated:** January 2026
 **Covers:** Phoenix 6 (TalonFX), REV Robotics (SparkMax), WPILib 2026

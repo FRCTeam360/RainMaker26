@@ -99,6 +99,7 @@ public class FlywheelKickerIOSim implements FlywheelKickerIO {
     motorControllerSim.getConfigurator().apply(talonConfig);
   }
 
+  @Override
   public void updateInputs(FlywheelKickerIOInputs inputs) {
     // --- AdvantageScope tuning (sim-only) ---
     if (tuningEnabled.get()) {

@@ -28,18 +28,8 @@ public class FlywheelIOSim implements FlywheelIO {
   // Motor constants (defaults)
   private double gearRatio = 1.0;
   private DCMotor gearbox = DCMotor.getKrakenX60(2);
-  // private final double kS = 0.0;
-  // private final double kV = 0.0;
-  // private final double kA = 0.0;
   private final double flywheelMOI = 0.01; // kg*m^2
 
-  // AdvantageScope tuning (sim-only, under /Tuning table)
-  // private final LoggedNetworkNumber tunableKp = new LoggedNetworkNumber("/Tuning/Flywheel/kP",
-  // 1.0);
-  // private final LoggedNetworkNumber tunableKi = new LoggedNetworkNumber("/Tuning/Flywheel/kI",
-  // 0.0);
-  // private final LoggedNetworkNumber tunableKd = new LoggedNetworkNumber("/Tuning/Flywheel/kD",
-  // 0.0);
   private final LoggedNetworkNumber tunableSetpoint =
       new LoggedNetworkNumber("/Tuning/Flywheel/SetpointRPM", 0.0);
   private final LoggedNetworkBoolean tuningEnabled =
@@ -58,11 +48,6 @@ public class FlywheelIOSim implements FlywheelIO {
   public FlywheelIOSim() {
     // Configure TalonFX with PID gains
     configureMotor();
-
-    // Initialize motor sim state to match flywheel sim initial state
-    // motorControllerSim1.getSimState().setRawRotorPosition(
-    //     Radians.of(flywheelSim.() * gearRatio).in(Rotations));
-    // motorControllerSim2.getSimState().setRawRotorPosition(angularPositionRotations);
     motorControllerSim1
         .getSimState()
         .setRotorVelocity(
@@ -77,15 +62,6 @@ public class FlywheelIOSim implements FlywheelIO {
 
   private void configureMotor() {
     TalonFXConfiguration talonConfig = new TalonFXConfiguration();
-
-    // Configure PID gains for slot 0 (use tunable defaults)
-    // Slot0Configs slot0 = talonConfig.Slot0;
-    // slot0.kP = tunableKp.get();
-    // slot0.kI = tunableKi.get();
-    // slot0.kD = tunableKd.get();
-    // slot0.kS = kS;
-    // slot0.kV = kV;
-    // slot0.kA = kA;
 
     // Configure current limits for safety
     CurrentLimitsConfigs currentLimits = talonConfig.CurrentLimits;
@@ -109,9 +85,6 @@ public class FlywheelIOSim implements FlywheelIO {
       // Apply tunable PID gains (simple: apply every loop when enabled)
       Slot0Configs slot0 = new Slot0Configs();
       motorControllerSim1.getConfigurator().refresh(slot0);
-      // slot0.kP = tunableKp.get();
-      // slot0.kI = tunableKi.get();
-      // slot0.kD = tunableKd.get();
       motorControllerSim1.getConfigurator().apply(slot0);
       motorControllerSim2.getConfigurator().apply(slot0);
 
@@ -131,16 +104,12 @@ public class FlywheelIOSim implements FlywheelIO {
     // Step 2: Update the simulation by one timestep
     flywheelSim.update(0.02);
 
-    // Step 3: Update angular position by integrating velocity
     double velocityRPS = flywheelSim.getAngularVelocityRPM() / 60.0;
-    // angularPositionRotations += velocityRPS * 0.02; // Integrate velocity over time
 
     // Step 4: Update the motor sim states with the new simulated values
-    //  motorControllerSim1.getSimState().setRawRotorPosition(angularPositionRotations);
     motorControllerSim1
         .getSimState()
         .setRotorVelocity(RotationsPerSecond.of(velocityRPS).in(RotationsPerSecond));
-    // motorControllerSim2.getSimState().setRawRotorPosition(angularPositionRotations);
     motorControllerSim2
         .getSimState()
         .setRotorVelocity(RotationsPerSecond.of(velocityRPS).in(RotationsPerSecond));
@@ -150,8 +119,6 @@ public class FlywheelIOSim implements FlywheelIO {
         BatterySim.calculateDefaultBatteryLoadedVoltage(flywheelSim.getCurrentDrawAmps()));
 
     // Step 6: Read all inputs from the SIMULATED VALUES (source of truth)
-    // inputs.positions[0] = angularPositionRotations;
-    // inputs.positions[1] = angularPositionRotations; // Both motors have same position
     inputs.velocities[0] = velocityRPS;
     inputs.velocities[1] = velocityRPS; // Both motors have same velocity
     inputs.voltages[0] = motorVoltage1;

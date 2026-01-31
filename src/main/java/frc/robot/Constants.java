@@ -48,30 +48,31 @@ public final class Constants {
   }
 
   public static class SimulationConstants {
-    public static final int FLYWHEEL_ENCODER1 = 0;
-    public static final int FLYWHEEL_ENCODER2 = 1;
+    // public static final int FLYWHEEL_ENCODER1 = 0;
+    // public static final int FLYWHEEL_ENCODER2 = 1;
     public static final int FLYWHEEL_MOTOR = 2;
+    // FLYWHEEL_MOTOR2 = 3
 
-    public static final int HOOD_ENCODER1 = 3;
-    public static final int HOOD_ENCODER2 = 4;
-    public static final int HOOD_MOTOR = 5;
+    // public static final int HOOD_ENCODER1 = 4;
+    // public static final int HOOD_ENCODER2 = 5;
+    public static final int HOOD_MOTOR = 6;
 
-    public static final int INDEXER_ENCODER1 = 6;
-    public static final int INDEXER_ENCODER2 = 7;
-    public static final int INDEXER_MOTOR = 8;
+    // public static final int INDEXER_ENCODER1 = 7;
+    // public static final int INDEXER_ENCODER2 = 8;
+    public static final int INDEXER_MOTOR = 9;
 
-    public static final int INTAKE_ENCODER1 = 9;
-    public static final int INTAKE_ENCODER2 = 10;
-    public static final int INTAKE_MOTOR = 11;
+    // public static final int INTAKE_ENCODER1 = 10;
+    // public static final int INTAKE_ENCODER2 = 11;
+    public static final int INTAKE_MOTOR = 12;
 
-    public static final int INTAKE_PIVOT_ENCODER1 = 12;
-    public static final int INTAKE_PIVOT_ENCODER2 = 13;
-    public static final int INTAKE_PIVOT_MOTOR = 14;
+    // public static final int INTAKE_PIVOT_ENCODER1 = 13;
+    // public static final int INTAKE_PIVOT_ENCODER2 = 14;
+    public static final int INTAKE_PIVOT_MOTOR = 15;
 
-    public static final int FLYWHEEL_KICKER_ENCODER1 = 15;
-    public static final int FLYWHEEL_KICKER_ENCODER2 = 16;
-    public static final int FLYWHEEL_KICKER_MOTOR = 17;
-    public static final int FLYWHEEL_KICKER_SENSOR_ID = 3;
+    // public static final int FLYWHEEL_KICKER_ENCODER1 = 16;
+    // public static final int FLYWHEEL_KICKER_ENCODER2 = 17;
+    public static final int FLYWHEEL_KICKER_MOTOR = 18;
+    public static final int FLYWHEEL_KICKER_SENSOR_ID = 19;
   }
 
   public static class OperatorConstants {
@@ -87,10 +88,9 @@ public final class Constants {
 
     if (serialAddress.equals(SerialAddressConstants.WOOD_SERIAL_ADDRESS)) {
       return Constants.RobotType.WOODBOT;
+    } else if (!Robot.isReal()) { // KEEP AT BOTTOM
+      return Constants.RobotType.SIM;
     }
-    // else if (!Robot.isReal()) { // KEEP AT BOTTOM
-    // return Constants.RobotType.SIM;
-    // }
-    return Constants.RobotType.SIM;
+    return Constants.RobotType.WOODBOT;
   }
 }

@@ -37,7 +37,7 @@ Traditional FRC code mixes hardware interaction with control logic:
 // ❌ Traditional approach - tightly coupled
 public class Flywheel extends SubsystemBase {
   private final TalonFX motor = new TalonFX(10);
-  
+
   public void setRPM(double rpm) {
     motor.setControl(new VelocityVoltage(rpm));  // Locked to TalonFX
   }
@@ -50,7 +50,7 @@ AdvantageKit separates these concerns:
 // ✅ AdvantageKit approach - loosely coupled
 public class Flywheel extends SubsystemBase {
   private final FlywheelIO io;  // Abstract interface
-  
+
   public void setRPM(double rpm) {
     io.setRPM(rpm);  // Works with ANY implementation
   }
@@ -122,7 +122,7 @@ public class Flywheel extends SubsystemBase {
 // ✅ With dependency injection
 public class Flywheel extends SubsystemBase {
   private final FlywheelIO io;  // Injected from outside
-  
+
   public Flywheel(FlywheelIO io) {
     this.io = io;  // Dependency is injected
   }
@@ -190,7 +190,7 @@ package frc.robot.subsystems.Indexer;
 import org.littletonrobotics.junction.AutoLog;
 
 public interface IndexerIO {
-  
+
   // Define the inputs that will be logged
   @AutoLog
   public static class IndexerIOInputs {
@@ -199,12 +199,12 @@ public interface IndexerIO {
     public double statorCurrent = 0.0;      // Amps
     public double supplyCurrent = 0.0;      // Amps
   }
-  
+
   // Define control methods
   public void setDutyCycle(double duty);
-  
+
   public void setRPM(double rpm);
-  
+
   // Update method called every loop
   public default void updateInputs(IndexerIOInputs inputs) {}
 }
@@ -233,28 +233,28 @@ public class IndexerIOReal implements IndexerIO {
   private final TalonFX motor;
   private final DutyCycleOut dutyCycleRequest = new DutyCycleOut(0);
   private final VelocityVoltage velocityRequest = new VelocityVoltage(0);
-  
+
   public IndexerIOReal(int canID) {
     motor = new TalonFX(canID);
     configureMotor();
   }
-  
+
   private void configureMotor() {
     TalonFXConfiguration config = new TalonFXConfiguration();
-    
+
     // PID configuration
     config.Slot0.kP = 0.5;
     config.Slot0.kI = 0.0;
     config.Slot0.kD = 0.0;
     config.Slot0.kV = 0.12;
-    
+
     // Current limits
     config.CurrentLimits.StatorCurrentLimit = 40.0;
     config.CurrentLimits.StatorCurrentLimitEnable = true;
-    
+
     motor.getConfigurator().apply(config);
   }
-  
+
   @Override
   public void updateInputs(IndexerIOInputs inputs) {
     inputs.velocity = motor.getVelocity().getValueAsDouble() * 60.0;  // RPS → RPM
@@ -262,12 +262,12 @@ public class IndexerIOReal implements IndexerIO {
     inputs.statorCurrent = motor.getStatorCurrent().getValueAsDouble();
     inputs.supplyCurrent = motor.getSupplyCurrent().getValueAsDouble();
   }
-  
+
   @Override
   public void setDutyCycle(double duty) {
     motor.setControl(dutyCycleRequest.withOutput(duty));
   }
-  
+
   @Override
   public void setRPM(double rpm) {
     motor.setControl(velocityRequest.withVelocity(rpm / 60.0));  // RPM → RPS
@@ -288,30 +288,30 @@ import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 public class IndexerIOSim implements IndexerIO {
   private final FlywheelSim flywheelSim;
   private double appliedVoltage = 0.0;
-  
+
   public IndexerIOSim() {
     flywheelSim = new FlywheelSim(
         DCMotor.getNEO(1),     // Motor model
         5.0,                    // Gear ratio
         0.05);                  // Moment of inertia (kg·m²)
   }
-  
+
   @Override
   public void updateInputs(IndexerIOInputs inputs) {
     flywheelSim.update(0.02);  // Advance simulation by 20ms
-    
+
     inputs.velocity = flywheelSim.getAngularVelocityRPM();
     inputs.voltage = appliedVoltage;
     inputs.statorCurrent = flywheelSim.getCurrentDrawAmps();
     inputs.supplyCurrent = flywheelSim.getCurrentDrawAmps();
   }
-  
+
   @Override
   public void setDutyCycle(double duty) {
     appliedVoltage = duty * 12.0;  // Assume 12V battery
     flywheelSim.setInputVoltage(appliedVoltage);
   }
-  
+
   @Override
   public void setRPM(double rpm) {
     // Simple approximation: use voltage to reach target RPM
@@ -337,34 +337,34 @@ import org.littletonrobotics.junction.Logger;
 public class Indexer extends SubsystemBase {
   private final IndexerIO io;
   private final IndexerIOInputsAutoLogged inputs = new IndexerIOInputsAutoLogged();
-  
+
   /** Creates a new Indexer subsystem */
   public Indexer(IndexerIO io) {
     this.io = io;  // Dependency injection!
   }
-  
+
   @Override
   public void periodic() {
     // Update inputs from hardware/sim
     io.updateInputs(inputs);
-    
+
     // Process and log the inputs
     Logger.processInputs("Indexer", inputs);
   }
-  
+
   // High-level control methods
   public void setRPM(double rpm) {
     io.setRPM(rpm);
   }
-  
+
   public void setDutyCycle(double duty) {
     io.setDutyCycle(duty);
   }
-  
+
   public void stop() {
     io.setDutyCycle(0.0);
   }
-  
+
   // Command factories
   public Command runAtRPM(double rpm) {
     return this.runEnd(() -> setRPM(rpm), this::stop);
@@ -379,7 +379,7 @@ File: `RobotContainer.java`
 ```java
 public class RobotContainer {
   private final Indexer indexer;
-  
+
   public RobotContainer() {
     // Choose implementation based on robot mode
     if (Robot.isReal()) {
@@ -387,10 +387,10 @@ public class RobotContainer {
     } else {
       indexer = new Indexer(new IndexerIOSim());
     }
-    
+
     configureBindings();
   }
-  
+
   private void configureBindings() {
     // Example: Run indexer when A button is pressed
     controller.a().whileTrue(indexer.runAtRPM(3000));
@@ -430,12 +430,12 @@ public interface FlywheelIO {
 public interface FlywheelIO {
   /** Set flywheel velocity in RPM */
   void setRPM(double rpm);
-  
+
   /** Optional: stop the flywheel (default implementation) */
   default void stop() {
     setDutyCycle(0.0);
   }
-  
+
   void updateInputs(FlywheelIOInputs inputs);
 }
 ```
@@ -521,12 +521,12 @@ Implements the IO interface for specific hardware or simulation.
 public class FlywheelIOReal implements FlywheelIO {
   private final TalonFX motor;
   private final VelocityVoltage velocityRequest = new VelocityVoltage(0);
-  
+
   public FlywheelIOReal(int canID) {
     motor = new TalonFX(canID);
     configureMotor();
   }
-  
+
   private void configureMotor() {
     // Configuration logic
     TalonFXConfiguration config = new TalonFXConfiguration();
@@ -534,7 +534,7 @@ public class FlywheelIOReal implements FlywheelIO {
     // ... more config
     motor.getConfigurator().apply(config);
   }
-  
+
   @Override
   public void updateInputs(FlywheelIOInputs inputs) {
     // Read from hardware
@@ -542,7 +542,7 @@ public class FlywheelIOReal implements FlywheelIO {
     inputs.voltage = motor.getMotorVoltage().getValueAsDouble();
     inputs.statorCurrent = motor.getStatorCurrent().getValueAsDouble();
   }
-  
+
   @Override
   public void setRPM(double rpm) {
     motor.setControl(velocityRequest.withVelocity(rpm / 60.0));
@@ -556,27 +556,27 @@ public class FlywheelIOReal implements FlywheelIO {
 public class FlywheelIOSparkMax implements FlywheelIO {
   private final SparkMax motor;
   private final SparkClosedLoopController controller;
-  
+
   public FlywheelIOSparkMax(int canID) {
     motor = new SparkMax(canID, MotorType.kBrushless);
     controller = motor.getClosedLoopController();
     configureMotor();
   }
-  
+
   private void configureMotor() {
     SparkMaxConfig config = new SparkMaxConfig();
     config.closedLoop.pid(0.0005, 0, 0);
     // ... more config
     motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
-  
+
   @Override
   public void updateInputs(FlywheelIOInputs inputs) {
     inputs.velocity = motor.getEncoder().getVelocity();  // Already in RPM
     inputs.voltage = motor.getAppliedOutput() * motor.getBusVoltage();
     inputs.statorCurrent = motor.getOutputCurrent();
   }
-  
+
   @Override
   public void setRPM(double rpm) {
     controller.setReference(rpm, ControlType.kVelocity);
@@ -608,46 +608,46 @@ Contains all high-level behavior, commands, and logic. **No hardware knowledge.*
 public class Flywheel extends SubsystemBase {
   // IO interface (dependency injection)
   private final FlywheelIO io;
-  
+
   // Auto-logged inputs
   private final FlywheelIOInputsAutoLogged inputs = new FlywheelIOInputsAutoLogged();
-  
+
   // Additional state (not logged through IO)
   private double targetRPM = 0.0;
-  
+
   public Flywheel(FlywheelIO io) {
     this.io = io;
   }
-  
+
   @Override
   public void periodic() {
     // 1. Update inputs from hardware/sim
     io.updateInputs(inputs);
-    
+
     // 2. Process and log inputs
     Logger.processInputs("Flywheel", inputs);
-    
+
     // 3. Log additional state
     Logger.recordOutput("Flywheel/TargetRPM", targetRPM);
-    
+
     // 4. Any periodic logic (state machines, etc.)
   }
-  
+
   // Control methods
   public void setRPM(double rpm) {
     targetRPM = rpm;
     io.setRPM(rpm);
   }
-  
+
   // Queries
   public double getVelocity() {
     return inputs.velocity;
   }
-  
+
   public boolean atTarget() {
     return Math.abs(inputs.velocity - targetRPM) < 50.0;  // Within 50 RPM
   }
-  
+
   // Command factories
   public Command spinUpCommand(double rpm) {
     return this.runEnd(
@@ -664,7 +664,7 @@ public class Flywheel extends SubsystemBase {
    ```java
    // ✅ Good - uses IO interface
    io.setRPM(rpm);
-   
+
    // ❌ Bad - knows about specific hardware
    motor.setControl(new VelocityVoltage(rpm));
    ```
@@ -698,7 +698,7 @@ When you have multiple motors in one subsystem:
 @AutoLog
 public static class FlywheelIOInputs {
   public static final int NUM_MOTORS = 2;
-  
+
   public double[] velocities = new double[NUM_MOTORS];
   public double[] voltages = new double[NUM_MOTORS];
   public double[] currents = new double[NUM_MOTORS];
@@ -711,7 +711,7 @@ Hardware implementation:
 public class FlywheelIOReal implements FlywheelIO {
   private final TalonFX leader;
   private final TalonFX follower;
-  
+
   @Override
   public void updateInputs(FlywheelIOInputs inputs) {
     inputs.velocities[0] = leader.getVelocity().getValueAsDouble() * 60.0;
@@ -731,15 +731,15 @@ public class Indexer extends SubsystemBase {
     FEEDING,
     REVERSING
   }
-  
+
   private State currentState = State.IDLE;
-  
+
   @Override
   public void periodic() {
     io.updateInputs(inputs);
     Logger.processInputs("Indexer", inputs);
     Logger.recordOutput("Indexer/State", currentState.toString());
-    
+
     // State machine logic
     switch (currentState) {
       case IDLE:
@@ -751,7 +751,7 @@ public class Indexer extends SubsystemBase {
       // ... etc
     }
   }
-  
+
   public void setState(State state) {
     currentState = state;
   }
@@ -765,12 +765,12 @@ Use default methods in the interface:
 ```java
 public interface ArmIO {
   void setPosition(double position);
-  
+
   // Optional absolute encoder
   default double getAbsolutePosition() {
     return 0.0;  // Default: not supported
   }
-  
+
   void updateInputs(ArmIOInputs inputs);
 }
 ```
@@ -780,7 +780,7 @@ Then in the hardware layer:
 ```java
 public class ArmIOReal implements ArmIO {
   private final CANcoder absoluteEncoder;  // Optional
-  
+
   @Override
   public double getAbsolutePosition() {
     if (absoluteEncoder != null) {
@@ -803,7 +803,7 @@ Keep units consistent within each layer:
 public class ElevatorIOReal implements ElevatorIO {
   private static final double SPOOL_RADIUS = 0.02;  // meters
   private static final double GEAR_RATIO = 10.0;
-  
+
   @Override
   public void updateInputs(ElevatorIOInputs inputs) {
     // Motor rotations → mechanism height
@@ -811,7 +811,7 @@ public class ElevatorIOReal implements ElevatorIO {
     double spoolRotations = motorRotations / GEAR_RATIO;
     inputs.heightMeters = spoolRotations * 2 * Math.PI * SPOOL_RADIUS;
   }
-  
+
   @Override
   public void setHeight(double meters) {
     // Mechanism height → motor rotations

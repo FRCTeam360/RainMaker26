@@ -154,6 +154,7 @@ public class HoodIOSim implements HoodIO {
    *
    * @param positionRotations Target position in rotations
    */
+  @Override
   public void setPosition(double positionRotations) {
     motorControllerSim.setControl(positionRequest.withPosition(positionRotations));
   }
