@@ -111,7 +111,7 @@ public class RobotContainer {
 
     registerPathplannerCommand("basic intake", commandFactory.basicIntakeCmd());
     registerPathplannerCommand("shoot at hub", commandFactory.shootWithSpinUp(3000.0, 4.0));
-    configureBindings();
+    configureTestBindings();
 
     PathPlannerLogging.setLogActivePathCallback(
         (poses -> Logger.recordOutput("Swerve/ActivePath", poses.toArray(new Pose2d[0]))));
@@ -144,6 +144,15 @@ public class RobotContainer {
    * PS4} controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
    * joysticks}.
    */
+  private void configureTestBindings() {
+    testCont1.a().whileTrue(flywheel.setDutyCycleCommand(() -> 0.5));
+    testCont1.b().whileTrue(flywheelKicker.setDutyCycleCommand(() -> 0.5));
+    testCont1.x().whileTrue(hood.setDutyCycleCommand(() -> 0.5));
+    testCont1.y().whileTrue(indexer.setDutyCycleCommand(() -> 0.5));
+    testCont1.leftBumper().whileTrue(intake.setDutyCycleCommand(() -> 0.5));
+    testCont1.rightBumper().whileTrue(intakePivot.setDutyCycleCommand(() -> 0.5));
+  }
+
   private void configureBindings() {
     // TODO: make more elegant solution for null checking subsystems/commands
 

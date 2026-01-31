@@ -57,7 +57,6 @@ public class IntakeIOSim implements IntakeIO {
 
     // Initialize everything to 0
     motorControllerSim.set(0.0);
-    encoder.setPosition(0.0);
   }
 
   private void configureMotor() {
@@ -92,11 +91,6 @@ public class IntakeIOSim implements IntakeIO {
     double velocityRPM = intakeSim.getAngularVelocityRPM();
     double velocityRPS = velocityRPM / 60.0;
 
-    // Integrate velocity to get position
-    double currentPositionRotations = encoder.getPosition();
-    double newPositionRotations = currentPositionRotations + velocityRPS * 0.02;
-    encoder.setPosition(newPositionRotations);
-
     // Step 4: Simple sensor simulation - triggers based on velocity
     sensorSim.setValue(Math.abs(velocityRPM) > 100); // Sensor triggers when spinning fast enough
 
@@ -105,7 +99,6 @@ public class IntakeIOSim implements IntakeIO {
         BatterySim.calculateDefaultBatteryLoadedVoltage(intakeSim.getCurrentDrawAmps()));
 
     // Step 6: Set inputs
-    inputs.position = newPositionRotations;
     inputs.velocity = velocityRPS;
     inputs.voltage = appliedVoltage;
     inputs.statorCurrent = intakeSim.getCurrentDrawAmps();

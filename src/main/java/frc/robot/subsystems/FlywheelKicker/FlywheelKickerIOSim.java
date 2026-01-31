@@ -144,7 +144,6 @@ public class FlywheelKickerIOSim implements FlywheelKickerIO {
         Math.abs(flywheelKickerSim.getAngularVelocityRPM()) > 2000); // Sensor triggers at high RPM
 
     // Step 7: Read all inputs from the SIMULATED VALUES (source of truth)
-    inputs.position = angularPositionRotations;
     inputs.velocity = velocityRPS;
     inputs.voltage = motorVoltage;
     inputs.statorCurrent = motorControllerSim.getStatorCurrent().getValueAsDouble();
