@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.generated.WoodBotDrivetrain;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Flywheel.Flywheel;
@@ -95,6 +96,9 @@ public class RobotContainer {
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOWB());
         // intakePivot = new IntakePivot(new IntakePivotIOPB());
     }
+    commandFactory =
+        new CommandFactory(
+            intake, flywheel, flywheelKicker, hood, indexer, intakePivot, null, drivetrain);
     // Configure the trigger bindings
     configureBindings();
 
@@ -135,6 +139,10 @@ public class RobotContainer {
     }
 
     drivetrain.registerTelemetry(logger::telemeterize);
+    testCont1.a().whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
+    testCont1.b().whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
+    testCont1.x().whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
+    testCont1.y().whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
   }
 
   /** Stops all subsystems safely when the robot is disabled. */
