@@ -4,7 +4,9 @@ import static edu.wpi.first.units.Units.*;
 
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.Utils;
+import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
+import com.ctre.phoenix6.swerve.SwerveModule;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -19,6 +21,7 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.units.measure.Velocity;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Notifier;
@@ -236,10 +239,13 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                   m_pathApplyRobotSpeeds
                       .withSpeeds(ChassisSpeeds.discretize(speeds, 0.020))
                       .withWheelForceFeedforwardsX(feedforwards.robotRelativeForcesXNewtons())
-                      .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons())),
+                      .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons())
+                    //  .withDriveRequestType(DriveRequestType.Velocity)
+                      ),
+          
           new PPHolonomicDriveController(
               // PID constants for translation
-              new PIDConstants(11, 0, 0),
+              new PIDConstants(10, 0, 0),
               // PID constants for rotation
               new PIDConstants(8, 0, 0)),
           config,
