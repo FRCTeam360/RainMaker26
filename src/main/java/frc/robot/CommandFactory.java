@@ -64,7 +64,7 @@ public class CommandFactory {
         .alongWith(flywheel.setRPMCommand(rpm))
         .alongWith(
             Commands.waitUntil(() -> flywheel.atSetpoint(rpm, 100.0) && hood.atSetpoint(position))
-                .andThen(this.setFlywheelKickerDutyCycle(1.0)));
+                .andThen(this.setFlywheelKickerDutyCycle(1.0).alongWith(this.basicIntakeCmd())));
   }
 
   public Command setFlywheelKickerDutyCycle(double value) {
