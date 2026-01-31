@@ -78,7 +78,7 @@ Traditional vision code is impossible to test without hardware:
 // ❌ Traditional approach - requires physical camera
 public class Vision extends SubsystemBase {
   private final PhotonCamera camera = new PhotonCamera("frontCam");
-  
+
   public Pose2d getEstimatedPose() {
     var result = camera.getLatestResult();  // Needs real camera!
     // ... process result
@@ -92,7 +92,7 @@ With the IO pattern and simulation:
 // ✅ IO pattern approach - works anywhere
 public class Vision extends SubsystemBase {
   private final VisionIO io;  // Could be real OR simulated
-  
+
   public Vision(VisionIO io) {
     this.io = io;  // Injected - we don't care which implementation
   }
@@ -254,11 +254,11 @@ File: `subsystems/Vision/VisionSimConstants.java`
 public class VisionSimConstants {
     public static class VisionPhotonSim {
         public static final String kCameraName = "YOUR CAMERA NAME";
-        
+
         // Camera mounted 0.5m forward, 0.5m up, facing forward
         public static final Transform3d kRobotToCam =
                 new Transform3d(new Translation3d(0.5, 0.0, 0.5), new Rotation3d(0, 0, 0));
-        
+
         // Load the current season's AprilTag layout
         public static final AprilTagFieldLayout kTagLayout =
                 AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
@@ -272,28 +272,28 @@ File: `subsystems/Vision/VisionIOPhotonSim.java`
 
 ```java
 public class VisionIOPhotonSim implements VisionIO {
-  
+
   private final PhotonCamera camera;
   private final PhotonPoseEstimator photonEstimator;
   private final Supplier<Pose2d> robotPoseSupplier;
-  
+
   // Simulation objects
   private final VisionSystemSim visionSim;
   private final PhotonCameraSim cameraSim;
-  
+
   public VisionIOPhotonSim(Supplier<Pose2d> robotPoseSupplier) {
     this.robotPoseSupplier = robotPoseSupplier;
-    
+
     // Create camera and pose estimator (same as real implementation would)
     camera = new PhotonCamera(kCameraName);
     photonEstimator = new PhotonPoseEstimator(kTagLayout, kRobotToCam);
-    
+
     // --- Simulation-specific setup ---
-    
+
     // Create the virtual field
     visionSim = new VisionSystemSim("main");
     visionSim.addAprilTags(kTagLayout);
-    
+
     // Configure camera properties
     SimCameraProperties cameraProp = new SimCameraProperties();
     cameraProp.setCalibration(960, 720, Rotation2d.fromDegrees(90));
@@ -301,23 +301,23 @@ public class VisionIOPhotonSim implements VisionIO {
     cameraProp.setFPS(15);
     cameraProp.setAvgLatencyMs(50);
     cameraProp.setLatencyStdDevMs(15);
-    
+
     // Create and configure simulated camera
     cameraSim = new PhotonCameraSim(camera, cameraProp);
     cameraSim.setMaxSightRange(5.0);  // 5 meter detection limit
-    
+
     // Add camera to the simulation world
     visionSim.addCamera(cameraSim, kRobotToCam);
   }
-  
+
   @Override
   public void updateInputs(VisionIOInputs inputs) {
     // Update simulation with current robot pose
     visionSim.update(robotPoseSupplier.get());
-    
+
     // Read results from the (now-updated) PhotonCamera
     var results = camera.getAllUnreadResults();
-    
+
     // Process results and fill inputs...
     // (See full implementation in VisionIOPhotonSim.java)
   }
@@ -334,13 +334,13 @@ switch (Constants.currentMode) {
         "limelight", new VisionIOLimelight()
     ));
     break;
-    
+
   case SIM:
     vision = new Vision(Map.of(
         "photonSim", new VisionIOPhotonSim(() -> drivetrain.getState().Pose)
     ));
     break;
-    
+
   case REPLAY:
     vision = new Vision(Map.of());  // Replay uses logged data
     break;
