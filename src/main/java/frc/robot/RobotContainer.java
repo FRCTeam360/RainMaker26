@@ -82,7 +82,6 @@ public class RobotContainer {
         // intake = new Intake(new IntakeIOSim());
         // flywheelKicker = new FlywheelKicker(new FlywheelKickerIOWB());
         break;
-
       case WOODBOT:
       default:
         drivetrain = WoodBotDrivetrain.createDrivetrain();
