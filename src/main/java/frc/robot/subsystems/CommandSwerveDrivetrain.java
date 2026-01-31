@@ -97,6 +97,16 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         .alongWith(new InstantCommand(() -> System.out.println("running")));
   }
 
+  // Xout Command
+  public void xOut() {
+    SwerveRequest xOutReq = new SwerveRequest.SwerveDriveBrake();
+    this.setControl(xOutReq);
+  }
+
+  public Command xOutCmd() {
+    SwerveRequest xOutReq = new SwerveRequest.SwerveDriveBrake();
+    return this.applyRequest(() -> xOutReq);
+  }
   /* SysId routine for characterizing translation. This is used to find PID gains for the drive motors. */
   private final SysIdRoutine m_sysIdRoutineTranslation =
       new SysIdRoutine(
