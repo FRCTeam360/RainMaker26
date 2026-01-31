@@ -11,12 +11,10 @@ public class FlywheelIOSim implements FlywheelIO {
   @Override
   public void setDutyCycle(double duty) {
     // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'setDutyCycle'");
   }
 
   @Override
   public void setRPM(double rpm) {
     // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'setRPM'");
   }
 }

@@ -11,12 +11,10 @@ public class IndexerIOSim implements IndexerIO {
   @Override
   public void updateInputs(IndexerIOInputs inputs) {
     // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'updateInputs'");
   }
 
   @Override
   public void setDutyCycle(double dutyCycle) {
     // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'setDutyCycle'");
   }
 }

@@ -11,12 +11,10 @@ public class IntakeIOSim implements IntakeIO {
   @Override
   public void setDutyCycle(double value) {
     // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'setDutyCycle'");
   }
 
   @Override
   public void stop() {
     // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'stop'");
   }
 }

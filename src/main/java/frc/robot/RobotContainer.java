@@ -18,18 +18,22 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.generated.WoodBotDrivetrain;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Flywheel.Flywheel;
+import frc.robot.subsystems.Flywheel.FlywheelIOSim;
 import frc.robot.subsystems.Flywheel.FlywheelIOWB;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKicker;
+import frc.robot.subsystems.FlywheelKicker.FlywheelKickerIOSim;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKickerIOWB;
 import frc.robot.subsystems.Hood.Hood;
+import frc.robot.subsystems.Hood.HoodIOSim;
 import frc.robot.subsystems.Hood.HoodIOWB;
 import frc.robot.subsystems.Indexer.Indexer;
+import frc.robot.subsystems.Indexer.IndexerIOSim;
 import frc.robot.subsystems.Indexer.IndexerIOWB;
 import frc.robot.subsystems.Intake.Intake;
+import frc.robot.subsystems.Intake.IntakeIOSim;
 import frc.robot.subsystems.Intake.IntakeIOWB;
 import frc.robot.subsystems.IntakePivot.IntakePivot;
 import frc.robot.subsystems.IntakePivot.IntakePivotIOSim;
@@ -77,11 +81,11 @@ public class RobotContainer {
         logger = new Telemetry(WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
         intakePivot = new IntakePivot(new IntakePivotIOSim());
 
-        // flywheel = new Flywheel(new FlywheelIOSim());
-        // hood = new Hood(new HoodIOWB());
-        // indexer = new Indexer(new IndexerIOSim());
-        // intake = new Intake(new IntakeIOSim());
-        // flywheelKicker = new FlywheelKicker(new FlywheelKickerIOWB());
+        flywheel = new Flywheel(new FlywheelIOSim());
+        hood = new Hood(new HoodIOSim());
+        indexer = new Indexer(new IndexerIOSim());
+        intake = new Intake(new IntakeIOSim());
+        flywheelKicker = new FlywheelKicker(new FlywheelKickerIOSim());
         break;
       case WOODBOT:
       default:
