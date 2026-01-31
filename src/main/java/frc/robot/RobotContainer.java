@@ -6,6 +6,12 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.commands.FollowPathCommand;
+import com.pathplanner.lib.util.PathPlannerLogging;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -23,6 +29,7 @@ import frc.robot.subsystems.Intake.IntakeIOWB;
 import frc.robot.subsystems.IntakePivot.IntakePivot;
 import frc.robot.subsystems.IntakePivot.IntakePivotIOSim;
 import java.util.Objects;
+import org.littletonrobotics.junction.Logger;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -33,12 +40,14 @@ import java.util.Objects;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private CommandSwerveDrivetrain drivetrain;
+  private SendableChooser<Command> autoChooser;
   private Flywheel flywheel;
   private Hood hood;
   private Indexer indexer;
   private Intake intake;
   private IntakePivot intakePivot;
   private FlywheelKicker flywheelKicker;
+
   private CommandFactory commandFactory;
 
   // TODO: refactor to allow for more than 1 drivetrain type
@@ -87,6 +96,17 @@ public class RobotContainer {
     }
     // Configure the trigger bindings
     configureBindings();
+
+    PathPlannerLogging.setLogActivePathCallback(
+        (poses -> Logger.recordOutput("Swerve/ActivePath", poses.toArray(new Pose2d[0]))));
+
+    PathPlannerLogging.setLogTargetPoseCallback(
+        pose -> Logger.recordOutput("Swerve/TargetPathPose", pose));
+
+    autoChooser = AutoBuilder.buildAutoChooser();
+    SmartDashboard.putData("Auto Chooser", autoChooser);
+
+    FollowPathCommand.warmupCommand().schedule();
   }
 
   /**
@@ -103,18 +123,17 @@ public class RobotContainer {
     if (Objects.nonNull(intake) && Objects.nonNull(flywheelKicker) && Objects.nonNull(indexer)) {
       driverCont.leftBumper().whileTrue(commandFactory.basicIntakeCmd());
     }
-
     if (Objects.nonNull(flywheel)) {
       driverCont.rightBumper().whileTrue(commandFactory.basicShootCmd());
     }
-
     if (Objects.nonNull(intake)) {
       driverCont.a().whileTrue(intake.setDutyCycleCommand(1.0));
     }
-
     if (Objects.nonNull(drivetrain)) {
       drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
     }
+
+    drivetrain.registerTelemetry(logger::telemeterize);
   }
 
   public void onDisable() {
@@ -139,6 +158,6 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
-    return null;
+    return autoChooser.getSelected();
   }
 }
