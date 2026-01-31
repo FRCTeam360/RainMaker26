@@ -45,12 +45,12 @@ public class CommandFactory {
     this.indexer = indexer;
     this.intakePivot = intakePivot;
     this.vision = vision;
-    this.drivetrain =   }drivetrain;
-
+    this.drivetrain =   drivetrain;
+  }
 
   public Command basicIntakeCmd() {
     return intake
-        .setDutyCycleCommand(()->0.65)
+        .setDutyCycleCommand(() -> 0.65)
         .alongWith(flyWheelKicker.setDutyCycleCommand(1.0))
         .alongWith(indexer.setDutyCycleCommand(0.5));
   }
