@@ -3,6 +3,7 @@ name: Format Check
 on:
   pull_request:
     branches: [main]
+  workflow_dispatch: # Allows manual trigger from Actions tab
 
 jobs:
   format:
