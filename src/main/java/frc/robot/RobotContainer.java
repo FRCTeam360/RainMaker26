@@ -99,10 +99,11 @@ public class RobotContainer {
         // intakePivot = new IntakePivot(new IntakePivotIOPB());
     }
     // Configure the trigger bindings
-    registerPathplannerCommand("basic intake", commandFactory.basicIntakeCmd());
-    registerPathplannerCommand("shoot at hub", commandFactory.shootWithSpinUp(3000.0, 4.0));
     commandFactory =
         new CommandFactory(intake, flywheel, flywheelKicker, hood, indexer, drivetrain);
+
+    registerPathplannerCommand("basic intake", commandFactory.basicIntakeCmd());
+    registerPathplannerCommand("shoot at hub", commandFactory.shootWithSpinUp(3000.0, 4.0));
     configureBindings();
 
     PathPlannerLogging.setLogActivePathCallback(
