@@ -50,7 +50,6 @@ public class HoodIOSim implements HoodIO {
   // Motor and control
   private final TalonFX motorControllerSim = new TalonFX(SimulationConstants.HOOD_MOTOR);
   private final PositionVoltage positionRequest = new PositionVoltage(0).withSlot(0);
-  private final VelocityVoltage velocityRequest = new VelocityVoltage(0).withSlot(0);
 
   // Simulation
   private final SingleJointedArmSim hoodSim =
@@ -72,10 +71,6 @@ public class HoodIOSim implements HoodIO {
     motorControllerSim
         .getSimState()
         .setRawRotorPosition(Radians.of(hoodSim.getAngleRads() * gearRatio).in(Rotations));
-    motorControllerSim
-        .getSimState()
-        .setRotorVelocity(
-            RadiansPerSecond.of(hoodSim.getVelocityRadPerSec() * gearRatio).in(RotationsPerSecond));
   }
 
   private void configureMotor() {
@@ -132,10 +127,6 @@ public class HoodIOSim implements HoodIO {
     motorControllerSim
         .getSimState()
         .setRawRotorPosition(Radians.of(hoodSim.getAngleRads() * gearRatio).in(Rotations));
-    motorControllerSim
-        .getSimState()
-        .setRotorVelocity(
-            RadiansPerSecond.of(hoodSim.getVelocityRadPerSec() * gearRatio).in(RotationsPerSecond));
 
     // Step 4: Update battery voltage based on current draw
     RoboRioSim.setVInVoltage(
@@ -143,7 +134,6 @@ public class HoodIOSim implements HoodIO {
 
     // Step 5: Read all inputs from the SIMULATED VALUES (source of truth)
     inputs.position = Radians.of(hoodSim.getAngleRads()).in(Rotations);
-    inputs.velocity = RadiansPerSecond.of(hoodSim.getVelocityRadPerSec()).in(RotationsPerSecond);
     inputs.voltage = motorControllerSim.getSimState().getMotorVoltage();
     inputs.statorCurrent = motorControllerSim.getStatorCurrent().getValueAsDouble();
     inputs.supplyCurrent = motorControllerSim.getSupplyCurrent().getValueAsDouble();
@@ -157,15 +147,6 @@ public class HoodIOSim implements HoodIO {
   @Override
   public void setPosition(double positionRotations) {
     motorControllerSim.setControl(positionRequest.withPosition(positionRotations));
-  }
-
-  /**
-   * Set velocity using closed-loop velocity control.
-   *
-   * @param velocityRPS Target velocity in rotations per second
-   */
-  public void setVelocity(double velocityRPS) {
-    motorControllerSim.setControl(velocityRequest.withVelocity(velocityRPS));
   }
 
   @Override
