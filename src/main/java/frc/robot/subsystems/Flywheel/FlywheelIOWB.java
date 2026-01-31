@@ -9,6 +9,7 @@ import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
+import com.ctre.phoenix6.controls.VelocityDutyCycle;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
@@ -26,13 +27,13 @@ public class FlywheelIOWB implements FlywheelIO {
   private MotorOutputConfigs motorOutputConfigs = new MotorOutputConfigs();
 
   public FlywheelIOWB() {
-    double kP = 0.0;
+    double kP = 0.025;
     double kI = 0.0;
     double kD = 0.0;
     double kA = 0.0;
     double kG = 0.0;
-    double kS = 0.0;
-    double kV = 0.0;
+    double kS = 0.07;
+    double kV = 0.008;
 
     Slot0Configs slot0Configs = rightConfig.Slot0;
     slot0Configs.kA = kA;
@@ -48,9 +49,9 @@ public class FlywheelIOWB implements FlywheelIO {
       i.getConfigurator().apply(defaultConfig);
     }
 
-    rightConfig.CurrentLimits.StatorCurrentLimit = 160.0;
+    rightConfig.CurrentLimits.StatorCurrentLimit = 200.0;
     rightConfig.CurrentLimits.StatorCurrentLimitEnable = true;
-    rightConfig.CurrentLimits.SupplyCurrentLimit = 80.0;
+    rightConfig.CurrentLimits.SupplyCurrentLimit = 100.0;
     rightConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
 
     rightConfig
@@ -81,11 +82,12 @@ public class FlywheelIOWB implements FlywheelIO {
   }
 
   MotionMagicVelocityVoltage velocityVoltage = new MotionMagicVelocityVoltage(0);
+  VelocityDutyCycle velocityDutyCycle = new VelocityDutyCycle(0.0);
 
   @Override
   public void setRPM(double rpm) {
     double rps = rpm / 60.0;
-    motors[0].setControl(velocityVoltage.withVelocity(rps));
+    motors[0].setControl(velocityDutyCycle.withVelocity(rps));
   }
 
   @Override
@@ -98,7 +100,8 @@ public class FlywheelIOWB implements FlywheelIO {
       inputs.statorCurrents[i] = motors[i].getStatorCurrent().getValueAsDouble();
       inputs.supplyCurrents[i] = motors[i].getStatorCurrent().getValueAsDouble();
       inputs.positions[i] = motors[i].getPosition().getValueAsDouble();
-      inputs.velocities[i] = motors[i].getVelocity().getValueAsDouble();
+      // velocities are now in RPM
+      inputs.velocities[i] = motors[i].getVelocity().getValueAsDouble() * 60.0;
       inputs.voltages[i] = motors[i].getMotorVoltage().getValueAsDouble();
     }
   }
