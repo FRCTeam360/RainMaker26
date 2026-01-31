@@ -2,11 +2,23 @@ plugins {
     id "java"
     id 'com.diffplug.spotless' version '6.25.0'
     id "edu.wpi.first.GradleRIO" version "2026.2.1"
+    id "com.peterabeles.gversion" version "1.10"
 }
 
 java {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
+}
+
+// Create version file
+project.compileJava.dependsOn(createVersionFile)
+gversion {
+    srcDir       = "src/main/java/"
+    classPackage = "frc.robot"
+    className    = "BuildConstants"
+    dateFormat   = "yyyy-MM-dd HH:mm:ss z"
+    timeZone     = "America/New_York"
+    indent       = "  "
 }
 
 // Spotless formatting
@@ -16,7 +28,7 @@ spotless {
     java {
         target fileTree(".") {
             include "**/*.java"
-            exclude "**/build/**", "**/build-*/**", ".*/**"
+            exclude "**/build/**", "**/build-*/**", ".*/**", "**/BuildConstants.java"
         }
         toggleOffOn()
         googleJavaFormat()
