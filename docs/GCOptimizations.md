@@ -20,24 +20,83 @@ The following patterns were identified as sources of frequent object allocation 
 
 ### Vision.java
 
-| Issue | Fix |
-|-------|-----|
-| `new ArrayList<>()` in periodic | Pre-allocated as class field, use `clear()` each cycle |
-| `Arrays.stream(distances).min()` | Replaced with simple for-loop |
-| `"Limelight: " + key` in loop | Pre-computed keys in Map during construction |
+| Issue                            | Fix                                                    |
+| -------------------------------- | ------------------------------------------------------ |
+| `new ArrayList<>()` in periodic  | Pre-allocated as class field, use `clear()` each cycle |
+| `Arrays.stream(distances).min()` | Replaced with simple for-loop                          |
+| `"Limelight: " + key` in loop    | Pre-computed keys in Map during construction           |
+
+### VisionIOLimelight.java
+
+| Issue                                                   | Fix                                                  |
+| ------------------------------------------------------- | ---------------------------------------------------- |
+| `new int[]`, `new double[]`, `new Pose3d[]` every cycle | Pre-allocated arrays as instance fields (max size 8) |
+
+Three arrays were allocated every periodic cycle (50Hz) when tags were visible, creating up to 150 array allocations per second per Limelight. Fixed by pre-allocating arrays with a fixed max size of 12 fiducials (a camera with an 80 degree FOV could see at least 9 tags in this game). The actual count is tracked via `inputs.fiducialCount`.
+
+![Vision GC Optimization](images/possible-tags-in-view.png)
 
 ### RobotContainer.java
 
-| Issue | Fix |
-|-------|-----|
+| Issue                                                  | Fix                                                           |
+| ------------------------------------------------------ | ------------------------------------------------------------- |
 | `poses.toArray(new Pose2d[0])` in PathPlanner callback | Reusable array field, reallocates only when path size changes |
 
 ### CommandSwerveDrivetrain.java
 
-| Issue | Fix |
-|-------|-----|
-| `CMD_NAME + " Current Pose"` (4x per cycle) | Static final String constants |
-| `getStateCopy()` called 4 times | Single call, reuse returned object |
+| Issue                                            | Fix                                          |
+| ------------------------------------------------ | -------------------------------------------- |
+| `CMD_NAME + " Current Pose"` (4x per cycle)      | Static final String constants                |
+| `getStateCopy()` called multiple times per cycle | Cached state pattern with `getCachedState()` |
+
+#### Cached State Pattern
+
+The `getStateCopy()` method allocates a new `SwerveDriveState` object each call. Previously this was called:
+
+- 4x in `periodic()` for logging
+- 2x in PathPlanner suppliers (pose + speeds) during auto
+
+**Solution:** Cache the state once per cycle and expose via `getCachedState()`:
+
+```java
+private SwerveDriveState cachedState;
+
+public SwerveDriveState getCachedState() {
+    if (cachedState == null) {
+        cachedState = this.getStateCopy();
+    }
+    return cachedState;
+}
+
+@Override
+public void periodic() {
+    cachedState = this.getStateCopy();  // Refresh once per cycle
+    Logger.recordOutput(LOG_CURRENT_POSE, cachedState.Pose);
+    // ... rest of logging uses cachedState
+}
+```
+
+PathPlanner's AutoBuilder is configured to use `getCachedState()`:
+
+```java
+AutoBuilder.configure(
+    () -> getCachedState().Pose,   // Pose supplier
+    this::resetPose,
+    () -> getCachedState().Speeds, // Speeds supplier
+    // ...
+);
+```
+
+#### Why This Works: Command Scheduler Execution Order
+
+Per [WPILib Command Scheduler docs](https://docs.wpilib.org/en/stable/docs/software/commandbased/command-scheduler.html), the scheduler runs in this order each cycle:
+
+1. **Subsystem `periodic()` methods** run first
+2. Triggers are polled to schedule new commands
+3. **Command `execute()` methods** run (including PathPlanner path following)
+4. Default commands are scheduled
+
+This guarantees `cachedState` is refreshed in `periodic()` before PathPlanner queries it in `execute()`. The cache is always current for the scheduler cycle.
 
 ## Not Modified
 
@@ -67,6 +126,7 @@ for (double v : arr) if (v < min) min = v;
 ## Related Configuration
 
 JVM arguments in `build.gradle` (lines 116-124) control GC behavior:
+
 - `-XX:+UseSerialGC` - Single-threaded collector for predictability
 - `-Xmx100M -Xms100M` - Fixed heap size prevents resize pauses
 - `-XX:+AlwaysPreTouch` - Pre-allocates memory at startup

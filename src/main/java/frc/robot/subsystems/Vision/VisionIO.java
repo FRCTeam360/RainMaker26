@@ -23,6 +23,7 @@ public interface VisionIO {
     public double timestampSeconds;
     public int[] targetIds;
     public double[] distancesToTargets;
+    public int fiducialCount;
     public boolean poseUpdated;
     public Pose3d[] tagPoses;
   }

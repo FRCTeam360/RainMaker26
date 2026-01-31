@@ -137,7 +137,8 @@ public class Vision extends SubsystemBase {
 
       // Get minimum distance to targets without stream allocation
       double closestTagDistance = Double.MAX_VALUE;
-      for (double dist : input.distancesToTargets) {
+      for (int i = 0; i < input.fiducialCount; i++) {
+        double dist = input.distancesToTargets[i];
         if (dist < closestTagDistance) {
           closestTagDistance = dist;
         }

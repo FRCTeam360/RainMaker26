@@ -226,9 +226,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
       var config = RobotConfig.fromGUISettings();
 
       AutoBuilder.configure(
-          () -> getStateCopy().Pose, // Supplier of current robot pose
+          () -> getCachedState().Pose, // Supplier of current robot pose
           this::resetPose, // Consumer for seeding pose against auto
-          () -> getStateCopy().Speeds, // Supplier of current robot speeds
+          () -> getCachedState().Speeds, // Supplier of current robot speeds
           // Consumer of ChassisSpeeds and feedforwards to drive the robot
           (speeds, feedforwards) ->
               setControl(
@@ -290,14 +290,30 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   private static final String LOG_CURRENT_STATE = "Swerve: CurrentState";
   private static final String LOG_TARGET_STATE = "Swerve: TargetState";
 
+  /** Cached state to avoid multiple getStateCopy() allocations per cycle. */
+  private SwerveDriveState cachedState;
+
+  /**
+   * Returns the cached swerve drive state from the current periodic cycle. Use this instead of
+   * getStateCopy() to avoid additional allocations.
+   *
+   * @return The cached SwerveDriveState, or a fresh copy if called before periodic()
+   */
+  public SwerveDriveState getCachedState() {
+    if (cachedState == null) {
+      cachedState = this.getStateCopy();
+    }
+    return cachedState;
+  }
+
   @Override
   public void periodic() {
     // Get state once to avoid multiple copy allocations
-    SwerveDriveState state = this.getStateCopy();
-    Logger.recordOutput(LOG_CURRENT_POSE, state.Pose);
-    Logger.recordOutput(LOG_ROTATION, state.RawHeading);
-    Logger.recordOutput(LOG_CURRENT_STATE, state.ModuleStates);
-    Logger.recordOutput(LOG_TARGET_STATE, state.ModuleTargets);
+    cachedState = this.getStateCopy();
+    Logger.recordOutput(LOG_CURRENT_POSE, cachedState.Pose);
+    Logger.recordOutput(LOG_ROTATION, cachedState.RawHeading);
+    Logger.recordOutput(LOG_CURRENT_STATE, cachedState.ModuleStates);
+    Logger.recordOutput(LOG_TARGET_STATE, cachedState.ModuleTargets);
     /*
      * Periodically try to apply the operator perspective.
      * If we haven't applied the operator perspective before, then we should apply it regardless of DS state.

@@ -23,6 +23,12 @@ public class VisionIOLimelight implements VisionIO {
 
   private boolean acceptMeasurements;
 
+  // Pre-allocated arrays to avoid GC pressure in updateInputs()
+  private static final int MAX_FIDUCIALS = 12;
+  private final int[] targetIds = new int[MAX_FIDUCIALS];
+  private final double[] distancesToTargets = new double[MAX_FIDUCIALS];
+  private final Pose3d[] tagPoses = new Pose3d[MAX_FIDUCIALS];
+
   /**
    * Creates a new Limelight hardware layer.
    *
@@ -85,10 +91,10 @@ public class VisionIOLimelight implements VisionIO {
 
     inputs.estimatedPose = poseEstimate.pose;
     inputs.timestampSeconds = poseEstimate.timestampSeconds;
-    int[] targetIds = new int[poseEstimate.rawFiducials.length];
-    double[] distancesToTargets = new double[poseEstimate.rawFiducials.length];
-    Pose3d[] tagPoses = new Pose3d[poseEstimate.rawFiducials.length];
-    for (int i = 0; i < poseEstimate.rawFiducials.length; i++) {
+
+    // Populate pre-allocated arrays to avoid GC pressure
+    int fiducialCount = Math.min(poseEstimate.rawFiducials.length, MAX_FIDUCIALS);
+    for (int i = 0; i < fiducialCount; i++) {
       RawFiducial rawFiducial = poseEstimate.rawFiducials[i];
       // if the pose is outside of the field, then skip to the next point
       Optional<Pose3d> tagPose = Constants.FIELD_LAYOUT.getTagPose(rawFiducial.id);
@@ -99,6 +105,7 @@ public class VisionIOLimelight implements VisionIO {
       tagPoses[i] = tagPose.get();
     }
 
+    inputs.fiducialCount = fiducialCount;
     inputs.targetIds = targetIds;
     inputs.distancesToTargets = distancesToTargets;
     inputs.tagPoses = tagPoses;
