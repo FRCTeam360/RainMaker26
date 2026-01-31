@@ -110,7 +110,8 @@ public class FlywheelIOSim implements FlywheelIO {
 
     // Step 1: Get the commanded voltage from motors and apply to simulation
     // Use average voltage from both motors for the flywheel sim
-    // TODO: Verify StrictFollower works in simulation - check if motorVoltage2 tracks motorVoltage1.
+    // TODO: Verify StrictFollower works in simulation - check if motorVoltage2 tracks
+    // motorVoltage1.
     //       If motorVoltage2 is always 0, the follower isn't working and we need to command both
     //       motors directly or use motorVoltage1 * 2 for the physics sim.
     double motorVoltage1 = motorControllerSim1.getSimState().getMotorVoltage();
