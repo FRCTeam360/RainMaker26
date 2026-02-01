@@ -100,8 +100,7 @@ public class FlywheelIOWB implements FlywheelIO {
       inputs.positions[i] = motors[i].getPosition().getValueAsDouble();
       inputs.velocities[i] = motors[i].getVelocity().getValueAsDouble();
       inputs.voltages[i] = motors[i].getMotorVoltage().getValueAsDouble();
-      inputs.setpoint[i] = motors[i].getClosedLoopReference().getValueAsDouble();  
-
+      inputs.setpoint[i] = motors[i].getClosedLoopReference().getValueAsDouble();
     }
   }
 }

@@ -59,8 +59,6 @@ public class IntakePivotIOPB implements IntakePivotIO {
     inputs.velocity = intakePivot.getVelocity().getValueAsDouble();
     inputs.voltage = intakePivot.getMotorVoltage().getValueAsDouble();
     inputs.supplyCurrent = intakePivot.getSupplyCurrent().getValueAsDouble();
-    inputs.setpoint = intakePivot.getClosedLoopReference().getValueAsDouble(); 
-     
-    
+    inputs.setpoint = intakePivot.getClosedLoopReference().getValueAsDouble();
   }
 }

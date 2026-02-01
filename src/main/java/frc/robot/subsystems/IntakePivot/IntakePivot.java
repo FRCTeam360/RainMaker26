@@ -49,7 +49,4 @@ public class IntakePivot extends SubsystemBase {
     // Update visualization with current arm angle (convert rotations to radians)
     visualizer.update(inputs.position * 2.0 * Math.PI);
   }
-  
-
-
 }
