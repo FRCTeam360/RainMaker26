@@ -178,22 +178,22 @@ The subsystem calls `io.setRPM(500)` and doesn't know—or need to know—whethe
 
 ## 4. Creating a New Subsystem: Step-by-Step
 
-Let's create a complete `Indexer` subsystem from scratch.
+Let's create a complete `Hopper` subsystem from scratch.
 
 ### Step 1: Create the IO Interface
 
-File: `subsystems/Indexer/IndexerIO.java`
+File: `subsystems/Hopper/HopperIO.java`
 
 ```java
-package frc.robot.subsystems.Indexer;
+package frc.robot.subsystems.Hopper;
 
 import org.littletonrobotics.junction.AutoLog;
 
-public interface IndexerIO {
+public interface HopperIO {
 
   // Define the inputs that will be logged
   @AutoLog
-  public static class IndexerIOInputs {
+  public static class HopperIOInputs {
     public double velocity = 0.0;           // RPM
     public double voltage = 0.0;            // Volts
     public double statorCurrent = 0.0;      // Amps
@@ -206,35 +206,35 @@ public interface IndexerIO {
   public void setRPM(double rpm);
 
   // Update method called every loop
-  public default void updateInputs(IndexerIOInputs inputs) {}
+  public default void updateInputs(HopperIOInputs inputs) {}
 }
 ```
 
 **Key Points:**
 
-- The `@AutoLog` annotation generates `IndexerIOInputsAutoLogged.java` when you build
+- The `@AutoLog` annotation generates `HopperIOInputsAutoLogged.java` when you build
 - Fields in `IOInputs` are what get logged to file
 - Methods define the control interface
 - `updateInputs()` has a default empty implementation (so you don't need `IOReplay`)
 
 ### Step 2: Create the Real Hardware Implementation
 
-File: `subsystems/Indexer/IndexerIOReal.java`
+File: `subsystems/Hopper/HopperIOReal.java`
 
 ```java
-package frc.robot.subsystems.Indexer;
+package frc.robot.subsystems.Hopper;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 
-public class IndexerIOReal implements IndexerIO {
+public class HopperIOReal implements HopperIO {
   private final TalonFX motor;
   private final DutyCycleOut dutyCycleRequest = new DutyCycleOut(0);
   private final VelocityVoltage velocityRequest = new VelocityVoltage(0);
 
-  public IndexerIOReal(int canID) {
+  public HopperIOReal(int canID) {
     motor = new TalonFX(canID);
     configureMotor();
   }
@@ -256,7 +256,7 @@ public class IndexerIOReal implements IndexerIO {
   }
 
   @Override
-  public void updateInputs(IndexerIOInputs inputs) {
+  public void updateInputs(HopperIOInputs inputs) {
     inputs.velocity = motor.getVelocity().getValueAsDouble() * 60.0;  // RPS → RPM
     inputs.voltage = motor.getMotorVoltage().getValueAsDouble();
     inputs.statorCurrent = motor.getStatorCurrent().getValueAsDouble();
@@ -277,19 +277,19 @@ public class IndexerIOReal implements IndexerIO {
 
 ### Step 3: Create the Simulation Implementation
 
-File: `subsystems/Indexer/IndexerIOSim.java`
+File: `subsystems/Hopper/HopperIOSim.java`
 
 ```java
-package frc.robot.subsystems.Indexer;
+package frc.robot.subsystems.Hopper;
 
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 
-public class IndexerIOSim implements IndexerIO {
+public class HopperIOSim implements HopperIO {
   private final FlywheelSim flywheelSim;
   private double appliedVoltage = 0.0;
 
-  public IndexerIOSim() {
+  public HopperIOSim() {
     flywheelSim = new FlywheelSim(
         DCMotor.getNEO(1),     // Motor model
         5.0,                    // Gear ratio
@@ -297,7 +297,7 @@ public class IndexerIOSim implements IndexerIO {
   }
 
   @Override
-  public void updateInputs(IndexerIOInputs inputs) {
+  public void updateInputs(HopperIOInputs inputs) {
     flywheelSim.update(0.02);  // Advance simulation by 20ms
 
     inputs.velocity = flywheelSim.getAngularVelocityRPM();
@@ -325,21 +325,21 @@ public class IndexerIOSim implements IndexerIO {
 
 ### Step 4: Create the Subsystem
 
-File: `subsystems/Indexer/Indexer.java`
+File: `subsystems/Hopper/Hopper.java`
 
 ```java
-package frc.robot.subsystems.Indexer;
+package frc.robot.subsystems.Hopper;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
 
-public class Indexer extends SubsystemBase {
-  private final IndexerIO io;
-  private final IndexerIOInputsAutoLogged inputs = new IndexerIOInputsAutoLogged();
+public class Hopper extends SubsystemBase {
+  private final HopperIO io;
+  private final HopperIOInputsAutoLogged inputs = new HopperIOInputsAutoLogged();
 
-  /** Creates a new Indexer subsystem */
-  public Indexer(IndexerIO io) {
+  /** Creates a new Hopper subsystem */
+  public Hopper(HopperIO io) {
     this.io = io;  // Dependency injection!
   }
 
@@ -349,7 +349,7 @@ public class Indexer extends SubsystemBase {
     io.updateInputs(inputs);
 
     // Process and log the inputs
-    Logger.processInputs("Indexer", inputs);
+    Logger.processInputs("Hopper", inputs);
   }
 
   // High-level control methods
@@ -378,14 +378,14 @@ File: `RobotContainer.java`
 
 ```java
 public class RobotContainer {
-  private final Indexer indexer;
+  private final Hopper indexer;
 
   public RobotContainer() {
     // Choose implementation based on robot mode
     if (Robot.isReal()) {
-      indexer = new Indexer(new IndexerIOReal(10));  // CAN ID 10
+      indexer = new Hopper(new HopperIOReal(10));  // CAN ID 10
     } else {
-      indexer = new Indexer(new IndexerIOSim());
+      indexer = new Hopper(new HopperIOSim());
     }
 
     configureBindings();
@@ -724,7 +724,7 @@ public class FlywheelIOReal implements FlywheelIO {
 ### 8.2 Using Enums for States
 
 ```java
-public class Indexer extends SubsystemBase {
+public class Hopper extends SubsystemBase {
   public enum State {
     IDLE,
     INTAKING,
@@ -737,8 +737,8 @@ public class Indexer extends SubsystemBase {
   @Override
   public void periodic() {
     io.updateInputs(inputs);
-    Logger.processInputs("Indexer", inputs);
-    Logger.recordOutput("Indexer/State", currentState.toString());
+    Logger.processInputs("Hopper", inputs);
+    Logger.recordOutput("Hopper/State", currentState.toString());
 
     // State machine logic
     switch (currentState) {

@@ -29,9 +29,9 @@ import frc.robot.subsystems.FlywheelKicker.FlywheelKickerIOWB;
 import frc.robot.subsystems.Hood.Hood;
 import frc.robot.subsystems.Hood.HoodIOSim;
 import frc.robot.subsystems.Hood.HoodIOWB;
-import frc.robot.subsystems.Indexer.Indexer;
-import frc.robot.subsystems.Indexer.IndexerIOSim;
-import frc.robot.subsystems.Indexer.IndexerIOWB;
+import frc.robot.subsystems.Hopper.Hopper;
+import frc.robot.subsystems.Hopper.HopperIOSim;
+import frc.robot.subsystems.Hopper.HopperIOWB;
 import frc.robot.subsystems.Intake.Intake;
 import frc.robot.subsystems.Intake.IntakeIOSim;
 import frc.robot.subsystems.Intake.IntakeIOWB;
@@ -55,7 +55,7 @@ public class RobotContainer {
   private SendableChooser<Command> autoChooser;
   private Flywheel flywheel;
   private Hood hood;
-  private Indexer indexer;
+  private Hopper indexer;
   private Vision vision;
   private Intake intake;
   private IntakePivot intakePivot;
@@ -82,7 +82,7 @@ public class RobotContainer {
         intakePivot = new IntakePivot(new IntakePivotIOSim());
         flywheel = new Flywheel(new FlywheelIOSim());
         hood = new Hood(new HoodIOSim());
-        indexer = new Indexer(new IndexerIOSim());
+        indexer = new Hopper(new HopperIOSim());
         intake = new Intake(new IntakeIOSim());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOSim());
         break;
@@ -92,7 +92,7 @@ public class RobotContainer {
         logger = new Telemetry(WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
         flywheel = new Flywheel(new FlywheelIOWB());
         hood = new Hood(new HoodIOWB());
-        indexer = new Indexer(new IndexerIOWB());
+        indexer = new Hopper(new HopperIOWB());
         vision =
             new Vision(
                 Map.ofEntries(
