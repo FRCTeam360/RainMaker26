@@ -77,7 +77,6 @@ public class SuperStructure extends SubsystemBase {
     private void intaking() {
         intake.setWantedState(Intake.IntakeStates.INTAKING);
         indexer.setWantedState(Indexer.IndexerStates.INTAKING);
-        flywheelKicker.setWantedState(FlywheelKickerStates.INTAKING);
     }
     private void shooting(){
         flywheel.setWantedState(Flywheel.FlywheelStates.SHOOTING);

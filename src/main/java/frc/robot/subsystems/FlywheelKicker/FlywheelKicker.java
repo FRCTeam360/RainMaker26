@@ -15,8 +15,7 @@ public class FlywheelKicker extends SubsystemBase {
   private final FlywheelKickerIO io;
   private final FlywheelKickerIOInputsAutoLogged inputs = new FlywheelKickerIOInputsAutoLogged();
 public enum FlywheelKickerStates {
-    OFF,
-    INTAKING
+    OFF
   }
   private FlywheelKickerStates wantedState = FlywheelKickerStates.OFF;
   private FlywheelKickerStates currentState = FlywheelKickerStates.OFF;
@@ -26,9 +25,6 @@ public enum FlywheelKickerStates {
     previousState = currentState;
 
     switch (wantedState) {
-      case INTAKING:
-        currentState = FlywheelKickerStates.INTAKING;
-        break;
       case OFF:
         currentState =  FlywheelKickerStates.OFF;
         break;
@@ -37,9 +33,6 @@ public enum FlywheelKickerStates {
   }
   private void applyState() {
     switch (currentState) {
-      case INTAKING:
-        setDutyCycle(1.0);
-        break;
       case OFF:
       default:
         stop();

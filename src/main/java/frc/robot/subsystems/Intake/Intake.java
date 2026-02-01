@@ -46,7 +46,7 @@ public class Intake extends SubsystemBase {
   private void applyState() {
     switch (currentState) {
       case INTAKING:
-        setDutyCycle(0.65);
+        setDutyCycle(0.75);
         break;
       case OFF:
       default:

@@ -39,7 +39,7 @@ public class Indexer extends SubsystemBase {
   private void applyState() {
     switch (currentState) {
       case INTAKING:
-        setDutyCycle(0.5);
+        setDutyCycle(0.2);
         break;
       case OFF:
       default:
