@@ -13,6 +13,7 @@ import org.littletonrobotics.junction.Logger;
 public class Hood extends SubsystemBase {
   private final HoodIO io;
   private final HoodIOInputsAutoLogged inputs = new HoodIOInputsAutoLogged();
+  private final double TOLERANCE = 0.5;
 
   /** Creates a new Hood. */
   public Hood(HoodIO io) {
@@ -27,12 +28,12 @@ public class Hood extends SubsystemBase {
     io.setPosition(position);
   }
 
-  public Command setPositionCmd(double position) {
-    return this.setPositionCmd(() -> position);
+  public double getPosition() {
+    return inputs.position;
   }
 
-  public Command setPositionCmd(DoubleSupplier position) {
-    return this.runOnce(() -> this.setPosition(position.getAsDouble()));
+  public Command setPositionCmd(double position) {
+    return this.runOnce(() -> io.setPosition(position));
   }
 
   public void setEncoder(double position) {
@@ -44,7 +45,7 @@ public class Hood extends SubsystemBase {
   }
 
   public boolean atSetpoint(double setpoint) {
-    return Math.abs(inputs.position - setpoint) < TOLERANCE;
+    return Math.abs(getPosition() - setpoint) < TOLERANCE;
   }
 
   public Command moveToZeroAndZero() {
@@ -68,5 +69,9 @@ public class Hood extends SubsystemBase {
 
   public Command setDutyCycleCommand(DoubleSupplier valueSup) {
     return this.runEnd(() -> io.setDutyCycle(valueSup.getAsDouble()), () -> io.setDutyCycle(0.0));
+  }
+
+  public Command zero() {
+    return this.runOnce(() -> setEncoder(0.0));
   }
 }
