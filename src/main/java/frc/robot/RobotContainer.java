@@ -20,6 +20,8 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.generated.WoodBotDrivetrain;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.SuperStructure;
+import frc.robot.subsystems.SuperStructure.SuperStates;
 import frc.robot.subsystems.Flywheel.Flywheel;
 import frc.robot.subsystems.Flywheel.FlywheelIOSim;
 import frc.robot.subsystems.Flywheel.FlywheelIOWB;
@@ -37,8 +39,6 @@ import frc.robot.subsystems.Intake.IntakeIOSim;
 import frc.robot.subsystems.Intake.IntakeIOWB;
 import frc.robot.subsystems.IntakePivot.IntakePivot;
 import frc.robot.subsystems.IntakePivot.IntakePivotIOSim;
-import frc.robot.subsystems.SuperStructure;
-import frc.robot.subsystems.SuperStructure.SuperStates;
 import frc.robot.subsystems.Vision.Vision;
 import frc.robot.subsystems.Vision.VisionIOLimelight;
 import java.util.Map;
@@ -173,7 +173,6 @@ public class RobotContainer {
       drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
     }
   }
-
   private void configureTestBindings() {
     if (Objects.nonNull(flywheel)) {
       testCont1.a().whileTrue(flywheel.setDutyCycleCommand(() -> 0.5));
@@ -266,3 +265,4 @@ public class RobotContainer {
     return autoChooser.getSelected();
   }
 }
+  

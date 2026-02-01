@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import java.util.function.DoubleSupplier;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
@@ -44,11 +46,11 @@ public class CommandFactory {
     this.indexer = indexer;
     this.intakePivot = intakePivot;
     this.vision = vision;
-    this.drivetrain = drivetrain;
+    this.drivetrain =   drivetrain;
   }
 
   public Command basicIntakeCmd() {
-    return intake.setDutyCycleCommand(() -> 0.65).alongWith(indexer.setDutyCycleCommand(0.4));
+    return intake.setDutyCycleCommand(()->0.65).alongWith(indexer.setDutyCycleCommand(0.4));
   }
 
   public Command basicShootCmd() {
