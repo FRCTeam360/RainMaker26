@@ -12,8 +12,8 @@ import edu.wpi.first.math.geometry.Translation2d;
 import org.littletonrobotics.junction.Logger;
 
 /**
- * Utility class for visualizing field elements and debug geometry in AdvantageScope.
- * Call {@link #update(Pose2d)} periodically (e.g., in Robot.periodic()) to log visualizations.
+ * Utility class for visualizing field elements and debug geometry in AdvantageScope. Call {@link
+ * #update(Pose2d)} periodically (e.g., in Robot.periodic()) to log visualizations.
  */
 public class FieldVisualizer {
 
@@ -63,8 +63,8 @@ public class FieldVisualizer {
   }
 
   /**
-   * Logs a trajectory/line from the robot's current position to the hub center.
-   * In AdvantageScope, display this as a "Trajectory" type to see the line.
+   * Logs a trajectory/line from the robot's current position to the hub center. In AdvantageScope,
+   * display this as a "Trajectory" type to see the line.
    *
    * @param robotPose The current robot pose
    */
@@ -101,11 +101,7 @@ public class FieldVisualizer {
    */
   public static void logLine(String name, Translation2d start, Translation2d end) {
     Rotation2d angle = end.minus(start).getAngle();
-    Pose2d[] line =
-        new Pose2d[] {
-          new Pose2d(start, angle),
-          new Pose2d(end, angle)
-        };
+    Pose2d[] line = new Pose2d[] {new Pose2d(start, angle), new Pose2d(end, angle)};
     Logger.recordOutput(LOG_PREFIX + name, line);
   }
 

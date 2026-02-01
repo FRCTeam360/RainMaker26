@@ -10,6 +10,7 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -27,11 +28,9 @@ import frc.robot.generated.WoodBotDrivetrain.TunerSwerveDrivetrain;
 import frc.robot.subsystems.Vision.VisionMeasurement;
 import frc.robot.utils.FieldConstants;
 import frc.robot.utils.FieldVisualizer;
-
-import edu.wpi.first.math.geometry.Translation2d;
 import java.util.List;
-import java.util.function.DoubleSupplier;
 import java.util.Optional;
+import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -111,9 +110,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   }
 
   /**
-   * Creates a command that drives the robot in field-centric mode while continuously
-   * rotating to face the hub center. The heading controller automatically adjusts
-   * the robot's rotation to always point toward the hub as the robot moves around the field.
+   * Creates a command that drives the robot in field-centric mode while continuously rotating to
+   * face the hub center. The heading controller automatically adjusts the robot's rotation to
+   * always point toward the hub as the robot moves around the field.
    *
    * @param velocityXSupplier Supplier for X velocity (field-relative, forward positive) in m/s
    * @param velocityYSupplier Supplier for Y velocity (field-relative, left positive) in m/s
@@ -121,39 +120,40 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
    */
   public Command faceHubWhileDriving(
       DoubleSupplier velocityXSupplier, DoubleSupplier velocityYSupplier) {
-    
+
     // Configure the heading controller with PID values
     m_faceHubRequest.HeadingController.setPID(HEADING_KP, HEADING_KI, HEADING_KD);
     m_faceHubRequest.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
     m_faceHubRequest.HeadingController.setIZone(HEADING_I_ZONE);
 
-    return run(() -> {
-      // Get the hub center position
-      Translation2d hubCenter = FieldConstants.Hub.topCenterPoint.toTranslation2d();
-      
-      // Get current robot position
-      Translation2d robotPosition = this.getStateCopy().Pose.getTranslation();
-      
-      // Calculate the angle from robot to hub
-      Rotation2d angleToHub = hubCenter.minus(robotPosition).getAngle();
-      
-      // Log the target angle for debugging
-      Logger.recordOutput(CMD_NAME + "FaceHub/TargetAngle", angleToHub.getDegrees());
-      Logger.recordOutput(CMD_NAME + "FaceHub/DistanceToHub", 
-          robotPosition.getDistance(hubCenter));
-      
-      // Apply the field-centric facing angle request
-      this.setControl(
-          m_faceHubRequest
-              .withVelocityX(velocityXSupplier.getAsDouble())
-              .withVelocityY(velocityYSupplier.getAsDouble())
-              .withTargetDirection(angleToHub));
-    });
+    return run(
+        () -> {
+          // Get the hub center position
+          Translation2d hubCenter = FieldConstants.Hub.topCenterPoint.toTranslation2d();
+
+          // Get current robot position
+          Translation2d robotPosition = this.getStateCopy().Pose.getTranslation();
+
+          // Calculate the angle from robot to hub
+          Rotation2d angleToHub = hubCenter.minus(robotPosition).getAngle();
+
+          // Log the target angle for debugging
+          Logger.recordOutput(CMD_NAME + "FaceHub/TargetAngle", angleToHub.getDegrees());
+          Logger.recordOutput(
+              CMD_NAME + "FaceHub/DistanceToHub", robotPosition.getDistance(hubCenter));
+
+          // Apply the field-centric facing angle request
+          this.setControl(
+              m_faceHubRequest
+                  .withVelocityX(velocityXSupplier.getAsDouble())
+                  .withVelocityY(velocityYSupplier.getAsDouble())
+                  .withTargetDirection(angleToHub));
+        });
   }
 
   /**
-   * Creates a command that drives the robot in field-centric mode while continuously
-   * rotating to face the hub center, using controller input with cubic response curve.
+   * Creates a command that drives the robot in field-centric mode while continuously rotating to
+   * face the hub center, using controller input with cubic response curve.
    *
    * @param driveCont The Xbox controller for driver input
    * @return Command that drives while facing the hub
@@ -370,12 +370,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     m_simNotifier.startPeriodic(kSimLoopPeriod);
   }
 
-
   public void addVisionMeasurements(List<VisionMeasurement> measurements) {
     // Update vision status based on whether we have measurements this cycle
     hasVisionMeasurements = !measurements.isEmpty();
-    
-    
+
     for (VisionMeasurement measurement : measurements) {
       this.addVisionMeasurement(
           measurement.estimatedPose(),

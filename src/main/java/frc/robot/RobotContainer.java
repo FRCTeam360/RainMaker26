@@ -6,6 +6,10 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.commands.FollowPathCommand;
+import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -23,9 +27,7 @@ import frc.robot.subsystems.FlywheelKicker.FlywheelKickerIOSim;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKickerIOWB;
 import frc.robot.subsystems.Hood.Hood;
 import frc.robot.subsystems.Hood.HoodIOSim;
-import frc.robot.subsystems.Hood.HoodIOWB;
 import frc.robot.subsystems.Indexer.Indexer;
-import frc.robot.subsystems.Indexer.IndexerIOSim;
 import frc.robot.subsystems.Indexer.IndexerIOWB;
 import frc.robot.subsystems.Intake.Intake;
 import frc.robot.subsystems.Intake.IntakeIOSim;
@@ -34,16 +36,9 @@ import frc.robot.subsystems.IntakePivot.IntakePivot;
 import frc.robot.subsystems.IntakePivot.IntakePivotIOSim;
 import frc.robot.subsystems.Vision.Vision;
 import frc.robot.subsystems.Vision.VisionIOPhotonSim;
-
 import java.util.Map;
 import java.util.Objects;
-
 import org.littletonrobotics.junction.Logger;
-
-import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.auto.NamedCommands;
-import com.pathplanner.lib.commands.FollowPathCommand;
-import com.pathplanner.lib.util.PathPlannerLogging;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -91,8 +86,9 @@ public class RobotContainer {
         drivetrain = WoodBotDrivetrain.createDrivetrain();
         logger = new Telemetry(WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
         intakePivot = new IntakePivot(new IntakePivotIOSim());
-        vision = new Vision(
-            Map.of("photonSim", new VisionIOPhotonSim(() -> drivetrain.getState().Pose)));
+        vision =
+            new Vision(
+                Map.of("photonSim", new VisionIOPhotonSim(() -> drivetrain.getState().Pose)));
         flywheel = new Flywheel(new FlywheelIOSim());
         hood = new Hood(new HoodIOSim());
         intake = new Intake(new IntakeIOSim());
@@ -166,13 +162,16 @@ public class RobotContainer {
   private void configureBindings() {
     // Only bind commands if the required subsystems/factories exist
     if (Objects.nonNull(vision)) {
-      Command consumeVisionMeasurements = vision.consumeVisionMeasurements(measurements -> {
-        drivetrain.addVisionMeasurements(measurements);
-      });
+      Command consumeVisionMeasurements =
+          vision.consumeVisionMeasurements(
+              measurements -> {
+                drivetrain.addVisionMeasurements(measurements);
+              });
       vision.setDefaultCommand(consumeVisionMeasurements.ignoringDisable(true));
     }
 
-    // TODO: this is a weird way to circumvent null pointer exceptions, refactor later. Done for Vision sim.
+    // TODO: this is a weird way to circumvent null pointer exceptions, refactor later. Done for
+    // Vision sim.
     if (Objects.nonNull(commandFactory)) {
       driverCont.leftBumper().whileTrue(commandFactory.basicIntakeCmd());
       driverCont.rightBumper().whileTrue(commandFactory.basicShootCmd());
@@ -182,9 +181,7 @@ public class RobotContainer {
     }
     if (Objects.nonNull(drivetrain)) {
       drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
-      driverCont.rightTrigger().whileTrue(
-      drivetrain.faceHubWhileDriving(driverCont)
-);
+      driverCont.rightTrigger().whileTrue(drivetrain.faceHubWhileDriving(driverCont));
     }
   }
 

@@ -42,7 +42,8 @@ public class Vision extends SubsystemBase {
     // X and Y in meters, rotation in radians
     MEASUREMENT_STD_DEV_DISTANCE_MAP.put(
         0.5, VecBuilder.fill(1.0, 1.0, 999999.0)); // Close tags: very high confidence (1cm std dev)
-    MEASUREMENT_STD_DEV_DISTANCE_MAP.put(5.0, VecBuilder.fill(0.5, 0.5, 999999.0)); // Far tags: still high confidence (5cm std dev)
+    MEASUREMENT_STD_DEV_DISTANCE_MAP.put(
+        5.0, VecBuilder.fill(0.5, 0.5, 999999.0)); // Far tags: still high confidence (5cm std dev)
   }
 
   /** Creates a new Vision. */
@@ -109,7 +110,7 @@ public class Vision extends SubsystemBase {
   public void periodic() {
     // Clear previous measurements to prevent unbounded growth
     acceptedMeasurements.clear();
-    
+
     for (String key : ios.keySet()) {
       VisionIO io = ios.get(key);
       VisionIOInputsAutoLogged input = visionInputs.get(key);
@@ -118,16 +119,14 @@ public class Vision extends SubsystemBase {
       Logger.processInputs("Limelight: " + key, input);
     }
 
-
-
     for (String key : visionInputs.keySet()) {
       VisionIOInputsAutoLogged input = visionInputs.get(key);
-      
+
       // Count total detections (pose updates attempted)
       if (input.poseUpdated) {
         totalDetections++;
       }
-      
+
       // skip input if not updated
       if (!input.poseUpdated) {
         rejectedMeasurements++;
@@ -154,13 +153,13 @@ public class Vision extends SubsystemBase {
 
       acceptedMeasurements.add(new VisionMeasurement(timestamp, pose, cprStdDevs));
     }
-    
+
     // Log rejection statistics
     Logger.recordOutput(VISION_LOGGING_PREFIX + "Total Detections", totalDetections);
     Logger.recordOutput(VISION_LOGGING_PREFIX + "Rejected Measurements", rejectedMeasurements);
-    Logger.recordOutput(VISION_LOGGING_PREFIX + "Rejection Rate", 
+    Logger.recordOutput(
+        VISION_LOGGING_PREFIX + "Rejection Rate",
         totalDetections > 0 ? (double) rejectedMeasurements / totalDetections : 0.0);
-    
   }
 
   /**
