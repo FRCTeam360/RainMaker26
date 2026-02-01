@@ -55,7 +55,7 @@ public class RobotContainer {
   private SendableChooser<Command> autoChooser;
   private Flywheel flywheel;
   private Hood hood;
-  private Hopper indexer;
+  private Hopper hopper;
   private Vision vision;
   private Intake intake;
   private IntakePivot intakePivot;
@@ -82,7 +82,7 @@ public class RobotContainer {
         intakePivot = new IntakePivot(new IntakePivotIOSim());
         flywheel = new Flywheel(new FlywheelIOSim());
         hood = new Hood(new HoodIOSim());
-        indexer = new Hopper(new HopperIOSim());
+        hopper = new Hopper(new HopperIOSim());
         intake = new Intake(new IntakeIOSim());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOSim());
         break;
@@ -92,7 +92,7 @@ public class RobotContainer {
         logger = new Telemetry(WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
         flywheel = new Flywheel(new FlywheelIOWB());
         hood = new Hood(new HoodIOWB());
-        indexer = new Hopper(new HopperIOWB());
+        hopper = new Hopper(new HopperIOWB());
         vision =
             new Vision(
                 Map.ofEntries(
@@ -107,7 +107,7 @@ public class RobotContainer {
     // Configure the trigger bindings
     commandFactory =
         new CommandFactory(
-            intake, flywheel, flywheelKicker, hood, indexer, intakePivot, vision, drivetrain);
+            intake, flywheel, flywheelKicker, hood, hopper, intakePivot, vision, drivetrain);
 
     registerPathplannerCommand("basic intake", commandFactory.basicIntakeCmd());
     registerPathplannerCommand("shoot at hub", commandFactory.shootWithSpinUp(3000.0, 4.0));
@@ -155,8 +155,8 @@ public class RobotContainer {
     if (Objects.nonNull(hood)) {
       testCont1.x().whileTrue(hood.setDutyCycleCommand(() -> 0.5));
     }
-    if (Objects.nonNull(indexer)) {
-      testCont1.y().whileTrue(indexer.setDutyCycleCommand(() -> 0.5));
+    if (Objects.nonNull(hopper)) {
+      testCont1.y().whileTrue(hopper.setDutyCycleCommand(() -> 0.5));
     }
     if (Objects.nonNull(intake)) {
       testCont1.leftBumper().whileTrue(intake.setDutyCycleCommand(() -> 0.5));
@@ -170,8 +170,8 @@ public class RobotContainer {
     // TODO: make more elegant solution for null checking subsystems/commands
 
     // Null checks based on subsystems used by each command
-    // basicIntakeCmd uses intake and indexer
-    if (Objects.nonNull(intake) && Objects.nonNull(indexer)) {
+    // basicIntakeCmd uses intake and hopper
+    if (Objects.nonNull(intake) && Objects.nonNull(hopper)) {
       driverCont.leftBumper().whileTrue(commandFactory.basicIntakeCmd());
     }
 
@@ -221,8 +221,8 @@ public class RobotContainer {
     if (Objects.nonNull(intakePivot)) {
       intakePivot.stop();
     }
-    if (Objects.nonNull(indexer)) {
-      indexer.stop();
+    if (Objects.nonNull(hopper)) {
+      hopper.stop();
     }
     if (Objects.nonNull(flywheelKicker)) {
       flywheelKicker.stop();

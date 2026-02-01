@@ -378,22 +378,22 @@ File: `RobotContainer.java`
 
 ```java
 public class RobotContainer {
-  private final Hopper indexer;
+  private final Hopper hopper;
 
   public RobotContainer() {
     // Choose implementation based on robot mode
     if (Robot.isReal()) {
-      indexer = new Hopper(new HopperIOReal(10));  // CAN ID 10
+      hopper = new Hopper(new HopperIOReal(10));  // CAN ID 10
     } else {
-      indexer = new Hopper(new HopperIOSim());
+      hopper = new Hopper(new HopperIOSim());
     }
 
     configureBindings();
   }
 
   private void configureBindings() {
-    // Example: Run indexer when A button is pressed
-    controller.a().whileTrue(indexer.runAtRPM(3000));
+    // Example: Run hopper when A button is pressed
+    controller.a().whileTrue(hopper.runAtRPM(3000));
   }
 }
 ```
