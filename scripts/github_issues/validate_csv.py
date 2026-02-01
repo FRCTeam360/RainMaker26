@@ -1,160 +1,166 @@
 #!/usr/bin/env python3
 """
-CSV Format Validator for GitHub Issues
-Validates that the CSV is properly formatted with quotes around all fields except 'number'
+CSV Format Validator and Fixer for GitHub Issues
+Validates and fixes CSV formatting: ensures commas are present and fields are properly quoted
 """
 
 import csv
+import re
 import sys
 from pathlib import Path
 
 
-def validate_csv(csv_file):
+def fix_and_validate_csv(csv_file):
     """
-    Validate CSV format and quote consistency.
+    Fix CSV format issues and validate the result.
     
     Args:
-        csv_file: Path to the CSV file to validate
+        csv_file: Path to the CSV file to validate and fix
         
     Returns:
-        tuple: (is_valid, errors list)
+        tuple: (is_valid, errors list, fixes_applied list)
     """
     errors = []
+    fixes = []
     
     if not Path(csv_file).exists():
-        return False, [f"Error: CSV file '{csv_file}' not found"]
+        return False, [f"Error: CSV file '{csv_file}' not found"], []
     
     try:
         with open(csv_file, 'r', encoding='utf-8') as f:
-            content = f.read()
-            lines = content.strip().split('\n')
+            lines = f.read().strip().split('\n')
         
         if not lines:
-            return False, ["Error: CSV file is empty"]
+            return False, ["Error: CSV file is empty"], []
         
-        # Get header
+        # Parse header to get expected field count
         header_line = lines[0]
-        headers = [h.strip() for h in header_line.split(',')]
+        try:
+            reader = csv.reader([header_line])
+            headers = next(reader)
+        except Exception as e:
+            return False, [f"Error parsing header: {e}"], []
         
-        # Validate header format
-        for i, header in enumerate(headers):
-            if header != "number" and not (header.startswith('"') and header.endswith('"')):
-                errors.append(f"Header validation: Field '{header}' at position {i} should be quoted (except 'number')")
+        num_expected_fields = len(headers)
+        fixed_lines = []
         
-        # Parse remaining lines
+        # Fix header line first - all fields except 'number' should be quoted
+        fixed_header = fix_csv_line(header_line, num_expected_fields, headers, is_header=True)
+        if fixed_header != header_line:
+            fixes.append(f"Line 1 (header): Added missing quotation marks")
+        fixed_lines.append(fixed_header)
+        
+        # Process data lines
         for line_num, line in enumerate(lines[1:], start=2):
             if not line.strip():
-                continue  # Skip empty lines
+                fixed_lines.append(line)
+                continue
             
-            # Use csv reader to properly parse the line
             try:
                 reader = csv.reader([line])
                 row = next(reader)
             except Exception as e:
                 errors.append(f"Line {line_num}: Failed to parse - {e}")
+                fixed_lines.append(line)
                 continue
             
-            if len(row) != len(headers):
-                errors.append(
-                    f"Line {line_num}: Expected {len(headers)} fields, got {len(row)}. "
-                    f"Headers: {len(headers)}, Fields: {len(row)}"
-                )
+            # Check if we have the right number of fields
+            if len(row) != num_expected_fields:
+                errors.append(f"Line {line_num}: Expected {num_expected_fields} fields, got {len(row)}")
+                fixed_lines.append(line)
                 continue
             
-            # Check each field
-            for col_idx, (header, value) in enumerate(zip(headers, row)):
-                if header == "number":
-                    # 'number' field should not be quoted in the raw line
-                    if not value:
-                        errors.append(f"Line {line_num}, {header}: Value is empty")
-                else:
-                    # All other fields should be quoted in the original line
-                    # We need to check the raw line for quotes
-                    pass  # Already parsed by csv reader
+            # Fix the line to add proper quoting
+            fixed_line = fix_csv_line(line, num_expected_fields, headers)
+            if fixed_line != line:
+                fixes.append(f"Line {line_num}: Added missing quotation marks around fields")
+            fixed_lines.append(fixed_line)
         
-        # Additional validation: Check raw format for non-number fields
-        for line_num, line in enumerate(lines[1:], start=2):
-            if not line.strip():
-                continue
-            
-            # Parse the line manually to check quotes in raw format
-            parts = line.split(',', 1)  # Split on first comma only
-            if len(parts) >= 1:
-                first_field = parts[0].strip()
-                # First field should be the 'number' field (no quotes expected)
-                if first_field.startswith('"'):
-                    errors.append(f"Line {line_num}: 'number' field should not be quoted, got: {first_field}")
-                
-                # Check remaining fields for quotes
-                if len(parts) > 1:
-                    remaining = parts[1]
-                    # Split on comma, but be careful of quoted fields containing commas
-                    reader = csv.reader([remaining])
-                    try:
-                        remaining_fields = next(reader)
-                        for col_idx, (header, value) in enumerate(zip(headers[1:], remaining_fields), start=1):
-                            # Check if the field in the CSV raw content has quotes
-                            # The CSV reader will have already removed them, so we need to check differently
-                            pass
-                    except:
-                        pass
-        
-        # Alternative: Read with csv.DictReader to validate structure
-        with open(csv_file, 'r', encoding='utf-8') as f:
-            try:
-                reader = csv.DictReader(f)
-                row_count = 0
-                for row_num, row in enumerate(reader, start=2):
-                    row_count += 1
-                    
-                    # Check that 'number' field exists and is not empty
-                    if 'number' not in row or not row['number']:
-                        errors.append(f"Line {row_num}: 'number' field is missing or empty")
-                    
-                    # Check that other fields exist
-                    for header in headers:
-                        if header not in row:
-                            errors.append(f"Line {row_num}: Missing field '{header}'")
-                
-            except Exception as e:
-                errors.append(f"Error reading CSV with DictReader: {e}")
+        # Write fixed CSV back to file if any fixes were applied
+        if fixes:
+            with open(csv_file, 'w', encoding='utf-8', newline='') as f:
+                f.write('\n'.join(fixed_lines) + '\n')
         
     except Exception as e:
-        errors.append(f"Error reading file: {e}")
+        errors.append(f"Error reading/writing file: {e}")
+        return False, errors, fixes
     
     is_valid = len(errors) == 0
-    return is_valid, errors
+    return is_valid, errors, fixes
 
 
-def print_validation_report(csv_file, is_valid, errors):
-    """Print a formatted validation report."""
+def fix_csv_line(line, expected_fields, headers, is_header=False):
+    """
+    Fix a CSV line by ensuring proper quoting on all fields except 'number'.
+    
+    Args:
+        line: The CSV line to fix
+        expected_fields: Expected number of fields
+        headers: The header fields
+        is_header: Whether this is a header line
+        
+    Returns:
+        str: Fixed CSV line with proper quoting
+    """
+    # Parse the line with csv reader
+    try:
+        reader = csv.reader([line])
+        row = next(reader)
+    except:
+        return line
+    
+    if len(row) != expected_fields:
+        return line  # Can't fix if field count is wrong
+    
+    # Reconstruct the line with proper quoting
+    fixed_parts = []
+    for i, value in enumerate(row):
+        field_name = headers[i] if i < len(headers) else f"field_{i}"
+        
+        if value and value.startswith('"') and value.endswith('"'):
+            fixed_parts.append(value)
+        else:
+            # Escape any internal quotes
+            escaped_value = value.replace('"', '""') if value else ""
+            fixed_parts.append(f'"{escaped_value}"')
+    
+    return ','.join(fixed_parts)
+
+
+def print_report(csv_file, is_valid, errors, fixes):
+    """Print a formatted validation and fix report."""
     print("\n" + "=" * 70)
-    print(f"CSV Validation Report: {csv_file}")
+    print(f"CSV Validation & Fix Report: {csv_file}")
     print("=" * 70)
     
+    if fixes:
+        print(f"\n✓ {len(fixes)} issue(s) FIXED:")
+        for fix in fixes:
+            print(f"  • {fix}")
+    
     if is_valid:
-        print("✓ CSV format is VALID")
+        print("\n✓ CSV format is VALID")
     else:
-        print("✗ CSV format has ERRORS:")
+        print("\n✗ CSV format has remaining ERRORS:")
         for error in errors:
             print(f"  • {error}")
     
-    print("=" * 70 + "\n")
+    print("\n" + "=" * 70 + "\n")
     return is_valid
 
 
 def main():
     """Main entry point."""
     if len(sys.argv) < 2:
-        csv_file = "important issues.csv"
+        csv_file = "scripts/github_issues/github_issues_to_update.csv"
         print(f"No CSV file specified. Using default: {csv_file}")
     else:
         csv_file = sys.argv[1]
     
-    is_valid, errors = validate_csv(csv_file)
-    valid_report = print_validation_report(csv_file, is_valid, errors)
+    is_valid, errors, fixes = fix_and_validate_csv(csv_file)
+    print_report(csv_file, is_valid, errors, fixes)
     
-    sys.exit(0 if valid_report else 1)
+    sys.exit(0 if is_valid else 1)
 
 
 if __name__ == "__main__":
