@@ -16,6 +16,8 @@ public interface IndexerIO {
     public double velocity = 0.0;
     public double position = 0.0;
     public boolean sensor = false;
+    public double intakeSensorProximity = 0.0;
+    public boolean fuelDetected = false;
   }
 
   public default void updateInputs(IndexerIOInputs inputs) {}
