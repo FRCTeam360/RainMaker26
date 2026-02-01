@@ -43,7 +43,12 @@ public class Flywheel extends SubsystemBase {
     // TODO: make tolerance a constant in hardware layer
     return Math.abs(getVelocity() - targetRPM) < tolerance;
   }
-
+  public double getVelocity() {
+    if (inputs.velocities.length > 0) {
+      return inputs.velocities[0];
+    }
+    return 0.0;
+  }
   private void applyState() {
     switch (currentState) {
       case SPINUP_SHOOTING:
