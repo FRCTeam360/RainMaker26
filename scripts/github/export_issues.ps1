@@ -164,6 +164,7 @@ foreach ($issue in $issues) {
 
     # Create CSV object
     $csvObject = [PSCustomObject]@{
+        number    = $issue.number
         title     = $issue.title
         body      = $issue.body -replace "`r`n", " " -replace "`n", " "  # Replace newlines with spaces
         labels    = $labelsStr
