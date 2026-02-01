@@ -26,6 +26,7 @@ public enum FlywheelKickerStates {
     previousState = currentState;
 
     switch (wantedState) {
+      this.currentState = wantedState;
       case SPINUP_SHOOTING:
         currentState = FlywheelKickerStates.SPINUP_SHOOTING;
       case OFF:
