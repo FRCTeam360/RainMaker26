@@ -57,7 +57,7 @@ try {
     $issuesJson = & gh @ghArgs 2>&1
     if ($LASTEXITCODE -ne 0) {
         Write-Host "Error fetching issues: $issuesJson" -ForegroundColor Red
-        exit 1
+        exit 1P
     }
 
     $issues = $issuesJson | ConvertFrom-Json

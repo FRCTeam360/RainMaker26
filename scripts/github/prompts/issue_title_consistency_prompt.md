@@ -32,12 +32,13 @@ Use these standard action verbs consistently:
 
 ### Format Patterns
 
-- **Hardware Integration**: "Implement [Component] Subsystem" (not "Create" or "Add")
-- **Software Features**: "Implement [Feature]" or "Add [Feature]"
-- **Testing Tasks**: "Test [What] [Where/How]" (e.g., "Test Flywheel VelocityTorqueCurrentFOC")
-- **Setup Tasks**: "Set Up [What]" (not "Setup" - use two words)
-- **Research Tasks**: "Research [Topic]" or "Investigate [Issue]"
-- **Documentation**: "Update [Document]" or "Document [What]"
+- **Hardware Integration**: "Implement [Component] Subsystem for [Purpose]" (e.g., "Implement Turret Subsystem for Hub Tracking")
+- **Software Features**: "Implement [Feature] [Key Detail]" (e.g., "Implement Snap to Hub Auto-Alignment")
+- **Testing Tasks**: "Test [What] [Specific Aspect]" (e.g., "Test Vision Localization Accuracy on Field")
+- **Setup Tasks**: "Set Up [What] for [Scope]" (e.g., "Set Up Unit Testing for Subsystems")
+- **Research Tasks**: "Research [Topic] for [Goal]" (e.g., "Research Steer Override for Autos")
+- **Documentation**: "Update [Document] for [Robot/Component]" (e.g., "Update Motor Controller Spreadsheet for PracticeBot")
+- **Command Creation**: "Create [Action] Command [Specific Detail]" (e.g., "Create IntakePivot Stow/Deploy Command")
 
 ### Naming Conventions
 
@@ -53,17 +54,36 @@ Use these standard action verbs consistently:
 
 ### Title Length
 
-- **Target**: 3-7 words
-- **Maximum**: 10 words
-- If too long, use description for details and keep title high-level
+- **Target**: 6-9 words (include clarifying detail)
+- **Minimum**: 4 words
+- **Maximum**: 12 words
+- Include one clarifying phrase that specifies purpose, scope, or key feature
+- If longer than 12 words, move implementation details to description
+
+### What Details to Include in Titles
+
+**✅ ADD these clarifying details:**
+- **Purpose/Goal**: "for Hub Tracking", "for Auto-Alignment", "for Competition"
+- **Scope**: "with IO Layers", "for All Subsystems", "Across Workspace"
+- **Key Feature**: "Stow/Deploy", "Vision-Based", "Dynamic Selection"
+- **What it Affects**: "Shooter Sequence", "Drivetrain Characterization"
+- **Specific Component**: "from Hub", "to Arbitrary Point", "on Field"
+
+**❌ DON'T add these (keep in description):**
+- Implementation details: "using DCMotorSim", "with PIDController"
+- Technology specifics: "using AdvantageKit IO pattern", "following FRC 6328"
+- Step-by-step instructions: "Create TurretIO, TurretIOSim, and TurretIOWB"
+- Code-level details: "in Constants.WoodBotConstants", "with VelocityTorqueCurrentFOC"
 
 ## Red Flags to Fix
 
 ❌ **Inconsistent verbs**: Some issues say "Implement", others "Create", others "Add" for same type of work
-❌ **Vague titles**: "Test Superstructure" → "Test Superstructure Subsystem in Sim"
-❌ **Missing context**: "Implement Turret Sim" is good, but "Turret Sim" would be bad
+❌ **Vague titles without purpose**: "Implement Turret Subsystem" → "Implement Turret Subsystem for Hub Tracking"
+❌ **Too short, unclear scope**: "Create IntakePivot Command" → "Create IntakePivot Stow/Deploy Command"
+❌ **Missing context**: "Test Localization" → "Test Vision Localization Accuracy on Field"
 ❌ **Inconsistent naming**: "Intake Pivot" vs "IntakePivot" in different titles
 ❌ **Wrong epic/verb pairing**: Testing epic with "Implement" verb
+❌ **Too long with implementation details**: "Implement Turret using DCMotorSim with Mechanism2d Visualization" → move details to description
 
 ## Examples
 
@@ -71,12 +91,16 @@ Use these standard action verbs consistently:
 
 | Before | After | Reason |
 |--------|-------|--------|
-| "Turret Subsystem" | "Implement Turret Subsystem" | Missing action verb |
-| "Create Turret Sim" | "Implement Turret Sim" | Consistency - use "Implement" for subsystem features |
-| "Setup unit testing" | "Set Up Unit Testing" | Grammar - two words, proper capitalization |
-| "Test flywheel" | "Test and Tune Flywheel VelocityTorqueCurrentFOC" | Specificity - add details from description |
-| "Implement simple AprilTag targeting" | "Implement AprilTag Targeting" | Brevity - "simple" is implied, details in description |
-| "Add Intake Pivot to Autos" | "Add IntakePivot to Bulletproof Autos" | Consistency - match code naming |
+| "Turret Subsystem" | "Implement Turret Subsystem for Hub Tracking" | Missing action verb + purpose |
+| "Implement Turret Subsystem" | "Implement Turret Subsystem for Hub Tracking" | Add purpose for clarity |
+| "Create Turret Sim" | "Implement Turret Subsystem Simulation" | Consistency + clearer scope |
+| "Setup unit testing" | "Set Up Unit Testing for Subsystems" | Grammar + scope |
+| "Test flywheel" | "Test and Tune Flywheel Velocity Control" | Add specific aspect being tested |
+| "Implement simple AprilTag targeting" | "Implement AprilTag Auto-Targeting" | Remove "simple", add "Auto-" for clarity |
+| "Add Intake Pivot to Autos" | "Add IntakePivot and Turret to Bulletproof Autos" | PascalCase + complete scope |
+| "Create IntakePivot Command" | "Create IntakePivot Stow/Deploy Command" | Specify which command feature |
+| "Implement Snap to Hub" | "Implement Snap to Hub Auto-Alignment" | Add goal/purpose |
+| "Test Localization Accuracy" | "Test Vision Localization Accuracy on Field" | Specify which localization + where |
 
 ---
 
@@ -136,7 +160,10 @@ Before finalizing, verify:
 - [ ] All similar issue types use consistent action verbs
 - [ ] Subsystem names match code exactly (PascalCase)
 - [ ] Technical terms are capitalized correctly
-- [ ] Titles are 3-7 words (maximum 10)
+- [ ] Titles are 6-9 words (minimum 4, maximum 12)
+- [ ] Each title includes clarifying detail (purpose, scope, key feature, or goal)
 - [ ] Epic categories align with title structure
 - [ ] Titles accurately reflect enhanced descriptions
 - [ ] No redundant words ("simple", "basic", "easy")
+- [ ] Implementation details are in description, not title
+- [ ] Title answers "What specifically?" without explaining "How?"
