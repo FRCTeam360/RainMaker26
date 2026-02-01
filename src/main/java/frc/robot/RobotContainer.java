@@ -103,6 +103,11 @@ public class RobotContainer {
     }
     // Configure the trigger bindings
     superStructure = new SuperStructure(intake, indexer, flywheelKicker, flywheel);
+    
+    registerPathplannerCommand("basic intake", commandFactory.basicIntakeCmd());
+    registerPathplannerCommand("shoot at hub", commandFactory.shootWithSpinUp(3000.0, 6.0));
+    registerPathplannerCommand("run flywheel kicker", flywheelKicker.setDutyCycleCommand(1.0));
+
     configureBindings();
   }
     public void registerPathplannerCommand(String name, Command command) {
