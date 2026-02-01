@@ -10,7 +10,7 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Flywheel.Flywheel;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKicker;
 import frc.robot.subsystems.Hood.Hood;
-import frc.robot.subsystems.Indexer.Indexer;
+import frc.robot.subsystems.Hopper.Hopper;
 import frc.robot.subsystems.Intake.Intake;
 import frc.robot.subsystems.IntakePivot.IntakePivot;
 import frc.robot.subsystems.Vision.Vision;
@@ -22,7 +22,7 @@ public class CommandFactory {
   private final Flywheel flywheel;
   private final FlywheelKicker flyWheelKicker;
   private final Hood hood;
-  private final Indexer indexer;
+  private final Hopper hopper;
   private final IntakePivot intakePivot;
   private final Vision vision;
   private final CommandSwerveDrivetrain drivetrain;
@@ -33,7 +33,7 @@ public class CommandFactory {
       Flywheel flywheel,
       FlywheelKicker flyWheelKicker,
       Hood hood,
-      Indexer indexer,
+      Hopper hopper,
       IntakePivot intakePivot,
       Vision vision,
       CommandSwerveDrivetrain drivetrain) {
@@ -41,14 +41,14 @@ public class CommandFactory {
     this.flywheel = flywheel;
     this.flyWheelKicker = flyWheelKicker;
     this.hood = hood;
-    this.indexer = indexer;
+    this.hopper = hopper;
     this.intakePivot = intakePivot;
     this.vision = vision;
     this.drivetrain = drivetrain;
   }
 
   public Command basicIntakeCmd() {
-    return intake.setDutyCycleCommand(0.65).alongWith(indexer.setDutyCycleCommand(0.4));
+    return intake.setDutyCycleCommand(0.65).alongWith(hopper.setDutyCycleCommand(0.4));
   }
 
   public Command basicShootCmd() {

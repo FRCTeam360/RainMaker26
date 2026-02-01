@@ -2,19 +2,19 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.subsystems.Indexer;
+package frc.robot.subsystems.Hopper;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
-public class Indexer extends SubsystemBase {
-  private final IndexerIO io;
-  private final IndexerIOInputsAutoLogged inputs = new IndexerIOInputsAutoLogged();
+public class Hopper extends SubsystemBase {
+  private final HopperIO io;
+  private final HopperIOInputsAutoLogged inputs = new HopperIOInputsAutoLogged();
 
-  /** Creates a new Indexer. */
-  public Indexer(IndexerIO io) {
+  /** Creates a new Hopper. */
+  public Hopper(HopperIO io) {
     this.io = io;
   }
 
@@ -37,6 +37,6 @@ public class Indexer extends SubsystemBase {
   @Override
   public void periodic() {
     io.updateInputs(inputs);
-    Logger.processInputs("Indexer", inputs);
+    Logger.processInputs("Hopper", inputs);
   }
 }

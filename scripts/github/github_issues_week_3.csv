@@ -19,7 +19,7 @@
 "Implement target selection states","Create states for selecting targets based on robot position; match time; and auto winner.","enhancement","","Week 4","Automation",""
 "Implement turret auto-tracking of hub","Implement automatic hub tracking with the turret subsystem.","enhancement","","Week 4","Automation",""
 "Implement automated check for subsystem sim compatibility","Create tooling to verify all subsystems can run in simulation.","enhancement","","Week 4","Tooling",""
-"Evaluate spindexer prototype for single ball stream","Test spindexer design for managing single stream of balls.","question","","Week 3","Testing/Prototyping",""
+"Evaluate sphopper prototype for single ball stream","Test sphopper design for managing single stream of balls.","question","","Week 3","Testing/Prototyping",""
 "Update SparkMax and SparkFlex firmware","Update REV motor controller firmware to latest versions.","enhancement","","Week 3","Testing/Prototyping",""
 "Fix Talon current logging","Fix current logging implementation for TalonFX motor controllers.","bug","","Week 3","Logging",""
 "Add setpoint logging to inputs","Add double setpoint value to logged inputs.","enhancement","","Week 3","Logging",""

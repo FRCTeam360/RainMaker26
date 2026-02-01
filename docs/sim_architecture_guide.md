@@ -40,7 +40,7 @@ Our codebase follows the **AdvantageKit IO pattern**, which cleanly separates ha
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│              SUBSYSTEM (IntakePivot, Indexer)           │
+│              SUBSYSTEM (IntakePivot, Hopper)           │
 │  • Commands and high-level behavior                     │
 │  • Owns IO implementation and logged inputs             │
 │  • Calls io.updateInputs() each loop                    │
@@ -354,14 +354,14 @@ public void setDutyCycle(double value) {
 
 ## 5. REV Robotics Pattern: SparkMax with FlywheelSim
 
-**Example: IndexerIOSim**
+**Example: HopperIOSim**
 
 This section demonstrates simulation of a flywheel/roller using REV SparkMax motor controllers.
 
 ### 5.1. Class Structure
 
 ```java
-public class IndexerIOSim implements IndexerIO {
+public class HopperIOSim implements HopperIO {
   // Physical constants
   private double gearRatio = 5.0;
   private DCMotor gearbox = DCMotor.getNEO(1);
@@ -369,7 +369,7 @@ public class IndexerIOSim implements IndexerIO {
 
   // Motor controller (REV SparkMax)
   private final SparkMax motorControllerSim =
-      new SparkMax(SimulationConstants.INDEXER_MOTOR, MotorType.kBrushless);
+      new SparkMax(SimulationConstants.HOPPER_MOTOR, MotorType.kBrushless);
   private final SparkMaxConfig motorConfig = new SparkMaxConfig();
 
   // SparkMax simulation object
@@ -378,7 +378,7 @@ public class IndexerIOSim implements IndexerIO {
   // Physics simulation
   private final LinearSystem<N1, N1, N1> plant =
       LinearSystemId.createFlywheelSystem(gearbox, moi, gearRatio);
-  private final FlywheelSim indexerSim = new FlywheelSim(plant, gearbox, gearRatio);
+  private final FlywheelSim hopperSim = new FlywheelSim(plant, gearbox, gearRatio);
 }
 ```
 
@@ -410,7 +410,7 @@ private void configureMotor() {
 The REV pattern differs slightly due to the `SparkMaxSim.iterate()` helper:
 
 ```java
-public void updateInputs(IndexerIOInputs inputs) {
+public void updateInputs(HopperIOInputs inputs) {
   // --- Optional: AdvantageScope tuning (sim-only) ---
   if (tuningEnabled.get()) {
     double targetDuty = targetDutyCycle.get();
@@ -423,28 +423,28 @@ public void updateInputs(IndexerIOInputs inputs) {
   double appliedVoltage = commandedDutyCycle * busVoltage;
 
   // STEP 2: Set input voltage to physics simulation
-  indexerSim.setInputVoltage(appliedVoltage);
+  hopperSim.setInputVoltage(appliedVoltage);
 
   // STEP 3: Update physics simulation
-  indexerSim.update(0.02);
+  hopperSim.update(0.02);
 
   // STEP 4: Use SparkMaxSim.iterate() to update controller state
   sparkSim.iterate(
-      indexerSim.getAngularVelocityRPM(), // Motor velocity in RPM
+      hopperSim.getAngularVelocityRPM(), // Motor velocity in RPM
       RoboRioSim.getVInVoltage(),         // Simulated battery voltage
       0.02);                              // Time interval (20ms)
 
   // STEP 5: Update battery voltage based on current draw
   RoboRioSim.setVInVoltage(
       BatterySim.calculateDefaultBatteryLoadedVoltage(
-          indexerSim.getCurrentDrawAmps()));
+          hopperSim.getCurrentDrawAmps()));
 
   // STEP 6: Fill inputs from physics model (source of truth)
   inputs.position = 0.0; // Position not tracked for flywheel
-  inputs.velocity = indexerSim.getAngularVelocityRPM();
+  inputs.velocity = hopperSim.getAngularVelocityRPM();
   inputs.voltage = appliedVoltage;
-  inputs.statorCurrent = indexerSim.getCurrentDrawAmps();
-  inputs.supplyCurrent = indexerSim.getCurrentDrawAmps();
+  inputs.statorCurrent = hopperSim.getCurrentDrawAmps();
+  inputs.supplyCurrent = hopperSim.getCurrentDrawAmps();
   inputs.sensor = false; // Sensor not used in this example
 }
 ```
