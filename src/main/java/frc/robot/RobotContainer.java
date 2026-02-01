@@ -6,19 +6,29 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.generated.WoodBotDrivetrain;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Flywheel.Flywheel;
+import frc.robot.subsystems.Flywheel.FlywheelIOSim;
 import frc.robot.subsystems.Flywheel.FlywheelIOWB;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKicker;
+import frc.robot.subsystems.FlywheelKicker.FlywheelKickerIOSim;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKickerIOWB;
 import frc.robot.subsystems.Hood.Hood;
+import frc.robot.subsystems.Hood.HoodIOSim;
+import frc.robot.subsystems.Hood.HoodIOWB;
 import frc.robot.subsystems.Indexer.Indexer;
+import frc.robot.subsystems.Indexer.IndexerIOSim;
 import frc.robot.subsystems.Indexer.IndexerIOWB;
 import frc.robot.subsystems.Intake.Intake;
+import frc.robot.subsystems.Intake.IntakeIOSim;
 import frc.robot.subsystems.Intake.IntakeIOWB;
 import frc.robot.subsystems.IntakePivot.IntakePivot;
 import frc.robot.subsystems.IntakePivot.IntakePivotIOSim;
@@ -27,6 +37,13 @@ import frc.robot.subsystems.Vision.VisionIOPhotonSim;
 
 import java.util.Map;
 import java.util.Objects;
+
+import org.littletonrobotics.junction.Logger;
+
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.commands.FollowPathCommand;
+import com.pathplanner.lib.util.PathPlannerLogging;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -37,6 +54,7 @@ import java.util.Objects;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private CommandSwerveDrivetrain drivetrain;
+  private SendableChooser<Command> autoChooser;
   private Flywheel flywheel;
   private Hood hood;
   private Indexer indexer;
@@ -75,14 +93,12 @@ public class RobotContainer {
         intakePivot = new IntakePivot(new IntakePivotIOSim());
         vision = new Vision(
             Map.of("photonSim", new VisionIOPhotonSim(() -> drivetrain.getState().Pose)));
-        // flywheel = new Flywheel(new FlywheelIOSim());
-        // hood = new Hood(new HoodIOWB());
-        // indexer = new Indexer(new IndexerIOSim());
-        // intake = new Intake(new IntakeIOSim());
-        // flywheelKicker = new FlywheelKicker(new FlywheelKickerIOWB());
+        flywheel = new Flywheel(new FlywheelIOSim());
+        hood = new Hood(new HoodIOSim());
+        intake = new Intake(new IntakeIOSim());
+        flywheelKicker = new FlywheelKicker(new FlywheelKickerIOSim());
         break;
       default:
-        drivetrain = WoodBotDrivetrain.createDrivetrain();
         logger = new Telemetry(WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
         flywheel = new Flywheel(new FlywheelIOWB());
         // hood = new Hood(new HoodIOWB());
@@ -93,6 +109,28 @@ public class RobotContainer {
     }
     // Configure the trigger bindings
     configureBindings();
+    configureTestBindings();
+
+    PathPlannerLogging.setLogActivePathCallback(
+        (poses -> Logger.recordOutput("Swerve/ActivePath", poses.toArray(new Pose2d[0]))));
+
+    PathPlannerLogging.setLogTargetPoseCallback(
+        pose -> Logger.recordOutput("Swerve/TargetPathPose", pose));
+
+    autoChooser = AutoBuilder.buildAutoChooser();
+    SmartDashboard.putData("Auto Chooser", autoChooser);
+
+    FollowPathCommand.warmupCommand().schedule();
+  }
+
+  public void registerPathplannerCommand(String name, Command command) {
+    if (Objects.nonNull(command)) {
+      NamedCommands.registerCommand(name, command);
+    } else {
+      System.err.println(name + " is null");
+      NamedCommands.registerCommand(
+          name, new InstantCommand(() -> System.err.println(name + " is null")));
+    }
   }
 
   /**
@@ -104,6 +142,27 @@ public class RobotContainer {
    * PS4} controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
    * joysticks}.
    */
+  private void configureTestBindings() {
+    if (Objects.nonNull(flywheel)) {
+      testCont1.a().whileTrue(flywheel.setDutyCycleCommand(() -> 0.5));
+    }
+    if (Objects.nonNull(flywheelKicker)) {
+      testCont1.b().whileTrue(flywheelKicker.setDutyCycleCommand(() -> 0.5));
+    }
+    if (Objects.nonNull(hood)) {
+      testCont1.x().whileTrue(hood.setDutyCycleCommand(() -> 0.5));
+    }
+    if (Objects.nonNull(indexer)) {
+      testCont1.y().whileTrue(indexer.setDutyCycleCommand(() -> 0.5));
+    }
+    if (Objects.nonNull(intake)) {
+      testCont1.leftBumper().whileTrue(intake.setDutyCycleCommand(() -> 0.5));
+    }
+    if (Objects.nonNull(intakePivot)) {
+      testCont1.rightBumper().whileTrue(intakePivot.setDutyCycleCommand(() -> 0.5));
+    }
+  }
+
   private void configureBindings() {
     // Only bind commands if the required subsystems/factories exist
     if (Objects.nonNull(vision)) {
