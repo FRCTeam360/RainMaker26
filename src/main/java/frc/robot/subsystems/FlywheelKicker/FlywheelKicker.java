@@ -73,8 +73,6 @@ public enum FlywheelKickerStates {
 
   @Override
   public void periodic() {
-    // updateState();
-    // applyState();
     io.updateInputs(inputs);
     Logger.processInputs("FlywheelKicker", inputs);
     Logger.recordOutput("Subsystems/FlywheelKicker/WantedState", wantedState.toString());
