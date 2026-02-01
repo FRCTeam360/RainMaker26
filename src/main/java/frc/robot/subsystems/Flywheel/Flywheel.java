@@ -60,18 +60,6 @@ public class Flywheel extends SubsystemBase {
     io.setRPM(rpm);
   }
 
-  public double getVelocity() {
-    if (inputs.velocities.length > 0) {
-      return inputs.velocities[0];
-    }
-    return 0.0;
-  }
-
-  public boolean atSetpoint(double targetRPM, double tolerance) {
-    // TODO: make tolerance a constant in hardware layer
-    return Math.abs(getVelocity() - targetRPM) < tolerance;
-  }
-
   @Override
   public void periodic() {
     io.updateInputs(inputs);
@@ -96,9 +84,5 @@ public class Flywheel extends SubsystemBase {
 
   public Command setDutyCycleCommand(DoubleSupplier valueSup) {
     return this.runEnd(() -> io.setDutyCycle(valueSup.getAsDouble()), () -> io.setDutyCycle(0.0));
-  }
-
-  public Command setRPMCommand(double rpm) {
-    return this.runOnce(() -> io.setRPM(rpm));
   }
 }

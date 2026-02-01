@@ -42,7 +42,6 @@ $ProjectOwner = "FRCTeam360"
 $ProjectNumber = 2
 $ProjectId = "PVT_kwDOAKOwYc4BMevW"
 $EpicFieldId = "PVTSSF_lADOAKOwYc4BMevWzg73hPQ"
-$PriorityFieldId = "PVTSSF_lADOAKOwYc4BMevWzg8Zqaw"
 
 # Epic name to option ID mapping
 $EpicOptions = @{
@@ -56,14 +55,6 @@ $EpicOptions = @{
     "Simulations"         = "6c4f461c"
     "Vision"              = "778415d0"
     "Administration"      = "025c48c1"
-    "Commands"            = "f1ebbe3d"
-}
-
-# Priority name to option ID mapping
-$PriorityOptions = @{
-    "Number One Highest Priority" = "18aec1f7"
-    "High Priority"               = "a9977a8d"
-    "Low Priority"                = "e9b3dc38"
 }
 
 Write-Host "Starting GitHub Issues import from: $CsvFile" -ForegroundColor Green
@@ -151,15 +142,14 @@ foreach ($issue in $issues) {
             if ($LASTEXITCODE -eq 0) {
                 Write-Host "  -> Added to Rebuilt board" -ForegroundColor Cyan
 
-                # Parse item ID from JSON response (needed for custom fields)
-                $itemData = $projectResult | ConvertFrom-Json
-                $itemId = $itemData.id
-
                 # Set Epic field if specified
                 if (-not [string]::IsNullOrWhiteSpace($issue.epic)) {
                     $epicName = $issue.epic.Trim()
                     if ($EpicOptions.ContainsKey($epicName)) {
                         $epicOptionId = $EpicOptions[$epicName]
+                        # Parse item ID from JSON response
+                        $itemData = $projectResult | ConvertFrom-Json
+                        $itemId = $itemData.id
 
                         $epicResult = gh project item-edit --project-id $ProjectId --id $itemId --field-id $EpicFieldId --single-select-option-id $epicOptionId 2>&1
                         if ($LASTEXITCODE -eq 0) {
@@ -169,23 +159,6 @@ foreach ($issue in $issues) {
                         }
                     } else {
                         Write-Host "  -> Warning: Unknown Epic '$epicName'. Valid options: $($EpicOptions.Keys -join ', ')" -ForegroundColor Yellow
-                    }
-                }
-
-                # Set Priority field if specified
-                if (-not [string]::IsNullOrWhiteSpace($issue.priority)) {
-                    $priorityName = $issue.priority.Trim()
-                    if ($PriorityOptions.ContainsKey($priorityName)) {
-                        $priorityOptionId = $PriorityOptions[$priorityName]
-
-                        $priorityResult = gh project item-edit --project-id $ProjectId --id $itemId --field-id $PriorityFieldId --single-select-option-id $priorityOptionId 2>&1
-                        if ($LASTEXITCODE -eq 0) {
-                            Write-Host "  -> Priority set to: $priorityName" -ForegroundColor Cyan
-                        } else {
-                            Write-Host "  -> Warning: Could not set Priority: $priorityResult" -ForegroundColor Yellow
-                        }
-                    } else {
-                        Write-Host "  -> Warning: Unknown Priority '$priorityName'. Valid options: $($PriorityOptions.Keys -join ', ')" -ForegroundColor Yellow
                     }
                 }
             } else {
@@ -230,7 +203,7 @@ if ($failedIssues.Count -gt 0) {
     Write-Host "Kept $($failedIssues.Count) failed issue(s) in: $CsvFile" -ForegroundColor Yellow
 } elseif ($successfulIssues.Count -gt 0) {
     # All issues succeeded - write empty CSV with just headers
-    "title,body,labels,assignee,milestone,epic,priority" | Set-Content -Path $CsvFile
+    "title,body,labels,assignee,milestone,epic" | Set-Content -Path $CsvFile
     Write-Host "Cleared original CSV (all issues imported successfully)" -ForegroundColor Green
 }
 
