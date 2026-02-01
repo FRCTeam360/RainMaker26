@@ -36,11 +36,124 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+# Function to get project configuration dynamically
+function Get-ProjectConfig {
+    param(
+        [string]$ProjectNumber,
+        [string]$ProjectOwner
+    )
+    
+    Write-Host "Fetching project configuration from GitHub..." -ForegroundColor Cyan
+    
+    try {
+        # Get project details
+        $projectInfo = gh project view $ProjectNumber --owner $ProjectOwner --format json 2>&1
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "Error: Could not fetch project information" -ForegroundColor Red
+            Write-Host "Details: $projectInfo" -ForegroundColor Red
+            return $null
+        }
+        
+        $project = $projectInfo | ConvertFrom-Json
+        $projectId = $project.id
+        
+        Write-Host "  -> Project ID: $projectId" -ForegroundColor Cyan
+        
+        # Get all fields in the project
+        $fieldsJson = gh project field-list $ProjectNumber --owner $ProjectOwner --format json 2>&1
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "Error: Could not fetch project fields" -ForegroundColor Red
+            Write-Host "Details: $fieldsJson" -ForegroundColor Red
+            return $null
+        }
+        
+        # Handle both single object and array responses
+        $fieldsData = $fieldsJson | ConvertFrom-Json
+        if ($null -eq $fieldsData) {
+            Write-Host "Error: No fields returned from project" -ForegroundColor Red
+            return $null
+        }
+        
+        # The response might have a 'fields' property or be an array directly
+        if ($fieldsData.PSObject.Properties.Name -contains "fields") {
+            $fieldsList = @($fieldsData.fields)
+        } elseif ($fieldsData -is [System.Collections.IEnumerable] -and $fieldsData -isnot [string]) {
+            $fieldsList = @($fieldsData)
+        } else {
+            $fieldsList = @($fieldsData)
+        }
+        
+        Write-Host "  -> Found $($fieldsList.Count) field(s)" -ForegroundColor Cyan
+        
+        $config = @{
+            ProjectId = $projectId
+            Fields = @{}
+            FieldIdToName = @{}
+        }
+        
+        foreach ($field in $fieldsList) {
+            if ($null -eq $field) { 
+                continue 
+            }
+            
+            # Skip fields without a name
+            if ([string]::IsNullOrWhiteSpace($field.name)) {
+                continue
+            }
+            
+            $fieldConfig = @{
+                Id = $field.id
+                Name = $field.name
+                Type = $field.type
+                Options = @{}
+                IdToOptionName = @{}
+            }
+            
+            Write-Host "    - Field: $($field.name) (Type: $($field.type))" -ForegroundColor Gray
+            
+            # Collect options for single-select fields
+            if (($field.type -eq "single_select" -or $field.type -eq "ProjectV2SingleSelectField") -and $null -ne $field.options) {
+                $optionsList = @($field.options)
+                foreach ($option in $optionsList) {
+                    if ($null -ne $option -and -not [string]::IsNullOrWhiteSpace($option.name)) {
+                        $fieldConfig.Options[$option.name] = $option.id
+                        $fieldConfig.IdToOptionName[$option.id] = $option.name
+                        Write-Host "      * $($option.name)" -ForegroundColor Gray
+                    }
+                }
+            }
+            
+            $config.Fields[$field.name] = $fieldConfig
+            $config.FieldIdToName[$field.id] = $field.name
+        }
+        
+        if ($config.Fields.Count -eq 0) {
+            Write-Host "Warning: No valid fields found in project" -ForegroundColor Yellow
+        }
+        
+        return $config
+    }
+    catch {
+        Write-Host "Error fetching project config: $_" -ForegroundColor Red
+        Write-Host "Stack trace: $($_.ScriptStackTrace)" -ForegroundColor Red
+        return $null
+    }
+}
+
+# Get dynamic project configuration
+$ProjectConfig = Get-ProjectConfig -ProjectNumber $ProjectNumber -ProjectOwner $ProjectOwner
+if ($null -eq $ProjectConfig) {
+    Write-Host "Error: Could not retrieve project configuration. Exiting." -ForegroundColor Red
+    exit 1
+}
+
+$ProjectId = $ProjectConfig.ProjectId
+
 Write-Host "Starting GitHub Issues export to: $CsvFile" -ForegroundColor Green
 Write-Host ""
 
 # Build gh issue list command
-$ghArgs = @("issue", "list", "--limit", "1000", "--state", "all", "--json", "number,title,body,labels,assignees,milestone,url")
+$ghArgs = @("issue", "list", "--limit", "1000", "--state", "all", "--json", "number,title,body,labels,assignees,milestone,url,state,author,createdAt,updatedAt,closedAt,comments")
 
 # Add repository if specified
 if (-not [string]::IsNullOrWhiteSpace($Repo)) {
@@ -84,20 +197,45 @@ try {
 
 # Extract issue numbers and URLs from project items
 $issueNumbers = @()
-$epicMap = @{}
+$fieldValueMaps = @{}
+
+# Initialize maps for all single-select fields
+foreach ($fieldName in $ProjectConfig.Fields.Keys) {
+    $fieldValueMaps[$fieldName] = @{}
+}
+
 foreach ($item in $projectItems.items) {
     if ($item.content.type -eq "Issue") {
         # Get issue number directly from content
         $issueNumber = $item.content.number.ToString()
         $issueNumbers += $issueNumber
 
-        # Get epic field value (directly available in the item)
-        if ($item.epic) {
-            $epicMap[$issueNumber] = $item.epic
+        # Get values for all single-select fields dynamically
+        foreach ($fieldName in $ProjectConfig.Fields.Keys) {
+            $field = $ProjectConfig.Fields[$fieldName]
+            
+            # Only process single-select fields with options
+            if (($field.Type -eq "single_select" -or $field.Type -eq "ProjectV2SingleSelectField") -and $field.Options.Count -gt 0) {
+                # Try to get the field value from the item
+                # Field names in items might be lowercase or have different casing
+                $fieldValue = $null
+                
+                # Check if the item has this field (case-insensitive)
+                foreach ($prop in $item.PSObject.Properties) {
+                    if ($prop.Name -eq $fieldName) {
+                        $fieldValue = $prop.Value
+                        break
+                    }
+                }
+                
+                if ($fieldValue) {
+                    $fieldValueMaps[$fieldName][$issueNumber] = $fieldValue
+                }
+            }
         }
     } else {
-      # print out the issue number of missing issues
-      Write-Host "Warning: Issue not found in Rebuilt board: $($item.content.number.ToString())" -ForegroundColor Yellow
+      # print out non-issue items
+      Write-Host "Warning: Non-issue item found in board: $($item.content.type)" -ForegroundColor Yellow
     }
 }
 
@@ -113,7 +251,7 @@ $issues = @()
 foreach ($issueNumber in $issueNumbers) {
     Write-Host "Fetching details for issue #$issueNumber..." -ForegroundColor Yellow
 
-    $ghArgs = @("issue", "view", $issueNumber, "--json", "number,title,body,labels,assignees,milestone,url")
+    $ghArgs = @("issue", "view", $issueNumber, "--json", "number,title,body,labels,assignees,milestone,url,state,author,createdAt,updatedAt,closedAt,comments")
 
     # Add repository if specified
     if (-not [string]::IsNullOrWhiteSpace($Repo)) {
@@ -144,10 +282,10 @@ foreach ($issue in $issues) {
         $labelsStr = ($issue.labels | ForEach-Object { $_.name }) -join ","
     }
 
-    # Format assignees (take first one if multiple)
-    $assigneeStr = ""
+    # Format assignees as comma-separated string (all assignees)
+    $assigneesStr = ""
     if ($issue.assignees -and $issue.assignees.Count -gt 0) {
-        $assigneeStr = $issue.assignees[0].login
+        $assigneesStr = ($issue.assignees | ForEach-Object { $_.login }) -join ","
     }
 
     # Get milestone title
@@ -156,21 +294,65 @@ foreach ($issue in $issues) {
         $milestoneStr = $issue.milestone.title
     }
 
-    # Get epic from map
-    $epicStr = ""
-    if ($epicMap.ContainsKey($issue.number.ToString())) {
-        $epicStr = $epicMap[$issue.number.ToString()]
+    # Get author
+    $authorStr = ""
+    if ($issue.author) {
+        $authorStr = $issue.author.login
     }
 
-    # Create CSV object
+    # Format dates
+    $createdAtStr = ""
+    if ($issue.createdAt) {
+        $createdAtStr = $issue.createdAt
+    }
+
+    $updatedAtStr = ""
+    if ($issue.updatedAt) {
+        $updatedAtStr = $issue.updatedAt
+    }
+
+    $closedAtStr = ""
+    if ($issue.closedAt) {
+        $closedAtStr = $issue.closedAt
+    }
+
+    # Get comment count
+    $commentCount = 0
+    if ($issue.comments) {
+        $commentCount = $issue.comments
+    }
+
+    # Create base CSV object with all standard GitHub fields
     $csvObject = [PSCustomObject]@{
-        number    = $issue.number
-        title     = $issue.title
-        body      = $issue.body -replace "`r`n", " " -replace "`n", " "  # Replace newlines with spaces
-        labels    = $labelsStr
-        assignee  = $assigneeStr
-        milestone = $milestoneStr
-        epic      = $epicStr
+        number     = $issue.number
+        title      = $issue.title
+        body       = $issue.body -replace "`r`n", " " -replace "`n", " "  # Replace newlines with spaces
+        state      = $issue.state
+        url        = $issue.url
+        author     = $authorStr
+        labels     = $labelsStr
+        assignees  = $assigneesStr
+        milestone  = $milestoneStr
+        createdAt  = $createdAtStr
+        updatedAt  = $updatedAtStr
+        closedAt   = $closedAtStr
+        comments   = $commentCount
+    }
+
+    # Dynamically add all single-select project fields
+    foreach ($fieldName in $ProjectConfig.Fields.Keys) {
+        $field = $ProjectConfig.Fields[$fieldName]
+        
+        # Only add single-select fields with options
+        if (($field.Type -eq "single_select" -or $field.Type -eq "ProjectV2SingleSelectField") -and $field.Options.Count -gt 0) {
+            $fieldValue = ""
+            if ($fieldValueMaps[$fieldName].ContainsKey($issue.number.ToString())) {
+                $fieldValue = $fieldValueMaps[$fieldName][$issue.number.ToString()]
+            }
+            
+            # Add the field as a property to the CSV object
+            $csvObject | Add-Member -MemberType NoteProperty -Name $fieldName.ToLower() -Value $fieldValue -Force
+        }
     }
 
     $csvData += $csvObject
