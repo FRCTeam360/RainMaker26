@@ -102,10 +102,10 @@ public class RobotContainer {
         // intakePivot = new IntakePivot(new IntakePivotIOPB());
     }
     // Configure the trigger bindings
-    superStructure = new SuperStructure(intake, indexer, flywheelKicker, flywheel);
+    superStructure = new SuperStructure(intake, indexer, flywheelKicker, flywheel, hood);
     
-    registerPathplannerCommand("basic intake", commandFactory.basicIntakeCmd());
-    registerPathplannerCommand("shoot at hub", commandFactory.shootWithSpinUp(3000.0, 6.0));
+    registerPathplannerCommand("basic intake", superStructure.setStateCommand(SuperStates.INTAKING));
+    registerPathplannerCommand("shoot at hub", superStructure.setStateCommand(SuperStates.SPINUP_SHOOTING));
     registerPathplannerCommand("run flywheel kicker", flywheelKicker.setDutyCycleCommand(1.0));
 
     configureBindings();

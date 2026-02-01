@@ -13,6 +13,7 @@ import frc.robot.subsystems.Hood.Hood;
 import frc.robot.subsystems.Hood.Hood.HoodStates;
 import frc.robot.subsystems.Indexer.Indexer;
 import frc.robot.subsystems.Intake.Intake;
+import frc.robot.subsystems.Intake.Intake.IntakeStates;
 
 public class SuperStructure extends SubsystemBase {
     private final Intake intake;
@@ -88,7 +89,10 @@ public class SuperStructure extends SubsystemBase {
         //hood, flywheel
         hood.setWantedState(HoodStates.SPINUP_SHOOTING);
         flywheel.setWantedState(FlywheelStates.SPINUP_SHOOTING);
-        if(hood.)
+        if(hood.atSetpoint(6.0) && flywheel.atSetPoint(3000.0, 100.0)){
+            flywheelKicker.setWantedState(FlywheelKickerStates.SPINUP_SHOOTING);
+            intake.setWantedState(IntakeStates.INTAKING);
+        }
     }
 
     private void intaking() {
