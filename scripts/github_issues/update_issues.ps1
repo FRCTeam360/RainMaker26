@@ -48,32 +48,162 @@ if (-not (Test-Path $CsvFile)) {
     exit 1
 }
 
-# GitHub Project configuration for FRCTeam360 Rebuilt board
-$ProjectId = "PVT_kwDOAKOwYc4BMevW"
-$EpicFieldId = "PVTSSF_lADOAKOwYc4BMevWzg73hPQ"
-$PriorityFieldId = "PVTSSF_lADOAKOwYc4BMevWzg8Zqaw"
-
-# Epic name to option ID mapping
-$EpicOptions = @{
-    "Architecture"        = "90ff87de"
-    "Subsystems"          = "25133e18"
-    "Automation"          = "52436123"
-    "Autos"               = "5973533d"
-    "Tooling"             = "dcae1a5f"
-    "Testing/Prototyping" = "f16aa092"
-    "Logging"             = "adddb420"
-    "Simulations"         = "6c4f461c"
-    "Vision"              = "778415d0"
-    "Administration"      = "025c48c1"
-    "Commands"            = "f1ebbe3d"
+# Function to get project configuration dynamically
+function Get-ProjectConfig {
+    param(
+        [string]$ProjectNumber,
+        [string]$ProjectOwner
+    )
+    
+    Write-Host "Fetching project configuration from GitHub..." -ForegroundColor Cyan
+    
+    try {
+        # Get project details
+        $projectInfo = gh project view $ProjectNumber --owner $ProjectOwner --format json 2>&1
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "Error: Could not fetch project information" -ForegroundColor Red
+            Write-Host "Details: $projectInfo" -ForegroundColor Red
+            return $null
+        }
+        
+        $project = $projectInfo | ConvertFrom-Json
+        $projectId = $project.id
+        
+        Write-Host "  -> Project ID: $projectId" -ForegroundColor Cyan
+        
+        # Get all fields in the project
+        $fieldsJson = gh project field-list $ProjectNumber --owner $ProjectOwner --format json 2>&1
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "Error: Could not fetch project fields" -ForegroundColor Red
+            Write-Host "Details: $fieldsJson" -ForegroundColor Red
+            return $null
+        }
+        
+        Write-Host "  -> Raw fields response:" -ForegroundColor Gray
+        Write-Host $fieldsJson -ForegroundColor Gray
+        
+        # Handle both single object and array responses
+        $fieldsData = $fieldsJson | ConvertFrom-Json
+        if ($null -eq $fieldsData) {
+            Write-Host "Error: No fields returned from project" -ForegroundColor Red
+            return $null
+        }
+        
+        # The response might have a 'fields' property or be an array directly
+        if ($fieldsData.PSObject.Properties.Name -contains "fields") {
+            $fieldsList = @($fieldsData.fields)
+        } elseif ($fieldsData -is [System.Collections.IEnumerable] -and $fieldsData -isnot [string]) {
+            $fieldsList = @($fieldsData)
+        } else {
+            $fieldsList = @($fieldsData)
+        }
+        
+        Write-Host "  -> Found $($fieldsList.Count) field(s)" -ForegroundColor Cyan
+        
+        $config = @{
+            ProjectId = $projectId
+            Fields = @{}
+        }
+        
+        foreach ($field in $fieldsList) {
+            if ($null -eq $field) { 
+                Write-Host "    - Skipping null field" -ForegroundColor Gray
+                continue 
+            }
+            
+            # Skip fields without a name
+            if ([string]::IsNullOrWhiteSpace($field.name)) {
+                Write-Host "    - Skipping field with empty name" -ForegroundColor Gray
+                continue
+            }
+            
+            $fieldConfig = @{
+                Id = $field.id
+                Name = $field.name
+                Type = $field.type
+                Options = @{}
+            }
+            
+            Write-Host "    - Field: $($field.name) (Type: $($field.type))" -ForegroundColor Gray
+            
+            # Collect options for single-select fields (both ProjectV2SingleSelectField and other types with options)
+            if (($field.type -eq "single_select" -or $field.type -eq "ProjectV2SingleSelectField") -and $null -ne $field.options) {
+                $optionsList = @($field.options)
+                foreach ($option in $optionsList) {
+                    if ($null -ne $option -and -not [string]::IsNullOrWhiteSpace($option.name)) {
+                        $fieldConfig.Options[$option.name] = $option.id
+                        Write-Host "      * $($option.name)" -ForegroundColor Gray
+                    }
+                }
+            }
+            
+            $config.Fields[$field.name] = $fieldConfig
+        }
+        
+        if ($config.Fields.Count -eq 0) {
+            Write-Host "Warning: No valid fields found in project" -ForegroundColor Yellow
+        }
+        
+        return $config
+    }
+    catch {
+        Write-Host "Error fetching project config: $_" -ForegroundColor Red
+        Write-Host "Stack trace: $($_.ScriptStackTrace)" -ForegroundColor Red
+        return $null
+    }
 }
 
-# Priority name to option ID mapping
-$PriorityOptions = @{
-    "Number One Highest Priority" = "18aec1f7"
-    "High Priority"               = "a9977a8d"
-    "Low Priority"                = "e9b3dc38"
+# Function to get CSV schema
+function Get-CsvSchema {
+    param([string]$CsvFile)
+    
+    try {
+        $csv = Import-Csv -Path $CsvFile
+        if ($csv.Count -gt 0) {
+            return $csv[0].PSObject.Properties.Name
+        }
+    }
+    catch {
+        Write-Host "Error reading CSV schema: $_" -ForegroundColor Red
+    }
+    return $null
 }
+
+# Get dynamic project configuration
+$ProjectConfig = Get-ProjectConfig -ProjectNumber $ProjectNumber -ProjectOwner $ProjectOwner
+if ($null -eq $ProjectConfig) {
+    Write-Host "Error: Could not retrieve project configuration. Exiting." -ForegroundColor Red
+    exit 1
+}
+
+$ProjectId = $ProjectConfig.ProjectId
+
+# Extract field IDs and options
+$EpicField = $ProjectConfig.Fields["Epic"]
+$PriorityField = $ProjectConfig.Fields["Priority"]
+
+$EpicFieldId = $null
+$PriorityFieldId = $null
+$EpicOptions = @{}
+$PriorityOptions = @{}
+
+if ($null -eq $EpicField) {
+    Write-Host "Warning: 'Epic' field not found in project" -ForegroundColor Yellow
+} else {
+    $EpicFieldId = $EpicField.Id
+    $EpicOptions = $EpicField.Options
+}
+
+if ($null -eq $PriorityField) {
+    Write-Host "Warning: 'Priority' field not found in project" -ForegroundColor Yellow
+} else {
+    $PriorityFieldId = $PriorityField.Id
+    $PriorityOptions = $PriorityField.Options
+}
+
+# Get CSV schema
+$CsvSchema = Get-CsvSchema -CsvFile $CsvFile
+Write-Host "CSV Schema: $($CsvSchema -join ', ')" -ForegroundColor Cyan
 
 Write-Host "Starting GitHub Issues update from: $CsvFile" -ForegroundColor Green
 Write-Host ""
@@ -214,7 +344,7 @@ foreach ($issue in $issues) {
     }
 
     # Set Epic field if specified and item found
-    if (-not [string]::IsNullOrWhiteSpace($issue.epic)) {
+    if (-not [string]::IsNullOrWhiteSpace($issue.epic) -and $null -ne $EpicFieldId) {
         if ($null -ne $itemId) {
             $epicName = $issue.epic.Trim()
             if ($EpicOptions.ContainsKey($epicName)) {
@@ -234,7 +364,7 @@ foreach ($issue in $issues) {
     }
 
     # Set Priority field if specified and item found
-    if (-not [string]::IsNullOrWhiteSpace($issue.priority)) {
+    if (-not [string]::IsNullOrWhiteSpace($issue.priority) -and $null -ne $PriorityFieldId) {
         if ($null -ne $itemId) {
             $priorityName = $issue.priority.Trim()
             if ($PriorityOptions.ContainsKey($priorityName)) {
