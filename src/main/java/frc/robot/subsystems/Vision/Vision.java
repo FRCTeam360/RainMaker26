@@ -16,7 +16,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,10 +26,11 @@ import org.littletonrobotics.junction.Logger;
 
 public class Vision extends SubsystemBase {
   private final Map<String, VisionIO> ios;
-
+  private int totalDetections = 0;
+  private int rejectedMeasurements = 0;
   private final Map<String, VisionIOInputsAutoLogged> visionInputs;
   private Timer snapshotTimer = new Timer();
-  List<VisionMeasurement> acceptedMeasurements = Collections.emptyList();
+  List<VisionMeasurement> acceptedMeasurements = new ArrayList<>();
 
   private final String VISION_LOGGING_PREFIX = "Vision: ";
 
@@ -38,10 +38,12 @@ public class Vision extends SubsystemBase {
       new InterpolatingMatrixTreeMap<>();
 
   static {
+    // Very low standard deviations = high confidence = vision dominates pose estimation
+    // X and Y in meters, rotation in radians
     MEASUREMENT_STD_DEV_DISTANCE_MAP.put(
-        0.5, VecBuilder.fill(1.0, 1.0, 999999.0)); // n1 and n2 are for x and y, n3
-    // is for angle
-    MEASUREMENT_STD_DEV_DISTANCE_MAP.put(5.0, VecBuilder.fill(10.0, 10.0, 999999.0));
+        0.5, VecBuilder.fill(1.0, 1.0, 999999.0)); // Close tags: very high confidence (1cm std dev)
+    MEASUREMENT_STD_DEV_DISTANCE_MAP.put(
+        5.0, VecBuilder.fill(0.5, 0.5, 999999.0)); // Far tags: still high confidence (5cm std dev)
   }
 
   /** Creates a new Vision. */
@@ -106,6 +108,9 @@ public class Vision extends SubsystemBase {
 
   @Override
   public void periodic() {
+    // Clear previous measurements to prevent unbounded growth
+    acceptedMeasurements.clear();
+
     for (String key : ios.keySet()) {
       VisionIO io = ios.get(key);
       VisionIOInputsAutoLogged input = visionInputs.get(key);
@@ -114,12 +119,19 @@ public class Vision extends SubsystemBase {
       Logger.processInputs("Limelight: " + key, input);
     }
 
-    List<VisionMeasurement> acceptedMeasurements = new ArrayList<>();
-
     for (String key : visionInputs.keySet()) {
       VisionIOInputsAutoLogged input = visionInputs.get(key);
+
+      // Count total detections (pose updates attempted)
+      if (input.poseUpdated) {
+        totalDetections++;
+      }
+
       // skip input if not updated
-      if (!input.poseUpdated) continue;
+      if (!input.poseUpdated) {
+        rejectedMeasurements++;
+        continue;
+      }
 
       Pose2d pose = input.estimatedPose;
       double timestamp = input.timestampSeconds;
@@ -128,7 +140,10 @@ public class Vision extends SubsystemBase {
       if (pose.getX() < 0.0
           || pose.getX() > Constants.FIELD_LAYOUT.getFieldLength()
           || pose.getY() < 0.0
-          || pose.getY() > Constants.FIELD_LAYOUT.getFieldWidth()) continue;
+          || pose.getY() > Constants.FIELD_LAYOUT.getFieldWidth()) {
+        rejectedMeasurements++;
+        continue;
+      }
 
       // get standard deviation based on distance to nearest tag
       OptionalDouble closestTagDistance = Arrays.stream(input.distancesToTargets).min();
@@ -138,7 +153,13 @@ public class Vision extends SubsystemBase {
 
       acceptedMeasurements.add(new VisionMeasurement(timestamp, pose, cprStdDevs));
     }
-    this.acceptedMeasurements = acceptedMeasurements;
+
+    // Log rejection statistics
+    Logger.recordOutput(VISION_LOGGING_PREFIX + "Total Detections", totalDetections);
+    Logger.recordOutput(VISION_LOGGING_PREFIX + "Rejected Measurements", rejectedMeasurements);
+    Logger.recordOutput(
+        VISION_LOGGING_PREFIX + "Rejection Rate",
+        totalDetections > 0 ? (double) rejectedMeasurements / totalDetections : 0.0);
   }
 
   /**
