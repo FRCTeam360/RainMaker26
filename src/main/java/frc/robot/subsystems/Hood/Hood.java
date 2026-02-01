@@ -39,6 +39,11 @@ public enum HoodStates {
         break;
     }
   }
+  
+  public double getPosition() {
+    return inputs.position;
+  }
+
 
   private void updateState() {
     previousState = currentState;
@@ -58,7 +63,7 @@ public enum HoodStates {
     this.io = io;
   }
     public boolean atSetpoint(double setpoint) {
-    return Math.abs(getPosition() - setpoint) < TOLERANCE;
+    return Math.abs(getPosition() - setpoint) < 0.5;
   }
 
   public void setDutyCycle(double dutyCycle) {

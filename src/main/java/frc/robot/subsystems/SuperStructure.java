@@ -89,7 +89,7 @@ public class SuperStructure extends SubsystemBase {
         //hood, flywheel
         hood.setWantedState(HoodStates.SPINUP_SHOOTING);
         flywheel.setWantedState(FlywheelStates.SPINUP_SHOOTING);
-        if(hood.atSetpoint(6.0) && flywheel.atSetPoint(3000.0, 100.0)){
+        if(hood.atSetpoint(6.0) && flywheel.atSetpoint(3000.0,100.0)){
             flywheelKicker.setWantedState(FlywheelKickerStates.SPINUP_SHOOTING);
             intake.setWantedState(IntakeStates.INTAKING);
         }
@@ -108,6 +108,7 @@ public class SuperStructure extends SubsystemBase {
         indexer.setWantedState(Indexer.IndexerStates.OFF);
         flywheelKicker.setWantedState(FlywheelKickerStates.OFF);
         flywheel.setWantedState(FlywheelStates.OFF);
+        hood.setWantedState(HoodStates.OFF);
     }
     public Command setStateCommand(SuperStates superState) {
         return new InstantCommand(

@@ -21,6 +21,7 @@ import frc.robot.subsystems.FlywheelKicker.FlywheelKicker;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKickerIOSim;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKickerIOWB;
 import frc.robot.subsystems.Hood.Hood;
+import frc.robot.subsystems.Hood.HoodIOWB;
 import frc.robot.subsystems.Indexer.Indexer;
 import frc.robot.subsystems.Indexer.IndexerIOSim;
 import frc.robot.subsystems.Indexer.IndexerIOWB;
@@ -73,6 +74,7 @@ public class RobotContainer {
         indexer = new Indexer(new IndexerIOWB());
         intake = new Intake(new IntakeIOWB());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOWB());
+        hood = new Hood(new HoodIOWB());
         // intakePivot = new IntakePivot(new IntakePivotIOPB());
         break;
       case SIM:
@@ -99,6 +101,7 @@ public class RobotContainer {
         indexer = new Indexer(new IndexerIOWB());
         intake = new Intake(new IntakeIOWB());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOWB());
+        hood = new Hood(new HoodIOWB());
         // intakePivot = new IntakePivot(new IntakePivotIOPB());
     }
     // Configure the trigger bindings
@@ -147,10 +150,12 @@ public class RobotContainer {
 
     driverCont.rightBumper().onTrue(superStructure.setStateCommand(SuperStates.SHOOTING));
     driverCont.rightBumper().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
+    driverCont.x().onTrue(superStructure.setStateCommand(SuperStates.SPINUP_SHOOTING));
+    driverCont.x().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
 
     if (Objects.nonNull(drivetrain)) {
       drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
-    }
+    } 
   }
 
   public void onDisable() {
