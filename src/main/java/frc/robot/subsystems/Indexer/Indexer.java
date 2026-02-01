@@ -6,8 +6,6 @@ package frc.robot.subsystems.Indexer;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.subsystems.Intake.Intake.IntakeStates;
-
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -36,6 +34,7 @@ public class Indexer extends SubsystemBase {
         break;
     }
   }
+
   private void applyState() {
     switch (currentState) {
       case INTAKING:
@@ -52,7 +51,8 @@ public class Indexer extends SubsystemBase {
   public Indexer(IndexerIO io) {
     this.io = io;
   }
- public void setWantedState(IndexerStates state) {
+
+  public void setWantedState(IndexerStates state) {
     wantedState = state;
     updateState();
     applyState();

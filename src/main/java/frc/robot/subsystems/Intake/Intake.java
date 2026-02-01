@@ -54,11 +54,12 @@ public class Intake extends SubsystemBase {
         break;
     }
   }
-  
-  public void setDutyCycle(double duty){
+
+  public void setDutyCycle(double duty) {
     io.setDutyCycle(duty);
   }
-  public void stop(){
+
+  public void stop() {
     io.setDutyCycle(0.0);
   }
 
@@ -75,8 +76,6 @@ public class Intake extends SubsystemBase {
 
   public Command setDutyCycleCommand(DoubleSupplier dutySupplier) {
     return this.runEnd(
-        () -> io.setDutyCycle(dutySupplier.getAsDouble()),
-        () -> io.setDutyCycle(0.0)
-    );
+        () -> io.setDutyCycle(dutySupplier.getAsDouble()), () -> io.setDutyCycle(0.0));
   }
 }

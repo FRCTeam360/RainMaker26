@@ -6,23 +6,23 @@ package frc.robot.subsystems.FlywheelKicker;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.subsystems.Indexer.Indexer.IndexerStates;
-
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
 public class FlywheelKicker extends SubsystemBase {
   private final FlywheelKickerIO io;
   private final FlywheelKickerIOInputsAutoLogged inputs = new FlywheelKickerIOInputsAutoLogged();
-public enum FlywheelKickerStates {
+
+  public enum FlywheelKickerStates {
     OFF,
     INTAKING
   }
+
   private FlywheelKickerStates wantedState = FlywheelKickerStates.OFF;
   private FlywheelKickerStates currentState = FlywheelKickerStates.OFF;
   private FlywheelKickerStates previousState = FlywheelKickerStates.OFF;
 
-   private void updateState() {
+  private void updateState() {
     previousState = currentState;
 
     switch (wantedState) {
@@ -30,11 +30,11 @@ public enum FlywheelKickerStates {
         currentState = FlywheelKickerStates.INTAKING;
         break;
       case OFF:
-        currentState =  FlywheelKickerStates.OFF;
+        currentState = FlywheelKickerStates.OFF;
         break;
     }
-
   }
+
   private void applyState() {
     switch (currentState) {
       case INTAKING:
@@ -46,11 +46,13 @@ public enum FlywheelKickerStates {
         break;
     }
   }
+
   public void setWantedState(FlywheelKickerStates state) {
     wantedState = state;
     updateState();
     applyState();
   }
+
   /** Creates a new FlywheelKicker. */
   public FlywheelKicker(FlywheelKickerIO io) {
     this.io = io;
