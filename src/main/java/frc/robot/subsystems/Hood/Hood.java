@@ -57,6 +57,9 @@ public enum HoodStates {
   public Hood(HoodIO io) {
     this.io = io;
   }
+    public boolean atSetpoint(double setpoint) {
+    return Math.abs(getPosition() - setpoint) < TOLERANCE;
+  }
 
   public void setDutyCycle(double dutyCycle) {
     io.setDutyCycle(dutyCycle);
