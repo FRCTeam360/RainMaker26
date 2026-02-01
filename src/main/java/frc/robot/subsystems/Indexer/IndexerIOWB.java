@@ -20,10 +20,11 @@ import frc.robot.Constants.WoodBotConstants;
 
 public class IndexerIOWB implements IndexerIO {
   /** Creates a new IndexerIOWB. */
-   CANrangeConfiguration intakeConfig = new CANrangeConfiguration();
+  CANrangeConfiguration intakeConfig = new CANrangeConfiguration();
+
   private final SparkMax indexerMotor =
       new SparkMax(Constants.WoodBotConstants.INDEXER_ID, MotorType.kBrushless);
- private final CANrange intakeSensor =
+  private final CANrange intakeSensor =
       new CANrange(
           Constants.WoodBotConstants.INDEXER_SENSOR_ID, Constants.WoodBotConstants.CANBUS_NAME);
   private final RelativeEncoder encoder = indexerMotor.getEncoder();
@@ -39,14 +40,12 @@ public class IndexerIOWB implements IndexerIO {
     indexerMotor.configure(
         sparkMaxConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-        CANrangeConfiguration intakeConfig = new CANrangeConfiguration();
-         intakeConfig.ProximityParams.MinSignalStrengthForValidMeasurement = 2000;
-        intakeConfig.ProximityParams.ProximityThreshold = 0.1;
-        intakeConfig.ToFParams.withUpdateMode(UpdateModeValue.ShortRangeUserFreq);
-         intakeSensor.getConfigurator().apply(intakeConfig);
+    CANrangeConfiguration intakeConfig = new CANrangeConfiguration();
+    intakeConfig.ProximityParams.MinSignalStrengthForValidMeasurement = 2000;
+    intakeConfig.ProximityParams.ProximityThreshold = 0.1;
+    intakeConfig.ToFParams.withUpdateMode(UpdateModeValue.ShortRangeUserFreq);
+    intakeSensor.getConfigurator().apply(intakeConfig);
   }
-
-
 
   public void updateInputs(IndexerIOInputs inputs) {
     inputs.position = encoder.getPosition();
