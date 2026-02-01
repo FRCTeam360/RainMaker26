@@ -30,6 +30,14 @@ public class Intake extends SubsystemBase {
     return this.runEnd(() -> io.setDutyCycle(valueSup.getAsDouble()), () -> io.setDutyCycle(0.0));
   }
 
+  public void setVelocity(double velocity) {
+    io.setVelocity(velocity);
+  }
+
+  public Command setVelocityCommand(double velocity) {
+    return this.runEnd(() -> setVelocity(velocity), () -> setVelocity(0.0));
+  }
+
   public void stop() {
     this.setDutyCycle(0.0);
   }

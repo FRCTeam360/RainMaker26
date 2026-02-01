@@ -13,6 +13,8 @@ public class IntakeIOSim implements IntakeIO {
     // TODO Auto-generated method stub
   }
 
+  public void setVelocity(double velocity) {}
+
   @Override
   public void stop() {
     // TODO Auto-generated method stub

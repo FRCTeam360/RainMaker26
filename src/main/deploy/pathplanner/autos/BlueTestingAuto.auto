@@ -30,7 +30,7 @@
           }
         },
         {
-          "type": "sequential",
+          "type": "deadline",
           "data": {
             "commands": [
               {
@@ -42,10 +42,16 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "shoot at hub"
+                  "name": "basic intake"
                 }
               }
             ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "shoot at hub"
           }
         }
       ]
