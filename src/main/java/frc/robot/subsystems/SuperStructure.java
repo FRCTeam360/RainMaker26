@@ -9,6 +9,8 @@ import frc.robot.subsystems.Flywheel.Flywheel;
 import frc.robot.subsystems.Flywheel.Flywheel.FlywheelStates;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKicker;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKicker.FlywheelKickerStates;
+import frc.robot.subsystems.Hood.Hood;
+import frc.robot.subsystems.Hood.Hood.HoodStates;
 import frc.robot.subsystems.Indexer.Indexer;
 import frc.robot.subsystems.Intake.Intake;
 
@@ -17,6 +19,7 @@ public class SuperStructure extends SubsystemBase {
     private final Indexer indexer;
     private final FlywheelKicker flywheelKicker;
     private Flywheel flywheel;
+    private Hood hood;
 
     public enum SuperStates {
         IDLE, //everything is stopped when nothing else happens
@@ -30,18 +33,20 @@ public class SuperStructure extends SubsystemBase {
         INTAKING,//while intake button pressed
            EJECTING// eject button
            ,PASSING    //has current zone, makes check for !current zone then passes to zone
-           ,SHOOTING
+           ,SHOOTING,
+           SPINUP_SHOOTING
     }
 
     private SuperStates wantedSuperState = SuperStates.IDLE;
     private SuperStates currentSuperState = SuperStates.IDLE;
     private SuperStates previousSuperState = SuperStates.IDLE;
 
-    public SuperStructure(Intake intake, Indexer indexer, FlywheelKicker flywheelKicker, Flywheel flywheel) {
+    public SuperStructure(Intake intake, Indexer indexer, FlywheelKicker flywheelKicker, Flywheel flywheel, Hood hood) {
         this.intake = intake;
         this.indexer = indexer;
         this.flywheelKicker = flywheelKicker;
         this.flywheel = flywheel;
+        this.hood = hood;
     }
     private void updateState() {
         previousSuperState = currentSuperState;
@@ -57,6 +62,9 @@ public class SuperStructure extends SubsystemBase {
             case IDLE:
                 currentSuperState = SuperStates.IDLE;
                 break;
+            case SPINUP_SHOOTING:
+                currentSuperState = SuperStates.SPINUP_SHOOTING;
+                break;
         }
     }
     private void applyStates() {
@@ -71,7 +79,16 @@ public class SuperStructure extends SubsystemBase {
             case IDLE:
                 stopped();
                 break;
+            case SPINUP_SHOOTING:
+            spinupShooting();
+            break;
         }
+    }
+    private void spinupShooting(){
+        //hood, flywheel
+        hood.setWantedState(HoodStates.SPINUP_SHOOTING);
+        flywheel.setWantedState(FlywheelStates.SPINUP_SHOOTING);
+        if(hood.)
     }
 
     private void intaking() {

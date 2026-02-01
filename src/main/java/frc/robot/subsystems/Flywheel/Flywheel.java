@@ -16,7 +16,8 @@ public class Flywheel extends SubsystemBase {
   private final FlywheelIOInputsAutoLogged inputs = new FlywheelIOInputsAutoLogged();
   public enum FlywheelStates {
     OFF,
-    SHOOTING
+    SHOOTING,
+    SPINUP_SHOOTING
   }
    private FlywheelStates wantedState = FlywheelStates.OFF;
   private FlywheelStates currentState = FlywheelStates.OFF;
@@ -29,6 +30,9 @@ public class Flywheel extends SubsystemBase {
       case SHOOTING:
         currentState = FlywheelStates.SHOOTING;
         break;
+      case SPINUP_SHOOTING:
+        currentState = FlywheelStates.SPINUP_SHOOTING;
+        break;
       case OFF:
         currentState = FlywheelStates.OFF;
         break;
@@ -36,6 +40,9 @@ public class Flywheel extends SubsystemBase {
   }
   private void applyState() {
     switch (currentState) {
+      case SPINUP_SHOOTING:
+        setRPM(3000.0);
+        break;
       case SHOOTING:
         setDutyCycle(0.75);
         break;

@@ -76,7 +76,7 @@ public class Indexer extends SubsystemBase {
 
   @Override
   public void periodic() {
-
+    
     io.updateInputs(inputs);
     Logger.processInputs("Indexer", inputs);
     Logger.recordOutput("Subsystems/Indexer/WantedState", wantedState.toString());
