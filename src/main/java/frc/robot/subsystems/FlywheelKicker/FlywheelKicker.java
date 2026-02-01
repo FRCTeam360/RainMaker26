@@ -15,27 +15,20 @@ public class FlywheelKicker extends SubsystemBase {
   private final FlywheelKickerIO io;
   private final FlywheelKickerIOInputsAutoLogged inputs = new FlywheelKickerIOInputsAutoLogged();
 public enum FlywheelKickerStates {
-    SPINUP_SHOOTING,
-    OFF
+    OFF,
+    SPINUP_SHOOTING
   }
+
   private FlywheelKickerStates wantedState = FlywheelKickerStates.OFF;
   private FlywheelKickerStates currentState = FlywheelKickerStates.OFF;
-  private FlywheelKickerStates previousState = FlywheelKickerStates.OFF;
+  private FlywheelKickerStates previousState =FlywheelKickerStates.OFF;
 
-   private void updateState() {
-    previousState = currentState;
-
-    switch (wantedState) {
-      this.currentState = wantedState;
-      case SPINUP_SHOOTING:
-        currentState = FlywheelKickerStates.SPINUP_SHOOTING;
-      case OFF:
-        currentState =  FlywheelKickerStates.OFF;
-        break;
-    }
-
+    public void setWantedState(FlywheelKickerStates state) {
+    wantedState = state;
+    updateState();
+    applyState();
   }
-  private void applyState() {
+    private void applyState() {
     switch (currentState) {
       case SPINUP_SHOOTING:
         setDutyCycle(1.0);
@@ -46,17 +39,27 @@ public enum FlywheelKickerStates {
         break;
     }
   }
-  public void setWantedState(FlywheelKickerStates state) {
-    wantedState = state;
-    updateState();
-    applyState();
+
+
+  private void updateState() {
+    previousState = currentState;
+
+    switch (wantedState) {
+      case SPINUP_SHOOTING:
+        currentState = FlywheelKickerStates.SPINUP_SHOOTING;
+        break;
+      case OFF:
+      default:
+        currentState = FlywheelKickerStates.OFF;
+        break;
+    }
   }
   /** Creates a new FlywheelKicker. */
   public FlywheelKicker(FlywheelKickerIO io) {
     this.io = io;
   }
 
-  public void setDutyCycle(double dutyCycle) {
+   public void setDutyCycle(double dutyCycle) {
     io.setDutyCycle(dutyCycle);
   }
 
@@ -69,11 +72,12 @@ public enum FlywheelKickerStates {
   }
 
   public void stop() {
-    io.setDutyCycle(0.0);
+    io.setDutyCycle(0);
   }
 
   @Override
   public void periodic() {
+    // This method will be called once per scheduler run
     io.updateInputs(inputs);
     Logger.processInputs("FlywheelKicker", inputs);
     Logger.recordOutput("Subsystems/FlywheelKicker/WantedState", wantedState.toString());
