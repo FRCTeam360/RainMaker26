@@ -13,9 +13,7 @@ public interface VisionIO {
   @AutoLog
   public static class VisionIOInputs {
     public double tx;
-    public double txAdjusted;
     public double ty;
-    public double tyAdjusted;
     public double tv;
     public int pipeline;
     public double tagID;

@@ -86,14 +86,14 @@ public class VisionIOPhotonSim implements VisionIO {
   }
 
   private void updateInputsWhenNoTargets(VisionIOInputs inputs) {
-      inputs.tv = 0.0;
-      inputs.tx = 0.0;
-      inputs.ty = 0.0;
-      inputs.tagID = -1;
-      // Clear target arrays
-      inputs.targetIds = new int[0];
-      inputs.distancesToTargets = new double[0];
-      inputs.tagPoses = new Pose3d[0];
+    inputs.tv = 0.0;
+    inputs.tx = 0.0;
+    inputs.ty = 0.0;
+    inputs.tagID = -1;
+    // Clear target arrays
+    inputs.targetIds = new int[0];
+    inputs.distancesToTargets = new double[0];
+    inputs.tagPoses = new Pose3d[0];
   }
 
   @Override
@@ -135,8 +135,6 @@ public class VisionIOPhotonSim implements VisionIO {
     if (bestTarget != null) {
       inputs.tx = bestTarget.getYaw();
       inputs.ty = bestTarget.getPitch();
-      inputs.txAdjusted = bestTarget.getYaw(); // No adjustment in sim
-      inputs.tyAdjusted = bestTarget.getPitch();
       inputs.tagID = bestTarget.getFiducialId();
     }
 
