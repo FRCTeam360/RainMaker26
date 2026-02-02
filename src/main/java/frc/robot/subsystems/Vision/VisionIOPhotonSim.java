@@ -41,6 +41,11 @@ public class VisionIOPhotonSim implements VisionIO {
   // Track pipeline (not used in sim but required by interface)
   private int currentPipeline = 0;
 
+  // Reusable lists to avoid allocations at 50Hz
+  private final List<Integer> targetIdsList = new ArrayList<>();
+  private final List<Double> distancesList = new ArrayList<>();
+  private final List<Pose3d> tagPosesList = new ArrayList<>();
+
   /**
    * Creates a new VisionIOPhotonSim.
    *
@@ -154,9 +159,9 @@ public class VisionIOPhotonSim implements VisionIO {
       inputs.poseUpdated = true;
 
       // Fill in target information
-      List<Integer> targetIdsList = new ArrayList<>();
-      List<Double> distancesList = new ArrayList<>();
-      List<Pose3d> tagPosesList = new ArrayList<>();
+      targetIdsList.clear();
+      distancesList.clear();
+      tagPosesList.clear();
 
       for (PhotonTrackedTarget target : targets) {
         int tagId = target.getFiducialId();
