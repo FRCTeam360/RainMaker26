@@ -180,10 +180,10 @@ public class RobotContainer {
               });
       vision.setDefaultCommand(consumeVisionMeasurements.ignoringDisable(true));
     }
+    // TODO: make more elegant solution for null checking subsystems/commands
 
-    // TODO: this is a weird way to circumvent null pointer exceptions, refactor later. Done for
-    // Vision sim.
-    if (Objects.nonNull(commandFactory)) {
+    // Null checks based on subsystems used by each command
+    // basicIntakeCmd uses intake and indexer
     if (Objects.nonNull(intake) && Objects.nonNull(indexer)) {
       driverCont.leftBumper().whileTrue(commandFactory.basicIntakeCmd());
     }
