@@ -8,7 +8,7 @@
 
 param(
     [Parameter(Position=0)]
-    [string]$CsvFile = "github_issues_export.csv",
+    [string]$CsvFile = "",
 
     [Parameter(Position=1)]
     [string]$Repo = "FRCTeam360/RainMaker26",
@@ -19,6 +19,19 @@ param(
 
     [string]$ProjectOwner = "FRCTeam360"
 )
+
+# Set default CSV file name with timestamp if not provided
+if ([string]::IsNullOrWhiteSpace($CsvFile)) {
+    $timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
+    $CsvFile = "scripts\github_issues\csv_exports\github_issues_export_$timestamp.csv"
+}
+
+# Ensure the csv_exports directory exists
+$exportDir = Split-Path -Parent $CsvFile
+if (-not (Test-Path $exportDir)) {
+    New-Item -ItemType Directory -Path $exportDir -Force | Out-Null
+    Write-Host "Created export directory: $exportDir" -ForegroundColor Cyan
+}
 
 # Check if gh CLI is installed
 if (-not (Get-Command gh -ErrorAction SilentlyContinue)) {
@@ -241,9 +254,9 @@ foreach ($item in $projectItems.items) {
 
 Write-Host "Found $($issueNumbers.Count) issues in the Rebuilt board" -ForegroundColor Cyan
 
-# Find and output missing issues (in repo but not in Rebuilt board)
-$missingIssues = $issues | Where-Object { $_.number.ToString() -notin $issueNumbers }
-Write-Host "Missing issues (not in Rebuilt board):" -ForegroundColor Yellow
+# Find and output missing issues (in repo but not in Rebuilt board, and still open)
+$missingIssues = $issues | Where-Object { $_.number.ToString() -notin $issueNumbers -and $_.state -eq "OPEN" }
+Write-Host "Missing issues (not in Rebuilt board and still open):" -ForegroundColor Yellow
 $missingIssues | ForEach-Object { Write-Host "Issue #$($_.number): $($_.title)" -ForegroundColor Yellow }
 
 # Fetch full issue details for each issue number
