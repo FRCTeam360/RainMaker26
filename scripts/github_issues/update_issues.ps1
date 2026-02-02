@@ -15,7 +15,7 @@
 
 param(
     [Parameter(Position=0)]
-    [string]$CsvFile = "scripts\github_issues\github_issues_to_update.csv",
+    [string]$CsvFile = "scripts\github_issues\csv_exports\archive\issues_to_update_20260201_pt2 copy 2.csv",
     
     [Parameter(Position=1)]
     [string]$Repo = "FRCTeam360/RainMaker26",
