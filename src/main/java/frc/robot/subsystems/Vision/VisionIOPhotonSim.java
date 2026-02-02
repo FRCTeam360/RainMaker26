@@ -10,7 +10,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -41,10 +41,11 @@ public class VisionIOPhotonSim implements VisionIO {
   // Track pipeline (not used in sim but required by interface)
   private int currentPipeline = 0;
 
-  // Reusable lists to avoid allocations at 50Hz
-  private final List<Integer> targetIdsList = new ArrayList<>();
-  private final List<Double> distancesList = new ArrayList<>();
-  private final List<Pose3d> tagPosesList = new ArrayList<>();
+  // Reusable arrays to avoid allocations at 50Hz (preallocated for max possible tags)
+  private static final int MAX_TAGS = 32;
+  private final int[] targetIdsBuffer = new int[MAX_TAGS];
+  private final double[] distancesBuffer = new double[MAX_TAGS];
+  private final Pose3d[] tagPosesBuffer = new Pose3d[MAX_TAGS];
 
   /**
    * Creates a new VisionIOPhotonSim.
@@ -158,17 +159,15 @@ public class VisionIOPhotonSim implements VisionIO {
       inputs.timestampSeconds = est.timestampSeconds;
       inputs.poseUpdated = true;
 
-      // Fill in target information
-      targetIdsList.clear();
-      distancesList.clear();
-      tagPosesList.clear();
+      // Fill in target information using preallocated buffers
+      int targetCount = 0;
 
       for (PhotonTrackedTarget target : targets) {
         int tagId = target.getFiducialId();
         Optional<Pose3d> tagPose = kTagLayout.getTagPose(tagId);
 
         if (tagPose.isPresent()) {
-          targetIdsList.add(tagId);
+          targetIdsBuffer[targetCount] = tagId;
 
           // Calculate distance from robot to tag
           double distance =
@@ -177,16 +176,17 @@ public class VisionIOPhotonSim implements VisionIO {
                   .toPose2d()
                   .getTranslation()
                   .getDistance(est.estimatedPose.toPose2d().getTranslation());
-          distancesList.add(distance);
+          distancesBuffer[targetCount] = distance;
 
-          tagPosesList.add(tagPose.get());
+          tagPosesBuffer[targetCount] = tagPose.get();
+          targetCount++;
         }
       }
 
-      // Convert lists to arrays
-      inputs.targetIds = targetIdsList.stream().mapToInt(Integer::intValue).toArray();
-      inputs.distancesToTargets = distancesList.stream().mapToDouble(Double::doubleValue).toArray();
-      inputs.tagPoses = tagPosesList.toArray(new Pose3d[0]);
+      // Copy to right-sized arrays (single allocation, native memcpy)
+      inputs.targetIds = Arrays.copyOf(targetIdsBuffer, targetCount);
+      inputs.distancesToTargets = Arrays.copyOf(distancesBuffer, targetCount);
+      inputs.tagPoses = Arrays.copyOf(tagPosesBuffer, targetCount);
 
       // Update the debug field visualization
       getSimDebugField().getObject("VisionEstimation").setPose(est.estimatedPose.toPose2d());
