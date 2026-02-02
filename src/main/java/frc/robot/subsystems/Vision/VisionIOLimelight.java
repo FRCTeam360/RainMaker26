@@ -120,7 +120,7 @@ public class VisionIOLimelight implements VisionIO {
   }
 
   public int getAprilTagID() {
-    return (int) table.getEntry("tid").getInteger(0);
+    return (int) table.getEntry("tid").getInteger(-1);
   }
 
   public double getTXRaw() {
