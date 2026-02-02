@@ -85,6 +85,17 @@ public class VisionIOPhotonSim implements VisionIO {
     cameraSim.enableDrawWireframe(false);
   }
 
+  private void updateInputsWhenNoTargets(VisionIOInputs inputs) {
+      inputs.tv = 0.0;
+      inputs.tx = 0.0;
+      inputs.ty = 0.0;
+      inputs.tagID = -1;
+      // Clear target arrays
+      inputs.targetIds = new int[0];
+      inputs.distancesToTargets = new double[0];
+      inputs.tagPoses = new Pose3d[0];
+  }
+
   @Override
   public void updateInputs(VisionIOInputs inputs) {
     // Update the vision simulation with the current robot pose
@@ -104,14 +115,7 @@ public class VisionIOPhotonSim implements VisionIO {
 
     // If we have no result at all (not even a cached one)
     if (latestResult == null) {
-      inputs.tv = 0.0;
-      inputs.tx = 0.0;
-      inputs.ty = 0.0;
-      inputs.tagID = -1;
-      // Clear target arrays
-      inputs.targetIds = new int[0];
-      inputs.distancesToTargets = new double[0];
-      inputs.tagPoses = new Pose3d[0];
+      updateInputsWhenNoTargets(inputs);
       return;
     }
 
@@ -119,14 +123,7 @@ public class VisionIOPhotonSim implements VisionIO {
 
     // If no targets detected
     if (targets.isEmpty()) {
-      inputs.tv = 0.0;
-      inputs.tx = 0.0;
-      inputs.ty = 0.0;
-      inputs.tagID = -1;
-      // Clear target arrays
-      inputs.targetIds = new int[0];
-      inputs.distancesToTargets = new double[0];
-      inputs.tagPoses = new Pose3d[0];
+      updateInputsWhenNoTargets(inputs);
       return;
     }
 
