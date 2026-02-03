@@ -19,11 +19,16 @@ public class IntakeIOWB implements IntakeIO {
   private final RelativeEncoder encoder = motor.getEncoder();
   private final SparkFlexConfig config = new SparkFlexConfig();
   private final DigitalInput sensor = new DigitalInput(WoodBotConstants.INTAKE_SENSOR_PORT);
+  private final double CONVERSION_FACTOR = 1.0;
 
   public IntakeIOWB() {
     config.idleMode(IdleMode.kBrake);
     config.inverted(true);
     config.smartCurrentLimit(40);
+    config
+        .analogSensor
+        .positionConversionFactor(CONVERSION_FACTOR)
+        .velocityConversionFactor(CONVERSION_FACTOR);
 
     motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
