@@ -15,7 +15,7 @@ public class Turret extends SubsystemBase {
     private final TurretIO io;
     private final TurretIOInputsAutoLogged inputs = new TurretIOInputsAutoLogged();
     private final WPI_TalonSRX turretMotor = new WPI_TalonSRX(0);
-    private static final double TICKS_PER_DEGREE = 10.0;
+    private static final double = 10.0;
 
     /** Creates a new Turret. */
     public Turret(TurretIO io) {
