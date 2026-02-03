@@ -114,6 +114,16 @@ public class Vision extends SubsystemBase {
       VisionIOInputsAutoLogged input = visionInputs.get(key);
 
       io.updateInputs(input);
+
+      // Fill remaining array slots with first target to avoid 0,0 visualization lines
+      if (input.targetCount > 0) {
+        for (int i = input.targetCount; i < VisionIO.MAX_TAGS; i++) {
+          input.targetIds[i] = input.targetIds[0];
+          input.distancesToTargets[i] = input.distancesToTargets[0];
+          input.tagPoses[i] = input.tagPoses[0];
+        }
+      }
+
       Logger.processInputs("Limelight: " + key, input.clone());
     }
 
