@@ -182,7 +182,7 @@ public class RobotContainer {
       testCont1.leftBumper().whileTrue(intake.setDutyCycleCommand(() -> 0.5));
     }
     if (Objects.nonNull(intakePivot)) {
-      testCont1.rightBumper().whileTrue(intakePivot.setDutyCycleCommand(() -> 0.5));
+      testCont1.rightBumper().whileTrue(commandFactory.aimTurretAndShoot(20, 3000, 50));
     }
   }
 

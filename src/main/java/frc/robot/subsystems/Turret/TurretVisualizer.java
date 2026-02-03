@@ -38,7 +38,7 @@ public class TurretVisualizer {
             new LoggedMechanismLigament2d(
                 "intake arm",
                 armLength,
-                90.0, // Initial angle (pointing up)
+                0.0, // Initial angle (pointing up)
                 6, // Line thickness
                 new Color8Bit(Color.kLimeGreen)));
   }

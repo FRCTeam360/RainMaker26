@@ -10,11 +10,13 @@ public class Turret extends SubsystemBase {
   private final TurretIO io;
   private final TurretIOInputsAutoLogged inputs = new TurretIOInputsAutoLogged();
   private double TOLERANCE = 0.5; // TODO: find actual one
+  private final TurretVisualizer visualizer;
 
   /** Creates a new Turret. */
   public Turret(TurretIO io) {
     // PID
     this.io = io;
+    this.visualizer = new TurretVisualizer(0.10);
   }
 
   public void setDutyCycle(double dutyCycle) {
@@ -50,5 +52,7 @@ public class Turret extends SubsystemBase {
     // This method will be called once per scheduler run
     io.updateInputs(inputs);
     Logger.processInputs("Turret", inputs);
+
+    visualizer.update(inputs.position * 2.0 * Math.PI);
   }
 }
