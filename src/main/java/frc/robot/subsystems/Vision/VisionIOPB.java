@@ -4,14 +4,36 @@
 
 package frc.robot.subsystems.Vision;
 
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
+import org.littletonrobotics.junction.AutoLog;
 
-public class VisionIOPB extends SubsystemBase {
+public interface VisionIOPB {
   /** Creates a new VisionIOPB. */
-  public VisionIOPB() {}
-
-  @Override
-  public void periodic() {
-    // This method will be called once per scheduler run
+  @AutoLog
+  public static class VisionIOInputs {
+    public double tx;
+    public double txAdjusted;
+    public double ty;
+    public double tyAdjusted;
+    public double tv;
+    public int pipeline;
+    public double tagID;
+    public Pose2d estimatedPose;
+    public double timestampSeconds;
+    public int[] targetIds;
+    public double[] distancesToTargets;
+    public boolean poseUpdated;
+    public Pose3d[] tagPoses;
   }
+
+  public void updateInputs(VisionIOInputs inputs);
+
+  public void setLEDMode(int mode);
+
+  public void setPipeline(int pipeline);
+
+  public void takeSnapshot();
+
+  public void resetSnapshot();
 }

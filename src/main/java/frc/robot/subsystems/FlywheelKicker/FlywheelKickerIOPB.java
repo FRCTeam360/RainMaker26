@@ -4,14 +4,21 @@
 
 package frc.robot.subsystems.FlywheelKicker;
 
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import org.littletonrobotics.junction.AutoLog;
 
-public class FlywheelKickerIOPB extends SubsystemBase {
+public interface FlywheelKickerIOPB {
   /** Creates a new FlywheelKickerIOPB. */
-  public FlywheelKickerIOPB() {}
-
-  @Override
-  public void periodic() {
-    // This method will be called once per scheduler run
+  @AutoLog
+  public static class FlywheelKickerIOInputs {
+    public double voltage = 0.0;
+    public double supplyCurrent = 0.0;
+    public double statorCurrent = 0.0;
+    public double velocity = 0.0;
+    public double position = 0.0;
+    public boolean sensor = false;
   }
+
+  public default void updateInputs(FlywheelKickerIOInputs inputs) {}
+
+  public void setDutyCycle(double dutyCycle);
 }

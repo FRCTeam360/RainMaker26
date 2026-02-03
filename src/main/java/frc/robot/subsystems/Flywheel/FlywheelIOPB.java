@@ -4,14 +4,23 @@
 
 package frc.robot.subsystems.Flywheel;
 
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import org.littletonrobotics.junction.AutoLog;
 
-public class FlywheelIOPB extends SubsystemBase {
-  /** Creates a new FlywheelIOPB. */
-  public FlywheelIOPB() {}
+public interface FlywheelIOPB {
+  public static final int MAX_MOTORS = 2; // might become 3 might become 4
 
-  @Override
-  public void periodic() {
-    // This method will be called once per scheduler run
+  @AutoLog
+  public static class FlywheelIOInputs {
+    public double[] statorCurrents = new double[MAX_MOTORS];
+    public double[] supplyCurrents = new double[MAX_MOTORS];
+    public double[] voltages = new double[MAX_MOTORS];
+    public double[] velocities = new double[MAX_MOTORS];
+    public double[] positions = new double[MAX_MOTORS];
   }
+
+  public void setDutyCycle(double duty);
+
+  public void setRPM(double rpm);
+
+  public default void updateInputs(FlywheelIOInputs inputs) {}
 }

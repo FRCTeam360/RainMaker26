@@ -4,14 +4,24 @@
 
 package frc.robot.subsystems.Intake;
 
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import org.littletonrobotics.junction.AutoLog;
 
-public class IntakeIOPB extends SubsystemBase {
+public interface IntakeIOPB {
   /** Creates a new IntakeIOPB. */
-  public IntakeIOPB() {}
-
-  @Override
-  public void periodic() {
-    // This method will be called once per scheduler run
+  @AutoLog
+  public static class IntakeIOInputs {
+    public double statorCurrent = 0.0;
+    public double supplyCurrent = 0.0;
+    public double voltage = 0.0;
+    public double velocity = 0.0;
+    public double position = 0.0;
+    public boolean sensor = false;
+    // insert inputs
   }
+
+  public void setDutyCycle(double value);
+
+  public void stop();
+
+  public default void updateInputs(IntakeIOInputs inputs) {}
 }
