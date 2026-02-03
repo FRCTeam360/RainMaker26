@@ -55,7 +55,7 @@ public class IndexerIOWB implements IndexerIO {
     // this is right
     inputs.velocity = encoder.getVelocity();
     inputs.voltage = indexerMotor.getBusVoltage() * indexerMotor.getAppliedOutput();
-    inputs.intakeSensorProximity = intakeSensor.getDistance().refresh().getValueAsDouble();
+    inputs.intakeSensorProximity = intakeSensor.getDistance().getValueAsDouble();
     inputs.fuelDetected = intakeSensor.getIsDetected().getValue();
   }
 
