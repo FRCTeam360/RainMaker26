@@ -46,7 +46,7 @@ public class Intake extends SubsystemBase {
   private void applyState() {
     switch (currentState) {
       case INTAKING:
-        setVelocity(0.75);
+        setVelocity(4000.0);
         break;
       case OFF:
       default:

@@ -6,6 +6,8 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -33,7 +35,9 @@ import frc.robot.subsystems.IntakePivot.IntakePivot;
 import frc.robot.subsystems.IntakePivot.IntakePivotIOSim;
 import java.util.Objects;
 
+import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.commands.FollowPathCommand;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -43,6 +47,7 @@ import com.pathplanner.lib.auto.NamedCommands;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
+  private SendableChooser<Command> autoChooser;
   private CommandSwerveDrivetrain drivetrain;
   private Flywheel flywheel;
   private Hood hood;
@@ -117,7 +122,12 @@ public class RobotContainer {
     registerPathplannerCommand("run flywheel kicker", flywheelKicker.setDutyCycleCommand(1.0));
 
     configureBindings();
+    autoChooser = AutoBuilder.buildAutoChooser();
+    SmartDashboard.putData("Auto Chooser", autoChooser);
+
+    FollowPathCommand.warmupCommand().schedule();
   }
+  
     public void registerPathplannerCommand(String name, Command command) {
     if (Objects.nonNull(command)) {
       NamedCommands.registerCommand(name, command);
@@ -126,6 +136,7 @@ public class RobotContainer {
       NamedCommands.registerCommand(
           name, new InstantCommand(() -> System.err.println(name + " is null")));
     }
+
   }
 
   /**
