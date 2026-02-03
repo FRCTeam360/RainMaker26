@@ -21,6 +21,7 @@ import frc.robot.subsystems.FlywheelKicker.FlywheelKicker;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKickerIOSim;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKickerIOWB;
 import frc.robot.subsystems.Hood.Hood;
+import frc.robot.subsystems.Hood.HoodIOSim;
 import frc.robot.subsystems.Hood.HoodIOWB;
 import frc.robot.subsystems.Indexer.Indexer;
 import frc.robot.subsystems.Indexer.IndexerIOSim;
@@ -85,6 +86,7 @@ public class RobotContainer {
         indexer = new Indexer(new IndexerIOSim());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOSim());
         flywheel = new Flywheel(new  FlywheelIOSim());
+        hood = new Hood(new HoodIOSim());
 
 
         // flywheel = new Flywheel(new FlywheelIOSim());
