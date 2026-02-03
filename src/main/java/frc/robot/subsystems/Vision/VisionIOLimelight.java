@@ -92,7 +92,7 @@ public class VisionIOLimelight implements VisionIO {
       RawFiducial rawFiducial = poseEstimate.rawFiducials[i];
       // if the pose is outside of the field, then skip to the next point
       Optional<Pose3d> tagPose = Constants.FIELD_LAYOUT.getTagPose(rawFiducial.id);
-      if (tagPose.isEmpty()) continue;
+      if (targetCount >= MAX_TAGS || tagPose.isEmpty()) continue;
 
       inputs.targetIds[targetCount] = rawFiducial.id;
       inputs.distancesToTargets[targetCount] = rawFiducial.distToRobot;

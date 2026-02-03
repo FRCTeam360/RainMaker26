@@ -156,21 +156,20 @@ public class VisionIOPhotonSim implements VisionIO {
         int tagId = target.getFiducialId();
         Optional<Pose3d> tagPose = kTagLayout.getTagPose(tagId);
 
-        if (tagPose.isPresent()) {
-          inputs.targetIds[targetCount] = tagId;
+        if (targetCount >= MAX_TAGS || tagPose.isEmpty()) continue;
+        inputs.targetIds[targetCount] = tagId;
 
-          // Calculate distance from robot to tag
-          double distance =
-              tagPose
-                  .get()
-                  .toPose2d()
-                  .getTranslation()
-                  .getDistance(est.estimatedPose.toPose2d().getTranslation());
-          inputs.distancesToTargets[targetCount] = distance;
+        // Calculate distance from robot to tag
+        double distance =
+            tagPose
+                .get()
+                .toPose2d()
+                .getTranslation()
+                .getDistance(est.estimatedPose.toPose2d().getTranslation());
+        inputs.distancesToTargets[targetCount] = distance;
 
-          inputs.tagPoses[targetCount] = tagPose.get();
-          targetCount++;
-        }
+        inputs.tagPoses[targetCount] = tagPose.get();
+        targetCount++;
       }
 
       inputs.targetCount = targetCount;
