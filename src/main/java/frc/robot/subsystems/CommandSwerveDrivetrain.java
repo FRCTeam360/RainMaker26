@@ -397,8 +397,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   }
 
   private void startSimThread() {
-    //prevents the method from running multiple times
-    if (m_simNotifier != null) {return;}
+    // prevents the method from running multiple times
+    if (m_simNotifier != null) {
+      return;
+    }
 
     m_lastSimTime = Utils.getCurrentTimeSeconds();
 
