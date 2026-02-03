@@ -16,14 +16,19 @@ import frc.robot.subsystems.SuperStructure;
 import frc.robot.subsystems.SuperStructure.SuperStates;
 import frc.robot.subsystems.Flywheel.Flywheel;
 import frc.robot.subsystems.Flywheel.FlywheelIOWB;
+import frc.robot.subsystems.Flywheel.FlywheelIOSim;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKicker;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKickerIOWB;
+import frc.robot.subsystems.FlywheelKicker.FlywheelKickerIOSim;
 import frc.robot.subsystems.Hood.Hood;
 import frc.robot.subsystems.Hood.HoodIOWB;
+import frc.robot.subsystems.Hood.HoodIOSim;
 import frc.robot.subsystems.Indexer.Indexer;
 import frc.robot.subsystems.Indexer.IndexerIOWB;
+import frc.robot.subsystems.Indexer.IndexerIOSim;
 import frc.robot.subsystems.Intake.Intake;
 import frc.robot.subsystems.Intake.IntakeIOWB;
+import frc.robot.subsystems.Intake.IntakeIOSim;
 import frc.robot.subsystems.IntakePivot.IntakePivot;
 import frc.robot.subsystems.IntakePivot.IntakePivotIOSim;
 import java.util.Objects;
@@ -45,7 +50,7 @@ public class RobotContainer {
   private Intake intake;
   private IntakePivot intakePivot;
   private FlywheelKicker flywheelKicker;
-  private CommandFactory commandFactory;
+  //private CommandFactory commandFactory;
 
   private final SuperStructure superStructure;
 
@@ -77,11 +82,11 @@ public class RobotContainer {
         drivetrain = WoodBotDrivetrain.createDrivetrain();
         logger = new Telemetry(WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
         intakePivot = new IntakePivot(new IntakePivotIOSim());
-        // intake = new Intake(new IntakeIOSim());
-        // indexer = new Indexer(new IndexerIOSim());
-        // flywheelKicker = new FlywheelKicker(new FlywheelKickerIOSim());
-        // flywheel = new Flywheel(new  FlywheelIOSim());
-        // hood = new Hood(new HoodIOSim());
+        intake = new Intake(new IntakeIOSim());
+        indexer = new Indexer(new IndexerIOSim());
+        flywheelKicker = new FlywheelKicker(new FlywheelKickerIOSim());
+        flywheel = new Flywheel(new  FlywheelIOSim());
+        hood = new Hood(new HoodIOSim());
 
 
         // flywheel = new Flywheel(new FlywheelIOSim());
@@ -101,9 +106,9 @@ public class RobotContainer {
         hood = new Hood(new HoodIOWB());
         // intakePivot = new IntakePivot(new IntakePivotIOPB());
     }
-    commandFactory =
-        new CommandFactory(
-            intake, flywheel, flywheelKicker, hood, indexer, intakePivot, null, drivetrain);
+    // commandFactory =
+    //     new CommandFactory(
+    //         intake, flywheel, flywheelKicker, hood, indexer, intakePivot, null, drivetrain);
     // Configure the trigger bindings
     superStructure = new SuperStructure(intake, indexer, flywheelKicker, flywheel, hood);
     
@@ -152,12 +157,12 @@ public class RobotContainer {
     // }
 
     // shootWithRPM uses flywheel
-    if (Objects.nonNull(flywheel)) {
-      driverCont.a().whileTrue(commandFactory.shootWithRPM(2000));
-      driverCont.x().whileTrue(commandFactory.shootWithRPM(2500));
-      driverCont.b().whileTrue(commandFactory.shootWithRPM(3000));
-      driverCont.y().whileTrue(commandFactory.shootWithRPM(3500));
-    }
+    // if (Objects.nonNull(flywheel)) {
+    //   driverCont.a().whileTrue(commandFactory.shootWithRPM(2000));
+    //   driverCont.x().whileTrue(commandFactory.shootWithRPM(2500));
+    //   driverCont.b().whileTrue(commandFactory.shootWithRPM(3000));
+    //   driverCont.y().whileTrue(commandFactory.shootWithRPM(3500));
+    // }
 
     // Drivetrain commands
     if (Objects.nonNull(drivetrain)) {
