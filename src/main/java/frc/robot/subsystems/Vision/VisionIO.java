@@ -10,7 +10,7 @@ import org.littletonrobotics.junction.AutoLog;
 
 public interface VisionIO {
   /** Maximum number of AprilTags that can be tracked simultaneously. */
-  public static final int MAX_TAGS = 32;
+  public static final int MAX_TAGS = 12;
 
   /** Creates a new VisionIO. */
   @AutoLog
