@@ -81,11 +81,11 @@ public class RobotContainer {
         logger = new Telemetry(WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
         intakePivot = new IntakePivot(new IntakePivotIOSim());
 
-        flywheel = new Flywheel(new FlywheelIOSim());
-        hood = new Hood(new HoodIOSim());
-        indexer = new Indexer(new IndexerIOSim());
-        intake = new Intake(new IntakeIOSim());
-        flywheelKicker = new FlywheelKicker(new FlywheelKickerIOSim());
+        // flywheel = new Flywheel(new FlywheelIOSim());
+        // hood = new Hood(new HoodIOWB());
+        // indexer = new Indexer(new IndexerIOSim());
+        // intake = new Intake(new IntakeIOSim());
+        // flywheelKicker = new FlywheelKicker(new FlywheelKickerIOWB());
         break;
       case WOODBOT:
       default:
@@ -117,6 +117,7 @@ public class RobotContainer {
     registerPathplannerCommand("shoot at hub", commandFactory.shootWithSpinUp(3000.0, 6.0));
     registerPathplannerCommand("run flywheel kicker", flywheelKicker.setDutyCycleCommand(1.0));
     configureBindings();
+    configureTestBindings();
 
     PathPlannerLogging.setLogActivePathCallback(
         (poses -> Logger.recordOutput("Swerve/ActivePath", poses.toArray(new Pose2d[0]))));
@@ -149,6 +150,27 @@ public class RobotContainer {
    * PS4} controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
    * joysticks}.
    */
+  private void configureTestBindings() {
+    if (Objects.nonNull(flywheel)) {
+      testCont1.a().whileTrue(flywheel.setDutyCycleCommand(() -> 0.5));
+    }
+    if (Objects.nonNull(flywheelKicker)) {
+      testCont1.b().whileTrue(flywheelKicker.setDutyCycleCommand(() -> 0.5));
+    }
+    if (Objects.nonNull(hood)) {
+      testCont1.x().whileTrue(hood.setDutyCycleCommand(() -> 0.5));
+    }
+    if (Objects.nonNull(indexer)) {
+      testCont1.y().whileTrue(indexer.setDutyCycleCommand(() -> 0.5));
+    }
+    if (Objects.nonNull(intake)) {
+      testCont1.leftBumper().whileTrue(intake.setDutyCycleCommand(() -> 0.5));
+    }
+    if (Objects.nonNull(intakePivot)) {
+      testCont1.rightBumper().whileTrue(intakePivot.setDutyCycleCommand(() -> 0.5));
+    }
+  }
+
   private void configureBindings() {
     // TODO: make more elegant solution for null checking subsystems/commands
 
