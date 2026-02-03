@@ -48,9 +48,10 @@ public class CommandFactory {
   }
 
   public Command basicIntakeCmd() {
-    return intake.setDutyCycleCommand(0.65)
-    .alongWith(indexer.setDutyCycleCommand(0.4))
-    .alongWith(intakePivot.setPositionCommand(0.0));
+    return intake
+        .setDutyCycleCommand(0.65)
+        .alongWith(indexer.setDutyCycleCommand(0.4))
+        .alongWith(intakePivot.setPositionCommand(0.0));
   }
 
   public Command stow() {
