@@ -5,19 +5,12 @@ import static edu.wpi.first.units.Units.*;
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
-import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
-import com.pathplanner.lib.controllers.PPHolonomicDriveController;
-
-import com.pathplanner.lib.controllers.PPHolonomicDriveController;
-
-import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
-
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -60,6 +53,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   /* Keep track if we've ever applied the operator perspective before or not */
   private boolean m_hasAppliedOperatorPerspective = false;
 
+  // Apply Robot Speeds
+  private final SwerveRequest.ApplyRobotSpeeds m_pathApplyRobotSpeeds =
+      new SwerveRequest.ApplyRobotSpeeds();
+
   /* Swerve requests to apply during SysId characterization */
   private final SwerveRequest.SysIdSwerveTranslation m_translationCharacterization =
       new SwerveRequest.SysIdSwerveTranslation();
@@ -67,7 +64,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
       new SwerveRequest.SysIdSwerveSteerGains();
   private final SwerveRequest.SysIdSwerveRotation m_rotationCharacterization =
       new SwerveRequest.SysIdSwerveRotation();
-  private final DriveRequestType m_driveRequestType = DriveRequestType.Velocity;
+
   // TODO refactor into a constants file
   public static final LinearVelocity maxSpeed = MetersPerSecond.of(5.12);
   public static final AngularVelocity maxAngularVelocity = RevolutionsPerSecond.of(2.0);
@@ -77,8 +74,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     SwerveRequest.FieldCentric drive =
         new SwerveRequest.FieldCentric() // creates a fieldcentric drive
             .withDeadband(maxSpeed.in(MetersPerSecond) * 0.01)
-            .withRotationalDeadband(maxAngularVelocity.in(RadiansPerSecond) * 0.01)
-            .withDriveRequestType(m_driveRequestType);
+            .withRotationalDeadband(maxAngularVelocity.in(RadiansPerSecond) * 0.01);
     return this.applyRequest(
             () ->
                 drive
@@ -98,7 +94,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             // with negative X
             // (left)
             )
-        .alongWith(new InstantCommand(() -> System.out.println("running")));
+        .alongWith(new InstantCommand(() -> System.out.println("running field oriented drive")));
   }
 
   /* SysId routine for characterizing translation. This is used to find PID gains for the drive motors. */
@@ -152,100 +148,100 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
   /* The SysId routine to test */
   private SysIdRoutine m_sysIdRoutineToApply = m_sysIdRoutineTranslation;
-  private Object m_pathApplyRobotSpeeds;
-  
-    /**
-     * Constructs a CTRE SwerveDrivetrain using the specified constants.
-     *
-     * <p>This constructs the underlying hardware devices, so users should not construct the devices
-     * themselves. If they need the devices, they can access them through getters in the classes.
-     *
-     * @param drivetrainConstants Drivetrain-wide constants for the swerve drive
-     * @param modules Constants for each specific module
-     */
-    public CommandSwerveDrivetrain(
-        SwerveDrivetrainConstants drivetrainConstants, SwerveModuleConstants<?, ?, ?>... modules) {
-      super(drivetrainConstants, modules);
-      if (Utils.isSimulation()) {
-        startSimThread();
-      }
+
+  /**
+   * Constructs a CTRE SwerveDrivetrain using the specified constants.
+   *
+   * <p>This constructs the underlying hardware devices, so users should not construct the devices
+   * themselves. If they need the devices, they can access them through getters in the classes.
+   *
+   * @param drivetrainConstants Drivetrain-wide constants for the swerve drive
+   * @param modules Constants for each specific module
+   */
+  public CommandSwerveDrivetrain(
+      SwerveDrivetrainConstants drivetrainConstants, SwerveModuleConstants<?, ?, ?>... modules) {
+    super(drivetrainConstants, modules);
+    if (Utils.isSimulation()) {
+      startSimThread();
     }
-  
-    /**
-     * Constructs a CTRE SwerveDrivetrain using the specified constants.
-     *
-     * <p>This constructs the underlying hardware devices, so users should not construct the devices
-     * themselves. If they need the devices, they can access them through getters in the classes.
-     *
-     * @param drivetrainConstants Drivetrain-wide constants for the swerve drive
-     * @param odometryUpdateFrequency The frequency to run the odometry loop. If unspecified or set to
-     *     0 Hz, this is 250 Hz on CAN FD, and 100 Hz on CAN 2.0.
-     * @param modules Constants for each specific module
-     */
-    public CommandSwerveDrivetrain(
-        SwerveDrivetrainConstants drivetrainConstants,
-        double odometryUpdateFrequency,
-        SwerveModuleConstants<?, ?, ?>... modules) {
-      super(drivetrainConstants, odometryUpdateFrequency, modules);
-      if (Utils.isSimulation()) {
-        startSimThread();
-      }
+    configureAutoBuilder();
+  }
+
+  /**
+   * Constructs a CTRE SwerveDrivetrain using the specified constants.
+   *
+   * <p>This constructs the underlying hardware devices, so users should not construct the devices
+   * themselves. If they need the devices, they can access them through getters in the classes.
+   *
+   * @param drivetrainConstants Drivetrain-wide constants for the swerve drive
+   * @param odometryUpdateFrequency The frequency to run the odometry loop. If unspecified or set to
+   *     0 Hz, this is 250 Hz on CAN FD, and 100 Hz on CAN 2.0.
+   * @param modules Constants for each specific module
+   */
+  public CommandSwerveDrivetrain(
+      SwerveDrivetrainConstants drivetrainConstants,
+      double odometryUpdateFrequency,
+      SwerveModuleConstants<?, ?, ?>... modules) {
+    super(drivetrainConstants, odometryUpdateFrequency, modules);
+    if (Utils.isSimulation()) {
+      startSimThread();
     }
-  
-    /**
-     * Constructs a CTRE SwerveDrivetrain using the specified constants.
-     *
-     * <p>This constructs the underlying hardware devices, so users should not construct the devices
-     * themselves. If they need the devices, they can access them through getters in the classes.
-     *
-     * @param drivetrainConstants Drivetrain-wide constants for the swerve drive
-     * @param odometryUpdateFrequency The frequency to run the odometry loop. If unspecified or set to
-     *     0 Hz, this is 250 Hz on CAN FD, and 100 Hz on CAN 2.0.
-     * @param odometryStandardDeviation The standard deviation for odometry calculation in the form
-     *     [x, y, theta]ᵀ, with units in meters and radians
-     * @param visionStandardDeviation The standard deviation for vision calculation in the form [x, y,
-     *     theta]ᵀ, with units in meters and radians
-     * @param modules Constants for each specific module
-     */
-    public CommandSwerveDrivetrain(
-        SwerveDrivetrainConstants drivetrainConstants,
-        double odometryUpdateFrequency,
-        Matrix<N3, N1> odometryStandardDeviation,
-        Matrix<N3, N1> visionStandardDeviation,
-        SwerveModuleConstants<?, ?, ?>... modules) {
-      super(
-          drivetrainConstants,
-          odometryUpdateFrequency,
-          odometryStandardDeviation,
-          visionStandardDeviation,
-          modules);
-      if (Utils.isSimulation()) {
-        startSimThread();
-      }
-      configureAutoBuilder();
+    configureAutoBuilder();
+  }
+
+  /**
+   * Constructs a CTRE SwerveDrivetrain using the specified constants.
+   *
+   * <p>This constructs the underlying hardware devices, so users should not construct the devices
+   * themselves. If they need the devices, they can access them through getters in the classes.
+   *
+   * @param drivetrainConstants Drivetrain-wide constants for the swerve drive
+   * @param odometryUpdateFrequency The frequency to run the odometry loop. If unspecified or set to
+   *     0 Hz, this is 250 Hz on CAN FD, and 100 Hz on CAN 2.0.
+   * @param odometryStandardDeviation The standard deviation for odometry calculation in the form
+   *     [x, y, theta]ᵀ, with units in meters and radians
+   * @param visionStandardDeviation The standard deviation for vision calculation in the form [x, y,
+   *     theta]ᵀ, with units in meters and radians
+   * @param modules Constants for each specific module
+   */
+  public CommandSwerveDrivetrain(
+      SwerveDrivetrainConstants drivetrainConstants,
+      double odometryUpdateFrequency,
+      Matrix<N3, N1> odometryStandardDeviation,
+      Matrix<N3, N1> visionStandardDeviation,
+      SwerveModuleConstants<?, ?, ?>... modules) {
+    super(
+        drivetrainConstants,
+        odometryUpdateFrequency,
+        odometryStandardDeviation,
+        visionStandardDeviation,
+        modules);
+    if (Utils.isSimulation()) {
+      startSimThread();
     }
-  
-    private void configureAutoBuilder() {
-      try {
-        var config = RobotConfig.fromGUISettings();
-  
-        AutoBuilder.configure(
-            () -> getStateCopy().Pose, // Supplier of current robot pose
-            this::resetPose, // Consumer for seeding pose against auto
-            () -> getStateCopy().Speeds, // Supplier of current robot speeds
-            // Consumer of ChassisSpeeds and feedforwards to drive the robot
-            (speeds, feedforwards) ->
-                setControl(
-                    m_pathApplyRobotSpeeds
+    configureAutoBuilder();
+  }
+
+  private void configureAutoBuilder() {
+    try {
+      var config = RobotConfig.fromGUISettings();
+
+      AutoBuilder.configure(
+          () -> getStateCopy().Pose, // Supplier of current robot pose
+          this::resetPose, // Consumer for seeding pose against auto
+          () -> getStateCopy().Speeds, // Supplier of current robot speeds
+          // Consumer of ChassisSpeeds and feedforwards to drive the robot
+          (speeds, feedforwards) ->
+              setControl(
+                  m_pathApplyRobotSpeeds
                       .withSpeeds(ChassisSpeeds.discretize(speeds, 0.020))
                       .withWheelForceFeedforwardsX(feedforwards.robotRelativeForcesXNewtons())
-                      .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons())
-                      .withDriveRequestType(m_driveRequestType)),
+                      .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons())),
           new PPHolonomicDriveController(
               // PID constants for translation
               new PIDConstants(10, 0, 0),
               // PID constants for rotation
-              new PIDConstants(8, 0, 0)),
+              new PIDConstants(7, 0, 0)),
           config,
           // Assume the path needs to be flipped for Red vs Blue, this is normally the case
           () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
