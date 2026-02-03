@@ -142,7 +142,12 @@ public class RobotContainer {
     // if (Objects.nonNull(intake) && Objects.nonNull(flywheelKicker) && Objects.nonNull(indexer)) {
     //   driverCont.leftBumper().whileTrue(commandFactory.basicIntakeCmd());
     // }
-
+    
+    driverCont.leftBumper().onTrue(superStructure.setStateCommand(SuperStates.INTAKING));
+    driverCont.leftBumper().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
+    
+    driverCont.rightBumper().onTrue(superStructure.setStateCommand(SuperStates.SPINUP_SHOOTING));
+    driverCont.rightBumper().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
     // if (Objects.nonNull(flywheel)) {
     //   driverCont.rightBumper().whileTrue(commandFactory.basicShootCmd());
     // }
