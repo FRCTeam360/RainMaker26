@@ -4,25 +4,18 @@ package frc.robot.subsystems.Turret;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.Turret.TurretIO;
 
-import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
-
 import org.littletonrobotics.junction.Logger;
 
-import com.ctre.phoenix.motorcontrol.ControlMode;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Turret extends SubsystemBase {
     private final TurretIO io;
     private final TurretIOInputsAutoLogged inputs = new TurretIOInputsAutoLogged();
-    private final WPI_TalonSRX turretMotor = new WPI_TalonSRX(0);
-    private static final double = 10.0;
 
     /** Creates a new Turret. */
     public Turret(TurretIO io) {
         // PID
         this.io = io;
-        turretMotor.configFactoryDefault();
-        turretMotor.setInverted(false);
     }
 
     public void setDutyCycle(double dutyCycle) {
