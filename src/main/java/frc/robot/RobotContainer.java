@@ -31,6 +31,10 @@ import frc.robot.subsystems.Intake.IntakeIOSim;
 import frc.robot.subsystems.Intake.IntakeIOWB;
 import frc.robot.subsystems.IntakePivot.IntakePivot;
 import frc.robot.subsystems.IntakePivot.IntakePivotIOSim;
+import frc.robot.subsystems.Vision.Vision;
+import frc.robot.subsystems.Vision.VisionIOLimelight;
+import frc.robot.subsystems.Vision.VisionIOPhotonSim;
+import java.util.Map;
 import java.util.Objects;
 
 import com.pathplanner.lib.auto.NamedCommands;
@@ -50,6 +54,7 @@ public class RobotContainer {
   private Intake intake;
   private IntakePivot intakePivot;
   private FlywheelKicker flywheelKicker;
+  private Vision vision;
   private CommandFactory commandFactory;
 
   private final SuperStructure superStructure;
@@ -67,21 +72,16 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     switch (Constants.getRobotType()) {
-      case WOODBOT:
-        drivetrain = WoodBotDrivetrain.createDrivetrain();
-        logger = new Telemetry(WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
-        flywheel = new Flywheel(new FlywheelIOWB());
-        // hood = new Hood(new HoodIOWB());
-        indexer = new Indexer(new IndexerIOWB());
-        intake = new Intake(new IntakeIOWB());
-        flywheelKicker = new FlywheelKicker(new FlywheelKickerIOWB());
-        hood = new Hood(new HoodIOWB());
-        // intakePivot = new IntakePivot(new IntakePivotIOPB());
-        break;
       case SIM:
         drivetrain = WoodBotDrivetrain.createDrivetrain();
         logger = new Telemetry(WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
         intakePivot = new IntakePivot(new IntakePivotIOSim());
+        vision =
+            new Vision(
+                Map.of("photonSim", new VisionIOPhotonSim(() -> drivetrain.getState().Pose)));
+        flywheel = new Flywheel(new FlywheelIOSim());
+        hood = new Hood(new HoodIOSim());
+        indexer = new Indexer(new IndexerIOSim());
         intake = new Intake(new IntakeIOSim());
         indexer = new Indexer(new IndexerIOSim());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOSim());
@@ -135,6 +135,15 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
+    // Only bind commands if the required subsystems/factories exist
+    if (Objects.nonNull(vision)) {
+      Command consumeVisionMeasurements =
+          vision.consumeVisionMeasurements(
+              measurements -> {
+                drivetrain.addVisionMeasurements(measurements);
+              });
+      vision.setDefaultCommand(consumeVisionMeasurements.ignoringDisable(true));
+    }
     // TODO: make more elegant solution for null checking subsystems/commands
     // if (Objects.nonNull(intake) && Objects.nonNull(flywheelKicker) && Objects.nonNull(indexer)) {
     //   driverCont.leftBumper().whileTrue(commandFactory.basicIntakeCmd());
@@ -157,7 +166,9 @@ public class RobotContainer {
 
     if (Objects.nonNull(drivetrain)) {
       drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
-    } 
+      driverCont.rightTrigger().whileTrue(drivetrain.faceHubWhileDriving(driverCont));
+      drivetrain.registerTelemetry(logger::telemeterize);
+    }
   }
 
   public void onDisable() {
