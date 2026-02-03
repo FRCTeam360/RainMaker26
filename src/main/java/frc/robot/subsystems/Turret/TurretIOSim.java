@@ -34,8 +34,8 @@ public class TurretIOSim implements TurretIO {
   private final double kV = 0.0;
   private final double kA = 0.0;
   private final double kG = 0.0; // Gravity compensation
-  private final double armLength = 0.0; // meters (30 inches)
-  private final double armMass = 0.0; // kg
+  private final double armLength = 3.0; // meters (30 inches)
+  private final double armMass = 1.0; // kg
 
   // AdvantageScope tuning (sim-only, under /Tuning table)
   private final LoggedNetworkNumber tunableKp = new LoggedNetworkNumber("/Tuning/Turret/kP", 0.0);
