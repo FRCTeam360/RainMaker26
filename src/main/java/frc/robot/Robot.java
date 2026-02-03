@@ -27,6 +27,8 @@ public class Robot extends LoggedRobot {
 
   private final RobotContainer m_robotContainer;
 
+  private final PowerDistribution pdh = new PowerDistribution(1, ModuleType.kRev);
+
   /* log and replay timestamp and joystick data */
   private final HootAutoReplay m_timeAndJoystickReplay =
       new HootAutoReplay().withTimestampReplay().withJoystickReplay();
@@ -90,6 +92,8 @@ public class Robot extends LoggedRobot {
    */
   @Override
   public void robotPeriodic() {
+    Logger.recordOutput(PDH/Voltage, pdh.getVoltage());
+    Logger.recordOutput(PDH/TotalCurrent, pdh.getTotalCurrent());
     // Runs the Scheduler.  This is responsible for polling buttons, adding newly-scheduled
     // commands, running already-scheduled commands, removing finished or interrupted commands,
     // and running subsystem periodic() methods.  This must be called from the robot's periodic
