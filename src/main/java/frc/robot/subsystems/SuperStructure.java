@@ -86,6 +86,9 @@ public class SuperStructure extends SubsystemBase {
         }
     }
     private void spinupShooting(){
+        intake.setWantedState(Intake.IntakeStates.OFF);
+        indexer.setWantedState(Indexer.IndexerStates.OFF);
+        flywheelKicker.setWantedState(FlywheelKickerStates.OFF);
         //hood, flywheel
         hood.setWantedState(HoodStates.SPINUP_SHOOTING);
         flywheel.setWantedState(FlywheelStates.SPINUP_SHOOTING);
@@ -98,9 +101,16 @@ public class SuperStructure extends SubsystemBase {
     private void intaking() {
         intake.setWantedState(Intake.IntakeStates.INTAKING);
         indexer.setWantedState(Indexer.IndexerStates.INTAKING);
+        flywheelKicker.setWantedState(FlywheelKickerStates.OFF);
+        flywheel.setWantedState(FlywheelStates.OFF);
+        hood.setWantedState(HoodStates.OFF);
     }
     private void shooting(){
         flywheel.setWantedState(Flywheel.FlywheelStates.SHOOTING);
+                intake.setWantedState(Intake.IntakeStates.OFF);
+        indexer.setWantedState(Indexer.IndexerStates.OFF);
+        flywheelKicker.setWantedState(FlywheelKickerStates.OFF);
+         hood.setWantedState(HoodStates.OFF);
     }
 
     private void stopped() {
