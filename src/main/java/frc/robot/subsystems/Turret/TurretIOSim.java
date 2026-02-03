@@ -38,12 +38,9 @@ public class TurretIOSim implements TurretIO {
   private final double armMass = 0.0; // kg
 
   // AdvantageScope tuning (sim-only, under /Tuning table)
-  private final LoggedNetworkNumber tunableKp =
-      new LoggedNetworkNumber("/Tuning/Turret/kP", 0.0);
-  private final LoggedNetworkNumber tunableKi =
-      new LoggedNetworkNumber("/Tuning/Turret/kI", 0.0);
-  private final LoggedNetworkNumber tunableKd =
-      new LoggedNetworkNumber("/Tuning/Turret/kD", 0.0);
+  private final LoggedNetworkNumber tunableKp = new LoggedNetworkNumber("/Tuning/Turret/kP", 0.0);
+  private final LoggedNetworkNumber tunableKi = new LoggedNetworkNumber("/Tuning/Turret/kI", 0.0);
+  private final LoggedNetworkNumber tunableKd = new LoggedNetworkNumber("/Tuning/Turret/kD", 0.0);
   private final LoggedNetworkNumber tunableSetpoint =
       new LoggedNetworkNumber("/Tuning/Turret/SetpointRotations", 0.0);
   private final LoggedNetworkBoolean tuningEnabled =
@@ -148,8 +145,7 @@ public class TurretIOSim implements TurretIO {
 
     // Step 5: Read all inputs from the SIMULATED VALUES (source of truth)
     inputs.position = Radians.of(TurretSim.getAngleRads()).in(Rotations);
-    inputs.velocity =
-        RadiansPerSecond.of(TurretSim.getVelocityRadPerSec()).in(RotationsPerSecond);
+    inputs.velocity = RadiansPerSecond.of(TurretSim.getVelocityRadPerSec()).in(RotationsPerSecond);
     inputs.voltage = motorControllerSim.getSimState().getMotorVoltage();
     inputs.statorCurrent = motorControllerSim.getStatorCurrent().getValueAsDouble();
     inputs.supplyCurrent = motorControllerSim.getSupplyCurrent().getValueAsDouble();

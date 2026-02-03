@@ -13,6 +13,7 @@ import frc.robot.subsystems.Hood.Hood;
 import frc.robot.subsystems.Indexer.Indexer;
 import frc.robot.subsystems.Intake.Intake;
 import frc.robot.subsystems.IntakePivot.IntakePivot;
+import frc.robot.subsystems.Turret.Turret;
 import frc.robot.subsystems.Vision.Vision;
 
 /** Add your docs here. */
@@ -24,6 +25,7 @@ public class CommandFactory {
   private final Hood hood;
   private final Indexer indexer;
   private final IntakePivot intakePivot;
+  private final Turret turret;
   private final Vision vision;
   private final CommandSwerveDrivetrain drivetrain;
 
@@ -35,6 +37,7 @@ public class CommandFactory {
       Hood hood,
       Indexer indexer,
       IntakePivot intakePivot,
+      Turret turret,
       Vision vision,
       CommandSwerveDrivetrain drivetrain) {
     this.intake = intake;
@@ -43,6 +46,7 @@ public class CommandFactory {
     this.hood = hood;
     this.indexer = indexer;
     this.intakePivot = intakePivot;
+    this.turret = turret;
     this.vision = vision;
     this.drivetrain = drivetrain;
   }
@@ -73,5 +77,10 @@ public class CommandFactory {
 
   public Command setHoodPosition(double position) {
     return hood.setPositionCmd(position);
+  }
+
+  public Command aimTurretAndShoot(double angle, double rpm, double position) {
+    return Commands.waitUntil(() -> turret.atSetpoint(angle))
+        .andThen(this.shootWithSpinUp(rpm, position));
   }
 }

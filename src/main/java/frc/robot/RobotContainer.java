@@ -37,6 +37,9 @@ import frc.robot.subsystems.Intake.IntakeIOSim;
 import frc.robot.subsystems.Intake.IntakeIOWB;
 import frc.robot.subsystems.IntakePivot.IntakePivot;
 import frc.robot.subsystems.IntakePivot.IntakePivotIOSim;
+import frc.robot.subsystems.Turret.Turret;
+import frc.robot.subsystems.Turret.TurretIOSim;
+import frc.robot.subsystems.Turret.TurretIOWB;
 import frc.robot.subsystems.Vision.Vision;
 import frc.robot.subsystems.Vision.VisionIOLimelight;
 import frc.robot.subsystems.Vision.VisionIOPhotonSim;
@@ -60,6 +63,7 @@ public class RobotContainer {
   private Vision vision;
   private Intake intake;
   private IntakePivot intakePivot;
+  private Turret turret;
   private FlywheelKicker flywheelKicker;
 
   private CommandFactory commandFactory;
@@ -89,6 +93,7 @@ public class RobotContainer {
         indexer = new Indexer(new IndexerIOSim());
         intake = new Intake(new IntakeIOSim());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOSim());
+        turret = new Turret(new TurretIOSim());
         break;
       case WOODBOT:
       default:
@@ -106,12 +111,21 @@ public class RobotContainer {
                             Constants.WoodBotConstants.LIMELIGHT, () -> 0.0, () -> 0.0, true))));
         intake = new Intake(new IntakeIOWB());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOWB());
+        turret = new Turret(new TurretIOWB());
         // intakePivot = new IntakePivot(new IntakePivotIOPB());
     }
     // Configure the trigger bindings
     commandFactory =
         new CommandFactory(
-            intake, flywheel, flywheelKicker, hood, indexer, intakePivot, vision, drivetrain);
+            intake,
+            flywheel,
+            flywheelKicker,
+            hood,
+            indexer,
+            intakePivot,
+            turret,
+            vision,
+            drivetrain);
 
     registerPathplannerCommand("basic intake", commandFactory.basicIntakeCmd());
     registerPathplannerCommand("shoot at hub", commandFactory.shootWithSpinUp(3000.0, 4.0));
