@@ -4,15 +4,10 @@
 
 package frc.robot.subsystems.IntakePivot;
 
-import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
-
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
-
-import com.ctre.phoenix6.hardware.TalonFX;
 
 public class IntakePivot extends SubsystemBase {
   public final IntakePivotIOInputsAutoLogged inputs = new IntakePivotIOInputsAutoLogged();
@@ -38,22 +33,16 @@ public class IntakePivot extends SubsystemBase {
     this.setDutyCycle(0.0);
   }
 
-  public void deploy() {
-    //
-    this.visualizer = new IntakePivotVisualizer(0.762);
-  }
-
-  public void stow() {
-    //
-    this.visualizer = new IntakePivotVisualizer(0.762);
-  }
-
   public Command setDutyCycleCommand(DoubleSupplier dutySupplier) {
     return this.runEnd(() -> this.setDutyCycle(dutySupplier.getAsDouble()), () -> this.stop());
   }
 
-  public Command setPosition(DoubleSupplier positionSupplier) {
+  public Command setPositionCommand(DoubleSupplier positionSupplier) {
     return this.runEnd(() -> this.setPosition(positionSupplier.getAsDouble()), () -> this.stop());
+  }
+
+  public Command setPositionCommand(double position) {
+    return this.setPositionCommand(() -> position);
   }
 
   @Override
