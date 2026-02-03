@@ -28,7 +28,7 @@ public class Vision extends SubsystemBase {
   private int rejectedMeasurements = 0;
   private final Map<String, VisionIOInputsAutoLogged> visionInputs;
   private Timer snapshotTimer = new Timer();
-  List<VisionMeasurement> acceptedMeasurements = new ArrayList<>();
+  private List<VisionMeasurement> acceptedMeasurements = new ArrayList<>();
 
   private final String VISION_LOGGING_PREFIX = "Vision: ";
 
@@ -41,7 +41,8 @@ public class Vision extends SubsystemBase {
     MEASUREMENT_STD_DEV_DISTANCE_MAP.put(
         0.5, VecBuilder.fill(1.0, 1.0, 999999.0)); // Close tags: very high confidence (1cm std dev)
     MEASUREMENT_STD_DEV_DISTANCE_MAP.put(
-        5.0, VecBuilder.fill(0.5, 0.5, 999999.0)); // Far tags: still high confidence (5cm std dev)
+        5.0,
+        VecBuilder.fill(10.0, 10.0, 999999.0)); // Far tags: still high confidence (5cm std dev)
   }
 
   /** Creates a new Vision. */
