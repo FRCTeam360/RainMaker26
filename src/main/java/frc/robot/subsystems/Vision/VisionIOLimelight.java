@@ -85,23 +85,22 @@ public class VisionIOLimelight implements VisionIO {
 
     inputs.estimatedPose = poseEstimate.pose;
     inputs.timestampSeconds = poseEstimate.timestampSeconds;
-    int[] targetIds = new int[poseEstimate.rawFiducials.length];
-    double[] distancesToTargets = new double[poseEstimate.rawFiducials.length];
-    Pose3d[] tagPoses = new Pose3d[poseEstimate.rawFiducials.length];
+
+    // Fill in target information directly into inputs arrays (zero allocation)
+    int targetCount = 0;
     for (int i = 0; i < poseEstimate.rawFiducials.length; i++) {
       RawFiducial rawFiducial = poseEstimate.rawFiducials[i];
       // if the pose is outside of the field, then skip to the next point
       Optional<Pose3d> tagPose = Constants.FIELD_LAYOUT.getTagPose(rawFiducial.id);
       if (tagPose.isEmpty()) continue;
 
-      targetIds[i] = rawFiducial.id;
-      distancesToTargets[i] = rawFiducial.distToRobot;
-      tagPoses[i] = tagPose.get();
+      inputs.targetIds[targetCount] = rawFiducial.id;
+      inputs.distancesToTargets[targetCount] = rawFiducial.distToRobot;
+      inputs.tagPoses[targetCount] = tagPose.get();
+      targetCount++;
     }
 
-    inputs.targetIds = targetIds;
-    inputs.distancesToTargets = distancesToTargets;
-    inputs.tagPoses = tagPoses;
+    inputs.targetCount = targetCount;
     inputs.poseUpdated = true;
   }
 

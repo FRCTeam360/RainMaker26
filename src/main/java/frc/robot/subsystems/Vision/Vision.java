@@ -15,12 +15,10 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.OptionalDouble;
 import java.util.function.Consumer;
 import org.littletonrobotics.junction.Logger;
 
@@ -116,7 +114,7 @@ public class Vision extends SubsystemBase {
       VisionIOInputsAutoLogged input = visionInputs.get(key);
 
       io.updateInputs(input);
-      Logger.processInputs("Limelight: " + key, input);
+      Logger.processInputs("Limelight: " + key, input.clone());
     }
 
     for (String key : visionInputs.keySet()) {
@@ -145,11 +143,15 @@ public class Vision extends SubsystemBase {
         continue;
       }
 
-      // get standard deviation based on distance to nearest tag
-      OptionalDouble closestTagDistance = Arrays.stream(input.distancesToTargets).min();
+      // Get standard deviation based on distance to nearest tag (zero allocation)
+      double closestTagDistance = Double.MAX_VALUE;
+      for (int i = 0; i < input.targetCount; i++) {
+        if (input.distancesToTargets[i] < closestTagDistance) {
+          closestTagDistance = input.distancesToTargets[i];
+        }
+      }
 
-      Matrix<N3, N1> cprStdDevs =
-          MEASUREMENT_STD_DEV_DISTANCE_MAP.get(closestTagDistance.orElse(Double.MAX_VALUE));
+      Matrix<N3, N1> cprStdDevs = MEASUREMENT_STD_DEV_DISTANCE_MAP.get(closestTagDistance);
 
       acceptedMeasurements.add(new VisionMeasurement(timestamp, pose, cprStdDevs));
     }
