@@ -5,19 +5,65 @@
 package frc.robot.subsystems.Hood;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.Intake.Intake.IntakeStates;
+
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
 public class Hood extends SubsystemBase {
   private final HoodIO io;
   private final HoodIOInputsAutoLogged inputs = new HoodIOInputsAutoLogged();
-  private final double TOLERANCE = 0.5;
+public enum HoodStates {
+    OFF,
+    SPINUP_SHOOTING
+  }
 
+  private HoodStates wantedState = HoodStates.OFF;
+  private HoodStates currentState = HoodStates.OFF;
+  private HoodStates previousState =HoodStates.OFF;
+
+    public void setWantedState(HoodStates state) {
+    wantedState = state;
+    updateState();
+    applyState();
+  }
+    private void applyState() {
+    switch (currentState) {
+      case SPINUP_SHOOTING:
+        setPosition(6.0);
+        break;
+      case OFF:
+      default:
+        setPosition(0.0);
+        break;
+    }
+  }
+  
+  public double getPosition() {
+    return inputs.position;
+  }
+
+
+  private void updateState() {
+    previousState = currentState;
+
+    switch (wantedState) {
+      case SPINUP_SHOOTING:
+        currentState = HoodStates.SPINUP_SHOOTING;
+        break;
+      case OFF:
+      default:
+        currentState = HoodStates.OFF;
+        break;
+    }
+  }
   /** Creates a new Hood. */
   public Hood(HoodIO io) {
     this.io = io;
+  }
+    public boolean atSetpoint(double setpoint) {
+    return Math.abs(getPosition() - setpoint) < 0.5;
   }
 
   public void setDutyCycle(double dutyCycle) {
@@ -28,13 +74,9 @@ public class Hood extends SubsystemBase {
     io.setPosition(position);
   }
 
-  public double getPosition() {
-    return inputs.position;
-  }
-
-  public Command setPositionCmd(double position) {
-    return this.runOnce(() -> io.setPosition(position));
-  }
+  // public Command setPositionCmd(double position) {
+  //   return this.setPosition(() -> );
+  // }
 
   public void setEncoder(double position) {
     io.setEncoder(position);
@@ -44,23 +86,14 @@ public class Hood extends SubsystemBase {
     io.setDutyCycle(0);
   }
 
-  public boolean atSetpoint(double setpoint) {
-    return Math.abs(getPosition() - setpoint) < TOLERANCE;
-  }
-
-  public Command moveToZeroAndZero() {
-    return Commands.waitUntil(
-            () -> Math.abs(inputs.supplyCurrent) >= 30.0 && Math.abs(inputs.velocity) == 0.0)
-        .deadlineFor(this.runEnd(() -> io.setDutyCycle(0.1), () -> io.setDutyCycle(0.0)))
-        // TODO make this call this.zero()
-        .andThen(runOnce(() -> inputs.position = 0.0));
-  }
-
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
     io.updateInputs(inputs);
     Logger.processInputs("Hood", inputs);
+    Logger.recordOutput("Subsystems/Hood/WantedState", wantedState.toString());
+    Logger.recordOutput("Subsystems/Hood/CurrentState", currentState.toString());
+    Logger.recordOutput("Subsystems/Hood/PreviousState", previousState.toString());
   }
 
   public Command setDutyCycleCommand(double value) {
@@ -69,9 +102,5 @@ public class Hood extends SubsystemBase {
 
   public Command setDutyCycleCommand(DoubleSupplier valueSup) {
     return this.runEnd(() -> io.setDutyCycle(valueSup.getAsDouble()), () -> io.setDutyCycle(0.0));
-  }
-
-  public Command zero() {
-    return this.runOnce(() -> setEncoder(0.0));
   }
 }

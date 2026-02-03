@@ -4,8 +4,9 @@
 
 package frc.robot;
 
+import java.util.function.DoubleSupplier;
+
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Flywheel.Flywheel;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKicker;
@@ -44,7 +45,7 @@ public class CommandFactory {
     this.indexer = indexer;
     this.intakePivot = intakePivot;
     this.vision = vision;
-    this.drivetrain = drivetrain;
+    this.drivetrain =   drivetrain;
   }
 
   public Command basicIntakeCmd() {
@@ -59,19 +60,19 @@ public class CommandFactory {
     return flywheel.setRPMCommand(rpm);
   }
 
-  public Command shootWithSpinUp(double rpm, double position) {
-    return hood.setPositionCmd(position)
-        .alongWith(flywheel.setRPMCommand(rpm))
-        .alongWith(
-            Commands.waitUntil(() -> flywheel.atSetpoint(rpm, 100.0) && hood.atSetpoint(position))
-                .andThen(this.setFlywheelKickerDutyCycle(1.0).alongWith(this.basicIntakeCmd())));
-  }
+  // public Command shootWithSpinUp(double rpm, double position) {
+  //   return hood.setPositionCmd(position)
+  //       .alongWith(flywheel.setRPMCommand(rpm))
+  //       .alongWith(
+  //           Commands.waitUntil(() -> flywheel.atSetpoint(rpm, 100.0) && hood.atSetpoint(position))
+  //               .andThen(this.setFlywheelKickerDutyCycle(1.0).alongWith(this.basicIntakeCmd())));
+  // }
 
-  public Command setFlywheelKickerDutyCycle(double value) {
-    return flyWheelKicker.setDutyCycleCommand(value);
-  }
+  // public Command setFlywheelKickerDutyCycle(double value) {
+  //   return flyWheelKicker.setDutyCycleCommand(value);
+  // }
 
-  public Command setHoodPosition(double position) {
-    return hood.setPositionCmd(position);
-  }
+  // public Command setHoodPosition(double position) {
+  //   return hood.setPositionCmd(position);
+  // }
 }

@@ -1,7 +1,3 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot.subsystems.Intake;
 
 import edu.wpi.first.wpilibj2.command.Command;
@@ -13,21 +9,50 @@ public class Intake extends SubsystemBase {
   private final IntakeIO io;
   private final IntakeIOInputsAutoLogged inputs = new IntakeIOInputsAutoLogged();
 
-  /** Creates a new Intake. */
+  public enum IntakeStates {
+    OFF,
+    INTAKING
+  }
+
+  private IntakeStates wantedState = IntakeStates.OFF;
+  private IntakeStates currentState = IntakeStates.OFF;
+  private IntakeStates previousState = IntakeStates.OFF;
+
   public Intake(IntakeIO io) {
     this.io = io;
   }
 
-  public void setDutyCycle(double value) {
-    io.setDutyCycle(value);
+  public void setWantedState(IntakeStates state) {
+    wantedState = state;
+    updateState();
+    applyState();
   }
 
-  public Command setDutyCycleCommand(double value) {
-    return this.setDutyCycleCommand(() -> value);
+  private void updateState() {
+    previousState = currentState;
+
+    switch (wantedState) {
+      case INTAKING:
+        currentState = IntakeStates.INTAKING;
+        break;
+
+      case OFF:
+      default:
+        currentState = IntakeStates.OFF;
+        break;
+    }
   }
 
-  public Command setDutyCycleCommand(DoubleSupplier valueSup) {
-    return this.runEnd(() -> io.setDutyCycle(valueSup.getAsDouble()), () -> io.setDutyCycle(0.0));
+  private void applyState() {
+    switch (currentState) {
+      case INTAKING:
+        setVelocity(0.75);
+        break;
+      case OFF:
+      default:
+        stop();
+        break;
+    }
   }
 
   public void setVelocity(double velocity) {
@@ -39,12 +64,24 @@ public class Intake extends SubsystemBase {
   }
 
   public void stop() {
-    this.setDutyCycle(0.0);
+    this.setVelocity(0.0);
   }
 
   @Override
   public void periodic() {
+
     io.updateInputs(inputs);
     Logger.processInputs("Intake", inputs);
+
+    Logger.recordOutput("Subsystems/Intake/WantedState", wantedState.toString());
+    Logger.recordOutput("Subsystems/Intake/CurrentState", currentState.toString());
+    Logger.recordOutput("Subsystems/Intake/PreviousState", previousState.toString());
+  }
+
+  public Command setDutyCycleCommand(DoubleSupplier dutySupplier) {
+    return this.runEnd(
+        () -> io.setDutyCycle(dutySupplier.getAsDouble()),
+        () -> io.setDutyCycle(0.0)
+    );
   }
 }

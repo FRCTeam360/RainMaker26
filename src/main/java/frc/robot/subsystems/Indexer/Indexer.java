@@ -6,6 +6,8 @@ package frc.robot.subsystems.Indexer;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.Intake.Intake.IntakeStates;
+
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -13,9 +15,47 @@ public class Indexer extends SubsystemBase {
   private final IndexerIO io;
   private final IndexerIOInputsAutoLogged inputs = new IndexerIOInputsAutoLogged();
 
+  public enum IndexerStates {
+    OFF,
+    INTAKING,
+  }
+
+  private IndexerStates wantedState = IndexerStates.OFF;
+  private IndexerStates currentState = IndexerStates.OFF;
+  private IndexerStates previousState = IndexerStates.OFF;
+
+  private void updateState() {
+    previousState = currentState;
+
+    switch (wantedState) {
+      case INTAKING:
+        currentState = IndexerStates.INTAKING;
+        break;
+      case OFF:
+        currentState = IndexerStates.OFF;
+        break;
+    }
+  }
+  private void applyState() {
+    switch (currentState) {
+      case INTAKING:
+        setDutyCycle(0.2);
+        break;
+      case OFF:
+      default:
+        stop();
+        break;
+    }
+  }
+
   /** Creates a new Indexer. */
   public Indexer(IndexerIO io) {
     this.io = io;
+  }
+ public void setWantedState(IndexerStates state) {
+    wantedState = state;
+    updateState();
+    applyState();
   }
 
   public void setDutyCycle(double dutyCycle) {
@@ -36,7 +76,11 @@ public class Indexer extends SubsystemBase {
 
   @Override
   public void periodic() {
+    
     io.updateInputs(inputs);
     Logger.processInputs("Indexer", inputs);
+    Logger.recordOutput("Subsystems/Indexer/WantedState", wantedState.toString());
+    Logger.recordOutput("Subsystems/Indexer/CurrentState", currentState.toString());
+    Logger.recordOutput("Subsystems/Indexer/PreviousState", previousState.toString());
   }
 }
