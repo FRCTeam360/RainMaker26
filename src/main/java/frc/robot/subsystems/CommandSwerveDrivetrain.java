@@ -85,7 +85,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             // with negative X
             // (left)
             )
-        .alongWith(new InstantCommand(() -> System.out.println("running")));
+        .alongWith(new InstantCommand(() -> System.out.println("running field oriented drive")));
   }
 
   /* SysId routine for characterizing translation. This is used to find PID gains for the drive motors. */
