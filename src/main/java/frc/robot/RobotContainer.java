@@ -37,6 +37,7 @@ import frc.robot.subsystems.Intake.IntakeIOSim;
 import frc.robot.subsystems.Intake.IntakeIOWB;
 import frc.robot.subsystems.IntakePivot.IntakePivot;
 import frc.robot.subsystems.IntakePivot.IntakePivotIOSim;
+import frc.robot.subsystems.SuperStructure;
 import frc.robot.subsystems.Vision.Vision;
 import frc.robot.subsystems.Vision.VisionIOLimelight;
 import frc.robot.subsystems.Vision.VisionIOPhotonSim;
@@ -63,6 +64,7 @@ public class RobotContainer {
   private FlywheelKicker flywheelKicker;
 
   private CommandFactory commandFactory;
+  private SuperStructure superStructure;
 
   // TODO: refactor to allow for more than 1 drivetrain type
 
@@ -112,6 +114,7 @@ public class RobotContainer {
     commandFactory =
         new CommandFactory(
             intake, flywheel, flywheelKicker, hood, indexer, intakePivot, vision, drivetrain);
+    superStructure = new SuperStructure(intake, indexer, flywheelKicker, flywheel, hood);
 
     registerPathplannerCommand("basic intake", commandFactory.basicIntakeCmd());
     registerPathplannerCommand("shoot at hub", commandFactory.shootWithSpinUp(3000.0, 4.0));
