@@ -6,14 +6,13 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
+import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.generated.WoodBotDrivetrain;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
-import frc.robot.subsystems.SuperStructure;
-import frc.robot.subsystems.SuperStructure.SuperStates;
 import frc.robot.subsystems.Flywheel.Flywheel;
 import frc.robot.subsystems.Flywheel.FlywheelIOSim;
 import frc.robot.subsystems.Flywheel.FlywheelIOWB;
@@ -31,13 +30,12 @@ import frc.robot.subsystems.Intake.IntakeIOSim;
 import frc.robot.subsystems.Intake.IntakeIOWB;
 import frc.robot.subsystems.IntakePivot.IntakePivot;
 import frc.robot.subsystems.IntakePivot.IntakePivotIOSim;
+import frc.robot.subsystems.SuperStructure;
+import frc.robot.subsystems.SuperStructure.SuperStates;
 import frc.robot.subsystems.Vision.Vision;
-import frc.robot.subsystems.Vision.VisionIOLimelight;
 import frc.robot.subsystems.Vision.VisionIOPhotonSim;
 import java.util.Map;
 import java.util.Objects;
-
-import com.pathplanner.lib.auto.NamedCommands;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -85,9 +83,8 @@ public class RobotContainer {
         intake = new Intake(new IntakeIOSim());
         indexer = new Indexer(new IndexerIOSim());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOSim());
-        flywheel = new Flywheel(new  FlywheelIOSim());
+        flywheel = new Flywheel(new FlywheelIOSim());
         hood = new Hood(new HoodIOSim());
-
 
         // flywheel = new Flywheel(new FlywheelIOSim());
         // hood = new Hood(new HoodIOWB());
@@ -108,14 +105,17 @@ public class RobotContainer {
     }
     // Configure the trigger bindings
     superStructure = new SuperStructure(intake, indexer, flywheelKicker, flywheel, hood);
-    
-    registerPathplannerCommand("basic intake", superStructure.setStateCommand(SuperStates.INTAKING));
-    registerPathplannerCommand("shoot at hub", superStructure.setStateCommand(SuperStates.SPINUP_SHOOTING));
+
+    registerPathplannerCommand(
+        "basic intake", superStructure.setStateCommand(SuperStates.INTAKING));
+    registerPathplannerCommand(
+        "shoot at hub", superStructure.setStateCommand(SuperStates.SPINUP_SHOOTING));
     registerPathplannerCommand("run flywheel kicker", flywheelKicker.setDutyCycleCommand(1.0));
 
     configureBindings();
   }
-    public void registerPathplannerCommand(String name, Command command) {
+
+  public void registerPathplannerCommand(String name, Command command) {
     if (Objects.nonNull(command)) {
       NamedCommands.registerCommand(name, command);
     } else {

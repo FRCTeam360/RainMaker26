@@ -6,20 +6,20 @@ package frc.robot.subsystems.Flywheel;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.subsystems.Indexer.Indexer.IndexerStates;
-
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
 public class Flywheel extends SubsystemBase {
   private final FlywheelIO io;
   private final FlywheelIOInputsAutoLogged inputs = new FlywheelIOInputsAutoLogged();
+
   public enum FlywheelStates {
     OFF,
     SHOOTING,
     SPINUP_SHOOTING
   }
-   private FlywheelStates wantedState = FlywheelStates.OFF;
+
+  private FlywheelStates wantedState = FlywheelStates.OFF;
   private FlywheelStates currentState = FlywheelStates.OFF;
   private FlywheelStates previousState = FlywheelStates.OFF;
 
@@ -38,17 +38,19 @@ public class Flywheel extends SubsystemBase {
         break;
     }
   }
-  
+
   public boolean atSetpoint(double targetRPM, double tolerance) {
     // TODO: make tolerance a constant in hardware layer
     return Math.abs(getVelocity() - targetRPM) < tolerance;
   }
+
   public double getVelocity() {
     if (inputs.velocities.length > 0) {
       return inputs.velocities[0];
     }
     return 0.0;
   }
+
   private void applyState() {
     switch (currentState) {
       case SPINUP_SHOOTING:
@@ -63,7 +65,8 @@ public class Flywheel extends SubsystemBase {
         break;
     }
   }
-   public void setWantedState(FlywheelStates state) {
+
+  public void setWantedState(FlywheelStates state) {
     wantedState = state;
     updateState();
     applyState();
@@ -82,7 +85,7 @@ public class Flywheel extends SubsystemBase {
   public void periodic() {
     io.updateInputs(inputs);
     Logger.processInputs("Flywheel", inputs);
-        Logger.processInputs("Flywheel", inputs);
+    Logger.processInputs("Flywheel", inputs);
     Logger.recordOutput("Subsystems/Flywheel/WantedState", wantedState.toString());
     Logger.recordOutput("Subsystems/Flywheel/CurrentState", currentState.toString());
     Logger.recordOutput("Subsystems/Flywheel/PreviousState", previousState.toString());

@@ -6,29 +6,29 @@ package frc.robot.subsystems.Hood;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.subsystems.Intake.Intake.IntakeStates;
-
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
 public class Hood extends SubsystemBase {
   private final HoodIO io;
   private final HoodIOInputsAutoLogged inputs = new HoodIOInputsAutoLogged();
-public enum HoodStates {
+
+  public enum HoodStates {
     OFF,
     SPINUP_SHOOTING
   }
 
   private HoodStates wantedState = HoodStates.OFF;
   private HoodStates currentState = HoodStates.OFF;
-  private HoodStates previousState =HoodStates.OFF;
+  private HoodStates previousState = HoodStates.OFF;
 
-    public void setWantedState(HoodStates state) {
+  public void setWantedState(HoodStates state) {
     wantedState = state;
     updateState();
     applyState();
   }
-    private void applyState() {
+
+  private void applyState() {
     switch (currentState) {
       case SPINUP_SHOOTING:
         setPosition(6.0);
@@ -39,11 +39,10 @@ public enum HoodStates {
         break;
     }
   }
-  
+
   public double getPosition() {
     return inputs.position;
   }
-
 
   private void updateState() {
     previousState = currentState;
@@ -58,11 +57,13 @@ public enum HoodStates {
         break;
     }
   }
+
   /** Creates a new Hood. */
   public Hood(HoodIO io) {
     this.io = io;
   }
-    public boolean atSetpoint(double setpoint) {
+
+  public boolean atSetpoint(double setpoint) {
     return Math.abs(getPosition() - setpoint) < 0.5;
   }
 

@@ -4,8 +4,6 @@
 
 package frc.robot;
 
-import java.util.function.DoubleSupplier;
-
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Flywheel.Flywheel;
@@ -45,7 +43,7 @@ public class CommandFactory {
     this.indexer = indexer;
     this.intakePivot = intakePivot;
     this.vision = vision;
-    this.drivetrain =   drivetrain;
+    this.drivetrain = drivetrain;
   }
 
   public Command basicIntakeCmd() {
