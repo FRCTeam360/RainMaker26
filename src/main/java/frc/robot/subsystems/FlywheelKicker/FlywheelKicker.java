@@ -72,7 +72,7 @@ public class FlywheelKicker extends SubsystemBase {
   }
 
   public void stop() {
-    io.setDutyCycle(0);
+    io.setDutyCycle(0.0);
   }
 
   @Override
