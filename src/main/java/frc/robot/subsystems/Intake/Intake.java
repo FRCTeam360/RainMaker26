@@ -78,7 +78,6 @@ public class Intake extends SubsystemBase {
 
   @Override
   public void periodic() {
-
     io.updateInputs(inputs);
     Logger.processInputs("Intake", inputs);
 
