@@ -48,16 +48,16 @@ public class Flywheel extends SubsystemBase {
     io.setRPM(rpm);
   }
 
-  public boolean atSetpoint(double targetRPM, double tolerance) {
-    // TODO: make tolerance a constant in hardware layer
-    return Math.abs(getVelocity() - targetRPM) < tolerance;
-  }
-
   public double getVelocity() {
     if (inputs.velocities.length > 0) {
       return inputs.velocities[0];
     }
     return 0.0;
+  }
+
+  public boolean atSetpoint(double targetRPM, double tolerance) {
+    // TODO: make tolerance a constant in hardware layer
+    return Math.abs(getVelocity() - targetRPM) < tolerance;
   }
 
   private void applyState() {
@@ -79,15 +79,6 @@ public class Flywheel extends SubsystemBase {
     wantedState = state;
     updateState();
     applyState();
-  }
-
-  /** Creates a new Flywheel. */
-  public Flywheel(FlywheelIO io) {
-    this.io = io;
-  }
-
-  public void setRPM(double rpm) {
-    io.setRPM(rpm);
   }
 
   @Override
