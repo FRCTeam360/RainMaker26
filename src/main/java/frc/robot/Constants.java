@@ -42,6 +42,8 @@ public final class Constants {
 
     public static final int HOOD_ID = 20;
 
+    public static final String LIMELIGHT = "limelight";
+
     public static final String CANBUS_NAME = "Default Name";
   }
 
@@ -72,10 +74,9 @@ public final class Constants {
 
     if (serialAddress.equals(SerialAddressConstants.WOOD_SERIAL_ADDRESS)) {
       return Constants.RobotType.WOODBOT;
+    } else if (!Robot.isReal()) { // KEEP AT BOTTOM
+      return Constants.RobotType.SIM;
     }
-    // else if (!Robot.isReal()) { // KEEP AT BOTTOM
-    // return Constants.RobotType.SIM;
-    // }
-    return Constants.RobotType.SIM;
+    return Constants.RobotType.WOODBOT;
   }
 }
