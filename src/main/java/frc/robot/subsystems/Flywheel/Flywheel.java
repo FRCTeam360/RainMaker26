@@ -19,6 +19,11 @@ public class Flywheel extends SubsystemBase {
     SPINUP_SHOOTING
   }
 
+  /** Creates a new Flywheel. */
+  public Flywheel(FlywheelIO io) {
+    this.io = io;
+  }
+
   private FlywheelStates wantedState = FlywheelStates.OFF;
   private FlywheelStates currentState = FlywheelStates.OFF;
   private FlywheelStates previousState = FlywheelStates.OFF;
@@ -37,6 +42,10 @@ public class Flywheel extends SubsystemBase {
         currentState = FlywheelStates.OFF;
         break;
     }
+  }
+
+  public void setRPM(double rpm) {
+    io.setRPM(rpm);
   }
 
   public boolean atSetpoint(double targetRPM, double tolerance) {
@@ -105,5 +114,9 @@ public class Flywheel extends SubsystemBase {
 
   public Command setDutyCycleCommand(DoubleSupplier valueSup) {
     return this.runEnd(() -> io.setDutyCycle(valueSup.getAsDouble()), () -> io.setDutyCycle(0.0));
+  }
+
+  public Command setRPMCommand(double rpm) {
+    return this.runOnce(() -> io.setRPM(rpm));
   }
 }
