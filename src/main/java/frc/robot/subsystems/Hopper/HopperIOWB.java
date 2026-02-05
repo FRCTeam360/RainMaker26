@@ -21,8 +21,6 @@ public class HopperIOWB implements HopperIO {
   private final RelativeEncoder encoder = motor.getEncoder();
   private final SparkMaxConfig sparkMaxConfig = new SparkMaxConfig();
 
-  private final DigitalInput sensor = new DigitalInput(WoodBotConstants.HOPPER_SENSOR_ID);
-
   public HopperIOWB() {
     sparkMaxConfig.idleMode(IdleMode.kBrake);
     sparkMaxConfig.inverted(true);
@@ -37,7 +35,6 @@ public class HopperIOWB implements HopperIO {
     // this is right
     inputs.velocity = encoder.getVelocity();
     inputs.voltage = motor.getBusVoltage() * motor.getAppliedOutput();
-    inputs.sensor = sensor.get();
   }
 
   public void setDutyCycle(double dutyCycle) {
