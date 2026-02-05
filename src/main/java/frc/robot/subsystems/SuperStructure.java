@@ -5,7 +5,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKicker;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKicker.FlywheelKickerStates;
-import frc.robot.subsystems.Indexer.Indexer;
+import frc.robot.subsystems.Hopper.Hopper;
 import frc.robot.subsystems.Intake.Intake;
 import frc.robot.subsystems.Intake.Intake.IntakeStates;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel;
@@ -16,7 +16,7 @@ import org.littletonrobotics.junction.Logger;
 
 public class SuperStructure extends SubsystemBase {
   private final Intake intake;
-  private final Indexer indexer;
+  private final Hopper hopper;
   private final FlywheelKicker flywheelKicker;
   private Flywheel flywheel;
   private Hood hood;
@@ -45,9 +45,9 @@ public class SuperStructure extends SubsystemBase {
   private SuperStates previousSuperState = SuperStates.IDLE;
 
   public SuperStructure(
-      Intake intake, Indexer indexer, FlywheelKicker flywheelKicker, Flywheel flywheel, Hood hood) {
+      Intake intake, Hopper hopper, FlywheelKicker flywheelKicker, Flywheel flywheel, Hood hood) {
     this.intake = intake;
-    this.indexer = indexer;
+    this.hopper = hopper;
     this.flywheelKicker = flywheelKicker;
     this.flywheel = flywheel;
     this.hood = hood;
@@ -103,7 +103,7 @@ public class SuperStructure extends SubsystemBase {
 
   private void intaking() {
     intake.setWantedState(Intake.IntakeStates.INTAKING);
-    indexer.setWantedState(Indexer.IndexerStates.INTAKING);
+    hopper.setWantedState(Hopper.HopperStates.INTAKING);
   }
 
   private void shooting() {
@@ -112,7 +112,7 @@ public class SuperStructure extends SubsystemBase {
 
   private void stopped() {
     intake.setWantedState(Intake.IntakeStates.OFF);
-    indexer.setWantedState(Indexer.IndexerStates.OFF);
+    hopper.setWantedState(Hopper.HopperStates.OFF);
     flywheelKicker.setWantedState(FlywheelKickerStates.OFF);
     flywheel.setWantedState(FlywheelStates.OFF);
     hood.setWantedState(HoodStates.OFF);
