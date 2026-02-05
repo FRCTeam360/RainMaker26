@@ -117,7 +117,8 @@ public class RobotContainer {
     superStructure = new SuperStructure(intake, indexer, flywheelKicker, flywheel, hood);
 
     registerPathplannerCommand("basic intake", commandFactory.basicIntakeCmd());
-    registerPathplannerCommand("shoot at hub", commandFactory.shootWithSpinUp(3000.0, 4.0));
+    registerPathplannerCommand("shoot at hub", commandFactory.shootWithSpinUp(3000.0, 6.0));
+    registerPathplannerCommand("run flywheel kicker", flywheelKicker.setDutyCycleCommand(1.0));
     configureBindings();
     configureTestBindings();
 
@@ -211,6 +212,7 @@ public class RobotContainer {
       driverCont.x().whileTrue(commandFactory.shootWithRPM(2500));
       driverCont.b().whileTrue(commandFactory.shootWithRPM(3000));
       driverCont.y().whileTrue(commandFactory.shootWithRPM(3500));
+      driverCont.rightTrigger().whileTrue(commandFactory.shootWithSpinUp(3500.0, 6.0));
     }
 
     // Drivetrain commands
