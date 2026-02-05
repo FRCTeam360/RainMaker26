@@ -4,8 +4,6 @@
 
 package frc.robot.subsystems.Indexer;
 
-import com.ctre.phoenix6.configs.CANrangeConfiguration;
-import com.ctre.phoenix6.signals.UpdateModeValue;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
@@ -17,8 +15,6 @@ import frc.robot.Constants;
 
 public class IndexerIOWB implements IndexerIO {
   /** Creates a new IndexerIOWB. */
-  CANrangeConfiguration intakeConfig = new CANrangeConfiguration();
-
   private final SparkMax indexerMotor =
       new SparkMax(Constants.WoodBotConstants.INDEXER_ID, MotorType.kBrushless);
   private final RelativeEncoder encoder = indexerMotor.getEncoder();
@@ -30,10 +26,6 @@ public class IndexerIOWB implements IndexerIO {
 
     indexerMotor.configure(
         sparkMaxConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-
-    intakeConfig.ProximityParams.MinSignalStrengthForValidMeasurement = 2000;
-    intakeConfig.ProximityParams.ProximityThreshold = 0.1;
-    intakeConfig.ToFParams.withUpdateMode(UpdateModeValue.ShortRangeUserFreq);
   }
 
   public void updateInputs(IndexerIOInputs inputs) {
