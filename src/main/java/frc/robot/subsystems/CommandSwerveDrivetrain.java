@@ -127,6 +127,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   private Command xOutCmd() {
     SwerveRequest xOutReq = new SwerveRequest.SwerveDriveBrake();
     return this.applyRequest(() -> xOutReq);
+  }
   /**
    * Creates a command that drives the robot in field-centric mode while continuously rotating to
    * face the hub center. The heading controller automatically adjusts the robot's rotation to
