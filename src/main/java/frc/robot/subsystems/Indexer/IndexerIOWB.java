@@ -41,6 +41,4 @@ public class IndexerIOWB implements IndexerIO {
   public void setDutyCycle(double dutyCycle) {
     indexerMotor.set(dutyCycle);
   }
-
-  public void refreshData() {}
 }
