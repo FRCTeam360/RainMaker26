@@ -39,7 +39,6 @@ import frc.robot.subsystems.IntakePivot.IntakePivot;
 import frc.robot.subsystems.IntakePivot.IntakePivotIOSim;
 import frc.robot.subsystems.Turret.Turret;
 import frc.robot.subsystems.Turret.TurretIOSim;
-import frc.robot.subsystems.Turret.TurretIOWB;
 import frc.robot.subsystems.Vision.Vision;
 import frc.robot.subsystems.Vision.VisionIOLimelight;
 import frc.robot.subsystems.Vision.VisionIOPhotonSim;
@@ -111,7 +110,6 @@ public class RobotContainer {
                             Constants.WoodBotConstants.LIMELIGHT, () -> 0.0, () -> 0.0, true))));
         intake = new Intake(new IntakeIOWB());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOWB());
-        turret = new Turret(new TurretIOWB());
         // intakePivot = new IntakePivot(new IntakePivotIOPB());
     }
     // Configure the trigger bindings

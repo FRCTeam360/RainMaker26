@@ -6,7 +6,6 @@ public interface TurretIO {
   /** Creates a new TurretIO. */
   @AutoLog
   public static class TurretIOInputs {
-    // taken from HoodIO.java
     public double voltage = 0.0;
     public double supplyCurrent = 0.0;
     public double statorCurrent = 0.0;
