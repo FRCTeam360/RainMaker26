@@ -27,16 +27,15 @@ public final class Constants {
   }
 
   public static class WoodBotConstants {
-    public static final int INTAKE_ID = 15;
     public static final int INTAKE_SENSOR_PORT = 0;
+    public static final int INTAKE_ID = 15;
+    public static final int INTAKE_PIVOT_ID = 0;
 
     public static final int HOPPER_SENSOR_PORT = 1;
-    public static final int INTAKE_PIVOT_ID = 0;
     public static final int HOPPER_SENSOR_ID = 2;
     public static final int HOPPER_ID = 16;
     public static final int FLYWHEEL_KICKER_ID = 17;
     public static final int FLYWHEEL_KICKER_SENSOR_ID = 3;
-
     public static final int FLYWHEEL_RIGHT_ID = 18;
     public static final int FLYWHEEL_LEFT_ID = 19;
 
@@ -48,19 +47,17 @@ public final class Constants {
   }
 
   public static class SimulationConstants {
-    public static final int FLYWHEEL_MOTOR = 2;
-
     public static final int HOOD_MOTOR = 6;
 
     public static final int HOPPER_MOTOR = 9;
 
     public static final int INTAKE_MOTOR = 12;
     public static final int INTAKE_SENSOR_PORT = 10;
-
     public static final int INTAKE_PIVOT_MOTOR = 15;
 
     public static final int FLYWHEEL_KICKER_MOTOR = 18;
     public static final int FLYWHEEL_KICKER_SENSOR_ID = 19;
+    public static final int FLYWHEEL_MOTOR = 2;
   }
 
   public static class OperatorConstants {

@@ -11,9 +11,7 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
-import edu.wpi.first.wpilibj.DigitalInput;
 import frc.robot.Constants;
-import frc.robot.Constants.WoodBotConstants;
 
 public class HopperIOWB implements HopperIO {
   /** Creates a new HopperIOWB. */
@@ -28,7 +26,6 @@ public class HopperIOWB implements HopperIO {
   public HopperIOWB() {
     sparkMaxConfig.idleMode(IdleMode.kBrake);
     sparkMaxConfig.inverted(true);
-    // sparkMaxConfig.smartCurrentLimit(40);
 
     motor.configure(sparkMaxConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }

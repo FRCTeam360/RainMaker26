@@ -20,9 +20,6 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.generated.WoodBotDrivetrain;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
-import frc.robot.subsystems.Flywheel.Flywheel;
-import frc.robot.subsystems.Flywheel.FlywheelIOSim;
-import frc.robot.subsystems.Flywheel.FlywheelIOWB;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKicker;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKickerIOSim;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKickerIOWB;
@@ -37,8 +34,16 @@ import frc.robot.subsystems.Intake.IntakeIOSim;
 import frc.robot.subsystems.Intake.IntakeIOWB;
 import frc.robot.subsystems.IntakePivot.IntakePivot;
 import frc.robot.subsystems.IntakePivot.IntakePivotIOSim;
+import frc.robot.subsystems.Shooter.Flywheel.Flywheel;
+import frc.robot.subsystems.Shooter.Flywheel.FlywheelIOSim;
+import frc.robot.subsystems.Shooter.Flywheel.FlywheelIOWB;
+import frc.robot.subsystems.Shooter.Hood.Hood;
+import frc.robot.subsystems.Shooter.Hood.HoodIOSim;
+import frc.robot.subsystems.Shooter.Hood.HoodIOWB;
+import frc.robot.subsystems.SuperStructure;
 import frc.robot.subsystems.Vision.Vision;
 import frc.robot.subsystems.Vision.VisionIOLimelight;
+import frc.robot.subsystems.Vision.VisionIOPhotonSim;
 import java.util.Map;
 import java.util.Objects;
 import org.littletonrobotics.junction.Logger;
@@ -62,6 +67,7 @@ public class RobotContainer {
   private FlywheelKicker flywheelKicker;
 
   private CommandFactory commandFactory;
+  private SuperStructure superStructure;
 
   // TODO: refactor to allow for more than 1 drivetrain type
 
@@ -80,6 +86,9 @@ public class RobotContainer {
         drivetrain = WoodBotDrivetrain.createDrivetrain();
         logger = new Telemetry(WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
         intakePivot = new IntakePivot(new IntakePivotIOSim());
+        vision =
+            new Vision(
+                Map.of("photonSim", new VisionIOPhotonSim(() -> drivetrain.getState().Pose)));
         flywheel = new Flywheel(new FlywheelIOSim());
         hood = new Hood(new HoodIOSim());
         hopper = new Hopper(new HopperIOSim());
@@ -110,7 +119,8 @@ public class RobotContainer {
             intake, flywheel, flywheelKicker, hood, hopper, intakePivot, vision, drivetrain);
 
     registerPathplannerCommand("basic intake", commandFactory.basicIntakeCmd());
-    registerPathplannerCommand("shoot at hub", commandFactory.shootWithSpinUp(3000.0, 4.0));
+    registerPathplannerCommand("shoot at hub", commandFactory.shootWithSpinUp(3000.0, 6.0));
+    registerPathplannerCommand("run flywheel kicker", flywheelKicker.setDutyCycleCommand(1.0));
     configureBindings();
     configureTestBindings();
 
@@ -167,6 +177,15 @@ public class RobotContainer {
   }
 
   private void configureBindings() {
+    // Only bind commands if the required subsystems/factories exist
+    if (Objects.nonNull(vision)) {
+      Command consumeVisionMeasurements =
+          vision.consumeVisionMeasurements(
+              measurements -> {
+                drivetrain.addVisionMeasurements(measurements);
+              });
+      vision.setDefaultCommand(consumeVisionMeasurements.ignoringDisable(true));
+    }
     // TODO: make more elegant solution for null checking subsystems/commands
 
     // Null checks based on subsystems used by each command
@@ -195,11 +214,13 @@ public class RobotContainer {
       driverCont.x().whileTrue(commandFactory.shootWithRPM(2500));
       driverCont.b().whileTrue(commandFactory.shootWithRPM(3000));
       driverCont.y().whileTrue(commandFactory.shootWithRPM(3500));
+      driverCont.rightTrigger().whileTrue(commandFactory.shootWithSpinUp(3500.0, 6.0));
     }
 
     // Drivetrain commands
     if (Objects.nonNull(drivetrain)) {
       drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
+      driverCont.rightTrigger().whileTrue(drivetrain.faceHubWhileDriving(driverCont));
       drivetrain.registerTelemetry(logger::telemeterize);
     }
   }

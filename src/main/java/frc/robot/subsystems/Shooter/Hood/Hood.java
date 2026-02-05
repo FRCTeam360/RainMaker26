@@ -2,7 +2,7 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.subsystems.Hood;
+package frc.robot.subsystems.Shooter.Hood;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -14,6 +14,47 @@ public class Hood extends SubsystemBase {
   private final HoodIO io;
   private final HoodIOInputsAutoLogged inputs = new HoodIOInputsAutoLogged();
   private final double TOLERANCE = 0.5;
+
+  public enum HoodStates {
+    OFF,
+    SPINUP_SHOOTING
+  }
+
+  private HoodStates wantedState = HoodStates.OFF;
+  private HoodStates currentState = HoodStates.OFF;
+  private HoodStates previousState = HoodStates.OFF;
+
+  public void setWantedState(HoodStates state) {
+    wantedState = state;
+    updateState();
+    applyState();
+  }
+
+  private void applyState() {
+    switch (currentState) {
+      case SPINUP_SHOOTING:
+        setPosition(6.0);
+        break;
+      case OFF:
+      default:
+        setPosition(0.0);
+        break;
+    }
+  }
+
+  private void updateState() {
+    previousState = currentState;
+
+    switch (wantedState) {
+      case SPINUP_SHOOTING:
+        currentState = HoodStates.SPINUP_SHOOTING;
+        break;
+      case OFF:
+      default:
+        currentState = HoodStates.OFF;
+        break;
+    }
+  }
 
   /** Creates a new Hood. */
   public Hood(HoodIO io) {
@@ -61,6 +102,9 @@ public class Hood extends SubsystemBase {
     // This method will be called once per scheduler run
     io.updateInputs(inputs);
     Logger.processInputs("Hood", inputs);
+    Logger.recordOutput("Subsystems/Hood/WantedState", wantedState.toString());
+    Logger.recordOutput("Subsystems/Hood/CurrentState", currentState.toString());
+    Logger.recordOutput("Subsystems/Hood/PreviousState", previousState.toString());
   }
 
   public Command setDutyCycleCommand(double value) {

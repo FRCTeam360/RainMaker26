@@ -109,6 +109,8 @@ public class IntakeIOSim implements IntakeIO {
     motorControllerSim.set(value);
   }
 
+  public void setVelocity(double velocity) {}
+
   @Override
   public void stop() {
     motorControllerSim.set(0.0);

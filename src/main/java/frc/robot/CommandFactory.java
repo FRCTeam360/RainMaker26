@@ -7,12 +7,13 @@ package frc.robot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
-import frc.robot.subsystems.Flywheel.Flywheel;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKicker;
 import frc.robot.subsystems.Hood.Hood;
 import frc.robot.subsystems.Hopper.Hopper;
 import frc.robot.subsystems.Intake.Intake;
 import frc.robot.subsystems.IntakePivot.IntakePivot;
+import frc.robot.subsystems.Shooter.Flywheel.Flywheel;
+import frc.robot.subsystems.Shooter.Hood.Hood;
 import frc.robot.subsystems.Vision.Vision;
 
 /** Add your docs here. */
@@ -64,7 +65,7 @@ public class CommandFactory {
         .alongWith(flywheel.setRPMCommand(rpm))
         .alongWith(
             Commands.waitUntil(() -> flywheel.atSetpoint(rpm, 100.0) && hood.atSetpoint(position))
-                .andThen(this.setFlywheelKickerDutyCycle(1.0)));
+                .andThen(this.setFlywheelKickerDutyCycle(1.0).alongWith(this.basicIntakeCmd())));
   }
 
   public Command setFlywheelKickerDutyCycle(double value) {
