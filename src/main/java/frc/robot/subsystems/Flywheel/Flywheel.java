@@ -13,9 +13,35 @@ public class Flywheel extends SubsystemBase {
   private final FlywheelIO io;
   private final FlywheelIOInputsAutoLogged inputs = new FlywheelIOInputsAutoLogged();
 
+  public enum FlywheelStates {
+    OFF,
+    SHOOTING,
+    SPINUP_SHOOTING
+  }
+
   /** Creates a new Flywheel. */
   public Flywheel(FlywheelIO io) {
     this.io = io;
+  }
+
+  private FlywheelStates wantedState = FlywheelStates.OFF;
+  private FlywheelStates currentState = FlywheelStates.OFF;
+  private FlywheelStates previousState = FlywheelStates.OFF;
+
+  private void updateState() {
+    previousState = currentState;
+
+    switch (wantedState) {
+      case SHOOTING:
+        currentState = FlywheelStates.SHOOTING;
+        break;
+      case SPINUP_SHOOTING:
+        currentState = FlywheelStates.SPINUP_SHOOTING;
+        break;
+      case OFF:
+        currentState = FlywheelStates.OFF;
+        break;
+    }
   }
 
   public void setRPM(double rpm) {
@@ -34,10 +60,35 @@ public class Flywheel extends SubsystemBase {
     return Math.abs(getVelocity() - targetRPM) < tolerance;
   }
 
+  private void applyState() {
+    switch (currentState) {
+      case SPINUP_SHOOTING:
+        setRPM(3000.0);
+        break;
+      case SHOOTING:
+        setDutyCycle(0.75);
+        break;
+      case OFF:
+      default:
+        stop();
+        break;
+    }
+  }
+
+  public void setWantedState(FlywheelStates state) {
+    wantedState = state;
+    updateState();
+    applyState();
+  }
+
   @Override
   public void periodic() {
     io.updateInputs(inputs);
     Logger.processInputs("Flywheel", inputs);
+    Logger.processInputs("Flywheel", inputs);
+    Logger.recordOutput("Subsystems/Flywheel/WantedState", wantedState.toString());
+    Logger.recordOutput("Subsystems/Flywheel/CurrentState", currentState.toString());
+    Logger.recordOutput("Subsystems/Flywheel/PreviousState", previousState.toString());
   }
 
   public void setDutyCycle(double duty) {
