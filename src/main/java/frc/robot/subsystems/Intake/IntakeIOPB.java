@@ -4,24 +4,49 @@
 
 package frc.robot.subsystems.Intake;
 
-import org.littletonrobotics.junction.AutoLog;
+import com.revrobotics.PersistMode;
+import com.revrobotics.RelativeEncoder;
+import com.revrobotics.ResetMode;
+import com.revrobotics.spark.SparkFlex;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkFlexConfig;
+import edu.wpi.first.wpilibj.DigitalInput;
+import frc.robot.Constants.WoodBotConstants;
 
-public interface IntakeIOPB {
-  /** Creates a new IntakeIOPB. */
-  @AutoLog
-  public static class IntakeIOInputs {
-    public double statorCurrent = 0.0;
-    public double supplyCurrent = 0.0;
-    public double voltage = 0.0;
-    public double velocity = 0.0;
-    public double position = 0.0;
-    public boolean sensor = false;
-    // insert inputs
+public class IntakeIOPB implements IntakeIO {
+  private final SparkFlex motor = new SparkFlex(WoodBotConstants.INTAKE_ID, MotorType.kBrushless);
+  private final RelativeEncoder encoder = motor.getEncoder();
+  private final SparkFlexConfig config = new SparkFlexConfig();
+  private final DigitalInput sensor = new DigitalInput(WoodBotConstants.INTAKE_SENSOR_PORT);
+
+  public IntakeIOPB() {
+    config.idleMode(IdleMode.kBrake);
+    config.inverted(true);
+    config.smartCurrentLimit(40);
+
+    motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 
-  public void setDutyCycle(double value);
+  public void setDutyCycle(double duty) {
+    motor.set(duty);
+  }
 
-  public void stop();
+  public void stop() {
+    this.setDutyCycle(0.0);
+  }
 
-  public default void updateInputs(IntakeIOInputs inputs) {}
+  public void setEncoder(double value) {
+    encoder.setPosition(value);
+  }
+
+  public void updateInputs(IntakeIOInputs inputs) {
+    inputs.position = encoder.getPosition();
+    inputs.sensor = sensor.get();
+    inputs.statorCurrent = motor.getOutputCurrent();
+    inputs.supplyCurrent = motor.getOutputCurrent() * motor.getAppliedOutput(); // TODO: check if
+    // this is right
+    inputs.velocity = encoder.getVelocity();
+    inputs.voltage = motor.getBusVoltage() * motor.getAppliedOutput();
+  }
 }

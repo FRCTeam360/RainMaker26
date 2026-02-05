@@ -4,21 +4,49 @@
 
 package frc.robot.subsystems.FlywheelKicker;
 
-import org.littletonrobotics.junction.AutoLog;
+import com.revrobotics.RelativeEncoder;
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkMaxConfig;
+import edu.wpi.first.wpilibj.DigitalInput;
+import frc.robot.Constants;
+import frc.robot.Constants.WoodBotConstants;
 
-public interface FlywheelKickerIOPB {
-  /** Creates a new FlywheelKickerIOPB. */
-  @AutoLog
-  public static class FlywheelKickerIOInputs {
-    public double voltage = 0.0;
-    public double supplyCurrent = 0.0;
-    public double statorCurrent = 0.0;
-    public double velocity = 0.0;
-    public double position = 0.0;
-    public boolean sensor = false;
+public class FlywheelKickerIOPB implements FlywheelKickerIO {
+  /** Creates a new FlywheelKickerIOWB. */
+  private final SparkMax flywheelkickerMotor =
+      new SparkMax(Constants.WoodBotConstants.FLYWHEEL_KICKER_ID, MotorType.kBrushless);
+
+  private final RelativeEncoder encoder = flywheelkickerMotor.getEncoder();
+  private final SparkMaxConfig sparkMaxConfig = new SparkMaxConfig();
+
+  private final DigitalInput sensor = new DigitalInput(WoodBotConstants.FLYWHEEL_KICKER_SENSOR_ID);
+
+  public FlywheelKickerIOPB() {
+    sparkMaxConfig.idleMode(IdleMode.kBrake);
+    sparkMaxConfig.inverted(true);
+    sparkMaxConfig.smartCurrentLimit(40);
+
+    flywheelkickerMotor.configure(
+        sparkMaxConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 
-  public default void updateInputs(FlywheelKickerIOInputs inputs) {}
+  public void updateInputs(FlywheelKickerIOInputs inputs) {
+    inputs.position = encoder.getPosition();
+    inputs.statorCurrent = flywheelkickerMotor.getOutputCurrent();
+    inputs.supplyCurrent =
+        flywheelkickerMotor.getOutputCurrent()
+            * flywheelkickerMotor.getAppliedOutput(); // TODO: check if
+    // this is right
+    inputs.velocity = encoder.getVelocity();
+    inputs.voltage = flywheelkickerMotor.getBusVoltage() * flywheelkickerMotor.getAppliedOutput();
+    inputs.sensor = sensor.get();
+  }
 
-  public void setDutyCycle(double dutyCycle);
+  public void setDutyCycle(double dutyCycle) {
+    flywheelkickerMotor.set(dutyCycle);
+  }
 }
