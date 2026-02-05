@@ -17,6 +17,7 @@ public class IndexerIOWB implements IndexerIO {
   /** Creates a new IndexerIOWB. */
   private final SparkMax indexerMotor =
       new SparkMax(Constants.WoodBotConstants.INDEXER_ID, MotorType.kBrushless);
+
   private final RelativeEncoder encoder = indexerMotor.getEncoder();
   private final SparkMaxConfig sparkMaxConfig = new SparkMaxConfig();
 
