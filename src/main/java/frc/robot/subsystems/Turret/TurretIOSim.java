@@ -38,7 +38,7 @@ public class TurretIOSim implements TurretIO {
   private final double armMass = 1.0; // kg
 
   // AdvantageScope tuning (sim-only, under /Tuning table)
-  private final LoggedNetworkNumber tunableKp = new LoggedNetworkNumber("/Tuning/Turret/kP", 0.0);
+  private final LoggedNetworkNumber tunableKp = new LoggedNetworkNumber("/Tuning/Turret/kP", 3.0);
   private final LoggedNetworkNumber tunableKi = new LoggedNetworkNumber("/Tuning/Turret/kI", 0.0);
   private final LoggedNetworkNumber tunableKd = new LoggedNetworkNumber("/Tuning/Turret/kD", 0.0);
   private final LoggedNetworkNumber tunableSetpoint =
@@ -47,7 +47,7 @@ public class TurretIOSim implements TurretIO {
       new LoggedNetworkBoolean("/Tuning/Turret/Enabled", false);
 
   // Motor and control
-  private final TalonFX motorControllerSim = new TalonFX(0);
+  private final TalonFX motorControllerSim = new TalonFX(15);
   private final PositionVoltage positionRequest = new PositionVoltage(0).withSlot(0);
   private final VelocityVoltage velocityRequest = new VelocityVoltage(0).withSlot(0);
 
@@ -58,8 +58,8 @@ public class TurretIOSim implements TurretIO {
           gearRatio,
           SingleJointedArmSim.estimateMOI(armLength, armMass),
           armLength,
-          Units.degreesToRadians(-75),
-          Units.degreesToRadians(255),
+          Units.degreesToRadians(-180),
+          Units.degreesToRadians(180),
           false, // Don't simulate gravity
           0);
 

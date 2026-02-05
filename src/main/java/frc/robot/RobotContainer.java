@@ -127,8 +127,7 @@ public class RobotContainer {
 
     registerPathplannerCommand("basic intake", commandFactory.basicIntakeCmd());
     registerPathplannerCommand("shoot at hub", commandFactory.shootWithSpinUp(3000.0, 4.0));
-    registerPathplannerCommand(
-        "aim turret and shoot", commandFactory.aimTurretAndShoot(50, 50, 50));
+    registerPathplannerCommand("aim turret and shoot", commandFactory.runShoot(50, 50, 50));
     configureBindings();
     configureTestBindings();
 
@@ -180,7 +179,7 @@ public class RobotContainer {
       testCont1.leftBumper().whileTrue(intake.setDutyCycleCommand(() -> 0.5));
     }
     if (Objects.nonNull(intakePivot)) {
-      testCont1.rightBumper().whileTrue(commandFactory.aimTurretAndShoot(20, 3000, 50));
+      testCont1.rightBumper().whileTrue(commandFactory.runShoot(20, 3000, 50));
     }
   }
 

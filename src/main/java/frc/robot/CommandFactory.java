@@ -86,8 +86,9 @@ public class CommandFactory {
     return hood.setPositionCmd(position);
   }
 
-  public Command aimTurretAndShoot(double angle, double rpm, double position) {
-    return Commands.waitUntil(() -> turret.atSetpoint(angle))
-        .andThen(this.shootWithSpinUp(rpm, position));
+  public Command runShoot(double hoodAngle, double flywheelRPM, double turretAngle) {
+    return turret
+        .setPositionCommand(turretAngle)
+        .alongWith(hood.setPositionCmd(hoodAngle), flywheel.setRPMCommand(flywheelRPM));
   }
 }

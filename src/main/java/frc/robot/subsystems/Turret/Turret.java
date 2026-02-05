@@ -16,7 +16,7 @@ public class Turret extends SubsystemBase {
   public Turret(TurretIO io) {
     // PID
     this.io = io;
-    this.visualizer = new TurretVisualizer(0.10);
+    this.visualizer = new TurretVisualizer(1.0);
   }
 
   public void setDutyCycle(double dutyCycle) {

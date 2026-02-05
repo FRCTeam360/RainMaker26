@@ -30,7 +30,7 @@ public class TurretVisualizer {
     mechanism = new LoggedMechanism2d(1.0, 0.5, new Color8Bit(Color.kWhite));
 
     // Create pivot root at center of canvas
-    LoggedMechanismRoot2d pivotRoot = mechanism.getRoot("pivot", 1.0, 0.25);
+    LoggedMechanismRoot2d pivotRoot = mechanism.getRoot("pivot", 0.0, 0.25);
 
     // Create arm ligament (lime green, 6 pixel thickness)
     armLigament =
@@ -38,7 +38,7 @@ public class TurretVisualizer {
             new LoggedMechanismLigament2d(
                 "intake arm",
                 armLength,
-                0.0, // Initial angle (pointing up)
+                180.0, // Initial angle (pointing up)
                 6, // Line thickness
                 new Color8Bit(Color.kLimeGreen)));
   }
