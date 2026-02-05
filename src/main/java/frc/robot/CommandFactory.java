@@ -56,12 +56,12 @@ public class CommandFactory {
   }
 
   public Command shootWithRPM(double rpm) {
-    return flywheel.setRPMCommand(rpm);
+    return flywheel.setVelocityCommand(rpm);
   }
 
   public Command shootWithSpinUp(double rpm, double position) {
     return hood.setPositionCmd(position)
-        .alongWith(flywheel.setRPMCommand(rpm))
+        .alongWith(flywheel.setVelocityCommand(rpm))
         .alongWith(
             Commands.waitUntil(() -> flywheel.atSetpoint(rpm, 100.0) && hood.atSetpoint(position))
                 .andThen(this.setFlywheelKickerDutyCycle(1.0).alongWith(this.basicIntakeCmd())));

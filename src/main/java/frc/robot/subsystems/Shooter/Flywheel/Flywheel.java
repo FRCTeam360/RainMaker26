@@ -8,10 +8,26 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
+
+import com.ctre.phoenix6.configs.Slot0Configs;
 
 public class Flywheel extends SubsystemBase {
   private final FlywheelIO io;
   private final FlywheelIOInputsAutoLogged inputs = new FlywheelIOInputsAutoLogged();
+
+   private final LoggedNetworkNumber tunableKp =
+      new LoggedNetworkNumber("/Tuning/FlywheelKicker/kP", 2.0);
+  private final LoggedNetworkNumber tunableKi =
+      new LoggedNetworkNumber("/Tuning/FlywheelKicker/kI", 0.0);
+  private final LoggedNetworkNumber tunableKd =
+      new LoggedNetworkNumber("/Tuning/FlywheelKicker/kD", 0.1);
+  private final LoggedNetworkNumber tunableSetpoint =
+      new LoggedNetworkNumber("/Tuning/FlywheelKicker/SetpointRPM", 0.0);
+  private final LoggedNetworkBoolean tuningEnabled =
+      new LoggedNetworkBoolean("/Tuning/FlywheelKicker/Enabled", false);
+
 
   public enum FlywheelStates {
     OFF,
@@ -44,8 +60,22 @@ public class Flywheel extends SubsystemBase {
     }
   }
 
-  public void setRPM(double rpm) {
-    io.setRPM(rpm);
+  // public void updateTunable() {
+  //   if (tuningEnabled.get()) {
+  //     Slot0Configs slot0 = new Slot0Configs();
+  //     io.getConfigurator().refresh(slot0);
+  //     slot0.kP = tunableKp.get();
+  //     slot0.kI = tunableKi.get();
+  //     slot0.kD = tunableKd.get();
+  //     io.getConfigurator().apply(slot0);
+
+  //     // Command the tunable setpoint to both motors
+  //     this.setVelocity(tunableSetpoint.get());
+  //   }
+  // }
+
+  public void setVelocity(double velocity) {
+    io.setVelocity(velocity);
   }
 
   public double getVelocity() {
@@ -63,7 +93,7 @@ public class Flywheel extends SubsystemBase {
   private void applyState() {
     switch (currentState) {
       case SPINUP_SHOOTING:
-        setRPM(3000.0);
+        setVelocity(3000.0);
         break;
       case SHOOTING:
         setDutyCycle(0.75);
@@ -107,7 +137,15 @@ public class Flywheel extends SubsystemBase {
     return this.runEnd(() -> io.setDutyCycle(valueSup.getAsDouble()), () -> io.setDutyCycle(0.0));
   }
 
-  public Command setRPMCommand(double rpm) {
-    return this.runEnd(() -> io.setRPM(rpm), () -> io.setDutyCycle(0.0));
+  public Command setVelocityCommand(DoubleSupplier supplierVelocity) {
+    return this.runEnd(() -> io.setVelocity(supplierVelocity.getAsDouble()), () -> io.setDutyCycle(0.0));
+  }
+
+  public Command setVelocityCommand(double velocity) {
+    return this.setVelocityCommand(() -> velocity);
+  }
+
+  public Command setVelocityTunableCommand() {
+    return this.setVelocityCommand(tunableSetpoint::get);
   }
 }
