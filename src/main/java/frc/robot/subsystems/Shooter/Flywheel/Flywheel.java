@@ -17,18 +17,6 @@ public class Flywheel extends SubsystemBase {
   private final FlywheelIO io;
   private final FlywheelIOInputsAutoLogged inputs = new FlywheelIOInputsAutoLogged();
 
-   private final LoggedNetworkNumber tunableKp =
-      new LoggedNetworkNumber("/Tuning/FlywheelKicker/kP", 2.0);
-  private final LoggedNetworkNumber tunableKi =
-      new LoggedNetworkNumber("/Tuning/FlywheelKicker/kI", 0.0);
-  private final LoggedNetworkNumber tunableKd =
-      new LoggedNetworkNumber("/Tuning/FlywheelKicker/kD", 0.1);
-  private final LoggedNetworkNumber tunableSetpoint =
-      new LoggedNetworkNumber("/Tuning/FlywheelKicker/SetpointRPM", 0.0);
-  private final LoggedNetworkBoolean tuningEnabled =
-      new LoggedNetworkBoolean("/Tuning/FlywheelKicker/Enabled", false);
-
-
   public enum FlywheelStates {
     OFF,
     SHOOTING,
@@ -59,20 +47,6 @@ public class Flywheel extends SubsystemBase {
         break;
     }
   }
-
-  // public void updateTunable() {
-  //   if (tuningEnabled.get()) {
-  //     Slot0Configs slot0 = new Slot0Configs();
-  //     io.getConfigurator().refresh(slot0);
-  //     slot0.kP = tunableKp.get();
-  //     slot0.kI = tunableKi.get();
-  //     slot0.kD = tunableKd.get();
-  //     io.getConfigurator().apply(slot0);
-
-  //     // Command the tunable setpoint to both motors
-  //     this.setVelocity(tunableSetpoint.get());
-  //   }
-  // }
 
   public void setVelocity(double velocity) {
     io.setVelocity(velocity);
@@ -114,6 +88,7 @@ public class Flywheel extends SubsystemBase {
   @Override
   public void periodic() {
     io.updateInputs(inputs);
+    io.updateTunable();
     Logger.processInputs("Flywheel", inputs);
     Logger.processInputs("Flywheel", inputs);
     Logger.recordOutput("Subsystems/Flywheel/WantedState", wantedState.toString());
@@ -143,9 +118,5 @@ public class Flywheel extends SubsystemBase {
 
   public Command setVelocityCommand(double velocity) {
     return this.setVelocityCommand(() -> velocity);
-  }
-
-  public Command setVelocityTunableCommand() {
-    return this.setVelocityCommand(tunableSetpoint::get);
   }
 }

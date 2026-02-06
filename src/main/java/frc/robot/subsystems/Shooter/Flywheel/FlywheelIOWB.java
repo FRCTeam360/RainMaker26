@@ -4,6 +4,11 @@
 
 package frc.robot.subsystems.Shooter.Flywheel;
 
+import java.util.function.DoubleSupplier;
+
+import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
+
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -14,6 +19,8 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.WoodBotConstants;
 
 public class FlywheelIOWB implements FlywheelIO {
@@ -25,6 +32,18 @@ public class FlywheelIOWB implements FlywheelIO {
   private TalonFXConfiguration rightConfig = new TalonFXConfiguration();
   private TalonFXConfiguration leftConfig = new TalonFXConfiguration();
   private MotorOutputConfigs motorOutputConfigs = new MotorOutputConfigs();
+
+  private final LoggedNetworkNumber tunableKp =
+      new LoggedNetworkNumber("/Tuning/FlywheelKicker/kP", 2.0);
+  private final LoggedNetworkNumber tunableKi =
+      new LoggedNetworkNumber("/Tuning/FlywheelKicker/kI", 0.0);
+  private final LoggedNetworkNumber tunableKd =
+      new LoggedNetworkNumber("/Tuning/FlywheelKicker/kD", 0.1);
+  private final LoggedNetworkNumber tunableSetpoint =
+      new LoggedNetworkNumber("/Tuning/Flywheel/SetpointRPM", 0.0);
+  private final LoggedNetworkBoolean tuningEnabled =
+      new LoggedNetworkBoolean("/Tuning/FlywheelKicker/Enabled", false);
+
 
   public FlywheelIOWB() {
     double kP = 0.025;
@@ -84,6 +103,20 @@ public class FlywheelIOWB implements FlywheelIO {
   MotionMagicVelocityVoltage velocityVoltage = new MotionMagicVelocityVoltage(0);
   VelocityDutyCycle velocityDutyCycle = new VelocityDutyCycle(0.0);
 
+    public void updateTunable() {
+      // needs testing
+    if (tuningEnabled.get()) {
+      Slot0Configs slot0 = new Slot0Configs();
+      motors[0].getConfigurator().refresh(slot0);
+      slot0.kP = tunableKp.get();
+      slot0.kI = tunableKi.get();
+      slot0.kD = tunableKd.get();
+      setVelocityTunable(() -> tunableSetpoint.get());
+      motors[0].getConfigurator().apply(slot0);
+    }
+  }
+
+
   @Override
   public void setVelocity(double rpm) {
     double rps = rpm / 60.0;
@@ -93,6 +126,10 @@ public class FlywheelIOWB implements FlywheelIO {
   @Override
   public void setDutyCycle(double duty) {
     motors[0].set(duty);
+  }
+
+  public void setVelocityTunable(DoubleSupplier doubleSupplier) {
+    this.setVelocity(tunableSetpoint.getAsDouble());
   }
 
   public void updateInputs(FlywheelIOInputs inputs) {

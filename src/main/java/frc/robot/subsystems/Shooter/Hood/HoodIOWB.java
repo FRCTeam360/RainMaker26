@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems.Shooter.Hood;
 
+import com.ctre.phoenix6.configs.Slot0Configs;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
