@@ -86,23 +86,33 @@ public class RobotUtils {
           // during alliance shifts 1 and 3:
         case AUTOLOSER:
           // if we're a part of the blue alliance
-          if (alliance.get() == Alliance.Blue) {
-            if (autoWinner == Alliance.Blue) hubActive = false;
-            if (autoWinner == Alliance.Red) hubActive = true;
-          } else if (alliance.get() == Alliance.Red) {
-            // if we're a part of the red alliance
-            if (autoWinner == Alliance.Blue) hubActive = true;
-            if (autoWinner == Alliance.Red) hubActive = false;
+          // if (alliance.get() == Alliance.Blue) {
+          //   if (autoWinner == Alliance.Blue) hubActive = false;
+          //   if (autoWinner == Alliance.Red) hubActive = true;
+          // } else if (alliance.get() == Alliance.Red) {
+          //   // if we're a part of the red alliance
+          //   if (autoWinner == Alliance.Blue) hubActive = true;
+          //   if (autoWinner == Alliance.Red) hubActive = false;
+          // }
+          if(alliance.get() == autoWinner){
+            hubActive = false;
+          } else {
+            hubActive = true;
           }
           return hubActive;
           // during alliance shifts 2 and 4:
         case AUTOWINNER:
-          if (alliance.get() == Alliance.Blue) {
-            if (autoWinner == Alliance.Blue) hubActive = true;
-            if (autoWinner == Alliance.Red) hubActive = false;
-          } else if (alliance.get() == Alliance.Red) {
-            if (autoWinner == Alliance.Blue) hubActive = false;
-            if (autoWinner == Alliance.Red) hubActive = true;
+          // if (alliance.get() == Alliance.Blue) {
+          //   if (autoWinner == Alliance.Blue) hubActive = true;
+          //   if (autoWinner == Alliance.Red) hubActive = false;
+          // } else if (alliance.get() == Alliance.Red) {
+          //   if (autoWinner == Alliance.Blue) hubActive = false;
+          //   if (autoWinner == Alliance.Red) hubActive = true;
+          // } 
+          if(alliance.get() == autoWinner){
+            hubActive = true;
+          } else {
+            hubActive = false;
           }
           return hubActive;
         default:
