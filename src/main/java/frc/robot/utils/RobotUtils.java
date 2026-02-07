@@ -11,6 +11,7 @@ public class RobotUtils {
     AUTOLOSER,
     AUTOWINNER,
   }
+
   public static boolean isUsbWriteable() {
     File usb = new File("/U");
     if (usb.exists() && usb.isDirectory()) {
@@ -51,24 +52,25 @@ public class RobotUtils {
     ActiveHub activeHub = null;
     // Sets phases based on the current time in the game
     if (DriverStation.isAutonomous()) {
-      activeHub = ActiveHub.BOTH; //AUTO
+      activeHub = ActiveHub.BOTH; // AUTO
     } else if (DriverStation.isTeleop()) {
-      if (gameTime <= 30){
-        activeHub = ActiveHub.BOTH; //END GAME
-      }else if (gameTime <= 55){
-        activeHub = ActiveHub.AUTOWINNER; //ALLIANCE SHIFT 4
-      }else if (gameTime <= 80){
-        activeHub = ActiveHub.AUTOLOSER; //ALLIANCE SHIFT 3
-      }else if (gameTime <= 105){
-        activeHub = ActiveHub.AUTOWINNER; //ALLIANCE SHIFT 2
-      }else if (gameTime <= 130){
-        activeHub = ActiveHub.AUTOLOSER; //ALLIANCE SHIFT 1
-      }else if (gameTime <= 140){
-        activeHub = ActiveHub.BOTH; //TRANSITION
+      if (gameTime <= 30) {
+        activeHub = ActiveHub.BOTH; // END GAME
+      } else if (gameTime <= 55) {
+        activeHub = ActiveHub.AUTOWINNER; // ALLIANCE SHIFT 4
+      } else if (gameTime <= 80) {
+        activeHub = ActiveHub.AUTOLOSER; // ALLIANCE SHIFT 3
+      } else if (gameTime <= 105) {
+        activeHub = ActiveHub.AUTOWINNER; // ALLIANCE SHIFT 2
+      } else if (gameTime <= 130) {
+        activeHub = ActiveHub.AUTOLOSER; // ALLIANCE SHIFT 1
+      } else if (gameTime <= 140) {
+        activeHub = ActiveHub.BOTH; // TRANSITION
       }
     }
     return activeHub;
   }
+
   public static Boolean hubActive() {
     Boolean hubActive = null;
     Optional<Alliance> alliance = DriverStation.getAlliance();

@@ -10,11 +10,13 @@ public class TestWhenCanShootInHubLogic {
     ActiveHub activeHub = RobotUtils.getHubPhase(35.0);
     assertEquals(BOTH, result);
   }
+
   @Test
   void hubPhaseShouldBeAUTOLOSER() {
     ActiveHub activeHub = RobotUtils.getHubPhase(90.0);
     assertEquals(AUTOLOSER, result);
   }
+
   @Test
   void hubPhaseShouldBeAUTOWINNER() {
     ActiveHub activeHub = RobotUtils.getHubPhase(60.0);
