@@ -1,5 +1,12 @@
 package frc.robot.subsystems.LED;
 
-public interface LedIo {
+import com.ctre.phoenix6.controls.*;
+import edu.wpi.first.wpilibj.util.Color;
 
+public interface LedIo {
+  void updateInputs(LEDInputs inputs);
+
+  void setColor(Color color);
+
+  void setAnimation(ControlRequest request);
 }
