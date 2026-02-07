@@ -33,11 +33,11 @@ public class FlywheelKickerIOWB implements FlywheelKickerIO {
     sparkMaxConfig.inverted(true);
     sparkMaxConfig.smartCurrentLimit(40);
 
-    flywheelkickerMotor.configure(
-        sparkMaxConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-
     sparkMaxConfig.closedLoop.p(0.0002).i(0.0).d(0.0);
     sparkMaxConfig.closedLoop.feedForward.kV(0.0021).kS(0.04);
+
+    flywheelkickerMotor.configure(
+        sparkMaxConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
     closedLoopController = flywheelkickerMotor.getClosedLoopController();
   }

@@ -216,7 +216,7 @@ public class RobotContainer {
       driverCont.x().whileTrue(commandFactory.shootWithRPM(2500));
       driverCont.b().whileTrue(commandFactory.shootWithRPM(3000));
       driverCont.y().whileTrue(commandFactory.shootWithRPM(3500));
-      driverCont.rightTrigger().whileTrue(commandFactory.shootWithSpinUp(3500.0, 6.0));
+      driverCont.rightTrigger().whileTrue(commandFactory.shootWithSpinUp(3250.0, 8.0));
     }
 
     // Drivetrain commands
