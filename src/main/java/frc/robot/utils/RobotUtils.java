@@ -94,7 +94,7 @@ public class RobotUtils {
           //   if (autoWinner == Alliance.Blue) hubActive = true;
           //   if (autoWinner == Alliance.Red) hubActive = false;
           // }
-          if(alliance.get() == autoWinner){
+          if (alliance.get() == autoWinner) {
             hubActive = false;
           } else {
             hubActive = true;
@@ -108,8 +108,8 @@ public class RobotUtils {
           // } else if (alliance.get() == Alliance.Red) {
           //   if (autoWinner == Alliance.Blue) hubActive = false;
           //   if (autoWinner == Alliance.Red) hubActive = true;
-          // } 
-          if(alliance.get() == autoWinner){
+          // }
+          if (alliance.get() == autoWinner) {
             hubActive = true;
           } else {
             hubActive = false;
