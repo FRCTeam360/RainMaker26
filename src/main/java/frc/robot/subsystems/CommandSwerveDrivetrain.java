@@ -121,13 +121,13 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   }
 
   // Xout Command
-  private void xOut() {
-    SwerveRequest xOutReq = new SwerveRequest.SwerveDriveBrake();
+  public void xOut() {
+    private final xOutReq = new SwerveRequest.SwerveDriveBrake();
     this.setControl(xOutReq);
   }
 
-  private Command xOutCmd() {
-    SwerveRequest xOutReq = new SwerveRequest.SwerveDriveBrake();
+  public Command xOutCmd() {
+    private final SwerveRequest xOutReq = new SwerveRequest.SwerveDriveBrake();
     return this.applyRequest(() -> xOutReq);
   }
 
