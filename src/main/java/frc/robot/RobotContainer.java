@@ -117,7 +117,7 @@ public class RobotContainer {
     commandFactory =
         new CommandFactory(
             intake, flywheel, flywheelKicker, hood, indexer, intakePivot, vision, drivetrain);
-    superStructure = new SuperStructure(intake, indexer, flywheelKicker, flywheel, hood);
+    // superStructure = new SuperStructure(intake, indexer, flywheelKicker, flywheel, hood);
 
     registerPathplannerCommand("basic intake", commandFactory.basicIntakeCmd());
     registerPathplannerCommand("shoot at hub", commandFactory.shootWithSpinUp(3000.0, 6.0));
