@@ -198,7 +198,7 @@ public class RobotContainer {
 
     // setFlywheelKickerDutyCycle uses flywheelKicker
     if (Objects.nonNull(flywheelKicker)) {
-      driverCont.rightBumper().whileTrue(commandFactory.setFlywheelKickerDutyCycle(1.0));
+      driverCont.rightBumper().whileTrue(flywheelKicker.setVelocityCommand(4000.0));
     }
 
     // setHoodPosition uses hood
