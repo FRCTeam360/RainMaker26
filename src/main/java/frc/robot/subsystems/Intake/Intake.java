@@ -13,9 +13,51 @@ public class Intake extends SubsystemBase {
   private final IntakeIO io;
   private final IntakeIOInputsAutoLogged inputs = new IntakeIOInputsAutoLogged();
 
+  public enum IntakeStates {
+    OFF,
+    INTAKING
+  }
+
+  private IntakeStates wantedState = IntakeStates.OFF;
+  private IntakeStates currentState = IntakeStates.OFF;
+  private IntakeStates previousState = IntakeStates.OFF;
+
   /** Creates a new Intake. */
   public Intake(IntakeIO io) {
     this.io = io;
+  }
+
+  public void setWantedState(IntakeStates state) {
+    wantedState = state;
+    updateState();
+    applyState();
+  }
+
+  private void updateState() {
+    previousState = currentState;
+
+    switch (wantedState) {
+      case INTAKING:
+        currentState = IntakeStates.INTAKING;
+        break;
+
+      case OFF:
+      default:
+        currentState = IntakeStates.OFF;
+        break;
+    }
+  }
+
+  private void applyState() {
+    switch (currentState) {
+      case INTAKING:
+        setDutyCycle(0.75);
+        break;
+      case OFF:
+      default:
+        stop();
+        break;
+    }
   }
 
   public void setDutyCycle(double value) {
@@ -30,6 +72,14 @@ public class Intake extends SubsystemBase {
     return this.runEnd(() -> io.setDutyCycle(valueSup.getAsDouble()), () -> io.setDutyCycle(0.0));
   }
 
+  public void setVelocity(double velocity) {
+    io.setVelocity(velocity);
+  }
+
+  public Command setVelocityCommand(double velocity) {
+    return this.runEnd(() -> setVelocity(velocity), () -> setVelocity(0.0));
+  }
+
   public void stop() {
     this.setDutyCycle(0.0);
   }
@@ -38,5 +88,9 @@ public class Intake extends SubsystemBase {
   public void periodic() {
     io.updateInputs(inputs);
     Logger.processInputs("Intake", inputs);
+
+    Logger.recordOutput("Subsystems/Intake/WantedState", wantedState.toString());
+    Logger.recordOutput("Subsystems/Intake/CurrentState", currentState.toString());
+    Logger.recordOutput("Subsystems/Intake/PreviousState", previousState.toString());
   }
 }

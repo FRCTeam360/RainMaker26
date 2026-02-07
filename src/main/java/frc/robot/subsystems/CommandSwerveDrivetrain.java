@@ -5,6 +5,7 @@ import static edu.wpi.first.units.Units.*;
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
+import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -14,6 +15,7 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
@@ -29,7 +31,12 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.generated.WoodBotDrivetrain.TunerSwerveDrivetrain;
+import frc.robot.subsystems.Vision.VisionMeasurement;
+import frc.robot.utils.FieldConstants;
+import frc.robot.utils.FieldVisualizer;
+import java.util.List;
 import java.util.Optional;
+import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -45,6 +52,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   private Notifier m_simNotifier = null;
   private double m_lastSimTime;
   private final String CMD_NAME = "Swerve: ";
+  private final SwerveRequest xOutReq = new SwerveRequest.SwerveDriveBrake();
+
+  // Keep track of when vision measurements are added for logging context
+  private boolean hasVisionMeasurements = false;
 
   /* Blue alliance sees forward as 0 degrees (toward red alliance wall) */
   private static final Rotation2d kBlueAlliancePerspectiveRotation = Rotation2d.kZero;
@@ -64,17 +75,31 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
       new SwerveRequest.SysIdSwerveSteerGains();
   private final SwerveRequest.SysIdSwerveRotation m_rotationCharacterization =
       new SwerveRequest.SysIdSwerveRotation();
-
+  private final DriveRequestType m_driveRequestType = DriveRequestType.Velocity;
   // TODO refactor into a constants file
-  public static final LinearVelocity maxSpeed = MetersPerSecond.of(5.12);
-  public static final AngularVelocity maxAngularVelocity = RevolutionsPerSecond.of(2.0);
+  public static final LinearVelocity maxSpeed = MetersPerSecond.of(4.69);
+  public static final AngularVelocity maxAngularVelocity = RevolutionsPerSecond.of(4.0);
+
+  // Heading controller PID gains (from example code)
+  private static final double HEADING_KP = 6.0;
+  private static final double HEADING_KI = 0.00;
+  private static final double HEADING_KD = 0.005;
+  private static final double HEADING_I_ZONE = 0.0;
+
+  // Field-centric facing angle request for hub tracking
+  private final SwerveRequest.FieldCentricFacingAngle m_faceHubRequest =
+      new SwerveRequest.FieldCentricFacingAngle()
+          .withDeadband(maxSpeed.in(MetersPerSecond) * 0.01)
+          .withRotationalDeadband(0.0)
+          .withDriveRequestType(m_driveRequestType); // No deadband for rotation when facing point
 
   public final Command fieldOrientedDrive(
       CommandXboxController driveCont) { // field oriented drive command!
     SwerveRequest.FieldCentric drive =
         new SwerveRequest.FieldCentric() // creates a fieldcentric drive
             .withDeadband(maxSpeed.in(MetersPerSecond) * 0.01)
-            .withRotationalDeadband(maxAngularVelocity.in(RadiansPerSecond) * 0.01);
+            .withRotationalDeadband(maxAngularVelocity.in(RadiansPerSecond) * 0.01)
+            .withDriveRequestType(m_driveRequestType);
     return this.applyRequest(
             () ->
                 drive
@@ -95,6 +120,71 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             // (left)
             )
         .alongWith(new InstantCommand(() -> System.out.println("running field oriented drive")));
+  }
+
+  // Xout Command
+  public void xOut() {
+    this.setControl(xOutReq);
+  }
+
+  public Command xOutCmd() {
+    return this.applyRequest(() -> xOutReq);
+  }
+
+  /**
+   * Creates a command that drives the robot in field-centric mode while continuously rotating to
+   * face the hub center. The heading controller automatically adjusts the robot's rotation to
+   * always point toward the hub as the robot moves around the field.
+   *
+   * @param velocityXSupplier Supplier for X velocity (field-relative, forward positive) in m/s
+   * @param velocityYSupplier Supplier for Y velocity (field-relative, left positive) in m/s
+   * @return Command that drives while facing the hub
+   */
+  public Command faceHubWhileDriving(
+      DoubleSupplier velocityXSupplier, DoubleSupplier velocityYSupplier) {
+
+    // Configure the heading controller with PID values
+    m_faceHubRequest.HeadingController.setPID(HEADING_KP, HEADING_KI, HEADING_KD);
+    m_faceHubRequest.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
+    m_faceHubRequest.HeadingController.setIZone(HEADING_I_ZONE);
+
+    return run(
+        () -> {
+          // Get the hub center position
+          Translation2d hubCenter = FieldConstants.Hub.topCenterPoint.toTranslation2d();
+
+          // Get current robot position
+          Translation2d robotPosition = this.getStateCopy().Pose.getTranslation();
+
+          // Calculate the angle from robot to hub
+          Rotation2d angleToHub =
+              hubCenter.minus(robotPosition).getAngle().rotateBy(Rotation2d.k180deg);
+
+          // Log the target angle for debugging
+          Logger.recordOutput(CMD_NAME + "FaceHub/TargetAngle", angleToHub.getDegrees());
+          Logger.recordOutput(
+              CMD_NAME + "FaceHub/DistanceToHub", robotPosition.getDistance(hubCenter));
+
+          // Apply the field-centric facing angle request
+          this.setControl(
+              m_faceHubRequest
+                  .withVelocityX(velocityXSupplier.getAsDouble())
+                  .withVelocityY(velocityYSupplier.getAsDouble())
+                  .withTargetDirection(angleToHub));
+        });
+  }
+
+  /**
+   * Creates a command that drives the robot in field-centric mode while continuously rotating to
+   * face the hub center, using controller input with cubic response curve.
+   *
+   * @param driveCont The Xbox controller for driver input
+   * @return Command that drives while facing the hub
+   */
+  public Command faceHubWhileDriving(CommandXboxController driveCont) {
+    return faceHubWhileDriving(
+        () -> Math.pow(driveCont.getLeftY(), 3) * maxSpeed.in(MetersPerSecond) * -1.0,
+        () -> Math.pow(driveCont.getLeftX(), 3) * maxSpeed.in(MetersPerSecond) * -1.0);
   }
 
   /* SysId routine for characterizing translation. This is used to find PID gains for the drive motors. */
@@ -236,12 +326,13 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                   m_pathApplyRobotSpeeds
                       .withSpeeds(ChassisSpeeds.discretize(speeds, 0.020))
                       .withWheelForceFeedforwardsX(feedforwards.robotRelativeForcesXNewtons())
-                      .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons())),
+                      .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons())
+                      .withDriveRequestType(m_driveRequestType)),
           new PPHolonomicDriveController(
               // PID constants for translation
               new PIDConstants(10, 0, 0),
               // PID constants for rotation
-              new PIDConstants(7, 0, 0)),
+              new PIDConstants(8, 0, 0)),
           config,
           // Assume the path needs to be flipped for Red vs Blue, this is normally the case
           () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
@@ -251,6 +342,30 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
       DriverStation.reportError(
           "Failed to load PathPlanner config and configure AutoBuilder", ex.getStackTrace());
     }
+  }
+
+  public Pose2d getPose2d() {
+    return this.getStateCopy().Pose;
+  }
+
+  public Rotation2d getRotation2d() {
+    return getPose2d().getRotation();
+  }
+
+  public double getAngle() {
+    return this.getRotation2d().getDegrees();
+  }
+
+  public double getAngularRate() {
+    return Math.toDegrees(this.getStateCopy().Speeds.omegaRadiansPerSecond);
+  }
+
+  public void zero() {
+    this.tareEverything();
+  }
+
+  public Command zeroCommand() {
+    return this.runOnce(() -> zero());
   }
 
   /**
@@ -288,10 +403,17 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   @Override
   public void periodic() {
 
+    // Current pose includes vision fusion when vision measurements are added
     Logger.recordOutput(CMD_NAME + " Current Pose", this.getStateCopy().Pose);
     Logger.recordOutput(CMD_NAME + " Rotation2d", this.getStateCopy().RawHeading);
     Logger.recordOutput(CMD_NAME + " CurrentState", this.getStateCopy().ModuleStates);
     Logger.recordOutput(CMD_NAME + " TargetState", this.getStateCopy().ModuleTargets);
+    Logger.recordOutput(CMD_NAME + " Using Vision", hasVisionMeasurements);
+
+    // Update field visualizations (hub points, line from robot to hub, etc.)
+    FieldVisualizer.update(this.getStateCopy().Pose);
+
+    // Log whether vision measurements have been applied (useful for analysis)
     /*
      * Periodically try to apply the operator perspective.
      * If we haven't applied the operator perspective before, then we should apply it regardless of DS state.
@@ -314,6 +436,11 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   }
 
   private void startSimThread() {
+    // prevents the method from running multiple times
+    if (m_simNotifier != null) {
+      return;
+    }
+
     m_lastSimTime = Utils.getCurrentTimeSeconds();
 
     /* Run simulation at a faster rate so PID gains behave more reasonably */
@@ -330,38 +457,16 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     m_simNotifier.startPeriodic(kSimLoopPeriod);
   }
 
-  /**
-   * Adds a vision measurement to the Kalman Filter. This will correct the odometry pose estimate
-   * while still accounting for measurement noise.
-   *
-   * @param visionRobotPoseMeters The pose of the robot as measured by the vision camera.
-   * @param timestampSeconds The timestamp of the vision measurement in seconds.
-   */
-  @Override
-  public void addVisionMeasurement(Pose2d visionRobotPoseMeters, double timestampSeconds) {
-    super.addVisionMeasurement(visionRobotPoseMeters, Utils.fpgaToCurrentTime(timestampSeconds));
-  }
+  public void addVisionMeasurements(List<VisionMeasurement> measurements) {
+    // Update vision status based on whether we have measurements this cycle
+    hasVisionMeasurements = !measurements.isEmpty();
 
-  /**
-   * Adds a vision measurement to the Kalman Filter. This will correct the odometry pose estimate
-   * while still accounting for measurement noise.
-   *
-   * <p>Note that the vision measurement standard deviations passed into this method will continue
-   * to apply to future measurements until a subsequent call to {@link
-   * #setVisionMeasurementStdDevs(Matrix)} or this method.
-   *
-   * @param visionRobotPoseMeters The pose of the robot as measured by the vision camera.
-   * @param timestampSeconds The timestamp of the vision measurement in seconds.
-   * @param visionMeasurementStdDevs Standard deviations of the vision pose measurement in the form
-   *     [x, y, theta]ᵀ, with units in meters and radians.
-   */
-  @Override
-  public void addVisionMeasurement(
-      Pose2d visionRobotPoseMeters,
-      double timestampSeconds,
-      Matrix<N3, N1> visionMeasurementStdDevs) {
-    super.addVisionMeasurement(
-        visionRobotPoseMeters, Utils.fpgaToCurrentTime(timestampSeconds), visionMeasurementStdDevs);
+    for (VisionMeasurement measurement : measurements) {
+      this.addVisionMeasurement(
+          measurement.estimatedPose(),
+          Utils.fpgaToCurrentTime(measurement.timestamp()),
+          measurement.standardDeviation());
+    }
   }
 
   /**
