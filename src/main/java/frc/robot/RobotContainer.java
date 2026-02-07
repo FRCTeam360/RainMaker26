@@ -38,6 +38,7 @@ import frc.robot.subsystems.Shooter.Hood.Hood;
 import frc.robot.subsystems.Shooter.Hood.HoodIOSim;
 import frc.robot.subsystems.Shooter.Hood.HoodIOWB;
 import frc.robot.subsystems.SuperStructure;
+import frc.robot.subsystems.SuperStructure.SuperStates;
 import frc.robot.subsystems.Vision.Vision;
 import frc.robot.subsystems.Vision.VisionIOLimelight;
 import frc.robot.subsystems.Vision.VisionIOPhotonSim;
@@ -116,8 +117,10 @@ public class RobotContainer {
             intake, flywheel, flywheelKicker, hood, indexer, intakePivot, vision, drivetrain);
     superStructure = new SuperStructure(intake, indexer, flywheelKicker, flywheel, hood);
 
-    registerPathplannerCommand("basic intake", commandFactory.basicIntakeCmd());
-    registerPathplannerCommand("shoot at hub", commandFactory.shootWithSpinUp(3000.0, 6.0));
+    registerPathplannerCommand(
+        "basic intake", superStructure.setStateCommand(SuperStates.INTAKING));
+    registerPathplannerCommand(
+        "shoot at hub", superStructure.setStateCommand(SuperStates.SPINUP_SHOOTING));
     registerPathplannerCommand("run flywheel kicker", flywheelKicker.setDutyCycleCommand(1.0));
     configureBindings();
     configureTestBindings();
