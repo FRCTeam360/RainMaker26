@@ -18,7 +18,7 @@ import edu.wpi.first.hal.HALUtil;
  */
 public final class Constants {
   public static final AprilTagFieldLayout FIELD_LAYOUT =
-      AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
+      AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
 
   public static enum RobotType {
     SIM,

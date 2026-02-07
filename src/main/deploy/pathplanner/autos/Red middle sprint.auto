@@ -7,17 +7,36 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Blue 1"
+            "pathName": "Red middle 1"
           }
         },
         {
-          "type": "race",
+          "type": "deadline",
           "data": {
             "commands": [
               {
                 "type": "path",
                 "data": {
-                  "pathName": "Blue 2"
+                  "pathName": "Red middle 2"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "basic intake"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "deadline",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "Red middle 3"
                 }
               },
               {
@@ -32,20 +51,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Blue 3"
+            "pathName": "Red middle 4"
           }
         },
         {
-          "type": "parallel",
+          "type": "named",
           "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "shoot at hub"
-                }
-              }
-            ]
+            "name": "shoot at hub"
           }
         }
       ]

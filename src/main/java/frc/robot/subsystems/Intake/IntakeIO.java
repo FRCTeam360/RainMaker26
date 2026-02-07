@@ -21,6 +21,8 @@ public interface IntakeIO {
 
   public void setDutyCycle(double value);
 
+  public void setVelocity(double velocity);
+
   public void stop();
 
   public default void updateInputs(IntakeIOInputs inputs) {}
