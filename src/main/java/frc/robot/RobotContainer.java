@@ -20,15 +20,9 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.generated.WoodBotDrivetrain;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
-import frc.robot.subsystems.Flywheel.Flywheel;
-import frc.robot.subsystems.Flywheel.FlywheelIOSim;
-import frc.robot.subsystems.Flywheel.FlywheelIOWB;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKicker;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKickerIOSim;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKickerIOWB;
-import frc.robot.subsystems.Hood.Hood;
-import frc.robot.subsystems.Hood.HoodIOSim;
-import frc.robot.subsystems.Hood.HoodIOWB;
 import frc.robot.subsystems.Indexer.Indexer;
 import frc.robot.subsystems.Indexer.IndexerIOSim;
 import frc.robot.subsystems.Indexer.IndexerIOWB;
@@ -37,6 +31,12 @@ import frc.robot.subsystems.Intake.IntakeIOSim;
 import frc.robot.subsystems.Intake.IntakeIOWB;
 import frc.robot.subsystems.IntakePivot.IntakePivot;
 import frc.robot.subsystems.IntakePivot.IntakePivotIOSim;
+import frc.robot.subsystems.Shooter.Flywheel.Flywheel;
+import frc.robot.subsystems.Shooter.Flywheel.FlywheelIOSim;
+import frc.robot.subsystems.Shooter.Flywheel.FlywheelIOWB;
+import frc.robot.subsystems.Shooter.Hood.Hood;
+import frc.robot.subsystems.Shooter.Hood.HoodIOSim;
+import frc.robot.subsystems.Shooter.Hood.HoodIOWB;
 import frc.robot.subsystems.SuperStructure;
 import frc.robot.subsystems.Vision.Vision;
 import frc.robot.subsystems.Vision.VisionIOLimelight;
@@ -105,7 +105,10 @@ public class RobotContainer {
                     Map.entry(
                         Constants.WoodBotConstants.LIMELIGHT,
                         new VisionIOLimelight(
-                            Constants.WoodBotConstants.LIMELIGHT, () -> 0.0, () -> 0.0, true))));
+                            Constants.WoodBotConstants.LIMELIGHT,
+                            () -> drivetrain.getAngle(),
+                            () -> drivetrain.getAngularRate(),
+                            true))));
         intake = new Intake(new IntakeIOWB());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOWB());
         // intakePivot = new IntakePivot(new IntakePivotIOPB());
@@ -114,10 +117,11 @@ public class RobotContainer {
     commandFactory =
         new CommandFactory(
             intake, flywheel, flywheelKicker, hood, indexer, intakePivot, vision, drivetrain);
-    superStructure = new SuperStructure(intake, indexer, flywheelKicker, flywheel, hood);
+    // superStructure = new SuperStructure(intake, indexer, flywheelKicker, flywheel, hood);
 
     registerPathplannerCommand("basic intake", commandFactory.basicIntakeCmd());
-    registerPathplannerCommand("shoot at hub", commandFactory.shootWithSpinUp(3000.0, 4.0));
+    registerPathplannerCommand("shoot at hub", commandFactory.shootWithSpinUp(3000.0, 6.0));
+    registerPathplannerCommand("run flywheel kicker", flywheelKicker.setDutyCycleCommand(1.0));
     configureBindings();
     configureTestBindings();
 
@@ -211,13 +215,15 @@ public class RobotContainer {
       driverCont.x().whileTrue(commandFactory.shootWithRPM(2500));
       driverCont.b().whileTrue(commandFactory.shootWithRPM(3000));
       driverCont.y().whileTrue(commandFactory.shootWithRPM(3500));
+      driverCont.rightTrigger().whileTrue(commandFactory.shootWithSpinUp(3500.0, 6.0));
     }
 
     // Drivetrain commands
     if (Objects.nonNull(drivetrain)) {
       drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
-      driverCont.rightTrigger().whileTrue(drivetrain.faceHubWhileDriving(driverCont));
+      driverCont.leftTrigger().whileTrue(drivetrain.faceHubWhileDriving(driverCont));
       drivetrain.registerTelemetry(logger::telemeterize);
+      driverCont.back().onTrue(drivetrain.zeroCommand());
     }
   }
 
