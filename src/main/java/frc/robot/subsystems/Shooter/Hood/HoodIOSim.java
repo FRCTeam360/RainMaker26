@@ -2,18 +2,15 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.subsystems.IntakePivot;
+package frc.robot.subsystems.Shooter.Hood;
 
 import static edu.wpi.first.units.Units.Radians;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.PositionVoltage;
-import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -26,61 +23,51 @@ import frc.robot.Constants.SimulationConstants;
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
-public class IntakePivotIOSim implements IntakePivotIO {
+public class HoodIOSim implements HoodIO {
 
   // Motor constants (defaults)
-  private double gearRatio = 10.0;
+  private double gearRatio = 15.0;
   private DCMotor gearbox = DCMotor.getKrakenX60(1);
   private final double kS = 0.0;
   private final double kV = 0.0;
   private final double kA = 0.0;
-  private final double kG = 0.75; // Gravity compensation
-  private final double armLength = 0.762; // meters (30 inches)
-  private final double armMass = 2.0; // kg
+  private final double kG = 0.5; // Gravity compensation
+  private final double armLength = 0.3; // meters (12 inches)
+  private final double armMass = 1.5; // kg
 
   // AdvantageScope tuning (sim-only, under /Tuning table)
-  private final LoggedNetworkNumber tunableKp =
-      new LoggedNetworkNumber("/Tuning/IntakePivot/kP", 7.0);
-  private final LoggedNetworkNumber tunableKi =
-      new LoggedNetworkNumber("/Tuning/IntakePivot/kI", 0.0);
-  private final LoggedNetworkNumber tunableKd =
-      new LoggedNetworkNumber("/Tuning/IntakePivot/kD", 0.5);
+  private final LoggedNetworkNumber tunableKp = new LoggedNetworkNumber("/Tuning/Hood/kP", 10.0);
+  private final LoggedNetworkNumber tunableKi = new LoggedNetworkNumber("/Tuning/Hood/kI", 0.0);
+  private final LoggedNetworkNumber tunableKd = new LoggedNetworkNumber("/Tuning/Hood/kD", 0.8);
   private final LoggedNetworkNumber tunableSetpoint =
-      new LoggedNetworkNumber("/Tuning/IntakePivot/SetpointRotations", 0.0);
+      new LoggedNetworkNumber("/Tuning/Hood/SetpointRotations", 0.0);
   private final LoggedNetworkBoolean tuningEnabled =
-      new LoggedNetworkBoolean("/Tuning/IntakePivot/Enabled", false);
+      new LoggedNetworkBoolean("/Tuning/Hood/Enabled", false);
 
   // Motor and control
-  private final TalonFX motorControllerSim = new TalonFX(SimulationConstants.INTAKE_PIVOT_MOTOR);
+  private final TalonFX motorControllerSim = new TalonFX(SimulationConstants.HOOD_MOTOR);
   private final PositionVoltage positionRequest = new PositionVoltage(0).withSlot(0);
-  private final VelocityVoltage velocityRequest = new VelocityVoltage(0).withSlot(0);
 
   // Simulation
-  private final SingleJointedArmSim intakePivotSim =
+  private final SingleJointedArmSim hoodSim =
       new SingleJointedArmSim(
           gearbox,
           gearRatio,
           SingleJointedArmSim.estimateMOI(armLength, armMass),
           armLength,
-          Units.degreesToRadians(-75),
-          Units.degreesToRadians(255),
+          Units.degreesToRadians(0),
+          Units.degreesToRadians(30),
           true, // Simulate gravity
           0);
 
-  public IntakePivotIOSim() {
+  public HoodIOSim() {
     // Configure TalonFX with PID and gravity compensation
     configureMotor();
 
     // Initialize motor sim state to match arm sim initial position
-
     motorControllerSim
         .getSimState()
-        .setRawRotorPosition(Radians.of(intakePivotSim.getAngleRads() * gearRatio).in(Rotations));
-    motorControllerSim
-        .getSimState()
-        .setRotorVelocity(
-            RadiansPerSecond.of(intakePivotSim.getVelocityRadPerSec() * gearRatio)
-                .in(RotationsPerSecond));
+        .setRawRotorPosition(Radians.of(hoodSim.getAngleRads() * gearRatio).in(Rotations));
   }
 
   private void configureMotor() {
@@ -99,7 +86,7 @@ public class IntakePivotIOSim implements IntakePivotIO {
 
     // Configure current limits for safety
     CurrentLimitsConfigs currentLimits = talonConfig.CurrentLimits;
-    currentLimits.StatorCurrentLimit = 180.0;
+    currentLimits.StatorCurrentLimit = 120.0;
     currentLimits.StatorCurrentLimitEnable = true;
 
     // Set brake mode (hold position when no command)
@@ -112,7 +99,7 @@ public class IntakePivotIOSim implements IntakePivotIO {
     motorControllerSim.getConfigurator().apply(talonConfig);
   }
 
-  public void updateInputs(IntakePivotIOInputs inputs) {
+  public void updateInputs(HoodIOInputs inputs) {
     // --- AdvantageScope tuning (sim-only) ---
     if (tuningEnabled.get()) {
       // Apply tunable PID gains (simple: apply every loop when enabled)
@@ -128,29 +115,22 @@ public class IntakePivotIOSim implements IntakePivotIO {
     }
 
     // Step 1: Get the commanded voltage from motor and apply to simulation
-    intakePivotSim.setInput(motorControllerSim.getSimState().getMotorVoltage());
+    hoodSim.setInput(motorControllerSim.getSimState().getMotorVoltage());
 
     // Step 2: Update the simulation by one timestep
-    intakePivotSim.update(0.02);
+    hoodSim.update(0.02);
 
     // Step 3: Update the motor sim state with the new simulated values
     motorControllerSim
         .getSimState()
-        .setRawRotorPosition(Radians.of(intakePivotSim.getAngleRads() * gearRatio).in(Rotations));
-    motorControllerSim
-        .getSimState()
-        .setRotorVelocity(
-            RadiansPerSecond.of(intakePivotSim.getVelocityRadPerSec() * gearRatio)
-                .in(RotationsPerSecond));
+        .setRawRotorPosition(Radians.of(hoodSim.getAngleRads() * gearRatio).in(Rotations));
 
     // Step 4: Update battery voltage based on current draw
     RoboRioSim.setVInVoltage(
-        BatterySim.calculateDefaultBatteryLoadedVoltage(intakePivotSim.getCurrentDrawAmps()));
+        BatterySim.calculateDefaultBatteryLoadedVoltage(hoodSim.getCurrentDrawAmps()));
 
     // Step 5: Read all inputs from the SIMULATED VALUES (source of truth)
-    inputs.position = Radians.of(intakePivotSim.getAngleRads()).in(Rotations);
-    inputs.velocity =
-        RadiansPerSecond.of(intakePivotSim.getVelocityRadPerSec()).in(RotationsPerSecond);
+    inputs.position = Radians.of(hoodSim.getAngleRads()).in(Rotations);
     inputs.voltage = motorControllerSim.getSimState().getMotorVoltage();
     inputs.statorCurrent = motorControllerSim.getStatorCurrent().getValueAsDouble();
     inputs.supplyCurrent = motorControllerSim.getSupplyCurrent().getValueAsDouble();
@@ -161,21 +141,18 @@ public class IntakePivotIOSim implements IntakePivotIO {
    *
    * @param positionRotations Target position in rotations
    */
+  @Override
   public void setPosition(double positionRotations) {
     motorControllerSim.setControl(positionRequest.withPosition(positionRotations));
-  }
-
-  /**
-   * Set velocity using closed-loop velocity control.
-   *
-   * @param velocityRPS Target velocity in rotations per second
-   */
-  public void setVelocity(double velocityRPS) {
-    motorControllerSim.setControl(velocityRequest.withVelocity(velocityRPS));
   }
 
   @Override
   public void setDutyCycle(double value) {
     motorControllerSim.set(value);
+  }
+
+  @Override
+  public void setEncoder(double position) {
+    motorControllerSim.getSimState().setRawRotorPosition(position);
   }
 }
