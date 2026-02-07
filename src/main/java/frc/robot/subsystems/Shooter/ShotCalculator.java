@@ -4,12 +4,16 @@
 
 package frc.robot.subsystems.Shooter;
 
-public class ShotCalculator {
-  private static ShotCalculator instance;
+import frc.robot.subsystems.Shooter.Flywheel.Flywheel;
+import frc.robot.subsystems.Shooter.Hood.Hood;
 
-  public static ShotCalculator getInstance() {
-    if (instance == null) instance = new ShotCalculator();
-    return instance;
+public class ShotCalculator {
+  private final Flywheel flywheel;
+  private final Hood hood;
+
+  public ShotCalculator(Flywheel flywheel, Hood hood) {
+    this.flywheel = flywheel;
+    this.hood = hood;
   }
 
   public record ShootingParameters() {}
