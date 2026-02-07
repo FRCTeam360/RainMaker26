@@ -53,18 +53,18 @@ public class RobotUtils {
     if (DriverStation.isAutonomous()) {
       activeHub = ActiveHub.BOTH; //AUTO
     } else if (DriverStation.isTeleop()) {
-      if (gameTime <= 140){
-        activeHub = ActiveHub.BOTH; //TRANSITION
-      }else if (gameTime <= 130){
-        activeHub = ActiveHub.AUTOLOSER; //ALLIANCE SHIFT 1
-      }else if (gameTime <= 105){
-        activeHub = ActiveHub.AUTOWINNER; //ALLIANCE SHIFT 2
-      }else if (gameTime <= 80){
-        activeHub = ActiveHub.AUTOLOSER; //ALLIANCE SHIFT 3
+      if (gameTime <= 30){
+        activeHub = ActiveHub.BOTH; //END GAME
       }else if (gameTime <= 55){
         activeHub = ActiveHub.AUTOWINNER; //ALLIANCE SHIFT 4
-      }else if (gameTime <= 30){
-        activeHub = ActiveHub.BOTH; //END GAME
+      }else if (gameTime <= 80){
+        activeHub = ActiveHub.AUTOLOSER; //ALLIANCE SHIFT 3
+      }else if (gameTime <= 105){
+        activeHub = ActiveHub.AUTOWINNER; //ALLIANCE SHIFT 2
+      }else if (gameTime <= 130){
+        activeHub = ActiveHub.AUTOLOSER; //ALLIANCE SHIFT 1
+      }else if (gameTime <= 140){
+        activeHub = ActiveHub.BOTH; //TRANSITION
       }
     }
     return activeHub;

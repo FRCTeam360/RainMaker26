@@ -5,8 +5,16 @@ import frc.robot.utils.RobotUtils;
 /** Add your docs here. */
 public class TestWhenCanShootInHubLogic {
     @Test
-    void hubPhaseShouldBeWinnerLoserOrBoth() {
-        ActiveHub activeHub = getHubPhase();
-        
+    void hubPhaseShouldBeBOTH() {
+        ActiveHub activeHub = RobotUtils.getHubPhase(35.0);
+        assertEquals(BOTH, result);
+    }
+    void hubPhaseShouldBeAUTOLOSER() {
+        ActiveHub activeHub = RobotUtils.getHubPhase(90.0);
+        assertEquals(AUTOLOSER, result);
+    }
+    void hubPhaseShouldBeAUTOWINNER() {
+        ActiveHub activeHub = RobotUtils.getHubPhase(60.0);
+        assertEquals(AUTOWINNER, result);
     }
 }
