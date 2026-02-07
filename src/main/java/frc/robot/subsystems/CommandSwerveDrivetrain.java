@@ -445,8 +445,13 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     FieldCentricFacingAngle request =
         new SwerveRequest.FieldCentricFacingAngle()
-            .withVelocityX(x * maxSpeed)
-            .withVelocityY(y * maxSpeed)
+            .withVelocityX(x * maxSpeed.in(MetersPerSecond))
+            .withVelocityY(y * maxSpeed.in(MetersPerSecond))
+            /* The driveToPose method was imported from 2025 code. That code's maxSpeed variable was a double,
+             * and could thus be multipled to the (also a double variable) x or y. This year, "maxSpeed" is a
+             * LinearVelocityObject. A method to convert the value into MetersPerSecond was used. This may need
+             * to be converted into a different value, such as Rotations or Feet.
+             */
             .withTargetDirection(setpointPose.getRotation());
     request.HeadingController = headingController;
     request.withDeadband(0.025);
