@@ -122,6 +122,7 @@ public class RobotContainer {
     registerPathplannerCommand("basic intake", commandFactory.basicIntakeCmd());
     registerPathplannerCommand("shoot at hub", commandFactory.shootWithSpinUp(3000.0, 6.0));
     registerPathplannerCommand("run flywheel kicker", flywheelKicker.setDutyCycleCommand(1.0));
+    registerPathplannerCommand("spinup flywheel hub shot", commandFactory.shootWithRPM(3000.0));
     configureBindings();
     configureTestBindings();
 
