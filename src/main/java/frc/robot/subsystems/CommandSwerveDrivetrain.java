@@ -432,10 +432,12 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
           measurement.standardDeviation());
     }
   }
-  public Pose2d getPosition(){
+
+  public Pose2d getPosition() {
     return this.getStateCopy().Pose;
   }
-    public ChassisSpeeds getVelocity(){
+
+  public ChassisSpeeds getVelocity() {
     return this.getStateCopy().Speeds;
   }
 

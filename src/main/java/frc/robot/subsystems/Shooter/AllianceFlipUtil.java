@@ -7,7 +7,7 @@ package frc.robot.subsystems.Shooter;
 // license that can be found in the LICENSE file at
 // the root directory of this project.
 
-//package org.littletonrobotics.frc2023.util;
+// package org.littletonrobotics.frc2023.util;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -15,8 +15,8 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-//import org.littletonrobotics.frc2023.FieldConstants;
-//import org.littletonrobotics.frc2023.util.trajectory.RotationSequence;
+// import org.littletonrobotics.frc2023.FieldConstants;
+// import org.littletonrobotics.frc2023.util.trajectory.RotationSequence;
 import frc.robot.utils.FieldConstants;
 
 /**

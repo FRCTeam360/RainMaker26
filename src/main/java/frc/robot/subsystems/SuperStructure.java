@@ -1,13 +1,5 @@
 package frc.robot.subsystems;
 
-import edu.wpi.first.math.filter.LinearFilter;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
-import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
-import edu.wpi.first.math.interpolation.InverseInterpolator;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -16,14 +8,11 @@ import frc.robot.subsystems.FlywheelKicker.FlywheelKicker.FlywheelKickerStates;
 import frc.robot.subsystems.Indexer.Indexer;
 import frc.robot.subsystems.Intake.Intake;
 import frc.robot.subsystems.Intake.Intake.IntakeStates;
-import frc.robot.subsystems.Shooter.AllianceFlipUtil;
-import frc.robot.subsystems.Shooter.ShotCalculator;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel.FlywheelStates;
 import frc.robot.subsystems.Shooter.Hood.Hood;
 import frc.robot.subsystems.Shooter.Hood.Hood.HoodStates;
-import frc.robot.utils.FieldConstants;
-
+import frc.robot.subsystems.Shooter.ShotCalculator;
 import org.littletonrobotics.junction.Logger;
 
 public class SuperStructure extends SubsystemBase {
@@ -38,10 +27,10 @@ public class SuperStructure extends SubsystemBase {
   public enum SuperStates {
     IDLE, // everything is stopped when nothing else happens
     DEFENSE, // driver holds defense button -> less desired velocitu moving latterally, more
-             // into
+    // into
     // rotation in drivetrain
     X_OUT, // hold down button to x out wheels or press once and wheels stop X-ing out when
-           // moved
+    // moved
     AUTO_ALIGHN, // aligns to a target
     X_OUT_SHOOTING, // when robot is aligned, ends when toggled off or shooting stops
     PREPAREING, // flywheel spins up and align to target
@@ -62,7 +51,12 @@ public class SuperStructure extends SubsystemBase {
   private SuperStates previousSuperState = SuperStates.IDLE;
 
   public SuperStructure(
-      Intake intake, Indexer indexer, FlywheelKicker flywheelKicker, Flywheel flywheel, Hood hood, CommandSwerveDrivetrain driveTrain) {
+      Intake intake,
+      Indexer indexer,
+      FlywheelKicker flywheelKicker,
+      Flywheel flywheel,
+      Hood hood,
+      CommandSwerveDrivetrain driveTrain) {
     this.intake = intake;
     this.indexer = indexer;
     this.flywheelKicker = flywheelKicker;
@@ -116,9 +110,7 @@ public class SuperStructure extends SubsystemBase {
     }
   }
 
-  private void aiming() {
-
-  }
+  private void aiming() {}
 
   private void spinupShooting() {
     // hood, flywheel
