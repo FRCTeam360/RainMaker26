@@ -27,38 +27,48 @@ public final class Constants {
   }
 
   public static class WoodBotConstants {
+    // === INTAKE ===
     public static final int INTAKE_SENSOR_PORT = 0;
     public static final int INTAKE_ID = 15;
     public static final int INTAKE_PIVOT_ID = 0;
 
+    // === HOPPER ===
     public static final int INDEXER_SENSOR_PORT = 1;
     public static final int INDEXER_SENSOR_ID = 2;
     public static final int INDEXER_ID = 16;
 
+    // === FLYWHEEL === 
     public static final int FLYWHEEL_KICKER_ID = 17;
     public static final int FLYWHEEL_KICKER_SENSOR_ID = 3;
     public static final int FLYWHEEL_RIGHT_ID = 18;
     public static final int FLYWHEEL_LEFT_ID = 19;
 
+    // === HOOD ===
     public static final int HOOD_ID = 20;
 
+    // === LIMELIGHT ===
     public static final String LIMELIGHT = "limelight";
 
+    // === CANBUS === 
     public static final String CANBUS_NAME = "Default Name";
   }
 
   public static class SimulationConstants {
-    public static final int HOOD_MOTOR = 6;
-
-    public static final int INDEXER_MOTOR = 9;
-
+    // === INTAKE ===
     public static final int INTAKE_MOTOR = 12;
     public static final int INTAKE_SENSOR_PORT = 10;
     public static final int INTAKE_PIVOT_MOTOR = 15;
 
+    // === HOPPER ===
+    public static final int INDEXER_MOTOR = 9;
+
+    // === FLYWHEEL === 
     public static final int FLYWHEEL_KICKER_MOTOR = 18;
     public static final int FLYWHEEL_KICKER_SENSOR_ID = 19;
     public static final int FLYWHEEL_MOTOR = 2;
+
+    // === HOOD ===
+    public static final int HOOD_MOTOR = 6;
   }
 
   public static class OperatorConstants {
