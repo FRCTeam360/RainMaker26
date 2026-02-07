@@ -91,7 +91,8 @@ public class RobotContainer {
         indexer = new Indexer(new IndexerIOSim());
         intake = new Intake(new IntakeIOSim());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOSim());
-        break;
+        throw new RuntimeException("Test exception - simulation should fail");
+        // break;
       case WOODBOT:
       default:
         drivetrain = WoodBotDrivetrain.createDrivetrain();
