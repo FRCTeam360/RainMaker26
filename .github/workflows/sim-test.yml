@@ -22,4 +22,4 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x gradlew
       - name: Automated sim test
-        run: ./gradlew simulateJavaDebug -PautomatedTest=true
+        run: ./gradlew simulateJava -PautomatedTest=true
