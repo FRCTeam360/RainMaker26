@@ -6,6 +6,11 @@ import java.io.File;
 import java.util.Optional;
 
 public class RobotUtils {
+  enum ActiveHub {
+    BOTH,
+    AUTOLOSER,
+    AUTOWINNER,
+  }
   public static boolean isUsbWriteable() {
     File usb = new File("/U");
     if (usb.exists() && usb.isDirectory()) {
@@ -21,13 +26,13 @@ public class RobotUtils {
     return false;
   }
 
-  public static Alliance hubData() {
+  public static Alliance getAutoWinner() {
     // the game specific message doesn't tell you which hub is active, it tells you which hub is
     // active for phases 2 and 4
-    String hubData = DriverStation.getGameSpecificMessage();
-    if (hubData.length() > 0) {
+    String autoWinner = DriverStation.getGameSpecificMessage();
+    if (autoWinner.length() > 0) {
       // checks which hub is open
-      switch (hubData.charAt(0)) {
+      switch (autoWinner.charAt(0)) {
         case 'B':
           return Alliance.Blue;
         case 'R':
@@ -41,57 +46,63 @@ public class RobotUtils {
     return null;
   }
 
-  public static String getHubPhase() {
+  public static ActiveHub getHubPhase() {
     double gameTime = DriverStation.getMatchTime();
-    String hubPhase = null;
+    ActiveHub activeHub = null;
     // Sets phases based on the current time in the game
     if (DriverStation.isAutonomous()) {
-      hubPhase = "Both";
+      activeHub = ActiveHub.BOTH; //AUTO
     } else if (DriverStation.isTeleop()) {
-      if (gameTime <= 140) hubPhase = "Both";
-      if (gameTime <= 130) hubPhase = "Shift odd";
-      if (gameTime <= 105) hubPhase = "Shift even";
-      if (gameTime <= 80) hubPhase = "Shift odd";
-      if (gameTime <= 55) hubPhase = "Shift even";
-      if (gameTime <= 30) hubPhase = "Both";
+      if (gameTime <= 140){
+        activeHub = ActiveHub.BOTH; //TRANSITION
+      }else if (gameTime <= 130){
+        activeHub = ActiveHub.AUTOLOSER; //ALLIANCE SHIFT 1
+      }else if (gameTime <= 105){
+        activeHub = ActiveHub.AUTOWINNER; //ALLIANCE SHIFT 2
+      }else if (gameTime <= 80){
+        activeHub = ActiveHub.AUTOLOSER; //ALLIANCE SHIFT 3
+      }else if (gameTime <= 55){
+        activeHub = ActiveHub.AUTOWINNER; //ALLIANCE SHIFT 4
+      }else if (gameTime <= 30){
+        activeHub = ActiveHub.BOTH; //END GAME
+      }
     }
-    return hubPhase;
+    return activeHub;
   }
-
   public static Boolean hubActive() {
     Boolean hubActive = null;
     Optional<Alliance> alliance = DriverStation.getAlliance();
-    Alliance hubData = hubData();
-    String gamePhase = getHubPhase();
+    Alliance autoWinner = getAutoWinner();
+    ActiveHub gamePhase = getHubPhase();
 
     if (alliance.isPresent()) {
       switch (gamePhase) {
           // during auto, transitional phase, and end game
-        case "Both":
+        case BOTH:
           hubActive = true;
           return hubActive;
           // during alliance shifts 1 and 3
-        case "Phase odd":
+        case AUTOLOSER:
           // if we're a part of the blue alliance
           if (alliance.get() == Alliance.Blue) {
-            if (hubData == Alliance.Blue) hubActive = false;
-            if (hubData == Alliance.Red) hubActive = true;
+            if (autoWinner == Alliance.Blue) hubActive = false;
+            if (autoWinner == Alliance.Red) hubActive = true;
           }
           // if we're a part of the red alliance
           if (alliance.get() == Alliance.Red) {
-            if (hubData == Alliance.Blue) hubActive = true;
-            if (hubData == Alliance.Red) hubActive = false;
+            if (autoWinner == Alliance.Blue) hubActive = true;
+            if (autoWinner == Alliance.Red) hubActive = false;
           }
           return hubActive;
           // during alliance shifts 2 and 4
-        case "Phase even":
+        case AUTOWINNER:
           if (alliance.get() == Alliance.Blue) {
-            if (hubData == Alliance.Blue) hubActive = true;
-            if (hubData == Alliance.Red) hubActive = false;
+            if (autoWinner == Alliance.Blue) hubActive = true;
+            if (autoWinner == Alliance.Red) hubActive = false;
           }
           if (alliance.get() == Alliance.Red) {
-            if (hubData == Alliance.Blue) hubActive = false;
-            if (hubData == Alliance.Red) hubActive = true;
+            if (autoWinner == Alliance.Blue) hubActive = false;
+            if (autoWinner == Alliance.Red) hubActive = true;
           }
           return hubActive;
         default:
