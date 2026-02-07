@@ -1,17 +1,18 @@
 name: Simulation Test
 
 on:
+  pull_request:
+    branches: [main]
   workflow_dispatch: # Allows manual trigger from Actions tab
 
 jobs:
   simulate:
     name: Simulation Smoke Test
     runs-on: ubuntu-latest
-    # Taken from FRC 2412's 2026 codebase https://github.com/robototes/REBUILT2026/blob/main/.github/workflows/spotless.yml
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - uses: actions/setup-java@v3
+      - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 17
@@ -20,5 +21,58 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x gradlew
 
-      - name: Automated sim test
-        run: ./gradlew simulateJavaDebug -PautomatedTest=true
+      - name: Install xvfb (headless display)
+        run: sudo apt-get update && sudo apt-get install -y xvfb
+
+      - name: Run simulation and check for errors
+        run: |
+          set +e  # Don't exit immediately on error
+
+          # Run simulation in background with virtual display, capture output
+          xvfb-run -a ./gradlew simulateJava > sim_output.log 2>&1 &
+          SIM_PID=$!
+
+          echo "Simulation started with PID $SIM_PID"
+
+          # Wait 10 seconds for simulation to initialize and run
+          sleep 10
+
+          # Kill the simulation
+          kill $SIM_PID 2>/dev/null || true
+          wait $SIM_PID 2>/dev/null || true
+
+          echo "Simulation stopped, checking logs..."
+
+          # Check for errors in the output
+          if grep -q "Error at" sim_output.log; then
+            echo "❌ ERRORS FOUND IN SIMULATION:"
+            echo "================================"
+            grep "Error at" sim_output.log
+            echo "================================"
+            echo ""
+            echo "Full log:"
+            cat sim_output.log
+            exit 1
+          fi
+
+          # Check for exceptions
+          if grep -q "Exception" sim_output.log; then
+            echo "❌ EXCEPTIONS FOUND IN SIMULATION:"
+            echo "================================"
+            grep "Exception" sim_output.log
+            echo "================================"
+            echo ""
+            echo "Full log:"
+            cat sim_output.log
+            exit 1
+          fi
+
+          echo "✅ Simulation ran successfully without errors"
+          exit 0
+
+      - name: Upload simulation logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: simulation-logs
+          path: sim_output.log
