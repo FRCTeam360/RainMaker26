@@ -52,6 +52,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   private Notifier m_simNotifier = null;
   private double m_lastSimTime;
   private final String CMD_NAME = "Swerve: ";
+  private final SwerveRequest xOutReq = new SwerveRequest.SwerveDriveBrake();
 
   // Keep track of when vision measurements are added for logging context
   private boolean hasVisionMeasurements = false;
@@ -122,12 +123,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
   // Xout Command
   public void xOut() {
-    private final xOutReq = new SwerveRequest.SwerveDriveBrake();
     this.setControl(xOutReq);
   }
 
   public Command xOutCmd() {
-    private final SwerveRequest xOutReq = new SwerveRequest.SwerveDriveBrake();
     return this.applyRequest(() -> xOutReq);
   }
 
