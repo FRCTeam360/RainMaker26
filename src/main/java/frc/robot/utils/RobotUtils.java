@@ -46,8 +46,8 @@ public class RobotUtils {
     return null;
   }
 
-  public static ActiveHub getHubPhase() {
-    double gameTime = DriverStation.getMatchTime();
+  public static ActiveHub getHubPhase(double gameTime) {
+    // double gameTime = DriverStation.getMatchTime();
     ActiveHub activeHub = null;
     // Sets phases based on the current time in the game
     if (DriverStation.isAutonomous()) {
@@ -73,7 +73,7 @@ public class RobotUtils {
     Boolean hubActive = null;
     Optional<Alliance> alliance = DriverStation.getAlliance();
     Alliance autoWinner = getAutoWinner();
-    ActiveHub gamePhase = getHubPhase();
+    ActiveHub gamePhase = getHubPhase(DriverStation.getMatchTime());
 
     if (alliance.isPresent()) {
       switch (gamePhase) {
