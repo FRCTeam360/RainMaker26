@@ -142,10 +142,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
           Optional<Alliance> alliance = DriverStation.getAlliance();
           if (alliance.isPresent() && alliance.get() == Alliance.Red) {
-            hubCenter = FieldConstants.Hub.oppTopCenterPoint.toTranslation2d();
+            hubCenter = FieldConstants.Hub.topCenterPoint.toTranslation2d();
           } else {
             // Default to blue hub (works for both Blue alliance and no alliance set)
-            hubCenter = FieldConstants.Hub.topCenterPoint.toTranslation2d();
+            hubCenter = FieldConstants.Hub.oppTopCenterPoint.toTranslation2d();
           }
 
           // Get current robot position

@@ -72,7 +72,7 @@ public class RobotContainer {
 
   private final CommandXboxController driverCont = new CommandXboxController(0);
 
-  private final CommandXboxController testCont1 = new CommandXboxController(5);
+  private final CommandXboxController testCont = new CommandXboxController(5);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -150,23 +150,29 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureTestBindings() {
+    if (Objects.nonNull(drivetrain)) {
+      drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(testCont));
+      testCont.rightTrigger().whileTrue(drivetrain.faceHubWhileDriving(testCont));
+      drivetrain.registerTelemetry(logger::telemeterize);
+    }
+
     if (Objects.nonNull(flywheel)) {
-      testCont1.a().whileTrue(flywheel.setDutyCycleCommand(() -> 0.5));
+      testCont.a().whileTrue(flywheel.setDutyCycleCommand(() -> 0.5));
     }
     if (Objects.nonNull(flywheelKicker)) {
-      testCont1.b().whileTrue(flywheelKicker.setDutyCycleCommand(() -> 0.5));
+      testCont.b().whileTrue(flywheelKicker.setDutyCycleCommand(() -> 0.5));
     }
     if (Objects.nonNull(hood)) {
-      testCont1.x().whileTrue(hood.setDutyCycleCommand(() -> 0.5));
+      testCont.x().whileTrue(hood.setDutyCycleCommand(() -> 0.5));
     }
     if (Objects.nonNull(indexer)) {
-      testCont1.y().whileTrue(indexer.setDutyCycleCommand(() -> 0.5));
+      testCont.y().whileTrue(indexer.setDutyCycleCommand(() -> 0.5));
     }
     if (Objects.nonNull(intake)) {
-      testCont1.leftBumper().whileTrue(intake.setDutyCycleCommand(() -> 0.5));
+      testCont.leftBumper().whileTrue(intake.setDutyCycleCommand(() -> 0.5));
     }
     if (Objects.nonNull(intakePivot)) {
-      testCont1.rightBumper().whileTrue(intakePivot.setDutyCycleCommand(() -> 0.5));
+      testCont.rightBumper().whileTrue(intakePivot.setDutyCycleCommand(() -> 0.5));
     }
   }
 
