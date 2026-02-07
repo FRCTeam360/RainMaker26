@@ -6,7 +6,7 @@ import java.io.File;
 import java.util.Optional;
 
 public class RobotUtils {
-  enum ActiveHub {
+  public enum ActiveHub {
     BOTH,
     AUTOLOSER,
     AUTOWINNER,
@@ -81,8 +81,7 @@ public class RobotUtils {
       switch (gamePhase) {
           // during auto, transitional phase, and end game
         case BOTH:
-          hubActive = true;
-          return hubActive;
+          return true;
           // during alliance shifts 1 and 3:
         case AUTOLOSER:
           // if we're a part of the blue alliance
