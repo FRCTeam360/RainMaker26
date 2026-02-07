@@ -76,20 +76,21 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
       new SwerveRequest.SysIdSwerveRotation();
   private final DriveRequestType m_driveRequestType = DriveRequestType.Velocity;
   // TODO refactor into a constants file
-  public static final LinearVelocity maxSpeed = MetersPerSecond.of(5.12);
-  public static final AngularVelocity maxAngularVelocity = RevolutionsPerSecond.of(2.0);
+  public static final LinearVelocity maxSpeed = MetersPerSecond.of(4.69);
+  public static final AngularVelocity maxAngularVelocity = RevolutionsPerSecond.of(4.0);
 
   // Heading controller PID gains (from example code)
-  private static final double HEADING_KP = 10.0;
-  private static final double HEADING_KI = 0.2;
-  private static final double HEADING_KD = 0.069;
-  private static final double HEADING_I_ZONE = 0.17;
+  private static final double HEADING_KP = 6.0;
+  private static final double HEADING_KI = 0.00;
+  private static final double HEADING_KD = 0.005;
+  private static final double HEADING_I_ZONE = 0.0;
 
   // Field-centric facing angle request for hub tracking
   private final SwerveRequest.FieldCentricFacingAngle m_faceHubRequest =
       new SwerveRequest.FieldCentricFacingAngle()
           .withDeadband(maxSpeed.in(MetersPerSecond) * 0.01)
-          .withRotationalDeadband(0.0); // No deadband for rotation when facing point
+          .withRotationalDeadband(0.0)
+          .withDriveRequestType(m_driveRequestType); // No deadband for rotation when facing point
 
   public final Command fieldOrientedDrive(
       CommandXboxController driveCont) { // field oriented drive command!
@@ -146,7 +147,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
           Translation2d robotPosition = this.getStateCopy().Pose.getTranslation();
 
           // Calculate the angle from robot to hub
-          Rotation2d angleToHub = hubCenter.minus(robotPosition).getAngle();
+          Rotation2d angleToHub =
+              hubCenter.minus(robotPosition).getAngle().rotateBy(Rotation2d.k180deg);
 
           // Log the target angle for debugging
           Logger.recordOutput(CMD_NAME + "FaceHub/TargetAngle", angleToHub.getDegrees());
@@ -330,6 +332,30 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
       DriverStation.reportError(
           "Failed to load PathPlanner config and configure AutoBuilder", ex.getStackTrace());
     }
+  }
+
+  public Pose2d getPose2d() {
+    return this.getStateCopy().Pose;
+  }
+
+  public Rotation2d getRotation2d() {
+    return getPose2d().getRotation();
+  }
+
+  public double getAngle() {
+    return this.getRotation2d().getDegrees();
+  }
+
+  public double getAngularRate() {
+    return Math.toDegrees(this.getStateCopy().Speeds.omegaRadiansPerSecond);
+  }
+
+  public void zero() {
+    this.tareEverything();
+  }
+
+  public Command zeroCommand() {
+    return this.runOnce(() -> zero());
   }
 
   /**
