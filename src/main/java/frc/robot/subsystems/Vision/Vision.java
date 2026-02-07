@@ -41,11 +41,11 @@ public class Vision extends SubsystemBase {
     MEASUREMENT_STD_DEV_DISTANCE_MAP.put(
         0.1,
         VecBuilder.fill(
-            0.5, 0.5, 999999.0)); // Close tags ( at 10 cm): very high confidence (50 cm std dev)
+            0.25, 0.25, 999999.0)); // Close tags ( at 10 cm): very high confidence (50 cm std dev)
     MEASUREMENT_STD_DEV_DISTANCE_MAP.put(
         8.0,
         VecBuilder.fill(
-            5.0, 5.0, 999999.0)); // Far tags (8 meters):  very low confidence (5 meter cm std dev)
+            3.0, 3.0, 999999.0)); // Far tags (8 meters):  very low confidence (5 meter cm std dev)
   }
 
   /** Creates a new Vision. */
