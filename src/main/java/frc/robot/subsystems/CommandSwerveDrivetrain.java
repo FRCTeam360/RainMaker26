@@ -5,6 +5,7 @@ import static edu.wpi.first.units.Units.*;
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
+import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -73,7 +74,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
       new SwerveRequest.SysIdSwerveSteerGains();
   private final SwerveRequest.SysIdSwerveRotation m_rotationCharacterization =
       new SwerveRequest.SysIdSwerveRotation();
-
+  private final DriveRequestType m_driveRequestType = DriveRequestType.Velocity;
   // TODO refactor into a constants file
   public static final LinearVelocity maxSpeed = MetersPerSecond.of(5.12);
   public static final AngularVelocity maxAngularVelocity = RevolutionsPerSecond.of(2.0);
@@ -95,7 +96,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     SwerveRequest.FieldCentric drive =
         new SwerveRequest.FieldCentric() // creates a fieldcentric drive
             .withDeadband(maxSpeed.in(MetersPerSecond) * 0.01)
-            .withRotationalDeadband(maxAngularVelocity.in(RadiansPerSecond) * 0.01);
+            .withRotationalDeadband(maxAngularVelocity.in(RadiansPerSecond) * 0.01)
+            .withDriveRequestType(m_driveRequestType);
     return this.applyRequest(
             () ->
                 drive
@@ -323,12 +325,13 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                   m_pathApplyRobotSpeeds
                       .withSpeeds(ChassisSpeeds.discretize(speeds, 0.020))
                       .withWheelForceFeedforwardsX(feedforwards.robotRelativeForcesXNewtons())
-                      .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons())),
+                      .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons())
+                      .withDriveRequestType(m_driveRequestType)),
           new PPHolonomicDriveController(
               // PID constants for translation
               new PIDConstants(10, 0, 0),
               // PID constants for rotation
-              new PIDConstants(7, 0, 0)),
+              new PIDConstants(8, 0, 0)),
           config,
           // Assume the path needs to be flipped for Red vs Blue, this is normally the case
           () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
@@ -408,6 +411,11 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   }
 
   private void startSimThread() {
+    // prevents the method from running multiple times
+    if (m_simNotifier != null) {
+      return;
+    }
+
     m_lastSimTime = Utils.getCurrentTimeSeconds();
 
     /* Run simulation at a faster rate so PID gains behave more reasonably */
