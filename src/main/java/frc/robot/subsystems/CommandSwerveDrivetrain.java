@@ -332,6 +332,30 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     }
   }
 
+  public Pose2d getPose2d() {
+    return this.getStateCopy().Pose;
+  }
+
+  public Rotation2d getRotation2d() {
+    return getPose2d().getRotation();
+  }
+
+  public double getAngle() {
+    return this.getRotation2d().getDegrees();
+  }
+
+  public double getAngularRate() {
+    return Math.toDegrees(this.getStateCopy().Speeds.omegaRadiansPerSecond);
+  }
+
+  public void zero() {
+    this.tareEverything();
+  }
+
+  public Command zeroCommand() {
+    return this.runOnce(() -> zero());
+  }
+
   /**
    * Returns a command that applies the specified control request to this swerve drivetrain.
    *
