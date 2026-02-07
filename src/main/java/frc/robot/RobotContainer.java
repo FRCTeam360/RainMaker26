@@ -116,7 +116,7 @@ public class RobotContainer {
     // Configure the trigger bindings
     commandFactory =
         new CommandFactory(
-            intake, flywheel, flywheelKicker, hood, Hopper, intakePivot, vision, drivetrain);
+            intake, flywheel, flywheelKicker, hood, hopper, intakePivot, vision, drivetrain);
     // superStructure = new SuperStructure(intake, Hopper, flywheelKicker, flywheel, hood);
 
     registerPathplannerCommand("basic intake", commandFactory.basicIntakeCmd());
