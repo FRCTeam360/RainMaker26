@@ -37,7 +37,7 @@ public final class Constants {
     public static final int INDEXER_SENSOR_ID = 2;
     public static final int INDEXER_ID = 16;
 
-    // === FLYWHEEL === 
+    // === FLYWHEEL ===
     public static final int FLYWHEEL_KICKER_ID = 17;
     public static final int FLYWHEEL_KICKER_SENSOR_ID = 3;
     public static final int FLYWHEEL_RIGHT_ID = 18;
@@ -49,7 +49,7 @@ public final class Constants {
     // === LIMELIGHT ===
     public static final String LIMELIGHT = "limelight";
 
-    // === CANBUS === 
+    // === CANBUS ===
     public static final String CANBUS_NAME = "Default Name";
   }
 
@@ -62,7 +62,7 @@ public final class Constants {
     // === HOPPER ===
     public static final int INDEXER_MOTOR = 9;
 
-    // === FLYWHEEL === 
+    // === FLYWHEEL ===
     public static final int FLYWHEEL_KICKER_MOTOR = 18;
     public static final int FLYWHEEL_KICKER_SENSOR_ID = 19;
     public static final int FLYWHEEL_MOTOR = 2;
