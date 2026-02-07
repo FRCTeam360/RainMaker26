@@ -94,7 +94,9 @@ spotless {
     }
 }
 
-def ROBOT_MAIN_CLASS = "frc.robot.Main"
+
+// Automated test approach based on FRC 2412: https://github.com/robototes/REBUILT2026
+def ROBOT_MAIN_CLASS = getProjectBooleanProperty('automatedTest') ? "frc.robot.test.AutomatedTestMain" : "frc.robot.Main"
 
 // Define my targets (RoboRIO) and artifacts (deployable files)
 // This is added by GradleRIO's backing project DeployUtils.
