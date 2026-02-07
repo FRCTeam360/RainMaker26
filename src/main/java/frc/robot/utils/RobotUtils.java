@@ -27,9 +27,7 @@ public class RobotUtils {
   }
 
   public static Alliance getAutoWinner(String autoWinner) {
-    // the game specific message doesn't tell you which hub is active, it tells you which hub is
-    // active for phases 2 and 4
-    // String autoWinner = DriverStation.getGameSpecificMessage();
+    // the game specific message tells you which alliance won auto
     if (autoWinner.length() > 0) {
       // checks which hub is open
       switch (autoWinner.charAt(0)) {
@@ -47,7 +45,8 @@ public class RobotUtils {
   }
 
   public static ActiveHub getHubPhase(double gameTime, Boolean isTele) {
-    // double gameTime = DriverStation.getMatchTime();
+    // gameTime is the getMatchTime() from DriverStation, isTele is the isTeleop() from
+    // DriverStation
     ActiveHub activeHub = null;
     // Sets phases based on the current time in the game
     if (isTele == false) {
@@ -72,11 +71,9 @@ public class RobotUtils {
 
   public static Boolean hubActive(
       Optional<Alliance> alliance, Alliance autoWinner, ActiveHub gamePhase) {
+    // alliance is our alliance, autoWinner is the result of getAutoWinner, gamePhase is the result
+    // of getHubPhase
     Boolean hubActive = null;
-    // Optional<Alliance> alliance = DriverStation.getAlliance();
-    // Alliance autoWinner = getAutoWinner(DriverStation.getGameSpecificMessage());
-    // ActiveHub gamePhase = getHubPhase(DriverStation.getMatchTime(), DriverStation.isTeleop());
-
     if (alliance.isPresent()) {
       if (gamePhase == null) {
         return null;
