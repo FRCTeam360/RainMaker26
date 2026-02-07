@@ -17,6 +17,7 @@ import frc.robot.subsystems.Indexer.Indexer;
 import frc.robot.subsystems.Intake.Intake;
 import frc.robot.subsystems.Intake.Intake.IntakeStates;
 import frc.robot.subsystems.Shooter.AllianceFlipUtil;
+import frc.robot.subsystems.Shooter.ShotCalculator;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel.FlywheelStates;
 import frc.robot.subsystems.Shooter.Hood.Hood;
@@ -32,6 +33,7 @@ public class SuperStructure extends SubsystemBase {
   private Flywheel flywheel;
   private Hood hood;
   private ShotCalculator shotCalculator;
+  private CommandSwerveDrivetrain drivetrain;
 
   public enum SuperStates {
     IDLE, // everything is stopped when nothing else happens
@@ -60,14 +62,14 @@ public class SuperStructure extends SubsystemBase {
   private SuperStates previousSuperState = SuperStates.IDLE;
 
   public SuperStructure(
-      Intake intake, Indexer indexer, FlywheelKicker flywheelKicker, Flywheel flywheel, Hood hood,
-      ShotCalculator shotCalculator) {
+      Intake intake, Indexer indexer, FlywheelKicker flywheelKicker, Flywheel flywheel, Hood hood, CommandSwerveDrivetrain driveTrain) {
     this.intake = intake;
     this.indexer = indexer;
     this.flywheelKicker = flywheelKicker;
     this.flywheel = flywheel;
     this.hood = hood;
-    this.shotCalculator = shotCalculator;
+    shotCalculator = new ShotCalculator(driveTrain);
+    this.drivetrain = driveTrain;
   }
 
   private void updateState() {
@@ -163,164 +165,3 @@ public class SuperStructure extends SubsystemBase {
     Logger.recordOutput("Superstructure/PreviousSuperState", previousSuperState.toString());
   }
 }
-
-// how far we are from the hub
-// taking that to convert to setpoints for flywhel and hood
-class ShotCalculator{
-    private CommandSwerveDrivetrain drivetrain;
-
-    public ShotCalculator(CommandSwerveDrivetrain drivetrain){
-      this.drivetrain = drivetrain;
-      
-    //distance from hub to hood angle
-    //launchHoodAngleMap.put(1.34, Rotation2d.fromDegrees(19.0));
-
-    //distance from hub to flywheel speed
-    //launchFlywheelSpeedMap.put(1.34, 210.0);
-    }
-
-    // Calculate distance from turret to target
-    private double getDistanceFromHub(){
-    Pose2d currentPosition = drivetrain.getPosition();
-    Translation2d target =
-    AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint.toTranslation2d());
-    double positionToTargetDistance = target.getDistance(currentPosition.getTranslation());
-        return positionToTargetDistance;
-    }
-
-    private Rotation2d getWantedHoodAngle(){
-      return launchHoodAngleMap.get(getDistanceFromHub());
-    }
-
-    private double getWantedFlywheelSpeed(){
-      return launchFlywheelSpeedMap.get(getDistanceFromHub());
-    }
-
-
-
-    // // moving average filter arranged ove r~.1 sec,
-    // // smooths angular velocityestimates
-    // // without this u get sensor noise and violent velocity spikes
-    // private final LinearFilter turretAngleFilter = LinearFilter.movingAverage((int) (0.1 / .02));
-    // private final LinearFilter hoodAngleFilter = LinearFilter.movingAverage((int) (0.1 / .02));
-
-    // private Rotation2d lastTurretAngle;
-    // private double lastHoodAngle;
-
-    // outputs
-    // private Rotation2d turretAngle;
-    // private double hoodAngle = Double.NaN;
-    // private double turretVelocity;
-    // private double hoodVelocity;
-
-    // isvalid checks if we can shoots
-    // turret angle where to aim
-    // turret velocity feedforward term
-    // hood angle is elevation
-    // hood velocity is feedforward
-    // flywheelspeed is RPM
-
-    // public record LaunchingParameters(
-    //         boolean isValid,
-    //         Rotation2d turretAngle,
-    //         double turretVelocity,
-    //         double hoodAngle,
-    //         double hoodVelocity,
-    //         double flywheelSpeed) {
-    // }
-
-    // Cache parameters
-    //private LaunchingParameters latestParameters = null;
-
-    // distance limits
-    // private static double minDistance = 1.34;
-    // private static double maxDistance= 5.60;
-    //private static double phaseDelay;
-
-    private static final InterpolatingTreeMap<Double, Rotation2d> launchHoodAngleMap = new InterpolatingTreeMap<>(
-            InverseInterpolator.forDouble(), Rotation2d::interpolate);
-    private static final InterpolatingDoubleTreeMap launchFlywheelSpeedMap = new InterpolatingDoubleTreeMap();
-   // private static final InterpolatingDoubleTreeMap timeOfFlightMap = new InterpolatingDoubleTreeMap();
-
-
-   //timeOfFlightMap.put(5.68, 1.16);
-    // timeOfFlightMap.put(4.55, 1.12);
-    // timeOfFlightMap.put(3.15, 1.11);
-    // timeOfFlightMap.put(1.88, 1.09);
-    // timeOfFlightMap.put(1.38, 0.90);
-
-  //cache check
-  // public LaunchingParameters getParameters() {
-  //   if (latestParameters != null) {
-  //     return latestParameters;
-  //   }
-
-    // Calculate estimated pose while accounting for phase delay
-    // Pose2d estimatedPose = RobotState.getInstance().getEstimatedPose();
-    // ChassisSpeeds robotRelativeVelocity = drivetrain.getVelocity();
-    // estimatedPose =
-    //     estimatedPose.exp(
-    //         new Twist2d(
-    //             robotRelativeVelocity.vxMetersPerSecond * phaseDelay,
-    //             robotRelativeVelocity.vyMetersPerSecond * phaseDelay,
-    //             robotRelativeVelocity.omegaRadiansPerSecond * phaseDelay));
-
-
-    // // Calculate field relative turret velocity
-    // ChassisSpeeds robotVelocity = drivetrain.getVelocity();
-    // double robotAngle = currentPosition.getRotation().getRadians();
-    // double velocityX =
-    //     robotVelocity.vxMetersPerSecond
-    //         + robotVelocity.omegaRadiansPerSecond
-    //             * (currentPosition.getY() * Math.cos(robotAngle)
-    //                 - currentPosition.getX() * Math.sin(robotAngle));
-    // double velocityY =
-    //     robotVelocity.vyMetersPerSecond
-    //         + robotVelocity.omegaRadiansPerSecond
-    //             * (currentPosition.getX() * Math.cos(robotAngle)
-    //                 - currentPosition.getY() * Math.sin(robotAngle));
-
-    // // Account for imparted velocity by robot (turret) to offset
-    // double timeOfFlight;
-    // Pose2d lookaheadPose = currentPosition;
-    // double lookaheadTurretToTargetDistance = positionToTargetDistance;
-    // for (int i = 0; i < 20; i++) {
-    //   timeOfFlight = timeOfFlightMap.get(lookaheadTurretToTargetDistance);
-    //   double offsetX = velocityX * timeOfFlight;
-    //   double offsetY = velocityY * timeOfFlight;
-    //   lookaheadPose =
-    //       new Pose2d(
-    //           currentPosition.getTranslation().plus(new Translation2d(offsetX, offsetY)),
-    //           currentPosition.getRotation());
-    //   lookaheadTurretToTargetDistance = target.getDistance(lookaheadPose.getTranslation());
-    // }
-
-    // Calculate parameters accounted for imparted velocity
-    //turretAngle = target.minus(lookaheadPose.getTranslation()).getAngle();
-   // hoodAngle = launchHoodAngleMap.get(lookaheadTurretToTargetDistance).getRadians();
-    //if (lastTurretAngle == null) lastTurretAngle = turretAngle;
-    //if (Double.isNaN(lastHoodAngle)) lastHoodAngle = hoodAngle;
-    //turretVelocity =
-        // turretAngleFilter.calculate(
-        //     turretAngle.minus(lastTurretAngle).getRadians() / 0.02);
-    // hoodVelocity =
-    //     hoodAngleFilter.calculate((hoodAngle - lastHoodAngle) / 0.02);
-    // lastTurretAngle = turretAngle;
-    // lastHoodAngle = hoodAngle;
-    // latestParameters =
-    //     new LaunchingParameters(
-    //         lookaheadTurretToTargetDistance >= minDistance
-    //             && lookaheadTurretToTargetDistance <= maxDistance,
-    //         turretAngle,
-    //         turretVelocity,
-    //         hoodAngle,
-    //         hoodVelocity,
-    //         launchFlywheelSpeedMap.get(lookaheadTurretToTargetDistance));
-
-    // Log calculated values
-    // Logger.recordOutput("ShotCalculator/LookaheadPose", lookaheadPose);
-    // Logger.recordOutput("ShotCalculator/TurretToTargetDistance", lookaheadTurretToTargetDistance);
-
-    //return latestParameters;
-    //}
-  }
