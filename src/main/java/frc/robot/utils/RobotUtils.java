@@ -1,6 +1,5 @@
 package frc.robot.utils;
 
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import java.io.File;
 import java.util.Optional;
@@ -27,10 +26,10 @@ public class RobotUtils {
     return false;
   }
 
-  public static Alliance getAutoWinner() {
+  public static Alliance getAutoWinner(String autoWinner) {
     // the game specific message doesn't tell you which hub is active, it tells you which hub is
     // active for phases 2 and 4
-    String autoWinner = DriverStation.getGameSpecificMessage();
+    // String autoWinner = DriverStation.getGameSpecificMessage();
     if (autoWinner.length() > 0) {
       // checks which hub is open
       switch (autoWinner.charAt(0)) {
@@ -47,13 +46,13 @@ public class RobotUtils {
     return null;
   }
 
-  public static ActiveHub getHubPhase(double gameTime) {
+  public static ActiveHub getHubPhase(double gameTime, Boolean isTele) {
     // double gameTime = DriverStation.getMatchTime();
     ActiveHub activeHub = null;
     // Sets phases based on the current time in the game
-    if (DriverStation.isAutonomous()) {
+    if (isTele == false) {
       activeHub = ActiveHub.BOTH; // AUTO
-    } else if (DriverStation.isTeleop()) {
+    } else if (isTele == true) {
       if (gameTime <= 30) {
         activeHub = ActiveHub.BOTH; // END GAME
       } else if (gameTime <= 55) {
@@ -71,13 +70,17 @@ public class RobotUtils {
     return activeHub;
   }
 
-  public static Boolean hubActive() {
+  public static Boolean hubActive(
+      Optional<Alliance> alliance, Alliance autoWinner, ActiveHub gamePhase) {
     Boolean hubActive = null;
-    Optional<Alliance> alliance = DriverStation.getAlliance();
-    Alliance autoWinner = getAutoWinner();
-    ActiveHub gamePhase = getHubPhase(DriverStation.getMatchTime());
+    // Optional<Alliance> alliance = DriverStation.getAlliance();
+    // Alliance autoWinner = getAutoWinner(DriverStation.getGameSpecificMessage());
+    // ActiveHub gamePhase = getHubPhase(DriverStation.getMatchTime(), DriverStation.isTeleop());
 
     if (alliance.isPresent()) {
+      if (gamePhase == null) {
+        return null;
+      }
       switch (gamePhase) {
           // during auto, transitional phase, and end game
         case BOTH:
@@ -119,7 +122,7 @@ public class RobotUtils {
       }
     } else {
       // this is called when no alliance has been received from driver station
-      hubActive = null;
+      return null;
     }
     return hubActive;
   }
