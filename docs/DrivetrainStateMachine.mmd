@@ -1,0 +1,26 @@
+%% Drivetrain State Diagram
+stateDiagram-v2
+    [*] --> DRIVER_CONTROL
+
+    %% Normal driving
+    DRIVER_CONTROL --> DEFENSE : Driver holds<br>defense button
+    DRIVER_CONTROL --> X_OUT : Driver holds<br>x-out button
+    DRIVER_CONTROL --> AUTO_ALIGN : SHOOTING (from SuperStructure)
+
+    %% Defense mode (rotation priority)
+    DEFENSE --> DRIVER_CONTROL : Driver releases<br>defense button
+
+    %% X-out mode (wheels locked in X)
+    X_OUT --> DRIVER_CONTROL : Driver releases<br>x-out button
+
+    %% Auto-align for shooting
+    AUTO_ALIGN --> X_OUT_SHOOTING : Robot aligned
+    AUTO_ALIGN --> DRIVER_CONTROL : SHOOTING (from SuperStructure) toggled off
+
+    %% X-out while shooting
+    X_OUT_SHOOTING --> DRIVER_CONTROL : Shot complete OR<br>SHOOTING (from SuperStructure) toggled off
+
+    note right of DEFENSE : Rotation priority increased
+    note right of X_OUT : Wheels locked in X pattern
+    note right of AUTO_ALIGN : Drivetrain aligns to target
+    note right of X_OUT_SHOOTING : Wheels locked during shot
