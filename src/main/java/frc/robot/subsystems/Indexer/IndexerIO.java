@@ -16,7 +16,7 @@ public interface IndexerIO {
     public double velocity = 0.0;
     public double position = 0.0;
     public boolean sensor = false;
-    public double SensorProximity = 0.0;
+    public double sensorProximity = 0.0;
     public boolean sensorActivated = false;
   }
 
