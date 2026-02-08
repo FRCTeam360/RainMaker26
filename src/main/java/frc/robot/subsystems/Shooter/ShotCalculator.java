@@ -23,6 +23,12 @@ public class ShotCalculator {
   private static final InterpolatingDoubleTreeMap timeOfFlightMap = new
   InterpolatingDoubleTreeMap();
 
+  public record ShootingParams(
+    Rotation2d drivebaseAngle,
+    double hoodAngle,
+    double flywheelSpeed
+  ) {}
+
   public ShotCalculator(CommandSwerveDrivetrain drivetrain) {
     this.drivetrain = drivetrain;
 
