@@ -16,6 +16,13 @@ import frc.robot.utils.FieldConstants;
 public class ShotCalculator {
   private CommandSwerveDrivetrain drivetrain;
 
+    private static final InterpolatingTreeMap<Double, Rotation2d> launchHoodAngleMap =
+      new InterpolatingTreeMap<>(InverseInterpolator.forDouble(), Rotation2d::interpolate);
+  private static final InterpolatingDoubleTreeMap launchFlywheelSpeedMap =
+      new InterpolatingDoubleTreeMap();
+  private static final InterpolatingDoubleTreeMap timeOfFlightMap = new
+  InterpolatingDoubleTreeMap();
+
   public ShotCalculator(CommandSwerveDrivetrain drivetrain) {
     this.drivetrain = drivetrain;
 
@@ -24,6 +31,9 @@ public class ShotCalculator {
 
     // distance from hub to flywheel speed
     // launchFlywheelSpeedMap.put(1.34, 210.0);
+
+    //idk what these values r rn
+    //   timeOfFlightMap.put(5.68, 1.16);
   }
 
   // Calculate distance from turret to target
@@ -36,12 +46,16 @@ public class ShotCalculator {
   }
 
   private double getShooterDistanceFromHub(){
-    Pose2d shooterPosition =new Pose2d();
-    shooterPosition = drivetrain.getPosition().transformBy(ShooterConstants.robotToShooter);
     Translation2d target =
         AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint.toTranslation2d());
-    double shooterToTargetDistance = target.getDistance(shooterPosition.getTranslation());
+    double shooterToTargetDistance = target.getDistance(getShooterPosition().getTranslation());
     return shooterToTargetDistance;
+  }
+
+  private Pose2d getShooterPosition(){
+    Pose2d shooterPosition =new Pose2d();
+    shooterPosition = drivetrain.getPosition().transformBy(ShooterConstants.robotToShooter);
+    return shooterPosition;
   }
 
   private Rotation2d getWantedHoodAngle() {
@@ -89,20 +103,6 @@ public class ShotCalculator {
   // private static double minDistance = 1.34;
   // private static double maxDistance= 5.60;
   // private static double phaseDelay;
-
-  private static final InterpolatingTreeMap<Double, Rotation2d> launchHoodAngleMap =
-      new InterpolatingTreeMap<>(InverseInterpolator.forDouble(), Rotation2d::interpolate);
-  private static final InterpolatingDoubleTreeMap launchFlywheelSpeedMap =
-      new InterpolatingDoubleTreeMap();
-  // private static final InterpolatingDoubleTreeMap timeOfFlightMap = new
-  // InterpolatingDoubleTreeMap();
-
-  // timeOfFlightMap.put(5.68, 1.16);
-  // timeOfFlightMap.put(4.55, 1.12);
-  // timeOfFlightMap.put(3.15, 1.11);
-  // timeOfFlightMap.put(1.88, 1.09);
-  // timeOfFlightMap.put(1.38, 0.90);
-
   // cache check
   // public LaunchingParameters getParameters() {
   //   if (latestParameters != null) {
@@ -119,34 +119,42 @@ public class ShotCalculator {
   //             robotRelativeVelocity.vyMetersPerSecond * phaseDelay,
   //             robotRelativeVelocity.omegaRadiansPerSecond * phaseDelay));
 
-  // // Calculate field relative turret velocity
-  // ChassisSpeeds robotVelocity = drivetrain.getVelocity();
-  // double robotAngle = currentPosition.getRotation().getRadians();
-  // double velocityX =
-  //     robotVelocity.vxMetersPerSecond
-  //         + robotVelocity.omegaRadiansPerSecond
-  //             * (currentPosition.getY() * Math.cos(robotAngle)
-  //                 - currentPosition.getX() * Math.sin(robotAngle));
-  // double velocityY =
-  //     robotVelocity.vyMetersPerSecond
-  //         + robotVelocity.omegaRadiansPerSecond
-  //             * (currentPosition.getX() * Math.cos(robotAngle)
-  //                 - currentPosition.getY() * Math.sin(robotAngle));
+  // // Calculate field relative turret velocit
 
   // // Account for imparted velocity by robot (turret) to offset
-  // double timeOfFlight;
-  // Pose2d lookaheadPose = currentPosition;
-  // double lookaheadTurretToTargetDistance = positionToTargetDistance;
-  // for (int i = 0; i < 20; i++) {
-  //   timeOfFlight = timeOfFlightMap.get(lookaheadTurretToTargetDistance);
-  //   double offsetX = velocityX * timeOfFlight;
-  //   double offsetY = velocityY * timeOfFlight;
-  //   lookaheadPose =
-  //       new Pose2d(
-  //           currentPosition.getTranslation().plus(new Translation2d(offsetX, offsetY)),
-  //           currentPosition.getRotation());
-  //   lookaheadTurretToTargetDistance = target.getDistance(lookaheadPose.getTranslation());
-  // }
+
+//   private Pose2d getLookAheadPose(){    
+//     Translation2d target =
+//         AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint.toTranslation2d());
+//     Pose2d drivetrainPos = drivetrain.getPosition();
+//     Pose2d lookaheadPose = drivetrainPos;
+//     double robotAngle = drivetrainPos.getRotation().getRadians();
+//     ChassisSpeeds robotVelocity = drivetrain.getVelocity();
+//     double velocityX =
+//       robotVelocity.vxMetersPerSecond
+//           + robotVelocity.omegaRadiansPerSecond
+//               * (drivetrainPos.getY() * Math.cos(robotAngle)
+//                   - drivetrainPos.getX() * Math.sin(robotAngle));
+//   double velocityY =
+//       robotVelocity.vyMetersPerSecond
+//           + robotVelocity.omegaRadiansPerSecond
+//               * (drivetrainPos.getX() * Math.cos(robotAngle)
+//                   - drivetrainPos.getY() * Math.sin(robotAngle));
+//     double timeOfFlight;
+// double lookaheadTurretToTargetDistance = getRobotDistanceFromHub();
+//   for (int i = 0; i < 20; i++) {
+//     timeOfFlight = timeOfFlightMap.get(lookaheadTurretToTargetDistance);
+//     double offsetX = velocityX * timeOfFlight;
+//     double offsetY = velocityY * timeOfFlight;
+//     lookaheadPose =
+//         new Pose2d(
+//             drivetrainPos.getTranslation().plus(new Translation2d(offsetX, offsetY)),
+//             drivetrainPos.getRotation());
+//     lookaheadTurretToTargetDistance = target.getDistance(lookaheadPose.getTranslation());
+//   }
+//   return lookaheadPose;
+//   }
+  
 
   // Calculate parameters accounted for imparted velocity
   // turretAngle = target.minus(lookaheadPose.getTranslation()).getAngle();
@@ -199,6 +207,7 @@ public class ShotCalculator {
     //                 - robotToTurret.getY() * Math.sin(robotAngle));
 
     // // Account for imparted velocity by robot (turret) to offset
+    // Pose2d  shooterPosition= drivetrain.getPosition().transformBy(ShooterConstants.robotToShooter);
     // double timeOfFlight;
     // Pose2d lookaheadPose = turretPosition;
     // double lookaheadTurretToTargetDistance = turretToTargetDistance;
