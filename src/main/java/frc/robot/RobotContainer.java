@@ -232,7 +232,7 @@ public class RobotContainer {
     if (Objects.nonNull(drivetrain)) {
       drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(superstructureCont));
       // drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
-      // driverCont.leftTrigger().whileTrue(drivetrain.faceHubWhileDriving(driverCont));
+      driverCont.leftTrigger().whileTrue(drivetrain.faceHubWhileDriving(driverCont));
       drivetrain.registerTelemetry(logger::telemeterize);
       driverCont.back().onTrue(drivetrain.zeroCommand());
     }
