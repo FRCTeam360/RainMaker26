@@ -169,7 +169,7 @@ public class RobotContainer {
           drivetrain
               .fieldOrientedDrive(testCont1)
               .alongWith(
-                  new InstantCommand(
+                  Commands.run(
                       () -> {
                         shotCalculator.calculateShot();
                         shotCalculator.clearShootingParams();
