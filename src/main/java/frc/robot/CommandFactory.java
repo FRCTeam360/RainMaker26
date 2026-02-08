@@ -53,27 +53,31 @@ public class CommandFactory {
   }
 
   public static Command driveToPose(CommandSwerveDrivetrain drive, Pose2d targetPose) {
-    ProfiledPIDController xController = new ProfiledPIDController(
-      3.0, 0, 0, new TrapezoidProfile.Constraints(MAX_VEL, MAX_ACCEL));
-    ProfiledPIDController yController = new ProfiledPIDController(
-      3.0, 0, 0, new TrapezoidProfile.Constraints(MAX_VEL, MAX_ACCEL));
-    ProfiledPIDController thetaController = new ProfiledPIDController(
-      3.0, 0, 0, new TrapezoidProfile.Constraints(Math.PI, Math.PI));
-    
-      thetaController.enableContinuousInput(-Math.PI, Math.PI);
+    ProfiledPIDController xController =
+        new ProfiledPIDController(3.0, 0, 0, new TrapezoidProfile.Constraints(MAX_VEL, MAX_ACCEL));
+    ProfiledPIDController yController =
+        new ProfiledPIDController(3.0, 0, 0, new TrapezoidProfile.Constraints(MAX_VEL, MAX_ACCEL));
+    ProfiledPIDController thetaController =
+        new ProfiledPIDController(3.0, 0, 0, new TrapezoidProfile.Constraints(Math.PI, Math.PI));
 
-      return drive.run(() -> {
-        Pose2d currentPose = drive.getPose();
+    thetaController.enableContinuousInput(-Math.PI, Math.PI);
 
-        double xSpeed = xController.calculate(currentPose.getX(), targetPose.getX());
-        double ySpeed = yController.calculate(currentPose.getY(), targetPose.getY());
-        double thetaSpeed = thetaController.calculate(
-          currentPose.getRotation().getRadians(), targetPose.getRotation().getRadians());
-        
-        drive.drive(xSpeed, ySpeed, thetaSpeed); 
-      })
-      .until(() -> xController.atGoal() && yController.atGoal() && thetaController.atGoal())
-      .withName("DriveToClimbPose");
+    return drive
+        .run(
+            () -> {
+              Pose2d currentPose = drive.getPose();
+
+              double xSpeed = xController.calculate(currentPose.getX(), targetPose.getX());
+              double ySpeed = yController.calculate(currentPose.getY(), targetPose.getY());
+              double thetaSpeed =
+                  thetaController.calculate(
+                      currentPose.getRotation().getRadians(),
+                      targetPose.getRotation().getRadians());
+
+              drive.drive(xSpeed, ySpeed, thetaSpeed);
+            })
+        .until(() -> xController.atGoal() && yController.atGoal() && thetaController.atGoal())
+        .withName("DriveToClimbPose");
   }
 
   public Command basicIntakeCmd() {
