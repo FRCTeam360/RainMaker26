@@ -31,13 +31,13 @@ public final class Constants {
     public static final int INTAKE_SENSOR_PORT = 0;
     public static final int INTAKE_ID = 15;
     public static final int INTAKE_PIVOT_ID = 0;
-
+    
     // === HOPPER ===
-    public static final int INDEXER_SENSOR_PORT = 1;
-    public static final int INDEXER_SENSOR_ID = 2;
-    public static final int INDEXER_ID = 16;
-
-    // === FLYWHEEL ===
+    public static final int HOPPER_SENSOR_PORT = 1;
+    public static final int HOPPER_SENSOR_ID = 2;
+    public static final int HOPPER_ID = 16;
+    
+    // === FLYWHEEL === 
     public static final int FLYWHEEL_KICKER_ID = 17;
     public static final int FLYWHEEL_KICKER_SENSOR_ID = 3;
     public static final int FLYWHEEL_RIGHT_ID = 18;
@@ -54,13 +54,13 @@ public final class Constants {
   }
 
   public static class SimulationConstants {
-    // === INTAKE ===
+    // === INTAKE === 
     public static final int INTAKE_MOTOR = 12;
     public static final int INTAKE_SENSOR_PORT = 10;
     public static final int INTAKE_PIVOT_MOTOR = 15;
 
     // === HOPPER ===
-    public static final int INDEXER_MOTOR = 9;
+    public static final int HOPPER_MOTOR = 9;
 
     // === FLYWHEEL ===
     public static final int FLYWHEEL_KICKER_MOTOR = 18;

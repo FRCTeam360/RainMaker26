@@ -23,9 +23,9 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKicker;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKickerIOSim;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKickerIOWB;
-import frc.robot.subsystems.Indexer.Indexer;
-import frc.robot.subsystems.Indexer.IndexerIOSim;
-import frc.robot.subsystems.Indexer.IndexerIOWB;
+import frc.robot.subsystems.Hopper.Hopper;
+import frc.robot.subsystems.Hopper.HopperIOSim;
+import frc.robot.subsystems.Hopper.HopperIOWB;
 import frc.robot.subsystems.Intake.Intake;
 import frc.robot.subsystems.Intake.IntakeIOSim;
 import frc.robot.subsystems.Intake.IntakeIOWB;
@@ -57,7 +57,7 @@ public class RobotContainer {
   private SendableChooser<Command> autoChooser;
   private Flywheel flywheel;
   private Hood hood;
-  private Indexer indexer;
+  private Hopper hopper;
   private Vision vision;
   private Intake intake;
   private IntakePivot intakePivot;
@@ -88,7 +88,7 @@ public class RobotContainer {
                 Map.of("photonSim", new VisionIOPhotonSim(() -> drivetrain.getState().Pose)));
         flywheel = new Flywheel(new FlywheelIOSim());
         hood = new Hood(new HoodIOSim());
-        indexer = new Indexer(new IndexerIOSim());
+        hopper = new Hopper(new HopperIOSim());
         intake = new Intake(new IntakeIOSim());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOSim());
         break;
@@ -98,7 +98,7 @@ public class RobotContainer {
         logger = new Telemetry(WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
         flywheel = new Flywheel(new FlywheelIOWB());
         hood = new Hood(new HoodIOWB());
-        indexer = new Indexer(new IndexerIOWB());
+        hopper = new Hopper(new HopperIOWB());
         vision =
             new Vision(
                 Map.ofEntries(
@@ -116,8 +116,8 @@ public class RobotContainer {
     // Configure the trigger bindings
     commandFactory =
         new CommandFactory(
-            intake, flywheel, flywheelKicker, hood, indexer, intakePivot, vision, drivetrain);
-    // superStructure = new SuperStructure(intake, indexer, flywheelKicker, flywheel, hood);
+            intake, flywheel, flywheelKicker, hood, hopper, intakePivot, vision, drivetrain);
+    // superStructure = new SuperStructure(intake, Hopper, flywheelKicker, flywheel, hood);
 
     registerPathplannerCommand("basic intake", commandFactory.basicIntakeCmd());
     registerPathplannerCommand("shoot at hub", commandFactory.shootWithSpinUp(3000.0, 6.0));
@@ -166,8 +166,8 @@ public class RobotContainer {
     if (Objects.nonNull(hood)) {
       testCont1.x().whileTrue(hood.setDutyCycleCommand(() -> 0.5));
     }
-    if (Objects.nonNull(indexer)) {
-      testCont1.y().whileTrue(indexer.setDutyCycleCommand(() -> 0.5));
+    if (Objects.nonNull(hopper)) {
+      testCont1.y().whileTrue(hopper.setDutyCycleCommand(() -> 0.5));
     }
     if (Objects.nonNull(intake)) {
       testCont1.leftBumper().whileTrue(intake.setDutyCycleCommand(() -> 0.5));
@@ -190,8 +190,8 @@ public class RobotContainer {
     // TODO: make more elegant solution for null checking subsystems/commands
 
     // Null checks based on subsystems used by each command
-    // basicIntakeCmd uses intake and indexer
-    if (Objects.nonNull(intake) && Objects.nonNull(indexer)) {
+    // basicIntakeCmd uses intake and hopper
+    if (Objects.nonNull(intake) && Objects.nonNull(hopper)) {
       driverCont.leftBumper().whileTrue(commandFactory.basicIntakeCmd());
     }
 
@@ -244,8 +244,8 @@ public class RobotContainer {
     if (Objects.nonNull(intakePivot)) {
       intakePivot.stop();
     }
-    if (Objects.nonNull(indexer)) {
-      indexer.stop();
+    if (Objects.nonNull(hopper)) {
+      hopper.stop();
     }
     if (Objects.nonNull(flywheelKicker)) {
       flywheelKicker.stop();
