@@ -8,7 +8,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.Shooter.ShotCalculator;
-
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -24,7 +23,7 @@ public class Hood extends SubsystemBase {
     AIMING
   }
 
-  public void setShotCalculator(ShotCalculator shotCalculator){
+  public void setShotCalculator(ShotCalculator shotCalculator) {
     this.shotCalculator = shotCalculator;
   }
 
@@ -68,11 +67,11 @@ public class Hood extends SubsystemBase {
         break;
     }
   }
+
   /** Creates a new Hood. */
   public Hood(HoodIO io) {
     this.io = io;
   }
-
 
   public void setDutyCycle(double dutyCycle) {
     io.setDutyCycle(dutyCycle);

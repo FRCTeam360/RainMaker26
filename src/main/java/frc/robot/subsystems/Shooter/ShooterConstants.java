@@ -5,10 +5,8 @@
 package frc.robot.subsystems.Shooter;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Transform3d;
 
 public class ShooterConstants {
-  public static Transform2d robotToShooter = new Transform2d(0.0,0.0,new Rotation2d());
+  public static Transform2d robotToShooter = new Transform2d(0.0, 0.0, new Rotation2d());
 }
