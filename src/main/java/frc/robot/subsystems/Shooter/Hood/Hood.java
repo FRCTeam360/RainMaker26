@@ -7,6 +7,8 @@ package frc.robot.subsystems.Shooter.Hood;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.Shooter.ShotCalculator;
+
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -14,10 +16,16 @@ public class Hood extends SubsystemBase {
   private final HoodIO io;
   private final HoodIOInputsAutoLogged inputs = new HoodIOInputsAutoLogged();
   private final double TOLERANCE = 0.5;
+  private ShotCalculator shotCalculator;
 
   public enum HoodStates {
     OFF,
-    SPINUP_SHOOTING
+    SPINUP_SHOOTING,
+    AIMING
+  }
+
+  public void setShotCalculator(ShotCalculator shotCalculator){
+    this.shotCalculator = shotCalculator;
   }
 
   private HoodStates wantedState = HoodStates.OFF;
@@ -35,6 +43,9 @@ public class Hood extends SubsystemBase {
       case SPINUP_SHOOTING:
         setPosition(6.0);
         break;
+      case AIMING:
+        setPosition(shotCalculator.getWantedHoodAngle());
+        break;
       case OFF:
       default:
         setPosition(0.0);
@@ -49,17 +60,19 @@ public class Hood extends SubsystemBase {
       case SPINUP_SHOOTING:
         currentState = HoodStates.SPINUP_SHOOTING;
         break;
+      case AIMING:
+        currentState = HoodStates.AIMING;
       case OFF:
       default:
         currentState = HoodStates.OFF;
         break;
     }
   }
-
   /** Creates a new Hood. */
   public Hood(HoodIO io) {
     this.io = io;
   }
+
 
   public void setDutyCycle(double dutyCycle) {
     io.setDutyCycle(dutyCycle);

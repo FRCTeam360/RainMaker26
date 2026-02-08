@@ -21,8 +21,8 @@ public class SuperStructure extends SubsystemBase {
   private final FlywheelKicker flywheelKicker;
   private Flywheel flywheel;
   private Hood hood;
-  private ShotCalculator shotCalculator;
   private CommandSwerveDrivetrain drivetrain;
+  private ShotCalculator shotCalculator;
 
   public enum SuperStates {
     IDLE, // everything is stopped when nothing else happens
@@ -62,8 +62,9 @@ public class SuperStructure extends SubsystemBase {
     this.flywheelKicker = flywheelKicker;
     this.flywheel = flywheel;
     this.hood = hood;
-    shotCalculator = new ShotCalculator(driveTrain);
     this.drivetrain = driveTrain;
+    shotCalculator = new ShotCalculator(driveTrain);
+    hood.setShotCalculator(shotCalculator);
   }
 
   private void updateState() {
@@ -110,7 +111,9 @@ public class SuperStructure extends SubsystemBase {
     }
   }
 
-  private void aiming() {}
+  private void aiming() {
+    hood.setWantedState(HoodStates.AIMING);
+  }
 
   private void spinupShooting() {
     // hood, flywheel

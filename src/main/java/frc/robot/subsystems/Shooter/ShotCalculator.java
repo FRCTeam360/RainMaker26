@@ -58,7 +58,7 @@ public class ShotCalculator {
     return shooterPosition;
   }
 
-  private Rotation2d getWantedHoodAngle() {
+  public Rotation2d getWantedHoodAngle() {
     return launchHoodAngleMap.get(getRobotDistanceFromHub());
   }
 
