@@ -1,8 +1,7 @@
-package frc.robot.subsystems.Shooter;
+package frc.robot.utils;
 
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.wpilibj.DriverStation;
-import frc.robot.utils.FieldConstants;
 
 public class AllianceFlipUtil {
   public static double applyX(double x) {
