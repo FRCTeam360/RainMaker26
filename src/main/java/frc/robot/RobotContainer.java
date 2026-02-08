@@ -108,7 +108,10 @@ public class RobotContainer {
                     Map.entry(
                         Constants.WoodBotConstants.LIMELIGHT,
                         new VisionIOLimelight(
-                            Constants.WoodBotConstants.LIMELIGHT, () -> 0.0, () -> 0.0, true))));
+                            Constants.WoodBotConstants.LIMELIGHT,
+                            () -> drivetrain.getAngle(),
+                            () -> drivetrain.getAngularRate(),
+                            true))));
         intake = new Intake(new IntakeIOWB());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOWB());
         // intakePivot = new IntakePivot(new IntakePivotIOPB());
@@ -117,7 +120,7 @@ public class RobotContainer {
     commandFactory =
         new CommandFactory(
             intake, flywheel, flywheelKicker, hood, indexer, intakePivot, vision, drivetrain);
-    superStructure = new SuperStructure(intake, indexer, flywheelKicker, flywheel, hood);
+    // superStructure = new SuperStructure(intake, indexer, flywheelKicker, flywheel, hood);
 
     registerPathplannerCommand(
         "basic intake", superStructure.setStateCommand(SuperStates.INTAKING));
@@ -229,8 +232,9 @@ public class RobotContainer {
     if (Objects.nonNull(drivetrain)) {
       drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(superstructureCont));
       // drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
-      // driverCont.rightTrigger().whileTrue(drivetrain.faceHubWhileDriving(driverCont));
+      // driverCont.leftTrigger().whileTrue(drivetrain.faceHubWhileDriving(driverCont));
       drivetrain.registerTelemetry(logger::telemeterize);
+      driverCont.back().onTrue(drivetrain.zeroCommand());
     }
   }
 
