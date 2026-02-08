@@ -16,6 +16,7 @@ public class Indexer extends SubsystemBase {
   public enum IndexerStates {
     OFF,
     INTAKING,
+    SHOOTING
   }
 
   private IndexerStates wantedState = IndexerStates.OFF;
@@ -29,6 +30,10 @@ public class Indexer extends SubsystemBase {
       case INTAKING:
         currentState = IndexerStates.INTAKING;
         break;
+
+      case SHOOTING:
+        currentState = IndexerStates.SHOOTING;
+        break;
       case OFF:
         currentState = IndexerStates.OFF;
         break;
@@ -38,7 +43,10 @@ public class Indexer extends SubsystemBase {
   private void applyState() {
     switch (currentState) {
       case INTAKING:
-        setDutyCycle(0.2);
+        setDutyCycle(0.4);
+        break;
+      case SHOOTING:
+        setDutyCycle(0.4);
         break;
       case OFF:
       default:

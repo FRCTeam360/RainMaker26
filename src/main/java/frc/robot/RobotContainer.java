@@ -77,6 +77,8 @@ public class RobotContainer {
 
   private final CommandXboxController testCont1 = new CommandXboxController(5);
 
+  private final CommandXboxController superstructureCont = new CommandXboxController(4);
+
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     switch (Constants.getRobotType()) {
@@ -192,7 +194,8 @@ public class RobotContainer {
     // Null checks based on subsystems used by each command
     // basicIntakeCmd uses intake and indexer
     if (Objects.nonNull(intake) && Objects.nonNull(indexer)) {
-      driverCont.leftBumper().whileTrue(commandFactory.basicIntakeCmd());
+      superstructureCont.leftBumper().onTrue(superStructure.setStateCommand(SuperStates.INTAKING));
+      superstructureCont.leftBumper().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
     }
 
     // setFlywheelKickerDutyCycle uses flywheelKicker
@@ -215,19 +218,25 @@ public class RobotContainer {
       driverCont.x().whileTrue(commandFactory.shootWithRPM(2500));
       driverCont.b().whileTrue(commandFactory.shootWithRPM(3000));
       driverCont.y().whileTrue(commandFactory.shootWithRPM(3500));
-      driverCont.rightTrigger().whileTrue(commandFactory.shootWithSpinUp(3500.0, 6.0));
+      // driverCont.rightTrigger().whileTrue(commandFactory.shootWithSpinUp(3500.0, 6.0));
+      superstructureCont
+          .rightTrigger()
+          .onTrue(superStructure.setStateCommand(SuperStates.SPINUP_SHOOTING));
+      superstructureCont.rightTrigger().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
     }
 
     // Drivetrain commands
     if (Objects.nonNull(drivetrain)) {
-      drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
-      driverCont.rightTrigger().whileTrue(drivetrain.faceHubWhileDriving(driverCont));
+      drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(superstructureCont));
+      // drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
+      // driverCont.rightTrigger().whileTrue(drivetrain.faceHubWhileDriving(driverCont));
       drivetrain.registerTelemetry(logger::telemeterize);
     }
   }
 
   /** Stops all subsystems safely when the robot is disabled. */
   public void onDisable() {
+    superStructure.setWantedSuperState(SuperStates.IDLE);
     if (Objects.nonNull(drivetrain)) {
       drivetrain.setControl(new SwerveRequest.Idle());
     }

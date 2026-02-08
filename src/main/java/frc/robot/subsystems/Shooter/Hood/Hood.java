@@ -33,7 +33,7 @@ public class Hood extends SubsystemBase {
   private void applyState() {
     switch (currentState) {
       case SPINUP_SHOOTING:
-        setPosition(6.0);
+        setPosition(8.0);
         break;
       case OFF:
       default:

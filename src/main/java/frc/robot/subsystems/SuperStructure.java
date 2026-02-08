@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKicker;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKicker.FlywheelKickerStates;
 import frc.robot.subsystems.Indexer.Indexer;
+import frc.robot.subsystems.Indexer.Indexer.IndexerStates;
 import frc.robot.subsystems.Intake.Intake;
 import frc.robot.subsystems.Intake.Intake.IntakeStates;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel;
@@ -23,9 +24,11 @@ public class SuperStructure extends SubsystemBase {
 
   public enum SuperStates {
     IDLE, // everything is stopped when nothing else happens
-    DEFENSE, // driver holds defense button -> less desired velocitu moving latterally, more into
+    DEFENSE, // driver holds defense button -> less desired velocitu moving latterally, more
+    // into
     // rotation in drivetrain
-    X_OUT, // hold down button to x out wheels or press once and wheels stop X-ing out when moved
+    X_OUT, // hold down button to x out wheels or press once and wheels stop X-ing out when
+    // moved
     AUTO_ALIGHN, // aligns to a target
     X_OUT_SHOOTING, // when robot is aligned, ends when toggled off or shooting stops
     PREPAREING, // flywheel spins up and align to target
@@ -95,9 +98,10 @@ public class SuperStructure extends SubsystemBase {
     // hood, flywheel
     hood.setWantedState(HoodStates.SPINUP_SHOOTING);
     flywheel.setWantedState(FlywheelStates.SPINUP_SHOOTING);
-    if (hood.atSetpoint(6.0) && flywheel.atSetpoint(3000.0, 100.0)) {
+    if (hood.atSetpoint(8.0) && flywheel.atSetpoint(3500.0, 100.0)) {
       flywheelKicker.setWantedState(FlywheelKickerStates.SPINUP_SHOOTING);
       intake.setWantedState(IntakeStates.INTAKING);
+      indexer.setWantedState(IndexerStates.SHOOTING);
     }
   }
 
