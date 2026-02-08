@@ -26,7 +26,7 @@ public final class Constants {
     REPLAY
   }
 
-  public static final String RIO_CANBUS = "RIO";
+  public static final String RIO_CANBUS = "rio";
 
   public static class WoodBotConstants {
     public static final int INTAKE_ID = 15;
