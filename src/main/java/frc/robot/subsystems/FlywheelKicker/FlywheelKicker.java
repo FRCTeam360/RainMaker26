@@ -31,7 +31,7 @@ public class FlywheelKicker extends SubsystemBase {
   private void applyState() {
     switch (currentState) {
       case SPINUP_SHOOTING:
-        setDutyCycle(1.0);
+        setVelocity(4000.0);
         break;
       case OFF:
       default:

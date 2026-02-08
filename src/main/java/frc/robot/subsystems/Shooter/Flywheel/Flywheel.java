@@ -63,7 +63,7 @@ public class Flywheel extends SubsystemBase {
   private void applyState() {
     switch (currentState) {
       case SPINUP_SHOOTING:
-        setRPM(3500.0);
+        setRPM(3250.0);
         break;
       case SHOOTING:
         setDutyCycle(0.75);
