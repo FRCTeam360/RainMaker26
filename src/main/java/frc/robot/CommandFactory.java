@@ -54,6 +54,13 @@ public class CommandFactory {
         .alongWith(intakePivot.setPositionCommand(0.0));
   }
 
+  public Command basicIndexingCommand() {
+    return intake
+        .setDutyCycleCommand(0.65)
+        .alongWith(indexer.setDutyCycleCommand(0.4))
+        .alongWith(intakePivot.setPositionCommand(90.0));
+  }
+
   public Command stow() {
     return intake.setVelocityCommand(5500.0).alongWith(indexer.setDutyCycleCommand(0.4));
   }
@@ -71,7 +78,8 @@ public class CommandFactory {
         .alongWith(flywheel.setRPMCommand(rpm))
         .alongWith(
             Commands.waitUntil(() -> flywheel.atSetpoint(rpm, 100.0) && hood.atSetpoint(position))
-                .andThen(this.setFlywheelKickerDutyCycle(1.0).alongWith(this.basicIntakeCmd())));
+                .andThen(
+                    this.setFlywheelKickerDutyCycle(1.0).alongWith(this.basicIndexingCommand())));
   }
 
   public Command setFlywheelKickerDutyCycle(double value) {

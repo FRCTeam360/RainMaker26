@@ -38,7 +38,8 @@ public class IntakePivot extends SubsystemBase {
   }
 
   public Command setPositionCommand(DoubleSupplier positionSupplier) {
-    return this.runEnd(() -> this.setPosition(positionSupplier.getAsDouble()), () -> this.stop());
+    return this.runEnd(
+        () -> this.setPosition(positionSupplier.getAsDouble()), () -> this.setPosition(90.0));
   }
 
   public Command setPositionCommand(double position) {
