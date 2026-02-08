@@ -32,7 +32,7 @@ public class FieldConstants {
   // Field dimensions
   public static final double fieldLength = AprilTagLayoutType.OFFICIAL.getLayout().getFieldLength();
   public static final double fieldWidth = AprilTagLayoutType.OFFICIAL.getLayout().getFieldWidth();
-
+  public static final AprilTagFieldLayout FIELD_LAYOUT = AprilTagLayoutType.OFFICIAL.getLayout();
   /**
    * Officially defined and relevant vertical lines found on the field (defined by X-axis offset)
    */
