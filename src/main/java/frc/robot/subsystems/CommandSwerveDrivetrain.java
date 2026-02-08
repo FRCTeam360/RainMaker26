@@ -119,7 +119,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             // with negative X
             // (left)
             )
-        .alongWith(new InstantCommand());
   }
 
   // Xout Command
