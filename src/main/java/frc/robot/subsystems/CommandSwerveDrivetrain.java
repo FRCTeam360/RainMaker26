@@ -119,7 +119,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             // with negative X
             // (left)
             )
-        .alongWith(new InstantCommand(() -> System.out.println("running field oriented drive")));
+        .alongWith(new InstantCommand(() -> System.out.println("running")));
   }
 
   // Xout Command
@@ -152,6 +152,14 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         () -> {
           // Get the hub center position
           Translation2d hubCenter = FieldConstants.Hub.topCenterPoint.toTranslation2d();
+
+          Optional<Alliance> alliance = DriverStation.getAlliance();
+          if (alliance.isPresent() && alliance.get() == Alliance.Red) {
+            hubCenter = FieldConstants.Hub.topCenterPoint.toTranslation2d();
+          } else {
+            // Default to blue hub (works for both Blue alliance and no alliance set)
+            hubCenter = FieldConstants.Hub.oppTopCenterPoint.toTranslation2d();
+          }
 
           // Get current robot position
           Translation2d robotPosition = this.getStateCopy().Pose.getTranslation();
@@ -187,7 +195,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         () -> Math.pow(driveCont.getLeftX(), 3) * maxSpeed.in(MetersPerSecond) * -1.0);
   }
 
-  /* SysId routine for characterizing translation. This is used to find PID gains for the drive motors. */
+  /*
+   * SysId routine for characterizing translation. This is used to find PID gains
+   * for the drive motors.
+   */
   private final SysIdRoutine m_sysIdRoutineTranslation =
       new SysIdRoutine(
           new SysIdRoutine.Config(
@@ -199,7 +210,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
           new SysIdRoutine.Mechanism(
               output -> setControl(m_translationCharacterization.withVolts(output)), null, this));
 
-  /* SysId routine for characterizing steer. This is used to find PID gains for the steer motors. */
+  /*
+   * SysId routine for characterizing steer. This is used to find PID gains for
+   * the steer motors.
+   */
   private final SysIdRoutine m_sysIdRoutineSteer =
       new SysIdRoutine(
           new SysIdRoutine.Config(
@@ -213,8 +227,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
   /*
    * SysId routine for characterizing rotation.
-   * This is used to find PID gains for the FieldCentricFacingAngle HeadingController.
-   * See the documentation of SwerveRequest.SysIdSwerveRotation for info on importing the log to SysId.
+   * This is used to find PID gains for the FieldCentricFacingAngle
+   * HeadingController.
+   * See the documentation of SwerveRequest.SysIdSwerveRotation for info on
+   * importing the log to SysId.
    */
   private final SysIdRoutine m_sysIdRoutineRotation =
       new SysIdRoutine(
@@ -334,7 +350,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
               // PID constants for rotation
               new PIDConstants(8, 0, 0)),
           config,
-          // Assume the path needs to be flipped for Red vs Blue, this is normally the case
+          // Assume the path needs to be flipped for Red vs Blue, this is normally the
+          // case
           () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
           this // Subsystem for requirements
           );
@@ -416,10 +433,14 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     // Log whether vision measurements have been applied (useful for analysis)
     /*
      * Periodically try to apply the operator perspective.
-     * If we haven't applied the operator perspective before, then we should apply it regardless of DS state.
-     * This allows us to correct the perspective in case the robot code restarts mid-match.
-     * Otherwise, only check and apply the operator perspective if the DS is disabled.
-     * This ensures driving behavior doesn't change until an explicit disable event occurs during testing.
+     * If we haven't applied the operator perspective before, then we should apply
+     * it regardless of DS state.
+     * This allows us to correct the perspective in case the robot code restarts
+     * mid-match.
+     * Otherwise, only check and apply the operator perspective if the DS is
+     * disabled.
+     * This ensures driving behavior doesn't change until an explicit disable event
+     * occurs during testing.
      */
 
     if (!m_hasAppliedOperatorPerspective || DriverStation.isDisabled()) {
