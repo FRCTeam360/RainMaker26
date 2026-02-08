@@ -8,6 +8,9 @@ import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
+import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentricFacingAngle;
+import com.ctre.phoenix6.swerve.SwerveRequest.ForwardPerspectiveValue;
+import com.ctre.phoenix6.swerve.utility.PhoenixPIDController;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
@@ -47,6 +50,12 @@ import org.littletonrobotics.junction.Logger;
  * https://v6.docs.ctr-electronics.com/en/stable/docs/tuner/tuner-swerve/index.html
  */
 public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Subsystem {
+  public PhoenixPIDController headingController;
+  public PhoenixPIDController strafeController;
+  public PhoenixPIDController forwardController;
+  public PhoenixPIDController poseXController;
+  public PhoenixPIDController poseYController;
+
   private static final double kSimLoopPeriod = 0.004; // 4 ms
   private Notifier m_simNotifier = null;
   private double m_lastSimTime;
@@ -476,5 +485,81 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   @Override
   public Optional<Pose2d> samplePoseAt(double timestampSeconds) {
     return super.samplePoseAt(Utils.fpgaToCurrentTime(timestampSeconds));
+  }
+
+  public Pose2d getPose() {
+    return this.getStateCopy().Pose;
+  }
+
+  public boolean isAtRotationSetpoint() {
+    return headingController.atSetpoint();
+  }
+
+  public double getHeadingControllerSetpoint() {
+    return headingController.getSetpoint();
+  }
+
+  public double getHeadingControllerPositionError() {
+    return headingController.getPositionError();
+  }
+
+  public double getHeadingControllerVelocityError() {
+    return headingController.getVelocityError();
+  }
+
+  public double getPoseXSetpoint() {
+    return poseXController.getSetpoint();
+  }
+
+  public boolean isAtPoseXSetpoint() {
+    return poseXController.atSetpoint();
+  }
+
+  public double getPoseXControllerPositionError() {
+    return poseXController.getPositionError();
+  }
+
+  public double getPoseXControllerVelocityError() {
+    return poseXController.getVelocityError();
+  }
+
+  public double getPoseYSetpoint() {
+    return poseYController.getSetpoint();
+  }
+
+  public boolean isAtPoseYSetpoint() {
+    return poseYController.atSetpoint();
+  }
+
+  public double getPoseYControllerPositionError() {
+    return poseYController.getPositionError();
+  }
+
+  public double getPoseYControllerVelocityError() {
+    return poseYController.getVelocityError();
+  }
+
+  public void driveToPose(Pose2d setpointPose) {
+    Pose2d currentPose = getPose();
+    double timestamp = getStateCopy().Timestamp;
+    double x = poseXController.calculate(currentPose.getX(), setpointPose.getX(), timestamp);
+    double y = poseYController.calculate(currentPose.getY(), setpointPose.getY(), timestamp);
+
+    FieldCentricFacingAngle request =
+        new SwerveRequest.FieldCentricFacingAngle()
+            .withVelocityX(x * maxSpeed.in(MetersPerSecond))
+            .withVelocityY(y * maxSpeed.in(MetersPerSecond))
+            /* The driveToPose method was imported from 2025 code. That code's maxSpeed variable was a double,
+             * and could thus be multipled to the (also a double variable) x or y. This year, "maxSpeed" is a
+             * LinearVelocityObject. A method to convert the value into MetersPerSecond was used. This may need
+             * to be converted into a different value, such as Rotations or Feet.
+             */
+            .withTargetDirection(setpointPose.getRotation());
+    request.HeadingController = headingController;
+    request.withDeadband(0.025);
+    request.withRotationalDeadband(0.021);
+    request.ForwardPerspective = ForwardPerspectiveValue.BlueAlliance;
+    request.withDriveRequestType(DriveRequestType.Velocity);
+    this.setControl(request);
   }
 }
