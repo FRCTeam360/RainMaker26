@@ -24,6 +24,10 @@ public class Flywheel extends SubsystemBase {
     this.io = io;
   }
 
+  public FlywheelStates getState() {
+    return currentState;
+  }
+
   private FlywheelStates wantedState = FlywheelStates.OFF;
   private FlywheelStates currentState = FlywheelStates.OFF;
   private FlywheelStates previousState = FlywheelStates.OFF;

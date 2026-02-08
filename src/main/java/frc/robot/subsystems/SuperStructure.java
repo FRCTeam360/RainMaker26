@@ -39,7 +39,7 @@ public class SuperStructure extends SubsystemBase {
     ,
     PASSING // has current zone, makes check for !current zone then passes to zone
     ,
-    SHOOTING,
+    // SHOOTING,
     SPINUP_SHOOTING
   }
 
@@ -63,15 +63,15 @@ public class SuperStructure extends SubsystemBase {
       case INTAKING:
         currentSuperState = SuperStates.INTAKING;
         break;
-      case SHOOTING:
-        currentSuperState = SuperStates.SHOOTING;
-        break;
 
       case IDLE:
         currentSuperState = SuperStates.IDLE;
         break;
       case SPINUP_SHOOTING:
         currentSuperState = SuperStates.SPINUP_SHOOTING;
+        break;
+      default:
+        currentSuperState = SuperStates.IDLE;
         break;
     }
   }
@@ -81,10 +81,6 @@ public class SuperStructure extends SubsystemBase {
       case INTAKING:
         intaking();
         break;
-      case SHOOTING:
-        shooting();
-        break;
-
       case IDLE:
         stopped();
         break;
@@ -100,18 +96,14 @@ public class SuperStructure extends SubsystemBase {
     flywheel.setWantedState(FlywheelStates.SPINUP_SHOOTING);
     if (hood.atSetpoint(8.0) && flywheel.atSetpoint(3500.0, 100.0)) {
       flywheelKicker.setWantedState(FlywheelKickerStates.SPINUP_SHOOTING);
-      intake.setWantedState(IntakeStates.INTAKING);
-      indexer.setWantedState(IndexerStates.SHOOTING);
+      intake.setWantedState(IntakeStates.SPINUP_SHOOTING);
+      indexer.setWantedState(IndexerStates.SPINUP_SHOOTING);
     }
   }
 
   private void intaking() {
     intake.setWantedState(Intake.IntakeStates.INTAKING);
     indexer.setWantedState(Indexer.IndexerStates.INTAKING);
-  }
-
-  private void shooting() {
-    flywheel.setWantedState(Flywheel.FlywheelStates.SHOOTING);
   }
 
   private void stopped() {
@@ -128,6 +120,33 @@ public class SuperStructure extends SubsystemBase {
 
   public void setWantedSuperState(SuperStates superState) {
     this.wantedSuperState = superState;
+  }
+
+  public void stopSuperState(SuperStates state) {
+    switch (state) {
+      case INTAKING:
+        if (intake.getState() == IntakeStates.INTAKING) intake.setWantedState(IntakeStates.OFF);
+        if (indexer.getState() == IndexerStates.INTAKING) indexer.setWantedState(IndexerStates.OFF);
+        break;
+      case SPINUP_SHOOTING:
+        if (intake.getState() == IntakeStates.SPINUP_SHOOTING)
+          intake.setWantedState(IntakeStates.OFF);
+        if (hood.getState() == HoodStates.SPINUP_SHOOTING) hood.setWantedState(HoodStates.OFF);
+        if (indexer.getState() == IndexerStates.SPINUP_SHOOTING)
+          indexer.setWantedState(IndexerStates.OFF);
+        if (flywheel.getState() == FlywheelStates.SPINUP_SHOOTING)
+          flywheel.setWantedState(FlywheelStates.OFF);
+        if (flywheelKicker.getState() == FlywheelKickerStates.SPINUP_SHOOTING)
+          flywheelKicker.setWantedState(FlywheelKickerStates.OFF);
+        break;
+      default:
+        stopped();
+        break;
+    }
+  }
+
+  public Command stopSuperStateCommand(SuperStates state) {
+    return new InstantCommand(() -> stopSuperState(state), this);
   }
 
   @Override

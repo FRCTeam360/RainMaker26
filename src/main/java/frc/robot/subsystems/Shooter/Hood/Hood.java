@@ -42,6 +42,10 @@ public class Hood extends SubsystemBase {
     }
   }
 
+  public HoodStates getState() {
+    return currentState;
+  }
+
   private void updateState() {
     previousState = currentState;
 

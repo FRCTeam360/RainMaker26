@@ -120,7 +120,7 @@ public class RobotContainer {
     commandFactory =
         new CommandFactory(
             intake, flywheel, flywheelKicker, hood, indexer, intakePivot, vision, drivetrain);
-    // superStructure = new SuperStructure(intake, indexer, flywheelKicker, flywheel, hood);
+    superStructure = new SuperStructure(intake, indexer, flywheelKicker, flywheel, hood);
 
     registerPathplannerCommand(
         "basic intake", superStructure.setStateCommand(SuperStates.INTAKING));
@@ -198,7 +198,9 @@ public class RobotContainer {
     // basicIntakeCmd uses intake and indexer
     if (Objects.nonNull(intake) && Objects.nonNull(indexer)) {
       superstructureCont.leftBumper().onTrue(superStructure.setStateCommand(SuperStates.INTAKING));
-      superstructureCont.leftBumper().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
+      superstructureCont
+          .leftBumper()
+          .onFalse(superStructure.stopSuperStateCommand(SuperStates.INTAKING));
     }
 
     // setFlywheelKickerDutyCycle uses flywheelKicker
@@ -225,7 +227,9 @@ public class RobotContainer {
       superstructureCont
           .rightTrigger()
           .onTrue(superStructure.setStateCommand(SuperStates.SPINUP_SHOOTING));
-      superstructureCont.rightTrigger().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
+      superstructureCont
+          .rightTrigger()
+          .onFalse(superStructure.stopSuperStateCommand(SuperStates.SPINUP_SHOOTING));
     }
 
     // Drivetrain commands

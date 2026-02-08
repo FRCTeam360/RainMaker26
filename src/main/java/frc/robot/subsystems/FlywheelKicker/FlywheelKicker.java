@@ -18,6 +18,10 @@ public class FlywheelKicker extends SubsystemBase {
     SPINUP_SHOOTING
   }
 
+  public FlywheelKickerStates getState() {
+    return currentState;
+  }
+
   private FlywheelKickerStates wantedState = FlywheelKickerStates.OFF;
   private FlywheelKickerStates currentState = FlywheelKickerStates.OFF;
   private FlywheelKickerStates previousState = FlywheelKickerStates.OFF;
