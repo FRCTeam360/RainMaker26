@@ -157,6 +157,14 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureTestBindings() {
+
+    // Drivetrain commands
+    if (Objects.nonNull(drivetrain)) {
+      drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(testCont1));
+      testCont1.rightTrigger().whileTrue(drivetrain.faceHubWhileDriving(testCont1));
+      drivetrain.registerTelemetry(logger::telemeterize);
+    }
+
     if (Objects.nonNull(flywheel)) {
       testCont1.a().whileTrue(flywheel.setDutyCycleCommand(() -> 0.5));
     }

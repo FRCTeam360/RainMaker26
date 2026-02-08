@@ -17,6 +17,7 @@ import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.simulation.BatterySim;
@@ -65,7 +66,7 @@ public class IntakePivotIOSim implements IntakePivotIO {
           Units.degreesToRadians(-75),
           Units.degreesToRadians(255),
           true, // Simulate gravity
-          0);
+          Rotation2d.fromDegrees(90).getRadians());
 
   public IntakePivotIOSim() {
     // Configure TalonFX with PID and gravity compensation
@@ -161,8 +162,9 @@ public class IntakePivotIOSim implements IntakePivotIO {
    *
    * @param positionRotations Target position in rotations
    */
-  public void setPosition(double positionRotations) {
-    motorControllerSim.setControl(positionRequest.withPosition(positionRotations));
+  public void setPosition(double degrees) {
+    double posRotations = degrees / 360;
+    motorControllerSim.setControl(positionRequest.withPosition(posRotations));
   }
 
   /**
