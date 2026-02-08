@@ -13,7 +13,7 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
+import frc.robot.utils.FieldConstants;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -150,9 +150,9 @@ public class Vision extends SubsystemBase {
 
       // Skip measurements that are not with in the field boundary
       if (pose.getX() < 0.0
-          || pose.getX() > Constants.FIELD_LAYOUT.getFieldLength()
+          || pose.getX() > FieldConstants.fieldLength
           || pose.getY() < 0.0
-          || pose.getY() > Constants.FIELD_LAYOUT.getFieldWidth()) {
+          || pose.getY() > FieldConstants.fieldWidth) {
         rejectedMeasurements++;
         continue;
       }
