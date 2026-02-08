@@ -24,7 +24,6 @@ import java.io.IOException;
  */
 public class FieldConstants {
   public static final FieldType fieldType = FieldType.WELDED;
-
   // AprilTag related constants
   public static final int aprilTagCount = AprilTagLayoutType.OFFICIAL.getLayout().getTags().size();
   public static final double aprilTagWidth = Units.inchesToMeters(6.5);
