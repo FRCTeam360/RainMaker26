@@ -16,21 +16,18 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import frc.robot.Constants;
 
-
 public class IndexerIOWB implements IndexerIO {
   /** Creates a new IndexerIOWB. */
   CANrangeConfiguration sensorConfig = new CANrangeConfiguration();
 
   private final SparkMax indexerMotor =
       new SparkMax(Constants.WoodBotConstants.INDEXER_ID, MotorType.kBrushless);
-      
+
   private final CANrange sensor =
-      new CANrange(
-          Constants.WoodBotConstants.INDEXER_SENSOR_ID, Constants.RIO_CANBUS);
+      new CANrange(Constants.WoodBotConstants.INDEXER_SENSOR_ID, Constants.RIO_CANBUS);
   private final RelativeEncoder encoder = indexerMotor.getEncoder();
   private final SparkMaxConfig sparkMaxConfig = new SparkMaxConfig();
 
-  
   public IndexerIOWB() {
     sparkMaxConfig.idleMode(IdleMode.kBrake);
     sparkMaxConfig.inverted(true);
