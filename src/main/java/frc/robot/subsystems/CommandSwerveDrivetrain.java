@@ -52,6 +52,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   private Notifier m_simNotifier = null;
   private double m_lastSimTime;
   private final String CMD_NAME = "Swerve: ";
+  private final SwerveRequest xOutReq = new SwerveRequest.SwerveDriveBrake();
 
   // Keep track of when vision measurements are added for logging context
   private boolean hasVisionMeasurements = false;
@@ -119,6 +120,15 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             // (left)
             )
         .alongWith(new InstantCommand(() -> System.out.println("running field oriented drive")));
+  }
+
+  // Xout Command
+  public void xOut() {
+    this.setControl(xOutReq);
+  }
+
+  public Command xOutCmd() {
+    return this.applyRequest(() -> xOutReq);
   }
 
   /**
