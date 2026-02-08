@@ -36,6 +36,7 @@ import frc.robot.subsystems.Shooter.Flywheel.FlywheelIOWB;
 import frc.robot.subsystems.Shooter.Hood.Hood;
 import frc.robot.subsystems.Shooter.Hood.HoodIOSim;
 import frc.robot.subsystems.Shooter.Hood.HoodIOWB;
+import frc.robot.subsystems.Shooter.ShotCalculator;
 import frc.robot.subsystems.SuperStructure;
 import frc.robot.subsystems.SuperStructure.SuperStates;
 import frc.robot.subsystems.Vision.Vision;
@@ -65,6 +66,8 @@ public class RobotContainer {
 
   private CommandFactory commandFactory;
   private SuperStructure superStructure;
+
+  private ShotCalculator shotCalculator;
 
   // TODO: refactor to allow for more than 1 drivetrain type
 
@@ -137,6 +140,8 @@ public class RobotContainer {
     SmartDashboard.putData("Auto Chooser", autoChooser);
 
     FollowPathCommand.warmupCommand().schedule();
+
+    shotCalculator = new ShotCalculator(drivetrain);
   }
 
   public void registerPathplannerCommand(String name, Command command) {
@@ -159,6 +164,20 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureTestBindings() {
+    if (Objects.nonNull(drivetrain)) {
+      drivetrain.setDefaultCommand(
+          drivetrain
+              .fieldOrientedDrive(testCont1)
+              .alongWith(
+                  new InstantCommand(
+                      () -> {
+                        shotCalculator.calculateShot();
+                        shotCalculator.clearShootingParams();
+                      })));
+      testCont1.rightTrigger().whileTrue(drivetrain.faceHubWhileDriving(testCont1));
+      drivetrain.registerTelemetry(logger::telemeterize);
+    }
+
     if (Objects.nonNull(flywheel)) {
       testCont1.a().whileTrue(flywheel.setDutyCycleCommand(() -> 0.5));
     }
