@@ -126,7 +126,7 @@ public class RobotContainer {
         "basic intake", superStructure.setStateCommand(SuperStates.INTAKING));
     registerPathplannerCommand(
         "shoot at hub", superStructure.setStateCommand(SuperStates.SPINUP_SHOOTING));
-    registerPathplannerCommand("run flywheel kicker", flywheelKicker.setDutyCycleCommand(1.0));
+    registerPathplannerCommand("run flywheel kicker", flywheelKicker.setVelocityCommand(4000.0));
     configureBindings();
     configureTestBindings();
 
