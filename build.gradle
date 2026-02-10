@@ -3,6 +3,7 @@ plugins {
     id 'com.diffplug.spotless' version '6.25.0'
     id "edu.wpi.first.GradleRIO" version "2026.2.1"
     id "com.peterabeles.gversion" version "1.10"
+    id 'com.github.spotbugs' version '6.0.26'
 }
 
 java {
@@ -53,6 +54,26 @@ gversion {
     timeZone     = "America/New_York"
     indent       = "  "
 }
+
+// SpotBugs static analysis
+spotbugs {
+    ignoreFailures = false
+    excludeFilter = file('spotbugs-exclude.xml')
+}
+
+tasks.withType(com.github.spotbugs.snom.SpotBugsTask) {
+    reports {
+        html {
+            required = true
+            outputLocation = file("$buildDir/reports/spotbugs/spotbugs.html")
+            stylesheet = 'fancy-hist.xsl'
+        }
+        xml.required = false
+    }
+}
+
+// Run SpotBugs as part of the build
+project.check.dependsOn('spotbugsMain')
 
 // Spotless formatting
 project.compileJava.dependsOn(spotlessApply)

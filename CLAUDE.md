@@ -57,6 +57,11 @@ Always run tests before committing.
 Check formatting with: ./gradlew spotlessCheck
 Apply formatting with: ./gradlew spotlessApply
 
+## Static Analysis
+
+Run SpotBugs to find potential bugs: ./gradlew spotbugsMain
+View the report: open build/reports/spotbugs/spotbugs.html
+
 ## Code Patterns
 
 - Use Command-based programming: subsystems own hardware, commands define actions
@@ -138,7 +143,7 @@ When reviewing PRs, check for the following (inspired by NASA's "Power of 10" fo
 
 ### Robotics-Specific
 
-- [ ] Commands have clear isFinished() conditions (no infinite commands without interruption)
+- [ ] Commands have clear isFinished() conditions or are bound/sequenced in a way that they stop when instructed (no infinite commands without interruption)
 - [ ] Sensor values validated/clamped before use
 - [ ] Units documented in variable names or comments (meters, radians, etc.)
 - [ ] Resource ownership clear (one subsystem per hardware device)
