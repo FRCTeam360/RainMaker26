@@ -53,6 +53,12 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   private final String CMD_NAME = "Swerve: ";
   private final SwerveRequest xOutReq = new SwerveRequest.SwerveDriveBrake();
 
+  public Pose2d getPose() {
+    return new Pose2d();
+  }
+
+  public void drive(double xSpeed, double ySpeed, double rotSpeed) {}
+
   // Keep track of when vision measurements are added for logging context
   private boolean hasVisionMeasurements = false;
 
@@ -465,6 +471,24 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
           Utils.fpgaToCurrentTime(measurement.timestamp()),
           measurement.standardDeviation());
     }
+  }
+
+  /**
+   * Returns the current estimated pose of the robot on the field.
+   *
+   * @return the current {@link Pose2d} of the robot
+   */
+  public Pose2d getPosition() {
+    return this.getStateCopy().Pose;
+  }
+
+  /**
+   * Returns the current chassis speeds of the robot.
+   *
+   * @return the current {@link ChassisSpeeds} of the robot
+   */
+  public ChassisSpeeds getVelocity() {
+    return this.getStateCopy().Speeds;
   }
 
   /**

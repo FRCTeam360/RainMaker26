@@ -1,26 +1,100 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot.subsystems.Shooter;
 
-import frc.robot.subsystems.Shooter.Flywheel.Flywheel;
-import frc.robot.subsystems.Shooter.Hood.Hood;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
+import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.utils.AllianceFlipUtil;
+import frc.robot.utils.FieldConstants;
+import org.littletonrobotics.junction.Logger;
 
+/**
+ * Calculates shooting parameters (hood angle, flywheel speed, and drivebase heading) based on the
+ * robot's distance to the hub. Uses interpolation maps to convert distance into mechanism
+ * setpoints.
+ */
 public class ShotCalculator {
-  private final Flywheel flywheel;
-  private final Hood hood;
+  private CommandSwerveDrivetrain drivetrain;
 
-  public ShotCalculator(Flywheel flywheel, Hood hood) {
-    this.flywheel = flywheel;
-    this.hood = hood;
+  private static final InterpolatingDoubleTreeMap shotHoodAngleMap =
+      new InterpolatingDoubleTreeMap();
+  private static final InterpolatingDoubleTreeMap launchFlywheelSpeedMap =
+      new InterpolatingDoubleTreeMap();
+  private static final InterpolatingDoubleTreeMap timeOfFlightMap =
+      new InterpolatingDoubleTreeMap();
+
+  /**
+   * Holds the calculated shooting parameters for a given robot position.
+   *
+   * @param targetAngle the angle the drivebase should face toward the hub
+   * @param hoodAngle the hood angle setpoint in degrees
+   * @param flywheelSpeed the flywheel speed setpoint in RPM
+   */
+  public record ShootingParams(Rotation2d targetAngle, double hoodAngle, double flywheelSpeed) {}
+
+  private ShootingParams latestParameters = null;
+
+  private static double minDistance;
+  private static double maxDistance;
+
+  static {
+    minDistance = 0.0;
+    maxDistance = Double.MAX_VALUE;
+
+    shotHoodAngleMap.put(0.0, 0.0);
+    launchFlywheelSpeedMap.put(0.0, 0.0);
   }
 
-  public record ShootingParameters() {}
-
-  public ShootingParameters getParameters() {
-    throw new UnsupportedOperationException("getParameters() has not been implemented");
+  /**
+   * Creates a new ShotCalculator.
+   *
+   * @param drivetrain the swerve drivetrain used to obtain the robot's current pose
+   */
+  public ShotCalculator(CommandSwerveDrivetrain drivetrain) {
+    this.drivetrain = drivetrain;
   }
 
-  public void clearShootingParameters() {}
+  private ShootingParams shootingParams = null;
+
+  /**
+   * Calculates and caches the shooting parameters for the current robot position. If parameters
+   * have already been calculated and not cleared, returns the cached result.
+   *
+   * @return the {@link ShootingParams} containing drivebase angle, hood angle, and flywheel speed
+   */
+  public ShootingParams calculateShot() {
+    if (shootingParams != null) {
+      Logger.recordOutput("ShotCalculator/cached", true);
+
+      return shootingParams;
+    }
+    Logger.recordOutput("ShotCalculator/cached", false);
+    Pose2d robotPosition = drivetrain.getPosition();
+    Pose2d shooterPosition = robotPosition.plus(ShooterConstants.robotToShooter);
+
+    Translation2d hubTranslation =
+        AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint.toTranslation2d());
+    double distanceToTarget = hubTranslation.getDistance(shooterPosition.getTranslation());
+
+    Rotation2d targetAngle = hubTranslation.minus(shooterPosition.getTranslation()).getAngle();
+    double hoodAngle = shotHoodAngleMap.get(distanceToTarget);
+    double flywheelSpeed = launchFlywheelSpeedMap.get(distanceToTarget);
+
+    Logger.recordOutput("ShotCalculator/hubPosition", FieldConstants.Hub.topCenterPoint);
+    Logger.recordOutput("ShotCalculator/distanceToTarget", distanceToTarget);
+    Logger.recordOutput("ShotCalculator/targetAngle", targetAngle);
+
+    shootingParams = new ShootingParams(targetAngle, hoodAngle, flywheelSpeed);
+
+    return shootingParams;
+  }
+
+  /**
+   * Clears the cached shooting parameters, forcing a recalculation on the next call to {@link
+   * #calculateShot()}.
+   */
+  public void clearShootingParams() {
+    shootingParams = null;
+  }
 }
