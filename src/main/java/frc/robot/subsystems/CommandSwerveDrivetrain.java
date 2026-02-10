@@ -479,6 +479,24 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   }
 
   /**
+   * Returns the current estimated pose of the robot on the field.
+   *
+   * @return the current {@link Pose2d} of the robot
+   */
+  public Pose2d getPosition() {
+    return this.getStateCopy().Pose;
+  }
+
+  /**
+   * Returns the current chassis speeds of the robot.
+   *
+   * @return the current {@link ChassisSpeeds} of the robot
+   */
+  public ChassisSpeeds getVelocity() {
+    return this.getStateCopy().Speeds;
+  }
+
+  /**
    * Return the pose at a given timestamp, if the buffer is not empty.
    *
    * @param timestampSeconds The timestamp of the pose in seconds.
