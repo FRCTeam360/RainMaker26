@@ -65,6 +65,7 @@ public class Hood extends SubsystemBase {
         break;
       case AIMING:
         currentState = HoodStates.AIMING;
+        break;
       case OFF:
       default:
         currentState = HoodStates.OFF;
