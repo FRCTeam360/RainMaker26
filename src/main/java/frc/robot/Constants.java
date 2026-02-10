@@ -23,6 +23,7 @@ public final class Constants {
   public static enum RobotType {
     SIM,
     WOODBOT,
+    PRACTICE,
     REPLAY
   }
 
@@ -74,6 +75,36 @@ public final class Constants {
     public static final int HOOD_MOTOR = 6;
   }
 
+  public static class PracticeBotConstants {
+    // === INTAKE ===
+    public static final int INTAKE_SENSOR_PORT = 0;
+    public static final int INTAKE_ID = 15;
+    public static final int INTAKE_PIVOT_ID = 0;
+
+    // === HOPPER ===
+    public static final int INDEXER_SENSOR_PORT = 1;
+    public static final int INDEXER_SENSOR_ID = 2;
+    public static final int INDEXER_ID = 16;
+
+    // === FLYWHEEL ===
+    public static final int FLYWHEEL_KICKER_ID = 17;
+    public static final int FLYWHEEL_KICKER_SENSOR_ID = 3;
+    public static final int FLYWHEEL_RIGHT_ID = 18;
+    public static final int FLYWHEEL_LEFT_ID = 19;
+
+    // === HOOD ===
+    public static final int HOOD_ID = 20;
+
+    // === LIMELIGHT ===
+    public static final String LIMELIGHT = "limelight";
+
+    // === CANBUS ===
+    public static final String CANBUS_NAME = "Default Name";
+
+    // === CLIMBER ===
+    public static final int CLIMBER_ID = 16; // what it was set to last year.
+  }
+
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
   }
@@ -90,6 +121,6 @@ public final class Constants {
     } else if (!Robot.isReal()) { // KEEP AT BOTTOM
       return Constants.RobotType.SIM;
     }
-    return Constants.RobotType.WOODBOT;
+    return Constants.RobotType.PRACTICE;
   }
 }
