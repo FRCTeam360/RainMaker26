@@ -48,7 +48,7 @@ public class CommandFactory {
   }
 
   public Command basicIntakeCmd() {
-    return intake.setVelocityCommand(5500.0).alongWith(indexer.setDutyCycleCommand(0.4));
+    return intake.setVelocityCommand(4500.0).alongWith(indexer.setDutyCycleCommand(0.4));
   }
 
   public Command basicShootCmd() {
@@ -64,7 +64,8 @@ public class CommandFactory {
         .alongWith(flywheel.setVelocityCommand(rpm))
         .alongWith(
             Commands.waitUntil(() -> flywheel.atSetpoint(rpm, 100.0) && hood.atSetpoint(position))
-                .andThen(this.setFlywheelKickerDutyCycle(1.0).alongWith(this.basicIntakeCmd())));
+                .andThen(
+                    flyWheelKicker.setVelocityCommand(4500.0).alongWith(this.basicIntakeCmd())));
   }
 
   public Command setFlywheelKickerDutyCycle(double value) {

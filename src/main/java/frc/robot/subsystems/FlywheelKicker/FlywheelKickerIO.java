@@ -21,4 +21,6 @@ public interface FlywheelKickerIO {
   public default void updateInputs(FlywheelKickerIOInputs inputs) {}
 
   public void setDutyCycle(double dutyCycle);
+
+  public void setVelocity(double rpm);
 }

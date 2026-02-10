@@ -26,7 +26,6 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -52,6 +51,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   private Notifier m_simNotifier = null;
   private double m_lastSimTime;
   private final String CMD_NAME = "Swerve: ";
+  private final SwerveRequest xOutReq = new SwerveRequest.SwerveDriveBrake();
 
   // Keep track of when vision measurements are added for logging context
   private boolean hasVisionMeasurements = false;
@@ -100,25 +100,33 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             .withRotationalDeadband(maxAngularVelocity.in(RadiansPerSecond) * 0.01)
             .withDriveRequestType(m_driveRequestType);
     return this.applyRequest(
-            () ->
-                drive
-                    .withVelocityX(
-                        Math.pow(driveCont.getLeftY(), 3)
-                            * maxSpeed.in(MetersPerSecond)
-                            * -1.0) // Drive forward with negative Y (forward)
-                    .withVelocityY(
-                        Math.pow(driveCont.getLeftX(), 3)
-                            * maxSpeed.in(MetersPerSecond)
-                            * -1.0) // Drive left with negative X (left)
-                    .withRotationalRate(
-                        Math.pow(driveCont.getRightX(), 2)
-                            * (maxAngularVelocity.in(RadiansPerSecond) / 2.0)
-                            * -Math.signum(driveCont.getRightX())) // Drive
-            // counterclockwise
-            // with negative X
-            // (left)
-            )
-        .alongWith(new InstantCommand(() -> System.out.println("running field oriented drive")));
+        () ->
+            drive
+                .withVelocityX(
+                    Math.pow(driveCont.getLeftY(), 3)
+                        * maxSpeed.in(MetersPerSecond)
+                        * -1.0) // Drive forward with negative Y (forward)
+                .withVelocityY(
+                    Math.pow(driveCont.getLeftX(), 3)
+                        * maxSpeed.in(MetersPerSecond)
+                        * -1.0) // Drive left with negative X (left)
+                .withRotationalRate(
+                    Math.pow(driveCont.getRightX(), 2)
+                        * (maxAngularVelocity.in(RadiansPerSecond) / 2.0)
+                        * -Math.signum(driveCont.getRightX())) // Drive
+        // counterclockwise
+        // with negative X
+        // (left)
+        );
+  }
+
+  // Xout Command
+  public void xOut() {
+    this.setControl(xOutReq);
+  }
+
+  public Command xOutCmd() {
+    return this.applyRequest(() -> xOutReq);
   }
 
   /**
@@ -320,7 +328,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                       .withDriveRequestType(m_driveRequestType)),
           new PPHolonomicDriveController(
               // PID constants for translation
-              new PIDConstants(10, 0, 0),
+              new PIDConstants(11, 0, 0),
               // PID constants for rotation
               new PIDConstants(8, 0, 0)),
           config,
