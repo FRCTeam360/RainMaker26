@@ -9,8 +9,11 @@ import frc.robot.utils.AllianceFlipUtil;
 import frc.robot.utils.FieldConstants;
 import org.littletonrobotics.junction.Logger;
 
-// how far we are from the hub
-// taking that to convert to setpoints for flywhel and hood
+/**
+ * Calculates shooting parameters (hood angle, flywheel speed, and drivebase heading) based on the
+ * robot's distance to the hub. Uses interpolation maps to convert distance into mechanism
+ * setpoints.
+ */
 public class ShotCalculator {
   private CommandSwerveDrivetrain drivetrain;
 
@@ -21,6 +24,13 @@ public class ShotCalculator {
   private static final InterpolatingDoubleTreeMap timeOfFlightMap =
       new InterpolatingDoubleTreeMap();
 
+  /**
+   * Holds the calculated shooting parameters for a given robot position.
+   *
+   * @param targetAngle the angle the drivebase should face toward the hub
+   * @param hoodAngle the hood angle setpoint in degrees
+   * @param flywheelSpeed the flywheel speed setpoint in RPM
+   */
   public record ShootingParams(Rotation2d targetAngle, double hoodAngle, double flywheelSpeed) {}
 
   private ShootingParams latestParameters = null;
@@ -36,6 +46,11 @@ public class ShotCalculator {
     launchFlywheelSpeedMap.put(0.0, 0.0);
   }
 
+  /**
+   * Creates a new ShotCalculator.
+   *
+   * @param drivetrain the swerve drivetrain used to obtain the robot's current pose
+   */
   public ShotCalculator(CommandSwerveDrivetrain drivetrain) {
     this.drivetrain = drivetrain;
   }
