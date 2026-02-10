@@ -25,6 +25,8 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -259,6 +261,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
       startSimThread();
     }
     configureAutoBuilder();
+    SmartDashboard.putData("Field", field);
   }
 
   /**
@@ -281,6 +284,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
       startSimThread();
     }
     configureAutoBuilder();
+    SmartDashboard.putData("Field", field);
   }
 
   /**
@@ -314,7 +318,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
       startSimThread();
     }
     configureAutoBuilder();
+    SmartDashboard.putData("Field", field);
   }
+
+  private final Field2d field = new Field2d();
 
   private void configureAutoBuilder() {
     try {
@@ -406,6 +413,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
   @Override
   public void periodic() {
+    field.setRobotPose(new Pose2d(getPose2d().getX(), getPose2d().getY(), getRotation2d()));
 
     // Current pose includes vision fusion when vision measurements are added
     Logger.recordOutput(CMD_NAME + " Current Pose", this.getStateCopy().Pose);
