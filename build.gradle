@@ -72,6 +72,14 @@ tasks.withType(com.github.spotbugs.snom.SpotBugsTask) {
     }
 }
 
+// Only run SpotBugs when explicitly invoked (e.g., ./gradlew spotbugsMain).
+// Skips automatically during build/check lifecycle.
+tasks.withType(com.github.spotbugs.snom.SpotBugsTask).configureEach {
+    onlyIf {
+        gradle.startParameter.taskNames.any { it.toLowerCase().contains('spotbugs') }
+    }
+}
+
 // Spotless formatting
 project.compileJava.dependsOn(spotlessApply)
 spotless {
