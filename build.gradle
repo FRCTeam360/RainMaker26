@@ -65,7 +65,7 @@ tasks.withType(com.github.spotbugs.snom.SpotBugsTask) {
     reports {
         html {
             required = true
-            outputLocation = file("$buildDir/reports/spotbugs/spotbugs.html")
+            outputLocation = layout.buildDirectory.file("reports/spotbugs/spotbugs.html")
             stylesheet = 'fancy-hist.xsl'
         }
         xml.required = false
