@@ -146,36 +146,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
    */
   public Command faceHubWhileDriving(
       DoubleSupplier velocityXSupplier, DoubleSupplier velocityYSupplier) {
-
-    // Configure the heading controller with PID values
-    m_faceHubRequest.HeadingController.setPID(HEADING_KP, HEADING_KI, HEADING_KD);
-    m_faceHubRequest.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
-    m_faceHubRequest.HeadingController.setIZone(HEADING_I_ZONE);
-
-    return run(
-        () -> {
-          // Get the hub center position
-          Translation2d hubCenter = FieldConstants.Hub.topCenterPoint.toTranslation2d();
-
-          // Get current robot position
-          Translation2d robotPosition = this.getStateCopy().Pose.getTranslation();
-
-          // Calculate the angle from robot to hub
-          Rotation2d angleToHub =
-              hubCenter.minus(robotPosition).getAngle().rotateBy(Rotation2d.k180deg);
-
-          // Log the target angle for debugging
-          Logger.recordOutput(CMD_NAME + "FaceHub/TargetAngle", angleToHub.getDegrees());
-          Logger.recordOutput(
-              CMD_NAME + "FaceHub/DistanceToHub", robotPosition.getDistance(hubCenter));
-
-          // Apply the field-centric facing angle request
-          this.setControl(
-              m_faceHubRequest
-                  .withVelocityX(velocityXSupplier.getAsDouble())
-                  .withVelocityY(velocityYSupplier.getAsDouble())
-                  .withTargetDirection(angleToHub));
-        });
+    return facePointWhileDriving(
+        velocityXSupplier,
+        velocityYSupplier,
+        () -> FieldConstants.Hub.topCenterPoint.toTranslation2d());
   }
 
   /**
@@ -189,6 +163,68 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     return faceHubWhileDriving(
         () -> Math.pow(driveCont.getLeftY(), 3) * maxSpeed.in(MetersPerSecond) * -1.0,
         () -> Math.pow(driveCont.getLeftX(), 3) * maxSpeed.in(MetersPerSecond) * -1.0);
+  }
+
+  /**
+   * Creates a command that drives the robot in field-centric mode while continuously rotating to
+   * face an arbitrary point on the field. The heading controller automatically adjusts the robot's
+   * rotation to always point toward the target as the robot moves around the field.
+   *
+   * @param velocityXSupplier Supplier for X velocity (field-relative, forward positive) in m/s
+   * @param velocityYSupplier Supplier for Y velocity (field-relative, left positive) in m/s
+   * @param targetSupplier Supplier for the target point to face (field coordinates)
+   * @return Command that drives while facing the target point
+   */
+  public Command facePointWhileDriving(
+      DoubleSupplier velocityXSupplier,
+      DoubleSupplier velocityYSupplier,
+      Supplier<Translation2d> targetSupplier) {
+
+    // Configure the heading controller with PID values
+    m_faceHubRequest.HeadingController.setPID(HEADING_KP, HEADING_KI, HEADING_KD);
+    m_faceHubRequest.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
+    m_faceHubRequest.HeadingController.setIZone(HEADING_I_ZONE);
+
+    return run(
+        () -> {
+          // Get the target position
+          Translation2d target = targetSupplier.get();
+
+          // Get current robot position
+          Translation2d robotPosition = this.getStateCopy().Pose.getTranslation();
+
+          // Calculate the angle from robot to target
+          Rotation2d angleToTarget =
+              target.minus(robotPosition).getAngle().rotateBy(Rotation2d.k180deg);
+
+          // Log the target angle for debugging
+          Logger.recordOutput(CMD_NAME + "FacePoint/TargetAngle", angleToTarget.getDegrees());
+          Logger.recordOutput(
+              CMD_NAME + "FacePoint/DistanceToTarget", robotPosition.getDistance(target));
+
+          // Apply the field-centric facing angle request
+          this.setControl(
+              m_faceHubRequest
+                  .withVelocityX(velocityXSupplier.getAsDouble())
+                  .withVelocityY(velocityYSupplier.getAsDouble())
+                  .withTargetDirection(angleToTarget));
+        });
+  }
+
+  /**
+   * Creates a command that drives the robot in field-centric mode while continuously rotating to
+   * face an arbitrary point, using controller input with cubic response curve.
+   *
+   * @param driveCont The Xbox controller for driver input
+   * @param targetSupplier Supplier for the target point to face (field coordinates)
+   * @return Command that drives while facing the target point
+   */
+  public Command facePointWhileDriving(
+      CommandXboxController driveCont, Supplier<Translation2d> targetSupplier) {
+    return facePointWhileDriving(
+        () -> Math.pow(driveCont.getLeftY(), 3) * maxSpeed.in(MetersPerSecond) * -1.0,
+        () -> Math.pow(driveCont.getLeftX(), 3) * maxSpeed.in(MetersPerSecond) * -1.0,
+        targetSupplier);
   }
 
   /* SysId routine for characterizing translation. This is used to find PID gains for the drive motors. */

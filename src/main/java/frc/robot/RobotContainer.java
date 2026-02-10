@@ -121,7 +121,15 @@ public class RobotContainer {
     // Configure the trigger bindings
     commandFactory =
         new CommandFactory(
-            intake, flywheel, flywheelKicker, hood, indexer, intakePivot, vision, drivetrain);
+            intake,
+            flywheel,
+            flywheelKicker,
+            hood,
+            indexer,
+            intakePivot,
+            vision,
+            drivetrain,
+            shotCalculator);
     // superStructure = new SuperStructure(intake, indexer, flywheelKicker, flywheel, hood);
 
     registerPathplannerCommand("basic intake", commandFactory.basicIntakeCmd());
@@ -235,7 +243,9 @@ public class RobotContainer {
       driverCont.x().whileTrue(commandFactory.shootWithRPM(2500));
       driverCont.b().whileTrue(commandFactory.shootWithRPM(3000));
       driverCont.y().whileTrue(commandFactory.shootWithRPM(3500));
-      driverCont.rightTrigger().whileTrue(commandFactory.shootWithSpinUp(3250.0, 8.0));
+      // Shoot at the dashboard-selected target (or hub if no custom target is active).
+      // Aims drivetrain, adjusts hood/flywheel from ShotCalculator, and auto-fires when ready.
+      driverCont.rightTrigger().whileTrue(commandFactory.shootAtTargetCmd(driverCont));
     }
 
     // Drivetrain commands
