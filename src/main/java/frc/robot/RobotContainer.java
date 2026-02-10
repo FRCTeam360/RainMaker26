@@ -19,6 +19,8 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.generated.WoodBotDrivetrain;
+import frc.robot.subsystems.Climber.Climber;
+import frc.robot.subsystems.Climber.ClimberIOSim;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKicker;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKickerIOSim;
@@ -38,7 +40,6 @@ import frc.robot.subsystems.Shooter.Hood.Hood;
 import frc.robot.subsystems.Shooter.Hood.HoodIOSim;
 import frc.robot.subsystems.Shooter.Hood.HoodIOWB;
 import frc.robot.subsystems.SuperStructure;
-import frc.robot.subsystems.Climber.Climber;
 import frc.robot.subsystems.Vision.Vision;
 import frc.robot.subsystems.Vision.VisionIOLimelight;
 import frc.robot.subsystems.Vision.VisionIOPhotonSim;
@@ -93,6 +94,7 @@ public class RobotContainer {
         indexer = new Indexer(new IndexerIOSim());
         intake = new Intake(new IntakeIOSim());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOSim());
+        climber = new Climber(new ClimberIOSim());
         break;
       case WOODBOT:
       default:
@@ -118,7 +120,15 @@ public class RobotContainer {
     // Configure the trigger bindings
     commandFactory =
         new CommandFactory(
-            intake, flywheel, flywheelKicker, hood, indexer, intakePivot, vision, drivetrain, climber);
+            intake,
+            flywheel,
+            flywheelKicker,
+            hood,
+            indexer,
+            intakePivot,
+            vision,
+            drivetrain,
+            climber);
     // superStructure = new SuperStructure(intake, indexer, flywheelKicker, flywheel, hood);
 
     registerPathplannerCommand("basic intake", commandFactory.basicIntakeCmd());
@@ -178,9 +188,9 @@ public class RobotContainer {
     if (Objects.nonNull(intakePivot)) {
       testCont1.rightBumper().whileTrue(intakePivot.setDutyCycleCommand(() -> 0.5));
     }
-    //if (Objects.nonNull(climber)) {
+    // if (Objects.nonNull(climber)) {
     //  testCont1.a().whileTrue(climber.setDutyCycleCommand(() -> 0.5));
-    //}
+    // }
   }
 
   private void configureBindings() {
