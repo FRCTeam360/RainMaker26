@@ -1,4 +1,4 @@
-# AGENTS.md
+# CLAUDE.md
 
 ## Project Overview
 
@@ -60,11 +60,43 @@ Apply formatting with: ./gradlew spotlessApply
 ## Code Patterns
 
 - Use Command-based programming: subsystems own hardware, commands define actions
-- Constants go in Constants.java, organized by subsystem inner classes
-- CAN IDs and port numbers are never magic numbers - always reference Constants
+- **Infrastructure constants** (CAN IDs, sensor ports, physical hardware config) always go in Constants.java
+- **Tuning constants** (PID gains, setpoints, tolerances, speeds) should be named `private static final` variables in the file where they're used
+- Avoid unnamed literals - give values descriptive names **with units** (e.g., `MAX_VELOCITY_MPS`, `STALL_CURRENT_AMPS`, `TIMEOUT_SECONDS`)
 - Use AdvantageKit's @AutoLogOutput for telemetry on important values
 - Subsystems extend SubsystemBase; commands extend Command or use factory methods
 - Subsystems have IO layers with specific hardware implementations (other than the superstructure) following FRC 6328's architecture
+
+## Code Review Checklist
+
+When reviewing PRs, check for the following (inspired by NASA's "Power of 10" for safety-critical code):
+
+### Static Analysis & Safety
+
+- [ ] All loops have clear termination conditions (no unbounded while loops)
+- [ ] No recursion (stack overflow risk in real-time systems)
+- [ ] Functions are <60 lines (split complex logic into helper methods)
+- [ ] No unused private methods or fields (run IDE inspections)
+- [ ] All return values are checked or explicitly ignored with comment
+- [ ] No dynamic allocation in periodic/command execution (only in initialization)
+- [ ] Constants are final and immutable where possible
+- [ ] Null checks present for all hardware objects before use
+
+### Code Clarity
+
+- [ ] Variable scope minimized (declare variables close to usage)
+- [ ] Infrastructure constants (CAN IDs, ports) in Constants.java; tuning values (setpoints, gains) as named constants in their usage file
+- [ ] No unnamed numeric literals - all values have descriptive names with units (e.g., `MAX_VELOCITY_MPS`, `STALL_CURRENT_AMPS`, `SPEAKER_RPM`)
+- [ ] Method names clearly describe what they do (verb-noun pattern)
+- [ ] Complex boolean expressions extracted to named variables
+- [ ] Public API has Javadoc with @param and @return tags
+
+### Robotics-Specific
+
+- [ ] Commands have clear isFinished() conditions (no infinite commands without interruption)
+- [ ] Sensor values validated/clamped before use
+- [ ] Units documented in variable names or comments (meters, radians, etc.)
+- [ ] Resource ownership clear (one subsystem per hardware device)
 
 ## Do
 
@@ -77,6 +109,7 @@ Apply formatting with: ./gradlew spotlessApply
 ## Don't
 
 - Hard-code CAN IDs or port numbers (use Constants.java)
+- Use unnamed numeric literals - always use named constants with descriptive names
 - Skip null checks on hardware initialization in RobotContainer.java
 - Delete existing tests
 - Modify vendor dependencies without team discussion
