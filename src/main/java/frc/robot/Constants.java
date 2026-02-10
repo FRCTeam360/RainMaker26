@@ -9,16 +9,20 @@ import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.hal.HALUtil;
 
 /**
- * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
- * constants. This class should not be used for any other purpose. All constants should be declared
+ * The Constants class provides a convenient place for teams to hold robot-wide
+ * numerical or boolean
+ * constants. This class should not be used for any other purpose. All constants
+ * should be declared
  * globally (i.e. public static). Do not put anything functional in this class.
  *
- * <p>It is advised to statically import this class (or one of its inner classes) wherever the
+ * <p>
+ * It is advised to statically import this class (or one of its inner classes)
+ * wherever the
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
-  public static final AprilTagFieldLayout FIELD_LAYOUT =
-      AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
+  public static final AprilTagFieldLayout FIELD_LAYOUT = AprilTagFieldLayout
+      .loadField(AprilTagFields.k2025ReefscapeWelded);
 
   public static enum RobotType {
     SIM,
@@ -41,6 +45,29 @@ public final class Constants {
     public static final int FLYWHEEL_LEFT_ID = 19;
 
     public static final int HOOD_ID = 20;
+
+    public static final String LIMELIGHT = "limelight";
+
+    public static final String CANBUS_NAME = "Default Name";
+  }
+
+  public static record PracticeBotConstants() {
+    public static final int INTAKE_ID = 0;
+    public static final int INTAKE_SENSOR_PORT = 0;
+    public static final int INTAKE_PIVOT_ID = 0;
+
+    public static final int INDEXER_SENSOR_ID = 0;
+    public static final int INDEXER_SENSOR_PORT = 0;
+    public static final int INDEXER_ID = 0;
+
+    public static final int FLYWHEEL_ID = 0;
+    public static final int FLYWHEEL_KICKER_ID = 0;
+    public static final int FLYWHEEL_KICKER_SENSOR_ID = 0;
+
+    public static final int FLYWHEEL_RIGHT_ID = 0;
+    public static final int FLYWHEEL_LEFT_ID = 0;
+
+    public static final int HOOD_ID = 0;
 
     public static final String LIMELIGHT = "limelight";
 

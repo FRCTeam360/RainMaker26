@@ -18,7 +18,7 @@ import frc.robot.Constants;
 public class HoodIOPB implements HoodIO {
   // /** Creates a new HoodIOWB. */
   private final SparkMax hoodMotor =
-      new SparkMax(Constants.WoodBotConstants.HOOD_ID, MotorType.kBrushless);
+      new SparkMax(Constants.PracticeBotConstants.HOOD_ID, MotorType.kBrushless);
   private final RelativeEncoder encoder = hoodMotor.getEncoder();
   private final SparkMaxConfig sparkMaxConfig = new SparkMaxConfig();
   private final SparkClosedLoopController controller;

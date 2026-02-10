@@ -13,17 +13,18 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.wpilibj.DigitalInput;
 import frc.robot.Constants;
+import frc.robot.Constants.PracticeBotConstants;
 import frc.robot.Constants.WoodBotConstants;
 
 public class IndexerIOPB implements IndexerIO {
   /** Creates a new IndexerIOWB. */
   private final SparkMax indexerMotor =
-      new SparkMax(Constants.WoodBotConstants.INDEXER_ID, MotorType.kBrushless);
+      new SparkMax(Constants.PracticeBotConstants.INDEXER_ID, MotorType.kBrushless);
 
   private final RelativeEncoder encoder = indexerMotor.getEncoder();
   private final SparkMaxConfig sparkMaxConfig = new SparkMaxConfig();
 
-  private final DigitalInput sensor = new DigitalInput(WoodBotConstants.INDEXER_SENSOR_ID);
+  private final DigitalInput sensor = new DigitalInput(PracticeBotConstants.INDEXER_SENSOR_ID);
 
   public IndexerIOPB() {
     sparkMaxConfig.idleMode(IdleMode.kBrake);

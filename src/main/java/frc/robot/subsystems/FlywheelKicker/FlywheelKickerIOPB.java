@@ -13,17 +13,18 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.wpilibj.DigitalInput;
 import frc.robot.Constants;
+import frc.robot.Constants.PracticeBotConstants;
 import frc.robot.Constants.WoodBotConstants;
 
 public class FlywheelKickerIOPB implements FlywheelKickerIO {
   /** Creates a new FlywheelKickerIOWB. */
   private final SparkMax flywheelkickerMotor =
-      new SparkMax(Constants.WoodBotConstants.FLYWHEEL_KICKER_ID, MotorType.kBrushless);
+      new SparkMax(Constants.PracticeBotConstants.FLYWHEEL_KICKER_ID, MotorType.kBrushless);
 
   private final RelativeEncoder encoder = flywheelkickerMotor.getEncoder();
   private final SparkMaxConfig sparkMaxConfig = new SparkMaxConfig();
 
-  private final DigitalInput sensor = new DigitalInput(WoodBotConstants.FLYWHEEL_KICKER_SENSOR_ID);
+  private final DigitalInput sensor = new DigitalInput(PracticeBotConstants.FLYWHEEL_KICKER_SENSOR_ID);
 
   public FlywheelKickerIOPB() {
     sparkMaxConfig.idleMode(IdleMode.kBrake);

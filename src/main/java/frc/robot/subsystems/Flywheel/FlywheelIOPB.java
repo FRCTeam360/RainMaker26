@@ -14,13 +14,15 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+
+import frc.robot.Constants.PracticeBotConstants;
 import frc.robot.Constants.WoodBotConstants;
 
 public class FlywheelIOPB implements FlywheelIO {
 
   private final TalonFX[] motors = {
-    new TalonFX(WoodBotConstants.FLYWHEEL_RIGHT_ID, WoodBotConstants.CANBUS_NAME),
-    new TalonFX(WoodBotConstants.FLYWHEEL_LEFT_ID, WoodBotConstants.CANBUS_NAME)
+    new TalonFX(PracticeBotConstants.FLYWHEEL_RIGHT_ID,PracticeBotConstants.CANBUS_NAME),
+    new TalonFX(PracticeBotConstants.FLYWHEEL_LEFT_ID, PracticeBotConstants.CANBUS_NAME)
   };
   private TalonFXConfiguration rightConfig = new TalonFXConfiguration();
   private TalonFXConfiguration leftConfig = new TalonFXConfiguration();
@@ -75,7 +77,7 @@ public class FlywheelIOPB implements FlywheelIO {
     for (int i = 1; i < motors.length; i++) {
       motors[i].setControl(
           new Follower(
-              WoodBotConstants.FLYWHEEL_RIGHT_ID,
+              PracticeBotConstants.FLYWHEEL_RIGHT_ID,
               (oddFollower ? MotorAlignmentValue.Opposed : MotorAlignmentValue.Aligned)));
       oddFollower = !oddFollower;
     }
