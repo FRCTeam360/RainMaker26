@@ -38,6 +38,7 @@ import frc.robot.subsystems.Shooter.Hood.Hood;
 import frc.robot.subsystems.Shooter.Hood.HoodIOSim;
 import frc.robot.subsystems.Shooter.Hood.HoodIOWB;
 import frc.robot.subsystems.SuperStructure;
+import frc.robot.subsystems.Climber.Climber;
 import frc.robot.subsystems.Vision.Vision;
 import frc.robot.subsystems.Vision.VisionIOLimelight;
 import frc.robot.subsystems.Vision.VisionIOPhotonSim;
@@ -62,6 +63,7 @@ public class RobotContainer {
   private Intake intake;
   private IntakePivot intakePivot;
   private FlywheelKicker flywheelKicker;
+  private Climber climber;
 
   private CommandFactory commandFactory;
   private SuperStructure superStructure;
@@ -116,7 +118,7 @@ public class RobotContainer {
     // Configure the trigger bindings
     commandFactory =
         new CommandFactory(
-            intake, flywheel, flywheelKicker, hood, indexer, intakePivot, vision, drivetrain);
+            intake, flywheel, flywheelKicker, hood, indexer, intakePivot, vision, drivetrain, climber);
     // superStructure = new SuperStructure(intake, indexer, flywheelKicker, flywheel, hood);
 
     registerPathplannerCommand("basic intake", commandFactory.basicIntakeCmd());
@@ -176,6 +178,9 @@ public class RobotContainer {
     if (Objects.nonNull(intakePivot)) {
       testCont1.rightBumper().whileTrue(intakePivot.setDutyCycleCommand(() -> 0.5));
     }
+    //if (Objects.nonNull(climber)) {
+    //  testCont1.a().whileTrue(climber.setDutyCycleCommand(() -> 0.5));
+    //}
   }
 
   private void configureBindings() {
@@ -249,6 +254,9 @@ public class RobotContainer {
       indexer.stop();
     }
     if (Objects.nonNull(flywheelKicker)) {
+      flywheelKicker.stop();
+    }
+    if (Objects.nonNull(climber)) {
       flywheelKicker.stop();
     }
   }

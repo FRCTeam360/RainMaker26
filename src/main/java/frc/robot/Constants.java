@@ -51,6 +51,9 @@ public final class Constants {
 
     // === CANBUS ===
     public static final String CANBUS_NAME = "Default Name";
+
+    // === CLIMBER ===
+    public static final int CLIMBER_ID = 17; // what it was set to last year.
   }
 
   public static class SimulationConstants {

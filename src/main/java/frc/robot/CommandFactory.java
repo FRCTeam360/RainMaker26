@@ -6,6 +6,7 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.subsystems.Climber.Climber;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKicker;
 import frc.robot.subsystems.Indexer.Indexer;
@@ -14,6 +15,7 @@ import frc.robot.subsystems.IntakePivot.IntakePivot;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel;
 import frc.robot.subsystems.Shooter.Hood.Hood;
 import frc.robot.subsystems.Vision.Vision;
+import java.util.function.DoubleSupplier;
 
 /** Add your docs here. */
 public class CommandFactory {
@@ -26,6 +28,7 @@ public class CommandFactory {
   private final IntakePivot intakePivot;
   private final Vision vision;
   private final CommandSwerveDrivetrain drivetrain;
+  private final Climber climber;
 
   // Contructor
   public CommandFactory(
@@ -36,7 +39,8 @@ public class CommandFactory {
       Indexer indexer,
       IntakePivot intakePivot,
       Vision vision,
-      CommandSwerveDrivetrain drivetrain) {
+      CommandSwerveDrivetrain drivetrain,
+      Climber climber) {
     this.intake = intake;
     this.flywheel = flywheel;
     this.flyWheelKicker = flyWheelKicker;
@@ -45,6 +49,7 @@ public class CommandFactory {
     this.intakePivot = intakePivot;
     this.vision = vision;
     this.drivetrain = drivetrain;
+    this.climber = climber;
   }
 
   public Command basicIntakeCmd() {
@@ -74,5 +79,18 @@ public class CommandFactory {
 
   public Command setHoodPosition(double position) {
     return hood.setPositionCmd(position);
+  }
+
+  public Command setClimberDutyCycleCmd(double dutyCycle) {
+    return climber.runEnd(() -> climber.setDutyCycle(dutyCycle), () -> climber.setDutyCycle(0));
+  }
+
+  public Command setClimberDutyCycleCmd(DoubleSupplier dutyCycle) {
+    return climber.runEnd(
+        () -> climber.setDutyCycle(dutyCycle.getAsDouble()), () -> climber.setDutyCycle(0));
+  }
+
+  public Command setClimberPositionCmd(double position) {
+    return climber.runEnd(() -> climber.setPosition(position), () -> climber.setPosition(position));
   }
 }
