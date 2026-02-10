@@ -151,4 +151,9 @@ public class FlywheelKickerIOSim implements FlywheelKickerIO {
   public void setDutyCycle(double duty) {
     motorControllerSim.set(duty);
   }
+
+  public void setVelocity(double rpm) {
+    // TODO: Implement velocity control for simulation (e.g., use velocityRequest to command the
+    // motor sim)
+  }
 }

@@ -49,4 +49,10 @@ public class FlywheelKickerIOPB implements FlywheelKickerIO {
   public void setDutyCycle(double dutyCycle) {
     flywheelkickerMotor.set(dutyCycle);
   }
+
+  @Override
+  public void setVelocity(double rpm) {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'setVelocity'");
+  }
 }

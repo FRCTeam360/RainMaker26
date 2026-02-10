@@ -49,4 +49,10 @@ public class IntakeIOPB implements IntakeIO {
     inputs.velocity = encoder.getVelocity();
     inputs.voltage = motor.getBusVoltage() * motor.getAppliedOutput();
   }
+
+  @Override
+  public void setVelocity(double velocity) {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'setVelocity'");
+  }
 }

@@ -4,19 +4,24 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
-import frc.robot.subsystems.Flywheel.Flywheel;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKicker;
-import frc.robot.subsystems.Hood.Hood;
 import frc.robot.subsystems.Indexer.Indexer;
 import frc.robot.subsystems.Intake.Intake;
 import frc.robot.subsystems.IntakePivot.IntakePivot;
+import frc.robot.subsystems.Shooter.Flywheel.Flywheel;
+import frc.robot.subsystems.Shooter.Hood.Hood;
 import frc.robot.subsystems.Vision.Vision;
 
 /** Add your docs here. */
 public class CommandFactory {
+  private static final double MAX_VEL = 2.0;
+  private static final double MAX_ACCEL = 1.0;
 
   private final Intake intake;
   private final Flywheel flywheel;
@@ -47,8 +52,36 @@ public class CommandFactory {
     this.drivetrain = drivetrain;
   }
 
+  public static Command driveToPose(CommandSwerveDrivetrain drive, Pose2d targetPose) {
+    ProfiledPIDController xController =
+        new ProfiledPIDController(3.0, 0, 0, new TrapezoidProfile.Constraints(MAX_VEL, MAX_ACCEL));
+    ProfiledPIDController yController =
+        new ProfiledPIDController(3.0, 0, 0, new TrapezoidProfile.Constraints(MAX_VEL, MAX_ACCEL));
+    ProfiledPIDController thetaController =
+        new ProfiledPIDController(3.0, 0, 0, new TrapezoidProfile.Constraints(Math.PI, Math.PI));
+
+    thetaController.enableContinuousInput(-Math.PI, Math.PI);
+
+    return drive
+        .run(
+            () -> {
+              Pose2d currentPose = drive.getPose();
+
+              double xSpeed = xController.calculate(currentPose.getX(), targetPose.getX());
+              double ySpeed = yController.calculate(currentPose.getY(), targetPose.getY());
+              double thetaSpeed =
+                  thetaController.calculate(
+                      currentPose.getRotation().getRadians(),
+                      targetPose.getRotation().getRadians());
+
+              drive.drive(xSpeed, ySpeed, thetaSpeed);
+            })
+        .until(() -> xController.atGoal() && yController.atGoal() && thetaController.atGoal())
+        .withName("DriveToClimbPose");
+  }
+
   public Command basicIntakeCmd() {
-    return intake.setDutyCycleCommand(0.65).alongWith(indexer.setDutyCycleCommand(0.4));
+    return intake.setVelocityCommand(4500.0).alongWith(indexer.setDutyCycleCommand(0.4));
   }
 
   public Command basicShootCmd() {
@@ -64,7 +97,8 @@ public class CommandFactory {
         .alongWith(flywheel.setRPMCommand(rpm))
         .alongWith(
             Commands.waitUntil(() -> flywheel.atSetpoint(rpm, 100.0) && hood.atSetpoint(position))
-                .andThen(this.setFlywheelKickerDutyCycle(1.0)));
+                .andThen(
+                    flyWheelKicker.setVelocityCommand(4500.0).alongWith(this.basicIntakeCmd())));
   }
 
   public Command setFlywheelKickerDutyCycle(double value) {
