@@ -45,7 +45,7 @@ public final class Constants {
 
     public static final String LIMELIGHT = "limelight";
 
-    public static final CANBus CANBUS_NAME = new CANBus();
+    public static final CANBus CANBUS = new CANBus("Default Name");
   }
 
   public static class SimulationConstants {
