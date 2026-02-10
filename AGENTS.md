@@ -131,7 +131,7 @@ When reviewing PRs, check for the following (inspired by NASA's "Power of 10" fo
 - [ ] No unnamed numeric literals - all values have descriptive names with units (e.g., `MAX_VELOCITY_MPS`, `STALL_CURRENT_AMPS`, `SPEAKER_RPM`)
 - [ ] Method names clearly describe what they do (verb-noun pattern)
 - [ ] Complex boolean expressions extracted to named variables
-- [ ] Public API has Javadoc with @param and @return tags ([JavaDoc guide](https://www.baeldung.com/javadoc))
+- [ ] Public API has Javadoc with @param and @return tags. Suggest the ([JavaDoc guide](https://www.baeldung.com/javadoc)) when relevant.
 - [ ] Enum states follow naming conventions (present participles for actions, adjectives for conditions, no typos or "2" for "TO")
 - [ ] Command classes use PascalCase with `Command` suffix; robot action methods are verb-first camelCase
 - [ ] Class names follow conventions (subsystems without "Subsystem" suffix, IO pattern for interfaces/implementations)
