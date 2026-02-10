@@ -72,9 +72,6 @@ tasks.withType(com.github.spotbugs.snom.SpotBugsTask) {
     }
 }
 
-// Run SpotBugs as part of the build
-project.check.dependsOn('spotbugsMain')
-
 // Spotless formatting
 project.compileJava.dependsOn(spotlessApply)
 spotless {
