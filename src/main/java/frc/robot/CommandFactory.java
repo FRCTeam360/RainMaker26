@@ -105,6 +105,10 @@ public class CommandFactory {
     return flyWheelKicker.setDutyCycleCommand(value);
   }
 
+  public Command runHopperAndKicker() {
+    return flyWheelKicker.setVelocityCommand(5000.0).alongWith(indexer.setDutyCycleCommand(0.3));
+  }
+
   public Command setHoodPosition(double position) {
     return hood.setPositionCmd(position);
   }

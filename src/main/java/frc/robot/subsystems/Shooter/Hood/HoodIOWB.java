@@ -60,10 +60,10 @@ public class HoodIOWB implements HoodIO {
   public void updateTunable() {
     // needs testing
     if (tuningEnabled.get()) {
-      sparkMaxConfig.closedLoop.p(tunableKp.get()).i(tunableKi.get()).d(tunableKd.get());
+      // sparkMaxConfig.closedLoop.p(tunableKp.get()).i(tunableKi.get()).d(tunableKd.get());
       controller.setSetpoint(tunableSetpoint.get(), ControlType.kPosition);
-      hoodMotor.configure(
-          sparkMaxConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+      // hoodMotor.configure(
+      //     sparkMaxConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
   }
 

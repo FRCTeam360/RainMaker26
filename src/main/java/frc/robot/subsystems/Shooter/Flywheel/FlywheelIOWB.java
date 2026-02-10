@@ -100,13 +100,13 @@ public class FlywheelIOWB implements FlywheelIO {
   public void updateTunable() {
     // needs testing
     if (tuningEnabled.get()) {
-      Slot0Configs slot0 = new Slot0Configs();
-      motors[0].getConfigurator().refresh(slot0);
-      slot0.kP = tunableKp.get();
-      slot0.kI = tunableKi.get();
-      slot0.kD = tunableKd.get();
+      // Slot0Configs slot0 = new Slot0Configs();
+      // motors[0].getConfigurator().refresh(slot0);
+      // slot0.kP = tunableKp.get();
+      // slot0.kI = tunableKi.get();
+      // slot0.kD = tunableKd.get();
       setVelocityTunable(() -> tunableSetpoint.get());
-      motors[0].getConfigurator().apply(slot0);
+      // motors[0].getConfigurator().apply(slot0);
     }
   }
 

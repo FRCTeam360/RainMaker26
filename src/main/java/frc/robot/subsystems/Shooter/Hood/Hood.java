@@ -108,10 +108,10 @@ public class Hood extends SubsystemBase {
 
   public Command moveToZeroAndZero() {
     return Commands.waitUntil(
-            () -> Math.abs(inputs.supplyCurrent) >= 30.0 && Math.abs(inputs.velocity) == 0.0)
-        .deadlineFor(this.runEnd(() -> io.setDutyCycle(0.1), () -> io.setDutyCycle(0.0)))
+            () -> Math.abs(inputs.supplyCurrent) >= 30.0 && Math.abs(inputs.velocity) <= 0.05)
+        .deadlineFor(this.runEnd(() -> io.setDutyCycle(-0.3), () -> io.setDutyCycle(0.0)))
         // TODO make this call this.zero()
-        .andThen(runOnce(() -> inputs.position = 0.0));
+        .andThen(zero());
   }
 
   @Override

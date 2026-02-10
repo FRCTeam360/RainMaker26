@@ -164,15 +164,15 @@ public class RobotContainer {
    */
   private void configureTestBindings() {
     if (Objects.nonNull(drivetrain)) {
-      drivetrain.setDefaultCommand(
-          drivetrain
-              .fieldOrientedDrive(testCont1)
-              .alongWith(
-                  Commands.run(
-                      () -> {
-                        shotCalculator.calculateShot();
-                        shotCalculator.clearShootingParams();
-                      })));
+      // drivetrain.setDefaultCommand(
+      //     drivetrain
+      //         .fieldOrientedDrive(testCont1)
+      //         .alongWith(
+      //             Commands.run(
+      //                 () -> {
+      //                   shotCalculator.calculateShot();
+      //                   shotCalculator.clearShootingParams();
+      //                 })));
       testCont1.rightTrigger().whileTrue(drivetrain.faceHubWhileDriving(testCont1));
       drivetrain.registerTelemetry(logger::telemeterize);
     }
@@ -217,12 +217,12 @@ public class RobotContainer {
 
     // setFlywheelKickerDutyCycle uses flywheelKicker
     if (Objects.nonNull(flywheelKicker)) {
-      driverCont.rightBumper().whileTrue(flywheelKicker.setVelocityCommand(4000.0));
+      driverCont.rightBumper().whileTrue(commandFactory.runHopperAndKicker());
     }
 
     // setHoodPosition uses hood
     if (Objects.nonNull(hood)) {
-      driverCont.pov(0).onTrue(commandFactory.setHoodPosition(0.0));
+      driverCont.pov(0).onTrue(hood.moveToZeroAndZero());
       driverCont.pov(90).onTrue(commandFactory.setHoodPosition(4.0));
       driverCont.pov(180).onTrue(commandFactory.setHoodPosition(16.0));
       driverCont.pov(270).onTrue(commandFactory.setHoodPosition(23.0));
@@ -240,7 +240,15 @@ public class RobotContainer {
 
     // Drivetrain commands
     if (Objects.nonNull(drivetrain)) {
-      drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
+      drivetrain.setDefaultCommand(
+          drivetrain
+              .fieldOrientedDrive(driverCont)
+              .alongWith(
+                  Commands.run(
+                      () -> {
+                        shotCalculator.calculateShot();
+                        shotCalculator.clearShootingParams();
+                      })));
       driverCont.leftTrigger().whileTrue(drivetrain.faceHubWhileDriving(driverCont));
       drivetrain.registerTelemetry(logger::telemeterize);
       driverCont.back().onTrue(drivetrain.zeroCommand());
