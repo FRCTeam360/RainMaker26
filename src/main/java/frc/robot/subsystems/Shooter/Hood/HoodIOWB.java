@@ -4,7 +4,6 @@
 
 package frc.robot.subsystems.Shooter.Hood;
 
-import com.ctre.phoenix6.configs.Slot0Configs;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
@@ -15,6 +14,9 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import frc.robot.Constants;
+import java.util.function.DoubleSupplier;
+import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 public class HoodIOWB implements HoodIO {
   // /** Creates a new HoodIOWB. */
@@ -23,6 +25,14 @@ public class HoodIOWB implements HoodIO {
   private final RelativeEncoder encoder = hoodMotor.getEncoder();
   private final SparkMaxConfig sparkMaxConfig = new SparkMaxConfig();
   private final SparkClosedLoopController controller;
+
+  private final LoggedNetworkNumber tunableKp = new LoggedNetworkNumber("/Tuning/Hood/kP", 0.21);
+  private final LoggedNetworkNumber tunableKi = new LoggedNetworkNumber("/Tuning/Hood/kI", 0.0);
+  private final LoggedNetworkNumber tunableKd = new LoggedNetworkNumber("/Tuning/Hood/kD", 0.0);
+  private final LoggedNetworkNumber tunableSetpoint =
+      new LoggedNetworkNumber("/Tuning/Hood/Position", 0.0);
+  private final LoggedNetworkBoolean tuningEnabled =
+      new LoggedNetworkBoolean("/Tuning/Hood/Enabled", false);
 
   public void setEncoder(double position) {
     encoder.setPosition(position);
@@ -47,6 +57,16 @@ public class HoodIOWB implements HoodIO {
     controller = hoodMotor.getClosedLoopController();
   }
 
+  public void updateTunable() {
+    // needs testing
+    if (tuningEnabled.get()) {
+      sparkMaxConfig.closedLoop.p(tunableKp.get()).i(tunableKi.get()).d(tunableKd.get());
+      controller.setSetpoint(tunableSetpoint.get(), ControlType.kPosition);
+      hoodMotor.configure(
+          sparkMaxConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    }
+  }
+
   public void setPosition(double position) {
     // old:encoder.setPosition(position);
     controller.setSetpoint(position, ControlType.kPosition);
@@ -58,6 +78,11 @@ public class HoodIOWB implements HoodIO {
     inputs.supplyCurrent = hoodMotor.getOutputCurrent() * hoodMotor.getAppliedOutput();
     inputs.velocity = encoder.getVelocity();
     inputs.voltage = hoodMotor.getBusVoltage() * hoodMotor.getAppliedOutput();
+    updateTunable();
+  }
+
+  public void setPositionTunable(DoubleSupplier doubleSupplier) {
+    this.setPosition(tunableSetpoint.getAsDouble());
   }
 
   public void setDutyCycle(double dutyCycle) {

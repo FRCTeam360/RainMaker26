@@ -8,10 +8,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
-import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
-import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
-
-import com.ctre.phoenix6.configs.Slot0Configs;
 
 public class Flywheel extends SubsystemBase {
   private final FlywheelIO io;
@@ -88,7 +84,6 @@ public class Flywheel extends SubsystemBase {
   @Override
   public void periodic() {
     io.updateInputs(inputs);
-    io.updateTunable();
     Logger.processInputs("Flywheel", inputs);
     Logger.processInputs("Flywheel", inputs);
     Logger.recordOutput("Subsystems/Flywheel/WantedState", wantedState.toString());
@@ -113,7 +108,8 @@ public class Flywheel extends SubsystemBase {
   }
 
   public Command setVelocityCommand(DoubleSupplier supplierVelocity) {
-    return this.runEnd(() -> io.setVelocity(supplierVelocity.getAsDouble()), () -> io.setDutyCycle(0.0));
+    return this.runEnd(
+        () -> io.setVelocity(supplierVelocity.getAsDouble()), () -> io.setDutyCycle(0.0));
   }
 
   public Command setVelocityCommand(double velocity) {
