@@ -40,19 +40,6 @@ public class ShotCalculator {
     this.drivetrain = drivetrain;
   }
 
-  // Calculate distance from turret to target
-  private double getRobotDistanceFromHub() {
-    Pose2d currentPosition = drivetrain.getPosition();
-    Translation2d target =
-        AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint.toTranslation2d());
-    double positionToTargetDistance = target.getDistance(currentPosition.getTranslation());
-    return positionToTargetDistance;
-  }
-
-  public double getWantedHoodAngle() {
-    return shotHoodAngleMap.get(getRobotDistanceFromHub());
-  }
-
   private ShootingParams shootingParams = null;
 
   /**

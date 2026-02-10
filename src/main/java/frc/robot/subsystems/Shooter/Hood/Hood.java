@@ -7,7 +7,6 @@ package frc.robot.subsystems.Shooter.Hood;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.subsystems.Shooter.ShotCalculator;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -15,7 +14,7 @@ public class Hood extends SubsystemBase {
   private final HoodIO io;
   private final HoodIOInputsAutoLogged inputs = new HoodIOInputsAutoLogged();
   private final double TOLERANCE = 0.5;
-  private ShotCalculator shotCalculator;
+  private DoubleSupplier hoodAngleSupplier = () -> 0.0;
 
   public enum HoodStates {
     OFF,
@@ -23,8 +22,13 @@ public class Hood extends SubsystemBase {
     AIMING
   }
 
-  public void setShotCalculator(ShotCalculator shotCalculator) {
-    this.shotCalculator = shotCalculator;
+  /**
+   * Sets the supplier for the hood angle from the shot calculator.
+   *
+   * @param hoodAngleSupplier a DoubleSupplier providing the desired hood angle
+   */
+  public void setHoodAngleSupplier(DoubleSupplier hoodAngleSupplier) {
+    this.hoodAngleSupplier = hoodAngleSupplier;
   }
 
   private HoodStates wantedState = HoodStates.OFF;
@@ -43,7 +47,7 @@ public class Hood extends SubsystemBase {
         setPosition(6.0);
         break;
       case AIMING:
-        setPosition(shotCalculator.getWantedHoodAngle());
+        setPosition(hoodAngleSupplier.getAsDouble());
         break;
       case OFF:
       default:

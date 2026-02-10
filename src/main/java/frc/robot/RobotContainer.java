@@ -117,6 +117,7 @@ public class RobotContainer {
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOWB());
         // intakePivot = new IntakePivot(new IntakePivotIOPB());
     }
+    shotCalculator = new ShotCalculator(drivetrain);
     // Configure the trigger bindings
     commandFactory =
         new CommandFactory(
@@ -140,8 +141,6 @@ public class RobotContainer {
     SmartDashboard.putData("Auto Chooser", autoChooser);
 
     FollowPathCommand.warmupCommand().schedule();
-
-    shotCalculator = new ShotCalculator(drivetrain);
   }
 
   public void registerPathplannerCommand(String name, Command command) {

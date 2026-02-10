@@ -56,15 +56,16 @@ public class SuperStructure extends SubsystemBase {
       FlywheelKicker flywheelKicker,
       Flywheel flywheel,
       Hood hood,
-      CommandSwerveDrivetrain driveTrain) {
+      CommandSwerveDrivetrain driveTrain,
+      ShotCalculator shotCalculator) {
     this.intake = intake;
     this.indexer = indexer;
     this.flywheelKicker = flywheelKicker;
     this.flywheel = flywheel;
     this.hood = hood;
     this.drivetrain = driveTrain;
-    shotCalculator = new ShotCalculator(driveTrain);
-    hood.setShotCalculator(shotCalculator);
+    this.shotCalculator = shotCalculator;
+    hood.setHoodAngleSupplier(() -> shotCalculator.calculateShot().hoodAngle());
   }
 
   private void updateState() {
