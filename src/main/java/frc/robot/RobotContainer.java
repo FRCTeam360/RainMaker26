@@ -122,6 +122,7 @@ public class RobotContainer {
     registerPathplannerCommand("basic intake", commandFactory.basicIntakeCmd());
     registerPathplannerCommand("shoot at hub", commandFactory.shootWithSpinUp(3000.0, 6.0));
     registerPathplannerCommand("run flywheel kicker", flywheelKicker.setDutyCycleCommand(1.0));
+    registerPathplannerCommand("spinup flywheel hub shot", commandFactory.shootWithRPM(3000.0));
     configureBindings();
     configureTestBindings();
 
@@ -197,7 +198,7 @@ public class RobotContainer {
 
     // setFlywheelKickerDutyCycle uses flywheelKicker
     if (Objects.nonNull(flywheelKicker)) {
-      driverCont.rightBumper().whileTrue(commandFactory.setFlywheelKickerDutyCycle(1.0));
+      driverCont.rightBumper().whileTrue(flywheelKicker.setVelocityCommand(4000.0));
     }
 
     // setHoodPosition uses hood
@@ -215,7 +216,7 @@ public class RobotContainer {
       driverCont.x().whileTrue(commandFactory.shootWithRPM(2500));
       driverCont.b().whileTrue(commandFactory.shootWithRPM(3000));
       driverCont.y().whileTrue(commandFactory.shootWithRPM(3500));
-      driverCont.rightTrigger().whileTrue(commandFactory.shootWithSpinUp(3500.0, 6.0));
+      driverCont.rightTrigger().whileTrue(commandFactory.shootWithSpinUp(3250.0, 8.0));
     }
 
     // Drivetrain commands

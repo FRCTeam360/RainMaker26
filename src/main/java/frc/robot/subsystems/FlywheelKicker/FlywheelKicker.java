@@ -71,6 +71,14 @@ public class FlywheelKicker extends SubsystemBase {
     return this.runEnd(() -> io.setDutyCycle(valueSup.getAsDouble()), () -> io.setDutyCycle(0.0));
   }
 
+  public void setVelocity(double veloicty) {
+    io.setVelocity(veloicty);
+  }
+
+  public Command setVelocityCommand(double rpm) {
+    return this.runEnd(() -> setVelocity(rpm), () -> setVelocity(0.0));
+  }
+
   public void stop() {
     io.setDutyCycle(0.0);
   }
