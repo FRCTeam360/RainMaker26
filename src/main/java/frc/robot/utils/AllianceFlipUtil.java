@@ -4,9 +4,9 @@ import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.wpilibj.DriverStation;
 
 /**
- * Utility class for flipping field coordinates based on the current driver station alliance. When on
- * the Red alliance, coordinates are mirrored across the field so that autonomous and targeting logic
- * written for the Blue alliance side works correctly from either side.
+ * Utility class for flipping field coordinates based on the current driver station alliance. When
+ * on the Red alliance, coordinates are mirrored across the field so that autonomous and targeting
+ * logic written for the Blue alliance side works correctly from either side.
  */
 public class AllianceFlipUtil {
 
