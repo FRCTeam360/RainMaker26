@@ -36,8 +36,6 @@ public class RobotUtils {
         case 'R':
           return Alliance.Red;
         default:
-          // only called when there's an invalid character for the game specific message
-          break;
       }
     }
     // called when no data was received from driver station
@@ -99,7 +97,6 @@ public class RobotUtils {
           }
           return hubActive;
         default:
-          break;
       }
     } else {
       // this is called when no alliance has been received from driver station
