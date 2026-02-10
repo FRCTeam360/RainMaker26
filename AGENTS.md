@@ -64,8 +64,50 @@ Apply formatting with: ./gradlew spotlessApply
 - **Tuning constants** (PID gains, setpoints, tolerances, speeds) should be named `private static final` variables in the file where they're used
 - Avoid unnamed literals - give values descriptive names **with units** (e.g., `MAX_VELOCITY_MPS`, `STALL_CURRENT_AMPS`, `TIMEOUT_SECONDS`)
 - Use AdvantageKit's @AutoLogOutput for telemetry on important values
-- Subsystems extend SubsystemBase; commands extend Command or use factory methods
+- Subsystems extend SubsystemBase; commands extend Command or use robot action methods
 - Subsystems have IO layers with specific hardware implementations (other than the superstructure) following FRC 6328's architecture
+
+## Naming Conventions
+
+### States (Enum Values)
+
+Use `ALL_CAPS` with underscores for separation:
+
+- **Present participles** for action states: `INTAKING`, `SHOOTING`, `SPINNING_UP`, `EJECTING`, `AIMING`
+- **Adjectives/nouns** for condition states: `IDLE`, `READY_TO_FIRE`, `AT_SETPOINT`, `DISABLED`
+- **Compound states**: Be descriptive: `SPINUP_SHOOTING`, `AUTO_ALIGN`, `X_OUT_SHOOTING`
+- Always spell out words fully (no "2" for "TO", "4" for "FOR")
+- Check spelling before committing (`PREPARING` not `PREPAREING`, `ALIGN` not `ALIGHN`)
+
+### Commands
+
+**Command classes** - PascalCase with descriptive `Command` suffix:
+
+- `FlywheelTuneCommand`, `DriveToPositionCommand`, `AutoAlignCommand`, `ShootAtTargetCommand`
+
+**Robot Action methods** - camelCase, verb-first:
+
+- `shootWithSpinup()`, `intakeUntilNote()`, `alignToTarget()`, `driveToPosition()`
+- Set-prefix for configuration: `setHoodPosition()`, `setFlywheelSpeed()`
+- Avoid "Cmd" abbreviation - use full "Command" suffix or drop it entirely
+
+### Classes
+
+**Subsystems** - PascalCase nouns (no "Subsystem" suffix):
+
+- `Intake`, `Flywheel`, `Hood`, `Indexer`, `IntakePivot`, `SuperStructure`
+
+**IO interfaces** - `<Subsystem>IO` pattern:
+
+- `IntakeIO`, `FlywheelIO`, `HoodIO`, `IndexerIO`
+
+**IO implementations** - `<Subsystem>IO<Type>` pattern:
+
+- `IntakeIOSim`, `IntakeIOTalonFX`, `FlywheelIOSparkMax`, `HoodIOSim`
+
+**Utility classes** - Descriptive purpose + type suffix:
+
+- `ShotCalculator`, `FieldVisualizer`, `CommandLogger`, `AllianceFlipUtil`
 
 ## Code Review Checklist
 
@@ -89,7 +131,10 @@ When reviewing PRs, check for the following (inspired by NASA's "Power of 10" fo
 - [ ] No unnamed numeric literals - all values have descriptive names with units (e.g., `MAX_VELOCITY_MPS`, `STALL_CURRENT_AMPS`, `SPEAKER_RPM`)
 - [ ] Method names clearly describe what they do (verb-noun pattern)
 - [ ] Complex boolean expressions extracted to named variables
-- [ ] Public API has Javadoc with @param and @return tags
+- [ ] Public API has Javadoc with @param and @return tags ([JavaDoc guide](https://www.baeldung.com/javadoc))
+- [ ] Enum states follow naming conventions (present participles for actions, adjectives for conditions, no typos or "2" for "TO")
+- [ ] Command classes use PascalCase with `Command` suffix; robot action methods are verb-first camelCase
+- [ ] Class names follow conventions (subsystems without "Subsystem" suffix, IO pattern for interfaces/implementations)
 
 ### Robotics-Specific
 
