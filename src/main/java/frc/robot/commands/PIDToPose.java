@@ -1,7 +1,3 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot.commands;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -10,7 +6,6 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.utils.CommandLogger;
 import org.littletonrobotics.junction.Logger;
 
-/* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class PIDToPose extends Command {
   private final CommandSwerveDrivetrain drivetrain;
   private final Pose2d setpointPose;
@@ -44,13 +39,9 @@ public class PIDToPose extends Command {
   public void initialize() {
     drivetrain.driveToPose(setpointPose);
     final double headingSetPoint = setpointPose.getRotation().getDegrees();
-    final double poseXSetpoint = setpointPose.getX();
-    final double poseYSetpoint = setpointPose.getY();
 
-    Logger.recordOutput(LOGGING_PREFIX + "positionSetpoint", headingSetPoint);
+    Logger.recordOutput(LOGGING_PREFIX + "positionSetpoint", setpointPose);
     Logger.recordOutput(LOGGING_PREFIX + "headingSetpoint", headingSetPoint);
-    Logger.recordOutput(LOGGING_PREFIX + "poseXSetpoint", poseXSetpoint);
-    Logger.recordOutput(LOGGING_PREFIX + "poseYSetpoint", poseYSetpoint);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
