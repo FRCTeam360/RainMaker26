@@ -12,6 +12,7 @@ import frc.robot.subsystems.Shooter.Flywheel.Flywheel;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel.FlywheelStates;
 import frc.robot.subsystems.Shooter.Hood.Hood;
 import frc.robot.subsystems.Shooter.Hood.Hood.HoodStates;
+import frc.robot.subsystems.Shooter.ShotCalculator;
 import org.littletonrobotics.junction.Logger;
 
 public class SuperStructure extends SubsystemBase {
@@ -20,12 +21,16 @@ public class SuperStructure extends SubsystemBase {
   private final FlywheelKicker flywheelKicker;
   private Flywheel flywheel;
   private Hood hood;
+  private CommandSwerveDrivetrain drivetrain;
+  private ShotCalculator shotCalculator;
 
   public enum SuperStates {
     IDLE, // everything is stopped when nothing else happens
-    DEFENSE, // driver holds defense button -> less desired velocitu moving latterally, more into
+    DEFENSE, // driver holds defense button -> less desired velocitu moving latterally, more
+    // into
     // rotation in drivetrain
-    X_OUT, // hold down button to x out wheels or press once and wheels stop X-ing out when moved
+    X_OUT, // hold down button to x out wheels or press once and wheels stop X-ing out when
+    // moved
     AUTO_ALIGHN, // aligns to a target
     X_OUT_SHOOTING, // when robot is aligned, ends when toggled off or shooting stops
     PREPAREING, // flywheel spins up and align to target
@@ -37,7 +42,8 @@ public class SuperStructure extends SubsystemBase {
     PASSING // has current zone, makes check for !current zone then passes to zone
     ,
     SHOOTING,
-    SPINUP_SHOOTING
+    SPINUP_SHOOTING,
+    AIMING
   }
 
   private SuperStates wantedSuperState = SuperStates.IDLE;
@@ -45,12 +51,21 @@ public class SuperStructure extends SubsystemBase {
   private SuperStates previousSuperState = SuperStates.IDLE;
 
   public SuperStructure(
-      Intake intake, Indexer indexer, FlywheelKicker flywheelKicker, Flywheel flywheel, Hood hood) {
+      Intake intake,
+      Indexer indexer,
+      FlywheelKicker flywheelKicker,
+      Flywheel flywheel,
+      Hood hood,
+      CommandSwerveDrivetrain driveTrain,
+      ShotCalculator shotCalculator) {
     this.intake = intake;
     this.indexer = indexer;
     this.flywheelKicker = flywheelKicker;
     this.flywheel = flywheel;
     this.hood = hood;
+    this.drivetrain = driveTrain;
+    this.shotCalculator = shotCalculator;
+    hood.setHoodAngleSupplier(() -> shotCalculator.calculateShot().hoodAngle());
   }
 
   private void updateState() {
@@ -70,6 +85,9 @@ public class SuperStructure extends SubsystemBase {
       case SPINUP_SHOOTING:
         currentSuperState = SuperStates.SPINUP_SHOOTING;
         break;
+      case AIMING:
+        currentSuperState = SuperStates.AIMING;
+        break;
     }
   }
 
@@ -88,7 +106,14 @@ public class SuperStructure extends SubsystemBase {
       case SPINUP_SHOOTING:
         spinupShooting();
         break;
+      case AIMING:
+        aiming();
+        break;
     }
+  }
+
+  private void aiming() {
+    hood.setWantedState(HoodStates.AIMING);
   }
 
   private void spinupShooting() {

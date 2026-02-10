@@ -14,10 +14,21 @@ public class Hood extends SubsystemBase {
   private final HoodIO io;
   private final HoodIOInputsAutoLogged inputs = new HoodIOInputsAutoLogged();
   private final double TOLERANCE = 0.5;
+  private DoubleSupplier hoodAngleSupplier = () -> 0.0;
 
   public enum HoodStates {
     OFF,
-    SPINUP_SHOOTING
+    SPINUP_SHOOTING,
+    AIMING
+  }
+
+  /**
+   * Sets the supplier for the hood angle from the shot calculator.
+   *
+   * @param hoodAngleSupplier a DoubleSupplier providing the desired hood angle
+   */
+  public void setHoodAngleSupplier(DoubleSupplier hoodAngleSupplier) {
+    this.hoodAngleSupplier = hoodAngleSupplier;
   }
 
   private HoodStates wantedState = HoodStates.OFF;
@@ -35,6 +46,9 @@ public class Hood extends SubsystemBase {
       case SPINUP_SHOOTING:
         setPosition(6.0);
         break;
+      case AIMING:
+        setPosition(hoodAngleSupplier.getAsDouble());
+        break;
       case OFF:
       default:
         setPosition(0.0);
@@ -48,6 +62,9 @@ public class Hood extends SubsystemBase {
     switch (wantedState) {
       case SPINUP_SHOOTING:
         currentState = HoodStates.SPINUP_SHOOTING;
+        break;
+      case AIMING:
+        currentState = HoodStates.AIMING;
         break;
       case OFF:
       default:
