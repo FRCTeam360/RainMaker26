@@ -1,6 +1,7 @@
 // Copyright (c) FIRST and other WPILib contributors.
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
+
 package frc.robot;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
@@ -39,7 +40,6 @@ import frc.robot.subsystems.Shooter.Hood.HoodIOSim;
 import frc.robot.subsystems.Shooter.Hood.HoodIOWB;
 import frc.robot.subsystems.Shooter.ShotCalculator;
 import frc.robot.subsystems.SuperStructure;
-import frc.robot.subsystems.SuperStructure.SuperStates;
 import frc.robot.subsystems.Vision.Vision;
 import frc.robot.subsystems.Vision.VisionIOLimelight;
 import frc.robot.subsystems.Vision.VisionIOPhotonSim;
@@ -109,7 +109,10 @@ public class RobotContainer {
                     Map.entry(
                         Constants.WoodBotConstants.LIMELIGHT,
                         new VisionIOLimelight(
-                            Constants.WoodBotConstants.LIMELIGHT, () -> 0.0, () -> 0.0, true))));
+                            Constants.WoodBotConstants.LIMELIGHT,
+                            () -> drivetrain.getAngle(),
+                            () -> drivetrain.getAngularRate(),
+                            true))));
         intake = new Intake(new IntakeIOWB());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOWB());
         // intakePivot = new IntakePivot(new IntakePivotIOPB());
@@ -118,16 +121,12 @@ public class RobotContainer {
     commandFactory =
         new CommandFactory(
             intake, flywheel, flywheelKicker, hood, indexer, intakePivot, vision, drivetrain);
-    superStructure =
-        new SuperStructure(intake, indexer, flywheelKicker, flywheel, hood, drivetrain);
+    // superStructure = new SuperStructure(intake, indexer, flywheelKicker, flywheel, hood);
 
-    // registerPathplannerCommand("basic intake", commandFactory.basicIntakeCmd());
-    // registerPathplannerCommand("shoot at hub", commandFactory.shootWithSpinUp(3000.0, 6.0));
+    registerPathplannerCommand("basic intake", commandFactory.basicIntakeCmd());
+    registerPathplannerCommand("shoot at hub", commandFactory.shootWithSpinUp(3000.0, 6.0));
     registerPathplannerCommand("run flywheel kicker", flywheelKicker.setDutyCycleCommand(1.0));
-    registerPathplannerCommand(
-        "basic intake", superStructure.setStateCommand(SuperStates.INTAKING));
-    registerPathplannerCommand(
-        "shoot at hub", superStructure.setStateCommand(SuperStates.SPINUP_SHOOTING));
+    registerPathplannerCommand("spinup flywheel hub shot", commandFactory.shootWithRPM(3000.0));
     configureBindings();
     configureTestBindings();
 
@@ -213,43 +212,40 @@ public class RobotContainer {
 
     // Null checks based on subsystems used by each command
     // basicIntakeCmd uses intake and indexer
-    // if (Objects.nonNull(intake) && Objects.nonNull(indexer)) {
-    //   driverCont.leftBumper().whileTrue(commandFactory.basicIntakeCmd());
-    // }
+    if (Objects.nonNull(intake) && Objects.nonNull(indexer)) {
+      driverCont.leftBumper().whileTrue(commandFactory.basicIntakeCmd());
+    }
 
-    // // setFlywheelKickerDutyCycle uses flywheelKicker
-    // if (Objects.nonNull(flywheelKicker)) {
-    //   driverCont.rightBumper().whileTrue(commandFactory.setFlywheelKickerDutyCycle(1.0));
-    // }
-    driverCont.leftBumper().onTrue(superStructure.setStateCommand(SuperStates.INTAKING));
-    driverCont.leftBumper().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
-    driverCont.rightBumper().onTrue(superStructure.setStateCommand(SuperStates.SPINUP_SHOOTING));
-    driverCont.rightBumper().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
+    // setFlywheelKickerDutyCycle uses flywheelKicker
+    if (Objects.nonNull(flywheelKicker)) {
+      driverCont.rightBumper().whileTrue(flywheelKicker.setVelocityCommand(4000.0));
+    }
 
     // setHoodPosition uses hood
-    // if (Objects.nonNull(hood)) {
-    //   driverCont.pov(0).onTrue(commandFactory.setHoodPosition(0.0));
-    //   driverCont.pov(90).onTrue(commandFactory.setHoodPosition(4.0));
-    //   driverCont.pov(180).onTrue(commandFactory.setHoodPosition(16.0));
-    //   driverCont.pov(270).onTrue(commandFactory.setHoodPosition(23.0));
-    //   driverCont.start().onTrue(hood.zero());
-    // }
+    if (Objects.nonNull(hood)) {
+      driverCont.pov(0).onTrue(commandFactory.setHoodPosition(0.0));
+      driverCont.pov(90).onTrue(commandFactory.setHoodPosition(4.0));
+      driverCont.pov(180).onTrue(commandFactory.setHoodPosition(16.0));
+      driverCont.pov(270).onTrue(commandFactory.setHoodPosition(23.0));
+      driverCont.start().onTrue(hood.zero());
+    }
 
-    // // shootWithRPM uses flywheel
-    // if (Objects.nonNull(flywheel)) {
-    //   driverCont.a().whileTrue(commandFactory.shootWithRPM(2000));
-    //   driverCont.x().whileTrue(commandFactory.shootWithRPM(2500));
-    //   driverCont.b().whileTrue(commandFactory.shootWithRPM(3000));
-    //   driverCont.y().whileTrue(commandFactory.shootWithRPM(3500));
-    //   driverCont.rightTrigger().whileTrue(commandFactory.shootWithSpinUp(3500.0, 6.0));
-    // }
+    // shootWithRPM uses flywheel
+    if (Objects.nonNull(flywheel)) {
+      driverCont.a().whileTrue(commandFactory.shootWithRPM(2000));
+      driverCont.x().whileTrue(commandFactory.shootWithRPM(2500));
+      driverCont.b().whileTrue(commandFactory.shootWithRPM(3000));
+      driverCont.y().whileTrue(commandFactory.shootWithRPM(3500));
+      driverCont.rightTrigger().whileTrue(commandFactory.shootWithSpinUp(3250.0, 8.0));
+    }
 
-    // // Drivetrain commands
-    // if (Objects.nonNull(drivetrain)) {
-    //   drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
-    //   driverCont.rightTrigger().whileTrue(drivetrain.faceHubWhileDriving(driverCont));
-    //   drivetrain.registerTelemetry(logger::telemeterize);
-    // }
+    // Drivetrain commands
+    if (Objects.nonNull(drivetrain)) {
+      drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
+      driverCont.leftTrigger().whileTrue(drivetrain.faceHubWhileDriving(driverCont));
+      drivetrain.registerTelemetry(logger::telemeterize);
+      driverCont.back().onTrue(drivetrain.zeroCommand());
+    }
   }
 
   /** Stops all subsystems safely when the robot is disabled. */
