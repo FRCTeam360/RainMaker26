@@ -5,7 +5,6 @@
 package frc.robot.subsystems.Climber;
 
 import edu.wpi.first.hal.HALUtil;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
 
@@ -41,10 +40,5 @@ public class Climber extends SubsystemBase {
     Logger.processInputs("Climber", inputs);
     long periodicLoopTime = HALUtil.getFPGATime() - periodicStartTime;
     Logger.recordOutput("Climber: periodic loop time", (periodicLoopTime / 1000.0));
-  }
-
-  public Command setDutyCycleCommand(Object object) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'setDutyCycleCommand'");
   }
 }
