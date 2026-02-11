@@ -15,6 +15,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -37,6 +38,7 @@ import frc.robot.subsystems.Shooter.Flywheel.FlywheelIOWB;
 import frc.robot.subsystems.Shooter.Hood.Hood;
 import frc.robot.subsystems.Shooter.Hood.HoodIOSim;
 import frc.robot.subsystems.Shooter.Hood.HoodIOWB;
+import frc.robot.subsystems.Shooter.ShotCalculator;
 import frc.robot.subsystems.SuperStructure;
 import frc.robot.subsystems.SuperStructure.SuperStates;
 import frc.robot.subsystems.Vision.Vision;
@@ -66,6 +68,8 @@ public class RobotContainer {
 
   private CommandFactory commandFactory;
   private SuperStructure superStructure;
+
+  private ShotCalculator shotCalculator;
 
   // TODO: refactor to allow for more than 1 drivetrain type
 
@@ -116,6 +120,7 @@ public class RobotContainer {
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOWB());
         // intakePivot = new IntakePivot(new IntakePivotIOPB());
     }
+    shotCalculator = new ShotCalculator(drivetrain);
     // Configure the trigger bindings
     commandFactory =
         new CommandFactory(
@@ -162,6 +167,20 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureTestBindings() {
+    if (Objects.nonNull(drivetrain)) {
+      drivetrain.setDefaultCommand(
+          drivetrain
+              .fieldOrientedDrive(testCont1)
+              .alongWith(
+                  Commands.run(
+                      () -> {
+                        shotCalculator.calculateShot();
+                        shotCalculator.clearShootingParams();
+                      })));
+      testCont1.rightTrigger().whileTrue(drivetrain.faceHubWhileDriving(testCont1));
+      drivetrain.registerTelemetry(logger::telemeterize);
+    }
+
     if (Objects.nonNull(flywheel)) {
       testCont1.a().whileTrue(flywheel.setDutyCycleCommand(() -> 0.5));
     }
