@@ -76,9 +76,6 @@ public class SuperStructure extends SubsystemBase {
       case INTAKING:
         currentSuperState = SuperStates.INTAKING;
         break;
-
-        currentSuperState = SuperStates.IDLE;
-        break;
       case SPINUP_SHOOTING:
         currentSuperState = SuperStates.SPINUP_SHOOTING;
         break;
