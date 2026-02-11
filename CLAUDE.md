@@ -116,7 +116,7 @@ Use `ALL_CAPS` with underscores for separation:
 
 ## Code Review Checklist
 
-When reviewing PRs, check for the following (inspired by NASA's "Power of 10" for safety-critical code):
+When reviewing PRs, check for the following (inspired by NASA's "Power of 10" for safety-critical code). **Only flag items that are violated — do not mention items that pass. Keep reviews focused on the 2-3 most important issues rather than enumerating every check.**
 
 ### Static Analysis & Safety
 
