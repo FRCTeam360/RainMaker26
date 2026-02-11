@@ -8,6 +8,10 @@ on:
       - "src/**/*.java"
       - "build.gradle"
 
+concurrency:
+  group: claude-review-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   claude-review:
     # Optional: Filter by PR author

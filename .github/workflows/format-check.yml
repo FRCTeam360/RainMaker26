@@ -5,6 +5,10 @@ on:
     branches: [main]
   workflow_dispatch: # Allows manual trigger from Actions tab
 
+concurrency:
+  group: format-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   format:
     name: Format Check
