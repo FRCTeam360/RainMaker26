@@ -142,33 +142,6 @@ public class SuperStructure extends SubsystemBase {
     this.wantedSuperState = superState;
   }
 
-  public void stopSuperState(SuperStates state) {
-    switch (state) {
-      case INTAKING:
-        if (intake.getState() == IntakeStates.INTAKING) intake.setWantedState(IntakeStates.OFF);
-        if (indexer.getState() == IndexerStates.INTAKING) indexer.setWantedState(IndexerStates.OFF);
-        break;
-      case SHOOTING:
-        if (intake.getState() == IntakeStates.SHOOTING)
-          intake.setWantedState(IntakeStates.OFF);
-        if (hood.getState() == HoodStates.SHOOTING) hood.setWantedState(HoodStates.OFF);
-        if (indexer.getState() == IndexerStates.SHOOTING)
-          indexer.setWantedState(IndexerStates.OFF);
-        if (flywheel.getState() == FlywheelStates.SHOOTING)
-          flywheel.setWantedState(FlywheelStates.OFF);
-        if (flywheelKicker.getState() == FlywheelKickerStates.SHOOTING)
-          flywheelKicker.setWantedState(FlywheelKickerStates.OFF);
-        break;
-      default:
-        stopped();
-        break;
-    }
-  }
-
-  public Command stopSuperStateCommand(SuperStates state) {
-    return new InstantCommand(() -> stopSuperState(state), this);
-  }
-
   @Override
   public void periodic() {
     updateState();

@@ -129,10 +129,12 @@ public class RobotContainer {
         new SuperStructure(
             intake, indexer, flywheelKicker, flywheel, hood, drivetrain, shotCalculator);
 
+            if(Objects.nonNull(superStructure)){
     registerPathplannerCommand(
         "basic intake", superStructure.setStateCommand(SuperStates.INTAKING));
     registerPathplannerCommand(
         "shoot at hub", superStructure.setStateCommand(SuperStates.SHOOTING));
+            }
     registerPathplannerCommand("run flywheel kicker", flywheelKicker.setVelocityCommand(4000.0));
     configureBindings();
     configureTestBindings();
@@ -217,11 +219,11 @@ public class RobotContainer {
 
     // Null checks based on subsystems used by each command
     // basicIntakeCmd uses intake and indexer
-    if (Objects.nonNull(intake) && Objects.nonNull(indexer)) {
+    if (Objects.nonNull(intake) && Objects.nonNull(indexer) && Objects.nonNull(superStructure)) {
       superstructureCont.leftBumper().onTrue(superStructure.setStateCommand(SuperStates.INTAKING));
       superstructureCont
           .leftBumper()
-          .onFalse(superStructure.stopSuperStateCommand(SuperStates.INTAKING));
+          .onFalse(superStructure.setStateCommand(SuperStates.IDLE));
     }
 
     // setFlywheelKickerDutyCycle uses flywheelKicker
@@ -245,12 +247,14 @@ public class RobotContainer {
       driverCont.b().whileTrue(commandFactory.shootWithRPM(3000));
       driverCont.y().whileTrue(commandFactory.shootWithRPM(3500));
       // driverCont.rightTrigger().whileTrue(commandFactory.shootWithSpinUp(3500.0, 6.0));
+      if(Objects.nonNull(superStructure)){
       superstructureCont
           .rightTrigger()
           .onTrue(superStructure.setStateCommand(SuperStates.SHOOTING));
       superstructureCont
           .rightTrigger()
-          .onFalse(superStructure.stopSuperStateCommand(SuperStates.SHOOTING));
+          .onFalse(superStructure.setStateCommand(SuperStates.IDLE));
+      }
     }
 
     // Drivetrain commands
@@ -265,7 +269,7 @@ public class RobotContainer {
 
   /** Stops all subsystems safely when the robot is disabled. */
   public void onDisable() {
-    superStructure.setWantedSuperState(SuperStates.IDLE);
+    if(Objects.nonNull(superStructure)) superStructure.setWantedSuperState(SuperStates.IDLE);
     if (Objects.nonNull(drivetrain)) {
       drivetrain.setControl(new SwerveRequest.Idle());
     }
