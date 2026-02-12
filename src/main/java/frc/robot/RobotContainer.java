@@ -81,8 +81,6 @@ public class RobotContainer {
 
   private final CommandXboxController testCont1 = new CommandXboxController(5);
 
-  private final CommandXboxController superstructureCont = new CommandXboxController(4);
-
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     switch (Constants.getRobotType()) {
@@ -129,13 +127,14 @@ public class RobotContainer {
         new SuperStructure(
             intake, indexer, flywheelKicker, flywheel, hood, drivetrain, shotCalculator);
 
-            if(Objects.nonNull(superStructure)){
-    registerPathplannerCommand(
-        "basic intake", superStructure.setStateCommand(SuperStates.INTAKING));
-    registerPathplannerCommand(
-        "shoot at hub", superStructure.setStateCommand(SuperStates.SHOOTING));
-            }
+    if (Objects.nonNull(superStructure)) {
+      registerPathplannerCommand(
+          "basic intake", superStructure.setStateCommand(SuperStates.INTAKING));
+      registerPathplannerCommand(
+          "shoot at hub", superStructure.setStateCommand(SuperStates.SHOOTING));
+    }
     registerPathplannerCommand("run flywheel kicker", flywheelKicker.setVelocityCommand(4000.0));
+    registerPathplannerCommand("spinup flywheel hub shot", commandFactory.shootWithRPM(3000.0));
     configureBindings();
     configureTestBindings();
 
@@ -220,10 +219,8 @@ public class RobotContainer {
     // Null checks based on subsystems used by each command
     // basicIntakeCmd uses intake and indexer
     if (Objects.nonNull(intake) && Objects.nonNull(indexer) && Objects.nonNull(superStructure)) {
-      superstructureCont.leftBumper().onTrue(superStructure.setStateCommand(SuperStates.INTAKING));
-      superstructureCont
-          .leftBumper()
-          .onFalse(superStructure.setStateCommand(SuperStates.IDLE));
+      driverCont.leftBumper().onTrue(superStructure.setStateCommand(SuperStates.INTAKING));
+      driverCont.leftBumper().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
     }
 
     // setFlywheelKickerDutyCycle uses flywheelKicker
@@ -247,20 +244,15 @@ public class RobotContainer {
       driverCont.b().whileTrue(commandFactory.shootWithRPM(3000));
       driverCont.y().whileTrue(commandFactory.shootWithRPM(3500));
       // driverCont.rightTrigger().whileTrue(commandFactory.shootWithSpinUp(3500.0, 6.0));
-      if(Objects.nonNull(superStructure)){
-      superstructureCont
-          .rightTrigger()
-          .onTrue(superStructure.setStateCommand(SuperStates.SHOOTING));
-      superstructureCont
-          .rightTrigger()
-          .onFalse(superStructure.setStateCommand(SuperStates.IDLE));
+      if (Objects.nonNull(superStructure)) {
+        driverCont.rightTrigger().onTrue(superStructure.setStateCommand(SuperStates.SHOOTING));
+        driverCont.rightTrigger().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
       }
     }
 
     // Drivetrain commands
     if (Objects.nonNull(drivetrain)) {
-      drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(superstructureCont));
-      // drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
+      drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
       driverCont.leftTrigger().whileTrue(drivetrain.faceHubWhileDriving(driverCont));
       drivetrain.registerTelemetry(logger::telemeterize);
       driverCont.back().onTrue(drivetrain.zeroCommand());
@@ -269,7 +261,7 @@ public class RobotContainer {
 
   /** Stops all subsystems safely when the robot is disabled. */
   public void onDisable() {
-    if(Objects.nonNull(superStructure)) superStructure.setWantedSuperState(SuperStates.IDLE);
+    if (Objects.nonNull(superStructure)) superStructure.setWantedSuperState(SuperStates.IDLE);
     if (Objects.nonNull(drivetrain)) {
       drivetrain.setControl(new SwerveRequest.Idle());
     }
