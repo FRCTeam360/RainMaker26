@@ -188,9 +188,6 @@ public class RobotContainer {
     if (Objects.nonNull(intakePivot)) {
       testCont1.rightBumper().whileTrue(intakePivot.setDutyCycleCommand(() -> 0.5));
     }
-    // if (Objects.nonNull(climber)) {
-    //  testCont1.a().whileTrue(climber.setDutyCycleCommand(() -> 0.5));
-    // }
   }
 
   private void configureBindings() {

@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj.simulation.RoboRioSim;
 
 public class ClimberIOSim implements ClimberIO {
 
+  private static final double measurements = 0.01;
   private DCMotor gearbox = DCMotor.getNEO(1);
   private Encoder climberEncoder = new Encoder(4, 5);
 
@@ -27,13 +28,13 @@ public class ClimberIOSim implements ClimberIO {
 
   private final LinearSystem<N1, N1, N1> plant =
       LinearSystemId.createFlywheelSystem(
-          gearbox, 0.00113951385, 1.0); // TODO: find actual MOI, old TODO, use if still applicable
+          gearbox, 0.00113951385, 1.0);
 
   private final FlywheelSim climberSim =
       new FlywheelSim(
           plant, //
           gearbox, // gearbox
-          0.01);
+          measurements);
 
   private final EncoderSim simClimberEncoder = new EncoderSim(climberEncoder);
   private final PWMSim simClimberMotor = new PWMSim(climberMotor);
@@ -42,7 +43,7 @@ public class ClimberIOSim implements ClimberIO {
   public ClimberIOSim() {}
 
   public void updateInputs(ClimberIOInputs inputs) {
-    simClimberEncoder.setDistancePerPulse(2.0 * Math.PI * (Units.inchesToMeters(2.0)) / 4096);
+    simClimberEncoder.setDistancePerPulse(2.0 * Math.PI * (Units.inchesToMeters(2.0)));
     climberSim.setInput(simClimberMotor.getSpeed() * RobotController.getBatteryVoltage());
     climberSim.update(0.02);
     simClimberEncoder.setDistance(simClimberMotor.getPosition());
