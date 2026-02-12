@@ -12,6 +12,7 @@ import org.littletonrobotics.junction.Logger;
 public class FlywheelKicker extends SubsystemBase {
   private final FlywheelKickerIO io;
   private final FlywheelKickerIOInputsAutoLogged inputs = new FlywheelKickerIOInputsAutoLogged();
+    private static final double KICKER_VELOCITY_RPM = 4000.0;
 
   public enum FlywheelKickerStates {
     OFF,
@@ -35,7 +36,7 @@ public class FlywheelKicker extends SubsystemBase {
   private void applyState() {
     switch (currentState) {
       case SPINUP_SHOOTING:
-        setVelocity(4000.0);
+        setVelocity(KICKER_VELOCITY_RPM);
         break;
       case OFF:
       default:

@@ -3,6 +3,7 @@ package frc.robot.subsystems;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKicker;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKicker.FlywheelKickerStates;
 import frc.robot.subsystems.Indexer.Indexer;
@@ -113,7 +114,7 @@ public class SuperStructure extends SubsystemBase {
     // hood, flywheel
     hood.setWantedState(HoodStates.SPINUP_SHOOTING);
     flywheel.setWantedState(FlywheelStates.SPINUP_SHOOTING);
-    if (hood.atSetpoint(8.0) && flywheel.atSetpoint(3500.0, 100.0)) {
+    if (hood.atSetpoint(8.0) && flywheel.atSetpoint(Constants.SPINUP_SHOOTING_FLYWHEEL_RPM, 100.0)) {
       flywheelKicker.setWantedState(FlywheelKickerStates.SPINUP_SHOOTING);
       intake.setWantedState(IntakeStates.SPINUP_SHOOTING);
       indexer.setWantedState(IndexerStates.SPINUP_SHOOTING);

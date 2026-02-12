@@ -12,6 +12,7 @@ import org.littletonrobotics.junction.Logger;
 public class Indexer extends SubsystemBase {
   private final IndexerIO io;
   private final IndexerIOInputsAutoLogged inputs = new IndexerIOInputsAutoLogged();
+  private static final double INDEXER_DUTY_CYCLE = 0.4;
 
   public enum IndexerStates {
     OFF,
@@ -47,10 +48,10 @@ public class Indexer extends SubsystemBase {
   private void applyState() {
     switch (currentState) {
       case INTAKING:
-        setDutyCycle(0.4);
+        setDutyCycle(INDEXER_DUTY_CYCLE);
         break;
       case SPINUP_SHOOTING:
-        setDutyCycle(0.4);
+        setDutyCycle(INDEXER_DUTY_CYCLE);
         break;
       case OFF:
       default:
