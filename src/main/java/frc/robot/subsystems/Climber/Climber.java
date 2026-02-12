@@ -35,10 +35,6 @@ public class Climber extends SubsystemBase {
 
   @Override
   public void periodic() {
-    long periodicStartTime = HALUtil.getFPGATime();
     io.updateInputs(inputs);
-    Logger.processInputs("Climber", inputs);
-    long periodicLoopTime = HALUtil.getFPGATime() - periodicStartTime;
-    Logger.recordOutput("Climber: periodic loop time", (periodicLoopTime / 1000.0));
   }
 }
