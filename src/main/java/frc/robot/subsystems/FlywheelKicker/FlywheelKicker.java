@@ -15,7 +15,11 @@ public class FlywheelKicker extends SubsystemBase {
 
   public enum FlywheelKickerStates {
     OFF,
-    SPINUP_SHOOTING
+    SHOOTING
+  }
+
+  public FlywheelKickerStates getState() {
+    return currentState;
   }
 
   private FlywheelKickerStates wantedState = FlywheelKickerStates.OFF;
@@ -28,10 +32,12 @@ public class FlywheelKicker extends SubsystemBase {
     applyState();
   }
 
+  private static final double KICKER_VELOCITY_RPM = 4000.0;
+
   private void applyState() {
     switch (currentState) {
-      case SPINUP_SHOOTING:
-        setDutyCycle(1.0);
+      case SHOOTING:
+        setVelocity(KICKER_VELOCITY_RPM);
         break;
       case OFF:
       default:
@@ -44,8 +50,8 @@ public class FlywheelKicker extends SubsystemBase {
     previousState = currentState;
 
     switch (wantedState) {
-      case SPINUP_SHOOTING:
-        currentState = FlywheelKickerStates.SPINUP_SHOOTING;
+      case SHOOTING:
+        currentState = FlywheelKickerStates.SHOOTING;
         break;
       case OFF:
       default:
