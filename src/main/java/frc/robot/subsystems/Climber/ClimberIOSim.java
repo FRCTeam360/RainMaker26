@@ -25,9 +25,10 @@ public class ClimberIOSim implements ClimberIO {
 
   private final PWMSparkMax climberMotor = new PWMSparkMax(5);
 
+  private final double JKgMetersSquared = 0.00113951385;
   private final LinearSystem<N1, N1, N1> plant =
       LinearSystemId.createFlywheelSystem(
-          gearbox, 0.00113951385, 1.0); // TODO: find actual MOI, old TODO, use if still applicable
+          gearbox, JKgMetersSquared, 1.0); // TODO: find actual MOI, old TODO, use if still applicable
 
   private final FlywheelSim climberSim =
       new FlywheelSim(
