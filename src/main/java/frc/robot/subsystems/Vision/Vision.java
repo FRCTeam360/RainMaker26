@@ -39,10 +39,13 @@ public class Vision extends SubsystemBase {
     // Very low standard deviations = high confidence = vision dominates pose estimation
     // X and Y in meters, rotation in radians
     MEASUREMENT_STD_DEV_DISTANCE_MAP.put(
-        0.5, VecBuilder.fill(1.0, 1.0, 999999.0)); // Close tags: very high confidence (1cm std dev)
+        0.1,
+        VecBuilder.fill(
+            0.25, 0.25, 999999.0)); // Close tags ( at 10 cm): very high confidence (50 cm std dev)
     MEASUREMENT_STD_DEV_DISTANCE_MAP.put(
-        5.0,
-        VecBuilder.fill(10.0, 10.0, 999999.0)); // Far tags: still high confidence (5cm std dev)
+        8.0,
+        VecBuilder.fill(
+            3.0, 3.0, 999999.0)); // Far tags (8 meters):  very low confidence (5 meter cm std dev)
   }
 
   /** Creates a new Vision. */

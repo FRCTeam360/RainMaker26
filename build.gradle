@@ -3,6 +3,7 @@ plugins {
     id 'com.diffplug.spotless' version '6.25.0'
     id "edu.wpi.first.GradleRIO" version "2026.2.1"
     id "com.peterabeles.gversion" version "1.10"
+    id 'com.github.spotbugs' version '6.0.26'
 }
 
 java {
@@ -50,8 +51,33 @@ gversion {
     classPackage = "frc.robot"
     className    = "BuildConstants"
     dateFormat   = "yyyy-MM-dd HH:mm:ss z"
-    timeZone     = "America/New_York"
+    timeZone     = "America/Los_Angeles"
     indent       = "  "
+}
+
+// SpotBugs static analysis
+spotbugs {
+    ignoreFailures = false
+    excludeFilter = file('spotbugs-exclude.xml')
+}
+
+tasks.withType(com.github.spotbugs.snom.SpotBugsTask) {
+    reports {
+        html {
+            required = true
+            outputLocation = layout.buildDirectory.file("reports/spotbugs/spotbugs.html")
+            stylesheet = 'fancy-hist.xsl'
+        }
+        xml.required = false
+    }
+}
+
+// Only run SpotBugs when explicitly invoked (e.g., ./gradlew spotbugsMain).
+// Skips automatically during build/check lifecycle.
+tasks.withType(com.github.spotbugs.snom.SpotBugsTask).configureEach {
+    onlyIf {
+        gradle.startParameter.taskNames.any { it.toLowerCase().contains('spotbugs') }
+    }
 }
 
 // Spotless formatting
@@ -94,7 +120,16 @@ spotless {
     }
 }
 
-def ROBOT_MAIN_CLASS = "frc.robot.Main"
+
+// Automated test approach based on FRC 2412: https://github.com/robototes/REBUILT2026
+def getProjectBooleanProperty(String name, boolean defaultValue = false) {
+    if (!project.hasProperty(name)) {
+        return defaultValue
+    }
+    return Boolean.parseBoolean(project.getProperty(name))
+}
+
+def ROBOT_MAIN_CLASS = getProjectBooleanProperty('automatedTest') ? "frc.robot.test.AutomatedTestMain" : "frc.robot.Main"
 
 // Define my targets (RoboRIO) and artifacts (deployable files)
 // This is added by GradleRIO's backing project DeployUtils.
