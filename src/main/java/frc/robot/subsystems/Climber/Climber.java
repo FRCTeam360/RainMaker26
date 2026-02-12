@@ -4,9 +4,7 @@
 
 package frc.robot.subsystems.Climber;
 
-import edu.wpi.first.hal.HALUtil;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import org.littletonrobotics.junction.Logger;
 
 public class Climber extends SubsystemBase {
   private final ClimberIO io;
@@ -35,10 +33,6 @@ public class Climber extends SubsystemBase {
 
   @Override
   public void periodic() {
-    long periodicStartTime = HALUtil.getFPGATime();
     io.updateInputs(inputs);
-    Logger.processInputs("Climber", inputs);
-    long periodicLoopTime = HALUtil.getFPGATime() - periodicStartTime;
-    Logger.recordOutput("Climber: periodic loop time", (periodicLoopTime / 1000.0));
   }
 }
