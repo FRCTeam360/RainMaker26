@@ -26,12 +26,9 @@ public class ClimberIOSim implements ClimberIO {
 
   private final PWMSparkMax climberMotor = new PWMSparkMax(5);
 
-  private final double JKgMetersSquared = 0.00113951385;
   private final LinearSystem<N1, N1, N1> plant =
       LinearSystemId.createFlywheelSystem(
-          gearbox,
-          JKgMetersSquared,
-          1.0); // TODO: find actual MOI, old TODO, use if still applicable
+          gearbox, 0.00113951385, 1.0);
 
   private final FlywheelSim climberSim =
       new FlywheelSim(
@@ -46,7 +43,7 @@ public class ClimberIOSim implements ClimberIO {
   public ClimberIOSim() {}
 
   public void updateInputs(ClimberIOInputs inputs) {
-    simClimberEncoder.setDistancePerPulse(2.0 * Math.PI * (Units.inchesToMeters(2.0)));
+    simClimberEncoder.setDistancePerPulse(2.0 * Math.PI * (Units.inchesToMeters(2.0)) / 4096); // divided by 4096 to convert the encoder's raw rotational data into meters. 
     climberSim.setInput(simClimberMotor.getSpeed() * RobotController.getBatteryVoltage());
     climberSim.update(0.02);
     simClimberEncoder.setDistance(simClimberMotor.getPosition());
