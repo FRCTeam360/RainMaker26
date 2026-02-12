@@ -16,7 +16,7 @@ public class Intake extends SubsystemBase {
   public enum IntakeStates {
     OFF,
     INTAKING,
-    SPINUP_SHOOTING
+    SHOOTING
   }
 
   private IntakeStates wantedState = IntakeStates.OFF;
@@ -46,8 +46,8 @@ public class Intake extends SubsystemBase {
         currentState = IntakeStates.INTAKING;
         break;
 
-      case SPINUP_SHOOTING:
-        currentState = IntakeStates.SPINUP_SHOOTING;
+      case SHOOTING:
+        currentState = IntakeStates.SHOOTING;
         break;
       case OFF:
       default:
@@ -61,7 +61,7 @@ public class Intake extends SubsystemBase {
       case INTAKING:
         intaking();
         break;
-      case SPINUP_SHOOTING:
+      case SHOOTING:
         intaking();
         break;
       case OFF:

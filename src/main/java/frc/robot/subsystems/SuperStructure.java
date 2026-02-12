@@ -44,7 +44,6 @@ public class SuperStructure extends SubsystemBase {
     PASSING // has current zone, makes check for !current zone then passes to zone
     ,
     SHOOTING,
-    SPINUP_SHOOTING,
     AIMING
   }
 
@@ -77,8 +76,8 @@ public class SuperStructure extends SubsystemBase {
       case INTAKING:
         currentSuperState = SuperStates.INTAKING;
         break;
-      case SPINUP_SHOOTING:
-        currentSuperState = SuperStates.SPINUP_SHOOTING;
+      case SHOOTING:
+        currentSuperState = SuperStates.SHOOTING;
         break;
       case AIMING:
         currentSuperState = SuperStates.AIMING;
@@ -97,7 +96,7 @@ public class SuperStructure extends SubsystemBase {
       case IDLE:
         stopped();
         break;
-      case SPINUP_SHOOTING:
+      case SHOOTING:
         spinupShooting();
         break;
       case AIMING:
@@ -112,13 +111,13 @@ public class SuperStructure extends SubsystemBase {
 
   private void spinupShooting() {
     // hood, flywheel
-    hood.setWantedState(HoodStates.SPINUP_SHOOTING);
-    flywheel.setWantedState(FlywheelStates.SPINUP_SHOOTING);
+    hood.setWantedState(HoodStates.SHOOTING);
+    flywheel.setWantedState(FlywheelStates.SHOOTING);
     if (hood.atSetpoint(8.0)
         && flywheel.atSetpoint(Constants.SPINUP_SHOOTING_FLYWHEEL_RPM, 100.0)) {
-      flywheelKicker.setWantedState(FlywheelKickerStates.SPINUP_SHOOTING);
-      intake.setWantedState(IntakeStates.SPINUP_SHOOTING);
-      indexer.setWantedState(IndexerStates.SPINUP_SHOOTING);
+      flywheelKicker.setWantedState(FlywheelKickerStates.SHOOTING);
+      intake.setWantedState(IntakeStates.SHOOTING);
+      indexer.setWantedState(IndexerStates.SHOOTING);
     }
   }
 
@@ -149,15 +148,15 @@ public class SuperStructure extends SubsystemBase {
         if (intake.getState() == IntakeStates.INTAKING) intake.setWantedState(IntakeStates.OFF);
         if (indexer.getState() == IndexerStates.INTAKING) indexer.setWantedState(IndexerStates.OFF);
         break;
-      case SPINUP_SHOOTING:
-        if (intake.getState() == IntakeStates.SPINUP_SHOOTING)
+      case SHOOTING:
+        if (intake.getState() == IntakeStates.SHOOTING)
           intake.setWantedState(IntakeStates.OFF);
-        if (hood.getState() == HoodStates.SPINUP_SHOOTING) hood.setWantedState(HoodStates.OFF);
-        if (indexer.getState() == IndexerStates.SPINUP_SHOOTING)
+        if (hood.getState() == HoodStates.SHOOTING) hood.setWantedState(HoodStates.OFF);
+        if (indexer.getState() == IndexerStates.SHOOTING)
           indexer.setWantedState(IndexerStates.OFF);
-        if (flywheel.getState() == FlywheelStates.SPINUP_SHOOTING)
+        if (flywheel.getState() == FlywheelStates.SHOOTING)
           flywheel.setWantedState(FlywheelStates.OFF);
-        if (flywheelKicker.getState() == FlywheelKickerStates.SPINUP_SHOOTING)
+        if (flywheelKicker.getState() == FlywheelKickerStates.SHOOTING)
           flywheelKicker.setWantedState(FlywheelKickerStates.OFF);
         break;
       default:

@@ -19,7 +19,7 @@ public class Hood extends SubsystemBase {
 
   public enum HoodStates {
     OFF,
-    SPINUP_SHOOTING,
+    SHOOTING,
     AIMING
   }
 
@@ -44,7 +44,7 @@ public class Hood extends SubsystemBase {
 
   private void applyState() {
     switch (currentState) {
-      case SPINUP_SHOOTING:
+      case SHOOTING:
         setPosition(SPINUP_SHOOTING_HOOD_POSITION_DEGREES);
         break;
       case AIMING:
@@ -65,8 +65,8 @@ public class Hood extends SubsystemBase {
     previousState = currentState;
 
     switch (wantedState) {
-      case SPINUP_SHOOTING:
-        currentState = HoodStates.SPINUP_SHOOTING;
+      case SHOOTING:
+        currentState = HoodStates.SHOOTING;
         break;
       case AIMING:
         currentState = HoodStates.AIMING;

@@ -15,7 +15,7 @@ public class FlywheelKicker extends SubsystemBase {
 
   public enum FlywheelKickerStates {
     OFF,
-    SPINUP_SHOOTING
+    SHOOTING
   }
 
   public FlywheelKickerStates getState() {
@@ -36,7 +36,7 @@ public class FlywheelKicker extends SubsystemBase {
 
   private void applyState() {
     switch (currentState) {
-      case SPINUP_SHOOTING:
+      case SHOOTING:
         setVelocity(KICKER_VELOCITY_RPM);
         break;
       case OFF:
@@ -50,8 +50,8 @@ public class FlywheelKicker extends SubsystemBase {
     previousState = currentState;
 
     switch (wantedState) {
-      case SPINUP_SHOOTING:
-        currentState = FlywheelKickerStates.SPINUP_SHOOTING;
+      case SHOOTING:
+        currentState = FlywheelKickerStates.SHOOTING;
         break;
       case OFF:
       default:

@@ -132,7 +132,7 @@ public class RobotContainer {
     registerPathplannerCommand(
         "basic intake", superStructure.setStateCommand(SuperStates.INTAKING));
     registerPathplannerCommand(
-        "shoot at hub", superStructure.setStateCommand(SuperStates.SPINUP_SHOOTING));
+        "shoot at hub", superStructure.setStateCommand(SuperStates.SHOOTING));
     registerPathplannerCommand("run flywheel kicker", flywheelKicker.setVelocityCommand(4000.0));
     configureBindings();
     configureTestBindings();
@@ -247,10 +247,10 @@ public class RobotContainer {
       // driverCont.rightTrigger().whileTrue(commandFactory.shootWithSpinUp(3500.0, 6.0));
       superstructureCont
           .rightTrigger()
-          .onTrue(superStructure.setStateCommand(SuperStates.SPINUP_SHOOTING));
+          .onTrue(superStructure.setStateCommand(SuperStates.SHOOTING));
       superstructureCont
           .rightTrigger()
-          .onFalse(superStructure.stopSuperStateCommand(SuperStates.SPINUP_SHOOTING));
+          .onFalse(superStructure.stopSuperStateCommand(SuperStates.SHOOTING));
     }
 
     // Drivetrain commands
