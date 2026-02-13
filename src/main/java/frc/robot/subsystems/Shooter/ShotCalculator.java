@@ -71,7 +71,7 @@ public class ShotCalculator {
     }
     Logger.recordOutput("ShotCalculator/cached", false);
     Pose2d robotPosition = drivetrain.getPosition();
-    Pose2d shooterPosition = robotPosition.plus(ShooterConstants.robotToShooter);
+    Pose2d shooterPosition = robotPosition.plus(ShooterConstants.ROBOT_TO_SHOOTER);
 
     Translation2d hubTranslation =
         AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint.toTranslation2d());

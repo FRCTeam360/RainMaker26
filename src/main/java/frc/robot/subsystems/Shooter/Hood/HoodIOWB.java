@@ -26,14 +26,6 @@ public class HoodIOWB implements HoodIO {
   private final SparkMaxConfig sparkMaxConfig = new SparkMaxConfig();
   private final SparkClosedLoopController controller;
 
-  private final LoggedNetworkNumber tunableKp = new LoggedNetworkNumber("/Tuning/Hood/kP", 0.21);
-  private final LoggedNetworkNumber tunableKi = new LoggedNetworkNumber("/Tuning/Hood/kI", 0.0);
-  private final LoggedNetworkNumber tunableKd = new LoggedNetworkNumber("/Tuning/Hood/kD", 0.0);
-  private final LoggedNetworkNumber tunableSetpoint =
-      new LoggedNetworkNumber("/Tuning/Hood/Position", 0.0);
-  private final LoggedNetworkBoolean tuningEnabled =
-      new LoggedNetworkBoolean("/Tuning/Hood/Enabled", false);
-
   public void setEncoder(double position) {
     encoder.setPosition(position);
   }
@@ -57,16 +49,6 @@ public class HoodIOWB implements HoodIO {
     controller = hoodMotor.getClosedLoopController();
   }
 
-  public void updateTunable() {
-    // needs testing
-    if (tuningEnabled.get()) {
-      // sparkMaxConfig.closedLoop.p(tunableKp.get()).i(tunableKi.get()).d(tunableKd.get());
-      controller.setSetpoint(tunableSetpoint.get(), ControlType.kPosition);
-      // hoodMotor.configure(
-      //     sparkMaxConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    }
-  }
-
   public void setPosition(double position) {
     // old:encoder.setPosition(position);
     controller.setSetpoint(position, ControlType.kPosition);
@@ -78,11 +60,6 @@ public class HoodIOWB implements HoodIO {
     inputs.supplyCurrent = hoodMotor.getOutputCurrent() * hoodMotor.getAppliedOutput();
     inputs.velocity = encoder.getVelocity();
     inputs.voltage = hoodMotor.getBusVoltage() * hoodMotor.getAppliedOutput();
-    updateTunable();
-  }
-
-  public void setPositionTunable(DoubleSupplier doubleSupplier) {
-    this.setPosition(tunableSetpoint.getAsDouble());
   }
 
   public void setDutyCycle(double dutyCycle) {

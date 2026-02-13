@@ -7,6 +7,8 @@ package frc.robot.subsystems.Shooter.Hood;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.commands.HoodTuneCommand;
+
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -15,6 +17,7 @@ public class Hood extends SubsystemBase {
   private final HoodIOInputsAutoLogged inputs = new HoodIOInputsAutoLogged();
   private final double TOLERANCE = 0.5;
   private DoubleSupplier hoodAngleSupplier = () -> 0.0;
+  private HoodTuneCommand tuner;
 
   public enum HoodStates {
     OFF,
@@ -122,6 +125,7 @@ public class Hood extends SubsystemBase {
     Logger.recordOutput("Subsystems/Hood/WantedState", wantedState.toString());
     Logger.recordOutput("Subsystems/Hood/CurrentState", currentState.toString());
     Logger.recordOutput("Subsystems/Hood/PreviousState", previousState.toString());
+    Logger.recordOutput("HoodTuner", tuner.toString());
   }
 
   public Command setDutyCycleCommand(double value) {

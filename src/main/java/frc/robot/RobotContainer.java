@@ -19,6 +19,8 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.commands.FlywheelTuneCommand;
+import frc.robot.commands.HoodTuneCommand;
 import frc.robot.generated.WoodBotDrivetrain;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKicker;
@@ -64,6 +66,8 @@ public class RobotContainer {
   private Intake intake;
   private IntakePivot intakePivot;
   private FlywheelKicker flywheelKicker;
+  private HoodTuneCommand hoodTuner;
+  private FlywheelTuneCommand flywheelTuner;
 
   private CommandFactory commandFactory;
   private SuperStructure superStructure;
@@ -129,7 +133,7 @@ public class RobotContainer {
     registerPathplannerCommand("run flywheel kicker", flywheelKicker.setDutyCycleCommand(1.0));
     registerPathplannerCommand("spinup flywheel hub shot", commandFactory.shootWithRPM(3000.0));
     configureBindings();
-    configureTestBindings();
+    // configureTestBindings();
 
     PathPlannerLogging.setLogActivePathCallback(
         (poses -> Logger.recordOutput("Swerve/ActivePath", poses.toArray(new Pose2d[0]))));
@@ -164,17 +168,19 @@ public class RobotContainer {
    */
   private void configureTestBindings() {
     if (Objects.nonNull(drivetrain)) {
-      // drivetrain.setDefaultCommand(
-      //     drivetrain
-      //         .fieldOrientedDrive(testCont1)
-      //         .alongWith(
-      //             Commands.run(
-      //                 () -> {
-      //                   shotCalculator.calculateShot();
-      //                   shotCalculator.clearShootingParams();
-      //                 })));
+      drivetrain.setDefaultCommand(
+          drivetrain
+              .fieldOrientedDrive(testCont1)
+              .alongWith(
+                  Commands.run(
+                      () -> {
+                        shotCalculator.calculateShot();
+                        shotCalculator.clearShootingParams();
+                      })));
       testCont1.rightTrigger().whileTrue(drivetrain.faceHubWhileDriving(testCont1));
       drivetrain.registerTelemetry(logger::telemeterize);
+      testCont1.a().onTrue(flywheelTuner);
+      testCont1.b().onTrue(hoodTuner);
     }
 
     if (Objects.nonNull(flywheel)) {
@@ -241,14 +247,7 @@ public class RobotContainer {
     // Drivetrain commands
     if (Objects.nonNull(drivetrain)) {
       drivetrain.setDefaultCommand(
-          drivetrain
-              .fieldOrientedDrive(driverCont)
-              .alongWith(
-                  Commands.run(
-                      () -> {
-                        shotCalculator.calculateShot();
-                        shotCalculator.clearShootingParams();
-                      })));
+          commandFactory.fieldOrientedDriveWithShotCalculator(driverCont));
       driverCont.leftTrigger().whileTrue(drivetrain.faceHubWhileDriving(driverCont));
       drivetrain.registerTelemetry(logger::telemeterize);
       driverCont.back().onTrue(drivetrain.zeroCommand());

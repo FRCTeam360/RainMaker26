@@ -9,11 +9,13 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKicker;
 import frc.robot.subsystems.Indexer.Indexer;
 import frc.robot.subsystems.Intake.Intake;
 import frc.robot.subsystems.IntakePivot.IntakePivot;
+import frc.robot.subsystems.Shooter.ShotCalculator;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel;
 import frc.robot.subsystems.Shooter.Hood.Hood;
 import frc.robot.subsystems.Vision.Vision;
@@ -107,6 +109,18 @@ public class CommandFactory {
 
   public Command runHopperAndKicker() {
     return flyWheelKicker.setVelocityCommand(5000.0).alongWith(indexer.setDutyCycleCommand(0.3));
+  }
+
+  private ShotCalculator shotCalculator;
+  public Command fieldOrientedDriveWithShotCalculator(CommandXboxController controller) {
+    return drivetrain
+              .fieldOrientedDrive(controller)
+              .alongWith(
+                  Commands.run(
+                      () -> {
+                        shotCalculator.calculateShot();
+                        shotCalculator.clearShootingParams();
+                      }));
   }
 
   public Command setHoodPosition(double position) {

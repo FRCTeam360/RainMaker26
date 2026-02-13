@@ -9,6 +9,6 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.util.Units;
 
 public class ShooterConstants {
-  public static Transform2d robotToShooter =
+  public static Transform2d ROBOT_TO_SHOOTER =
       new Transform2d(Units.inchesToMeters(-7.0), 0.0, new Rotation2d());
 }
