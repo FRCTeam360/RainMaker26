@@ -19,5 +19,6 @@ jobs:
         with:
           distribution: temurin
           java-version: 17
+          cache: gradle
       - name: Check formatting
         run: ./gradlew spotlessCheck

@@ -1,0 +1,18 @@
+%% SuperStructure State Diagram (Intake/Shooter systems)
+stateDiagram-v2
+    [*] --> IDLE
+
+    %% Intake flow
+    IDLE --> INTAKING : Driver holds<br>intake button
+    INTAKING --> IDLE : Driver releases<br>intake button
+
+    %% Shooting flow (toggleable)
+    IDLE --> SHOOTING : Driver presses<br>shoot button (toggle on)
+    SHOOTING --> IDLE : Driver presses<br>shoot button (toggle off)
+    SHOOTING --> IDLE : Hopper empty
+
+    note right of SHOOTING : See ShootingStateMachine<br>for internal states
+
+    %% Ejecting (from any state)
+    IDLE --> EJECTING : Driver holds<br>eject button
+    EJECTING --> IDLE : Driver releases<br>eject button

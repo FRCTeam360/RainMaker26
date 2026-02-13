@@ -21,3 +21,4 @@ After cloning, follow the steps below to set up the project for the first time:
 | `./gradlew simulateJava`  | Run simulation locally                    |
 | `./gradlew test`          | Run tests                                 |
 | `./gradlew spotlessApply` | Format code                               |
+| `./gradlew spotbugsMain`  | Run static analysis to find bugs          |
