@@ -6,6 +6,8 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Shooter.Hood.Hood;
+
+import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 /**
@@ -18,6 +20,8 @@ public class HoodTuneCommand extends Command {
   private final Hood hood;
   private final LoggedNetworkNumber tunablePosition =
       new LoggedNetworkNumber("/Tuning/Hood/TunablePosition", 0.0);
+  private final LoggedNetworkBoolean tuningEnabled =
+      new LoggedNetworkBoolean("Tuning/Hood/TuningEnabled", false);
 
   /**
    * Creates a new HoodTuneCommand.
@@ -34,6 +38,7 @@ public class HoodTuneCommand extends Command {
 
   @Override
   public void execute() {
+    if (tuningEnabled.getAsBoolean())
     hood.setPosition(tunablePosition.get());
   }
 
