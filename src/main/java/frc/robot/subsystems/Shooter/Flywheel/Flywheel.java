@@ -19,6 +19,9 @@ public class Flywheel extends SubsystemBase {
     SHOOTING
   }
 
+  public void runVelocity(double velocityRPM){
+    io.runVelocity(velocityRPM);
+  }
   /** Creates a new Flywheel. */
   public Flywheel(FlywheelIO io) {
     this.io = io;

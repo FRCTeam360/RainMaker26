@@ -18,6 +18,19 @@ public interface FlywheelIO {
     public double[] positions = new double[MAX_MOTORS];
   }
 
+    public static enum FlywheelIOOutputMode {
+    COAST,
+    DUTY_CYCLE_BANG_BANG,
+    TORQUE_CURRENT_BANG_BANG
+  }
+
+  public static class FlywheelIOOutputs {
+    public FlywheelIOOutputMode mode = FlywheelIOOutputMode.COAST;
+    public double velocityRPM = 0.0;
+  }
+
+  public void runVelocity(double velocityRPM);
+  
   public void setDutyCycle(double duty);
 
   public void setRPM(double rpm);

@@ -21,6 +21,9 @@ public final class Constants {
       AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
   public static final double SPINUP_SHOOTING_FLYWHEEL_RPM = 3250;
 
+  public static final boolean TUNING_MODE = false;
+  public static final boolean DISABLE_HAL = false;
+
   public static enum RobotType {
     SIM,
     WOODBOT,

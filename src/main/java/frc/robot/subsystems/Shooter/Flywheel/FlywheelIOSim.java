@@ -153,4 +153,9 @@ public class FlywheelIOSim implements FlywheelIO {
     rpm = rpm / 60;
     motorControllerSim1.setControl(velocityRequest.withVelocity(rpm));
   }
+
+  @Override
+  public void runVelocity(double velocityRPM) {
+    throw new UnsupportedOperationException("Unimplemented method 'runVelocity'");
+  }
 }

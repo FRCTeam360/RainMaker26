@@ -4,6 +4,9 @@
 
 package frc.robot.subsystems.Shooter.Flywheel;
 
+import org.littletonrobotics.junction.AutoLogOutput;
+import org.littletonrobotics.junction.Logger;
+
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -15,13 +18,20 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+
+import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.math.filter.Debouncer.DebounceType;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Constants.WoodBotConstants;
+import frc.robot.subsystems.Shooter.ShotCalculator;
+import frc.robot.utils.LoggedTunableNumber;
 
 public class FlywheelIOWB implements FlywheelIO {
 
   private final TalonFX[] motors = {
-    new TalonFX(WoodBotConstants.FLYWHEEL_RIGHT_ID, WoodBotConstants.CANBUS_NAME),
-    new TalonFX(WoodBotConstants.FLYWHEEL_LEFT_ID, WoodBotConstants.CANBUS_NAME)
+      new TalonFX(WoodBotConstants.FLYWHEEL_RIGHT_ID, WoodBotConstants.CANBUS_NAME),
+      new TalonFX(WoodBotConstants.FLYWHEEL_LEFT_ID, WoodBotConstants.CANBUS_NAME)
   };
   private TalonFXConfiguration rightConfig = new TalonFXConfiguration();
   private TalonFXConfiguration leftConfig = new TalonFXConfiguration();
@@ -55,8 +65,7 @@ public class FlywheelIOWB implements FlywheelIO {
     rightConfig.CurrentLimits.SupplyCurrentLimit = 100.0;
     rightConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
 
-    rightConfig
-        .MotionMagic
+    rightConfig.MotionMagic
         .withMotionMagicAcceleration(0.0)
         .withMotionMagicCruiseVelocity(0.0)
         .withMotionMagicJerk(0.0);
@@ -90,6 +99,40 @@ public class FlywheelIOWB implements FlywheelIO {
   public void setRPM(double rpm) {
     double rps = rpm / 60.0;
     motors[0].setControl(velocityTorqueCurrent.withVelocity(rps));
+  }
+
+  // from Mechanical advantage
+  private static final LoggedTunableNumber torqueCurrentControlTolerance = new LoggedTunableNumber(
+      "Flywheel/TorqueCurrentControlTolerance", 20.0);
+  private static final LoggedTunableNumber torqueCurrentControlDebounce = new LoggedTunableNumber(
+      "Flywheel/TorqueCurrentControlDebounce", 0.025);
+  private static final LoggedTunableNumber atGoalDebounce = new LoggedTunableNumber("Flywheel/AtGoalDebounce", 0.2);
+  private Debouncer torqueCurrentDebouncer = new Debouncer(torqueCurrentControlDebounce.get(), DebounceType.kFalling);
+  private Debouncer atGoalDebouncer = new Debouncer(atGoalDebounce.get(), DebounceType.kFalling);
+  private boolean lastTorqueCurrentControl = false;
+  @AutoLogOutput(key = "Flywheel/AtGoal")
+  private boolean atGoal = false;
+  @AutoLogOutput
+  private long lanchCount = 0;
+  private final FlywheelIOOutputs outputs = new FlywheelIOOutputs();
+
+  // mech avantage code, used radians pers sec originally/ keep in mond 4 futur
+  @Override
+    public void runVelocity(double velocityRPM) {
+    boolean inTolerance = Math
+        .abs(motors[0].getVelocity().getValueAsDouble() - velocityRPM) <= torqueCurrentControlTolerance.get();
+    boolean torqueCurrentControl = torqueCurrentDebouncer.calculate(inTolerance);
+    atGoal = atGoalDebouncer.calculate(inTolerance);
+
+    if (!torqueCurrentControl && lastTorqueCurrentControl) {
+      lanchCount++;
+    }
+    lastTorqueCurrentControl = torqueCurrentControl;
+
+    outputs.mode = torqueCurrentControl
+        ? FlywheelIOOutputMode.TORQUE_CURRENT_BANG_BANG
+        : FlywheelIOOutputMode.DUTY_CYCLE_BANG_BANG;
+    outputs.velocityRPM = velocityRPM;
   }
 
   @Override
