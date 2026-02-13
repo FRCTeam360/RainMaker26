@@ -20,8 +20,6 @@ public class FlywheelTuneCommand extends Command {
   private final Flywheel flywheel;
   private final LoggedNetworkNumber tunableRPM =
       new LoggedNetworkNumber("/Tuning/Flywheel/TunableRPM", 0.0);
-  private final LoggedNetworkBoolean tuningEnabled =
-      new LoggedNetworkBoolean("Tuning/Flywheel/TuningEnabled", false);
 
   /**
    * Creates a new FlywheelTuneCommand.
@@ -38,9 +36,7 @@ public class FlywheelTuneCommand extends Command {
 
   @Override
   public void execute() {
-    if (tuningEnabled.getAsBoolean()) {
       flywheel.setVelocity(tunableRPM.get());
-    }
   }
 
   @Override
