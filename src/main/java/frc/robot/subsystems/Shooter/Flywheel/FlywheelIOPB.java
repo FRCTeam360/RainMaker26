@@ -10,18 +10,17 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
+import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-
 import frc.robot.Constants.PracticeBotConstants;
-import frc.robot.Constants.WoodBotConstants;
 
 public class FlywheelIOPB implements FlywheelIO {
 
   private final TalonFX[] motors = {
-    new TalonFX(PracticeBotConstants.FLYWHEEL_RIGHT_ID,PracticeBotConstants.CANBUS_NAME),
+    new TalonFX(PracticeBotConstants.FLYWHEEL_RIGHT_ID, PracticeBotConstants.CANBUS_NAME),
     new TalonFX(PracticeBotConstants.FLYWHEEL_LEFT_ID, PracticeBotConstants.CANBUS_NAME)
   };
   private TalonFXConfiguration rightConfig = new TalonFXConfiguration();
@@ -29,12 +28,12 @@ public class FlywheelIOPB implements FlywheelIO {
   private MotorOutputConfigs motorOutputConfigs = new MotorOutputConfigs();
 
   public FlywheelIOPB() {
-    double kP = 0.025;
+    double kP = 3.0;
     double kI = 0.0;
-    double kD = 0.0;
+    double kD = 0.1;
     double kA = 0.0;
     double kG = 0.0;
-    double kS = 0.07;
+    double kS = 3.0;
     double kV = 0.008;
 
     Slot0Configs slot0Configs = rightConfig.Slot0;
@@ -85,11 +84,12 @@ public class FlywheelIOPB implements FlywheelIO {
 
   MotionMagicVelocityVoltage velocityVoltage = new MotionMagicVelocityVoltage(0);
   VelocityDutyCycle velocityDutyCycle = new VelocityDutyCycle(0.0);
+  VelocityTorqueCurrentFOC velocityTorqueCurrent = new VelocityTorqueCurrentFOC(0.0);
 
   @Override
   public void setRPM(double rpm) {
     double rps = rpm / 60.0;
-    motors[0].setControl(velocityDutyCycle.withVelocity(rps));
+    motors[0].setControl(velocityTorqueCurrent.withVelocity(rps));
   }
 
   @Override
@@ -100,7 +100,7 @@ public class FlywheelIOPB implements FlywheelIO {
   public void updateInputs(FlywheelIOInputs inputs) {
     for (int i = 0; i < motors.length; i++) {
       inputs.statorCurrents[i] = motors[i].getStatorCurrent().getValueAsDouble();
-      inputs.supplyCurrents[i] = motors[i].getStatorCurrent().getValueAsDouble();
+      inputs.supplyCurrents[i] = motors[i].getSupplyCurrent().getValueAsDouble();
       inputs.positions[i] = motors[i].getPosition().getValueAsDouble();
       // velocities are now in RPM
       inputs.velocities[i] = motors[i].getVelocity().getValueAsDouble() * 60.0;

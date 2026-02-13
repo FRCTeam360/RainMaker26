@@ -2,8 +2,17 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.subsystems.Hood;
+package frc.robot.subsystems.Shooter.Hood;
 
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
+import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
@@ -14,49 +23,66 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import frc.robot.Constants;
+import frc.robot.Constants.PracticeBotConstants;
 
 public class HoodIOPB implements HoodIO {
   // /** Creates a new HoodIOWB. */
-  private final SparkMax hoodMotor =
-      new SparkMax(Constants.PracticeBotConstants.HOOD_ID, MotorType.kBrushless);
-  private final RelativeEncoder encoder = hoodMotor.getEncoder();
-  private final SparkMaxConfig sparkMaxConfig = new SparkMaxConfig();
-  private final SparkClosedLoopController controller;
+  private final TalonFX hoodMotor =
+      new TalonFX(Constants.PracticeBotConstants.HOOD_ID);
+  private TalonFXConfiguration config = new TalonFXConfiguration();
+  private MotorOutputConfigs motorOutputConfigs = new MotorOutputConfigs();
 
   public void setEncoder(double position) {
-    encoder.setPosition(position);
+    hoodMotor.setPosition(position);
   }
 
   public HoodIOPB() {
-    sparkMaxConfig.idleMode(IdleMode.kBrake);
-    sparkMaxConfig.inverted(false);
+    double kP = 0.21;
+    double kI = 0.0;
+    double kD = 0.0;
+    double kA = 0.0;
+    double kG = 0.0;
+    double kS = 0.0;
+    double kV = 0.0;
 
-    // Smart current limit
-    sparkMaxConfig.smartCurrentLimit(40);
+    Slot0Configs slot0Configs = config.Slot0;
+    slot0Configs.kA = kA;
+    slot0Configs.kD = kD;
+    slot0Configs.kG = kG;
+    slot0Configs.kI = kI;
+    slot0Configs.kP = kP;
+    slot0Configs.kS = kS;
+    slot0Configs.kV = kV;
 
-    // PID gains
-    sparkMaxConfig.closedLoop.p(0.21).i(0.0).d(0.0);
+    config.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
+    config.SoftwareLimitSwitch.ForwardSoftLimitThreshold = 24.0; 
+    config.CurrentLimits.StatorCurrentLimit = 40.0;
+        //not legit vals yet stole from flywheel :sob:
+    config.CurrentLimits.StatorCurrentLimitEnable = true;
+    config.CurrentLimits.SupplyCurrentLimit = 100.0;
+    config.CurrentLimits.SupplyCurrentLimitEnable = true;
 
-    // Soft limits
-    sparkMaxConfig.softLimit.forwardSoftLimitEnabled(true).forwardSoftLimit(24.0);
+    config
+        .MotionMagic
+        .withMotionMagicAcceleration(0.0)
+        .withMotionMagicCruiseVelocity(0.0)
+        .withMotionMagicJerk(0.0);
+    config.MotorOutput.withInverted(InvertedValue.Clockwise_Positive);
+    hoodMotor.setNeutralMode(NeutralModeValue.Brake);
 
-    hoodMotor.configure(
-        sparkMaxConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-
-    controller = hoodMotor.getClosedLoopController();
+    hoodMotor.getConfigurator().apply(config);
   }
 
   public void setPosition(double position) {
-    // old:encoder.setPosition(position);
-    controller.setSetpoint(position, ControlType.kPosition);
+    hoodMotor.setPosition(position);
   }
 
   public void updateInputs(HoodIOInputs inputs) {
-    inputs.position = encoder.getPosition();
-    inputs.statorCurrent = hoodMotor.getOutputCurrent();
-    inputs.supplyCurrent = hoodMotor.getOutputCurrent() * hoodMotor.getAppliedOutput();
-    inputs.velocity = encoder.getVelocity();
-    inputs.voltage = hoodMotor.getBusVoltage() * hoodMotor.getAppliedOutput();
+    inputs.position = hoodMotor.getPosition().getValueAsDouble();
+    inputs.statorCurrent = hoodMotor.getStatorCurrent().getValueAsDouble();
+    inputs.supplyCurrent = hoodMotor.getSupplyCurrent().getValueAsDouble();
+    inputs.velocity = hoodMotor.getVelocity().getValueAsDouble();
+    inputs.voltage = hoodMotor.getMotorVoltage().getValueAsDouble();;
   }
 
   public void setDutyCycle(double dutyCycle) {
