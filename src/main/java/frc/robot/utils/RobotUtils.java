@@ -26,6 +26,13 @@ public class RobotUtils {
     return false;
   }
 
+  /**
+   * Returns the alliance that won auto based on the gameSpecificMessage from DriverStation by
+   * checking the first character of the gameSpecificMessage
+   *
+   * @param autoWinner the gameSpecificMessage from DriverStation
+   * @return the alliance that won the autonomous period
+   */
   public static Alliance getAutoWinner(String autoWinner) {
     // the game specific message tells you which alliance won auto
     if (autoWinner.length() > 0) {
@@ -42,6 +49,13 @@ public class RobotUtils {
     return null;
   }
 
+  /**
+   * Returns which alliance's hub is active based on the gameTime from DriverStation
+   *
+   * @param gameTime the gameTime from DriverStation
+   * @param isTele if the game is in teleop or auto. Can be accessed by DriverStation.isTeleop()
+   * @return which hub(s) are currently active
+   */
   public static ActiveHub getHubPhase(double gameTime, Boolean isTele) {
     // gameTime is the getMatchTime() from DriverStation, isTele is the isTeleop() from
     // DriverStation
@@ -67,6 +81,15 @@ public class RobotUtils {
     return activeHub;
   }
 
+  /**
+   * Returns if our alliance's hub is active based on which alliance we're on, which alliance won
+   * auto, and which hub(s) are open
+   *
+   * @param alliance the alliance we're on from DriverStation
+   * @param autoWinner the alliance that won auto
+   * @param gamePhase which hub(s) are active (auto winner's or auto loser's)
+   * @return if our alliance's hub is active
+   */
   public static Boolean hubActive(
       Optional<Alliance> alliance, Alliance autoWinner, ActiveHub gamePhase) {
     // alliance is our alliance, autoWinner is the result of getAutoWinner, gamePhase is the result

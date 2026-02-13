@@ -69,6 +69,12 @@ public class TestWhenCanShootInHubLogic {
   }
 
   @Test
+  void autoWinnerShouldBeNull3() {
+    Alliance autoWinner = RobotUtils.getAutoWinner("");
+    assertEquals(null, autoWinner);
+  }
+
+  @Test
   void hubActiveShouldBeTrue() {
     Boolean hubActive =
         RobotUtils.hubActive(Optional.of(Alliance.Blue), Alliance.Blue, ActiveHub.AUTOWINNER);
