@@ -21,6 +21,12 @@ public class TestWhenCanShootInHubLogic {
   }
 
   @Test
+  void hubPhaseShouldBeBOTH2() {
+    ActiveHub activeHub = RobotUtils.getHubPhase(360, true);
+    assertEquals(BOTH, activeHub);
+  }
+
+  @Test
   void hubPhaseShouldBeBOTHAuto() {
     ActiveHub activeHub = RobotUtils.getHubPhase(25.0, false);
     assertEquals(BOTH, activeHub);
@@ -36,12 +42,6 @@ public class TestWhenCanShootInHubLogic {
   void hubPhaseShouldBeAUTOWINNER() {
     ActiveHub activeHub = RobotUtils.getHubPhase(50.0, true);
     assertEquals(AUTOWINNER, activeHub);
-  }
-
-  @Test
-  void hubPhaseShouldBeNull() {
-    ActiveHub activeHub = RobotUtils.getHubPhase(360, true);
-    assertEquals(null, activeHub);
   }
 
   @Test

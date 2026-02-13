@@ -76,6 +76,8 @@ public class RobotUtils {
         activeHub = ActiveHub.AUTOLOSER; // ALLIANCE SHIFT 1
       } else if (gameTime <= 140) {
         activeHub = ActiveHub.BOTH; // TRANSITION
+      } else {
+        return ActiveHub.BOTH;
       }
     }
     return activeHub;
