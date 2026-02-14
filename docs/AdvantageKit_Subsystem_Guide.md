@@ -801,7 +801,7 @@ Keep units consistent within each layer:
 
 ```java
 public class ElevatorIOReal implements ElevatorIO {
-  private static final double SPOOL_RADIUS = SimulationConstants.SIM_TICK_RATE_S;  // meters
+  private static final double SPOOL_RADIUS = 0.02;  // meters
   private static final double GEAR_RATIO = 10.0;
 
   @Override
