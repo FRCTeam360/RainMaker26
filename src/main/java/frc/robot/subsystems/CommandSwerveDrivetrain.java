@@ -60,8 +60,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   private final String CMD_NAME = "Swerve: ";
   private final SwerveRequest xOutReq = new SwerveRequest.SwerveDriveBrake();
 
-  public void drive(double xSpeed, double ySpeed, double rotSpeed) {}
-
   // Keep track of when vision measurements are added for logging context
   private boolean hasVisionMeasurements = false;
 
