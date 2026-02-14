@@ -13,6 +13,7 @@ import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
 public class Hood extends SubsystemBase {
+  private static final double SPINUP_SHOOTING_HOOD_POSITION_DEGREES = 8.0;
   private final HoodIO io;
   private final HoodIOInputsAutoLogged inputs = new HoodIOInputsAutoLogged();
   private final double TOLERANCE = 0.5;
@@ -20,7 +21,7 @@ public class Hood extends SubsystemBase {
 
   public enum HoodStates {
     OFF,
-    SPINUP_SHOOTING,
+    SHOOTING,
     AIMING
   }
 
@@ -45,8 +46,8 @@ public class Hood extends SubsystemBase {
 
   private void applyState() {
     switch (currentState) {
-      case SPINUP_SHOOTING:
-        setPosition(6.0);
+      case SHOOTING:
+        setPosition(SPINUP_SHOOTING_HOOD_POSITION_DEGREES);
         break;
       case AIMING:
         setPosition(hoodAngleSupplier.getAsDouble());
@@ -58,12 +59,16 @@ public class Hood extends SubsystemBase {
     }
   }
 
+  public HoodStates getState() {
+    return currentState;
+  }
+
   private void updateState() {
     previousState = currentState;
 
     switch (wantedState) {
-      case SPINUP_SHOOTING:
-        currentState = HoodStates.SPINUP_SHOOTING;
+      case SHOOTING:
+        currentState = HoodStates.SHOOTING;
         break;
       case AIMING:
         currentState = HoodStates.AIMING;
