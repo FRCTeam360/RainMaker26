@@ -124,9 +124,9 @@ public class CommandFactory {
                 }));
   }
 
-  // private Command shootWithShotCalculator() {
-  //   return this.shooWith
-  // }
+  private Command shootWithShotCalculator() {
+    shotCalculator.calculateShot().
+  }
 
   public Command setHoodPosition(double position) {
     return hood.setPositionCmd(position);

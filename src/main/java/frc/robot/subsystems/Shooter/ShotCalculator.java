@@ -42,11 +42,9 @@ public class ShotCalculator {
     minDistance = 0.0;
     maxDistance = Double.MAX_VALUE;
 
-    shotHoodAngleMap.put(4.93, 25.0);
     shotHoodAngleMap.put(4.944, 18.0);
     shotHoodAngleMap.put(3.789, 20.0);
 
-    launchFlywheelSpeedMap.put(4.93, 3350.0);
     launchFlywheelSpeedMap.put(4.944, 3750.0);
     launchFlywheelSpeedMap.put(3.789, 3750.0);
   }
@@ -82,15 +80,15 @@ public class ShotCalculator {
         AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint.toTranslation2d());
     double distanceToTarget = hubTranslation.getDistance(shooterPosition.getTranslation());
 
-    Rotation2d targetAngle = hubTranslation.minus(shooterPosition.getTranslation()).getAngle();
+    Rotation2d targetHeading = hubTranslation.minus(shooterPosition.getTranslation()).getAngle();
     double hoodAngle = shotHoodAngleMap.get(distanceToTarget);
     double flywheelSpeed = launchFlywheelSpeedMap.get(distanceToTarget);
 
     Logger.recordOutput("ShotCalculator/hubPosition", FieldConstants.Hub.topCenterPoint);
     Logger.recordOutput("ShotCalculator/distanceToTarget", distanceToTarget);
-    Logger.recordOutput("ShotCalculator/targetAngle", targetAngle);
+    Logger.recordOutput("ShotCalculator/targetAngle", targetHeading);
 
-    shootingParams = new ShootingParams(targetAngle, hoodAngle, flywheelSpeed);
+    shootingParams = new ShootingParams(targetHeading, hoodAngle, flywheelSpeed);
 
     return shootingParams;
   }
