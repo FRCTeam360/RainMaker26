@@ -20,6 +20,8 @@ public class VisionIOLimelight implements VisionIO {
   private final String name;
   private final DoubleSupplier gyroAngleSupplier;
   private final DoubleSupplier gyroAngleRateSupplier;
+  private final NetworkTable limelightTable = NetworkTableInstance.getDefault().getTable("limelight");
+  private int rewindCounter = 0;
 
   private boolean acceptMeasurements;
 
@@ -148,5 +150,12 @@ public class VisionIOLimelight implements VisionIO {
 
   public void resetSnapshot() {
     table.getEntry("snapshot").setNumber(0.0);
+  }
+
+  public void captureRewind(String eventName){
+    rewindCounter++;
+    limelightTable.getEntry("snapname").setString(eventName);
+    double[] captureData = {(double)rewindCounter, 10.0};
+    limelightTable.getEntry("capture_rewind").setDoubleArray(captureData);
   }
 }
