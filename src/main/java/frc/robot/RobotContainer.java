@@ -227,11 +227,12 @@ public class RobotContainer {
     if (Objects.nonNull(intake) && Objects.nonNull(indexer) && Objects.nonNull(superStructure)) {
       driverCont.leftBumper().onTrue(superStructure.setStateCommand(SuperStates.INTAKING));
       driverCont.leftBumper().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
+      driverCont.a().whileTrue(indexer.setDutyCycleCommand(0.5));
     }
 
     // setFlywheelKickerDutyCycle uses flywheelKicker
     if (Objects.nonNull(flywheelKicker)) {
-      driverCont.rightBumper().whileTrue(commandFactory.runHopperAndKicker());
+      // driverCont.rightBumper().whileTrue(commandFactory.runHopperAndKicker());
     }
 
     // setHoodPosition uses hood
@@ -245,7 +246,7 @@ public class RobotContainer {
 
     // shootWithRPM uses flywheel
     if (Objects.nonNull(flywheel)) {
-      driverCont.a().whileTrue(commandFactory.shootWithRPM(2000));
+      // driverCont.a().whileTrue(commandFactory.shootWithRPM(2000));
       driverCont.x().whileTrue(commandFactory.shootWithRPM(2500));
       driverCont.b().whileTrue(commandFactory.shootWithRPM(3000));
       driverCont.y().whileTrue(commandFactory.shootWithRPM(3500));

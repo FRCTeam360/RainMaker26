@@ -52,6 +52,7 @@ public class CommandFactory {
     this.intakePivot = intakePivot;
     this.vision = vision;
     this.drivetrain = drivetrain;
+    shotCalculator = new ShotCalculator(drivetrain);
   }
 
   public static Command driveToPose(CommandSwerveDrivetrain drive, Pose2d targetPose) {
@@ -82,9 +83,9 @@ public class CommandFactory {
         .withName("DriveToClimbPose");
   }
 
-  public Command basicIntakeCmd() {
-    return intake.setVelocityCommand(4500.0).alongWith(indexer.setDutyCycleCommand(0.4));
-  }
+  // public Command basicIntakeCmd() {
+  //  // return intake.setVelocityCommand(4500.0).alongWith(indexer.setDutyCycleCommand(0.4));
+  // }
 
   public Command basicShootCmd() {
     return flywheel.setDutyCycleCommand(0.75);
@@ -94,26 +95,28 @@ public class CommandFactory {
     return flywheel.setVelocityCommand(rpm);
   }
 
-  public Command shootWithSpinUp(double rpm, double position) {
-    return hood.setPositionCmd(position)
-        .alongWith(flywheel.setVelocityCommand(rpm))
-        .alongWith(
-            Commands.waitUntil(() -> flywheel.atSetpoint(rpm, 100.0) && hood.atSetpoint(position))
-                .andThen(
-                    flyWheelKicker.setVelocityCommand(4500.0).alongWith(this.basicIntakeCmd())));
-  }
+  // public Command shootWithSpinUp(double rpm, double position) {
+  //   return hood.setPositionCmd(position)
+  //       .alongWith(flywheel.setVelocityCommand(rpm))
+  //       .alongWith(
+  //           Commands.waitUntil(() -> flywheel.atSetpoint(rpm, 100.0) &&
+  // hood.atSetpoint(position))
+  //               .andThen(
+  //                   flyWheelKicker.setVelocityCommand(4500.0).alongWith(this.basicIntakeCmd())));
+  // }
 
   public Command setFlywheelKickerDutyCycle(double value) {
     return flyWheelKicker.setDutyCycleCommand(value);
   }
 
-  public Command runHopperAndKicker() {
-    return flyWheelKicker.setVelocityCommand(5000.0).alongWith(indexer.setDutyCycleCommand(0.3));
-  }
+  // public Command runHopperAndKicker() {
+  //   return flyWheelKicker.setVelocityCommand(5000.0).alongWith(indexer.setDutyCycleCommand(0.3));
+  // }
 
-  private ShotCalculator shotCalculator = new ShotCalculator(drivetrain);
+  ShotCalculator shotCalculator;
 
   public Command fieldOrientedDriveWithShotCalculator(CommandXboxController controller) {
+    // ShotCalculator shotCalculator = new ShotCalculator(drivetrain);
     return drivetrain
         .fieldOrientedDrive(controller)
         .alongWith(
