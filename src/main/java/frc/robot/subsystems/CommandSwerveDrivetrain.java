@@ -50,9 +50,9 @@ import org.littletonrobotics.junction.Logger;
  * https://v6.docs.ctr-electronics.com/en/stable/docs/tuner/tuner-swerve/index.html
  */
 public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Subsystem {
-  private PhoenixPIDController headingController;
-  private PhoenixPIDController poseXController;
-  private PhoenixPIDController poseYController;
+  public PhoenixPIDController headingController;
+  public PhoenixPIDController poseXController;
+  public PhoenixPIDController poseYController;
 
   private static final double kSimLoopPeriod = 0.004; // 4 ms
   private Notifier m_simNotifier = null;
@@ -134,6 +134,12 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
   public Command xOutCmd() {
     return this.applyRequest(() -> xOutReq);
+  }
+
+  public void addHeadingController(double kP, double kD, double kI) {
+    headingController = new PhoenixPIDController(kP, kI, kD);
+    headingController.enableContinuousInput(-Math.PI, Math.PI);
+    headingController.setTolerance(Math.toRadians(1.5));
   }
 
   /**
@@ -254,12 +260,18 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
    * @param modules Constants for each specific module
    */
   public CommandSwerveDrivetrain(
+      PhoenixPIDController poseXController,
+      PhoenixPIDController poseYController,
       SwerveDrivetrainConstants drivetrainConstants, SwerveModuleConstants<?, ?, ?>... modules) {
     super(drivetrainConstants, modules);
     if (Utils.isSimulation()) {
       startSimThread();
     }
-    configureAutoBuilder();
+    
+    this.poseXController = poseXController;
+    this.poseYController = poseYController;
+
+    configureAutoBuilder(); 
   }
 
   /**
