@@ -298,7 +298,7 @@ public void updateInputs(IntakePivotIOInputs inputs) {
   intakePivotSim.setInput(appliedVoltage);
 
   // STEP 2: Update physics simulation by one timestep (20ms)
-  intakePivotSim.update(0.02);
+  intakePivotSim.update(SimulationConstants.SIM_TICK_RATE_S);
 
   // STEP 3: Write simulated state back to motor controller
   motorControllerSim.getSimState().setRawRotorPosition(
@@ -426,13 +426,13 @@ public void updateInputs(IndexerIOInputs inputs) {
   indexerSim.setInputVoltage(appliedVoltage);
 
   // STEP 3: Update physics simulation
-  indexerSim.update(0.02);
+  indexerSim.update(SimulationConstants.SIM_TICK_RATE_S);
 
   // STEP 4: Use SparkMaxSim.iterate() to update controller state
   sparkSim.iterate(
       indexerSim.getAngularVelocityRPM(), // Motor velocity in RPM
       RoboRioSim.getVInVoltage(),         // Simulated battery voltage
-      0.02);                              // Time interval (20ms)
+      SimulationConstants.SIM_TICK_RATE_S);                              // Time interval (20ms)
 
   // STEP 5: Update battery voltage based on current draw
   RoboRioSim.setVInVoltage(
@@ -596,7 +596,7 @@ When creating a new `*IOSim` class:
 ### Phase 5: updateInputs() Implementation
 - [ ] Read commanded voltage from controller
 - [ ] Apply voltage to physics model
-- [ ] Call `physics.update(0.02)`
+- [ ] Call `physics.update(SimulationConstants.SIM_TICK_RATE_S)`
 - [ ] Write new position/velocity back to controller sim state
 - [ ] Update battery voltage via `BatterySim`
 - [ ] Fill inputs struct from **physics model** (source of truth)
@@ -652,7 +652,7 @@ public void updateInputs(...) {
   // Controller → Physics
   voltage = motorController.getSimState().getMotorVoltage();
   physicsSim.setInput(voltage);
-  physicsSim.update(0.02);
+  physicsSim.update(SimulationConstants.SIM_TICK_RATE_S);
 
   // Physics → Controller (CRITICAL!)
   motorController.getSimState().setRawRotorPosition(...);
@@ -668,7 +668,7 @@ public void updateInputs(...) {
 public void updateInputs(...) {
   voltage = motorController.getSimState().getMotorVoltage();
   physicsSim.setInput(voltage);
-  physicsSim.update(0.02);
+  physicsSim.update(SimulationConstants.SIM_TICK_RATE_S);
 
   // Missing: Writing state back to controller!
   // Controller's PID won't see mechanism moving
@@ -829,7 +829,7 @@ Possible causes:
 
 Possible causes:
 - PID gains too high (especially kP or kD)
-- Timestep too large (should be 0.02)
+- Timestep too large (should be SimulationConstants.SIM_TICK_RATE_S)
 - Missing (or unexpected) kV or kA terms
 - Moment of inertia too low
 

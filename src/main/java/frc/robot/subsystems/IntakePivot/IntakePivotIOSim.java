@@ -131,7 +131,7 @@ public class IntakePivotIOSim implements IntakePivotIO {
     intakePivotSim.setInput(motorControllerSim.getSimState().getMotorVoltage());
 
     // Step 2: Update the simulation by one timestep
-    intakePivotSim.update(0.02);
+    intakePivotSim.update(SimulationConstants.SIM_TICK_RATE_S);
 
     // Step 3: Update the motor sim state with the new simulated values
     motorControllerSim

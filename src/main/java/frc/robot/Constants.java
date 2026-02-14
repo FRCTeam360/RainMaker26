@@ -55,6 +55,8 @@ public final class Constants {
   }
 
   public static class SimulationConstants {
+    public static final double SIM_TICK_RATE_S = SimulationConstants.SIM_TICK_RATE_S;
+
     // === INTAKE ===
     public static final int INTAKE_MOTOR = 12;
     public static final int INTAKE_SENSOR_PORT = 10;
