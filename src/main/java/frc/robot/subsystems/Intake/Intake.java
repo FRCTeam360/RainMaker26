@@ -15,7 +15,8 @@ public class Intake extends SubsystemBase {
 
   public enum IntakeStates {
     OFF,
-    INTAKING
+    INTAKING,
+    SHOOTING
   }
 
   private IntakeStates wantedState = IntakeStates.OFF;
@@ -25,6 +26,10 @@ public class Intake extends SubsystemBase {
   /** Creates a new Intake. */
   public Intake(IntakeIO io) {
     this.io = io;
+  }
+
+  public IntakeStates getState() {
+    return currentState;
   }
 
   public void setWantedState(IntakeStates state) {
@@ -41,6 +46,9 @@ public class Intake extends SubsystemBase {
         currentState = IntakeStates.INTAKING;
         break;
 
+      case SHOOTING:
+        currentState = IntakeStates.SHOOTING;
+        break;
       case OFF:
       default:
         currentState = IntakeStates.OFF;
@@ -51,13 +59,20 @@ public class Intake extends SubsystemBase {
   private void applyState() {
     switch (currentState) {
       case INTAKING:
-        setDutyCycle(0.75);
+        intaking();
+        break;
+      case SHOOTING:
+        intaking();
         break;
       case OFF:
       default:
         stop();
         break;
     }
+  }
+
+  private void intaking() {
+    setDutyCycle(0.75);
   }
 
   public void setDutyCycle(double value) {
