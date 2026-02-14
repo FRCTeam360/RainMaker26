@@ -81,6 +81,8 @@ public class RobotContainer {
 
   private final CommandXboxController testCont1 = new CommandXboxController(5);
 
+  private final CommandXboxController operatorController = new CommandXboxController(1);
+
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     switch (Constants.getRobotType()) {
@@ -186,18 +188,28 @@ public class RobotContainer {
 
     if (Objects.nonNull(flywheel)) {
       testCont1.a().whileTrue(flywheel.setDutyCycleCommand(() -> 0.5));
+      operatorController.b().whileTrue(flywheel.setDutyCycleCommand(0.5));
+      operatorController.x().whileTrue(flywheel.setDutyCycleCommand(-0.5));
     }
     if (Objects.nonNull(flywheelKicker)) {
       testCont1.b().whileTrue(flywheelKicker.setDutyCycleCommand(() -> 0.5));
+      operatorController.rightBumper().whileTrue(flywheelKicker.setDutyCycleCommand(0.5));
+      operatorController.leftBumper().whileTrue(flywheelKicker.setDutyCycleCommand(-0.5));
     }
     if (Objects.nonNull(hood)) {
       testCont1.x().whileTrue(hood.setDutyCycleCommand(() -> 0.5));
+      operatorController.y().whileTrue(hood.setDutyCycleCommand(0.5));
+      operatorController.a().whileTrue(hood.setDutyCycleCommand(-0.5));
     }
     if (Objects.nonNull(indexer)) {
       testCont1.y().whileTrue(indexer.setDutyCycleCommand(() -> 0.5));
+      operatorController.povRight().whileTrue(indexer.setDutyCycleCommand(() -> 0.5));
+      operatorController.povLeft().whileTrue(indexer.setDutyCycleCommand(() -> -0.5));
     }
     if (Objects.nonNull(intake)) {
       testCont1.leftBumper().whileTrue(intake.setDutyCycleCommand(() -> 0.5));
+      operatorController.rightTrigger().whileTrue(intake.setDutyCycleCommand(0.5));
+      operatorController.leftTrigger().whileTrue(intake.setDutyCycleCommand(-0.5));
     }
     if (Objects.nonNull(intakePivot)) {
       testCont1.rightBumper().whileTrue(intakePivot.setDutyCycleCommand(() -> 0.5));
