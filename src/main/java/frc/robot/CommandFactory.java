@@ -101,7 +101,10 @@ public class CommandFactory {
         .alongWith(flywheel.setVelocityCommand(rpm))
         .alongWith(
             Commands.waitUntil(() -> flywheel.atSetpoint(rpm, 100.0) && hood.atSetpoint(position))
-                .andThen(flyWheelKicker.setVelocityCommand(4500.0).alongWith(basicIntakeCmd())));
+                .andThen(
+                    flyWheelKicker
+                        .setVelocityCommand(4500.0)
+                        .alongWith(indexer.setDutyCycleCommand(0.4))));
   }
 
   public Command setFlywheelKickerDutyCycle(double value) {
@@ -121,13 +124,24 @@ public class CommandFactory {
             Commands.run(
                 () -> {
                   shotCalculator.calculateShot();
-                  shotCalculator.clearShootingParams();
                 }));
   }
 
+  // public Command shootWithShotCalculator() {
+  // return shootWithSpinUp(
+  // shotCalculator.calculateShot().flywheelSpeed(),
+  // shotCalculator.calculateShot().hoodAngle())
+  // .finallyDo(() -> shotCalculator.clearShootingParams());
+  // }
+
   public Command shootWithShotCalculator() {
-    return shootWithSpinUp(
-        shotCalculator.calculateShot().flywheelSpeed(), shotCalculator.calculateShot().hoodAngle());
+    return Commands.defer(
+            () -> {
+              var params = shotCalculator.calculateShot();
+              return shootWithSpinUp(params.flywheelSpeed(), params.hoodAngle());
+            },
+            java.util.Set.of())
+        .finallyDo(() -> shotCalculator.clearShootingParams());
   }
 
   public Command setHoodPosition(double position) {
