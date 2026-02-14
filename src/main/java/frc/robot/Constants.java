@@ -21,6 +21,11 @@ public final class Constants {
       AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
   public static final double SPINUP_SHOOTING_FLYWHEEL_RPM = 3250;
 
+  // public static final LinearVelocity maxSpeed = MetersPerSecond.of(4.69);
+  // public static final AngularVelocity maxAngularVelocity = RevolutionsPerSecond.of(4.0);
+  // Above was copied from CommandSwerveDrivetrain file,
+  // MetersPerSecond errors - and there is no import option.
+
   public static enum RobotType {
     SIM,
     WOODBOT,
