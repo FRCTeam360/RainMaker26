@@ -262,16 +262,17 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   public CommandSwerveDrivetrain(
       PhoenixPIDController poseXController,
       PhoenixPIDController poseYController,
-      SwerveDrivetrainConstants drivetrainConstants, SwerveModuleConstants<?, ?, ?>... modules) {
+      SwerveDrivetrainConstants drivetrainConstants,
+      SwerveModuleConstants<?, ?, ?>... modules) {
     super(drivetrainConstants, modules);
     if (Utils.isSimulation()) {
       startSimThread();
     }
-    
+
     this.poseXController = poseXController;
     this.poseYController = poseYController;
 
-    configureAutoBuilder(); 
+    configureAutoBuilder();
   }
 
   /**
