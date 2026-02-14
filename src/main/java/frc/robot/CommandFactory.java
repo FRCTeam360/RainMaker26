@@ -33,6 +33,7 @@ public class CommandFactory {
   private final IntakePivot intakePivot;
   private final Vision vision;
   private final CommandSwerveDrivetrain drivetrain;
+  private final ShotCalculator shotCalculator;
 
   // Contructor
   public CommandFactory(
@@ -56,12 +57,12 @@ public class CommandFactory {
   }
 
   public static Command driveToPose(CommandSwerveDrivetrain drive, Pose2d targetPose) {
-    ProfiledPIDController xController = new ProfiledPIDController(3.0, 0, 0,
-        new TrapezoidProfile.Constraints(MAX_VEL, MAX_ACCEL));
-    ProfiledPIDController yController = new ProfiledPIDController(3.0, 0, 0,
-        new TrapezoidProfile.Constraints(MAX_VEL, MAX_ACCEL));
-    ProfiledPIDController thetaController = new ProfiledPIDController(3.0, 0, 0,
-        new TrapezoidProfile.Constraints(Math.PI, Math.PI));
+    ProfiledPIDController xController =
+        new ProfiledPIDController(3.0, 0, 0, new TrapezoidProfile.Constraints(MAX_VEL, MAX_ACCEL));
+    ProfiledPIDController yController =
+        new ProfiledPIDController(3.0, 0, 0, new TrapezoidProfile.Constraints(MAX_VEL, MAX_ACCEL));
+    ProfiledPIDController thetaController =
+        new ProfiledPIDController(3.0, 0, 0, new TrapezoidProfile.Constraints(Math.PI, Math.PI));
 
     thetaController.enableContinuousInput(-Math.PI, Math.PI);
 
@@ -72,9 +73,10 @@ public class CommandFactory {
 
               double xSpeed = xController.calculate(currentPose.getX(), targetPose.getX());
               double ySpeed = yController.calculate(currentPose.getY(), targetPose.getY());
-              double thetaSpeed = thetaController.calculate(
-                  currentPose.getRotation().getRadians(),
-                  targetPose.getRotation().getRadians());
+              double thetaSpeed =
+                  thetaController.calculate(
+                      currentPose.getRotation().getRadians(),
+                      targetPose.getRotation().getRadians());
 
               drive.drive(xSpeed, ySpeed, thetaSpeed);
             })
@@ -98,10 +100,8 @@ public class CommandFactory {
     return hood.setPositionCmd(position)
         .alongWith(flywheel.setVelocityCommand(rpm))
         .alongWith(
-            Commands.waitUntil(() -> flywheel.atSetpoint(rpm, 100.0) &&
-                hood.atSetpoint(position))
-                .andThen(
-                    flyWheelKicker.setVelocityCommand(4500.0).alongWith(basicIntakeCmd())));
+            Commands.waitUntil(() -> flywheel.atSetpoint(rpm, 100.0) && hood.atSetpoint(position))
+                .andThen(flyWheelKicker.setVelocityCommand(4500.0).alongWith(basicIntakeCmd())));
   }
 
   public Command setFlywheelKickerDutyCycle(double value) {
@@ -112,8 +112,6 @@ public class CommandFactory {
   // return
   // flyWheelKicker.setVelocityCommand(5000.0).alongWith(indexer.setDutyCycleCommand(0.3));
   // }
-
-  ShotCalculator shotCalculator;
 
   public Command fieldOrientedDriveWithShotCalculator(CommandXboxController controller) {
     // ShotCalculator shotCalculator = new ShotCalculator(drivetrain);
@@ -127,8 +125,9 @@ public class CommandFactory {
                 }));
   }
 
-  private Command shootWithShotCalculator() {
-    return shootWithSpinUp(shotCalculator.calculateShot().flywheelSpeed(), shotCalculator.calculateShot().hoodAngle());
+  public Command shootWithShotCalculator() {
+    return shootWithSpinUp(
+        shotCalculator.calculateShot().flywheelSpeed(), shotCalculator.calculateShot().hoodAngle());
   }
 
   public Command setHoodPosition(double position) {

@@ -44,9 +44,13 @@ public class ShotCalculator {
 
     shotHoodAngleMap.put(4.944, 18.0);
     shotHoodAngleMap.put(3.789, 20.0);
+    shotHoodAngleMap.put(1.0, 10.0);
+    shotHoodAngleMap.put(0.0, 1.0);
 
     launchFlywheelSpeedMap.put(4.944, 3750.0);
     launchFlywheelSpeedMap.put(3.789, 3750.0);
+    launchFlywheelSpeedMap.put(1.0, 3000.0);
+    launchFlywheelSpeedMap.put(0.0, 3000.0);
   }
 
   /**
@@ -86,7 +90,9 @@ public class ShotCalculator {
 
     Logger.recordOutput("ShotCalculator/hubPosition", FieldConstants.Hub.topCenterPoint);
     Logger.recordOutput("ShotCalculator/distanceToTarget", distanceToTarget);
-    Logger.recordOutput("ShotCalculator/targetAngle", targetHeading);
+    Logger.recordOutput("ShotCalculator/targetFlywheelSpeed", flywheelSpeed);
+    Logger.recordOutput("ShotCalculator/targethHoodAngle", hoodAngle);
+    Logger.recordOutput("ShotCalculator/targetHeading", targetHeading);
 
     shootingParams = new ShootingParams(targetHeading, hoodAngle, flywheelSpeed);
 

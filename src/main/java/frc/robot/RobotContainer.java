@@ -127,9 +127,9 @@ public class RobotContainer {
     commandFactory =
         new CommandFactory(
             intake, flywheel, flywheelKicker, hood, indexer, intakePivot, vision, drivetrain);
-    superStructure =
-        new SuperStructure(
-            intake, indexer, flywheelKicker, flywheel, hood, drivetrain, shotCalculator);
+    // superStructure =
+    //     new SuperStructure(
+    //         intake, indexer, flywheelKicker, flywheel, hood, drivetrain, shotCalculator);
 
     if (Objects.nonNull(superStructure)) {
       registerPathplannerCommand(
@@ -224,10 +224,12 @@ public class RobotContainer {
 
     // Null checks based on subsystems used by each command
     // basicIntakeCmd uses intake and indexer
-    if (Objects.nonNull(intake) && Objects.nonNull(indexer) && Objects.nonNull(superStructure)) {
-      driverCont.leftBumper().onTrue(superStructure.setStateCommand(SuperStates.INTAKING));
-      driverCont.leftBumper().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
+    // TODO add back superstructure check to this null check
+    if (Objects.nonNull(intake) && Objects.nonNull(indexer)) {
+      // driverCont.leftBumper().onTrue(superStructure.setStateCommand(SuperStates.INTAKING));
+      // driverCont.leftBumper().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
       driverCont.a().whileTrue(indexer.setDutyCycleCommand(0.5));
+      driverCont.leftBumper().whileTrue(commandFactory.basicIntakeCmd());
     }
 
     // setFlywheelKickerDutyCycle uses flywheelKicker
@@ -250,10 +252,11 @@ public class RobotContainer {
       driverCont.x().whileTrue(commandFactory.shootWithRPM(2500));
       driverCont.b().whileTrue(commandFactory.shootWithRPM(3000));
       driverCont.y().whileTrue(commandFactory.shootWithRPM(3500));
+      driverCont.rightTrigger().whileTrue(commandFactory.shootWithShotCalculator());
       // driverCont.rightTrigger().whileTrue(commandFactory.shootWithSpinUp(3500.0, 6.0));
       if (Objects.nonNull(superStructure)) {
-        driverCont.rightTrigger().onTrue(superStructure.setStateCommand(SuperStates.SHOOTING));
-        driverCont.rightTrigger().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
+        // driverCont.rightTrigger().onTrue(superStructure.setStateCommand(SuperStates.SHOOTING));
+        // driverCont.rightTrigger().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
       }
     }
 

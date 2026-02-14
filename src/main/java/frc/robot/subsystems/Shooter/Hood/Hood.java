@@ -95,8 +95,12 @@ public class Hood extends SubsystemBase {
     return inputs.position;
   }
 
+  public Command setPositionCmd(DoubleSupplier position) {
+    return this.runOnce(() -> io.setPosition(position.getAsDouble()));
+  }
+
   public Command setPositionCmd(double position) {
-    return this.runOnce(() -> io.setPosition(position));
+    return this.setPositionCmd(() -> position);
   }
 
   public void setEncoder(double position) {
