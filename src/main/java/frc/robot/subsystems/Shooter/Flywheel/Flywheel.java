@@ -6,6 +6,7 @@ package frc.robot.subsystems.Shooter.Flywheel;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.commands.FlywheelTuneCommand;
 
 import java.util.function.DoubleSupplier;
@@ -65,11 +66,8 @@ public class Flywheel extends SubsystemBase {
 
   private void applyState() {
     switch (currentState) {
-      case SPINUP_SHOOTING:
-        setVelocity(3000.0);
-        break;
       case SHOOTING:
-        setRPM(Constants.SPINUP_SHOOTING_FLYWHEEL_RPM);
+        setVelocity(Constants.SPINUP_SHOOTING_FLYWHEEL_RPM);
         break;
       case OFF:
       default:
