@@ -173,6 +173,9 @@ networktables.json
 simgui*.json
 /*-window.json
 
+# RoboRIO Team Number Setter Folder
+.roboRIOTeamNumberSetter/*
+
 # Simulation data log directory
 logs/
 
