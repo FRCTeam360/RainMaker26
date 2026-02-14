@@ -6,6 +6,7 @@ package frc.robot.subsystems.Shooter.Flywheel;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -15,13 +16,16 @@ public class Flywheel extends SubsystemBase {
 
   public enum FlywheelStates {
     OFF,
-    SHOOTING,
-    SPINUP_SHOOTING
+    SHOOTING
   }
 
   /** Creates a new Flywheel. */
   public Flywheel(FlywheelIO io) {
     this.io = io;
+  }
+
+  public FlywheelStates getState() {
+    return currentState;
   }
 
   private FlywheelStates wantedState = FlywheelStates.OFF;
@@ -34,9 +38,6 @@ public class Flywheel extends SubsystemBase {
     switch (wantedState) {
       case SHOOTING:
         currentState = FlywheelStates.SHOOTING;
-        break;
-      case SPINUP_SHOOTING:
-        currentState = FlywheelStates.SPINUP_SHOOTING;
         break;
       case OFF:
         currentState = FlywheelStates.OFF;
@@ -62,11 +63,8 @@ public class Flywheel extends SubsystemBase {
 
   private void applyState() {
     switch (currentState) {
-      case SPINUP_SHOOTING:
-        setRPM(3000.0);
-        break;
       case SHOOTING:
-        setDutyCycle(0.75);
+        setRPM(Constants.SPINUP_SHOOTING_FLYWHEEL_RPM);
         break;
       case OFF:
       default:

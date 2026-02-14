@@ -19,6 +19,7 @@ import edu.wpi.first.hal.HALUtil;
 public final class Constants {
   public static final AprilTagFieldLayout FIELD_LAYOUT =
       AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
+  public static final double SPINUP_SHOOTING_FLYWHEEL_RPM = 3250;
 
   public static enum RobotType {
     SIM,
@@ -112,6 +113,8 @@ public final class Constants {
   public static final class SerialAddressConstants {
     public static String WOOD_SERIAL_ADDRESS = "032BE44A";
   }
+
+  public static double loopPeriodSecs; // add value
 
   public static RobotType getRobotType() {
     String serialAddress = HALUtil.getSerialNumber();
