@@ -258,8 +258,7 @@ public class RobotContainer {
 
     // Drivetrain commands
     if (Objects.nonNull(drivetrain)) {
-      drivetrain.setDefaultCommand(
-          commandFactory.fieldOrientedDriveWithShotCalculator(driverCont));
+      drivetrain.setDefaultCommand(commandFactory.fieldOrientedDriveWithShotCalculator(driverCont));
       driverCont.leftTrigger().whileTrue(drivetrain.faceHubWhileDriving(driverCont));
       drivetrain.registerTelemetry(logger::telemeterize);
       driverCont.back().onTrue(drivetrain.zeroCommand());

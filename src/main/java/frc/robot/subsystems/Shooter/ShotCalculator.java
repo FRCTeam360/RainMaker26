@@ -42,8 +42,13 @@ public class ShotCalculator {
     minDistance = 0.0;
     maxDistance = Double.MAX_VALUE;
 
-    shotHoodAngleMap.put(0.0, 0.0);
-    launchFlywheelSpeedMap.put(0.0, 0.0);
+    shotHoodAngleMap.put(4.93, 25.0);
+    shotHoodAngleMap.put(4.944, 18.0);
+    shotHoodAngleMap.put(3.789, 20.0);
+
+    launchFlywheelSpeedMap.put(4.93, 3350.0);
+    launchFlywheelSpeedMap.put(4.944, 3750.0);
+    launchFlywheelSpeedMap.put(3.789, 3750.0);
   }
 
   /**

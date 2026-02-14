@@ -15,9 +15,9 @@ import frc.robot.subsystems.FlywheelKicker.FlywheelKicker;
 import frc.robot.subsystems.Indexer.Indexer;
 import frc.robot.subsystems.Intake.Intake;
 import frc.robot.subsystems.IntakePivot.IntakePivot;
-import frc.robot.subsystems.Shooter.ShotCalculator;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel;
 import frc.robot.subsystems.Shooter.Hood.Hood;
+import frc.robot.subsystems.Shooter.ShotCalculator;
 import frc.robot.subsystems.Vision.Vision;
 
 /** Add your docs here. */
@@ -83,7 +83,7 @@ public class CommandFactory {
   }
 
   public Command basicIntakeCmd() {
-    return intake.setVelocityCommand(4500.0);
+    return intake.setVelocityCommand(4500.0).alongWith(indexer.setDutyCycleCommand(0.4));
   }
 
   public Command basicShootCmd() {
@@ -112,16 +112,21 @@ public class CommandFactory {
   }
 
   private ShotCalculator shotCalculator;
+
   public Command fieldOrientedDriveWithShotCalculator(CommandXboxController controller) {
     return drivetrain
-              .fieldOrientedDrive(controller)
-              .alongWith(
-                  Commands.run(
-                      () -> {
-                        shotCalculator.calculateShot();
-                        shotCalculator.clearShootingParams();
-                      }));
+        .fieldOrientedDrive(controller)
+        .alongWith(
+            Commands.run(
+                () -> {
+                  shotCalculator.calculateShot();
+                  shotCalculator.clearShootingParams();
+                }));
   }
+
+  // private Command shootWithShotCalculator() {
+  //   return this.shooWith
+  // }
 
   public Command setHoodPosition(double position) {
     return hood.setPositionCmd(position);

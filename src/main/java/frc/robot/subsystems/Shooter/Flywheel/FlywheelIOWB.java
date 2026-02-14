@@ -4,7 +4,6 @@
 
 package frc.robot.subsystems.Shooter.Flywheel;
 
-import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
@@ -16,11 +15,6 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import frc.robot.Constants.WoodBotConstants;
-import frc.robot.commands.FlywheelTuneCommand;
-
-import java.util.function.DoubleSupplier;
-import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
-import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 public class FlywheelIOWB implements FlywheelIO {
 
