@@ -198,18 +198,18 @@ public class RobotContainer {
     }
     if (Objects.nonNull(hood)) {
       testCont1.x().whileTrue(hood.setDutyCycleCommand(() -> 0.5));
-      operatorController.y().whileTrue(hood.setDutyCycleCommand(0.5));
-      operatorController.a().whileTrue(hood.setDutyCycleCommand(-0.5));
+      operatorController.y().whileTrue(hood.setDutyCycleCommand(0.2));
+      operatorController.a().whileTrue(hood.setDutyCycleCommand(-0.2));
     }
     if (Objects.nonNull(indexer)) {
       testCont1.y().whileTrue(indexer.setDutyCycleCommand(() -> 0.5));
-      operatorController.povRight().whileTrue(indexer.setDutyCycleCommand(() -> 0.5));
-      operatorController.povLeft().whileTrue(indexer.setDutyCycleCommand(() -> -0.5));
+      operatorController.povRight().whileTrue(indexer.setDutyCycleCommand(() -> 0.3));
+      operatorController.povLeft().whileTrue(indexer.setDutyCycleCommand(() -> -0.3));
     }
     if (Objects.nonNull(intake)) {
       testCont1.leftBumper().whileTrue(intake.setDutyCycleCommand(() -> 0.5));
-      operatorController.rightTrigger().whileTrue(intake.setDutyCycleCommand(0.5));
-      operatorController.leftTrigger().whileTrue(intake.setDutyCycleCommand(-0.5));
+      operatorController.rightTrigger().whileTrue(intake.setDutyCycleCommand(0.6));
+      operatorController.leftTrigger().whileTrue(intake.setDutyCycleCommand(-0.6));
     }
     if (Objects.nonNull(intakePivot)) {
       testCont1.rightBumper().whileTrue(intakePivot.setDutyCycleCommand(() -> 0.5));
