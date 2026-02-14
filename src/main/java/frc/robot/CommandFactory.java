@@ -111,7 +111,7 @@ public class CommandFactory {
     return flyWheelKicker.setVelocityCommand(5000.0).alongWith(indexer.setDutyCycleCommand(0.3));
   }
 
-  private ShotCalculator shotCalculator;
+  private ShotCalculator shotCalculator = new ShotCalculator(drivetrain);
 
   public Command fieldOrientedDriveWithShotCalculator(CommandXboxController controller) {
     return drivetrain
@@ -124,9 +124,9 @@ public class CommandFactory {
                 }));
   }
 
-  private Command shootWithShotCalculator() {
-    shotCalculator.calculateShot().
-  }
+  // private Command shootWithShotCalculator() {
+  //   shotCalculator.calculateShot()
+  // }
 
   public Command setHoodPosition(double position) {
     return hood.setPositionCmd(position);
