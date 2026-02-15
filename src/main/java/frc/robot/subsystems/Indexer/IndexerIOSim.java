@@ -74,13 +74,13 @@ public class IndexerIOSim implements IndexerIO {
     indexerSim.setInputVoltage(appliedVoltage);
 
     // Step 3: Update the physics simulation
-    indexerSim.update(0.02);
+    indexerSim.update(SimulationConstants.SIM_TICK_RATE_S);
 
     // Step 4: Use SparkMaxSim.iterate() to update the Spark MAX with simulated values
     sparkSim.iterate(
         indexerSim.getAngularVelocityRPM(), // Motor velocity in RPM
         RoboRioSim.getVInVoltage(), // Simulated battery voltage
-        0.02); // Time interval (20ms)
+        SimulationConstants.SIM_TICK_RATE_S); // Time interval (20ms)
     // Step 5: Update battery voltage based on current draw
     RoboRioSim.setVInVoltage(
         BatterySim.calculateDefaultBatteryLoadedVoltage(indexerSim.getCurrentDrawAmps()));

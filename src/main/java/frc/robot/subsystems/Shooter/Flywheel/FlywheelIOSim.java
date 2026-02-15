@@ -120,7 +120,7 @@ public class FlywheelIOSim implements FlywheelIO {
     flywheelSim.setInputVoltage(averageVoltage);
 
     // Step 2: Update the simulation by one timestep
-    flywheelSim.update(0.02);
+    flywheelSim.update(SimulationConstants.SIM_TICK_RATE_S);
 
     double velocityRPS = flywheelSim.getAngularVelocityRPM() / 60.0;
 

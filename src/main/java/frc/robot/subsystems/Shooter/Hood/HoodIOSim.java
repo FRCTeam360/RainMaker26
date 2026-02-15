@@ -118,7 +118,7 @@ public class HoodIOSim implements HoodIO {
     hoodSim.setInput(motorControllerSim.getSimState().getMotorVoltage());
 
     // Step 2: Update the simulation by one timestep
-    hoodSim.update(0.02);
+    hoodSim.update(SimulationConstants.SIM_TICK_RATE_S);
 
     // Step 3: Update the motor sim state with the new simulated values
     motorControllerSim
