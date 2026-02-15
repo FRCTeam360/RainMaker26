@@ -13,6 +13,7 @@ import frc.robot.subsystems.FlywheelKicker.FlywheelKicker;
 import frc.robot.subsystems.Indexer.Indexer;
 import frc.robot.subsystems.Intake.Intake;
 import frc.robot.subsystems.IntakePivot.IntakePivot;
+import frc.robot.subsystems.Shooter.DashboardTargetProvider;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel;
 import frc.robot.subsystems.Shooter.Hood.Hood;
 import frc.robot.subsystems.Shooter.ShooterConstants;
@@ -36,6 +37,7 @@ public class CommandFactory {
   private final Vision vision;
   private final CommandSwerveDrivetrain drivetrain;
   private final ShotCalculator shotCalculator;
+  private final DashboardTargetProvider dashboardTargetProvider;
 
   // Constructor
   public CommandFactory(
@@ -47,7 +49,8 @@ public class CommandFactory {
       IntakePivot intakePivot,
       Vision vision,
       CommandSwerveDrivetrain drivetrain,
-      ShotCalculator shotCalculator) {
+      ShotCalculator shotCalculator,
+      DashboardTargetProvider dashboardTargetProvider) {
     this.intake = intake;
     this.flywheel = flywheel;
     this.flyWheelKicker = flyWheelKicker;
@@ -57,6 +60,7 @@ public class CommandFactory {
     this.vision = vision;
     this.drivetrain = drivetrain;
     this.shotCalculator = shotCalculator;
+    this.dashboardTargetProvider = dashboardTargetProvider;
   }
 
   // public static Command driveToPose(CommandSwerveDrivetrain drive, Pose2d targetPose) {
@@ -125,8 +129,8 @@ public class CommandFactory {
 
   public Command shootWithShotCalculator() {
     return shootWithSpinUp(
-        () -> shotCalculator.calculateShot().flywheelSpeed(),
-        () -> shotCalculator.calculateShot().hoodAngle());
+        () -> shotCalculator.calculateShotToHub().flywheelSpeed(),
+        () -> shotCalculator.calculateShotToHub().hoodAngle());
   }
 
   public Command setHoodPosition(double position) {
@@ -152,15 +156,18 @@ public class CommandFactory {
    * @return the composite shoot-at-target command
    */
   public Command shootAtTargetCmd(CommandXboxController driveCont) {
+    final double KICKER_FEED_VELOCITY_RPM = 4500.0;
     return Commands.parallel(
-            // Continuously recalculate shot params and aim drivetrain at the target
-            drivetrain.facePointWhileDriving(driveCont, () -> shotCalculator.getTargetPosition()),
+            // Continuously recalculate shot params and aim drivetrain at the effective target
+            // (dashboard if active, otherwise hub)
+            drivetrain.facePointWhileDriving(
+                driveCont, () -> dashboardTargetProvider.getEffectiveTarget()),
 
             // Continuously run the ShotCalculator so params stay fresh
             Commands.run(
                 () -> {
                   shotCalculator.clearShootingParams();
-                  shotCalculator.calculateShot();
+                  shotCalculator.calculateShotToPoint(dashboardTargetProvider.getEffectiveTarget());
                 }),
 
             // Set hood + flywheel from ShotCalculator, then auto-fire when aligned
@@ -168,13 +175,17 @@ public class CommandFactory {
                 // Spin up flywheel and set hood based on calculated params
                 hood.run(
                         () -> {
-                          ShotCalculator.ShootingParams params = shotCalculator.calculateShot();
+                          ShotCalculator.ShootingParams params =
+                              shotCalculator.calculateShotToPoint(
+                                  dashboardTargetProvider.getEffectiveTarget());
                           hood.setPosition(params.hoodAngle());
                           flywheel.setVelocity(params.flywheelSpeed());
                         })
                     .until(
                         () -> {
-                          ShotCalculator.ShootingParams params = shotCalculator.calculateShot();
+                          ShotCalculator.ShootingParams params =
+                              shotCalculator.calculateShotToPoint(
+                                  dashboardTargetProvider.getEffectiveTarget());
                           Rotation2d currentHeading = drivetrain.getRotation2d();
                           double headingError =
                               Math.abs(
@@ -201,7 +212,9 @@ public class CommandFactory {
                           return flywheelReady && hoodReady && headingAligned;
                         }),
                 // Auto-fire: engage kicker + intake to feed the ball
-                flyWheelKicker.setVelocityCommand(4500.0).alongWith(basicIntakeCmd())))
+                flyWheelKicker
+                    .setVelocityCommand(KICKER_FEED_VELOCITY_RPM)
+                    .alongWith(basicIntakeCmd())))
         .finallyDo(
             () -> {
               shotCalculator.clearShootingParams();
