@@ -133,11 +133,19 @@ public class ShotCalculator {
     double hoodAngle = shotHoodAngleMap.get(distanceToTarget);
     double flywheelSpeed = launchFlywheelSpeedMap.get(distanceToTarget);
 
+    // Log raw NT dashboard inputs (captured for AdvantageKit replay)
+    Logger.recordOutput("ShotCalculator/Dashboard/RawTargetX", targetXSub.get());
+    Logger.recordOutput("ShotCalculator/Dashboard/RawTargetY", targetYSub.get());
+    Logger.recordOutput("ShotCalculator/Dashboard/RawTargetActive", targetActiveSub.get());
+
+    // Log computed values
     Logger.recordOutput("ShotCalculator/customTargetActive", hasCustomTarget());
     Logger.recordOutput(
         "ShotCalculator/targetPosition", new Pose2d(targetTranslation, new Rotation2d()));
     Logger.recordOutput("ShotCalculator/distanceToTarget", distanceToTarget);
     Logger.recordOutput("ShotCalculator/targetAngle", targetAngle);
+    Logger.recordOutput("ShotCalculator/hoodAngle", hoodAngle);
+    Logger.recordOutput("ShotCalculator/flywheelSpeed", flywheelSpeed);
 
     // Publish effective target back for the dashboard
     targetXPub.set(targetTranslation.getX());

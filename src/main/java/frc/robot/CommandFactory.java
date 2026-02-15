@@ -21,6 +21,7 @@ import frc.robot.subsystems.Shooter.Hood.Hood;
 import frc.robot.subsystems.Shooter.ShooterConstants;
 import frc.robot.subsystems.Shooter.ShotCalculator;
 import frc.robot.subsystems.Vision.Vision;
+import org.littletonrobotics.junction.Logger;
 
 /**
  * Factory for creating composite commands that coordinate multiple subsystems. Contains the core
@@ -173,6 +174,16 @@ public class CommandFactory {
                           boolean hoodReady = hood.atSetpoint(params.hoodAngle());
                           boolean headingAligned =
                               Math.abs(headingError) < ShooterConstants.HEADING_TOLERANCE_RAD;
+
+                          // Log readiness state for debugging in AdvantageScope
+                          Logger.recordOutput(
+                              "ShootAtTarget/headingErrorDeg", Math.toDegrees(headingError));
+                          Logger.recordOutput("ShootAtTarget/flywheelReady", flywheelReady);
+                          Logger.recordOutput("ShootAtTarget/hoodReady", hoodReady);
+                          Logger.recordOutput("ShootAtTarget/headingAligned", headingAligned);
+                          Logger.recordOutput(
+                              "ShootAtTarget/allReady",
+                              flywheelReady && hoodReady && headingAligned);
 
                           return flywheelReady && hoodReady && headingAligned;
                         }),
