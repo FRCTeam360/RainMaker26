@@ -232,7 +232,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 public class IndexerIOReal implements IndexerIO {
   private final TalonFX motor;
   private final DutyCycleOut dutyCycleRequest = new DutyCycleOut(0);
-  private final VelocityVoltage velocityRequest = new velocityVoltage(0);
+  private final VelocityVoltage velocityRequest = new VelocityVoltage(0);
 
   public IndexerIOReal(int canID) {
     motor = new TalonFX(canID);
@@ -666,7 +666,7 @@ public class Flywheel extends SubsystemBase {
    io.setVelocity(velocity);
 
    // ❌ Bad - knows about specific hardware
-   motor.setControl(new velocityVoltage(velocity));
+   motor.setControl(new VelocityVoltage(velocity));
    ```
 
 2. **Log everything important**

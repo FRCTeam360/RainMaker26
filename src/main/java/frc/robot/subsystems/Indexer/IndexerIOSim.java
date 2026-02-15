@@ -60,7 +60,7 @@ public class IndexerIOSim implements IndexerIO {
   public void updateInputs(IndexerIOInputs inputs) {
     // --- AdvantageScope tuning (sim-only) ---
     if (tuningEnabled.get()) {
-      // Command the tunable setpoint in Velocity
+      // Command the tunable setpoint in RPM
       double targetDuty = targetDutyCycle.get();
       motorControllerSim.set(Math.max(-1, Math.min(1, targetDuty)));
     }
@@ -78,7 +78,7 @@ public class IndexerIOSim implements IndexerIO {
 
     // Step 4: Use SparkMaxSim.iterate() to update the Spark MAX with simulated values
     sparkSim.iterate(
-        indexerSim.getAngularVelocityRPM(), // Motor velocity in Velocity
+        indexerSim.getAngularVelocityRPM(), // Motor velocity in RPM
         RoboRioSim.getVInVoltage(), // Simulated battery voltage
         0.02); // Time interval (20ms)
     // Step 5: Update battery voltage based on current draw
@@ -87,7 +87,7 @@ public class IndexerIOSim implements IndexerIO {
 
     // Step 6: Set inputs from simulated values (source of truth)
     inputs.position = 0.0; // Position not tracked for this flywheel
-    inputs.velocity = indexerSim.getAngularVelocityRPM(); // in Velocity
+    inputs.velocity = indexerSim.getAngularVelocityRPM(); // in RPM
     inputs.voltage = appliedVoltage;
     inputs.statorCurrent = indexerSim.getCurrentDrawAmps();
     inputs.supplyCurrent = indexerSim.getCurrentDrawAmps();
