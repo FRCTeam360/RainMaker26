@@ -60,7 +60,7 @@ public class IndexerIOSim implements IndexerIO {
   public void updateInputs(IndexerIOInputs inputs) {
     // --- AdvantageScope tuning (sim-only) ---
     if (tuningEnabled.get()) {
-      // Command the tunable setpoint in Velocity
+      // Command the tunable setpoint in RPM
       double targetDuty = targetDutyCycle.get();
       motorControllerSim.set(Math.max(-1, Math.min(1, targetDuty)));
     }
