@@ -15,7 +15,6 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
@@ -31,8 +30,6 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.generated.WoodBotDrivetrain.TunerSwerveDrivetrain;
 import frc.robot.subsystems.Vision.VisionMeasurement;
-import frc.robot.utils.AllianceFlipUtil;
-import frc.robot.utils.FieldConstants;
 import frc.robot.utils.FieldVisualizer;
 import java.util.List;
 import java.util.Optional;
@@ -139,47 +136,26 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
    * @param velocityYSupplier Supplier for Y velocity (field-relative, left positive) in m/s
    * @return Command that drives while facing the hub
    */
-  public Command faceHubWhileDriving(
-      DoubleSupplier velocityXSupplier, DoubleSupplier velocityYSupplier) {
+  public Command faceAngleWhileDriving(
+      DoubleSupplier velocityXSupplier,
+      DoubleSupplier velocityYSupplier,
+      Supplier<Rotation2d> headingSupplier) {
 
     // Configure the heading controller with PID values
+
+    headingSupplier.get();
     m_faceHubRequest.HeadingController.setPID(HEADING_KP, HEADING_KI, HEADING_KD);
     m_faceHubRequest.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
     m_faceHubRequest.HeadingController.setIZone(HEADING_I_ZONE);
 
     return run(
         () -> {
-          // Get the hub center position
-
-          // TODO use the heading calculated from the shot calculator in this command
-          Translation2d hubCenter = FieldConstants.Hub.topCenterPoint.toTranslation2d();
-
-          Translation2d hubTranslation =
-              AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint.toTranslation2d());
-
-          // Get current robot position
-          Translation2d robotPosition = this.getStateCopy().Pose.getTranslation();
-          Rotation2d angleToHub;
-
-          // Calculate the angle from robot to hub
-          if (DriverStation.getAlliance().get() == Alliance.Red) {
-            angleToHub = hubTranslation.minus(robotPosition).getAngle();
-          } else {
-            angleToHub =
-                hubTranslation.minus(robotPosition).getAngle().rotateBy(Rotation2d.k180deg);
-          }
-
-          // Log the target angle for debugging
-          Logger.recordOutput(CMD_NAME + "FaceHub/TargetAngle", angleToHub.getDegrees());
-          Logger.recordOutput(
-              CMD_NAME + "FaceHub/DistanceToHub", robotPosition.getDistance(hubCenter));
-
           // Apply the field-centric facing angle request
           this.setControl(
               m_faceHubRequest
                   .withVelocityX(velocityXSupplier.getAsDouble())
                   .withVelocityY(velocityYSupplier.getAsDouble())
-                  .withTargetDirection(angleToHub));
+                  .withTargetDirection(headingSupplier.get()));
         });
   }
 
@@ -190,10 +166,12 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
    * @param driveCont The Xbox controller for driver input
    * @return Command that drives while facing the hub
    */
-  public Command faceHubWhileDriving(CommandXboxController driveCont) {
-    return faceHubWhileDriving(
+  public Command faceAngleWhileDriving(
+      CommandXboxController driveCont, Supplier<Rotation2d> headingSupplier) {
+    return faceAngleWhileDriving(
         () -> Math.pow(driveCont.getLeftY(), 3) * maxSpeed.in(MetersPerSecond) * -1.0,
-        () -> Math.pow(driveCont.getLeftX(), 3) * maxSpeed.in(MetersPerSecond) * -1.0);
+        () -> Math.pow(driveCont.getLeftX(), 3) * maxSpeed.in(MetersPerSecond) * -1.0,
+        headingSupplier);
   }
 
   /*

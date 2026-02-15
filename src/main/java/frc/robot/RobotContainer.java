@@ -180,7 +180,7 @@ public class RobotContainer {
   private void configureTestBindings() {
     if (Objects.nonNull(drivetrain)) {
       drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(testCont1));
-      testCont1.rightTrigger().whileTrue(drivetrain.faceHubWhileDriving(testCont1));
+      // testCont1.rightTrigger().whileTrue(drivetrain.faceHubWhileDriving(testCont1));
       drivetrain.registerTelemetry(logger::telemeterize);
     }
 
@@ -245,7 +245,11 @@ public class RobotContainer {
       driverCont.x().whileTrue(commandFactory.shootWithRPM(2500));
       driverCont.b().whileTrue(commandFactory.shootWithRPM(3000));
       driverCont.y().whileTrue(commandFactory.shootWithRPM(3500));
-      driverCont.rightTrigger().whileTrue(commandFactory.shootWithShotCalculator());
+      driverCont
+          .rightTrigger()
+          .whileTrue(
+              commandFactory.faceAngleWhileShooting(
+                  driverCont, () -> shotCalculator.calculateShot().targetAngle()));
       if (Objects.nonNull(superStructure)) {
         // driverCont.rightTrigger().onTrue(superStructure.setStateCommand(SuperStates.SHOOTING));
         // driverCont.rightTrigger().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
@@ -255,7 +259,7 @@ public class RobotContainer {
     // Drivetrain commands
     if (Objects.nonNull(drivetrain)) {
       drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
-      driverCont.leftTrigger().whileTrue(drivetrain.faceHubWhileDriving(driverCont));
+      // driverCont.leftTrigger().whileTrue(drivetrain.faceHubWhileDriving(driverCont));
       drivetrain.registerTelemetry(logger::telemeterize);
       driverCont.back().onTrue(drivetrain.zeroCommand());
     }
