@@ -430,7 +430,7 @@ public void updateInputs(IndexerIOInputs inputs) {
 
   // STEP 4: Use SparkMaxSim.iterate() to update controller state
   sparkSim.iterate(
-      indexerSim.getAngularVelocityRPM(), // Motor velocity in RPM
+      indexerSim.getAngularVelocityVelocity(), // Motor velocity in Velocity
       RoboRioSim.getVInVoltage(),         // Simulated battery voltage
       0.02);                              // Time interval (20ms)
 
@@ -441,7 +441,7 @@ public void updateInputs(IndexerIOInputs inputs) {
 
   // STEP 6: Fill inputs from physics model (source of truth)
   inputs.position = 0.0; // Position not tracked for flywheel
-  inputs.velocity = indexerSim.getAngularVelocityRPM();
+  inputs.velocity = indexerSim.getAngularVelocityVelocity();
   inputs.voltage = appliedVoltage;
   inputs.statorCurrent = indexerSim.getCurrentDrawAmps();
   inputs.supplyCurrent = indexerSim.getCurrentDrawAmps();
@@ -475,10 +475,10 @@ public void setDutyCycle(double value) {
 For closed-loop control, you could add:
 
 ```java
-public void setVelocity(double velocityRPM) {
+public void setVelocity(double velocityVelocity) {
   // Configure PID controller and use closed-loop control
   motorControllerSim.getPIDController().setReference(
-      velocityRPM,
+      velocityVelocity,
       ControlType.kVelocity);
 }
 ```
@@ -629,7 +629,7 @@ When creating a new `*IOSim` class:
 **Best practice:**
 - Physics models use **radians** internally
 - Phoenix 6 uses **rotations** by default
-- SparkMax can use rotations, RPM, or custom units
+- SparkMax can use rotations, Velocity, or custom units
 - Use WPILib's `Units` class and `edu.wpi.first.units` for conversions
 
 ```java
@@ -777,7 +777,7 @@ config.CurrentLimits.StatorCurrentLimitEnable = true;
 | **Control requests** | `PositionVoltage`, `VelocityVoltage` | `getPIDController().setReference()` |
 | **Sim state update** | Manual: `getSimState().setRawRotorPosition()` | Helper: `SparkMaxSim.iterate()` |
 | **Gravity comp** | Built-in: `kG` + `GravityType` | Manual: Add to feedforward |
-| **Units** | Rotations by default | Configurable (rotations, RPM, etc.) |
+| **Units** | Rotations by default | Configurable (rotations, Velocity, etc.) |
 
 ### 9.8. Testing Your Simulation
 

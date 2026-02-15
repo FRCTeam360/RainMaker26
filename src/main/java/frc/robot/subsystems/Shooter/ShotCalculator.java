@@ -29,7 +29,7 @@ public class ShotCalculator {
    *
    * @param targetAngle the angle the drivebase should face toward the hub
    * @param hoodAngle the hood angle setpoint in degrees
-   * @param flywheelSpeed the flywheel speed setpoint in RPM
+   * @param flywheelSpeed the flywheel speed setpoint in Velocity
    */
   public record ShootingParams(Rotation2d targetAngle, double hoodAngle, double flywheelSpeed) {}
 

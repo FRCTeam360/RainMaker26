@@ -143,7 +143,7 @@ When reviewing PRs, apply the checklist below **only to lines added or modified 
 
 - [ ] Variable scope minimized (declare variables close to usage)
 - [ ] Infrastructure constants (CAN IDs, ports) in Constants.java; tuning values (setpoints, gains) as named constants in their usage file
-- [ ] No unnamed numeric literals - all values have descriptive names with units (e.g., `MAX_VELOCITY_MPS`, `STALL_CURRENT_AMPS`, `SPEAKER_RPM`)
+- [ ] No unnamed numeric literals - all values have descriptive names with units (e.g., `MAX_VELOCITY_MPS`, `STALL_CURRENT_AMPS`, `SPEAKER_Velocity`)
 - [ ] Method names clearly describe what they do (verb-noun pattern)
 - [ ] Complex boolean expressions extracted to named variables
 - [ ] Public API has Javadoc with @param and @return tags. Suggest the ([JavaDoc guide](https://www.baeldung.com/javadoc)) when relevant.

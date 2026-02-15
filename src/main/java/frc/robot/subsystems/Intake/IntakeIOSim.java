@@ -31,7 +31,7 @@ public class IntakeIOSim implements IntakeIO {
 
   // AdvantageScope tuning (sim-only, under /Tuning table)
   private final LoggedNetworkNumber tunableSetpoint =
-      new LoggedNetworkNumber("/Tuning/Intake/SetpointRPM", 0.0);
+      new LoggedNetworkNumber("/Tuning/Intake/SetpointVelocity", 0.0);
   private final LoggedNetworkBoolean tuningEnabled =
       new LoggedNetworkBoolean("/Tuning/Intake/Enabled", false);
 
@@ -72,8 +72,8 @@ public class IntakeIOSim implements IntakeIO {
     // --- AdvantageScope tuning (sim-only) ---
     if (tuningEnabled.get()) {
       // Command the tunable setpoint
-      double targetRPS = tunableSetpoint.get() / 60.0; // Convert RPM to RPS
-      double targetDuty = targetRPS / 6000.0; // Assuming max ~6000 RPM for Neo550
+      double targetRPS = tunableSetpoint.get() / 60.0; // Convert Velocity to RPS
+      double targetDuty = targetRPS / 6000.0; // Assuming max ~6000 Velocity for Neo550
       motorControllerSim.set(Math.max(-1, Math.min(1, targetDuty)));
     }
 
@@ -86,11 +86,11 @@ public class IntakeIOSim implements IntakeIO {
     intakeSim.update(0.02);
 
     // Step 3: Get simulated values directly
-    double velocityRPM = intakeSim.getAngularVelocityRPM();
-    double velocityRPS = velocityRPM / 60.0;
+    double velocityVelocity = intakeSim.getAngularVelocityVelocity();
+    double velocityRPS = velocityVelocity / 60.0;
 
     // Step 4: Simple sensor simulation - triggers based on velocity
-    sensorSim.setValue(Math.abs(velocityRPM) > 100); // Sensor triggers when spinning fast enough
+    sensorSim.setValue(Math.abs(velocityVelocity) > 100); // Sensor triggers when spinning fast enough
 
     // Step 5: Update battery voltage based on current draw
     RoboRioSim.setVInVoltage(

@@ -32,12 +32,12 @@ public class FlywheelKicker extends SubsystemBase {
     applyState();
   }
 
-  private static final double KICKER_VELOCITY_RPM = 4000.0;
+  private static final double KICKER_VELOCITY_Velocity = 4000.0;
 
   private void applyState() {
     switch (currentState) {
       case SHOOTING:
-        setVelocity(KICKER_VELOCITY_RPM);
+        setVelocity(KICKER_VELOCITY_Velocity);
         break;
       case OFF:
       default:
@@ -81,8 +81,8 @@ public class FlywheelKicker extends SubsystemBase {
     io.setVelocity(veloicty);
   }
 
-  public Command setVelocityCommand(double rpm) {
-    return this.runEnd(() -> setVelocity(rpm), () -> setVelocity(0.0));
+  public Command setVelocityCommand(double Velocity) {
+    return this.runEnd(() -> setVelocity(Velocity), () -> setVelocity(0.0));
   }
 
   public void stop() {

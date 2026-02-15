@@ -38,7 +38,7 @@ public class FlywheelIOSim implements FlywheelIO {
   private final LoggedNetworkNumber tunableKd =
       new LoggedNetworkNumber("/Tuning/FlywheelKicker/kD", 0.1);
   private final LoggedNetworkNumber tunableSetpoint =
-      new LoggedNetworkNumber("/Tuning/FlywheelKicker/SetpointRPM", 0.0);
+      new LoggedNetworkNumber("/Tuning/FlywheelKicker/SetpointVelocity", 0.0);
   private final LoggedNetworkBoolean tuningEnabled =
       new LoggedNetworkBoolean("/Tuning/FlywheelKicker/Enabled", false);
 
@@ -59,12 +59,12 @@ public class FlywheelIOSim implements FlywheelIO {
     motorControllerSim1
         .getSimState()
         .setRotorVelocity(
-            RotationsPerSecond.of(flywheelSim.getAngularVelocityRPM() / 60.0)
+            RotationsPerSecond.of(flywheelSim.getAngularVelocityVelocity() / 60.0)
                 .in(RotationsPerSecond));
     motorControllerSim2
         .getSimState()
         .setRotorVelocity(
-            RotationsPerSecond.of(flywheelSim.getAngularVelocityRPM() / 60.0)
+            RotationsPerSecond.of(flywheelSim.getAngularVelocityVelocity() / 60.0)
                 .in(RotationsPerSecond));
 
     motorControllerSim2.setControl(new StrictFollower(SimulationConstants.FLYWHEEL_MOTOR));
@@ -122,7 +122,7 @@ public class FlywheelIOSim implements FlywheelIO {
     // Step 2: Update the simulation by one timestep
     flywheelSim.update(0.02);
 
-    double velocityRPS = flywheelSim.getAngularVelocityRPM() / 60.0;
+    double velocityRPS = flywheelSim.getAngularVelocityVelocity() / 60.0;
 
     // Step 4: Update the motor sim states with the new simulated values
     motorControllerSim1.getSimState().setRotorVelocity(velocityRPS);
@@ -149,8 +149,8 @@ public class FlywheelIOSim implements FlywheelIO {
   }
 
   @Override
-  public void setVelocity(double rpm) {
-    rpm = rpm / 60;
-    motorControllerSim1.setControl(velocityRequest.withVelocity(rpm));
+  public void setVelocity(double Velocity) {
+    Velocity = Velocity / 60;
+    motorControllerSim1.setControl(velocityRequest.withVelocity(Velocity));
   }
 }

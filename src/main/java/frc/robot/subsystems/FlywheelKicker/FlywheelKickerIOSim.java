@@ -40,7 +40,7 @@ public class FlywheelKickerIOSim implements FlywheelKickerIO {
   private final LoggedNetworkNumber tunableKd =
       new LoggedNetworkNumber("/Tuning/FlywheelKicker/kD", 0.1);
   private final LoggedNetworkNumber tunableSetpoint =
-      new LoggedNetworkNumber("/Tuning/FlywheelKicker/SetpointRPM", 0.0);
+      new LoggedNetworkNumber("/Tuning/FlywheelKicker/SetpointVelocity", 0.0);
   private final LoggedNetworkBoolean tuningEnabled =
       new LoggedNetworkBoolean("/Tuning/FlywheelKicker/Enabled", false);
 
@@ -69,7 +69,7 @@ public class FlywheelKickerIOSim implements FlywheelKickerIO {
     motorControllerSim
         .getSimState()
         .setRotorVelocity(
-            RotationsPerSecond.of(flywheelKickerSim.getAngularVelocityRPM() / 60.0)
+            RotationsPerSecond.of(flywheelKickerSim.getAngularVelocityVelocity() / 60.0)
                 .in(RotationsPerSecond));
   }
 
@@ -122,7 +122,7 @@ public class FlywheelKickerIOSim implements FlywheelKickerIO {
     flywheelKickerSim.update(0.02);
 
     // Step 3: Update angular position by integrating velocity
-    double velocityRPS = flywheelKickerSim.getAngularVelocityRPM() / 60.0;
+    double velocityRPS = flywheelKickerSim.getAngularVelocityVelocity() / 60.0;
     angularPositionRotations += velocityRPS * 0.02; // Integrate velocity over time
 
     // Step 4: Update the motor sim state with the new simulated values
@@ -137,7 +137,7 @@ public class FlywheelKickerIOSim implements FlywheelKickerIO {
 
     // Step 6: Simple sensor simulation - triggers when flywheel is at speed
     sensorSim.setValue(
-        Math.abs(flywheelKickerSim.getAngularVelocityRPM()) > 2000); // Sensor triggers at high RPM
+        Math.abs(flywheelKickerSim.getAngularVelocityVelocity()) > 2000); // Sensor triggers at high Velocity
 
     // Step 7: Read all inputs from the SIMULATED VALUES (source of truth)
     inputs.velocity = velocityRPS;
@@ -152,7 +152,7 @@ public class FlywheelKickerIOSim implements FlywheelKickerIO {
     motorControllerSim.set(duty);
   }
 
-  public void setVelocity(double rpm) {
+  public void setVelocity(double Velocity) {
     // TODO: Implement velocity control for simulation (e.g., use velocityRequest to command the
     // motor sim)
   }
