@@ -225,7 +225,7 @@ public class RobotContainer {
 
     // setFlywheelKickerDutyCycle uses flywheelKicker
     if (Objects.nonNull(flywheelKicker)) {
-      // driverCont.rightBumper().whileTrue(commandFactory.runHopperAndKicker());
+      driverCont.rightBumper().whileTrue(flywheelKicker.setVelocityCommand(4000.0));
     }
 
     // setHoodPosition uses hood
@@ -247,7 +247,7 @@ public class RobotContainer {
       // driverCont.rightTrigger().whileTrue(commandFactory.shootWithSpinUp(3500.0, 6.0));
       if (Objects.nonNull(superStructure)) {
         // driverCont.rightTrigger().onTrue(superStructure.setStateCommand(SuperStates.SHOOTING));
-        // driverCont.rightTrigger().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
+        // driverCont.rightTrigger\[]().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
       }
     }
 
