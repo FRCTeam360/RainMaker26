@@ -21,6 +21,7 @@ import frc.robot.subsystems.Shooter.Hood.Hood;
 import frc.robot.subsystems.Shooter.ShooterConstants;
 import frc.robot.subsystems.Shooter.ShotCalculator;
 import frc.robot.subsystems.Vision.Vision;
+import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
 /**
@@ -28,8 +29,6 @@ import org.littletonrobotics.junction.Logger;
  * intake, shoot, and drive commands used in teleop and autonomous.
  */
 public class CommandFactory {
-  private static final double MAX_VEL = 2.0;
-  private static final double MAX_ACCEL = 1.0;
 
   private final Intake intake;
   private final Flywheel flywheel;
@@ -92,7 +91,8 @@ public class CommandFactory {
   }
 
   public Command basicIntakeCmd() {
-    return intake.setVelocityCommand(4500.0).alongWith(indexer.setDutyCycleCommand(0.4));
+    final double INTAKE_VELOCITY_RPM = 4500.0;
+    return intake.setVelocityCommand(INTAKE_VELOCITY_RPM);
   }
 
   public Command basicShootCmd() {
@@ -100,20 +100,34 @@ public class CommandFactory {
   }
 
   public Command shootWithRPM(double rpm) {
-    return flywheel.setRPMCommand(rpm);
+    return flywheel.setVelocityCommand(rpm);
   }
 
-  public Command shootWithSpinUp(double rpm, double position) {
-    return hood.setPositionCmd(position)
-        .alongWith(flywheel.setRPMCommand(rpm))
+  public Command shootWithSpinUp(DoubleSupplier rpmSupplier, DoubleSupplier positionSupplier) {
+    final double FLYWHEEL_TOLERANCE_RPM = 100.0;
+    final double KICKER_FEED_VELOCITY_RPM = 4500.0;
+    final double INDEXER_FEED_DUTY_CYCLE = 0.4;
+    return hood.setPositionCmd(positionSupplier)
+        .alongWith(flywheel.setVelocityCommand(rpmSupplier))
         .alongWith(
-            Commands.waitUntil(() -> flywheel.atSetpoint(rpm, 100.0) && hood.atSetpoint(position))
+            Commands.waitUntil(
+                    () ->
+                        flywheel.atSetpoint(rpmSupplier, FLYWHEEL_TOLERANCE_RPM)
+                            && hood.atSetpoint(positionSupplier))
                 .andThen(
-                    flyWheelKicker.setVelocityCommand(4500.0).alongWith(this.basicIntakeCmd())));
+                    flyWheelKicker
+                        .setVelocityCommand(KICKER_FEED_VELOCITY_RPM)
+                        .alongWith(indexer.setDutyCycleCommand(INDEXER_FEED_DUTY_CYCLE))));
   }
 
   public Command setFlywheelKickerDutyCycle(double value) {
     return flyWheelKicker.setDutyCycleCommand(value);
+  }
+
+  public Command shootWithShotCalculator() {
+    return shootWithSpinUp(
+        () -> shotCalculator.calculateShot().flywheelSpeed(),
+        () -> shotCalculator.calculateShot().hoodAngle());
   }
 
   public Command setHoodPosition(double position) {

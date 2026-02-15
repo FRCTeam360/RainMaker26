@@ -43,15 +43,21 @@ public class ShotCalculator {
 
   private ShootingParams latestParameters = null;
 
-  private static double minDistance;
-  private static double maxDistance;
+  private static final double MIN_DISTANCE_METERS = 0.0;
+  private static final double MAX_DISTANCE_METERS = 5.0;
 
   static {
-    minDistance = 0.0;
-    maxDistance = Double.MAX_VALUE;
+    shotHoodAngleMap.put(5.0, 18.0);
+    shotHoodAngleMap.put(4.0, 15.0);
+    shotHoodAngleMap.put(3.0, 12.0);
+    shotHoodAngleMap.put(2.0, 8.0);
+    shotHoodAngleMap.put(0.0, 5.0);
 
-    shotHoodAngleMap.put(0.0, 0.0);
-    launchFlywheelSpeedMap.put(0.0, 0.0);
+    launchFlywheelSpeedMap.put(5.0, 3750.0);
+    launchFlywheelSpeedMap.put(4.0, 3750.0);
+    launchFlywheelSpeedMap.put(3.0, 3250.0);
+    launchFlywheelSpeedMap.put(2.0, 3000.0);
+    launchFlywheelSpeedMap.put(0.0, 2750.0);
   }
 
   // --- NetworkTables subscribers for custom target ---

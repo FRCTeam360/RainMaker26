@@ -11,6 +11,7 @@ import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
 public class Hood extends SubsystemBase {
+  private static final double SPINUP_SHOOTING_HOOD_POSITION_DEGREES = 8.0;
   private final HoodIO io;
   private final HoodIOInputsAutoLogged inputs = new HoodIOInputsAutoLogged();
   private final double TOLERANCE = 0.5;
@@ -18,7 +19,7 @@ public class Hood extends SubsystemBase {
 
   public enum HoodStates {
     OFF,
-    SPINUP_SHOOTING,
+    SHOOTING,
     AIMING
   }
 
@@ -43,8 +44,8 @@ public class Hood extends SubsystemBase {
 
   private void applyState() {
     switch (currentState) {
-      case SPINUP_SHOOTING:
-        setPosition(6.0);
+      case SHOOTING:
+        setPosition(SPINUP_SHOOTING_HOOD_POSITION_DEGREES);
         break;
       case AIMING:
         setPosition(hoodAngleSupplier.getAsDouble());
@@ -56,12 +57,16 @@ public class Hood extends SubsystemBase {
     }
   }
 
+  public HoodStates getState() {
+    return currentState;
+  }
+
   private void updateState() {
     previousState = currentState;
 
     switch (wantedState) {
-      case SPINUP_SHOOTING:
-        currentState = HoodStates.SPINUP_SHOOTING;
+      case SHOOTING:
+        currentState = HoodStates.SHOOTING;
         break;
       case AIMING:
         currentState = HoodStates.AIMING;
@@ -90,8 +95,12 @@ public class Hood extends SubsystemBase {
     return inputs.position;
   }
 
+  public Command setPositionCmd(DoubleSupplier position) {
+    return this.run(() -> io.setPosition(position.getAsDouble()));
+  }
+
   public Command setPositionCmd(double position) {
-    return this.runOnce(() -> io.setPosition(position));
+    return this.setPositionCmd(() -> position);
   }
 
   public void setEncoder(double position) {
@@ -106,12 +115,18 @@ public class Hood extends SubsystemBase {
     return Math.abs(getPosition() - setpoint) < TOLERANCE;
   }
 
+  public boolean atSetpoint(DoubleSupplier setpoint) {
+    return atSetpoint(setpoint.getAsDouble());
+  }
+
   public Command moveToZeroAndZero() {
-    return Commands.waitUntil(
-            () -> Math.abs(inputs.supplyCurrent) >= 30.0 && Math.abs(inputs.velocity) == 0.0)
-        .deadlineFor(this.runEnd(() -> io.setDutyCycle(0.1), () -> io.setDutyCycle(0.0)))
-        // TODO make this call this.zero()
-        .andThen(runOnce(() -> inputs.position = 0.0));
+    final double ZERO_DUTY_CYCLE = -0.03;
+    final double ZERO_TIMEOUT_SECONDS = 3.0;
+    final double ZERO_SETTLE_SECONDS = 2.0;
+    return Commands.runEnd(() -> io.setDutyCycle(ZERO_DUTY_CYCLE), () -> io.setDutyCycle(0.0))
+        .withTimeout(ZERO_TIMEOUT_SECONDS)
+        .andThen(Commands.waitSeconds(ZERO_SETTLE_SECONDS))
+        .andThen(zero());
   }
 
   @Override
