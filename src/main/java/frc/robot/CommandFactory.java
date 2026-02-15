@@ -74,7 +74,7 @@ public class CommandFactory {
         .alongWith(
             Commands.waitUntil(
                     () ->
-                        flywheel.atSetpoint(VelocitySupplier, FLYWHEEL_TOLERANCE_VELOCITY)
+                        flywheel.atSetpoint(velocitySupplier, FLYWHEEL_TOLERANCE_VELOCITY)
                             && hood.atSetpoint(positionSupplier))
                 .andThen(
                     flyWheelKicker
