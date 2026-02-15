@@ -4,10 +4,7 @@
 
 package frc.robot;
 
-import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -62,33 +59,35 @@ public class CommandFactory {
     this.shotCalculator = shotCalculator;
   }
 
-  public static Command driveToPose(CommandSwerveDrivetrain drive, Pose2d targetPose) {
-    ProfiledPIDController xController =
-        new ProfiledPIDController(3.0, 0, 0, new TrapezoidProfile.Constraints(MAX_VEL, MAX_ACCEL));
-    ProfiledPIDController yController =
-        new ProfiledPIDController(3.0, 0, 0, new TrapezoidProfile.Constraints(MAX_VEL, MAX_ACCEL));
-    ProfiledPIDController thetaController =
-        new ProfiledPIDController(3.0, 0, 0, new TrapezoidProfile.Constraints(Math.PI, Math.PI));
+  // public static Command driveToPose(CommandSwerveDrivetrain drive, Pose2d targetPose) {
+  //   ProfiledPIDController xController =
+  //       new ProfiledPIDController(3.0, 0, 0, new TrapezoidProfile.Constraints(MAX_VEL,
+  // MAX_ACCEL));
+  //   ProfiledPIDController yController =
+  //       new ProfiledPIDController(3.0, 0, 0, new TrapezoidProfile.Constraints(MAX_VEL,
+  // MAX_ACCEL));
+  //   ProfiledPIDController thetaController =
+  //       new ProfiledPIDController(3.0, 0, 0, new TrapezoidProfile.Constraints(Math.PI, Math.PI));
 
-    thetaController.enableContinuousInput(-Math.PI, Math.PI);
+  //   thetaController.enableContinuousInput(-Math.PI, Math.PI);
 
-    return drive
-        .run(
-            () -> {
-              Pose2d currentPose = drive.getPose();
+  //   return drive
+  //       .run(
+  //           () -> {
+  //             Pose2d currentPose = drive.getPose2d());
 
-              double xSpeed = xController.calculate(currentPose.getX(), targetPose.getX());
-              double ySpeed = yController.calculate(currentPose.getY(), targetPose.getY());
-              double thetaSpeed =
-                  thetaController.calculate(
-                      currentPose.getRotation().getRadians(),
-                      targetPose.getRotation().getRadians());
+  //             double xSpeed = xController.calculate(currentPose.getX(), targetPose.getX());
+  //             double ySpeed = yController.calculate(currentPose.getY(), targetPose.getY());
+  //             double thetaSpeed =
+  //                 thetaController.calculate(
+  //                     currentPose.getRotation().getRadians(),
+  //                     targetPose.getRotation().getRadians());
 
-              drive.drive(xSpeed, ySpeed, thetaSpeed);
-            })
-        .until(() -> xController.atGoal() && yController.atGoal() && thetaController.atGoal())
-        .withName("DriveToClimbPose");
-  }
+  //             drive.drive(xSpeed, ySpeed, thetaSpeed);
+  //           })
+  //       .until(() -> xController.atGoal() && yController.atGoal() && thetaController.atGoal())
+  //       .withName("DriveToClimbPose");
+  // }
 
   public Command basicIntakeCmd() {
     final double INTAKE_VELOCITY_RPM = 4500.0;
@@ -171,7 +170,7 @@ public class CommandFactory {
                         () -> {
                           ShotCalculator.ShootingParams params = shotCalculator.calculateShot();
                           hood.setPosition(params.hoodAngle());
-                          flywheel.setRPM(params.flywheelSpeed());
+                          flywheel.setVelocity(params.flywheelSpeed());
                         })
                     .until(
                         () -> {
