@@ -48,7 +48,7 @@ public class ShotCalculator {
 
     launchFlywheelSpeedMap.put(5.0, 3750.0);
     launchFlywheelSpeedMap.put(4.0, 3750.0);
-    launchFlywheelSpeedMap.put(3.0, 3250.0);
+    launchFlywheelSpeedMap.put(3.0, 3375.0);
     launchFlywheelSpeedMap.put(2.0, 3000.0); // THIS IS GOOD
     launchFlywheelSpeedMap.put(0.0, 2750.0);
   }

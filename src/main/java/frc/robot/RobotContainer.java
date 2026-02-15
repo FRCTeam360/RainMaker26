@@ -132,8 +132,8 @@ public class RobotContainer {
             shotCalculator);
     // TODO: Re-enable superStructure construction and PathPlanner commands
     // superStructure =
-    //     new SuperStructure(
-    //         intake, indexer, flywheelKicker, flywheel, hood, drivetrain, shotCalculator);
+    // new SuperStructure(
+    // intake, indexer, flywheelKicker, flywheel, hood, drivetrain, shotCalculator);
 
     if (Objects.nonNull(superStructure)) {
       registerPathplannerCommand(
@@ -292,6 +292,7 @@ public class RobotContainer {
     if (Objects.nonNull(shotCalculator)) {
       shotCalculator.clearShootingParams();
       shotCalculator.calculateShot();
+    }
   }
 
   /**
