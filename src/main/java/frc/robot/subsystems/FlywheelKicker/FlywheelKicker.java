@@ -83,6 +83,7 @@ public class FlywheelKicker extends SubsystemBase {
 
   public Command setVelocityCommand(double velocity) {
     return this.runEnd(() -> setVelocity(velocity), () -> setVelocity(0.0));
+    return this.runEnd(() -> setVelocity(velocity), () -> setVelocity(0.0));
   }
 
   public void stop() {
