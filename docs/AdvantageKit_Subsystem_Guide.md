@@ -666,7 +666,7 @@ public class Flywheel extends SubsystemBase {
    io.setVelocity(velocity);
 
    // ❌ Bad - knows about specific hardware
-   motor.setControl(new velocityVoltage(velocity));
+   motor.setControl(new VelocityVoltage(velocity));
    ```
 
 2. **Log everything important**
