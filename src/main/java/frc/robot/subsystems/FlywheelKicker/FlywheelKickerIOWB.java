@@ -23,12 +23,11 @@ public class FlywheelKickerIOWB implements FlywheelKickerIO {
   private final SparkMax flywheelkickerMotor =
       new SparkMax(Constants.WoodBotConstants.FLYWHEEL_KICKER_ID, MotorType.kBrushless);
 
-  CANrangeConfiguration sensorConfig = new CANrangeConfiguration();
   private final RelativeEncoder encoder = flywheelkickerMotor.getEncoder();
   private final SparkMaxConfig sparkMaxConfig = new SparkMaxConfig();
   private final SparkClosedLoopController closedLoopController;
 
-  private final CANrange CanSensor =
+  private final CANrange canSensor =
       new CANrange(Constants.WoodBotConstants.FLYWHEEL_KICKER_SENSOR_ID, Constants.RIO_CANBUS);
 
   public FlywheelKickerIOWB() {
@@ -45,10 +44,10 @@ public class FlywheelKickerIOWB implements FlywheelKickerIO {
     closedLoopController = flywheelkickerMotor.getClosedLoopController();
 
     CANrangeConfiguration sensorConfig = new CANrangeConfiguration();
-    sensorConfig.ProximityParams.MinSignalStrengthForValidMeasurement = 2000;
-    sensorConfig.ProximityParams.ProximityThreshold = 0.1;
+    sensorConfig.ProximityParams.MinSignalStrengthForValidMeasurement = 2000; // unknown unit
+    sensorConfig.ProximityParams.ProximityThreshold = 0.1; // meters
     sensorConfig.ToFParams.withUpdateMode(UpdateModeValue.ShortRangeUserFreq);
-    CanSensor.getConfigurator().apply(sensorConfig);
+    canSensor.getConfigurator().apply(sensorConfig);
   }
 
   public void updateInputs(FlywheelKickerIOInputs inputs) {
@@ -60,8 +59,8 @@ public class FlywheelKickerIOWB implements FlywheelKickerIO {
     // this is right
     inputs.velocity = encoder.getVelocity();
     inputs.voltage = flywheelkickerMotor.getBusVoltage() * flywheelkickerMotor.getAppliedOutput();
-    inputs.sensorProximity = CanSensor.getDistance().getValueAsDouble();
-    inputs.sensorActivated = CanSensor.getIsDetected().getValue();
+    inputs.sensorProximity = canSensor.getDistance().getValueAsDouble();
+    inputs.sensorActivated = canSensor.getIsDetected().getValue();
   }
 
   public void setDutyCycle(double dutyCycle) {
