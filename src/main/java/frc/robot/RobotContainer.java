@@ -125,7 +125,15 @@ public class RobotContainer {
     // Configure the trigger bindings
     commandFactory =
         new CommandFactory(
-            intake, flywheel, flywheelKicker, hood, indexer, intakePivot, vision, drivetrain);
+            intake,
+            flywheel,
+            flywheelKicker,
+            hood,
+            indexer,
+            intakePivot,
+            vision,
+            drivetrain,
+            shotCalculator);
     // superStructure =
     //     new SuperStructure(
     //         intake, indexer, flywheelKicker, flywheel, hood, drivetrain, shotCalculator);

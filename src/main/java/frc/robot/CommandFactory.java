@@ -45,7 +45,8 @@ public class CommandFactory {
       Indexer indexer,
       IntakePivot intakePivot,
       Vision vision,
-      CommandSwerveDrivetrain drivetrain) {
+      CommandSwerveDrivetrain drivetrain,
+      ShotCalculator shotCalculator) {
     this.intake = intake;
     this.flywheel = flywheel;
     this.flyWheelKicker = flyWheelKicker;
@@ -54,7 +55,7 @@ public class CommandFactory {
     this.intakePivot = intakePivot;
     this.vision = vision;
     this.drivetrain = drivetrain;
-    shotCalculator = new ShotCalculator(drivetrain);
+    this.shotCalculator = shotCalculator;
   }
 
   public static Command driveToPose(CommandSwerveDrivetrain drive, Pose2d targetPose) {
@@ -121,7 +122,6 @@ public class CommandFactory {
   // }
 
   public Command fieldOrientedDriveWithShotCalculator(CommandXboxController controller) {
-    // ShotCalculator shotCalculator = new ShotCalculator(drivetrain);
     return drivetrain
         .fieldOrientedDrive(controller)
         .alongWith(
@@ -130,13 +130,6 @@ public class CommandFactory {
                   shotCalculator.calculateShot();
                 }));
   }
-
-  // public Command shootWithShotCalculator() {
-  // return shootWithSpinUp(
-  // shotCalculator.calculateShot().flywheelSpeed(),
-  // shotCalculator.calculateShot().hoodAngle())
-  // .finallyDo(() -> shotCalculator.clearShootingParams());
-  // }
 
   public Command shootWithShotCalculator() {
     return shootWithSpinUp(
