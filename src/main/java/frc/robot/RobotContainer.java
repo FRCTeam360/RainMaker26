@@ -20,6 +20,8 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.generated.WoodBotDrivetrain;
+import frc.robot.subsystems.Climber.Climber;
+import frc.robot.subsystems.Climber.ClimberIOSim;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKicker;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKickerIOSim;
@@ -65,6 +67,7 @@ public class RobotContainer {
   private Intake intake;
   private IntakePivot intakePivot;
   private FlywheelKicker flywheelKicker;
+  private Climber climber;
 
   private CommandFactory commandFactory;
   private SuperStructure superStructure;
@@ -96,6 +99,7 @@ public class RobotContainer {
         indexer = new Indexer(new IndexerIOSim());
         intake = new Intake(new IntakeIOSim());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOSim());
+        climber = new Climber(new ClimberIOSim());
         break;
       case WOODBOT:
       default:
@@ -122,10 +126,16 @@ public class RobotContainer {
     // Configure the trigger bindings
     commandFactory =
         new CommandFactory(
-            intake, flywheel, flywheelKicker, hood, indexer, intakePivot, vision, drivetrain);
-    superStructure =
-        new SuperStructure(
-            intake, indexer, flywheelKicker, flywheel, hood, drivetrain, shotCalculator);
+            intake,
+            flywheel,
+            flywheelKicker,
+            hood,
+            indexer,
+            intakePivot,
+            vision,
+            drivetrain,
+            climber);
+    // superStructure = new SuperStructure(intake, indexer, flywheelKicker, flywheel, hood);
 
     if (Objects.nonNull(superStructure)) {
       registerPathplannerCommand(
@@ -281,6 +291,9 @@ public class RobotContainer {
       indexer.stop();
     }
     if (Objects.nonNull(flywheelKicker)) {
+      flywheelKicker.stop();
+    }
+    if (Objects.nonNull(climber)) {
       flywheelKicker.stop();
     }
   }
