@@ -140,7 +140,8 @@ public class CommandFactory {
 
   public Command shootWithShotCalculator() {
     return shootWithSpinUp(
-        shotCalculator.calculateShot()::flywheelSpeed, shotCalculator.calculateShot()::hoodAngle);
+        () -> shotCalculator.calculateShot().flywheelSpeed(),
+        () -> shotCalculator.calculateShot().hoodAngle());
   }
 
   public Command setHoodPosition(double position) {
