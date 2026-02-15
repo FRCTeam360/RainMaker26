@@ -31,6 +31,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.generated.WoodBotDrivetrain.TunerSwerveDrivetrain;
 import frc.robot.subsystems.Vision.VisionMeasurement;
+import frc.robot.utils.AllianceFlipUtil;
 import frc.robot.utils.FieldConstants;
 import frc.robot.utils.FieldVisualizer;
 import java.util.List;
@@ -155,14 +156,17 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     return run(
         () -> {
           // Get the hub center position
+          // TODO use the heading calculated from the shot calculator in this command
           Translation2d hubCenter = FieldConstants.Hub.topCenterPoint.toTranslation2d();
+
+          Translation2d hubTranslation =
+              AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint.toTranslation2d());
 
           // Get current robot position
           Translation2d robotPosition = this.getStateCopy().Pose.getTranslation();
 
           // Calculate the angle from robot to hub
-          Rotation2d angleToHub =
-              hubCenter.minus(robotPosition).getAngle().rotateBy(Rotation2d.k180deg);
+          Rotation2d angleToHub = hubTranslation.minus(robotPosition).getAngle();
 
           // Log the target angle for debugging
           Logger.recordOutput(CMD_NAME + "FaceHub/TargetAngle", angleToHub.getDegrees());
