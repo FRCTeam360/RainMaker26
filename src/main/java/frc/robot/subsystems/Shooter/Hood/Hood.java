@@ -120,12 +120,12 @@ public class Hood extends SubsystemBase {
   }
 
   public Command moveToZeroAndZero() {
-    final double zeroDutyCycle = -0.03;
-    final double zeroTimeoutSeconds = 3.0;
-    final double zeroSettleSeconds = 2.0;
-    return Commands.runEnd(() -> io.setDutyCycle(zeroDutyCycle), () -> io.setDutyCycle(0.0))
-        .withTimeout(zeroTimeoutSeconds)
-        .andThen(Commands.waitSeconds(zeroSettleSeconds))
+    final double ZERO_DUTY_CYCLE = -0.03;
+    final double ZERO_TIMEOUT_SECONDS = 3.0;
+    final double ZERO_SETTLE_SECONDS = 2.0;
+    return Commands.runEnd(() -> io.setDutyCycle(ZERO_DUTY_CYCLE), () -> io.setDutyCycle(0.0))
+        .withTimeout(ZERO_TIMEOUT_SECONDS)
+        .andThen(Commands.waitSeconds(ZERO_SETTLE_SECONDS))
         .andThen(zero());
   }
 
