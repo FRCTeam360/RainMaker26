@@ -19,6 +19,7 @@ import frc.robot.subsystems.Shooter.Flywheel.Flywheel;
 import frc.robot.subsystems.Shooter.Hood.Hood;
 import frc.robot.subsystems.Shooter.ShotCalculator;
 import frc.robot.subsystems.Vision.Vision;
+import java.util.function.DoubleSupplier;
 
 /** Add your docs here. */
 public class CommandFactory {
@@ -96,11 +97,14 @@ public class CommandFactory {
     return flywheel.setVelocityCommand(rpm);
   }
 
-  public Command shootWithSpinUp(double rpm, double position) {
-    return hood.setPositionCmd(position)
-        .alongWith(flywheel.setVelocityCommand(rpm))
+  public Command shootWithSpinUp(DoubleSupplier rpmSupplier, DoubleSupplier positionSupplier) {
+    return hood.setPositionCmd(positionSupplier.getAsDouble())
+        .alongWith(flywheel.setVelocityCommand(rpmSupplier.getAsDouble()))
         .alongWith(
-            Commands.waitUntil(() -> flywheel.atSetpoint(rpm, 100.0) && hood.atSetpoint(position))
+            Commands.waitUntil(
+                    () ->
+                        flywheel.atSetpoint(rpmSupplier.getAsDouble(), 100.0)
+                            && hood.atSetpoint(positionSupplier.getAsDouble()))
                 .andThen(
                     flyWheelKicker
                         .setVelocityCommand(4500.0)
@@ -135,13 +139,8 @@ public class CommandFactory {
   // }
 
   public Command shootWithShotCalculator() {
-    return Commands.defer(
-            () -> {
-              var params = shotCalculator.calculateShot();
-              return shootWithSpinUp(params.flywheelSpeed(), params.hoodAngle());
-            },
-            java.util.Set.of())
-        .finallyDo(() -> shotCalculator.clearShootingParams());
+    return shootWithSpinUp(
+        shotCalculator.calculateShot()::flywheelSpeed, shotCalculator.calculateShot()::hoodAngle);
   }
 
   public Command setHoodPosition(double position) {

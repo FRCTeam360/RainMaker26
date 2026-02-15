@@ -15,7 +15,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -175,15 +174,7 @@ public class RobotContainer {
    */
   private void configureTestBindings() {
     if (Objects.nonNull(drivetrain)) {
-      drivetrain.setDefaultCommand(
-          drivetrain
-              .fieldOrientedDrive(testCont1)
-              .alongWith(
-                  Commands.run(
-                      () -> {
-                        shotCalculator.calculateShot();
-                        shotCalculator.clearShootingParams();
-                      })));
+      drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(testCont1));
       testCont1.rightTrigger().whileTrue(drivetrain.faceHubWhileDriving(testCont1));
       drivetrain.registerTelemetry(logger::telemeterize);
       testCont1.a().onTrue(flywheelTuner);
@@ -293,6 +284,11 @@ public class RobotContainer {
     if (Objects.nonNull(flywheelKicker)) {
       flywheelKicker.stop();
     }
+  }
+
+  /** Runs the given calls on periodic before commands are scheduled */
+  public void periodic() {
+    if (Objects.nonNull(shotCalculator)) shotCalculator.clearShootingParams();
   }
 
   /**
