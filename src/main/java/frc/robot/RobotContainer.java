@@ -130,6 +130,7 @@ public class RobotContainer {
             vision,
             drivetrain,
             shotCalculator);
+    // TODO: Re-enable superStructure construction and PathPlanner commands
     // superStructure =
     //     new SuperStructure(
     //         intake, indexer, flywheelKicker, flywheel, hood, drivetrain, shotCalculator);
@@ -140,7 +141,6 @@ public class RobotContainer {
       registerPathplannerCommand(
           "shoot at hub", superStructure.setStateCommand(SuperStates.SHOOTING));
     }
-    // TODO: Re-enable superStructure construction and PathPlanner commands
     registerPathplannerCommand("run flywheel kicker", flywheelKicker.setVelocityCommand(4000.0));
     registerPathplannerCommand("spinup flywheel hub shot", commandFactory.shootWithRPM(3000.0));
     configureBindings();
@@ -254,7 +254,7 @@ public class RobotContainer {
 
     // Drivetrain commands
     if (Objects.nonNull(drivetrain)) {
-      drivetrain.setDefaultCommand(commandFactory.fieldOrientedDriveWithShotCalculator(driverCont));
+      drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
       driverCont.leftTrigger().whileTrue(drivetrain.faceHubWhileDriving(driverCont));
       drivetrain.registerTelemetry(logger::telemeterize);
       driverCont.back().onTrue(drivetrain.zeroCommand());
