@@ -54,7 +54,8 @@ public class CommandFactory {
   }
 
   public Command basicIntakeCmd() {
-    return intake.setVelocityCommand(4500.0);
+    final double intakeVelocityRpm = 4500.0;
+    return intake.setVelocityCommand(intakeVelocityRpm);
   }
 
   public Command basicShootCmd() {
@@ -66,27 +67,25 @@ public class CommandFactory {
   }
 
   public Command shootWithSpinUp(DoubleSupplier rpmSupplier, DoubleSupplier positionSupplier) {
+    final double flywheelToleranceRpm = 100.0;
+    final double kickerFeedVelocityRpm = 4500.0;
+    final double indexerFeedDutyCycle = 0.4;
     return hood.setPositionCmd(positionSupplier)
         .alongWith(flywheel.setVelocityCommand(rpmSupplier))
         .alongWith(
             Commands.waitUntil(
                     () ->
-                        flywheel.atSetpoint(rpmSupplier, 100.0)
+                        flywheel.atSetpoint(rpmSupplier, flywheelToleranceRpm)
                             && hood.atSetpoint(positionSupplier))
                 .andThen(
                     flyWheelKicker
-                        .setVelocityCommand(4500.0)
-                        .alongWith(indexer.setDutyCycleCommand(0.4))));
+                        .setVelocityCommand(kickerFeedVelocityRpm)
+                        .alongWith(indexer.setDutyCycleCommand(indexerFeedDutyCycle))));
   }
 
   public Command setFlywheelKickerDutyCycle(double value) {
     return flyWheelKicker.setDutyCycleCommand(value);
   }
-
-  // public Command runHopperAndKicker() {
-  // return
-  // flyWheelKicker.setVelocityCommand(5000.0).alongWith(indexer.setDutyCycleCommand(0.3));
-  // }
 
   public Command fieldOrientedDriveWithShotCalculator(CommandXboxController controller) {
     return drivetrain

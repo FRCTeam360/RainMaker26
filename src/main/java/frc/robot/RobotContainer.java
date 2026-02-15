@@ -140,6 +140,7 @@ public class RobotContainer {
       registerPathplannerCommand(
           "shoot at hub", superStructure.setStateCommand(SuperStates.SHOOTING));
     }
+    // TODO: Re-enable superStructure construction and PathPlanner commands
     registerPathplannerCommand("run flywheel kicker", flywheelKicker.setVelocityCommand(4000.0));
     registerPathplannerCommand("spinup flywheel hub shot", commandFactory.shootWithRPM(3000.0));
     configureBindings();
@@ -217,7 +218,7 @@ public class RobotContainer {
 
     // Null checks based on subsystems used by each command
     // basicIntakeCmd uses intake and indexer
-    // TODO add back superstructure check to this null check
+    // TODO: Re-enable superStructure bindings
     if (Objects.nonNull(intake) && Objects.nonNull(indexer)) {
       // driverCont.leftBumper().onTrue(superStructure.setStateCommand(SuperStates.INTAKING));
       // driverCont.leftBumper().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
@@ -241,12 +242,10 @@ public class RobotContainer {
 
     // shootWithRPM uses flywheel
     if (Objects.nonNull(flywheel)) {
-      // driverCont.a().whileTrue(commandFactory.shootWithRPM(2000));
       driverCont.x().whileTrue(commandFactory.shootWithRPM(2500));
       driverCont.b().whileTrue(commandFactory.shootWithRPM(3000));
       driverCont.y().whileTrue(commandFactory.shootWithRPM(3500));
       driverCont.rightTrigger().whileTrue(commandFactory.shootWithShotCalculator());
-      // driverCont.rightTrigger().whileTrue(commandFactory.shootWithSpinUp(3500.0, 6.0));
       if (Objects.nonNull(superStructure)) {
         // driverCont.rightTrigger().onTrue(superStructure.setStateCommand(SuperStates.SHOOTING));
         // driverCont.rightTrigger\[]().onFalse(superStructure.setStateCommand(SuperStates.IDLE));

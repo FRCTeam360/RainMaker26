@@ -35,13 +35,10 @@ public class ShotCalculator {
 
   private ShootingParams latestParameters = null;
 
-  private static double minDistance;
-  private static double maxDistance;
+  private static final double MIN_DISTANCE_METERS = 0.0;
+  private static final double MAX_DISTANCE_METERS = 5.0;
 
   static {
-    minDistance = 0.0;
-    maxDistance = Double.MAX_VALUE;
-
     shotHoodAngleMap.put(5.0, 18.0);
     shotHoodAngleMap.put(4.0, 15.0);
     shotHoodAngleMap.put(3.0, 12.0);
@@ -85,6 +82,8 @@ public class ShotCalculator {
     Translation2d hubTranslation =
         AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint.toTranslation2d());
     double distanceToTarget = hubTranslation.getDistance(shooterPosition.getTranslation());
+    distanceToTarget =
+        Math.max(MIN_DISTANCE_METERS, Math.min(MAX_DISTANCE_METERS, distanceToTarget));
 
     Rotation2d targetHeading = hubTranslation.minus(shooterPosition.getTranslation()).getAngle();
     double hoodAngle = shotHoodAngleMap.get(distanceToTarget);
