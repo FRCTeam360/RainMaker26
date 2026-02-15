@@ -15,6 +15,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.revrobotics.spark.config.SparkMaxConfig;
 import frc.robot.Constants.WoodBotConstants;
 
 public class FlywheelIOWB implements FlywheelIO {
@@ -26,8 +27,18 @@ public class FlywheelIOWB implements FlywheelIO {
   private TalonFXConfiguration rightConfig = new TalonFXConfiguration();
   private TalonFXConfiguration leftConfig = new TalonFXConfiguration();
   private MotorOutputConfigs motorOutputConfigs = new MotorOutputConfigs();
+  private final SparkMaxConfig config = new SparkMaxConfig();
+  private static final double CONVERSION_FACTOR = 1.0;
 
   public FlywheelIOWB() {
+    // need to find equivalent to "false" for invertedvalue on talonfx
+    rightConfig
+        .MotorOutput
+        .withNeutralMode(NeutralModeValue.Brake)
+        .withInverted(InvertedValue.CounterClockwise_Positive);
+    // I don't know what this code does, but it needs to be converted to match with Talon FX.
+    // analogSensor is for Spark Max
+    rightConfig.Feedback.SensorToMechanismRatio = CONVERSION_FACTOR;
     double kP = 3.0;
     double kI = 0.0;
     double kD = 0.1;

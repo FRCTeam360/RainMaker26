@@ -11,7 +11,9 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
+import edu.wpi.first.wpilibj.DigitalInput;
 import frc.robot.Constants;
+import frc.robot.Constants.WoodBotConstants;
 
 public class IndexerIOWB implements IndexerIO {
   /** Creates a new IndexerIOWB. */
@@ -19,14 +21,22 @@ public class IndexerIOWB implements IndexerIO {
       new SparkMax(Constants.WoodBotConstants.INDEXER_ID, MotorType.kBrushless);
 
   private final RelativeEncoder encoder = indexerMotor.getEncoder();
-  private final SparkMaxConfig sparkMaxConfig = new SparkMaxConfig();
+  private final SparkMaxConfig config = new SparkMaxConfig();
+
+  private final DigitalInput sensor = new DigitalInput(WoodBotConstants.INDEXER_SENSOR_ID);
+
+  private final double CONVERSION_FACTOR = 1.0;
 
   public IndexerIOWB() {
-    sparkMaxConfig.idleMode(IdleMode.kBrake);
-    sparkMaxConfig.inverted(true);
+    config.idleMode(IdleMode.kBrake);
+    config.inverted(true);
+    config.smartCurrentLimit(40);
+    config
+        .analogSensor
+        .positionConversionFactor(CONVERSION_FACTOR)
+        .velocityConversionFactor(CONVERSION_FACTOR);
 
-    indexerMotor.configure(
-        sparkMaxConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    indexerMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 
   public void updateInputs(IndexerIOInputs inputs) {
