@@ -15,6 +15,7 @@ public interface IndexerIO {
     public double statorCurrent = 0.0;
     public double velocity = 0.0;
     public double position = 0.0;
+    // capacity sensor
     public boolean sensor = false;
     public double sensorProximity = 0.0;
     public boolean sensorActivated = false;

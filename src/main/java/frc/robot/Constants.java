@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.CANBus;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.hal.HALUtil;
@@ -18,7 +19,8 @@ import edu.wpi.first.hal.HALUtil;
  */
 public final class Constants {
   public static final AprilTagFieldLayout FIELD_LAYOUT =
-      AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
+      AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
+  public static final double SPINUP_SHOOTING_FLYWHEEL_RPM = 3250;
 
   public static enum RobotType {
     SIM,
@@ -29,24 +31,48 @@ public final class Constants {
   public static final String RIO_CANBUS = "rio";
 
   public static class WoodBotConstants {
-    public static final int INTAKE_ID = 15;
+    // === INTAKE ===
     public static final int INTAKE_SENSOR_PORT = 0;
-
-    public static final int INDEXER_SENSOR_PORT = 1;
+    public static final int INTAKE_ID = 15;
     public static final int INTAKE_PIVOT_ID = 0;
+
+    // === HOPPER ===
+    public static final int INDEXER_SENSOR_PORT = 1;
     public static final int INDEXER_SENSOR_ID = 2;
     public static final int INDEXER_ID = 16;
+
+    // === FLYWHEEL ===
     public static final int FLYWHEEL_KICKER_ID = 17;
     public static final int FLYWHEEL_KICKER_SENSOR_ID = 3;
-
     public static final int FLYWHEEL_RIGHT_ID = 18;
     public static final int FLYWHEEL_LEFT_ID = 19;
 
+    // === HOOD ===
     public static final int HOOD_ID = 20;
 
+    // === LIMELIGHT ===
     public static final String LIMELIGHT = "limelight";
 
-    public static final String CANBUS_NAME = "Default Name";
+    // === CANBUS ===
+    public static final CANBus CANBUS = new CANBus("Default Name");
+  }
+
+  public static class SimulationConstants {
+    // === INTAKE ===
+    public static final int INTAKE_MOTOR = 12;
+    public static final int INTAKE_SENSOR_PORT = 10;
+    public static final int INTAKE_PIVOT_MOTOR = 15;
+
+    // === HOPPER ===
+    public static final int INDEXER_MOTOR = 9;
+
+    // === FLYWHEEL ===
+    public static final int FLYWHEEL_KICKER_MOTOR = 18;
+    public static final int FLYWHEEL_KICKER_SENSOR_ID = 19;
+    public static final int FLYWHEEL_MOTOR = 2;
+
+    // === HOOD ===
+    public static final int HOOD_MOTOR = 6;
   }
 
   public static class OperatorConstants {
@@ -57,15 +83,16 @@ public final class Constants {
     public static String WOOD_SERIAL_ADDRESS = "032BE44A";
   }
 
+  public static double loopPeriodSecs; // add value
+
   public static RobotType getRobotType() {
     String serialAddress = HALUtil.getSerialNumber();
 
     if (serialAddress.equals(SerialAddressConstants.WOOD_SERIAL_ADDRESS)) {
       return Constants.RobotType.WOODBOT;
+    } else if (!Robot.isReal()) { // KEEP AT BOTTOM
+      return Constants.RobotType.SIM;
     }
-    // else if (!Robot.isReal()) { // KEEP AT BOTTOM
-    // return Constants.RobotType.SIM;
-    // }
-    return Constants.RobotType.SIM;
+    return Constants.RobotType.WOODBOT;
   }
 }

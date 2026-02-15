@@ -7,9 +7,9 @@ package frc.robot.subsystems.Indexer;
 import com.ctre.phoenix6.configs.CANrangeConfiguration;
 import com.ctre.phoenix6.hardware.CANrange;
 import com.ctre.phoenix6.signals.UpdateModeValue;
+import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
-import com.revrobotics.spark.SparkBase.PersistMode;
-import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
@@ -31,7 +31,6 @@ public class IndexerIOWB implements IndexerIO {
   public IndexerIOWB() {
     sparkMaxConfig.idleMode(IdleMode.kBrake);
     sparkMaxConfig.inverted(true);
-    // sparkMaxConfig.smartCurrentLimit(40);
 
     indexerMotor.configure(
         sparkMaxConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
