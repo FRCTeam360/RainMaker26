@@ -68,7 +68,7 @@ public class Flywheel extends SubsystemBase {
   private void applyState() {
     switch (currentState) {
       case SHOOTING:
-        setVelocity(Constants.SPINUP_SHOOTING_FLYWHEEL_VELOCITY);
+        setVelocity(Constants.SPINUP_SHOOTING_FLYWHEEL_VELOCITY_RPM);
         break;
       case OFF:
       default:
