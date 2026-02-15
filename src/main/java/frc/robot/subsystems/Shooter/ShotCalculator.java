@@ -93,7 +93,7 @@ public class ShotCalculator {
     Logger.recordOutput("ShotCalculator/hubPosition", FieldConstants.Hub.topCenterPoint);
     Logger.recordOutput("ShotCalculator/distanceToTarget", distanceToTarget);
     Logger.recordOutput("ShotCalculator/targetFlywheelSpeed", flywheelSpeed);
-    Logger.recordOutput("ShotCalculator/targethHoodAngle", hoodAngle);
+    Logger.recordOutput("ShotCalculator/targetHoodAngle", hoodAngle);
     Logger.recordOutput("ShotCalculator/targetHeading", targetHeading);
 
     shootingParams = new ShootingParams(targetHeading, hoodAngle, flywheelSpeed);
