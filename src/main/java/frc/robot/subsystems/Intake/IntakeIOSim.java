@@ -86,11 +86,11 @@ public class IntakeIOSim implements IntakeIO {
     intakeSim.update(0.02);
 
     // Step 3: Get simulated values directly
-    double velocityVelocity = intakeSim.getAngularVelocityVelocity();
-    double velocityRPS = velocityVelocity / 60.0;
+    double velocityRPM = intakeSim.getAngularVelocityRPM();
+    double velocityRPS = velocityRPM / 60.0;
 
     // Step 4: Simple sensor simulation - triggers based on velocity
-    sensorSim.setValue(Math.abs(velocityVelocity) > 100); // Sensor triggers when spinning fast enough
+    sensorSim.setValue(Math.abs(velocityRPM) > 100); // Sensor triggers when spinning fast enough
 
     // Step 5: Update battery voltage based on current draw
     RoboRioSim.setVInVoltage(

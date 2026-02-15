@@ -53,32 +53,32 @@ public class CommandFactory {
   }
 
   public Command basicIntakeCmd() {
-    final double INTAKE_VELOCITY_Velocity = 4500.0;
-    return intake.setVelocityCommand(INTAKE_VELOCITY_Velocity);
+    final double INTAKE_VELOCITY_RPM = 4500.0;
+    return intake.setVelocityCommand(INTAKE_VELOCITY_RPM);
   }
 
   public Command basicShootCmd() {
     return flywheel.setDutyCycleCommand(0.75);
   }
 
-  public Command shootWithVelocity(double Velocity) {
-    return flywheel.setVelocityCommand(Velocity);
+  public Command shootWithVelocity(double velocity) {
+    return flywheel.setVelocityCommand(velocity);
   }
 
-  public Command shootWithSpinUp(DoubleSupplier VelocitySupplier, DoubleSupplier positionSupplier) {
-    final double FLYWHEEL_TOLERANCE_Velocity = 100.0;
-    final double KICKER_FEED_VELOCITY_Velocity = 4500.0;
+  public Command shootWithSpinUp(DoubleSupplier velocitySupplier, DoubleSupplier positionSupplier) {
+    final double FLYWHEEL_TOLERANCE_VELOCITY = 100.0;
+    final double KICKER_FEED_VELOCITY_RPM = 4500.0;
     final double INDEXER_FEED_DUTY_CYCLE = 0.4;
     return hood.setPositionCmd(positionSupplier)
-        .alongWith(flywheel.setVelocityCommand(VelocitySupplier))
+        .alongWith(flywheel.setVelocityCommand(velocitySupplier))
         .alongWith(
             Commands.waitUntil(
                     () ->
-                        flywheel.atSetpoint(VelocitySupplier, FLYWHEEL_TOLERANCE_Velocity)
+                        flywheel.atSetpoint(VelocitySupplier, FLYWHEEL_TOLERANCE_VELOCITY)
                             && hood.atSetpoint(positionSupplier))
                 .andThen(
                     flyWheelKicker
-                        .setVelocityCommand(KICKER_FEED_VELOCITY_Velocity)
+                        .setVelocityCommand(KICKER_FEED_VELOCITY_RPM)
                         .alongWith(indexer.setDutyCycleCommand(INDEXER_FEED_DUTY_CYCLE))));
   }
 

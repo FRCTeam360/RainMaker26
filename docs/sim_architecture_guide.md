@@ -430,7 +430,7 @@ public void updateInputs(IndexerIOInputs inputs) {
 
   // STEP 4: Use SparkMaxSim.iterate() to update controller state
   sparkSim.iterate(
-      indexerSim.getAngularVelocityVelocity(), // Motor velocity in Velocity
+      indexerSim.getAngularVelocityRPM(), // Motor velocity in Velocity
       RoboRioSim.getVInVoltage(),         // Simulated battery voltage
       0.02);                              // Time interval (20ms)
 
@@ -441,7 +441,7 @@ public void updateInputs(IndexerIOInputs inputs) {
 
   // STEP 6: Fill inputs from physics model (source of truth)
   inputs.position = 0.0; // Position not tracked for flywheel
-  inputs.velocity = indexerSim.getAngularVelocityVelocity();
+  inputs.velocity = indexerSim.getAngularVelocityRPM();
   inputs.voltage = appliedVoltage;
   inputs.statorCurrent = indexerSim.getCurrentDrawAmps();
   inputs.supplyCurrent = indexerSim.getCurrentDrawAmps();
@@ -475,10 +475,10 @@ public void setDutyCycle(double value) {
 For closed-loop control, you could add:
 
 ```java
-public void setVelocity(double velocityVelocity) {
+public void setVelocity(double velocityRPM) {
   // Configure PID controller and use closed-loop control
   motorControllerSim.getPIDController().setReference(
-      velocityVelocity,
+      velocityRPM,
       ControlType.kVelocity);
 }
 ```

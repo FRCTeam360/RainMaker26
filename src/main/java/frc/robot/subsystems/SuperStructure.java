@@ -114,7 +114,7 @@ public class SuperStructure extends SubsystemBase {
     hood.setWantedState(HoodStates.SHOOTING);
     flywheel.setWantedState(FlywheelStates.SHOOTING);
     if (hood.atSetpoint(8.0)
-        && flywheel.atSetpoint(Constants.SPINUP_SHOOTING_FLYWHEEL_Velocity, 100.0)) {
+        && flywheel.atSetpoint(Constants.SPINUP_SHOOTING_FLYWHEEL_VELOCITY, 100.0)) {
       flywheelKicker.setWantedState(FlywheelKickerStates.SHOOTING);
       intake.setWantedState(IntakeStates.SHOOTING);
       indexer.setWantedState(IndexerStates.SHOOTING);
