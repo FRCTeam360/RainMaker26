@@ -8,6 +8,7 @@ import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
+import com.ctre.phoenix6.swerve.SwerveRequest.ForwardPerspectiveValue;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
@@ -147,16 +148,20 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     m_faceHubRequest.HeadingController.setPID(HEADING_KP, HEADING_KI, HEADING_KD);
     m_faceHubRequest.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
     m_faceHubRequest.HeadingController.setIZone(HEADING_I_ZONE);
+    m_faceHubRequest.ForwardPerspective = ForwardPerspectiveValue.BlueAlliance;
 
-    return run(
-        () -> {
-          // Apply the field-centric facing angle request
-          this.setControl(
-              m_faceHubRequest
-                  .withVelocityX(velocityXSupplier.getAsDouble())
-                  .withVelocityY(velocityYSupplier.getAsDouble())
-                  .withTargetDirection(headingSupplier.get()));
-        });
+    return this.applyRequest(
+        () ->
+            m_faceHubRequest
+                .withVelocityX(
+                    DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
+                        ? velocityXSupplier.getAsDouble()
+                        : -velocityXSupplier.getAsDouble())
+                .withVelocityY(
+                    DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
+                        ? velocityYSupplier.getAsDouble()
+                        : -velocityYSupplier.getAsDouble())
+                .withTargetDirection(headingSupplier.get()));
   }
 
   /**

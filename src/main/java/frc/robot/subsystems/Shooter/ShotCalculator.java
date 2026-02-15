@@ -4,8 +4,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.utils.AllianceFlipUtil;
 import frc.robot.utils.FieldConstants;
@@ -88,15 +86,11 @@ public class ShotCalculator {
     distanceToTarget =
         Math.max(MIN_DISTANCE_METERS, Math.min(MAX_DISTANCE_METERS, distanceToTarget));
 
-    Rotation2d targetHeading;
-    if (DriverStation.getAlliance().get() == Alliance.Red) {
-      targetHeading = hubTranslation.minus(shooterPosition.getTranslation()).getAngle();
-    } else
-      targetHeading =
-          hubTranslation
-              .minus(shooterPosition.getTranslation())
-              .getAngle()
-              .rotateBy(Rotation2d.k180deg);
+    Rotation2d targetHeading =
+        hubTranslation
+            .minus(shooterPosition.getTranslation())
+            .getAngle()
+            .rotateBy(Rotation2d.k180deg);
 
     double hoodAngle = shotHoodAngleMap.get(distanceToTarget);
     double flywheelSpeed = launchFlywheelSpeedMap.get(distanceToTarget);
