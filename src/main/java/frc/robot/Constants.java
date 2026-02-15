@@ -28,7 +28,7 @@ public final class Constants {
     REPLAY
   }
 
-  public static final String RIO_CANBUS = "rio";
+  public static final CANBus RIO_CANBUS = new CANBus("rio");
 
   public static class WoodBotConstants {
     // === INTAKE ===
