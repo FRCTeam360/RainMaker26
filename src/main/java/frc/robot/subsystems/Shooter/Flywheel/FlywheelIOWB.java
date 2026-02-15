@@ -4,7 +4,6 @@
 
 package frc.robot.subsystems.Shooter.Flywheel;
 
-import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
@@ -25,7 +24,6 @@ public class FlywheelIOWB implements FlywheelIO {
   };
   private TalonFXConfiguration rightConfig = new TalonFXConfiguration();
   private TalonFXConfiguration leftConfig = new TalonFXConfiguration();
-  private MotorOutputConfigs motorOutputConfigs = new MotorOutputConfigs();
 
   public FlywheelIOWB() {
     double kP = 3.0;
@@ -87,7 +85,7 @@ public class FlywheelIOWB implements FlywheelIO {
   VelocityTorqueCurrentFOC velocityTorqueCurrent = new VelocityTorqueCurrentFOC(0.0);
 
   @Override
-  public void setRPM(double rpm) {
+  public void setVelocity(double rpm) {
     double rps = rpm / 60.0;
     motors[0].setControl(velocityTorqueCurrent.withVelocity(rps));
   }
