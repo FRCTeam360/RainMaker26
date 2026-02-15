@@ -66,8 +66,6 @@ public class RobotContainer {
   private Intake intake;
   private IntakePivot intakePivot;
   private FlywheelKicker flywheelKicker;
-  private HoodTuneCommand hoodTuner;
-  private FlywheelTuneCommand flywheelTuner;
 
   private CommandFactory commandFactory;
   private SuperStructure superStructure;
@@ -185,8 +183,6 @@ public class RobotContainer {
       drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(testCont1));
       testCont1.rightTrigger().whileTrue(drivetrain.faceHubWhileDriving(testCont1));
       drivetrain.registerTelemetry(logger::telemeterize);
-      testCont1.a().onTrue(flywheelTuner);
-      testCont1.b().onTrue(hoodTuner);
     }
 
     if (Objects.nonNull(flywheel)) {
