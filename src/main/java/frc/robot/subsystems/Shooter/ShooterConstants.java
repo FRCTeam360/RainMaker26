@@ -8,7 +8,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 
 public class ShooterConstants {
-  public static Transform2d robotToShooter = new Transform2d(0.0, 0.0, new Rotation2d());
+  public static final Transform2d ROBOT_TO_SHOOTER = new Transform2d(0.0, 0.0, new Rotation2d());
 
   /** NetworkTables keys for the custom dashboard target point. */
   public static final String NT_TABLE = "Shooting";

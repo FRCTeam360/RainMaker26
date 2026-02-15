@@ -188,8 +188,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
           Translation2d robotPosition = this.getStateCopy().Pose.getTranslation();
 
           // Calculate the angle from robot to target
-          Rotation2d angleToTarget =
-              target.minus(robotPosition).getAngle().rotateBy(Rotation2d.k180deg);
+          Rotation2d angleToTarget = target.minus(robotPosition).getAngle();
 
           // Log the target angle for debugging
           Logger.recordOutput(CMD_NAME + "FacePoint/TargetAngle", angleToTarget.getDegrees());

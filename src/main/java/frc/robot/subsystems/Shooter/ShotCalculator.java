@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.utils.FieldConstants;
+import java.util.Optional;
 import org.littletonrobotics.junction.Logger;
 
 /**
@@ -68,7 +69,8 @@ public class ShotCalculator {
    * @return the {@link ShootingParams} containing drivebase angle, hood angle, and flywheel speed
    */
   public ShootingParams calculateShotToHub() {
-    if (DriverStation.getAlliance().get() == Alliance.Blue) {
+    Optional<Alliance> alliance = DriverStation.getAlliance();
+    if (alliance.isEmpty() || alliance.get() == Alliance.Blue) {
       return calculateShotToPoint(FieldConstants.Hub.topCenterPoint.toTranslation2d());
     } else {
       return calculateShotToPoint(FieldConstants.Hub.oppTopCenterPoint.toTranslation2d());
@@ -84,7 +86,7 @@ public class ShotCalculator {
    */
   public ShootingParams calculateShotToPoint(Translation2d target) {
     Pose2d robotPosition = drivetrain.getPosition();
-    Pose2d shooterPosition = robotPosition.plus(ShooterConstants.robotToShooter);
+    Pose2d shooterPosition = robotPosition.plus(ShooterConstants.ROBOT_TO_SHOOTER);
 
     double distanceToTarget = target.getDistance(shooterPosition.getTranslation());
 

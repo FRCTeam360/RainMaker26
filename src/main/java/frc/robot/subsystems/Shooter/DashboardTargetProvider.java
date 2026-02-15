@@ -25,6 +25,11 @@ public class DashboardTargetProvider {
   private final DoublePublisher targetXPub;
   private final DoublePublisher targetYPub;
 
+  // --- Cached values from NetworkTables ---
+  private double cachedTargetX = 0.0;
+  private double cachedTargetY = 0.0;
+  private boolean cachedTargetActive = false;
+
   /** Creates a new DashboardTargetProvider that reads from the Shooting NT table. */
   public DashboardTargetProvider() {
     // Set up NT subscribers for the custom target from the web dashboard
@@ -40,12 +45,28 @@ public class DashboardTargetProvider {
   }
 
   /**
+   * Reads values from NetworkTables and caches them. Call this once per robot cycle (in
+   * Robot.periodic() or RobotContainer.periodic()). This ensures all methods use consistent values
+   * within a single cycle and minimizes NT calls.
+   */
+  public void periodic() {
+    cachedTargetX = targetXSub.get();
+    cachedTargetY = targetYSub.get();
+    cachedTargetActive = targetActiveSub.get();
+
+    // Log raw NT dashboard inputs (captured for AdvantageKit replay)
+    Logger.recordOutput("DashboardTargetProvider/RawTargetX", cachedTargetX);
+    Logger.recordOutput("DashboardTargetProvider/RawTargetY", cachedTargetY);
+    Logger.recordOutput("DashboardTargetProvider/RawTargetActive", cachedTargetActive);
+  }
+
+  /**
    * Returns whether the custom dashboard target is active.
    *
    * @return true if a custom target has been set via the web dashboard
    */
   public boolean hasCustomTarget() {
-    return targetActiveSub.get();
+    return cachedTargetActive;
   }
 
   /**
@@ -62,13 +83,8 @@ public class DashboardTargetProvider {
     if (!hasCustomTarget()) {
       return null;
     }
-    Translation2d customTarget = new Translation2d(targetXSub.get(), targetYSub.get());
+    Translation2d customTarget = new Translation2d(cachedTargetX, cachedTargetY);
     Translation2d flippedTarget = AllianceFlipUtil.apply(customTarget);
-
-    // Log raw NT dashboard inputs (captured for AdvantageKit replay)
-    Logger.recordOutput("DashboardTargetProvider/RawTargetX", targetXSub.get());
-    Logger.recordOutput("DashboardTargetProvider/RawTargetY", targetYSub.get());
-    Logger.recordOutput("DashboardTargetProvider/RawTargetActive", targetActiveSub.get());
 
     // Publish effective target back for the dashboard
     targetXPub.set(flippedTarget.getX());

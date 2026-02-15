@@ -296,6 +296,7 @@ public class RobotContainer {
   /** Runs the given calls on periodic before commands are scheduled */
   public void periodic() {
     if (Objects.nonNull(shotCalculator)) shotCalculator.clearShootingParams();
+    if (Objects.nonNull(dashboardTargetProvider)) dashboardTargetProvider.periodic();
   }
 
   /**

@@ -163,13 +163,6 @@ public class CommandFactory {
             drivetrain.facePointWhileDriving(
                 driveCont, () -> dashboardTargetProvider.getEffectiveTarget()),
 
-            // Continuously run the ShotCalculator so params stay fresh
-            Commands.run(
-                () -> {
-                  shotCalculator.clearShootingParams();
-                  shotCalculator.calculateShotToPoint(dashboardTargetProvider.getEffectiveTarget());
-                }),
-
             // Set hood + flywheel from ShotCalculator, then auto-fire when aligned
             Commands.sequence(
                 // Spin up flywheel and set hood based on calculated params
@@ -188,8 +181,7 @@ public class CommandFactory {
                                   dashboardTargetProvider.getEffectiveTarget());
                           Rotation2d currentHeading = drivetrain.getRotation2d();
                           double headingError =
-                              Math.abs(
-                                  currentHeading.getRadians() - params.targetAngle().getRadians());
+                              currentHeading.getRadians() - params.targetAngle().getRadians();
                           // Normalize heading error to [-pi, pi]
                           headingError = Math.atan2(Math.sin(headingError), Math.cos(headingError));
 
@@ -218,6 +210,11 @@ public class CommandFactory {
         .finallyDo(
             () -> {
               shotCalculator.clearShootingParams();
+              // Stop all subsystems used in the command
+              hood.stop();
+              flywheel.stop();
+              flyWheelKicker.stop();
+              intake.stop();
             })
         .withName("ShootAtTarget");
   }
