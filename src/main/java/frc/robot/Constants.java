@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.CANBus;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.hal.HALUtil;
@@ -51,7 +52,7 @@ public final class Constants {
     public static final String LIMELIGHT = "limelight";
 
     // === CANBUS ===
-    public static final String CANBUS_NAME = "Default Name";
+    public static final CANBus CANBUS = new CANBus("Default Name");
   }
 
   public static class SimulationConstants {
