@@ -58,7 +58,7 @@ public class FlywheelKickerIOWB implements FlywheelKickerIO {
     flywheelkickerMotor.set(dutyCycle);
   }
 
-  public void setVelocity(double rpm) {
-    closedLoopController.setSetpoint(rpm, ControlType.kVelocity);
+  public void setVelocity(double velocity) {
+    closedLoopController.setSetpoint(velocity, ControlType.kVelocity);
   }
 }

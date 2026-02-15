@@ -61,20 +61,20 @@ public class CommandFactory {
     return flywheel.setDutyCycleCommand(0.75);
   }
 
-  public Command shootWithRPM(double rpm) {
-    return flywheel.setVelocityCommand(rpm);
+  public Command shootWithVelocity(double velocity) {
+    return flywheel.setVelocityCommand(velocity);
   }
 
-  public Command shootWithSpinUp(DoubleSupplier rpmSupplier, DoubleSupplier positionSupplier) {
-    final double FLYWHEEL_TOLERANCE_RPM = 100.0;
+  public Command shootWithSpinUp(DoubleSupplier velocitySupplier, DoubleSupplier positionSupplier) {
+    final double FLYWHEEL_TOLERANCE_VELOCITY = 100.0;
     final double KICKER_FEED_VELOCITY_RPM = 4500.0;
     final double INDEXER_FEED_DUTY_CYCLE = 0.4;
     return hood.setPositionCmd(positionSupplier)
-        .alongWith(flywheel.setVelocityCommand(rpmSupplier))
+        .alongWith(flywheel.setVelocityCommand(velocitySupplier))
         .alongWith(
             Commands.waitUntil(
                     () ->
-                        flywheel.atSetpoint(rpmSupplier, FLYWHEEL_TOLERANCE_RPM)
+                        flywheel.atSetpoint(velocitySupplier, FLYWHEEL_TOLERANCE_VELOCITY)
                             && hood.atSetpoint(positionSupplier))
                 .andThen(
                     flyWheelKicker

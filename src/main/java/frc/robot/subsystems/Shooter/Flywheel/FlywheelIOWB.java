@@ -85,8 +85,8 @@ public class FlywheelIOWB implements FlywheelIO {
   VelocityTorqueCurrentFOC velocityTorqueCurrent = new VelocityTorqueCurrentFOC(0.0);
 
   @Override
-  public void setVelocity(double rpm) {
-    double rps = rpm / 60.0;
+  public void setVelocity(double velocity) {
+    double rps = velocity / 60.0;
     motors[0].setControl(velocityTorqueCurrent.withVelocity(rps));
   }
 

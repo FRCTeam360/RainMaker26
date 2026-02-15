@@ -142,7 +142,7 @@ public class RobotContainer {
           "shoot at hub", superStructure.setStateCommand(SuperStates.SHOOTING));
     }
     registerPathplannerCommand("run flywheel kicker", flywheelKicker.setVelocityCommand(4000.0));
-    registerPathplannerCommand("spinup flywheel hub shot", commandFactory.shootWithRPM(3000.0));
+    registerPathplannerCommand("spinup flywheel hub shot", commandFactory.shootWithVelocity(3000.0));
     configureBindings();
     // configureTestBindings();
 
@@ -240,11 +240,11 @@ public class RobotContainer {
       driverCont.start().onTrue(hood.zero());
     }
 
-    // shootWithRPM uses flywheel
+    // shootWithVelocity uses flywheel
     if (Objects.nonNull(flywheel)) {
-      driverCont.x().whileTrue(commandFactory.shootWithRPM(2500));
-      driverCont.b().whileTrue(commandFactory.shootWithRPM(3000));
-      driverCont.y().whileTrue(commandFactory.shootWithRPM(3500));
+      driverCont.x().whileTrue(commandFactory.shootWithVelocity(2500));
+      driverCont.b().whileTrue(commandFactory.shootWithVelocity(3000));
+      driverCont.y().whileTrue(commandFactory.shootWithVelocity(3500));
       driverCont.rightTrigger().whileTrue(commandFactory.shootWithShotCalculator());
       if (Objects.nonNull(superStructure)) {
         // driverCont.rightTrigger().onTrue(superStructure.setStateCommand(SuperStates.SHOOTING));
