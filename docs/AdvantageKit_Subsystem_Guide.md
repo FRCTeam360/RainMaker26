@@ -39,7 +39,7 @@ public class Flywheel extends SubsystemBase {
   private final TalonFX motor = new TalonFX(10);
 
   public void setVelocity(double velocity) {
-    motor.setControl(new velocityVoltage(velocity));  // Locked to TalonFX
+    motor.setControl(new VelocityVoltage(velocity));  // Locked to TalonFX
   }
 }
 ```
