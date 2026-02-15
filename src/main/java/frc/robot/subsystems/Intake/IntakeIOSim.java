@@ -72,7 +72,7 @@ public class IntakeIOSim implements IntakeIO {
     // --- AdvantageScope tuning (sim-only) ---
     if (tuningEnabled.get()) {
       // Command the tunable setpoint
-      double targetRPS = tunableSetpoint.get() / 60.0; // Convert Velocity to RPS
+      double targetRPS = tunableSetpoint.get() / 60.0; // Convert RPM to RPS
       double targetDuty = targetRPS / 6000.0; // Assuming max ~6000 RPM for Neo550
       motorControllerSim.set(Math.max(-1, Math.min(1, targetDuty)));
     }
