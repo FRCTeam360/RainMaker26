@@ -66,13 +66,13 @@ public class CommandFactory {
   }
 
   public Command shootWithSpinUp(DoubleSupplier rpmSupplier, DoubleSupplier positionSupplier) {
-    return hood.setPositionCmd(positionSupplier.getAsDouble())
-        .alongWith(flywheel.setVelocityCommand(rpmSupplier.getAsDouble()))
+    return hood.setPositionCmd(positionSupplier)
+        .alongWith(flywheel.setVelocityCommand(rpmSupplier))
         .alongWith(
             Commands.waitUntil(
                     () ->
-                        flywheel.atSetpoint(rpmSupplier.getAsDouble(), 100.0)
-                            && hood.atSetpoint(positionSupplier.getAsDouble()))
+                        flywheel.atSetpoint(rpmSupplier, 100.0)
+                            && hood.atSetpoint(positionSupplier))
                 .andThen(
                     flyWheelKicker
                         .setVelocityCommand(4500.0)

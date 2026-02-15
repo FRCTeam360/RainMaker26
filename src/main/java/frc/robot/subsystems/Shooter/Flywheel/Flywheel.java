@@ -63,6 +63,10 @@ public class Flywheel extends SubsystemBase {
     return Math.abs(getVelocity() - targetRPM) < tolerance;
   }
 
+  public boolean atSetpoint(DoubleSupplier targetRPM, double tolerance) {
+    return atSetpoint(targetRPM.getAsDouble(), tolerance);
+  }
+
   private void applyState() {
     switch (currentState) {
       case SHOOTING:

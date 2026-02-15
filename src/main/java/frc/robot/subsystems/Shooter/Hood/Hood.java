@@ -96,7 +96,7 @@ public class Hood extends SubsystemBase {
   }
 
   public Command setPositionCmd(DoubleSupplier position) {
-    return this.runOnce(() -> io.setPosition(position.getAsDouble()));
+    return this.run(() -> io.setPosition(position.getAsDouble()));
   }
 
   public Command setPositionCmd(double position) {
@@ -113,6 +113,10 @@ public class Hood extends SubsystemBase {
 
   public boolean atSetpoint(double setpoint) {
     return Math.abs(getPosition() - setpoint) < TOLERANCE;
+  }
+
+  public boolean atSetpoint(DoubleSupplier setpoint) {
+    return atSetpoint(setpoint.getAsDouble());
   }
 
   public Command moveToZeroAndZero() {
