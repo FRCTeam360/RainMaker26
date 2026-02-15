@@ -48,7 +48,6 @@ public class Indexer extends SubsystemBase {
   private void applyState() {
     switch (currentState) {
       case INTAKING:
-        // setDutyCycle(INDEXER_DUTY_CYCLE);
         setDutyCycle(INDEXER_DUTY_CYCLE);
         break;
       case SHOOTING:
