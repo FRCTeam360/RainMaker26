@@ -4,9 +4,6 @@
 
 package frc.robot;
 
-import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -23,8 +20,6 @@ import java.util.function.DoubleSupplier;
 
 /** Add your docs here. */
 public class CommandFactory {
-  private static final double MAX_VEL = 2.0;
-  private static final double MAX_ACCEL = 1.0;
 
   private final Intake intake;
   private final Flywheel flywheel;
@@ -56,34 +51,6 @@ public class CommandFactory {
     this.vision = vision;
     this.drivetrain = drivetrain;
     this.shotCalculator = shotCalculator;
-  }
-
-  public static Command driveToPose(CommandSwerveDrivetrain drive, Pose2d targetPose) {
-    ProfiledPIDController xController =
-        new ProfiledPIDController(3.0, 0, 0, new TrapezoidProfile.Constraints(MAX_VEL, MAX_ACCEL));
-    ProfiledPIDController yController =
-        new ProfiledPIDController(3.0, 0, 0, new TrapezoidProfile.Constraints(MAX_VEL, MAX_ACCEL));
-    ProfiledPIDController thetaController =
-        new ProfiledPIDController(3.0, 0, 0, new TrapezoidProfile.Constraints(Math.PI, Math.PI));
-
-    thetaController.enableContinuousInput(-Math.PI, Math.PI);
-
-    return drive
-        .run(
-            () -> {
-              Pose2d currentPose = drive.getPose();
-
-              double xSpeed = xController.calculate(currentPose.getX(), targetPose.getX());
-              double ySpeed = yController.calculate(currentPose.getY(), targetPose.getY());
-              double thetaSpeed =
-                  thetaController.calculate(
-                      currentPose.getRotation().getRadians(),
-                      targetPose.getRotation().getRadians());
-
-              drive.drive(xSpeed, ySpeed, thetaSpeed);
-            })
-        .until(() -> xController.atGoal() && yController.atGoal() && thetaController.atGoal())
-        .withName("DriveToClimbPose");
   }
 
   public Command basicIntakeCmd() {
