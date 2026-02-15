@@ -87,7 +87,7 @@ public class IndexerIOSim implements IndexerIO {
 
     // Step 6: Set inputs from simulated values (source of truth)
     inputs.position = 0.0; // Position not tracked for this flywheel
-    inputs.velocity = indexerSim.getAngularVelocityRPM(); // in Velocity
+    inputs.velocity = indexerSim.getAngularVelocityRPM(); // in RPM
     inputs.voltage = appliedVoltage;
     inputs.statorCurrent = indexerSim.getCurrentDrawAmps();
     inputs.supplyCurrent = indexerSim.getCurrentDrawAmps();
