@@ -520,7 +520,7 @@ Implements the IO interface for specific hardware or simulation.
 ```java
 public class FlywheelIOReal implements FlywheelIO {
   private final TalonFX motor;
-  private final VelocityVoltage velocityRequest = new velocityVoltage(0);
+  private final VelocityVoltage velocityRequest = new VelocityVoltage(0);
 
   public FlywheelIOReal(int canID) {
     motor = new TalonFX(canID);
