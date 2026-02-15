@@ -4,9 +4,6 @@
 
 package frc.robot.subsystems.Indexer;
 
-import com.ctre.phoenix6.configs.CANrangeConfiguration;
-import com.ctre.phoenix6.hardware.CANrange;
-import com.ctre.phoenix6.signals.UpdateModeValue;
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
@@ -18,13 +15,9 @@ import frc.robot.Constants;
 
 public class IndexerIOWB implements IndexerIO {
   /** Creates a new IndexerIOWB. */
-  CANrangeConfiguration sensorConfig = new CANrangeConfiguration();
-
   private final SparkMax indexerMotor =
       new SparkMax(Constants.WoodBotConstants.INDEXER_ID, MotorType.kBrushless);
 
-  private final CANrange sensor =
-      new CANrange(Constants.WoodBotConstants.INDEXER_SENSOR_ID, Constants.RIO_CANBUS);
   private final RelativeEncoder encoder = indexerMotor.getEncoder();
   private final SparkMaxConfig sparkMaxConfig = new SparkMaxConfig();
 
@@ -34,12 +27,6 @@ public class IndexerIOWB implements IndexerIO {
 
     indexerMotor.configure(
         sparkMaxConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-
-    CANrangeConfiguration intakeConfig = new CANrangeConfiguration();
-    intakeConfig.ProximityParams.MinSignalStrengthForValidMeasurement = 2000;
-    intakeConfig.ProximityParams.ProximityThreshold = 0.1;
-    intakeConfig.ToFParams.withUpdateMode(UpdateModeValue.ShortRangeUserFreq);
-    sensor.getConfigurator().apply(intakeConfig);
   }
 
   public void updateInputs(IndexerIOInputs inputs) {
@@ -50,8 +37,6 @@ public class IndexerIOWB implements IndexerIO {
     // this is right
     inputs.velocity = encoder.getVelocity();
     inputs.voltage = indexerMotor.getBusVoltage() * indexerMotor.getAppliedOutput();
-    inputs.sensorProximity = sensor.getDistance().getValueAsDouble();
-    inputs.sensorActivated = sensor.getIsDetected().getValue();
   }
 
   public void setDutyCycle(double dutyCycle) {

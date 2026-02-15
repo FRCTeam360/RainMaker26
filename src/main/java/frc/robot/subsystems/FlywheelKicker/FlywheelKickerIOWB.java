@@ -29,7 +29,7 @@ public class FlywheelKickerIOWB implements FlywheelKickerIO {
   private final SparkClosedLoopController closedLoopController;
 
   private final CANrange CanSensor =
-      new CANrange(Constants.WoodBotConstants.INDEXER_SENSOR_ID, Constants.RIO_CANBUS);
+      new CANrange(Constants.WoodBotConstants.FLYWHEEL_KICKER_SENSOR_ID, Constants.RIO_CANBUS);
 
   public FlywheelKickerIOWB() {
     sparkMaxConfig.idleMode(IdleMode.kBrake);
@@ -60,6 +60,8 @@ public class FlywheelKickerIOWB implements FlywheelKickerIO {
     // this is right
     inputs.velocity = encoder.getVelocity();
     inputs.voltage = flywheelkickerMotor.getBusVoltage() * flywheelkickerMotor.getAppliedOutput();
+    inputs.sensorProximity = CanSensor.getDistance().getValueAsDouble();
+    inputs.sensorActivated = CanSensor.getIsDetected().getValue();
   }
 
   public void setDutyCycle(double dutyCycle) {
