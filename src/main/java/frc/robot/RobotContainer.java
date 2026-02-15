@@ -248,7 +248,7 @@ public class RobotContainer {
       driverCont.rightTrigger().whileTrue(commandFactory.shootWithShotCalculator());
       if (Objects.nonNull(superStructure)) {
         // driverCont.rightTrigger().onTrue(superStructure.setStateCommand(SuperStates.SHOOTING));
-        // driverCont.rightTrigger\[]().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
+        // driverCont.rightTrigger().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
       }
     }
 
