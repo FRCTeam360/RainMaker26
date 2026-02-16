@@ -23,9 +23,9 @@ public final class Constants {
   public static final double SPINUP_SHOOTING_FLYWHEEL_RPM = 3250.0;
 
   public static final int IMU_MODE_EXTERNAL_ONLY = 0;
-  
+
   public static final int IMU_MODE_EXTERNAL_SEED = 1;
-  
+
   public static final int IMU_MODE_INTERNAL_ONLY = 2;
 
   public static final int IMU_MODE_INTERNAL_MT1_ASSIST = 3;
@@ -62,7 +62,7 @@ public final class Constants {
 
     // === LIMELIGHT ===
     public static final String LIMELIGHT_3 = "limelight";
-    public static final String LIMELIGHT_4 = "limelight-shooter";
+    public static final String LIMELIGHT_4 = "limelight-two";
 
     // === CANBUS ===
     public static final CANBus CANBUS = new CANBus("Default Name");

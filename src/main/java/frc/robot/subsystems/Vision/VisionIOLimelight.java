@@ -42,7 +42,7 @@ public class VisionIOLimelight implements VisionIO {
     this.acceptMeasurements = acceptMeasurements;
     this.isLimelight4 = isLimelight4;
 
-    if(isLimelight4) {
+    if (isLimelight4) {
       LimelightHelpers.SetIMUAssistAlpha(name, Constants.IMU_ASSIST_ALPHA);
       LimelightHelpers.SetIMUMode(name, Constants.IMU_MODE_EXTERNAL_SEED);
     }
@@ -158,16 +158,16 @@ public class VisionIOLimelight implements VisionIO {
     table.getEntry("snapshot").setNumber(0.0);
   }
 
-// while enabled
+  // while enabled
   public void enableIMUAssist() {
     if (isLimelight4) {
       LimelightHelpers.SetIMUMode(name, Constants.IMU_MODE_INTERNAL_EXTERNAL_ASSIST);
     }
   }
 
-// call during disabled
+  // call during disabled
   public void seedIMU() {
-    if(isLimelight4) {
+    if (isLimelight4) {
       LimelightHelpers.SetIMUMode(name, Constants.IMU_MODE_EXTERNAL_SEED);
     }
   }
