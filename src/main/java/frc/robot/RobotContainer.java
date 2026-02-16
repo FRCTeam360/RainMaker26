@@ -132,9 +132,9 @@ public class RobotContainer {
             drivetrain,
             shotCalculator);
     // TODO: Re-enable superStructure construction and PathPlanner commands
-    // superStructure =
-    // new SuperStructure(
-    // intake, indexer, flywheelKicker, flywheel, hood, drivetrain, shotCalculator);
+    superStructure =
+    new SuperStructure(
+    intake, indexer, flywheelKicker, flywheel, hood, drivetrain, shotCalculator, driverCont);
 
     if (Objects.nonNull(superStructure)) {
       registerPathplannerCommand(
@@ -246,10 +246,10 @@ public class RobotContainer {
       driverCont.x().whileTrue(commandFactory.shootWithRPM(2500));
       driverCont.b().whileTrue(commandFactory.shootWithRPM(3000));
       driverCont.y().whileTrue(commandFactory.shootWithRPM(3500));
-      driverCont.rightTrigger().whileTrue(commandFactory.faceAngleWhileShooting(driverCont));
+      // driverCont.rightTrigger().whileTrue(commandFactory.faceAngleWhileShooting(driverCont));
       if (Objects.nonNull(superStructure)) {
-        // driverCont.rightTrigger().onTrue(superStructure.setStateCommand(SuperStates.SHOOTING));
-        // driverCont.rightTrigger().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
+        driverCont.rightTrigger().onTrue(superStructure.setStateCommand(SuperStates.SHOOTING));
+        driverCont.rightTrigger().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
       }
     }
 
