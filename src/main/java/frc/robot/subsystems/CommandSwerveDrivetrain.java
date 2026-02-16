@@ -91,7 +91,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
           .withRotationalDeadband(0.0)
           .withDriveRequestType(m_driveRequestType); // No deadband for rotation when facing point
 
-  public final Command fieldOrientedDrive(
+  public final Command fieldOrientedDriveCommand(
       CommandXboxController driveCont) { // field oriented drive command!
     SwerveRequest.FieldCentric drive =
         new SwerveRequest.FieldCentric() // creates a fieldcentric drive
@@ -100,6 +100,33 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             .withDriveRequestType(m_driveRequestType);
     return this.applyRequest(
         () ->
+            drive
+                .withVelocityX(
+                    Math.pow(driveCont.getLeftY(), 3)
+                        * maxSpeed.in(MetersPerSecond)
+                        * -1.0) // Drive forward with negative Y (forward)
+                .withVelocityY(
+                    Math.pow(driveCont.getLeftX(), 3)
+                        * maxSpeed.in(MetersPerSecond)
+                        * -1.0) // Drive left with negative X (left)
+                .withRotationalRate(
+                    Math.pow(driveCont.getRightX(), 2)
+                        * (maxAngularVelocity.in(RadiansPerSecond) / 2.0)
+                        * -Math.signum(driveCont.getRightX())) // Drive
+        // counterclockwise
+        // with negative X
+        // (left)
+        );
+  }
+
+  public void fieldOrientedDrive(
+      CommandXboxController driveCont) { // field oriented drive command!
+    SwerveRequest.FieldCentric drive =
+        new SwerveRequest.FieldCentric() // creates a fieldcentric drive
+            .withDeadband(maxSpeed.in(MetersPerSecond) * 0.01)
+            .withRotationalDeadband(maxAngularVelocity.in(RadiansPerSecond) * 0.01)
+            .withDriveRequestType(m_driveRequestType);
+    this.setControl(
             drive
                 .withVelocityX(
                     Math.pow(driveCont.getLeftY(), 3)
@@ -137,7 +164,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
    * @param velocityYSupplier Supplier for Y velocity (field-relative, left positive) in m/s
    * @return Command that drives while facing the hub
    */
-  public Command faceAngleWhileDriving(
+  public Command faceAngleWhileDrivingCommand(
       DoubleSupplier velocityXSupplier,
       DoubleSupplier velocityYSupplier,
       Supplier<Rotation2d> headingSupplier) {
@@ -163,6 +190,28 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                 .withTargetDirection(headingSupplier.get()));
   }
 
+  public void faceAngleWhileDriving(double velocityX, double velocityY, Rotation2d heading) {
+
+    // Configure the heading controller with PID values
+
+    m_faceHubRequest.HeadingController.setPID(HEADING_KP, HEADING_KI, HEADING_KD);
+    m_faceHubRequest.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
+    m_faceHubRequest.HeadingController.setIZone(HEADING_I_ZONE);
+    m_faceHubRequest.ForwardPerspective = ForwardPerspectiveValue.BlueAlliance;
+
+    this.setControl(
+        m_faceHubRequest
+            .withVelocityX(
+                DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
+                    ? velocityX
+                    : -velocityX)
+            .withVelocityY(
+                DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
+                    ? velocityY
+                    : -velocityY)
+            .withTargetDirection(heading));
+  }
+
   /**
    * Creates a command that drives the robot in field-centric mode while continuously rotating to
    * face the hub center, using controller input with cubic response curve.
@@ -172,7 +221,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
    */
   public Command faceAngleWhileDriving(
       CommandXboxController driveCont, Supplier<Rotation2d> headingSupplier) {
-    return faceAngleWhileDriving(
+    return faceAngleWhileDrivingCommand(
         () -> Math.pow(driveCont.getLeftY(), 3) * maxSpeed.in(MetersPerSecond) * -1.0,
         () -> Math.pow(driveCont.getLeftX(), 3) * maxSpeed.in(MetersPerSecond) * -1.0,
         headingSupplier);

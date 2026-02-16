@@ -1,20 +1,22 @@
 package frc.robot.subsystems;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKicker;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKicker.FlywheelKickerStates;
 import frc.robot.subsystems.Indexer.Indexer;
-import frc.robot.subsystems.Indexer.Indexer.IndexerStates;
 import frc.robot.subsystems.Intake.Intake;
-import frc.robot.subsystems.Intake.Intake.IntakeStates;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel.FlywheelStates;
 import frc.robot.subsystems.Shooter.Hood.Hood;
 import frc.robot.subsystems.Shooter.Hood.Hood.HoodStates;
 import frc.robot.subsystems.Shooter.ShotCalculator;
+
+import java.util.Objects;
+
 import org.littletonrobotics.junction.Logger;
 
 public class SuperStructure extends SubsystemBase {
@@ -25,6 +27,7 @@ public class SuperStructure extends SubsystemBase {
   private Hood hood;
   private CommandSwerveDrivetrain drivetrain;
   private ShotCalculator shotCalculator;
+  private CommandXboxController controller;
 
   public enum SuperStates {
     IDLE, // everything is stopped when nothing else happens
@@ -47,9 +50,17 @@ public class SuperStructure extends SubsystemBase {
     AIMING
   }
 
+  public enum ShooterStates {
+    FIRING,
+    PREPARING
+  }
+
   private SuperStates wantedSuperState = SuperStates.IDLE;
   private SuperStates currentSuperState = SuperStates.IDLE;
   private SuperStates previousSuperState = SuperStates.IDLE;
+
+  private ShooterStates currentShooterState = ShooterStates.PREPARING;
+  private ShooterStates previousShooterState = ShooterStates.PREPARING;
 
   public SuperStructure(
       Intake intake,
@@ -58,7 +69,8 @@ public class SuperStructure extends SubsystemBase {
       Flywheel flywheel,
       Hood hood,
       CommandSwerveDrivetrain driveTrain,
-      ShotCalculator shotCalculator) {
+      ShotCalculator shotCalculator,
+      CommandXboxController controller) {
     this.intake = intake;
     this.indexer = indexer;
     this.flywheelKicker = flywheelKicker;
@@ -66,7 +78,7 @@ public class SuperStructure extends SubsystemBase {
     this.hood = hood;
     this.drivetrain = driveTrain;
     this.shotCalculator = shotCalculator;
-    hood.setHoodAngleSupplier(() -> shotCalculator.calculateShot().hoodAngle());
+    this.controller = controller;
   }
 
   private void updateState() {
@@ -91,17 +103,42 @@ public class SuperStructure extends SubsystemBase {
   private void applyStates() {
     switch (currentSuperState) {
       case INTAKING:
+        fieldOrientedDrive();
         intaking();
         break;
       case IDLE:
+        fieldOrientedDrive();
         stopped();
         break;
       case SHOOTING:
-        spinupShooting();
+        shooting();
+        updateShooterStates();
+        applyShooterStates();
         break;
       case AIMING:
+        fieldOrientedDrive();
         aiming();
         break;
+    }
+  }
+
+  private void updateShooterStates() {
+    double FLYWHEEL_TOLERANCE_RPM = 100.0;
+    if (flywheel.atSetpoint(shotCalculator.calculateShot().flywheelSpeed(), FLYWHEEL_TOLERANCE_RPM)
+        && hood.atSetpoint(shotCalculator.calculateShot().hoodAngle())) {
+      previousShooterState = ShooterStates.PREPARING;
+      currentShooterState = ShooterStates.FIRING;
+    } else {
+      previousShooterState = ShooterStates.FIRING;
+      currentShooterState = ShooterStates.PREPARING;
+    }
+  }
+
+  private void applyShooterStates() {
+    if (currentShooterState == ShooterStates.FIRING) {
+      flywheelKicker.setVelocity(4500.0);
+    } else {
+      flywheelKicker.setVelocity(0.0);
     }
   }
 
@@ -109,21 +146,24 @@ public class SuperStructure extends SubsystemBase {
     hood.setWantedState(HoodStates.AIMING);
   }
 
-  private void spinupShooting() {
-    // hood, flywheel
-    hood.setWantedState(HoodStates.SHOOTING);
-    flywheel.setWantedState(FlywheelStates.SHOOTING);
-    if (hood.atSetpoint(8.0)
-        && flywheel.atSetpoint(Constants.SPINUP_SHOOTING_FLYWHEEL_RPM, 100.0)) {
-      flywheelKicker.setWantedState(FlywheelKickerStates.SHOOTING);
-      intake.setWantedState(IntakeStates.SHOOTING);
-      indexer.setWantedState(IndexerStates.SHOOTING);
+  private void shooting() {
+    flywheel.setVelocityCommand(() -> shotCalculator.calculateShot().flywheelSpeed());
+    hood.setPositionCmd(() -> shotCalculator.calculateShot().hoodAngle());
+    drivetrain.faceAngleWhileDriving(
+        controller.getLeftY(),
+        controller.getLeftX(),
+        shotCalculator.calculateShot().targetHeading());
+  }
+
+  private void fieldOrientedDrive() {
+    if (DriverStation.isTeleopEnabled()) {
+      drivetrain.fieldOrientedDrive(controller);
     }
   }
 
   private void intaking() {
     intake.setWantedState(Intake.IntakeStates.INTAKING);
-    indexer.setWantedState(Indexer.IndexerStates.INTAKING);
+    // indexer.setWantedState(Indexer.IndexerStates.INTAKING);
   }
 
   private void stopped() {

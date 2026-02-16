@@ -180,7 +180,6 @@ public class RobotContainer {
    */
   private void configureTestBindings() {
     if (Objects.nonNull(drivetrain)) {
-      drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(testCont1));
       drivetrain.registerTelemetry(logger::telemeterize);
     }
 
@@ -233,8 +232,8 @@ public class RobotContainer {
 
     // setHoodPosition uses hood
     if (Objects.nonNull(hood)) {
-      hood.setDefaultCommand(
-          CommandLogger.logCommand(hood.setPositionCmd(0.0), "hood default command"));
+      // hood.setDefaultCommand(
+      //     CommandLogger.logCommand(hood.setPositionCmd(0.0), "hood default command"));
       driverCont.pov(0).onTrue(hood.moveToZeroAndZero());
       driverCont.pov(90).whileTrue(commandFactory.setHoodPosition(4.0));
       driverCont.pov(180).whileTrue(commandFactory.setHoodPosition(16.0));
@@ -256,7 +255,6 @@ public class RobotContainer {
 
     // Drivetrain commands
     if (Objects.nonNull(drivetrain)) {
-      drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
       // driverCont.leftTrigger().whileTrue(drivetrain.faceHubWhileDriving(driverCont));
       drivetrain.registerTelemetry(logger::telemeterize);
       driverCont.back().onTrue(drivetrain.zeroCommand());
