@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>RainMaker26 - Tap to Shoot Dashboard</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #1a1a2e;
+      color: #eee;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      overflow: hidden;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 16px;
+      background: #16213e;
+      border-bottom: 2px solid #0f3460;
+      flex-shrink: 0;
+    }
+    header h1 { font-size: 18px; color: #e94560; }
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 13px;
+    }
+    .status-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: #e94560;
+      transition: background 0.3s;
+    }
+    .status-dot.connected { background: #4ade80; }
+    #controls {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    button {
+      background: #0f3460;
+      color: #eee;
+      border: 1px solid #e94560;
+      padding: 6px 14px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: background 0.2s;
+    }
+    button:hover { background: #e94560; }
+    button:active { transform: scale(0.97); }
+    button.active { background: #e94560; }
+    .info-bar {
+      display: flex;
+      gap: 20px;
+      padding: 6px 16px;
+      background: #16213e;
+      font-size: 12px;
+      color: #aaa;
+      flex-shrink: 0;
+      border-bottom: 1px solid #0f3460;
+    }
+    .info-bar span { color: #4ade80; font-weight: bold; }
+    #field-container {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px;
+      position: relative;
+    }
+    canvas {
+      border: 2px solid #0f3460;
+      border-radius: 4px;
+      cursor: crosshair;
+      touch-action: none;
+    }
+    #connection-overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.6);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      gap: 12px;
+    }
+    #connection-overlay.hidden { display: none; }
+    #connection-overlay input {
+      background: #16213e;
+      border: 1px solid #0f3460;
+      color: #eee;
+      padding: 8px 14px;
+      border-radius: 4px;
+      font-size: 14px;
+      width: 300px;
+      text-align: center;
+    }
+    #connection-overlay p {
+      font-size: 14px;
+      color: #aaa;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>RainMaker26 Tap-to-Shoot</h1>
+    <div class="status">
+      <div id="controls">
+        <button id="btn-clear" title="Clear target">Clear Target</button>
+        <button id="btn-disconnect" title="Disconnect">Disconnect</button>
+      </div>
+      <div class="status-dot" id="status-dot"></div>
+      <span id="status-text">Disconnected</span>
+    </div>
+  </header>
+  <div class="info-bar">
+    Robot: (<span id="robot-x">-</span>, <span id="robot-y">-</span>) m
+    &nbsp;|&nbsp; Target: (<span id="target-x">-</span>, <span id="target-y">-</span>) m
+    &nbsp;|&nbsp; Distance: <span id="distance">-</span> m
+    &nbsp;|&nbsp; Active: <span id="target-active">No</span>
+  </div>
+  <div id="field-container">
+    <canvas id="field"></canvas>
+    <div id="connection-overlay">
+      <p>Enter robot address to connect:</p>
+      <input id="robot-address" type="text" placeholder="roborio-360-frc.local" value="roborio-360-frc.local">
+      <button id="btn-connect">Connect</button>
+      <p style="font-size:11px; color:#666;">Use 127.0.0.1 for simulation</p>
+    </div>
+  </div>
+
+<script>
+// =============================================================================
+// NT4 Minimal Client - Communicates with roboRIO NetworkTables 4 via WebSocket
+// =============================================================================
+// NT4 uses msgpack binary encoding over WebSocket. For simplicity, this
+// dashboard uses the JSON text-frame sub-protocol which NT4 also supports.
+// The roboRIO NT4 server listens on port 5810 at /nt/ws.
+// =============================================================================
+
+class NT4Client {
+  constructor(address, onConnect, onDisconnect) {
+    this.address = address;
+    this.onConnect = onConnect;
+    this.onDisconnect = onDisconnect;
+    this.ws = null;
+    this.connected = false;
+    this.subscriptions = {};  // id -> { topic, callback }
+    this.publications = {};   // topic -> { pubuid, type }
+    this.topicMap = {};       // server topic name -> server topic id
+    this.nextSubId = 1;
+    this.nextPubId = 1;
+    this.serverTimeOffsetUs = 0;
+    this.pendingValues = {};  // topic -> value (queued before announce)
+  }
+
+  connect() {
+    const url = `ws://${this.address}:5810/nt/ws`;
+    try {
+      this.ws = new WebSocket(url, ['networktables.first.wpi.edu']);
+    } catch (e) {
+      console.error('WebSocket creation failed:', e);
+      return;
+    }
+    this.ws.binaryType = 'arraybuffer';
+
+    this.ws.onopen = () => {
+      this.connected = true;
+      this.onConnect();
+      // Re-subscribe and re-publish
+      for (const [id, sub] of Object.entries(this.subscriptions)) {
+        this._sendSubscribe(parseInt(id), sub.topics, sub.options);
+      }
+      for (const [topic, pub] of Object.entries(this.publications)) {
+        this._sendPublish(topic, pub.type, pub.pubuid);
+      }
+    };
+
+    this.ws.onclose = () => {
+      this.connected = false;
+      this.topicMap = {};
+      this.onDisconnect();
+    };
+
+    this.ws.onerror = (e) => {
+      console.error('WebSocket error:', e);
+    };
+
+    this.ws.onmessage = (event) => {
+      if (typeof event.data === 'string') {
+        this._handleTextFrame(JSON.parse(event.data));
+      } else {
+        this._handleBinaryFrame(event.data);
+      }
+    };
+  }
+
+  disconnect() {
+    if (this.ws) {
+      this.ws.close();
+      this.ws = null;
+    }
+  }
+
+  subscribe(topics, callback, options = {}) {
+    const id = this.nextSubId++;
+    this.subscriptions[id] = { topics, callback, options };
+    if (this.connected) {
+      this._sendSubscribe(id, topics, options);
+    }
+    return id;
+  }
+
+  publish(topic, type) {
+    const pubuid = this.nextPubId++;
+    this.publications[topic] = { type, pubuid };
+    if (this.connected) {
+      this._sendPublish(topic, type, pubuid);
+    }
+    return pubuid;
+  }
+
+  setValue(topic, value) {
+    const pub = this.publications[topic];
+    if (!pub) return;
+    // Check if topic has been announced by server
+    if (this.topicMap[topic] !== undefined) {
+      this._sendValue(pub.pubuid, this._getNowUs(), value, pub.type);
+    } else {
+      // Queue until announced
+      this.pendingValues[topic] = value;
+    }
+  }
+
+  _sendSubscribe(subuid, topics, options) {
+    const msg = [{
+      method: 'subscribe',
+      params: {
+        subuid,
+        topics,
+        options: { periodic: 0.1, ...options }
+      }
+    }];
+    this._sendJson(msg);
+  }
+
+  _sendPublish(topic, type, pubuid) {
+    const msg = [{
+      method: 'publish',
+      params: { name: topic, pubuid, type, properties: {} }
+    }];
+    this._sendJson(msg);
+  }
+
+  _sendJson(data) {
+    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+      this.ws.send(JSON.stringify(data));
+    }
+  }
+
+  _sendValue(pubuid, timestampUs, value, type) {
+    if (!this.ws || this.ws.readyState !== WebSocket.OPEN) return;
+
+    // NT4 binary frame: msgpack array of [pubuid, timestamp_us, type_idx, value]
+    // For text-based approach, we use the JSON text frame with setvalue
+    // However, NT4 value updates must go via binary frames (msgpack).
+    // We'll use a simplified approach: publish via JSON method call.
+
+    // Actually, NT4 requires binary frames for value updates. Let's encode msgpack manually.
+    const encoded = this._encodeMsgpack([pubuid, timestampUs, this._typeToIdx(type), value]);
+    this.ws.send(encoded);
+  }
+
+  _typeToIdx(type) {
+    const map = {
+      'boolean': 0, 'double': 1, 'int': 2, 'float': 3,
+      'string': 4, 'json': 4, 'raw': 5, 'rpc': 5,
+      'boolean[]': 16, 'double[]': 17, 'int[]': 18, 'float[]': 19, 'string[]': 20
+    };
+    return map[type] || 1;
+  }
+
+  _getNowUs() {
+    return Math.floor(performance.now() * 1000) + this.serverTimeOffsetUs;
+  }
+
+  // Minimal msgpack encoder for the specific shapes we need
+  _encodeMsgpack(arr) {
+    const parts = [];
+
+    function encodeValue(v) {
+      if (typeof v === 'boolean') {
+        parts.push(new Uint8Array([v ? 0xc3 : 0xc2]));
+      } else if (typeof v === 'number') {
+        // Encode as float64
+        const buf = new ArrayBuffer(9);
+        const view = new DataView(buf);
+        view.setUint8(0, 0xcb);
+        view.setFloat64(1, v, false);
+        parts.push(new Uint8Array(buf));
+      } else if (typeof v === 'string') {
+        const encoded = new TextEncoder().encode(v);
+        if (encoded.length < 32) {
+          parts.push(new Uint8Array([0xa0 | encoded.length]));
+        } else if (encoded.length < 256) {
+          parts.push(new Uint8Array([0xd9, encoded.length]));
+        } else {
+          const buf = new ArrayBuffer(3);
+          const view = new DataView(buf);
+          view.setUint8(0, 0xda);
+          view.setUint16(1, encoded.length, false);
+          parts.push(new Uint8Array(buf));
+        }
+        parts.push(encoded);
+      } else if (Array.isArray(v)) {
+        if (v.length < 16) {
+          parts.push(new Uint8Array([0x90 | v.length]));
+        } else {
+          const buf = new ArrayBuffer(3);
+          const view = new DataView(buf);
+          view.setUint8(0, 0xdc);
+          view.setUint16(1, v.length, false);
+          parts.push(new Uint8Array(buf));
+        }
+        v.forEach(item => encodeValue(item));
+      } else if (v === null || v === undefined) {
+        parts.push(new Uint8Array([0xc0]));
+      }
+    }
+
+    encodeValue(arr);
+
+    // Concatenate all parts
+    const totalLen = parts.reduce((s, p) => s + p.length, 0);
+    const result = new Uint8Array(totalLen);
+    let offset = 0;
+    for (const part of parts) {
+      result.set(part, offset);
+      offset += part.length;
+    }
+    return result.buffer;
+  }
+
+  // Minimal msgpack decoder
+  _decodeMsgpack(buffer) {
+    const view = new DataView(buffer);
+    let offset = 0;
+
+    function read() {
+      const byte = view.getUint8(offset++);
+
+      // Positive fixint
+      if (byte <= 0x7f) return byte;
+      // Negative fixint
+      if (byte >= 0xe0) return byte - 256;
+      // fixmap
+      if ((byte & 0xf0) === 0x80) {
+        const len = byte & 0x0f;
+        const obj = {};
+        for (let i = 0; i < len; i++) { const k = read(); obj[k] = read(); }
+        return obj;
+      }
+      // fixarray
+      if ((byte & 0xf0) === 0x90) {
+        const len = byte & 0x0f;
+        const arr = [];
+        for (let i = 0; i < len; i++) arr.push(read());
+        return arr;
+      }
+      // fixstr
+      if ((byte & 0xe0) === 0xa0) {
+        const len = byte & 0x1f;
+        const str = new TextDecoder().decode(new Uint8Array(buffer, offset, len));
+        offset += len;
+        return str;
+      }
+
+      switch (byte) {
+        case 0xc0: return null;
+        case 0xc2: return false;
+        case 0xc3: return true;
+        case 0xca: { const v = view.getFloat32(offset, false); offset += 4; return v; }
+        case 0xcb: { const v = view.getFloat64(offset, false); offset += 8; return v; }
+        case 0xcc: return view.getUint8(offset++);
+        case 0xcd: { const v = view.getUint16(offset, false); offset += 2; return v; }
+        case 0xce: { const v = view.getUint32(offset, false); offset += 4; return v; }
+        case 0xd0: return view.getInt8(offset++);
+        case 0xd1: { const v = view.getInt16(offset, false); offset += 2; return v; }
+        case 0xd2: { const v = view.getInt32(offset, false); offset += 4; return v; }
+        case 0xd3: {
+          // int64 - read as two 32-bit values
+          const hi = view.getInt32(offset, false);
+          const lo = view.getUint32(offset + 4, false);
+          offset += 8;
+          return hi * 0x100000000 + lo;
+        }
+        case 0xcf: {
+          // uint64
+          const hi = view.getUint32(offset, false);
+          const lo = view.getUint32(offset + 4, false);
+          offset += 8;
+          return hi * 0x100000000 + lo;
+        }
+        case 0xd9: {
+          const len = view.getUint8(offset++);
+          const str = new TextDecoder().decode(new Uint8Array(buffer, offset, len));
+          offset += len;
+          return str;
+        }
+        case 0xda: {
+          const len = view.getUint16(offset, false); offset += 2;
+          const str = new TextDecoder().decode(new Uint8Array(buffer, offset, len));
+          offset += len;
+          return str;
+        }
+        case 0xc4: {
+          const len = view.getUint8(offset++);
+          const bin = new Uint8Array(buffer, offset, len);
+          offset += len;
+          return bin;
+        }
+        case 0xc5: {
+          const len = view.getUint16(offset, false); offset += 2;
+          const bin = new Uint8Array(buffer, offset, len);
+          offset += len;
+          return bin;
+        }
+        case 0xdc: {
+          const len = view.getUint16(offset, false); offset += 2;
+          const arr = [];
+          for (let i = 0; i < len; i++) arr.push(read());
+          return arr;
+        }
+        case 0xdd: {
+          const len = view.getUint32(offset, false); offset += 4;
+          const arr = [];
+          for (let i = 0; i < len; i++) arr.push(read());
+          return arr;
+        }
+        case 0xde: {
+          const len = view.getUint16(offset, false); offset += 2;
+          const obj = {};
+          for (let i = 0; i < len; i++) { const k = read(); obj[k] = read(); }
+          return obj;
+        }
+        default:
+          console.warn('Unknown msgpack byte:', byte.toString(16));
+          return null;
+      }
+    }
+
+    const results = [];
+    while (offset < buffer.byteLength) {
+      results.push(read());
+    }
+    return results;
+  }
+
+  _handleTextFrame(messages) {
+    if (!Array.isArray(messages)) messages = [messages];
+    for (const msg of messages) {
+      if (msg.method === 'announce') {
+        const { name, id, type } = msg.params;
+        this.topicMap[name] = id;
+
+        // If we have a pending value for this topic, send it now
+        if (this.pendingValues[name] !== undefined) {
+          const pub = this.publications[name];
+          if (pub) {
+            this._sendValue(pub.pubuid, this._getNowUs(), this.pendingValues[name], pub.type);
+          }
+          delete this.pendingValues[name];
+        }
+      } else if (msg.method === 'unannounce') {
+        const { name } = msg.params;
+        delete this.topicMap[name];
+      }
+    }
+  }
+
+  _handleBinaryFrame(buffer) {
+    try {
+      const values = this._decodeMsgpack(buffer);
+      // Each value is [topicId, timestampUs, typeIdx, value]
+      for (const entry of values) {
+        if (!Array.isArray(entry) || entry.length < 4) continue;
+        const [topicId, , , value] = entry;
+
+        // Find topic name from id
+        for (const [name, id] of Object.entries(this.topicMap)) {
+          if (id === topicId) {
+            // Notify matching subscriptions
+            for (const sub of Object.values(this.subscriptions)) {
+              for (const pattern of sub.topics) {
+                if (name === pattern || (pattern.endsWith('/') && name.startsWith(pattern))) {
+                  sub.callback(name, value);
+                }
+              }
+            }
+            break;
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to decode binary frame:', e);
+    }
+  }
+}
+
+// =============================================================================
+// Field Dashboard Application
+// =============================================================================
+
+const FIELD_LENGTH_M = 16.54;  // WPILib 2026 REBUILT field dimensions
+const FIELD_WIDTH_M = 8.21;
+
+// State
+let nt = null;
+let robotPose = { x: 0, y: 0, rot: 0 };
+let targetPoint = null;   // { x, y } in meters (blue-alliance coords), or null
+let targetActive = false;
+let fieldImage = null;
+let canvasScale = 1;
+let fieldOffsetX = 0;
+let fieldOffsetY = 0;
+
+// DOM elements
+const canvas = document.getElementById('field');
+const ctx = canvas.getContext('2d');
+const statusDot = document.getElementById('status-dot');
+const statusText = document.getElementById('status-text');
+const robotXEl = document.getElementById('robot-x');
+const robotYEl = document.getElementById('robot-y');
+const targetXEl = document.getElementById('target-x');
+const targetYEl = document.getElementById('target-y');
+const distanceEl = document.getElementById('distance');
+const targetActiveEl = document.getElementById('target-active');
+const overlay = document.getElementById('connection-overlay');
+const addressInput = document.getElementById('robot-address');
+
+// --- Canvas sizing ---
+function resizeCanvas() {
+  const container = document.getElementById('field-container');
+  const maxW = container.clientWidth - 16;
+  const maxH = container.clientHeight - 16;
+  const fieldAspect = FIELD_LENGTH_M / FIELD_WIDTH_M;
+  const containerAspect = maxW / maxH;
+
+  let w, h;
+  if (containerAspect > fieldAspect) {
+    h = maxH;
+    w = h * fieldAspect;
+  } else {
+    w = maxW;
+    h = w / fieldAspect;
+  }
+
+  canvas.width = Math.floor(w);
+  canvas.height = Math.floor(h);
+  canvasScale = canvas.width / FIELD_LENGTH_M;
+}
+
+// --- Coordinate conversion ---
+function fieldToCanvas(fx, fy) {
+  // WPILib: origin bottom-left (blue corner), X right, Y up
+  // Canvas: origin top-left, X right, Y down
+  return {
+    cx: fx * canvasScale,
+    cy: (FIELD_WIDTH_M - fy) * canvasScale
+  };
+}
+
+function canvasToField(cx, cy) {
+  return {
+    fx: cx / canvasScale,
+    fy: FIELD_WIDTH_M - (cy / canvasScale)
+  };
+}
+
+// --- Drawing ---
+function drawField() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Field background
+  ctx.fillStyle = '#2d5016';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Grid lines (1m spacing)
+  ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+  ctx.lineWidth = 1;
+  for (let x = 0; x <= FIELD_LENGTH_M; x++) {
+    const { cx } = fieldToCanvas(x, 0);
+    ctx.beginPath();
+    ctx.moveTo(cx, 0);
+    ctx.lineTo(cx, canvas.height);
+    ctx.stroke();
+  }
+  for (let y = 0; y <= FIELD_WIDTH_M; y++) {
+    const { cy } = fieldToCanvas(0, y);
+    ctx.beginPath();
+    ctx.moveTo(0, cy);
+    ctx.lineTo(canvas.width, cy);
+    ctx.stroke();
+  }
+
+  // Center line
+  ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+  ctx.lineWidth = 2;
+  const centerX = FIELD_LENGTH_M / 2;
+  const { cx: ccx } = fieldToCanvas(centerX, 0);
+  ctx.beginPath();
+  ctx.moveTo(ccx, 0);
+  ctx.lineTo(ccx, canvas.height);
+  ctx.stroke();
+
+  // Alliance walls
+  ctx.fillStyle = 'rgba(59, 130, 246, 0.3)';
+  ctx.fillRect(0, 0, 12 * canvasScale / FIELD_LENGTH_M * canvas.width / canvasScale * 0.15, canvas.height);
+  const blueW = 0.3 * canvasScale;
+  ctx.fillStyle = 'rgba(59, 130, 246, 0.4)';
+  ctx.fillRect(0, 0, blueW, canvas.height);
+
+  ctx.fillStyle = 'rgba(239, 68, 68, 0.4)';
+  ctx.fillRect(canvas.width - blueW, 0, blueW, canvas.height);
+
+  // Alliance labels
+  ctx.save();
+  ctx.font = 'bold 14px sans-serif';
+  ctx.fillStyle = 'rgba(59, 130, 246, 0.7)';
+  ctx.textAlign = 'center';
+  ctx.translate(12, canvas.height / 2);
+  ctx.rotate(-Math.PI / 2);
+  ctx.fillText('BLUE', 0, 0);
+  ctx.restore();
+
+  ctx.save();
+  ctx.font = 'bold 14px sans-serif';
+  ctx.fillStyle = 'rgba(239, 68, 68, 0.7)';
+  ctx.textAlign = 'center';
+  ctx.translate(canvas.width - 12, canvas.height / 2);
+  ctx.rotate(Math.PI / 2);
+  ctx.fillText('RED', 0, 0);
+  ctx.restore();
+
+  // Field dimensions label
+  ctx.font = '10px sans-serif';
+  ctx.fillStyle = 'rgba(255,255,255,0.3)';
+  ctx.textAlign = 'right';
+  ctx.fillText(`${FIELD_LENGTH_M}m x ${FIELD_WIDTH_M}m`, canvas.width - 8, canvas.height - 6);
+
+  // --- Draw target line ---
+  if (targetPoint && targetActive) {
+    const rp = fieldToCanvas(robotPose.x, robotPose.y);
+    const tp = fieldToCanvas(targetPoint.x, targetPoint.y);
+
+    // Dashed line from robot to target
+    ctx.save();
+    ctx.setLineDash([6, 4]);
+    ctx.strokeStyle = '#facc15';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(rp.cx, rp.cy);
+    ctx.lineTo(tp.cx, tp.cy);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  // --- Draw target crosshair ---
+  if (targetPoint) {
+    const { cx, cy } = fieldToCanvas(targetPoint.x, targetPoint.y);
+    const r = 12;
+
+    // Outer ring
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.strokeStyle = targetActive ? '#facc15' : 'rgba(250, 204, 21, 0.4)';
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
+
+    // Crosshair lines
+    ctx.beginPath();
+    ctx.moveTo(cx - r - 4, cy); ctx.lineTo(cx - 4, cy);
+    ctx.moveTo(cx + 4, cy); ctx.lineTo(cx + r + 4, cy);
+    ctx.moveTo(cx, cy - r - 4); ctx.lineTo(cx, cy - 4);
+    ctx.moveTo(cx, cy + 4); ctx.lineTo(cx, cy + r + 4);
+    ctx.stroke();
+
+    // Center dot
+    ctx.beginPath();
+    ctx.arc(cx, cy, 2.5, 0, Math.PI * 2);
+    ctx.fillStyle = targetActive ? '#facc15' : 'rgba(250, 204, 21, 0.4)';
+    ctx.fill();
+  }
+
+  // --- Draw robot ---
+  {
+    const { cx, cy } = fieldToCanvas(robotPose.x, robotPose.y);
+    const robotSize = 0.45 * canvasScale; // ~45cm robot footprint
+
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(-robotPose.rot); // WPILib CCW positive -> canvas CW
+
+    // Robot body
+    ctx.fillStyle = 'rgba(59, 130, 246, 0.7)';
+    ctx.strokeStyle = '#3b82f6';
+    ctx.lineWidth = 2;
+    ctx.fillRect(-robotSize / 2, -robotSize / 2, robotSize, robotSize);
+    ctx.strokeRect(-robotSize / 2, -robotSize / 2, robotSize, robotSize);
+
+    // Direction arrow (forward = +X in robot frame)
+    ctx.fillStyle = '#facc15';
+    ctx.beginPath();
+    ctx.moveTo(robotSize / 2 + 6, 0);
+    ctx.lineTo(robotSize / 2 - 4, -6);
+    ctx.lineTo(robotSize / 2 - 4, 6);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.restore();
+  }
+}
+
+// --- Animation loop ---
+function animate() {
+  drawField();
+  requestAnimationFrame(animate);
+}
+
+// --- Click/tap handler ---
+function handleFieldClick(e) {
+  e.preventDefault();
+  const rect = canvas.getBoundingClientRect();
+  let clientX, clientY;
+  if (e.touches) {
+    clientX = e.touches[0].clientX;
+    clientY = e.touches[0].clientY;
+  } else {
+    clientX = e.clientX;
+    clientY = e.clientY;
+  }
+
+  const cx = (clientX - rect.left) * (canvas.width / rect.width);
+  const cy = (clientY - rect.top) * (canvas.height / rect.height);
+  const { fx, fy } = canvasToField(cx, cy);
+
+  // Clamp to field bounds
+  const x = Math.max(0, Math.min(FIELD_LENGTH_M, fx));
+  const y = Math.max(0, Math.min(FIELD_WIDTH_M, fy));
+
+  targetPoint = { x, y };
+  targetActive = true;
+
+  // Send to NetworkTables
+  if (nt && nt.connected) {
+    nt.setValue('/Shooting/TargetX', x);
+    nt.setValue('/Shooting/TargetY', y);
+    nt.setValue('/Shooting/TargetActive', true);
+  }
+
+  updateInfoBar();
+}
+
+canvas.addEventListener('click', handleFieldClick);
+canvas.addEventListener('touchstart', handleFieldClick, { passive: false });
+
+// --- Clear target ---
+document.getElementById('btn-clear').addEventListener('click', () => {
+  targetPoint = null;
+  targetActive = false;
+  if (nt && nt.connected) {
+    nt.setValue('/Shooting/TargetActive', false);
+    nt.setValue('/Shooting/TargetX', 0);
+    nt.setValue('/Shooting/TargetY', 0);
+  }
+  updateInfoBar();
+});
+
+// --- Disconnect ---
+document.getElementById('btn-disconnect').addEventListener('click', () => {
+  if (nt) {
+    nt.disconnect();
+    nt = null;
+  }
+  overlay.classList.remove('hidden');
+});
+
+// --- Connect ---
+document.getElementById('btn-connect').addEventListener('click', () => {
+  connectToRobot();
+});
+addressInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') connectToRobot();
+});
+
+function connectToRobot() {
+  const address = addressInput.value.trim();
+  if (!address) return;
+
+  overlay.classList.add('hidden');
+  statusText.textContent = 'Connecting...';
+
+  nt = new NT4Client(
+    address,
+    () => {
+      // On connect
+      statusDot.classList.add('connected');
+      statusText.textContent = 'Connected';
+
+      // Publish our target topics
+      nt.publish('/Shooting/TargetX', 'double');
+      nt.publish('/Shooting/TargetY', 'double');
+      nt.publish('/Shooting/TargetActive', 'boolean');
+
+      // Subscribe to robot pose (from Telemetry.java DriveState/Pose)
+      nt.subscribe(['/DriveState/'], (name, value) => {
+        // The Pose topic is a WPILib struct - we'll use the double array from Pose table instead
+      });
+
+      // Subscribe to the Pose/robotPose double array [x, y, degrees]
+      nt.subscribe(['/Pose/robotPose'], (name, value) => {
+        if (Array.isArray(value) && value.length >= 3) {
+          robotPose.x = value[0];
+          robotPose.y = value[1];
+          robotPose.rot = value[2] * Math.PI / 180; // degrees to radians
+          updateInfoBar();
+        }
+      });
+
+      // Subscribe to our own shooting topics to confirm round-trip
+      nt.subscribe(['/Shooting/'], (name, value) => {
+        if (name === '/Shooting/EffectiveTargetX' || name === '/Shooting/EffectiveTargetY') {
+          // Server-side effective target (after alliance flip)
+        }
+      });
+
+      // If we had a target before reconnect, re-send it
+      if (targetPoint && targetActive) {
+        nt.setValue('/Shooting/TargetX', targetPoint.x);
+        nt.setValue('/Shooting/TargetY', targetPoint.y);
+        nt.setValue('/Shooting/TargetActive', true);
+      }
+    },
+    () => {
+      // On disconnect
+      statusDot.classList.remove('connected');
+      statusText.textContent = 'Disconnected';
+      // Auto-reconnect after 2 seconds
+      setTimeout(() => {
+        if (nt && !nt.connected) {
+          statusText.textContent = 'Reconnecting...';
+          nt.connect();
+        }
+      }, 2000);
+    }
+  );
+
+  nt.connect();
+}
+
+function updateInfoBar() {
+  robotXEl.textContent = robotPose.x.toFixed(2);
+  robotYEl.textContent = robotPose.y.toFixed(2);
+
+  if (targetPoint) {
+    targetXEl.textContent = targetPoint.x.toFixed(2);
+    targetYEl.textContent = targetPoint.y.toFixed(2);
+    const dx = targetPoint.x - robotPose.x;
+    const dy = targetPoint.y - robotPose.y;
+    distanceEl.textContent = Math.sqrt(dx * dx + dy * dy).toFixed(2);
+  } else {
+    targetXEl.textContent = '-';
+    targetYEl.textContent = '-';
+    distanceEl.textContent = '-';
+  }
+  targetActiveEl.textContent = targetActive ? 'Yes' : 'No';
+  targetActiveEl.style.color = targetActive ? '#4ade80' : '#aaa';
+}
+
+// --- Init ---
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+animate();
+</script>
+</body>
+</html>

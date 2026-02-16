@@ -66,7 +66,7 @@ public class SuperStructure extends SubsystemBase {
     this.hood = hood;
     this.drivetrain = driveTrain;
     this.shotCalculator = shotCalculator;
-    hood.setHoodAngleSupplier(() -> shotCalculator.calculateShot().hoodAngle());
+    hood.setHoodAngleSupplier(() -> shotCalculator.calculateShotToHub().hoodAngle());
   }
 
   private void updateState() {

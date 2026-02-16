@@ -31,6 +31,7 @@ import frc.robot.subsystems.Intake.IntakeIOSim;
 import frc.robot.subsystems.Intake.IntakeIOWB;
 import frc.robot.subsystems.IntakePivot.IntakePivot;
 import frc.robot.subsystems.IntakePivot.IntakePivotIOSim;
+import frc.robot.subsystems.Shooter.DashboardTargetProvider;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel;
 import frc.robot.subsystems.Shooter.Flywheel.FlywheelIOSim;
 import frc.robot.subsystems.Shooter.Flywheel.FlywheelIOWB;
@@ -70,6 +71,7 @@ public class RobotContainer {
   private SuperStructure superStructure;
 
   private ShotCalculator shotCalculator;
+  private DashboardTargetProvider dashboardTargetProvider;
 
   // TODO: refactor to allow for more than 1 drivetrain type
 
@@ -119,6 +121,7 @@ public class RobotContainer {
         // intakePivot = new IntakePivot(new IntakePivotIOPB());
     }
     shotCalculator = new ShotCalculator(drivetrain);
+    dashboardTargetProvider = new DashboardTargetProvider();
     // Configure the trigger bindings
     commandFactory =
         new CommandFactory(

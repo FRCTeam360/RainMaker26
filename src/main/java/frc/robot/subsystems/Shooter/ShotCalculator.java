@@ -4,18 +4,22 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
-import frc.robot.utils.AllianceFlipUtil;
 import frc.robot.utils.FieldConstants;
+import java.util.Optional;
 import org.littletonrobotics.junction.Logger;
 
 /**
- * Calculates shooting parameters (hood angle, flywheel speed, and drivebase heading) based on the
- * robot's distance to the hub. Uses interpolation maps to convert distance into mechanism
- * setpoints.
+ * Pure calculation logic for shooting parameters. Takes a target point as input and calculates the
+ * required hood angle, flywheel speed, and drivebase heading. Does not depend on NetworkTables ---
+ * the target point is passed in from the caller.
+ *
+ * <p>Shared calculation logic is used for both hub shots and custom target shots.
  */
 public class ShotCalculator {
-  private CommandSwerveDrivetrain drivetrain;
+  private final CommandSwerveDrivetrain drivetrain;
 
   private static final InterpolatingDoubleTreeMap shotHoodAngleMap =
       new InterpolatingDoubleTreeMap();
@@ -33,10 +37,7 @@ public class ShotCalculator {
    */
   public record ShootingParams(Rotation2d targetHeading, double hoodAngle, double flywheelSpeed) {}
 
-  private ShootingParams latestParameters = null;
-
-  private static final double MIN_DISTANCE_METERS = 0.0;
-  private static final double MAX_DISTANCE_METERS = 5.0;
+  private ShootingParams shootingParams = null;
 
   static {
     shotHoodAngleMap.put(5.0, 20.0);
@@ -62,29 +63,33 @@ public class ShotCalculator {
     this.drivetrain = drivetrain;
   }
 
-  private ShootingParams shootingParams = null;
-
   /**
-   * Calculates and caches the shooting parameters for the current robot position. If parameters
-   * have already been calculated and not cleared, returns the cached result.
+   * Calculates shooting parameters for the hub center. Convenience method that uses the same
+   * underlying calculation as custom targets.
    *
    * @return the {@link ShootingParams} containing drivebase angle, hood angle, and flywheel speed
    */
-  public ShootingParams calculateShot() {
-    if (shootingParams != null) {
-      Logger.recordOutput("ShotCalculator/cached", true);
-
-      return shootingParams;
+  public ShootingParams calculateShotToHub() {
+    Optional<Alliance> alliance = DriverStation.getAlliance();
+    if (alliance.isEmpty() || alliance.get() == Alliance.Blue) {
+      return calculateShotToPoint(FieldConstants.Hub.topCenterPoint.toTranslation2d());
+    } else {
+      return calculateShotToPoint(FieldConstants.Hub.oppTopCenterPoint.toTranslation2d());
     }
-    Logger.recordOutput("ShotCalculator/cached", false);
+  }
+
+  /**
+   * Calculates shooting parameters for any arbitrary target point on the field. This is the shared
+   * calculation logic used for both hub shots and dashboard target shots.
+   *
+   * @param target the target position in field coordinates (already alliance-flipped if necessary)
+   * @return the {@link ShootingParams} containing drivebase angle, hood angle, and flywheel speed
+   */
+  public ShootingParams calculateShotToPoint(Translation2d target) {
     Pose2d robotPosition = drivetrain.getPosition();
     Pose2d shooterPosition = robotPosition.plus(ShooterConstants.ROBOT_TO_SHOOTER);
 
-    Translation2d hubTranslation =
-        AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint.toTranslation2d());
-    double distanceToTarget = hubTranslation.getDistance(shooterPosition.getTranslation());
-    distanceToTarget =
-        Math.max(MIN_DISTANCE_METERS, Math.min(MAX_DISTANCE_METERS, distanceToTarget));
+    double distanceToTarget = target.getDistance(shooterPosition.getTranslation());
 
     // Calculate heading toward hub, then rotate 180° because the shooter
     // is at the back of the robot - robot faces away from hub to shoot at it
@@ -97,11 +102,12 @@ public class ShotCalculator {
     double hoodAngle = shotHoodAngleMap.get(distanceToTarget);
     double flywheelSpeed = launchFlywheelSpeedMap.get(distanceToTarget);
 
-    Logger.recordOutput("ShotCalculator/hubPosition", FieldConstants.Hub.topCenterPoint);
+    // Log computed values
+    Logger.recordOutput("ShotCalculator/targetPosition", new Pose2d(target, new Rotation2d()));
     Logger.recordOutput("ShotCalculator/distanceToTarget", distanceToTarget);
-    Logger.recordOutput("ShotCalculator/targetFlywheelSpeed", flywheelSpeed);
-    Logger.recordOutput("ShotCalculator/targetHoodAngle", hoodAngle);
-    Logger.recordOutput("ShotCalculator/targetHeading", targetHeading);
+    Logger.recordOutput("ShotCalculator/targetAngle", targetHeading);
+    Logger.recordOutput("ShotCalculator/hoodAngle", hoodAngle);
+    Logger.recordOutput("ShotCalculator/flywheelSpeed", flywheelSpeed);
 
     shootingParams = new ShootingParams(targetHeading, hoodAngle, flywheelSpeed);
 
@@ -109,8 +115,33 @@ public class ShotCalculator {
   }
 
   /**
+   * Calculates and caches the shooting parameters for the provided target point. If parameters have
+   * already been calculated and not cleared, returns the cached result.
+   *
+   * @param target the target position in field coordinates
+   * @return the {@link ShootingParams} containing drivebase angle, hood angle, and flywheel speed
+   */
+  public ShootingParams calculateShot(Translation2d target) {
+    if (shootingParams != null) {
+      Logger.recordOutput("ShotCalculator/cached", true);
+      return shootingParams;
+    }
+    Logger.recordOutput("ShotCalculator/cached", false);
+    return calculateShotToPoint(target);
+  }
+
+  /**
+   * Returns the cached shooting parameters, or null if none have been calculated.
+   *
+   * @return the cached {@link ShootingParams}, or null
+   */
+  public ShootingParams getCachedParams() {
+    return shootingParams;
+  }
+
+  /**
    * Clears the cached shooting parameters, forcing a recalculation on the next call to {@link
-   * #calculateShot()}.
+   * #calculateShot(Translation2d)} or {@link #calculateShotToPoint(Translation2d)}.
    */
   public void clearShootingParams() {
     shootingParams = null;
