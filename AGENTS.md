@@ -61,6 +61,7 @@ Apply formatting with: ./gradlew spotlessApply
 
 Run SpotBugs to find potential bugs: ./gradlew spotbugsMain
 View the report: open build/reports/spotbugs/spotbugs.html
+**Note:** SpotBugs is diagnostic only. Findings are informational and should not block PRs from merging.
 
 ## Code Patterns
 
@@ -114,9 +115,17 @@ Use `ALL_CAPS` with underscores for separation:
 
 - `ShotCalculator`, `FieldVisualizer`, `CommandLogger`, `AllianceFlipUtil`
 
+## PR Review Guidelines
+
+When reviewing a PR, follow these rules strictly:
+
+- **Only review lines that are part of the PR diff.** Do not flag pre-existing issues in files the PR touches. If a line was not added or modified in the diff, do not comment on it.
+- **Focus on correctness and intent of the PR.** Evaluate whether the changed code does what the PR description says, follows project conventions, and doesn't introduce new issues. Do not expand scope beyond the PR's purpose.
+- **CI status:** Only Build, Test, Format Check, and Simulation Test are merge blockers.
+
 ## Code Review Checklist
 
-When reviewing PRs, check for the following (inspired by NASA's "Power of 10" for safety-critical code). **Only flag items that are violated — do not mention items that pass.**
+When reviewing PRs, apply the checklist below **only to lines added or modified in the PR diff** (inspired by NASA's "Power of 10" for safety-critical code). **Only flag items that are violated — do not mention items that pass.**
 
 ### Static Analysis & Safety
 

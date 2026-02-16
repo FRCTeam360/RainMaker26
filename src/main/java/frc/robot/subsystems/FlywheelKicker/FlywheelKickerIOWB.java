@@ -4,18 +4,19 @@
 
 package frc.robot.subsystems.FlywheelKicker;
 
+import com.ctre.phoenix6.configs.CANrangeConfiguration;
+import com.ctre.phoenix6.hardware.CANrange;
+import com.ctre.phoenix6.signals.UpdateModeValue;
+import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
+import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkBase.ControlType;
-import com.revrobotics.spark.SparkBase.PersistMode;
-import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
-import edu.wpi.first.wpilibj.DigitalInput;
 import frc.robot.Constants;
-import frc.robot.Constants.WoodBotConstants;
 
 public class FlywheelKickerIOWB implements FlywheelKickerIO {
   /** Creates a new FlywheelKickerIOWB. */
@@ -26,7 +27,8 @@ public class FlywheelKickerIOWB implements FlywheelKickerIO {
   private final SparkMaxConfig sparkMaxConfig = new SparkMaxConfig();
   private final SparkClosedLoopController closedLoopController;
 
-  private final DigitalInput sensor = new DigitalInput(WoodBotConstants.FLYWHEEL_KICKER_SENSOR_ID);
+  private final CANrange canSensor =
+      new CANrange(Constants.WoodBotConstants.FLYWHEEL_KICKER_SENSOR_ID, Constants.RIO_CANBUS);
 
   public FlywheelKickerIOWB() {
     sparkMaxConfig.idleMode(IdleMode.kBrake);
@@ -40,6 +42,12 @@ public class FlywheelKickerIOWB implements FlywheelKickerIO {
         sparkMaxConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
     closedLoopController = flywheelkickerMotor.getClosedLoopController();
+
+    CANrangeConfiguration sensorConfig = new CANrangeConfiguration();
+    sensorConfig.ProximityParams.MinSignalStrengthForValidMeasurement = 2000; // unknown unit
+    sensorConfig.ProximityParams.ProximityThreshold = 0.1; // meters
+    sensorConfig.ToFParams.withUpdateMode(UpdateModeValue.ShortRangeUserFreq);
+    canSensor.getConfigurator().apply(sensorConfig);
   }
 
   public void updateInputs(FlywheelKickerIOInputs inputs) {
@@ -51,7 +59,8 @@ public class FlywheelKickerIOWB implements FlywheelKickerIO {
     // this is right
     inputs.velocity = encoder.getVelocity();
     inputs.voltage = flywheelkickerMotor.getBusVoltage() * flywheelkickerMotor.getAppliedOutput();
-    inputs.sensor = sensor.get();
+    inputs.sensorProximity = canSensor.getDistance().getValueAsDouble();
+    inputs.sensorActivated = canSensor.getIsDetected().getValue();
   }
 
   public void setDutyCycle(double dutyCycle) {

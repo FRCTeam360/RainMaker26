@@ -6,6 +6,7 @@ package frc.robot.subsystems.Shooter.Flywheel;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -15,13 +16,16 @@ public class Flywheel extends SubsystemBase {
 
   public enum FlywheelStates {
     OFF,
-    SHOOTING,
-    SPINUP_SHOOTING
+    SHOOTING
   }
 
   /** Creates a new Flywheel. */
   public Flywheel(FlywheelIO io) {
     this.io = io;
+  }
+
+  public FlywheelStates getState() {
+    return currentState;
   }
 
   private FlywheelStates wantedState = FlywheelStates.OFF;
@@ -35,17 +39,14 @@ public class Flywheel extends SubsystemBase {
       case SHOOTING:
         currentState = FlywheelStates.SHOOTING;
         break;
-      case SPINUP_SHOOTING:
-        currentState = FlywheelStates.SPINUP_SHOOTING;
-        break;
       case OFF:
         currentState = FlywheelStates.OFF;
         break;
     }
   }
 
-  public void setRPM(double rpm) {
-    io.setVelocity(rpm);
+  public void setVelocity(double velocity) {
+    io.setVelocity(velocity);
   }
 
   public double getVelocity() {
@@ -60,13 +61,14 @@ public class Flywheel extends SubsystemBase {
     return Math.abs(getVelocity() - targetRPM) < tolerance;
   }
 
+  public boolean atSetpoint(DoubleSupplier targetRPM, double tolerance) {
+    return atSetpoint(targetRPM.getAsDouble(), tolerance);
+  }
+
   private void applyState() {
     switch (currentState) {
-      case SPINUP_SHOOTING:
-        setRPM(3000.0);
-        break;
       case SHOOTING:
-        setDutyCycle(0.75);
+        setVelocity(Constants.SPINUP_SHOOTING_FLYWHEEL_RPM);
         break;
       case OFF:
       default:
@@ -84,7 +86,6 @@ public class Flywheel extends SubsystemBase {
   @Override
   public void periodic() {
     io.updateInputs(inputs);
-    Logger.processInputs("Flywheel", inputs);
     Logger.processInputs("Flywheel", inputs);
     Logger.recordOutput("Subsystems/Flywheel/WantedState", wantedState.toString());
     Logger.recordOutput("Subsystems/Flywheel/CurrentState", currentState.toString());
@@ -107,7 +108,12 @@ public class Flywheel extends SubsystemBase {
     return this.runEnd(() -> io.setDutyCycle(valueSup.getAsDouble()), () -> io.setDutyCycle(0.0));
   }
 
-  public Command setRPMCommand(double rpm) {
-    return this.runEnd(() -> io.setVelocity(rpm), () -> io.setDutyCycle(0.0));
+  public Command setVelocityCommand(DoubleSupplier supplierVelocity) {
+    return this.runEnd(
+        () -> io.setVelocity(supplierVelocity.getAsDouble()), () -> io.setDutyCycle(0.0));
+  }
+
+  public Command setVelocityCommand(double velocity) {
+    return this.setVelocityCommand(() -> velocity);
   }
 }

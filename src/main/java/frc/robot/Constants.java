@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.CANBus;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.hal.HALUtil;
@@ -19,12 +20,15 @@ import edu.wpi.first.hal.HALUtil;
 public final class Constants {
   public static final AprilTagFieldLayout FIELD_LAYOUT =
       AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
+  public static final double SPINUP_SHOOTING_FLYWHEEL_RPM = 3250.0;
 
   public static enum RobotType {
     SIM,
     WOODBOT,
     REPLAY
   }
+
+  public static final CANBus RIO_CANBUS = new CANBus("rio");
 
   public static class WoodBotConstants {
     // === INTAKE ===
@@ -34,12 +38,11 @@ public final class Constants {
 
     // === HOPPER ===
     public static final int INDEXER_SENSOR_PORT = 1;
-    public static final int INDEXER_SENSOR_ID = 2;
     public static final int INDEXER_ID = 16;
 
     // === FLYWHEEL ===
     public static final int FLYWHEEL_KICKER_ID = 17;
-    public static final int FLYWHEEL_KICKER_SENSOR_ID = 3;
+    public static final int FLYWHEEL_KICKER_SENSOR_ID = 2;
     public static final int FLYWHEEL_RIGHT_ID = 18;
     public static final int FLYWHEEL_LEFT_ID = 19;
 
@@ -50,7 +53,7 @@ public final class Constants {
     public static final String LIMELIGHT = "limelight";
 
     // === CANBUS ===
-    public static final String CANBUS_NAME = "Default Name";
+    public static final CANBus CANBUS = new CANBus("Default Name");
   }
 
   public static record PracticeBotConstants() {
