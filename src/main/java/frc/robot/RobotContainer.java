@@ -225,10 +225,10 @@ public class RobotContainer {
     // basicIntakeCmd uses intake and indexer
     // TODO: Re-enable superStructure bindings
     if (Objects.nonNull(intake) && Objects.nonNull(indexer)) {
-      // driverCont.leftBumper().onTrue(superStructure.setStateCommand(SuperStates.INTAKING));
-      // driverCont.leftBumper().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
+      driverCont.leftBumper().onTrue(superStructure.setStateCommand(SuperStates.INTAKING));
+      driverCont.leftBumper().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
       driverCont.a().whileTrue(indexer.setDutyCycleCommand(0.5));
-      driverCont.leftBumper().whileTrue(commandFactory.basicIntakeCmd());
+      // driverCont.leftBumper().whileTrue(commandFactory.basicIntakeCmd());
     }
 
     // setFlywheelKickerDutyCycle uses flywheelKicker

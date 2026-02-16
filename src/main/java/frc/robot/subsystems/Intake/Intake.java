@@ -72,7 +72,7 @@ public class Intake extends SubsystemBase {
   }
 
   private void intaking() {
-    setDutyCycle(0.75);
+    setVelocity(4500.0);
   }
 
   public void setDutyCycle(double value) {

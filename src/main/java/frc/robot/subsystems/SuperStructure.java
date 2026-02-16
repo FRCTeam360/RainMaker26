@@ -121,7 +121,7 @@ public class SuperStructure extends SubsystemBase {
 
   private void updateShooterStates() {
     previousShooterState = currentShooterState;
-    double FLYWHEEL_TOLERANCE_RPM = 100.0;
+    double FLYWHEEL_TOLERANCE_RPM = 500.0;
     if (flywheel.atSetpoint(shotCalculator.calculateShot().flywheelSpeed(), FLYWHEEL_TOLERANCE_RPM)
         && hood.atSetpoint(shotCalculator.calculateShot().hoodAngle())) {
       currentShooterState = ShooterStates.FIRING;
@@ -133,6 +133,7 @@ public class SuperStructure extends SubsystemBase {
   private void applyShooterStates() {
     if (currentShooterState == ShooterStates.FIRING) {
       flywheelKicker.setVelocity(4500.0);
+      indexer.setDutyCycle(0.4);
     } else {
       flywheelKicker.setVelocity(0.0);
     }
