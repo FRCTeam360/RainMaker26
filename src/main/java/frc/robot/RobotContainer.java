@@ -245,11 +245,7 @@ public class RobotContainer {
       driverCont.x().whileTrue(commandFactory.shootWithRPM(2500));
       driverCont.b().whileTrue(commandFactory.shootWithRPM(3000));
       driverCont.y().whileTrue(commandFactory.shootWithRPM(3500));
-      driverCont
-          .rightTrigger()
-          .whileTrue(
-              commandFactory.faceAngleWhileShooting(
-                  driverCont, () -> shotCalculator.calculateShot().targetAngle()));
+      driverCont.rightTrigger().whileTrue(commandFactory.faceAngleWhileShooting(driverCont));
       if (Objects.nonNull(superStructure)) {
         // driverCont.rightTrigger().onTrue(superStructure.setStateCommand(SuperStates.SHOOTING));
         // driverCont.rightTrigger().onFalse(superStructure.setStateCommand(SuperStates.IDLE));

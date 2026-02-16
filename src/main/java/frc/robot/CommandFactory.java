@@ -4,7 +4,6 @@
 
 package frc.robot;
 
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -18,7 +17,6 @@ import frc.robot.subsystems.Shooter.Hood.Hood;
 import frc.robot.subsystems.Shooter.ShotCalculator;
 import frc.robot.subsystems.Vision.Vision;
 import java.util.function.DoubleSupplier;
-import java.util.function.Supplier;
 
 /** Add your docs here. */
 public class CommandFactory {
@@ -95,10 +93,11 @@ public class CommandFactory {
         () -> shotCalculator.calculateShot().hoodAngle());
   }
 
-  public Command faceAngleWhileShooting(
-      CommandXboxController controller, Supplier<Rotation2d> headingSupplier) {
+  public Command faceAngleWhileShooting(CommandXboxController controller) {
     return shootWithShotCalculator()
-        .alongWith(drivetrain.faceAngleWhileDriving(controller, headingSupplier));
+        .alongWith(
+            drivetrain.faceAngleWhileDriving(
+                controller, () -> shotCalculator.calculateShot().targetHeading()));
   }
 
   public Command setHoodPosition(double position) {

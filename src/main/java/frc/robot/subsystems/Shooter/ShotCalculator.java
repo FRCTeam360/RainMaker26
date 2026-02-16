@@ -27,11 +27,11 @@ public class ShotCalculator {
   /**
    * Holds the calculated shooting parameters for a given robot position.
    *
-   * @param targetAngle the angle the drivebase should face toward the hub
+   * @param targetHeading the angle the drivebase should face toward the hub
    * @param hoodAngle the hood angle setpoint in degrees
    * @param flywheelSpeed the flywheel speed setpoint in RPM
    */
-  public record ShootingParams(Rotation2d targetAngle, double hoodAngle, double flywheelSpeed) {}
+  public record ShootingParams(Rotation2d targetHeading, double hoodAngle, double flywheelSpeed) {}
 
   private ShootingParams latestParameters = null;
 
