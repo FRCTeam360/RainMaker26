@@ -26,7 +26,8 @@ public class FlywheelKickerIOPB implements FlywheelKickerIO {
   private final SparkMaxConfig sparkMaxConfig = new SparkMaxConfig();
   private final SparkClosedLoopController closedLoopController;
 
-  private final DigitalInput sensor = new DigitalInput(PracticeBotConstants.FLYWHEEL_KICKER_SENSOR_ID);
+  private final DigitalInput sensor =
+      new DigitalInput(PracticeBotConstants.FLYWHEEL_KICKER_SENSOR_ID);
 
   public FlywheelKickerIOPB() {
     sparkMaxConfig.idleMode(IdleMode.kBrake);

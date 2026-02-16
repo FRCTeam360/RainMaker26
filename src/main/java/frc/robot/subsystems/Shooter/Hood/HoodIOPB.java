@@ -6,34 +6,23 @@ package frc.robot.subsystems.Shooter.Hood;
 
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
-import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
-import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import com.revrobotics.RelativeEncoder;
-import com.revrobotics.spark.SparkBase.ControlType;
-import com.revrobotics.spark.SparkBase.PersistMode;
-import com.revrobotics.spark.SparkBase.ResetMode;
-import com.revrobotics.spark.SparkClosedLoopController;
-import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-import com.revrobotics.spark.config.SparkMaxConfig;
 import frc.robot.Constants;
-import frc.robot.Constants.PracticeBotConstants;
 
 public class HoodIOPB implements HoodIO {
   // /** Creates a new HoodIOWB. */
-  private final TalonFX hoodMotor =
-      new TalonFX(Constants.PracticeBotConstants.HOOD_ID);
+  private final TalonFX hoodMotor = new TalonFX(Constants.PracticeBotConstants.HOOD_ID);
   private TalonFXConfiguration config = new TalonFXConfiguration();
   private MotorOutputConfigs motorOutputConfigs = new MotorOutputConfigs();
 
-  public void setEncoder(double position) {
-    hoodMotor.setPosition(position);
+  private final MotionMagicVoltage motionMagicPosition = new MotionMagicVoltage(0);
+
+  public void setZero() {
+    hoodMotor.setPosition(0);
   }
 
   public HoodIOPB() {
@@ -55,16 +44,14 @@ public class HoodIOPB implements HoodIO {
     slot0Configs.kV = kV;
 
     config.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
-    config.SoftwareLimitSwitch.ForwardSoftLimitThreshold = 24.0; 
+    config.SoftwareLimitSwitch.ForwardSoftLimitThreshold = 24.0;
     config.CurrentLimits.StatorCurrentLimit = 40.0;
-        //not legit vals yet stole from flywheel :sob:
+    // not legit vals yet stole from flywheel :sob:
     config.CurrentLimits.StatorCurrentLimitEnable = true;
     config.CurrentLimits.SupplyCurrentLimit = 100.0;
     config.CurrentLimits.SupplyCurrentLimitEnable = true;
 
-    config
-        .MotionMagic
-        .withMotionMagicAcceleration(0.0)
+    config.MotionMagic.withMotionMagicAcceleration(0.0)
         .withMotionMagicCruiseVelocity(0.0)
         .withMotionMagicJerk(0.0);
     config.MotorOutput.withInverted(InvertedValue.Clockwise_Positive);
@@ -74,7 +61,7 @@ public class HoodIOPB implements HoodIO {
   }
 
   public void setPosition(double position) {
-    hoodMotor.setPosition(position);
+    hoodMotor.setControl(motionMagicPosition.withPosition(position));
   }
 
   public void updateInputs(HoodIOInputs inputs) {
@@ -82,7 +69,8 @@ public class HoodIOPB implements HoodIO {
     inputs.statorCurrent = hoodMotor.getStatorCurrent().getValueAsDouble();
     inputs.supplyCurrent = hoodMotor.getSupplyCurrent().getValueAsDouble();
     inputs.velocity = hoodMotor.getVelocity().getValueAsDouble();
-    inputs.voltage = hoodMotor.getMotorVoltage().getValueAsDouble();;
+    inputs.voltage = hoodMotor.getMotorVoltage().getValueAsDouble();
+    ;
   }
 
   public void setDutyCycle(double dutyCycle) {

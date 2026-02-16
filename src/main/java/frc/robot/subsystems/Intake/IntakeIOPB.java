@@ -13,11 +13,11 @@ import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
-import edu.wpi.first.wpilibj.DigitalInput;
 import frc.robot.Constants.PracticeBotConstants;
 
 public class IntakeIOPB implements IntakeIO {
-  private final SparkFlex motor = new SparkFlex(PracticeBotConstants.INTAKE_ID, MotorType.kBrushless);
+  private final SparkFlex motor =
+      new SparkFlex(PracticeBotConstants.INTAKE_ID, MotorType.kBrushless);
   private final RelativeEncoder encoder = motor.getEncoder();
   private final SparkFlexConfig config = new SparkFlexConfig();
   private final SparkClosedLoopController closedLoopConfig;
