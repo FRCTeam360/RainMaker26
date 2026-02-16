@@ -43,6 +43,7 @@ import frc.robot.subsystems.SuperStructure.SuperStates;
 import frc.robot.subsystems.Vision.Vision;
 import frc.robot.subsystems.Vision.VisionIOLimelight;
 import frc.robot.subsystems.Vision.VisionIOPhotonSim;
+import frc.robot.utils.CommandLogger;
 import java.util.Map;
 import java.util.Objects;
 import org.littletonrobotics.junction.Logger;
@@ -232,10 +233,12 @@ public class RobotContainer {
 
     // setHoodPosition uses hood
     if (Objects.nonNull(hood)) {
+      hood.setDefaultCommand(
+          CommandLogger.logCommand(hood.setPositionCmd(0.0), "hood default command"));
       driverCont.pov(0).onTrue(hood.moveToZeroAndZero());
-      driverCont.pov(90).onTrue(commandFactory.setHoodPosition(4.0));
-      driverCont.pov(180).onTrue(commandFactory.setHoodPosition(16.0));
-      driverCont.pov(270).onTrue(commandFactory.setHoodPosition(23.0));
+      driverCont.pov(90).whileTrue(commandFactory.setHoodPosition(4.0));
+      driverCont.pov(180).whileTrue(commandFactory.setHoodPosition(16.0));
+      driverCont.pov(270).whileTrue(commandFactory.setHoodPosition(23.0));
       driverCont.start().onTrue(hood.zero());
     }
 
