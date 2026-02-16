@@ -137,7 +137,8 @@ public class FlywheelKickerIOSim implements FlywheelKickerIO {
 
     // Step 6: Simple sensor simulation - triggers when flywheel is at speed
     sensorSim.setValue(
-        Math.abs(flywheelKickerSim.getAngularVelocityRPM()) > 2000); // Sensor triggers at high Velocity
+        Math.abs(flywheelKickerSim.getAngularVelocityRPM())
+            > 2000); // Sensor triggers at high Velocity
 
     // Step 7: Read all inputs from the SIMULATED VALUES (source of truth)
     inputs.velocity = velocityRPS;

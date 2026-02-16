@@ -143,7 +143,8 @@ public class RobotContainer {
           "shoot at hub", superStructure.setStateCommand(SuperStates.SHOOTING));
     }
     registerPathplannerCommand("run flywheel kicker", flywheelKicker.setVelocityCommand(4000.0));
-    registerPathplannerCommand("spinup flywheel hub shot", commandFactory.shootWithVelocity(3000.0));
+    registerPathplannerCommand(
+        "spinup flywheel hub shot", commandFactory.shootWithVelocity(3000.0));
     configureBindings();
     // configureTestBindings();
 

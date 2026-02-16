@@ -11,8 +11,8 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 /**
  * Command to tune the flywheel Velocity using a LoggedNetworkNumber.
  *
- * <p>This command continuously reads from a NetworkTables tunable value and sets the flywheel Velocity
- * accordingly. Useful for testing and tuning flywheel speeds during development.
+ * <p>This command continuously reads from a NetworkTables tunable value and sets the flywheel
+ * Velocity accordingly. Useful for testing and tuning flywheel speeds during development.
  */
 public class FlywheelTuneCommand extends Command {
   private final Flywheel flywheel;
