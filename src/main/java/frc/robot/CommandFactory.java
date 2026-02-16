@@ -96,7 +96,7 @@ public class CommandFactory {
   public Command faceAngleWhileShooting(CommandXboxController controller) {
     return shootWithShotCalculator()
         .alongWith(
-            drivetrain.faceAngleWhileDriving(
+            drivetrain.faceAngleWhileDrivingCommand(
                 controller, () -> shotCalculator.calculateShot().targetHeading()));
   }
 

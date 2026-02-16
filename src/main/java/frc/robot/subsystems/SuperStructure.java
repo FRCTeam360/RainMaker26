@@ -145,10 +145,7 @@ public class SuperStructure extends SubsystemBase {
   private void shooting() {
     flywheel.setVelocity(shotCalculator.calculateShot().flywheelSpeed());
     hood.setPosition(shotCalculator.calculateShot().hoodAngle());
-    drivetrain.faceAngleWhileDriving(
-        controller.getLeftY(),
-        controller.getLeftX(),
-        shotCalculator.calculateShot().targetHeading());
+    drivetrain.faceAngleWhileDriving(controller, shotCalculator.calculateShot().targetHeading());
   }
 
   private void fieldOrientedDrive() {

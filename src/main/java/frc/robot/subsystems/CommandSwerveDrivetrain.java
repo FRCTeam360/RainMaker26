@@ -208,7 +208,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                 DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
                     ? velocityY
                     : -velocityY)
-            .withTargetDirection(heading));
+            .withTargetDirection(heading)
+            .withDeadband(maxSpeed.in(MetersPerSecond) * 0.02));
   }
 
   /**
@@ -218,12 +219,19 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
    * @param driveCont The Xbox controller for driver input
    * @return Command that drives while facing the hub
    */
-  public Command faceAngleWhileDriving(
+  public Command faceAngleWhileDrivingCommand(
       CommandXboxController driveCont, Supplier<Rotation2d> headingSupplier) {
     return faceAngleWhileDrivingCommand(
         () -> Math.pow(driveCont.getLeftY(), 3) * maxSpeed.in(MetersPerSecond) * -1.0,
         () -> Math.pow(driveCont.getLeftX(), 3) * maxSpeed.in(MetersPerSecond) * -1.0,
         headingSupplier);
+  }
+
+  public void faceAngleWhileDriving(CommandXboxController driveCont, Rotation2d heading) {
+    faceAngleWhileDriving(
+        Math.pow(driveCont.getLeftY(), 3) * maxSpeed.in(MetersPerSecond) * -1.0,
+        Math.pow(driveCont.getLeftX(), 3) * maxSpeed.in(MetersPerSecond) * -1.0,
+        heading);
   }
 
   /*
