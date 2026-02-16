@@ -16,8 +16,8 @@ import org.littletonrobotics.junction.Logger;
  */
 public class ShotCalculator {
   private final Supplier<Pose2d> robotPoseSupplier;
-  private InterpolatingDoubleTreeMap shotHoodAngleMap = null;
-  private InterpolatingDoubleTreeMap launchFlywheelSpeedMap = null;
+  private final InterpolatingDoubleTreeMap shotHoodAngleMap;
+  private final InterpolatingDoubleTreeMap launchFlywheelSpeedMap;
 
   private static final InterpolatingDoubleTreeMap timeOfFlightMap =
       new InterpolatingDoubleTreeMap();
