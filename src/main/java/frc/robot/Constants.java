@@ -28,6 +28,8 @@ public final class Constants {
     REPLAY
   }
 
+  public static final CANBus RIO_CANBUS = new CANBus("rio");
+
   public static class WoodBotConstants {
     // === INTAKE ===
     public static final int INTAKE_SENSOR_PORT = 0;
@@ -36,12 +38,11 @@ public final class Constants {
 
     // === HOPPER ===
     public static final int INDEXER_SENSOR_PORT = 1;
-    public static final int INDEXER_SENSOR_ID = 2;
     public static final int INDEXER_ID = 16;
 
     // === FLYWHEEL ===
     public static final int FLYWHEEL_KICKER_ID = 17;
-    public static final int FLYWHEEL_KICKER_SENSOR_ID = 3;
+    public static final int FLYWHEEL_KICKER_SENSOR_ID = 2;
     public static final int FLYWHEEL_RIGHT_ID = 18;
     public static final int FLYWHEEL_LEFT_ID = 19;
 

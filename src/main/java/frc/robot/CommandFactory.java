@@ -6,6 +6,7 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKicker;
 import frc.robot.subsystems.Indexer.Indexer;
@@ -90,6 +91,13 @@ public class CommandFactory {
     return shootWithSpinUp(
         () -> shotCalculator.calculateShot().flywheelSpeed(),
         () -> shotCalculator.calculateShot().hoodAngle());
+  }
+
+  public Command faceAngleWhileShooting(CommandXboxController controller) {
+    return shootWithShotCalculator()
+        .alongWith(
+            drivetrain.faceAngleWhileDriving(
+                controller, () -> shotCalculator.calculateShot().targetHeading()));
   }
 
   public Command setHoodPosition(double position) {

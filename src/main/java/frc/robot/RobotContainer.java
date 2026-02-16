@@ -43,6 +43,7 @@ import frc.robot.subsystems.SuperStructure.SuperStates;
 import frc.robot.subsystems.Vision.Vision;
 import frc.robot.subsystems.Vision.VisionIOLimelight;
 import frc.robot.subsystems.Vision.VisionIOPhotonSim;
+import frc.robot.utils.CommandLogger;
 import java.util.Map;
 import java.util.Objects;
 import org.littletonrobotics.junction.Logger;
@@ -132,8 +133,8 @@ public class RobotContainer {
             shotCalculator);
     // TODO: Re-enable superStructure construction and PathPlanner commands
     // superStructure =
-    //     new SuperStructure(
-    //         intake, indexer, flywheelKicker, flywheel, hood, drivetrain, shotCalculator);
+    // new SuperStructure(
+    // intake, indexer, flywheelKicker, flywheel, hood, drivetrain, shotCalculator);
 
     if (Objects.nonNull(superStructure)) {
       registerPathplannerCommand(
@@ -180,7 +181,6 @@ public class RobotContainer {
   private void configureTestBindings() {
     if (Objects.nonNull(drivetrain)) {
       drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(testCont1));
-      testCont1.rightTrigger().whileTrue(drivetrain.faceHubWhileDriving(testCont1));
       drivetrain.registerTelemetry(logger::telemeterize);
     }
 
@@ -233,10 +233,12 @@ public class RobotContainer {
 
     // setHoodPosition uses hood
     if (Objects.nonNull(hood)) {
+      hood.setDefaultCommand(
+          CommandLogger.logCommand(hood.setPositionCmd(0.0), "hood default command"));
       driverCont.pov(0).onTrue(hood.moveToZeroAndZero());
-      driverCont.pov(90).onTrue(commandFactory.setHoodPosition(4.0));
-      driverCont.pov(180).onTrue(commandFactory.setHoodPosition(16.0));
-      driverCont.pov(270).onTrue(commandFactory.setHoodPosition(23.0));
+      driverCont.pov(90).whileTrue(commandFactory.setHoodPosition(4.0));
+      driverCont.pov(180).whileTrue(commandFactory.setHoodPosition(16.0));
+      driverCont.pov(270).whileTrue(commandFactory.setHoodPosition(23.0));
       driverCont.start().onTrue(hood.zero());
     }
 
@@ -245,7 +247,7 @@ public class RobotContainer {
       driverCont.x().whileTrue(commandFactory.shootWithVelocity(2500));
       driverCont.b().whileTrue(commandFactory.shootWithVelocity(3000));
       driverCont.y().whileTrue(commandFactory.shootWithVelocity(3500));
-      driverCont.rightTrigger().whileTrue(commandFactory.shootWithShotCalculator());
+      driverCont.rightTrigger().whileTrue(commandFactory.faceAngleWhileShooting(driverCont));
       if (Objects.nonNull(superStructure)) {
         // driverCont.rightTrigger().onTrue(superStructure.setStateCommand(SuperStates.SHOOTING));
         // driverCont.rightTrigger().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
@@ -255,7 +257,7 @@ public class RobotContainer {
     // Drivetrain commands
     if (Objects.nonNull(drivetrain)) {
       drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
-      driverCont.leftTrigger().whileTrue(drivetrain.faceHubWhileDriving(driverCont));
+      // driverCont.leftTrigger().whileTrue(drivetrain.faceHubWhileDriving(driverCont));
       drivetrain.registerTelemetry(logger::telemeterize);
       driverCont.back().onTrue(drivetrain.zeroCommand());
     }
@@ -289,7 +291,10 @@ public class RobotContainer {
 
   /** Runs the given calls on periodic before commands are scheduled */
   public void periodic() {
-    if (Objects.nonNull(shotCalculator)) shotCalculator.clearShootingParams();
+    if (Objects.nonNull(shotCalculator)) {
+      shotCalculator.clearShootingParams();
+      shotCalculator.calculateShot();
+    }
   }
 
   /**
