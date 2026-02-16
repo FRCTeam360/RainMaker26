@@ -20,6 +20,7 @@ public class VisionIOLimelight implements VisionIO {
   private final String name;
   private final DoubleSupplier gyroAngleSupplier;
   private final DoubleSupplier gyroAngleRateSupplier;
+  private final boolean isLimelight4;
 
   private boolean acceptMeasurements;
 
@@ -32,12 +33,19 @@ public class VisionIOLimelight implements VisionIO {
       String name,
       DoubleSupplier gyroAngleSupplier,
       DoubleSupplier gyroAngleRateSupplier,
-      boolean acceptMeasurements) {
+      boolean acceptMeasurements,
+      boolean isLimelight4) {
     table = NetworkTableInstance.getDefault().getTable(name);
     this.name = name;
     this.gyroAngleSupplier = gyroAngleSupplier;
     this.gyroAngleRateSupplier = gyroAngleRateSupplier;
     this.acceptMeasurements = acceptMeasurements;
+    this.isLimelight4 = isLimelight4;
+
+    if(isLimelight4) {
+      LimelightHelpers.SetIMUAssistAlpha(name, Constants.IMU_ASSIST_ALPHA);
+      LimelightHelpers.SetIMUMode(name, Constants.IMU_MODE_EXTERNAL_SEED);
+    }
   }
 
   public void setLEDMode(int mode) {
@@ -148,5 +156,19 @@ public class VisionIOLimelight implements VisionIO {
 
   public void resetSnapshot() {
     table.getEntry("snapshot").setNumber(0.0);
+  }
+
+// while enabled
+  public void enableIMUAssist() {
+    if (isLimelight4) {
+      LimelightHelpers.SetIMUMode(name, Constants.IMU_MODE_INTERNAL_EXTERNAL_ASSIST);
+    }
+  }
+
+// call during disabled
+  public void seedIMU() {
+    if(isLimelight4) {
+      LimelightHelpers.SetIMUMode(name, Constants.IMU_MODE_EXTERNAL_SEED);
+    }
   }
 }
