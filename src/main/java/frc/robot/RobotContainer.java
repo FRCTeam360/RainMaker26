@@ -232,6 +232,7 @@ public class RobotContainer {
 
     // setHoodPosition uses hood
     if (Objects.nonNull(hood)) {
+      hood.setDefaultCommand(hood.setPositionCmd(0.0));
       driverCont.pov(0).onTrue(hood.moveToZeroAndZero());
       driverCont.pov(90).onTrue(commandFactory.setHoodPosition(4.0));
       driverCont.pov(180).onTrue(commandFactory.setHoodPosition(16.0));
