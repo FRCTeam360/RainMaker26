@@ -1,6 +1,4 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
+
 
 package frc.robot.subsystems.Shooter.Flywheel;
 
@@ -25,7 +23,6 @@ public class FlywheelIOPB implements FlywheelIO {
   };
   private TalonFXConfiguration rightConfig = new TalonFXConfiguration();
   private TalonFXConfiguration leftConfig = new TalonFXConfiguration();
-  private MotorOutputConfigs motorOutputConfigs = new MotorOutputConfigs();
 
   public FlywheelIOPB() {
     double kP = 3.0;
@@ -55,22 +52,16 @@ public class FlywheelIOPB implements FlywheelIO {
     rightConfig.CurrentLimits.SupplyCurrentLimit = 100.0;
     rightConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
 
-    rightConfig
-        .MotionMagic
-        .withMotionMagicAcceleration(0.0)
-        .withMotionMagicCruiseVelocity(0.0)
-        .withMotionMagicJerk(0.0);
     rightConfig.MotorOutput.withInverted(InvertedValue.Clockwise_Positive);
 
     leftConfig = rightConfig.clone();
+    // do not edit right configs after cloning
     leftConfig.MotorOutput.withInverted(InvertedValue.CounterClockwise_Positive);
 
-    boolean odd = false;
-    for (TalonFX i : motors) {
-      i.getConfigurator().apply(odd ? leftConfig : rightConfig);
-      odd = !odd;
-      i.setNeutralMode(NeutralModeValue.Coast);
-    }
+    motors[0].getConfigurator().apply(leftConfig);
+    motors[0].setNeutralMode(NeutralModeValue.Coast);
+    motors[1].getConfigurator().apply(rightConfig);
+    motors[1].setNeutralMode(NeutralModeValue.Coast);
 
     boolean oddFollower = true;
     for (int i = 1; i < motors.length; i++) {

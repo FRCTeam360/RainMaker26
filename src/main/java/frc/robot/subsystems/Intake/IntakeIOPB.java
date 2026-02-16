@@ -20,7 +20,6 @@ public class IntakeIOPB implements IntakeIO {
   private final SparkFlex motor = new SparkFlex(PracticeBotConstants.INTAKE_ID, MotorType.kBrushless);
   private final RelativeEncoder encoder = motor.getEncoder();
   private final SparkFlexConfig config = new SparkFlexConfig();
-  private final DigitalInput sensor = new DigitalInput(PracticeBotConstants.INTAKE_SENSOR_PORT);
   private final SparkClosedLoopController closedLoopConfig;
 
   public IntakeIOPB() {
@@ -54,7 +53,6 @@ public class IntakeIOPB implements IntakeIO {
 
   public void updateInputs(IntakeIOInputs inputs) {
     inputs.position = encoder.getPosition();
-    inputs.sensor = sensor.get();
     inputs.statorCurrent = motor.getOutputCurrent();
     inputs.supplyCurrent = motor.getOutputCurrent() * motor.getAppliedOutput(); // TODO: check if
     // this is right
