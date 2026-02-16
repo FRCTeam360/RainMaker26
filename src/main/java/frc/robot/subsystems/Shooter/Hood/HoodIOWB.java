@@ -4,10 +4,10 @@
 
 package frc.robot.subsystems.Shooter.Hood;
 
+import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
+import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkBase.ControlType;
-import com.revrobotics.spark.SparkBase.PersistMode;
-import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
@@ -53,8 +53,8 @@ public class HoodIOWB implements HoodIO {
 
   public void updateInputs(HoodIOInputs inputs) {
     inputs.position = encoder.getPosition();
-    inputs.statorCurrent = hoodMotor.getOutputCurrent();
-    inputs.supplyCurrent = hoodMotor.getOutputCurrent() * hoodMotor.getAppliedOutput();
+    inputs.statorCurrent = hoodMotor.getOutputCurrent() * hoodMotor.getAppliedOutput();
+    inputs.supplyCurrent = hoodMotor.getOutputCurrent();
     inputs.velocity = encoder.getVelocity();
     inputs.voltage = hoodMotor.getBusVoltage() * hoodMotor.getAppliedOutput();
   }

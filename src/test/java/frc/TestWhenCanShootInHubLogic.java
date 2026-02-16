@@ -21,6 +21,18 @@ public class TestWhenCanShootInHubLogic {
   }
 
   @Test
+  void hubPhaseShouldBeBOTH2() {
+    ActiveHub activeHub = RobotUtils.getHubPhase(360, true);
+    assertEquals(BOTH, activeHub);
+  }
+
+  @Test
+  void hubPhaseShouldBeBOTHAuto() {
+    ActiveHub activeHub = RobotUtils.getHubPhase(25.0, false);
+    assertEquals(BOTH, activeHub);
+  }
+
+  @Test
   void hubPhaseShouldBeAUTOLOSER() {
     ActiveHub activeHub = RobotUtils.getHubPhase(75.0, true);
     assertEquals(AUTOLOSER, activeHub);
@@ -42,6 +54,24 @@ public class TestWhenCanShootInHubLogic {
   void autoWinnerShouldBeRedAlliance() {
     Alliance autoWinner = RobotUtils.getAutoWinner("Red");
     assertEquals(Alliance.Red, autoWinner);
+  }
+
+  @Test
+  void autoWinnerShouldBeNull1() {
+    Alliance autoWinner = RobotUtils.getAutoWinner("Mr. James");
+    assertEquals(null, autoWinner);
+  }
+
+  @Test
+  void autoWinnerShouldBeNull2() {
+    Alliance autoWinner = RobotUtils.getAutoWinner(" ");
+    assertEquals(null, autoWinner);
+  }
+
+  @Test
+  void autoWinnerShouldBeNull3() {
+    Alliance autoWinner = RobotUtils.getAutoWinner("");
+    assertEquals(null, autoWinner);
   }
 
   @Test
@@ -98,5 +128,11 @@ public class TestWhenCanShootInHubLogic {
     Boolean hubActive =
         RobotUtils.hubActive(Optional.of(Alliance.Red), Alliance.Red, ActiveHub.AUTOLOSER);
     assertEquals(false, hubActive);
+  }
+
+  @Test
+  void hubActiveShouldBeNull() {
+    Boolean hubActive = RobotUtils.hubActive(Optional.of(Alliance.Red), Alliance.Red, null);
+    assertEquals(null, hubActive);
   }
 }

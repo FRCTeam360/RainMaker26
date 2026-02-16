@@ -3,9 +3,11 @@ package frc.robot.subsystems;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKicker;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKicker.FlywheelKickerStates;
 import frc.robot.subsystems.Indexer.Indexer;
+import frc.robot.subsystems.Indexer.Indexer.IndexerStates;
 import frc.robot.subsystems.Intake.Intake;
 import frc.robot.subsystems.Intake.Intake.IntakeStates;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel;
@@ -42,7 +44,6 @@ public class SuperStructure extends SubsystemBase {
     PASSING // has current zone, makes check for !current zone then passes to zone
     ,
     SHOOTING,
-    SPINUP_SHOOTING,
     AIMING
   }
 
@@ -78,16 +79,12 @@ public class SuperStructure extends SubsystemBase {
       case SHOOTING:
         currentSuperState = SuperStates.SHOOTING;
         break;
-
-      case IDLE:
-        currentSuperState = SuperStates.IDLE;
-        break;
-      case SPINUP_SHOOTING:
-        currentSuperState = SuperStates.SPINUP_SHOOTING;
-        break;
       case AIMING:
         currentSuperState = SuperStates.AIMING;
         break;
+      case IDLE:
+      default:
+        currentSuperState = SuperStates.IDLE;
     }
   }
 
@@ -96,14 +93,10 @@ public class SuperStructure extends SubsystemBase {
       case INTAKING:
         intaking();
         break;
-      case SHOOTING:
-        shooting();
-        break;
-
       case IDLE:
         stopped();
         break;
-      case SPINUP_SHOOTING:
+      case SHOOTING:
         spinupShooting();
         break;
       case AIMING:
@@ -118,21 +111,19 @@ public class SuperStructure extends SubsystemBase {
 
   private void spinupShooting() {
     // hood, flywheel
-    hood.setWantedState(HoodStates.SPINUP_SHOOTING);
-    flywheel.setWantedState(FlywheelStates.SPINUP_SHOOTING);
-    if (hood.atSetpoint(6.0) && flywheel.atSetpoint(3000.0, 100.0)) {
-      flywheelKicker.setWantedState(FlywheelKickerStates.SPINUP_SHOOTING);
-      intake.setWantedState(IntakeStates.INTAKING);
+    hood.setWantedState(HoodStates.SHOOTING);
+    flywheel.setWantedState(FlywheelStates.SHOOTING);
+    if (hood.atSetpoint(8.0)
+        && flywheel.atSetpoint(Constants.SPINUP_SHOOTING_FLYWHEEL_RPM, 100.0)) {
+      flywheelKicker.setWantedState(FlywheelKickerStates.SHOOTING);
+      intake.setWantedState(IntakeStates.SHOOTING);
+      indexer.setWantedState(IndexerStates.SHOOTING);
     }
   }
 
   private void intaking() {
     intake.setWantedState(Intake.IntakeStates.INTAKING);
     indexer.setWantedState(Indexer.IndexerStates.INTAKING);
-  }
-
-  private void shooting() {
-    flywheel.setWantedState(Flywheel.FlywheelStates.SHOOTING);
   }
 
   private void stopped() {
