@@ -4,9 +4,9 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
-import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.utils.AllianceFlipUtil;
 import frc.robot.utils.FieldConstants;
+import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
 /**
@@ -15,12 +15,10 @@ import org.littletonrobotics.junction.Logger;
  * setpoints.
  */
 public class ShotCalculator {
-  private CommandSwerveDrivetrain drivetrain;
+  private final Supplier<Pose2d> robotPoseSupplier;
+  private InterpolatingDoubleTreeMap shotHoodAngleMap = null;
+  private InterpolatingDoubleTreeMap launchFlywheelSpeedMap = null;
 
-  private static final InterpolatingDoubleTreeMap shotHoodAngleMap =
-      new InterpolatingDoubleTreeMap();
-  private static final InterpolatingDoubleTreeMap launchFlywheelSpeedMap =
-      new InterpolatingDoubleTreeMap();
   private static final InterpolatingDoubleTreeMap timeOfFlightMap =
       new InterpolatingDoubleTreeMap();
 
@@ -38,28 +36,19 @@ public class ShotCalculator {
   private static final double MIN_DISTANCE_METERS = 0.0;
   private static final double MAX_DISTANCE_METERS = 5.0;
 
-  static {
-    shotHoodAngleMap.put(5.0, 20.0);
-    shotHoodAngleMap.put(4.0, 18.0);
-    shotHoodAngleMap.put(3.0, 16.0);
-    shotHoodAngleMap.put(2.0, 11.0); // THIS IS GOOD
-    shotHoodAngleMap.put(1.0, 8.0); // THIS IS GOOD
-    shotHoodAngleMap.put(0.0, 6.0);
-
-    launchFlywheelSpeedMap.put(5.0, 3750.0);
-    launchFlywheelSpeedMap.put(4.0, 3750.0);
-    launchFlywheelSpeedMap.put(3.0, 3375.0);
-    launchFlywheelSpeedMap.put(2.0, 3000.0); // THIS IS GOOD
-    launchFlywheelSpeedMap.put(0.0, 2750.0);
-  }
-
   /**
    * Creates a new ShotCalculator.
    *
-   * @param drivetrain the swerve drivetrain used to obtain the robot's current pose
+   * @param robotPoseSupplier the supplier used to obtain the robot's current pose. Robot position
+   *     should be drivetrain.getPosition()
    */
-  public ShotCalculator(CommandSwerveDrivetrain drivetrain) {
-    this.drivetrain = drivetrain;
+  public ShotCalculator(
+      Supplier<Pose2d> robotPoseSupplier,
+      InterpolatingDoubleTreeMap shotHoodAngleMap,
+      InterpolatingDoubleTreeMap launchFlywheelSpeedMap) {
+    this.robotPoseSupplier = robotPoseSupplier;
+    this.shotHoodAngleMap = shotHoodAngleMap;
+    this.launchFlywheelSpeedMap = launchFlywheelSpeedMap;
   }
 
   private ShootingParams shootingParams = null;
@@ -70,15 +59,14 @@ public class ShotCalculator {
    *
    * @return the {@link ShootingParams} containing drivebase angle, hood angle, and flywheel speed
    */
-  public ShootingParams calculateShot() {
+  public ShootingParams calculateShot() { // ;
     if (shootingParams != null) {
       Logger.recordOutput("ShotCalculator/cached", true);
 
       return shootingParams;
     }
     Logger.recordOutput("ShotCalculator/cached", false);
-    Pose2d robotPosition = drivetrain.getPosition();
-    Pose2d shooterPosition = robotPosition.plus(ShooterConstants.ROBOT_TO_SHOOTER);
+    Pose2d shooterPosition = robotPoseSupplier.get().plus(ShooterConstants.ROBOT_TO_SHOOTER);
 
     Translation2d hubTranslation =
         AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint.toTranslation2d());

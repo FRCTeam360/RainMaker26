@@ -118,7 +118,11 @@ public class RobotContainer {
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOWB());
         // intakePivot = new IntakePivot(new IntakePivotIOPB());
     }
-    shotCalculator = new ShotCalculator(drivetrain);
+    shotCalculator =
+        new ShotCalculator(
+            drivetrain::getPosition,
+            Constants.WoodBotConstants.shotHoodAngleMap,
+            Constants.WoodBotConstants.launchFlywheelSpeedMap);
     // Configure the trigger bindings
     commandFactory =
         new CommandFactory(
