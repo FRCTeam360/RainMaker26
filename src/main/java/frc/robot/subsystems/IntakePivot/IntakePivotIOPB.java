@@ -1,5 +1,3 @@
-
-
 package frc.robot.subsystems.IntakePivot;
 
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;

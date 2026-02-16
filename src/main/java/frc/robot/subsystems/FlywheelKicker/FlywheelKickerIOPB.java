@@ -1,5 +1,3 @@
-
-
 package frc.robot.subsystems.FlywheelKicker;
 
 import com.revrobotics.RelativeEncoder;
