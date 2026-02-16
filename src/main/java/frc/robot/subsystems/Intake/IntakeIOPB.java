@@ -43,10 +43,6 @@ public class IntakeIOPB implements IntakeIO {
     this.setDutyCycle(0.0);
   }
 
-  public void setEncoder(double value) {
-    encoder.setPosition(value);
-  }
-
   public void setVelocity(double velocity) {
     closedLoopConfig.setSetpoint(velocity, ControlType.kVelocity);
   }
