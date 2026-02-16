@@ -61,6 +61,10 @@ public final class Constants {
     public static final int FLYWHEEL_MOTOR = 2;
   }
 
+  public static class PracticeBotConstants {
+    public static final int HOPPER_ROLLER_ID = 0;
+  }
+
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
   }
