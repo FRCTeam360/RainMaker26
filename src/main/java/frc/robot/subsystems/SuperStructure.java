@@ -14,9 +14,6 @@ import frc.robot.subsystems.Shooter.Flywheel.Flywheel.FlywheelStates;
 import frc.robot.subsystems.Shooter.Hood.Hood;
 import frc.robot.subsystems.Shooter.Hood.Hood.HoodStates;
 import frc.robot.subsystems.Shooter.ShotCalculator;
-
-import java.util.Objects;
-
 import org.littletonrobotics.junction.Logger;
 
 public class SuperStructure extends SubsystemBase {
@@ -123,13 +120,12 @@ public class SuperStructure extends SubsystemBase {
   }
 
   private void updateShooterStates() {
+    previousShooterState = currentShooterState;
     double FLYWHEEL_TOLERANCE_RPM = 100.0;
     if (flywheel.atSetpoint(shotCalculator.calculateShot().flywheelSpeed(), FLYWHEEL_TOLERANCE_RPM)
         && hood.atSetpoint(shotCalculator.calculateShot().hoodAngle())) {
-      previousShooterState = ShooterStates.PREPARING;
       currentShooterState = ShooterStates.FIRING;
     } else {
-      previousShooterState = ShooterStates.FIRING;
       currentShooterState = ShooterStates.PREPARING;
     }
   }
@@ -147,8 +143,8 @@ public class SuperStructure extends SubsystemBase {
   }
 
   private void shooting() {
-    flywheel.setVelocityCommand(() -> shotCalculator.calculateShot().flywheelSpeed());
-    hood.setPositionCmd(() -> shotCalculator.calculateShot().hoodAngle());
+    flywheel.setVelocity(shotCalculator.calculateShot().flywheelSpeed());
+    hood.setPosition(shotCalculator.calculateShot().hoodAngle());
     drivetrain.faceAngleWhileDriving(
         controller.getLeftY(),
         controller.getLeftX(),

@@ -43,7 +43,6 @@ import frc.robot.subsystems.SuperStructure.SuperStates;
 import frc.robot.subsystems.Vision.Vision;
 import frc.robot.subsystems.Vision.VisionIOLimelight;
 import frc.robot.subsystems.Vision.VisionIOPhotonSim;
-import frc.robot.utils.CommandLogger;
 import java.util.Map;
 import java.util.Objects;
 import org.littletonrobotics.junction.Logger;
@@ -133,8 +132,15 @@ public class RobotContainer {
             shotCalculator);
     // TODO: Re-enable superStructure construction and PathPlanner commands
     superStructure =
-    new SuperStructure(
-    intake, indexer, flywheelKicker, flywheel, hood, drivetrain, shotCalculator, driverCont);
+        new SuperStructure(
+            intake,
+            indexer,
+            flywheelKicker,
+            flywheel,
+            hood,
+            drivetrain,
+            shotCalculator,
+            driverCont);
 
     if (Objects.nonNull(superStructure)) {
       registerPathplannerCommand(
