@@ -13,7 +13,6 @@ import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.revrobotics.spark.config.SoftLimitConfig;
-
 import edu.wpi.first.wpilibj.DigitalInput;
 import frc.robot.Constants;
 
@@ -21,36 +20,37 @@ public class IntakePivotIOPB implements IntakePivotIO {
   private final TalonFX intakePivot =
       new TalonFX(Constants.WoodBotConstants.INTAKE_PIVOT_ID, Constants.WoodBotConstants.CANBUS);
 
-  private DutyCycleOut dutyCycleOut = new DutyCycleOut(0);
-
+  private final DutyCycleOut dutyCycleOut = new DutyCycleOut(0);
+  private final MotionMagicVoltage motionMagicPosition = new MotionMagicVoltage(0);
   private final TalonFXConfiguration config = new TalonFXConfiguration();
   private final CurrentLimitsConfigs currentLimitConfig = new CurrentLimitsConfigs();
   private final SoftLimitConfig softLimitConfig = new SoftLimitConfig();
   private NeutralModeValue neutralMode = NeutralModeValue.Brake;
 
+  // do not call --> will result in null pointer
   private DigitalInput zeroButton;
   private DigitalInput brakeButton;
-  MotionMagicConfigs motionMagic ;
 
   private boolean zeroPrev = false;
   private boolean brakePrev = false;
 
-// TODO: UPDATE GEAR RATIO
+  // TODO: UPDATE GEAR RATIO
   private final double GEAR_RATIO = 360.0 / 60.0;
-//TODO: ADD CONVERSION FACTOR TO GET MECHANISM INTO DEGREES
 
+  // TODO: ADD CONVERSION FACTOR TO GET MECHANISM INTO DEGREES
 
   /** Creates a new IntakePivotIOWB. */
   public IntakePivotIOPB() {
     intakePivot.getConfigurator().apply(config);
     intakePivot.setNeutralMode(NeutralModeValue.Brake);
 
-    final double motionMagicAcceleration = 400.0;
-    final double motionMagicCruiseVelocity = 85.0;
-    final double motionMagicCruiseJerk = 1750.0;
+    final double motionMagicAcceleration = 400.0; // rotations per second squared
+    final double motionMagicCruiseVelocity = 85.0; // rotations per second
+    final double motionMagicCruiseJerk = 1750.0; // rotations per second cubed
 
-    final double forwardLimit = 178.0; // TODO: make sure these are correct for prac bot
-    final double reverseLimit = 0.0; // 29.5
+    final double forwardLimit =
+        178.0; // TODO: make sure these are correct for prac bots; units are in degrees
+    final double reverseLimit = 0.0; // 29.5, units are in degrees
 
     currentLimitConfig.StatorCurrentLimit = 120.0;
     currentLimitConfig.SupplyCurrentLimit = 60.0;
@@ -97,52 +97,54 @@ public class IntakePivotIOPB implements IntakePivotIO {
     intakePivot.getConfigurator().apply(config, 0.050);
   }
 
+  public void setZero() {
+    intakePivot.setPosition(0.0);
+  }
 
   public void setPosition(double position) {
-    MotionMagicVoltage motionMagicVoltage = new MotionMagicVoltage(position);
-    intakePivot.setControl(motionMagicVoltage);
+    intakePivot.setControl(motionMagicPosition.withPosition(position));
   }
 
   public void setDutyCycle(double value) {
     intakePivot.setControl(dutyCycleOut.withOutput(value));
   }
 
-  public void enableBrakeMode(){
+  public void enableBrakeMode() {
     neutralMode = NeutralModeValue.Brake;
     intakePivot.setNeutralMode(NeutralModeValue.Brake);
   }
-  public void disableBrakeMode(){
+
+  public void disableBrakeMode() {
     neutralMode = NeutralModeValue.Coast;
     intakePivot.setNeutralMode(NeutralModeValue.Coast);
   }
 
-  public boolean isBrakeMode(){
+  public boolean isBrakeMode() {
     return neutralMode == NeutralModeValue.Brake;
   }
 
-//TODO: ASK ELECTRICAL FOR A ZEROING BUTTON OR AN ABSOLUTE ENCODER
-  private boolean getRawZeroButton(){
+  // TODO: ASK ELECTRICAL FOR A ZEROING BUTTON OR AN ABSOLUTE ENCODER
+  private boolean getRawZeroButton() {
     return !this.zeroButton.get();
   }
 
-  public boolean getZeroButton(){
+  public boolean getZeroButton() {
     boolean zeroCurr = getRawZeroButton();
     boolean risingEdge = zeroCurr && !zeroPrev;
     zeroPrev = zeroCurr;
     return risingEdge;
   }
 
-  private boolean getRawBrakeButton(){
+  private boolean getRawBrakeButton() {
     return !this.brakeButton.get();
   }
 
-  public boolean getBrakeButton(){
+  public boolean getBrakeButton() {
     boolean brakeCurr = getRawBrakeButton();
     boolean risingEdge = brakeCurr && !brakePrev;
     brakePrev = brakeCurr;
     return risingEdge;
   }
-
 
   public void updateInputs(IntakePivotIOInputs inputs) {
     inputs.position = intakePivot.getPosition().getValueAsDouble();
