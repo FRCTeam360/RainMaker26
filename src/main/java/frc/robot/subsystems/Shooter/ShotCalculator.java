@@ -59,7 +59,7 @@ public class ShotCalculator {
    *
    * @return the {@link ShootingParams} containing drivebase angle, hood angle, and flywheel speed
    */
-  public ShootingParams calculateShot() { // ;
+  public ShootingParams calculateShot() {
     if (shootingParams != null) {
       Logger.recordOutput("ShotCalculator/cached", true);
 
