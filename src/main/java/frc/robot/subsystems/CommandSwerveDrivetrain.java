@@ -49,7 +49,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   private static final double kSimLoopPeriod = 0.004; // 4 ms
   private Notifier m_simNotifier = null;
   private double m_lastSimTime;
-  private final String CMD_NAME = "Swerve: ";
+  private static final String SUBSYSTEM_NAME = "Swerve/";
   private final SwerveRequest xOutReq = new SwerveRequest.SwerveDriveBrake();
 
   // Keep track of when vision measurements are added for logging context
@@ -456,13 +456,12 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
   @Override
   public void periodic() {
-
     // Current pose includes vision fusion when vision measurements are added
-    Logger.recordOutput(CMD_NAME + " Current Pose", this.getStateCopy().Pose);
-    Logger.recordOutput(CMD_NAME + " Rotation2d", this.getStateCopy().RawHeading);
-    Logger.recordOutput(CMD_NAME + " CurrentState", this.getStateCopy().ModuleStates);
-    Logger.recordOutput(CMD_NAME + " TargetState", this.getStateCopy().ModuleTargets);
-    Logger.recordOutput(CMD_NAME + " Using Vision", hasVisionMeasurements);
+    Logger.recordOutput(SUBSYSTEM_NAME + " CurrentPose", this.getStateCopy().Pose);
+    Logger.recordOutput(SUBSYSTEM_NAME + " Rotation2d", this.getStateCopy().RawHeading);
+    Logger.recordOutput(SUBSYSTEM_NAME + " CurrentState", this.getStateCopy().ModuleStates);
+    Logger.recordOutput(SUBSYSTEM_NAME + " TargetState", this.getStateCopy().ModuleTargets);
+    Logger.recordOutput(SUBSYSTEM_NAME + " Using Vision", hasVisionMeasurements);
 
     // Update field visualizations (hub points, line from robot to hub, etc.)
     FieldVisualizer.update(this.getStateCopy().Pose);
