@@ -27,11 +27,11 @@ public class ShotCalculator {
   /**
    * Holds the calculated shooting parameters for a given robot position.
    *
-   * @param targetAngle the angle the drivebase should face toward the hub
+   * @param targetHeading the angle the drivebase should face toward the hub
    * @param hoodAngle the hood angle setpoint in degrees
    * @param flywheelSpeed the flywheel speed setpoint in RPM
    */
-  public record ShootingParams(Rotation2d targetAngle, double hoodAngle, double flywheelSpeed) {}
+  public record ShootingParams(Rotation2d targetHeading, double hoodAngle, double flywheelSpeed) {}
 
   private ShootingParams latestParameters = null;
 
@@ -39,16 +39,17 @@ public class ShotCalculator {
   private static final double MAX_DISTANCE_METERS = 5.0;
 
   static {
-    shotHoodAngleMap.put(5.0, 18.0);
-    shotHoodAngleMap.put(4.0, 15.0);
-    shotHoodAngleMap.put(3.0, 12.0);
-    shotHoodAngleMap.put(2.0, 8.0);
-    shotHoodAngleMap.put(0.0, 5.0);
+    shotHoodAngleMap.put(5.0, 20.0);
+    shotHoodAngleMap.put(4.0, 18.0);
+    shotHoodAngleMap.put(3.0, 16.0);
+    shotHoodAngleMap.put(2.0, 11.0); // THIS IS GOOD
+    shotHoodAngleMap.put(1.0, 8.0); // THIS IS GOOD
+    shotHoodAngleMap.put(0.0, 6.0);
 
     launchFlywheelSpeedMap.put(5.0, 3750.0);
     launchFlywheelSpeedMap.put(4.0, 3750.0);
-    launchFlywheelSpeedMap.put(3.0, 3250.0);
-    launchFlywheelSpeedMap.put(2.0, 3000.0);
+    launchFlywheelSpeedMap.put(3.0, 3375.0);
+    launchFlywheelSpeedMap.put(2.0, 3000.0); // THIS IS GOOD
     launchFlywheelSpeedMap.put(0.0, 2750.0);
   }
 
@@ -85,7 +86,14 @@ public class ShotCalculator {
     distanceToTarget =
         Math.max(MIN_DISTANCE_METERS, Math.min(MAX_DISTANCE_METERS, distanceToTarget));
 
-    Rotation2d targetHeading = hubTranslation.minus(shooterPosition.getTranslation()).getAngle();
+    // Calculate heading toward hub, then rotate 180° because the shooter
+    // is at the back of the robot - robot faces away from hub to shoot at it
+    Rotation2d targetHeading =
+        hubTranslation
+            .minus(shooterPosition.getTranslation())
+            .getAngle()
+            .rotateBy(Rotation2d.k180deg);
+
     double hoodAngle = shotHoodAngleMap.get(distanceToTarget);
     double flywheelSpeed = launchFlywheelSpeedMap.get(distanceToTarget);
 

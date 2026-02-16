@@ -120,9 +120,8 @@ Use `ALL_CAPS` with underscores for separation:
 When reviewing a PR, follow these rules strictly:
 
 - **Only review lines that are part of the PR diff.** Do not flag pre-existing issues in files the PR touches. If a line was not added or modified in the diff, do not comment on it.
-- **Do not block merges on SpotBugs findings.** SpotBugs is diagnostic only — mention findings as informational if they appear in changed lines, but never mark them as blockers or recommend against merging because of them.
 - **Focus on correctness and intent of the PR.** Evaluate whether the changed code does what the PR description says, follows project conventions, and doesn't introduce new issues. Do not expand scope beyond the PR's purpose.
-- **CI status:** Only Build, Test, Format Check, and Simulation Test are merge blockers. SpotBugs is not.
+- **CI status:** Only Build, Test, Format Check, and Simulation Test are merge blockers.
 
 ## Code Review Checklist
 
