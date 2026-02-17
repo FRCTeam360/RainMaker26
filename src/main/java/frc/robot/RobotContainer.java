@@ -301,14 +301,6 @@ public class RobotContainer {
     }
   }
 
-  /** Runs the given calls on periodic before commands are scheduled */
-  public void periodic() {
-    if (Objects.nonNull(shotCalculator)) {
-      shotCalculator.clearShootingParams();
-      shotCalculator.calculateShot();
-    }
-  }
-
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
    *
