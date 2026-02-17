@@ -19,8 +19,8 @@ public class Flywheel extends SubsystemBase {
   public enum FlywheelStates {
     OFF,
     SPINNING_UP,    // Duty cycle bang-bang - fast acceleration
-    AT_SPEED,       // Torque current bang-bang - maintaining speed
-    SHOOTING        // Legacy state for compatibility
+    AT_SETPOINT,    // Torque current bang-bang - maintaining speed
+    COAST           // Legacy state for compatibility
   }
 
 
@@ -28,7 +28,8 @@ public class Flywheel extends SubsystemBase {
   public enum FlywheelControlMode {
     DUTY_CYCLE_BANG_BANG,   // Startup/Recovery - fast acceleration
     TORQUE_CURRENT_BANG_BANG, // Idle/Ball - consistent torque
-    COAST // No control, free spinning
+    TORQUE_CURRENT_VELOCITY, // No control, free spinning
+    STOP 
   }
 
   // Tunable parameters for 4-phase bang-bang control
@@ -56,9 +57,19 @@ public class Flywheel extends SubsystemBase {
   /**
    * Set flywheel velocity using 4-phase bang-bang control.
    * State machine handles control mode transitions automatically.
+   * 
+   * Can be called repeatedly with different targets - state machine will adapt.
    */
   public void setVelocityRPS(double velocityRPS) {
     targetVelocityRPS = velocityRPS;
+    
+    // Only transition states if we're currently OFF or target goes to zero
+    if (velocityRPS > 0.0 && wantedState == FlywheelStates.OFF) {
+      setWantedState(FlywheelStates.SPINNING_UP);
+    } else if (velocityRPS == 0.0) {
+      setWantedState(FlywheelStates.OFF);
+    }
+    // Otherwise let state machine handle transitions (SPINNING_UP <-> AT_SPEED)
   }
 
   public boolean isAtGoal() {
@@ -77,36 +88,53 @@ public class Flywheel extends SubsystemBase {
   private FlywheelStates currentState = FlywheelStates.OFF;
   private FlywheelStates previousState = FlywheelStates.OFF;
 
+  /**
+   * Check if flywheel is at setpoint using debounced tolerance checks.
+   * Updates both the fast control mode debouncer and slower at-goal debouncer.
+   * 
+   * @return true if velocity has been within tolerance for control mode debounce time
+   */
+  private boolean isAtSetpointVelocity() {
+    double currentRPS = getLeaderVelocityRPS();
+    boolean inTolerance = Math.abs(currentRPS - targetVelocityRPS) <= toleranceRPS.get();
+    
+    // Fast debouncer for control mode transitions (25ms default)
+    boolean isAtSpeed = controlModeDebouncer.calculate(inTolerance);
+    
+    // Slower debouncer for external "ready to shoot" signal (200ms default)
+    atGoal = atGoalDebouncer.calculate(inTolerance);
+    
+    return isAtSpeed;
+  }
+
   private void updateState() {
     previousState = currentState;
 
-    // Get current velocity in RPS (native units)
-    double currentRPS = getLeaderVelocityRPS();
-    
-    // Check if velocity is within tolerance
-    boolean inTolerance = Math.abs(currentRPS - targetVelocityRPS) <= toleranceRPS.get();
-    
-    // Update debounced values
-    boolean isAtSpeed = controlModeDebouncer.calculate(inTolerance);
-    atGoal = atGoalDebouncer.calculate(inTolerance);
-
     // State machine transitions
     switch (wantedState) {
-      case SHOOTING:
-        // SHOOTING uses duty cycle bang-bang for maximum acceleration during shot
-        currentState = FlywheelStates.SHOOTING;
-        break;
-      
       case SPINNING_UP:
-      case AT_SPEED:
-        // Automatic transitions based on velocity
         if (targetVelocityRPS == 0.0) {
           currentState = FlywheelStates.OFF;
-        } else if (isAtSpeed) {
-          currentState = FlywheelStates.AT_SPEED;
+        } else if (isAtSetpointVelocity()) {
+          currentState = FlywheelStates.AT_SETPOINT;
         } else {
           currentState = FlywheelStates.SPINNING_UP;
         }
+        break;
+
+      case AT_SETPOINT:
+        // Automatic transitions based on velocity
+        if (targetVelocityRPS == 0.0) {
+          currentState = FlywheelStates.OFF;
+        } else if (!isAtSetpointVelocity()) {
+          currentState = FlywheelStates.SPINNING_UP;
+        } else {
+          currentState = FlywheelStates.AT_SETPOINT;
+        }
+        break;
+      
+      case COAST:
+        currentState = FlywheelStates.COAST;
         break;
       
       case OFF:
@@ -128,27 +156,27 @@ public class Flywheel extends SubsystemBase {
 
   private void applyState() {
     switch (currentState) {
-      case SHOOTING:
-        // SHOOTING: Duty cycle bang-bang (fast acceleration during shot)
-        currentControlMode = FlywheelControlMode.TORQUE_CURRENT_BANG_BANG;
+      case SPINNING_UP:
+        // SPINNING_UP: Duty cycle bang-bang (fast acceleration while spinning up)
+        currentControlMode = FlywheelControlMode.DUTY_CYCLE_BANG_BANG;
         io.setVelocityBangBang(targetVelocityRPS);
         break;
       
-      case SPINNING_UP:
-        // SPINNING_UP: Torque current bang-bang (consistent torque while accelerating)
-        currentControlMode = FlywheelControlMode.DUTY_CYCLE_BANG_BANG;
-        io.setVelocityTorqueCurrentBangBang(targetVelocityRPS);
-        break;
-      
-      case AT_SPEED:
-        // AT_SPEED: Torque current bang-bang (maintain speed with consistent torque)
+      case AT_SETPOINT:
+        // AT_SETPOINT: Torque current bang-bang (maintain speed with consistent torque)
         currentControlMode = FlywheelControlMode.TORQUE_CURRENT_BANG_BANG;
         io.setVelocityTorqueCurrentBangBang(targetVelocityRPS);
         break;
 
+      case COAST:
+        // COAST: Coast mode (no active control)
+        currentControlMode = FlywheelControlMode.TORQUE_CURRENT_VELOCITY;
+        io.setVelocityPID(targetVelocityRPS);
+        break;
+
       case OFF:
       default:
-        currentControlMode = FlywheelControlMode.COAST;
+        currentControlMode = FlywheelControlMode.STOP;
         io.stop();
         break;
     }
@@ -170,6 +198,7 @@ public class Flywheel extends SubsystemBase {
     Logger.recordOutput("Subsystems/Flywheel/ControlMode", currentControlMode.toString());
     Logger.recordOutput("Subsystems/Flywheel/AtGoal", atGoal);
     Logger.recordOutput("Subsystems/Flywheel/TargetVelocityRPS", targetVelocityRPS);
+    Logger.recordOutput("Subsystems/Flywheel/AtSetpointVelocity", isAtSetpointVelocity());
   }
 
   public void setDutyCycle(double duty) {
