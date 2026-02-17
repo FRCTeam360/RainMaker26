@@ -117,15 +117,16 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         );
   }
 
-  public void fieldOrientedDrive(CommandXboxController driveCont) { // field oriented drive command!
-    SwerveRequest.FieldCentric drive =
-        new SwerveRequest.FieldCentric() // creates a fieldcentric drive
-            .withDeadband(maxSpeed.in(MetersPerSecond) * 0.01)
-            .withRotationalDeadband(maxAngularVelocity.in(RadiansPerSecond) * 0.01)
-            .withDriveRequestType(m_driveRequestType);
-    drive.ForwardPerspective = ForwardPerspectiveValue.OperatorPerspective;
+  private final SwerveRequest.FieldCentric FIELD_CENTRIC_DRIVE =
+      new SwerveRequest.FieldCentric()
+          .withDeadband(maxSpeed.in(MetersPerSecond) * 0.01)
+          .withRotationalDeadband(maxAngularVelocity.in(RadiansPerSecond) * 0.01)
+          .withDriveRequestType(m_driveRequestType);
+
+  public void fieldOrientedDrive(CommandXboxController driveCont) {
+    FIELD_CENTRIC_DRIVE.ForwardPerspective = ForwardPerspectiveValue.OperatorPerspective;
     this.setControl(
-        drive
+        FIELD_CENTRIC_DRIVE
             .withVelocityX(
                 Math.pow(driveCont.getLeftY(), 3)
                     * maxSpeed.in(MetersPerSecond)
