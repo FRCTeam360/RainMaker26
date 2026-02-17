@@ -104,8 +104,8 @@ public class FlywheelIOSim implements FlywheelIO {
       slot0.kD = tunableKd.get();
       motorControllerSim1.getConfigurator().apply(slot0);
 
-      // Command the tunable setpoint to both motors
-      this.setRPM(tunableSetpoint.get());
+      // Command the tunable setpoint to both motors (convert RPM to RPS)
+      this.setVelocityBangBang(tunableSetpoint.get() / 60.0);
     }
 
     // Step 1: Get the commanded voltage from motors and apply to simulation
@@ -149,13 +149,26 @@ public class FlywheelIOSim implements FlywheelIO {
   }
 
   @Override
-  public void setRPM(double rpm) {
-    rpm = rpm / 60;
-    motorControllerSim1.setControl(velocityRequest.withVelocity(rpm));
+  public void setVelocityBangBang(double velocityRPS) {
+    // Sim uses traditional PID control, not bang-bang
+    motorControllerSim1.setControl(velocityRequest.withVelocity(velocityRPS));
   }
 
   @Override
-  public void runVelocity(double velocityRPM) {
-    throw new UnsupportedOperationException("Unimplemented method 'runVelocity'");
+  public void setVelocityTorqueCurrentBangBang(double velocityRPS) {
+    // Sim uses traditional PID control, not bang-bang
+    // For simulation purposes, both methods use the same velocity control
+    motorControllerSim1.setControl(velocityRequest.withVelocity(velocityRPS));
+  }
+
+  @Override
+  public void setVelocityPID(double velocityRPS) {
+    // Traditional PID control (same as other methods in sim)
+    motorControllerSim1.setControl(velocityRequest.withVelocity(velocityRPS));
+  }
+
+  @Override
+  public void stop() {
+    motorControllerSim1.set(0.0);
   }
 }

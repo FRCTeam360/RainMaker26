@@ -1,7 +1,3 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot.subsystems.Shooter.Flywheel;
 
 import org.littletonrobotics.junction.AutoLog;
@@ -14,26 +10,24 @@ public interface FlywheelIO {
     public double[] statorCurrents = new double[MAX_MOTORS];
     public double[] supplyCurrents = new double[MAX_MOTORS];
     public double[] voltages = new double[MAX_MOTORS];
-    public double[] velocities = new double[MAX_MOTORS];
+    public double[] velocities = new double[MAX_MOTORS];  // RPS (rotations per second)
     public double[] positions = new double[MAX_MOTORS];
   }
 
-    public static enum FlywheelIOOutputMode {
-    COAST,
-    DUTY_CYCLE_BANG_BANG,
-    TORQUE_CURRENT_BANG_BANG
-  }
+  /** Set flywheel velocity using duty cycle bang-bang control (fast acceleration) */
+  public void setVelocityBangBang(double velocityRPS);
 
-  public static class FlywheelIOOutputs {
-    public FlywheelIOOutputMode mode = FlywheelIOOutputMode.COAST;
-    public double velocityRPM = 0.0;
-  }
+  /** Set flywheel velocity using torque current bang-bang control (consistent torque) */
+  public void setVelocityTorqueCurrentBangBang(double velocityRPS);
 
-  public void runVelocity(double velocityRPM);
+  /** Set flywheel velocity using traditional PID control with torque current (Slot 2) */
+  public void setVelocityPID(double velocityRPS);
   
+  /** Set flywheel duty cycle directly (open loop) */
   public void setDutyCycle(double duty);
 
-  public void setRPM(double rpm);
+  /** Stop the flywheel */
+  public void stop();
 
   public default void updateInputs(FlywheelIOInputs inputs) {}
 }
