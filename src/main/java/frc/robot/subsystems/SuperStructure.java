@@ -1,10 +1,8 @@
 package frc.robot.subsystems;
 
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKicker;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKicker.FlywheelKickerStates;
 import frc.robot.subsystems.Indexer.Indexer;
@@ -14,17 +12,17 @@ import frc.robot.subsystems.Shooter.Flywheel.Flywheel.FlywheelStates;
 import frc.robot.subsystems.Shooter.Hood.Hood;
 import frc.robot.subsystems.Shooter.Hood.Hood.HoodStates;
 import frc.robot.subsystems.Shooter.ShotCalculator;
+import java.util.function.BooleanSupplier;
 import org.littletonrobotics.junction.Logger;
 
 public class SuperStructure extends SubsystemBase {
   private final Intake intake;
   private final Indexer indexer;
   private final FlywheelKicker flywheelKicker;
-  private Flywheel flywheel;
-  private Hood hood;
-  private CommandSwerveDrivetrain drivetrain;
-  private ShotCalculator shotCalculator;
-  private CommandXboxController controller;
+  private final Flywheel flywheel;
+  private final Hood hood;
+  private final ShotCalculator shotCalculator;
+  private final BooleanSupplier isAlignedToTarget;
 
   public enum SuperStates {
     IDLE, // everything is stopped when nothing else happens
@@ -68,17 +66,15 @@ public class SuperStructure extends SubsystemBase {
       FlywheelKicker flywheelKicker,
       Flywheel flywheel,
       Hood hood,
-      CommandSwerveDrivetrain driveTrain,
       ShotCalculator shotCalculator,
-      CommandXboxController controller) {
+      BooleanSupplier isAlignedToTarget) {
     this.intake = intake;
     this.indexer = indexer;
     this.flywheelKicker = flywheelKicker;
     this.flywheel = flywheel;
     this.hood = hood;
-    this.drivetrain = driveTrain;
     this.shotCalculator = shotCalculator;
-    this.controller = controller;
+    this.isAlignedToTarget = isAlignedToTarget;
   }
 
   private void updateState() {
@@ -103,11 +99,9 @@ public class SuperStructure extends SubsystemBase {
   private void applyStates() {
     switch (currentSuperState) {
       case INTAKING:
-        fieldOrientedDrive();
         intaking();
         break;
       case IDLE:
-        fieldOrientedDrive();
         stopped();
         break;
       case SHOOTING:
@@ -116,7 +110,6 @@ public class SuperStructure extends SubsystemBase {
         applyShooterStates();
         break;
       case AIMING:
-        fieldOrientedDrive();
         aiming();
         break;
     }
@@ -125,7 +118,8 @@ public class SuperStructure extends SubsystemBase {
   private void updateShooterStates() {
     previousShooterState = currentShooterState;
     if (flywheel.atSetpoint(shotCalculator.calculateShot().flywheelSpeed(), FLYWHEEL_TOLERANCE_RPM)
-        && hood.atSetpoint(shotCalculator.calculateShot().hoodAngle())) {
+        && hood.atSetpoint(shotCalculator.calculateShot().hoodAngle())
+        && isAlignedToTarget.getAsBoolean()) {
       currentShooterState = ShooterStates.FIRING;
     } else {
       currentShooterState = ShooterStates.PREPARING;
@@ -148,15 +142,6 @@ public class SuperStructure extends SubsystemBase {
   private void shooting() {
     flywheel.setVelocity(shotCalculator.calculateShot().flywheelSpeed());
     hood.setPosition(shotCalculator.calculateShot().hoodAngle());
-    if (DriverStation.isTeleopEnabled()) {
-      drivetrain.faceAngleWhileDriving(controller, shotCalculator.calculateShot().targetHeading());
-    }
-  }
-
-  private void fieldOrientedDrive() {
-    if (DriverStation.isTeleopEnabled()) {
-      drivetrain.fieldOrientedDrive(controller);
-    }
   }
 
   private void intaking() {

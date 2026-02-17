@@ -12,6 +12,7 @@ import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -45,6 +46,7 @@ import frc.robot.subsystems.Vision.VisionIOLimelight;
 import frc.robot.subsystems.Vision.VisionIOPhotonSim;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.BooleanSupplier;
 import org.littletonrobotics.junction.Logger;
 
 /**
@@ -79,6 +81,7 @@ public class RobotContainer {
   private final CommandXboxController testCont1 = new CommandXboxController(5);
 
   private static final double FLYWHEEL_KICKER_WARMUP_VELOCITY_RPM = 4000.0;
+  private static final double HEADING_TOLERANCE_DEG = 3.0;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -127,18 +130,21 @@ public class RobotContainer {
         // intakePivot = new IntakePivot(new IntakePivotIOPB());
     }
     shotCalculator = new ShotCalculator(drivetrain);
-    // Configure the trigger bindings
-    // TODO: Re-enable superStructure construction and PathPlanner commands
+
+    BooleanSupplier isAlignedToTarget =
+        () -> {
+          Rotation2d current = drivetrain.getRotation2d();
+          Rotation2d target = shotCalculator.calculateShot().targetHeading();
+          return Math.abs(current.minus(target).getDegrees()) < HEADING_TOLERANCE_DEG;
+        };
+
     superStructure =
         new SuperStructure(
-            intake,
-            indexer,
-            flywheelKicker,
-            flywheel,
-            hood,
-            drivetrain,
-            shotCalculator,
-            driverCont);
+            intake, indexer, flywheelKicker, flywheel, hood, shotCalculator, isAlignedToTarget);
+
+    if (Objects.nonNull(drivetrain)) {
+      drivetrain.setDefaultCommand(drivetrain.fieldOrientedDriveCommand(driverCont));
+    }
 
     if (Objects.nonNull(superStructure)) {
       registerPathplannerCommand(
@@ -253,7 +259,14 @@ public class RobotContainer {
       driverCont.b().whileTrue(flywheel.setVelocityCommand(3000));
       driverCont.y().whileTrue(flywheel.setVelocityCommand(3500));
       if (Objects.nonNull(superStructure)) {
-        driverCont.rightTrigger().onTrue(superStructure.setStateCommand(SuperStates.SHOOTING));
+        driverCont
+            .rightTrigger()
+            .whileTrue(
+                superStructure
+                    .setStateCommand(SuperStates.SHOOTING)
+                    .alongWith(
+                        drivetrain.faceAngleWhileDrivingCommand(
+                            driverCont, () -> shotCalculator.calculateShot().targetHeading())));
         driverCont.rightTrigger().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
       }
     }
