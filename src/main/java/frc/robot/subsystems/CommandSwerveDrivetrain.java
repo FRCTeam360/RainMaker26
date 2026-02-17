@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -288,6 +289,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   public CommandSwerveDrivetrain(
       SwerveDrivetrainConstants drivetrainConstants, SwerveModuleConstants<?, ?, ?>... modules) {
     super(drivetrainConstants, modules);
+    CommandScheduler.getInstance().registerSubsystem(this);
     m_faceHubRequest.HeadingController.setPID(HEADING_KP, HEADING_KI, HEADING_KD);
     m_faceHubRequest.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
     m_faceHubRequest.HeadingController.setIZone(HEADING_I_ZONE);
@@ -417,11 +419,11 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   @Override
   public void periodic() {
     // Current pose includes vision fusion when vision measurements are added
-    Logger.recordOutput(SUBSYSTEM_NAME + " CurrentPose", this.getStateCopy().Pose);
-    Logger.recordOutput(SUBSYSTEM_NAME + " Rotation2d", this.getStateCopy().RawHeading);
-    Logger.recordOutput(SUBSYSTEM_NAME + " CurrentState", this.getStateCopy().ModuleStates);
-    Logger.recordOutput(SUBSYSTEM_NAME + " TargetState", this.getStateCopy().ModuleTargets);
-    Logger.recordOutput(SUBSYSTEM_NAME + " Using Vision", hasVisionMeasurements);
+    Logger.recordOutput(SUBSYSTEM_NAME + "CurrentPose", this.getStateCopy().Pose);
+    Logger.recordOutput(SUBSYSTEM_NAME + "Rotation2d", this.getStateCopy().RawHeading);
+    Logger.recordOutput(SUBSYSTEM_NAME + "CurrentState", this.getStateCopy().ModuleStates);
+    Logger.recordOutput(SUBSYSTEM_NAME + "TargetState", this.getStateCopy().ModuleTargets);
+    Logger.recordOutput(SUBSYSTEM_NAME + "Using Vision", hasVisionMeasurements);
 
     // Update field visualizations (hub points, line from robot to hub, etc.)
     FieldVisualizer.update(this.getStateCopy().Pose);
