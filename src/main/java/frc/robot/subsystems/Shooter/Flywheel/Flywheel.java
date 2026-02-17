@@ -156,6 +156,7 @@ public class Flywheel extends SubsystemBase {
 
   private void applyState() {
     switch (currentState) {
+      
       case SPINNING_UP:
         // SPINNING_UP: Duty cycle bang-bang (fast acceleration while spinning up)
         currentControlMode = FlywheelControlMode.DUTY_CYCLE_BANG_BANG;

@@ -8,6 +8,7 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
 import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
@@ -86,7 +87,8 @@ public class FlywheelIOWB implements FlywheelIO {
   // Control request objects (reused for efficiency)
   private final VelocityDutyCycle dutyCycleBangBang = new VelocityDutyCycle(0.0).withSlot(0);
   private final VelocityTorqueCurrentFOC torqueCurrentBangBang = new VelocityTorqueCurrentFOC(0.0).withSlot(0);
-  private final VelocityTorqueCurrentFOC velocityPID = new VelocityTorqueCurrentFOC(0.0).withSlot(2);
+  // PID uses VelocityVoltage instead - not limited by torque current config
+  private final VelocityVoltage velocityPID = new VelocityVoltage(0.0).withSlot(2);
 
   @Override
   public void setVelocityBangBang(double velocityRPS) {
@@ -96,13 +98,14 @@ public class FlywheelIOWB implements FlywheelIO {
 
   @Override
   public void setVelocityTorqueCurrentBangBang(double velocityRPS) {
-    // Idle/Ball phase: Torque current bang-bang (consistent torque)
+    // Idle/Ball phase: Torque current bang-bang (consistent torque, 40A limit from config)
     motors[0].setControl(torqueCurrentBangBang.withVelocity(velocityRPS));
   }
 
   @Override
   public void setVelocityPID(double velocityRPS) {
-    // Traditional PID control with torque current (Slot 2)
+    // Traditional PID control using voltage control (not limited by torque current)
+    // Limited only by supply current limit (100A) and voltage saturation
     motors[0].setControl(velocityPID.withVelocity(velocityRPS));
   }
 
