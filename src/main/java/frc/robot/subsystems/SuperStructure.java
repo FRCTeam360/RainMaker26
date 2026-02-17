@@ -58,6 +58,10 @@ public class SuperStructure extends SubsystemBase {
 
   private ShooterStates currentShooterState = ShooterStates.PREPARING;
   private ShooterStates previousShooterState = ShooterStates.PREPARING;
+  private static final double FLYWHEEL_TOLERANCE_RPM = 500.0;
+  private static final double KICKER_FEED_VELOCITY_RPM = 4500.0;
+  private static final double INDEXER_FEED_DUTY_CYCLE = 0.4;
+  private static final double STOPPED_VELOCITY_RPM = 0.0;
 
   public SuperStructure(
       Intake intake,
@@ -121,7 +125,6 @@ public class SuperStructure extends SubsystemBase {
 
   private void updateShooterStates() {
     previousShooterState = currentShooterState;
-    double FLYWHEEL_TOLERANCE_RPM = 500.0;
     if (flywheel.atSetpoint(shotCalculator.calculateShot().flywheelSpeed(), FLYWHEEL_TOLERANCE_RPM)
         && hood.atSetpoint(shotCalculator.calculateShot().hoodAngle())) {
       currentShooterState = ShooterStates.FIRING;
@@ -132,10 +135,10 @@ public class SuperStructure extends SubsystemBase {
 
   private void applyShooterStates() {
     if (currentShooterState == ShooterStates.FIRING) {
-      flywheelKicker.setVelocity(4500.0);
-      indexer.setDutyCycle(0.4);
+      flywheelKicker.setVelocity(KICKER_FEED_VELOCITY_RPM);
+      indexer.setDutyCycle(INDEXER_FEED_DUTY_CYCLE);
     } else {
-      flywheelKicker.setVelocity(0.0);
+      flywheelKicker.setVelocity(STOPPED_VELOCITY_RPM);
     }
   }
 
@@ -185,6 +188,6 @@ public class SuperStructure extends SubsystemBase {
     Logger.recordOutput("Superstructure/CurrentSuperState", currentSuperState.toString());
     Logger.recordOutput("Superstructure/PreviousSuperState", previousSuperState.toString());
     Logger.recordOutput("Superstructure/PreviousShooterState", previousShooterState.toString());
-    Logger.recordOutput("Superstructure/CurrentShooterState", currentSuperState.toString());
+    Logger.recordOutput("Superstructure/CurrentShooterState", currentShooterState.toString());
   }
 }

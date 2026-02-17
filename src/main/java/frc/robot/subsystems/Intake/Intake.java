@@ -12,6 +12,7 @@ import org.littletonrobotics.junction.Logger;
 public class Intake extends SubsystemBase {
   private final IntakeIO io;
   private final IntakeIOInputsAutoLogged inputs = new IntakeIOInputsAutoLogged();
+  private static final double INTAKE_VELOCITY_RPM = 4500.0;
 
   public enum IntakeStates {
     OFF,
@@ -72,7 +73,7 @@ public class Intake extends SubsystemBase {
   }
 
   private void intaking() {
-    setVelocity(4500.0);
+    setVelocity(INTAKE_VELOCITY_RPM);
   }
 
   public void setDutyCycle(double value) {
