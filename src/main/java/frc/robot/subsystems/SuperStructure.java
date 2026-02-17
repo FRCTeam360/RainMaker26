@@ -177,8 +177,6 @@ public class SuperStructure extends SubsystemBase {
 
   @Override
   public void periodic() {
-    shotCalculator.clearShootingParams();
-
     updateState();
     applyStates();
 

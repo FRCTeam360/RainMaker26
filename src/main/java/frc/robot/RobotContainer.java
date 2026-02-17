@@ -302,6 +302,18 @@ public class RobotContainer {
   }
 
   /**
+   * Pre-computes cached values (e.g. shot parameters) before the command scheduler runs. Must be
+   * called in {@link Robot#robotPeriodic()} before {@link
+   * edu.wpi.first.wpilibj2.command.CommandScheduler#run()}.
+   */
+  public void preSchedulerUpdate() {
+    if (Objects.nonNull(shotCalculator)) {
+      shotCalculator.clearShootingParams();
+      shotCalculator.calculateShot();
+    }
+  }
+
+  /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
    *
    * @return the command to run in autonomous
