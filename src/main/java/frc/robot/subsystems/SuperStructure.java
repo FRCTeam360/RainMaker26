@@ -55,10 +55,6 @@ public class SuperStructure extends SubsystemBase {
 
   private ShooterStates currentShooterState = ShooterStates.PREPARING;
   private ShooterStates previousShooterState = ShooterStates.PREPARING;
-  private static final double FLYWHEEL_TOLERANCE_RPM = 500.0;
-  private static final double KICKER_FEED_VELOCITY_RPM = 4500.0;
-  private static final double INDEXER_FEED_DUTY_CYCLE = 0.4;
-  private static final double STOPPED_VELOCITY_RPM = 0.0;
 
   public SuperStructure(
       Intake intake,
@@ -114,6 +110,8 @@ public class SuperStructure extends SubsystemBase {
     }
   }
 
+  private static final double FLYWHEEL_TOLERANCE_RPM = 500.0;
+
   private void updateShooterStates() {
     previousShooterState = currentShooterState;
     boolean flywheelReady =
@@ -131,6 +129,10 @@ public class SuperStructure extends SubsystemBase {
       currentShooterState = ShooterStates.PREPARING;
     }
   }
+
+  private static final double KICKER_FEED_VELOCITY_RPM = 4500.0;
+  private static final double INDEXER_FEED_DUTY_CYCLE = 0.4;
+  private static final double STOPPED_VELOCITY_RPM = 0.0;
 
   private void applyShooterStates() {
     shooting();
