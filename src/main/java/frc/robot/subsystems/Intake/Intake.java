@@ -61,8 +61,8 @@ public class Intake extends SubsystemBase {
       default:
         currentState = IntakeStates.OFF;
         break;
-      // case JAMMED:
-      //   currentState = IntakeStates.JAMMED;
+        // case JAMMED:
+        //   currentState = IntakeStates.JAMMED;
     }
   }
 
@@ -78,8 +78,8 @@ public class Intake extends SubsystemBase {
       default:
         stop();
         break;
-      // case JAMMED:
-      //   unjamIntake();
+        // case JAMMED:
+        //   unjamIntake();
     }
   }
 
