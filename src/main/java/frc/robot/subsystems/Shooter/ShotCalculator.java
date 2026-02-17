@@ -4,7 +4,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
-import frc.robot.utils.AllianceFlipUtil;
 import frc.robot.utils.FieldConstants;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
@@ -16,6 +15,7 @@ import org.littletonrobotics.junction.Logger;
  */
 public class ShotCalculator {
   private final Supplier<Pose2d> robotPoseSupplier;
+  private final Supplier<Translation2d> targetSupplier;
   private final InterpolatingDoubleTreeMap shotHoodAngleMap;
   private final InterpolatingDoubleTreeMap launchFlywheelSpeedMap;
 
@@ -44,9 +44,12 @@ public class ShotCalculator {
    */
   public ShotCalculator(
       Supplier<Pose2d> robotPoseSupplier,
+      Supplier<Translation2d>
+          targetSupplier, // AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint.toTranslation2d());
       InterpolatingDoubleTreeMap shotHoodAngleMap,
       InterpolatingDoubleTreeMap launchFlywheelSpeedMap) {
     this.robotPoseSupplier = robotPoseSupplier;
+    this.targetSupplier = targetSupplier;
     this.shotHoodAngleMap = shotHoodAngleMap;
     this.launchFlywheelSpeedMap = launchFlywheelSpeedMap;
   }
@@ -68,16 +71,16 @@ public class ShotCalculator {
     Logger.recordOutput("ShotCalculator/cached", false);
     Pose2d shooterPosition = robotPoseSupplier.get().plus(ShooterConstants.ROBOT_TO_SHOOTER);
 
-    Translation2d hubTranslation =
-        AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint.toTranslation2d());
-    double distanceToTarget = hubTranslation.getDistance(shooterPosition.getTranslation());
+    Translation2d target = targetSupplier.get();
+
+    double distanceToTarget = target.getDistance(shooterPosition.getTranslation());
     distanceToTarget =
         Math.max(MIN_DISTANCE_METERS, Math.min(MAX_DISTANCE_METERS, distanceToTarget));
 
     // Calculate heading toward hub, then rotate 180° because the shooter
     // is at the back of the robot - robot faces away from hub to shoot at it
     Rotation2d targetHeading =
-        hubTranslation
+        target
             .minus(shooterPosition.getTranslation())
             .getAngle()
             .rotateBy(Rotation2d.k180deg);
