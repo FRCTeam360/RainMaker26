@@ -125,14 +125,17 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             .withDeadband(maxSpeed.in(MetersPerSecond) * 0.01)
             .withRotationalDeadband(maxAngularVelocity.in(RadiansPerSecond) * 0.01)
             .withDriveRequestType(m_driveRequestType);
+    drive.ForwardPerspective = ForwardPerspectiveValue.OperatorPerspective;
     this.setControl(
         drive
             .withVelocityX(
                 Math.pow(driveCont.getLeftY(), 3)
-                    * maxSpeed.in(MetersPerSecond)) // Drive forward with negative Y (forward)
+                    * maxSpeed.in(MetersPerSecond)
+                    * -1.0) // Drive forward with negative Y (forward)
             .withVelocityY(
                 Math.pow(driveCont.getLeftX(), 3)
-                    * maxSpeed.in(MetersPerSecond)) // Drive left with negative X (left)
+                    * maxSpeed.in(MetersPerSecond)
+                    * -1.0) // Drive left with negative X (left)
             .withRotationalRate(
                 Math.pow(driveCont.getRightX(), 2)
                     * (maxAngularVelocity.in(RadiansPerSecond) / 2.0)
