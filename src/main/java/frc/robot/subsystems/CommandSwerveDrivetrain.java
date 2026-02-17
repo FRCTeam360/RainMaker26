@@ -290,6 +290,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   public CommandSwerveDrivetrain(
       SwerveDrivetrainConstants drivetrainConstants, SwerveModuleConstants<?, ?, ?>... modules) {
     super(drivetrainConstants, modules);
+    // Registers the subsystem so periodic runs
     CommandScheduler.getInstance().registerSubsystem(this);
     m_faceHubRequest.HeadingController.setPID(HEADING_KP, HEADING_KI, HEADING_KD);
     m_faceHubRequest.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
