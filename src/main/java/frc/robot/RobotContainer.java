@@ -66,7 +66,6 @@ public class RobotContainer {
   private IntakePivot intakePivot;
   private FlywheelKicker flywheelKicker;
 
-  private CommandFactory commandFactory;
   private SuperStructure superStructure;
 
   private ShotCalculator shotCalculator;
@@ -122,17 +121,6 @@ public class RobotContainer {
     CommandScheduler.getInstance().registerSubsystem(drivetrain);
     shotCalculator = new ShotCalculator(drivetrain);
     // Configure the trigger bindings
-    commandFactory =
-        new CommandFactory(
-            intake,
-            flywheel,
-            flywheelKicker,
-            hood,
-            indexer,
-            intakePivot,
-            vision,
-            drivetrain,
-            shotCalculator);
     // TODO: Re-enable superStructure construction and PathPlanner commands
     superStructure =
         new SuperStructure(
@@ -232,7 +220,6 @@ public class RobotContainer {
       driverCont.leftBumper().onTrue(superStructure.setStateCommand(SuperStates.INTAKING));
       driverCont.leftBumper().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
       driverCont.a().whileTrue(indexer.setDutyCycleCommand(0.5));
-      // driverCont.leftBumper().whileTrue(commandFactory.basicIntakeCmd());
     }
 
     // setFlywheelKickerDutyCycle uses flywheelKicker
@@ -247,18 +234,17 @@ public class RobotContainer {
       // hood.setDefaultCommand(
       //     CommandLogger.logCommand(hood.setPositionCmd(0.0), "hood default command"));
       driverCont.pov(0).onTrue(hood.moveToZeroAndZero());
-      driverCont.pov(90).whileTrue(commandFactory.setHoodPosition(4.0));
-      driverCont.pov(180).whileTrue(commandFactory.setHoodPosition(16.0));
-      driverCont.pov(270).whileTrue(commandFactory.setHoodPosition(23.0));
+      driverCont.pov(90).whileTrue(hood.setPositionCmd(4.0));
+      driverCont.pov(180).whileTrue(hood.setPositionCmd(16.0));
+      driverCont.pov(270).whileTrue(hood.setPositionCmd(23.0));
       driverCont.start().onTrue(hood.zero());
     }
 
     // shootWithRPM uses flywheel
     if (Objects.nonNull(flywheel)) {
-      driverCont.x().whileTrue(commandFactory.shootWithRPM(2500));
-      driverCont.b().whileTrue(commandFactory.shootWithRPM(3000));
-      driverCont.y().whileTrue(commandFactory.shootWithRPM(3500));
-      // driverCont.rightTrigger().whileTrue(commandFactory.faceAngleWhileShooting(driverCont));
+      driverCont.x().whileTrue(flywheel.setVelocityCommand(2500));
+      driverCont.b().whileTrue(flywheel.setVelocityCommand(3000));
+      driverCont.y().whileTrue(flywheel.setVelocityCommand(3500));
       if (Objects.nonNull(superStructure)) {
         driverCont.rightTrigger().onTrue(superStructure.setStateCommand(SuperStates.SHOOTING));
         driverCont.rightTrigger().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
