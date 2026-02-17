@@ -25,10 +25,10 @@ public class Flywheel extends SubsystemBase {
 
 
   // These enums are more for logging and debugging purposes - the actual control mode is determined by the state machine logic
-  public enum FlywheelControlMode {
+  public enum FlywheelControlType {
     DUTY_CYCLE_BANG_BANG,   // Startup/Recovery - fast acceleration
     TORQUE_CURRENT_BANG_BANG, // Idle/Ball - consistent torque
-    TORQUE_CURRENT_VELOCITY, // No control, free spinning
+    VOLTAGE_VELOCITY, // No control, free spinning
     STOP 
   }
 
@@ -45,7 +45,7 @@ public class Flywheel extends SubsystemBase {
   private final Debouncer atGoalDebouncer = new Debouncer(
       atGoalDebounceSeconds.get(), DebounceType.kFalling);
 
-  private FlywheelControlMode currentControlMode = FlywheelControlMode.DUTY_CYCLE_BANG_BANG;
+  private FlywheelControlType currentControlMode = FlywheelControlType.DUTY_CYCLE_BANG_BANG;
   private boolean atGoal = false;
   private double targetVelocityRPS = 0.0;
 
@@ -76,7 +76,7 @@ public class Flywheel extends SubsystemBase {
     return atGoal;
   }
 
-  public FlywheelControlMode getControlMode() {
+  public FlywheelControlType getControlMode() {
     return currentControlMode;
   }
 
@@ -159,25 +159,25 @@ public class Flywheel extends SubsystemBase {
       
       case SPINNING_UP:
         // SPINNING_UP: Duty cycle bang-bang (fast acceleration while spinning up)
-        currentControlMode = FlywheelControlMode.DUTY_CYCLE_BANG_BANG;
+        currentControlMode = FlywheelControlType.DUTY_CYCLE_BANG_BANG;
         io.setVelocityBangBang(targetVelocityRPS);
         break;
       
       case AT_SETPOINT:
         // AT_SETPOINT: Torque current bang-bang (maintain speed with consistent torque)
-        currentControlMode = FlywheelControlMode.TORQUE_CURRENT_BANG_BANG;
+        currentControlMode = FlywheelControlType.TORQUE_CURRENT_BANG_BANG;
         io.setVelocityTorqueCurrentBangBang(targetVelocityRPS);
         break;
 
       case COAST:
         // COAST: Coast mode (no active control)
-        currentControlMode = FlywheelControlMode.TORQUE_CURRENT_VELOCITY;
+        currentControlMode = FlywheelControlType.VOLTAGE_VELOCITY;
         io.setVelocityPID(targetVelocityRPS);
         break;
 
       case OFF:
       default:
-        currentControlMode = FlywheelControlMode.STOP;
+        currentControlMode = FlywheelControlType.STOP;
         io.stop();
         break;
     }

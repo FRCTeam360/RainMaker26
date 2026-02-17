@@ -86,6 +86,7 @@ public class FlywheelIOWB implements FlywheelIO {
 
   // Control request objects (reused for efficiency)
   private final VelocityDutyCycle dutyCycleBangBang = new VelocityDutyCycle(0.0).withSlot(0);
+  // Because this uses the VelocityTorqueCurrentFOC control mode, it will be limited by the torque current config (40A limit from config)
   private final VelocityTorqueCurrentFOC torqueCurrentBangBang = new VelocityTorqueCurrentFOC(0.0).withSlot(0);
   // PID uses VelocityVoltage instead - not limited by torque current config
   private final VelocityVoltage velocityPID = new VelocityVoltage(0.0).withSlot(2);
