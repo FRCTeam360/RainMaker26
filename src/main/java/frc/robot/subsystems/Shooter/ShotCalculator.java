@@ -80,10 +80,7 @@ public class ShotCalculator {
     // Calculate heading toward hub, then rotate 180° because the shooter
     // is at the back of the robot - robot faces away from hub to shoot at it
     Rotation2d targetHeading =
-        target
-            .minus(shooterPosition.getTranslation())
-            .getAngle()
-            .rotateBy(Rotation2d.k180deg);
+        target.minus(shooterPosition.getTranslation()).getAngle().rotateBy(Rotation2d.k180deg);
 
     double hoodAngle = shotHoodAngleMap.get(distanceToTarget);
     double flywheelSpeed = launchFlywheelSpeedMap.get(distanceToTarget);
