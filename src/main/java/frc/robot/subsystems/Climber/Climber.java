@@ -15,21 +15,22 @@ public class Climber extends SubsystemBase {
     this.io = io;
   }
 
-  public void setDutyCycle(double dutyCycle) {
-    io.setDutyCycle(dutyCycle);
+  public void setLeftDutyCycle(double dutyCycle) {
+    io.setLeftDutyCycle(dutyCycle);
+  }
+
+  public void setRightDutyCycle(double dutyCycle) {
+    io.setRightDutyCycle(dutyCycle);
   }
 
   public void stop() {
-    io.setDutyCycle(0.0);
+    io.setLeftDutyCycle(0.0);
   }
 
-  public void setPosition(double position) {
-    io.setPosition(position);
+  public void setLeftPosition(double position) {
+    io.setLeftPosition(position);
   }
 
-  public double getPosition() {
-    return inputs.climberPosition;
-  }
 
   @Override
   public void periodic() {

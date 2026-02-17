@@ -20,9 +20,13 @@ import frc.robot.Constants.WoodBotConstants;
 
 public class ClimberIOPB implements ClimberIO {
 
-  private final SparkMax climberMotor =
+  private final SparkMax leftClimberMotor =
       new SparkMax(WoodBotConstants.CLIMBER_ID, MotorType.kBrushless);
-  private final RelativeEncoder climberEncoder = climberMotor.getEncoder();
+  private final SparkMax rightClimberMotor = 
+      new SparkMax(WoodBotConstants.CLIMBER_ID, MotorType.kBrushless);
+  
+  private final RelativeEncoder leftClimberEncoder = leftClimberMotor.getEncoder();
+  private final RelativeEncoder rightClimberEncoder = rightClimberMotor.getEncoder();
 
   private final double kP = 0.2;
   private final double kI = 0.0;
@@ -41,22 +45,27 @@ public class ClimberIOPB implements ClimberIO {
     EncoderConfig encoderConfig = new EncoderConfig();
     encoderConfig.positionConversionFactor(positionConversionFactor);
     config.apply(encoderConfig);
-    climberMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    leftClimberMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 
   public void setDutyCycle(double dutyCycle) {
-    climberMotor.set(dutyCycle);
+    leftClimberMotor.set(dutyCycle);
   }
 
   public void setPosition(double position) {
-    climberMotor.getClosedLoopController().setReference(position, ControlType.kPosition);
-  }
+    leftClimberMotor.getClosedLoopController().setReference(position, ControlType.kPosition);
+  } 
 
   public void updateInputs(ClimberIOInputs inputs) {
-    inputs.climberDutyCycle = climberMotor.getAppliedOutput();
-    inputs.climberPosition = climberEncoder.getPosition();
-    inputs.climberVelocity = climberEncoder.getVelocity();
-    inputs.climberCurrent = climberMotor.getOutputCurrent();
-    inputs.climberTemp = climberMotor.getMotorTemperature();
+    inputs.climberLeftDutyCycle = leftClimberMotor.getAppliedOutput();
+    inputs.climberRightDutyCycle = rightClimberMotor.getAppliedOutput();
+    inputs.climberLeftPosition = leftClimberEncoder.getPosition();
+    inputs.climberRightPosition = rightClimberEncoder.getPosition();
+    inputs.climberLeftVelocity = leftClimberEncoder.getVelocity();
+    inputs.climberRightVelocity = rightClimberEncoder.getVelocity();
+    inputs.climberLeftCurrent = leftClimberMotor.getOutputCurrent();
+    inputs.climberRightCurrent = rightClimberMotor.getOutputCurrent();
+    inputs.climberLeftTemp = leftClimberMotor.getMotorTemperature();
+    inputs.climberRightTemp = rightClimberMotor.getMotorTemperature();
   }
 }

@@ -9,16 +9,23 @@ import org.littletonrobotics.junction.AutoLog;
 public interface ClimberIO {
   @AutoLog
   public static class ClimberIOInputs {
-    public double climberVelocity = 0.0;
-    public double climberPosition = 0.0;
-    public double climberDutyCycle = 0.0;
-    public double climberCurrent = 0.0;
-    public double climberTemp = 0.0;
+    public double climberLeftVelocity = 0.0;
+    public double climberRightVelocity = 0.0;
+    public double climberLeftPosition = 0.0;
+    public double climberRightPosition = 0.0;
+    public double climberLeftDutyCycle = 0.0;
+    public double climberRightDutyCycle = 0.0;
+    public double climberLeftCurrent = 0.0;
+    public double climberRightCurrent = 0.0;
+    public double climberLeftTemp = 0.0;
+    public double climberRightTemp = 0.0;
   }
 
   public default void updateInputs(ClimberIOInputs inputs) {}
 
-  public void setDutyCycle(double dutyCycle);
+  public void setLeftDutyCycle(double dutyCycle);
+  public void setLeftPosition(double position);
 
-  public void setPosition(double position);
+  public void setRightDutyCycle(double dutyCycle);
+  public void setRightPosition(double position);
 }
