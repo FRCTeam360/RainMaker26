@@ -13,12 +13,9 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
-import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.numbers.N1;
-import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -168,14 +165,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
       DoubleSupplier velocityXSupplier,
       DoubleSupplier velocityYSupplier,
       Supplier<Rotation2d> headingSupplier) {
-
-    // Configure the heading controller with PID values
-
-    m_faceHubRequest.HeadingController.setPID(HEADING_KP, HEADING_KI, HEADING_KD);
-    m_faceHubRequest.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
-    m_faceHubRequest.HeadingController.setIZone(HEADING_I_ZONE);
-    m_faceHubRequest.ForwardPerspective = ForwardPerspectiveValue.BlueAlliance;
-
     return this.applyRequest(
         () ->
             m_faceHubRequest
@@ -191,14 +180,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   }
 
   public void faceAngleWhileDriving(double velocityX, double velocityY, Rotation2d heading) {
-
-    // Configure the heading controller with PID values
-
-    m_faceHubRequest.HeadingController.setPID(HEADING_KP, HEADING_KI, HEADING_KD);
-    m_faceHubRequest.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
-    m_faceHubRequest.HeadingController.setIZone(HEADING_I_ZONE);
-    m_faceHubRequest.ForwardPerspective = ForwardPerspectiveValue.BlueAlliance;
-
     this.setControl(
         m_faceHubRequest
             .withVelocityX(
@@ -210,7 +191,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                     ? velocityY
                     : -velocityY)
             .withTargetDirection(heading)
-            .withDeadband(maxSpeed.in(MetersPerSecond) * 0.02));
+            .withDeadband(maxSpeed.in(MetersPerSecond) * 0.01));
   }
 
   /**
@@ -307,6 +288,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   public CommandSwerveDrivetrain(
       SwerveDrivetrainConstants drivetrainConstants, SwerveModuleConstants<?, ?, ?>... modules) {
     super(drivetrainConstants, modules);
+    m_faceHubRequest.HeadingController.setPID(HEADING_KP, HEADING_KI, HEADING_KD);
+    m_faceHubRequest.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
+    m_faceHubRequest.HeadingController.setIZone(HEADING_I_ZONE);
+    m_faceHubRequest.ForwardPerspective = ForwardPerspectiveValue.BlueAlliance;
     if (Utils.isSimulation()) {
       startSimThread();
     }
@@ -324,16 +309,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
    *     0 Hz, this is 250 Hz on CAN FD, and 100 Hz on CAN 2.0.
    * @param modules Constants for each specific module
    */
-  public CommandSwerveDrivetrain(
-      SwerveDrivetrainConstants drivetrainConstants,
-      double odometryUpdateFrequency,
-      SwerveModuleConstants<?, ?, ?>... modules) {
-    super(drivetrainConstants, odometryUpdateFrequency, modules);
-    if (Utils.isSimulation()) {
-      startSimThread();
-    }
-    configureAutoBuilder();
-  }
 
   /**
    * Constructs a CTRE SwerveDrivetrain using the specified constants.
@@ -350,24 +325,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
    *     theta]ᵀ, with units in meters and radians
    * @param modules Constants for each specific module
    */
-  public CommandSwerveDrivetrain(
-      SwerveDrivetrainConstants drivetrainConstants,
-      double odometryUpdateFrequency,
-      Matrix<N3, N1> odometryStandardDeviation,
-      Matrix<N3, N1> visionStandardDeviation,
-      SwerveModuleConstants<?, ?, ?>... modules) {
-    super(
-        drivetrainConstants,
-        odometryUpdateFrequency,
-        odometryStandardDeviation,
-        visionStandardDeviation,
-        modules);
-    if (Utils.isSimulation()) {
-      startSimThread();
-    }
-    configureAutoBuilder();
-  }
-
   private void configureAutoBuilder() {
     try {
       var config = RobotConfig.fromGUISettings();

@@ -33,10 +33,9 @@ public class SuperStructure extends SubsystemBase {
     // rotation in drivetrain
     X_OUT, // hold down button to x out wheels or press once and wheels stop X-ing out when
     // moved
-    AUTO_ALIGHN, // aligns to a target
+    AUTO_ALIGN, // aligns to a target
     X_OUT_SHOOTING, // when robot is aligned, ends when toggled off or shooting stops
-    PREPAREING, // flywheel spins up and align to target
-    READY_2_FIRE, // if robot aligned and flywheel up to proper speed
+    READY_TO_FIRE, // if robot aligned and flywheel up to proper speed
     FIRING, // while theres still fuel to shoot and ready to fire
     INTAKING, // while intake button pressed
     EJECTING // eject button
@@ -149,7 +148,9 @@ public class SuperStructure extends SubsystemBase {
   private void shooting() {
     flywheel.setVelocity(shotCalculator.calculateShot().flywheelSpeed());
     hood.setPosition(shotCalculator.calculateShot().hoodAngle());
-    drivetrain.faceAngleWhileDriving(controller, shotCalculator.calculateShot().targetHeading());
+    if (DriverStation.isTeleopEnabled()) {
+      drivetrain.faceAngleWhileDriving(controller, shotCalculator.calculateShot().targetHeading());
+    }
   }
 
   private void fieldOrientedDrive() {

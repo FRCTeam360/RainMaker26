@@ -78,8 +78,9 @@ public class RobotContainer {
   // Replace with CommandPS4Controller or CommandJoystick if needed
 
   private final CommandXboxController driverCont = new CommandXboxController(0);
-
   private final CommandXboxController testCont1 = new CommandXboxController(5);
+
+  private static final double FLYWHEEL_KICKER_WARMUP_VELOCITY_RPM = 4000.0;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -150,7 +151,9 @@ public class RobotContainer {
       registerPathplannerCommand(
           "shoot at hub", superStructure.setStateCommand(SuperStates.SHOOTING));
     }
-    registerPathplannerCommand("run flywheel kicker", flywheelKicker.setVelocityCommand(4000.0));
+    registerPathplannerCommand(
+        "run flywheel kicker",
+        flywheelKicker.setVelocityCommand(FLYWHEEL_KICKER_WARMUP_VELOCITY_RPM));
     registerPathplannerCommand("spinup flywheel hub shot", commandFactory.shootWithRPM(3000.0));
     configureBindings();
     // configureTestBindings();
@@ -235,7 +238,9 @@ public class RobotContainer {
 
     // setFlywheelKickerDutyCycle uses flywheelKicker
     if (Objects.nonNull(flywheelKicker)) {
-      driverCont.rightBumper().whileTrue(flywheelKicker.setVelocityCommand(4000.0));
+      driverCont
+          .rightBumper()
+          .whileTrue(flywheelKicker.setVelocityCommand(FLYWHEEL_KICKER_WARMUP_VELOCITY_RPM));
     }
 
     // setHoodPosition uses hood
