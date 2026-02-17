@@ -105,7 +105,6 @@ public class SuperStructure extends SubsystemBase {
         stopped();
         break;
       case SHOOTING:
-        shooting();
         updateShooterStates();
         applyShooterStates();
         break;
@@ -117,9 +116,16 @@ public class SuperStructure extends SubsystemBase {
 
   private void updateShooterStates() {
     previousShooterState = currentShooterState;
-    if (flywheel.atSetpoint(shotCalculator.calculateShot().flywheelSpeed(), FLYWHEEL_TOLERANCE_RPM)
-        && hood.atSetpoint(shotCalculator.calculateShot().hoodAngle())
-        && isAlignedToTarget.getAsBoolean()) {
+    boolean flywheelReady =
+        flywheel.atSetpoint(shotCalculator.calculateShot().flywheelSpeed(), FLYWHEEL_TOLERANCE_RPM);
+    boolean hoodReady = hood.atSetpoint(shotCalculator.calculateShot().hoodAngle());
+    boolean aligned = isAlignedToTarget.getAsBoolean();
+
+    Logger.recordOutput("Superstructure/Shooting/FlywheelReady", flywheelReady);
+    Logger.recordOutput("Superstructure/Shooting/HoodReady", hoodReady);
+    Logger.recordOutput("Superstructure/Shooting/Aligned", aligned);
+
+    if (flywheelReady && hoodReady && aligned) {
       currentShooterState = ShooterStates.FIRING;
     } else {
       currentShooterState = ShooterStates.PREPARING;
@@ -127,6 +133,7 @@ public class SuperStructure extends SubsystemBase {
   }
 
   private void applyShooterStates() {
+    shooting();
     if (currentShooterState == ShooterStates.FIRING) {
       flywheelKicker.setVelocity(KICKER_FEED_VELOCITY_RPM);
       indexer.setDutyCycle(INDEXER_FEED_DUTY_CYCLE);
