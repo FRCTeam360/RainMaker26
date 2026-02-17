@@ -154,7 +154,6 @@ public class RobotContainer {
     registerPathplannerCommand(
         "run flywheel kicker",
         flywheelKicker.setVelocityCommand(FLYWHEEL_KICKER_WARMUP_VELOCITY_RPM));
-    registerPathplannerCommand("spinup flywheel hub shot", commandFactory.shootWithRPM(3000.0));
     configureBindings();
     // configureTestBindings();
 
