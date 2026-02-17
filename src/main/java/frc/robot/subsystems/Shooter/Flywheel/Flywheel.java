@@ -6,22 +6,34 @@ package frc.robot.subsystems.Shooter.Flywheel;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
 public class Flywheel extends SubsystemBase {
+  private static final double SPINUP_SHOOTING_FLYWHEEL_RPM = 3250.0;
+
   private final FlywheelIO io;
   private final FlywheelIOInputsAutoLogged inputs = new FlywheelIOInputsAutoLogged();
+  private DoubleSupplier velocitySupplier = () -> 0.0;
 
   public enum FlywheelStates {
     OFF,
-    SHOOTING
+    SHOOTING,
+    AIMING
   }
 
   /** Creates a new Flywheel. */
   public Flywheel(FlywheelIO io) {
     this.io = io;
+  }
+
+  /**
+   * Sets the supplier for the flywheel velocity from the shot calculator.
+   *
+   * @param velocitySupplier a DoubleSupplier providing the desired flywheel velocity in RPM
+   */
+  public void setVelocitySupplier(DoubleSupplier velocitySupplier) {
+    this.velocitySupplier = velocitySupplier;
   }
 
   public FlywheelStates getState() {
@@ -38,6 +50,9 @@ public class Flywheel extends SubsystemBase {
     switch (wantedState) {
       case SHOOTING:
         currentState = FlywheelStates.SHOOTING;
+        break;
+      case AIMING:
+        currentState = FlywheelStates.AIMING;
         break;
       case OFF:
         currentState = FlywheelStates.OFF;
@@ -68,7 +83,10 @@ public class Flywheel extends SubsystemBase {
   private void applyState() {
     switch (currentState) {
       case SHOOTING:
-        setVelocity(Constants.SPINUP_SHOOTING_FLYWHEEL_RPM);
+        setVelocity(SPINUP_SHOOTING_FLYWHEEL_RPM);
+        break;
+      case AIMING:
+        setVelocity(velocitySupplier.getAsDouble());
         break;
       case OFF:
       default:

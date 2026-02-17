@@ -32,7 +32,7 @@ public class FlywheelKicker extends SubsystemBase {
     applyState();
   }
 
-  private static final double KICKER_VELOCITY_RPM = 4000.0;
+  private static final double KICKER_VELOCITY_RPM = 4500.0;
 
   private void applyState() {
     switch (currentState) {

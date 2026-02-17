@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKicker;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKicker.FlywheelKickerStates;
 import frc.robot.subsystems.Indexer.Indexer;
+import frc.robot.subsystems.Indexer.Indexer.IndexerStates;
 import frc.robot.subsystems.Intake.Intake;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel.FlywheelStates;
@@ -71,6 +72,9 @@ public class SuperStructure extends SubsystemBase {
     this.hood = hood;
     this.shotCalculator = shotCalculator;
     this.isAlignedToTarget = isAlignedToTarget;
+
+    flywheel.setVelocitySupplier(() -> shotCalculator.calculateShot().flywheelSpeed());
+    hood.setHoodAngleSupplier(() -> shotCalculator.calculateShot().hoodAngle());
   }
 
   private void updateState() {
@@ -130,17 +134,14 @@ public class SuperStructure extends SubsystemBase {
     }
   }
 
-  private static final double KICKER_FEED_VELOCITY_RPM = 4500.0;
-  private static final double INDEXER_FEED_DUTY_CYCLE = 0.4;
-  private static final double STOPPED_VELOCITY_RPM = 0.0;
-
   private void applyShooterStates() {
     shooting();
     if (currentShooterState == ShooterStates.FIRING) {
-      flywheelKicker.setVelocity(KICKER_FEED_VELOCITY_RPM);
-      indexer.setDutyCycle(INDEXER_FEED_DUTY_CYCLE);
+      flywheelKicker.setWantedState(FlywheelKickerStates.SHOOTING);
+      indexer.setWantedState(IndexerStates.SHOOTING);
     } else {
-      flywheelKicker.setVelocity(STOPPED_VELOCITY_RPM);
+      flywheelKicker.setWantedState(FlywheelKickerStates.OFF);
+      indexer.setWantedState(IndexerStates.OFF);
     }
   }
 
@@ -149,8 +150,8 @@ public class SuperStructure extends SubsystemBase {
   }
 
   private void shooting() {
-    flywheel.setVelocity(shotCalculator.calculateShot().flywheelSpeed());
-    hood.setPosition(shotCalculator.calculateShot().hoodAngle());
+    flywheel.setWantedState(FlywheelStates.AIMING);
+    hood.setWantedState(HoodStates.AIMING);
   }
 
   private void intaking() {
