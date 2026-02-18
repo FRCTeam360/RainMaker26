@@ -153,7 +153,8 @@ public class RobotContainer {
                           drivetrain.faceAngleWhileDrivingCommand(
                               () -> 0,
                               () -> 0,
-                              () -> shotCalculator.calculateShot().targetHeading()))));
+                              () -> shotCalculator.calculateShot().targetHeading())))
+              .andThen(superStructure.setStateCommand(SuperStates.IDLE)));
     }
     registerPathplannerCommand(
         "run flywheel kicker",
