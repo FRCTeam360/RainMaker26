@@ -68,7 +68,6 @@ public class RobotContainer {
   private IntakePivot intakePivot;
   private FlywheelKicker flywheelKicker;
 
-  private CommandFactory commandFactory;
   private SuperStructure superStructure;
 
   private ShotCalculator shotCalculator;
@@ -80,8 +79,9 @@ public class RobotContainer {
   // Replace with CommandPS4Controller or CommandJoystick if needed
 
   private final CommandXboxController driverCont = new CommandXboxController(0);
-
   private final CommandXboxController testCont1 = new CommandXboxController(5);
+
+  private static final double FLYWHEEL_KICKER_WARMUP_VELOCITY_RPM = 4000.0;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -110,11 +110,20 @@ public class RobotContainer {
             new Vision(
                 Map.ofEntries(
                     Map.entry(
-                        Constants.WoodBotConstants.LIMELIGHT,
+                        Constants.WoodBotConstants.LIMELIGHT_3,
                         new VisionIOLimelight(
-                            Constants.WoodBotConstants.LIMELIGHT,
+                            Constants.WoodBotConstants.LIMELIGHT_3,
                             () -> drivetrain.getAngle(),
                             () -> drivetrain.getAngularRate(),
+                            true,
+                            false)),
+                    Map.entry(
+                        Constants.WoodBotConstants.LIMELIGHT_4,
+                        new VisionIOLimelight(
+                            Constants.WoodBotConstants.LIMELIGHT_4,
+                            () -> drivetrain.getAngle(),
+                            () -> drivetrain.getAngularRate(),
+                            true,
                             true))));
         intake = new Intake(new IntakeIOWB());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOWB());
@@ -127,21 +136,17 @@ public class RobotContainer {
             Constants.WoodBotConstants.shotHoodAngleMap,
             Constants.WoodBotConstants.launchFlywheelSpeedMap);
     // Configure the trigger bindings
-    commandFactory =
-        new CommandFactory(
-            intake,
-            flywheel,
-            flywheelKicker,
-            hood,
-            indexer,
-            intakePivot,
-            vision,
-            drivetrain,
-            shotCalculator);
     // TODO: Re-enable superStructure construction and PathPlanner commands
-    // superStructure =
-    // new SuperStructure(
-    // intake, indexer, flywheelKicker, flywheel, hood, drivetrain, shotCalculator);
+    superStructure =
+        new SuperStructure(
+            intake,
+            indexer,
+            flywheelKicker,
+            flywheel,
+            hood,
+            drivetrain,
+            shotCalculator,
+            driverCont);
 
     if (Objects.nonNull(superStructure)) {
       registerPathplannerCommand(
@@ -149,8 +154,9 @@ public class RobotContainer {
       registerPathplannerCommand(
           "shoot at hub", superStructure.setStateCommand(SuperStates.SHOOTING));
     }
-    registerPathplannerCommand("run flywheel kicker", flywheelKicker.setVelocityCommand(4000.0));
-    registerPathplannerCommand("spinup flywheel hub shot", commandFactory.shootWithRPM(3000.0));
+    registerPathplannerCommand(
+        "run flywheel kicker",
+        flywheelKicker.setVelocityCommand(FLYWHEEL_KICKER_WARMUP_VELOCITY_RPM));
     configureBindings();
     // configureTestBindings();
 
@@ -187,7 +193,6 @@ public class RobotContainer {
    */
   private void configureTestBindings() {
     if (Objects.nonNull(drivetrain)) {
-      drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(testCont1));
       drivetrain.registerTelemetry(logger::telemeterize);
     }
 
@@ -227,43 +232,42 @@ public class RobotContainer {
     // basicIntakeCmd uses intake and indexer
     // TODO: Re-enable superStructure bindings
     if (Objects.nonNull(intake) && Objects.nonNull(indexer)) {
-      // driverCont.leftBumper().onTrue(superStructure.setStateCommand(SuperStates.INTAKING));
-      // driverCont.leftBumper().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
+      driverCont.leftBumper().onTrue(superStructure.setStateCommand(SuperStates.INTAKING));
+      driverCont.leftBumper().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
       driverCont.a().whileTrue(indexer.setDutyCycleCommand(0.5));
-      driverCont.leftBumper().whileTrue(commandFactory.basicIntakeCmd());
     }
 
     // setFlywheelKickerDutyCycle uses flywheelKicker
     if (Objects.nonNull(flywheelKicker)) {
-      driverCont.rightBumper().whileTrue(flywheelKicker.setVelocityCommand(4000.0));
+      driverCont
+          .rightBumper()
+          .whileTrue(flywheelKicker.setVelocityCommand(FLYWHEEL_KICKER_WARMUP_VELOCITY_RPM));
     }
 
     // setHoodPosition uses hood
     if (Objects.nonNull(hood)) {
-      hood.setDefaultCommand(
-          CommandLogger.logCommand(hood.setPositionCmd(0.0), "hood default command"));
+      // hood.setDefaultCommand(
+      //     CommandLogger.logCommand(hood.setPositionCmd(0.0), "hood default command"));
       driverCont.pov(0).onTrue(hood.moveToZeroAndZero());
-      driverCont.pov(90).whileTrue(commandFactory.setHoodPosition(4.0));
-      driverCont.pov(180).whileTrue(commandFactory.setHoodPosition(16.0));
-      driverCont.pov(270).whileTrue(commandFactory.setHoodPosition(23.0));
+      driverCont.pov(90).whileTrue(hood.setPositionCmd(4.0));
+      driverCont.pov(180).whileTrue(hood.setPositionCmd(16.0));
+      driverCont.pov(270).whileTrue(hood.setPositionCmd(23.0));
       driverCont.start().onTrue(hood.zero());
     }
 
     // shootWithRPM uses flywheel
     if (Objects.nonNull(flywheel)) {
-      driverCont.x().whileTrue(commandFactory.shootWithRPM(2500));
-      driverCont.b().whileTrue(commandFactory.shootWithRPM(3000));
-      driverCont.y().whileTrue(commandFactory.shootWithRPM(3500));
-      driverCont.rightTrigger().whileTrue(commandFactory.faceAngleWhileShooting(driverCont));
+      driverCont.x().whileTrue(flywheel.setVelocityCommand(2500));
+      driverCont.b().whileTrue(flywheel.setVelocityCommand(3000));
+      driverCont.y().whileTrue(flywheel.setVelocityCommand(3500));
       if (Objects.nonNull(superStructure)) {
-        // driverCont.rightTrigger().onTrue(superStructure.setStateCommand(SuperStates.SHOOTING));
-        // driverCont.rightTrigger().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
+        driverCont.rightTrigger().onTrue(superStructure.setStateCommand(SuperStates.SHOOTING));
+        driverCont.rightTrigger().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
       }
     }
 
     // Drivetrain commands
     if (Objects.nonNull(drivetrain)) {
-      drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
       // driverCont.leftTrigger().whileTrue(drivetrain.faceHubWhileDriving(driverCont));
       drivetrain.registerTelemetry(logger::telemeterize);
       driverCont.back().onTrue(drivetrain.zeroCommand());
