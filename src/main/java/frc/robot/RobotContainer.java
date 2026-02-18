@@ -141,6 +141,8 @@ public class RobotContainer {
     if (Objects.nonNull(superStructure)) {
       registerPathplannerCommand(
           "basic intake", superStructure.setStateCommand(SuperStates.INTAKING));
+      // TODO: add end condition based on either time or state from SuperStructure (based on sensor
+      // inputs)
       registerPathplannerCommand(
           "shoot at hub",
           superStructure

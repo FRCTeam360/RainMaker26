@@ -20,6 +20,34 @@ This is the robot code for RainMaker26 FRC 360's 26th robot for the 2026 season,
 | PathplannerLib | 2026.1.2 | [Javadoc](https://pathplanner.dev/api/java/)                                          | [Docs](https://pathplanner.dev/home.html)              |
 | AdvantageKit   | 26.0.0   | [Javadoc](https://docs.advantagekit.org/javadoc/)                                     | [Docs](https://docs.advantagekit.org/)                 |
 
+## WPILib Command Composition Quick Reference
+
+When reviewing or writing command compositions, use these exact semantics — do not guess:
+
+| Method | Group Type | Ends When |
+| --- | --- | --- |
+| `alongWith()` | `ParallelCommandGroup` | **ALL** commands finish |
+| `raceWith()` | `ParallelRaceGroup` | **ANY** command finishes |
+| `deadlineFor()` | `ParallelDeadlineGroup` | The **deadline** (calling) command finishes, interrupts all others |
+| `andThen()` | `SequentialCommandGroup` | Commands run in order, ends when last finishes |
+
+### Command lifecycle types
+
+| Factory / Class | Behavior |
+| --- | --- |
+| `InstantCommand` / `runOnce()` | Runs once, finishes immediately |
+| `RunCommand` / `run()` | Runs every cycle, **never finishes on its own** |
+| `runEnd()` | Runs every cycle with an end action, **never finishes on its own** |
+| `startEnd()` | Runs a start action on init; runs an end action when interrupted, **never finishes on its own** |
+
+
+### Common pitfalls
+
+- **PathPlanner NamedCommands must terminate** — an infinite command (e.g., `run()`) will stall the entire auto sequence
+- **`FieldCentricFacingAngle.HeadingController.atSetpoint()`** returns stale/invalid results when the facing-angle request is not actively being applied
+- **CTRE `StatusSignal` values must be refreshed** before reading; stale signals return old data silently
+- **`ParallelCommandGroup` with an `InstantCommand`** — the instant command finishes immediately but the group keeps running until all other commands finish; this is often not the intended behavior
+
 ## Project Structure
 
 ```
