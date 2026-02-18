@@ -20,8 +20,6 @@ public class VisionIOLimelight implements VisionIO {
   private final String name;
   private final DoubleSupplier gyroAngleSupplier;
   private final DoubleSupplier gyroAngleRateSupplier;
-  private final NetworkTable limelightTable =
-      NetworkTableInstance.getDefault().getTable("limelight");
   private int rewindCounter = 0;
   private final boolean isLimelight4;
 
@@ -163,10 +161,10 @@ public class VisionIOLimelight implements VisionIO {
 
   public void captureRewind(String eventName) {
     rewindCounter++;
-    limelightTable.getEntry("snapname").setString(eventName);
+    table.getEntry("snapname").setString(eventName);
     double[] captureData = {(double) rewindCounter, 10.0};
-    limelightTable.getEntry("capture_rewind").setDoubleArray(captureData);
-    
+    table.getEntry("capture_rewind").setDoubleArray(captureData);
+
   // while enabled
   public void enableIMUAssist() {
     if (isLimelight4) {
