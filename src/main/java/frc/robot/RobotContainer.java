@@ -138,10 +138,6 @@ public class RobotContainer {
             shotCalculator,
             drivetrain::isAlignedToTarget);
 
-    if (Objects.nonNull(drivetrain)) {
-      drivetrain.setDefaultCommand(drivetrain.fieldOrientedDriveCommand(driverCont));
-    }
-
     if (Objects.nonNull(superStructure)) {
       registerPathplannerCommand(
           "basic intake", superStructure.setStateCommand(SuperStates.INTAKING));
@@ -221,6 +217,21 @@ public class RobotContainer {
       vision.setDefaultCommand(consumeVisionMeasurements.ignoringDisable(true));
     }
     // TODO: make more elegant solution for null checking subsystems/commands
+    if (Objects.nonNull(drivetrain)) {
+      drivetrain.setDefaultCommand(drivetrain.fieldOrientedDriveCommand(driverCont));
+    }
+
+    if (Objects.nonNull(superStructure) && Objects.nonNull(drivetrain)) {
+      driverCont
+          .rightTrigger()
+          .whileTrue(
+              superStructure
+                  .setStateCommand(SuperStates.SHOOTING)
+                  .alongWith(
+                      drivetrain.faceAngleWhileDrivingCommand(
+                          driverCont, () -> shotCalculator.calculateShot().targetHeading())));
+      driverCont.rightTrigger().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
+    }
 
     // Null checks based on subsystems used by each command
     // basicIntakeCmd uses intake and indexer
@@ -254,17 +265,6 @@ public class RobotContainer {
       driverCont.x().whileTrue(flywheel.setVelocityCommand(2500));
       driverCont.b().whileTrue(flywheel.setVelocityCommand(3000));
       driverCont.y().whileTrue(flywheel.setVelocityCommand(3500));
-      if (Objects.nonNull(superStructure)) {
-        driverCont
-            .rightTrigger()
-            .whileTrue(
-                superStructure
-                    .setStateCommand(SuperStates.SHOOTING)
-                    .alongWith(
-                        drivetrain.faceAngleWhileDrivingCommand(
-                            driverCont, () -> shotCalculator.calculateShot().targetHeading())));
-        driverCont.rightTrigger().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
-      }
     }
 
     // Drivetrain commands

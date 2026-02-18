@@ -10,16 +10,13 @@ import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
 public class Flywheel extends SubsystemBase {
-  private static final double SPINUP_SHOOTING_FLYWHEEL_RPM = 3250.0;
-
   private final FlywheelIO io;
   private final FlywheelIOInputsAutoLogged inputs = new FlywheelIOInputsAutoLogged();
   private DoubleSupplier velocitySupplier = () -> 0.0;
 
   public enum FlywheelStates {
     OFF,
-    SHOOTING,
-    AIMING
+    SHOOTING
   }
 
   /** Creates a new Flywheel. */
@@ -51,9 +48,6 @@ public class Flywheel extends SubsystemBase {
       case SHOOTING:
         currentState = FlywheelStates.SHOOTING;
         break;
-      case AIMING:
-        currentState = FlywheelStates.AIMING;
-        break;
       case OFF:
         currentState = FlywheelStates.OFF;
         break;
@@ -83,9 +77,6 @@ public class Flywheel extends SubsystemBase {
   private void applyState() {
     switch (currentState) {
       case SHOOTING:
-        setVelocity(SPINUP_SHOOTING_FLYWHEEL_RPM);
-        break;
-      case AIMING:
         setVelocity(velocitySupplier.getAsDouble());
         break;
       case OFF:

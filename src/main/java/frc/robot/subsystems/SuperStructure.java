@@ -41,8 +41,7 @@ public class SuperStructure extends SubsystemBase {
     ,
     PASSING // has current zone, makes check for !current zone then passes to zone
     ,
-    SHOOTING,
-    AIMING
+    SHOOTING
   }
 
   public enum ShooterStates {
@@ -87,9 +86,6 @@ public class SuperStructure extends SubsystemBase {
       case SHOOTING:
         currentSuperState = SuperStates.SHOOTING;
         break;
-      case AIMING:
-        currentSuperState = SuperStates.AIMING;
-        break;
       case IDLE:
       default:
         currentSuperState = SuperStates.IDLE;
@@ -107,9 +103,6 @@ public class SuperStructure extends SubsystemBase {
       case SHOOTING:
         updateShooterStates();
         applyShooterStates();
-        break;
-      case AIMING:
-        aiming();
         break;
     }
   }
@@ -145,13 +138,9 @@ public class SuperStructure extends SubsystemBase {
     }
   }
 
-  private void aiming() {
-    hood.setWantedState(HoodStates.AIMING);
-  }
-
   private void shooting() {
-    flywheel.setWantedState(FlywheelStates.AIMING);
-    hood.setWantedState(HoodStates.AIMING);
+    flywheel.setWantedState(FlywheelStates.SHOOTING);
+    hood.setWantedState(HoodStates.SHOOTING);
   }
 
   private void intaking() {
