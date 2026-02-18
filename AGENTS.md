@@ -91,12 +91,15 @@ View the report: open build/reports/spotbugs/spotbugs.html
 
 ## Code Patterns
 
-- Use Command-based programming: subsystems own hardware, commands define actions
+- Use Command-based programming controlling the drivetrain and superstructure for competition code: superstructure owns non-drivetrain subsystems own hardware, commands define actions
+- Superstructure state transition commands are fire and forget
+- Subsystems are controlled by the superstructure through setting wanted states and can be unhooked from that and ran by commands through a separate state for testing
 - **Infrastructure constants** (CAN IDs, sensor ports, physical hardware config) always go in Constants.java
 - **Tuning constants** (PID gains, setpoints, tolerances, speeds) should be named `private static final` variables in the file where they're used
 - Avoid unnamed literals - give values descriptive names **with units** (e.g., `MAX_VELOCITY_MPS`, `STALL_CURRENT_AMPS`, `TIMEOUT_SECONDS`)
-- Use AdvantageKit's @AutoLogOutput for telemetry on important values
-- Subsystems extend SubsystemBase; commands extend Command or use robot action methods
+- Use AdvantageKit's @AutoLog on IO input classes for hardware telemetry
+- Use AdvantageKit's Logger.recordOutput() for all other values, grouping them by subsystem, class, or state type
+- Subsystems extend SubsystemBase
 - Subsystems have IO layers with specific hardware implementations (other than the superstructure) following FRC 6328's architecture
 
 ## Naming Conventions
