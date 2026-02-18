@@ -95,8 +95,12 @@ public class Hood extends SubsystemBase {
     return inputs.position;
   }
 
+  public Command setPositionCmd(DoubleSupplier position) {
+    return this.run(() -> io.setPosition(position.getAsDouble()));
+  }
+
   public Command setPositionCmd(double position) {
-    return this.runOnce(() -> io.setPosition(position));
+    return this.setPositionCmd(() -> position);
   }
 
   public void setEncoder(double position) {
@@ -111,12 +115,18 @@ public class Hood extends SubsystemBase {
     return Math.abs(getPosition() - setpoint) < TOLERANCE;
   }
 
+  public boolean atSetpoint(DoubleSupplier setpoint) {
+    return atSetpoint(setpoint.getAsDouble());
+  }
+
   public Command moveToZeroAndZero() {
-    return Commands.waitUntil(
-            () -> Math.abs(inputs.supplyCurrent) >= 30.0 && Math.abs(inputs.velocity) == 0.0)
-        .deadlineFor(this.runEnd(() -> io.setDutyCycle(0.1), () -> io.setDutyCycle(0.0)))
-        // TODO make this call this.zero()
-        .andThen(runOnce(() -> inputs.position = 0.0));
+    final double ZERO_DUTY_CYCLE = -0.03;
+    final double ZERO_TIMEOUT_SECONDS = 3.0;
+    final double ZERO_SETTLE_SECONDS = 2.0;
+    return Commands.runEnd(() -> io.setDutyCycle(ZERO_DUTY_CYCLE), () -> io.setDutyCycle(0.0))
+        .withTimeout(ZERO_TIMEOUT_SECONDS)
+        .andThen(Commands.waitSeconds(ZERO_SETTLE_SECONDS))
+        .andThen(zero());
   }
 
   @Override
