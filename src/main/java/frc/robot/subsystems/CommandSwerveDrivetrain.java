@@ -124,28 +124,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
           .withRotationalDeadband(maxAngularVelocity.in(RadiansPerSecond) * 0.01)
           .withDriveRequestType(m_driveRequestType);
 
-  public void fieldOrientedDrive(CommandXboxController driveCont) {
-    FIELD_CENTRIC_DRIVE.ForwardPerspective = ForwardPerspectiveValue.OperatorPerspective;
-    this.setControl(
-        FIELD_CENTRIC_DRIVE
-            .withVelocityX(
-                Math.pow(driveCont.getLeftY(), 3)
-                    * maxSpeed.in(MetersPerSecond)
-                    * -1.0) // Drive forward with negative Y (forward)
-            .withVelocityY(
-                Math.pow(driveCont.getLeftX(), 3)
-                    * maxSpeed.in(MetersPerSecond)
-                    * -1.0) // Drive left with negative X (left)
-            .withRotationalRate(
-                Math.pow(driveCont.getRightX(), 2)
-                    * (maxAngularVelocity.in(RadiansPerSecond) / 2.0)
-                    * -Math.signum(driveCont.getRightX())) // Drive
-        // counterclockwise
-        // with negative X
-        // (left)
-        );
-  }
-
   // Xout Command
   public void xOut() {
     this.setControl(xOutReq);
@@ -183,21 +161,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         .finallyDo(() -> m_faceHubRequest.HeadingController.reset());
   }
 
-  public void faceAngleWhileDriving(double velocityX, double velocityY, Rotation2d heading) {
-    this.setControl(
-        m_faceHubRequest
-            .withVelocityX(
-                DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
-                    ? velocityX
-                    : -velocityX)
-            .withVelocityY(
-                DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
-                    ? velocityY
-                    : -velocityY)
-            .withTargetDirection(heading)
-            .withDeadband(maxSpeed.in(MetersPerSecond) * 0.01));
-  }
-
   /**
    * Creates a command that drives the robot in field-centric mode while continuously rotating to
    * face the hub center, using controller input with cubic response curve.
@@ -211,13 +174,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         () -> Math.pow(driveCont.getLeftY(), 3) * maxSpeed.in(MetersPerSecond) * -1.0,
         () -> Math.pow(driveCont.getLeftX(), 3) * maxSpeed.in(MetersPerSecond) * -1.0,
         headingSupplier);
-  }
-
-  public void faceAngleWhileDriving(CommandXboxController driveCont, Rotation2d heading) {
-    faceAngleWhileDriving(
-        Math.pow(driveCont.getLeftY(), 3) * maxSpeed.in(MetersPerSecond) * -1.0,
-        Math.pow(driveCont.getLeftX(), 3) * maxSpeed.in(MetersPerSecond) * -1.0,
-        heading);
   }
 
   /*
