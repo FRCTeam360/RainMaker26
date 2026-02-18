@@ -106,6 +106,8 @@ public class FlywheelIOSim implements FlywheelIO {
 
       // Command the tunable setpoint to both motors (convert RPM to RPS)
       this.setVelocityBangBang(tunableSetpoint.get() / 60.0);
+      // Command the tunable setpoint to both motors
+      this.setVelocity(tunableSetpoint.get());
     }
 
     // Step 1: Get the commanded voltage from motors and apply to simulation
@@ -170,5 +172,8 @@ public class FlywheelIOSim implements FlywheelIO {
   @Override
   public void stop() {
     motorControllerSim1.set(0.0);
+  public void setVelocity(double rpm) {
+    rpm = rpm / 60;
+    motorControllerSim1.setControl(velocityRequest.withVelocity(rpm));
   }
 }

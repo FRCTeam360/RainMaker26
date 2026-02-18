@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems.Shooter.Flywheel;
 
+import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
@@ -21,6 +22,8 @@ public class FlywheelIOWB implements FlywheelIO {
   private final TalonFX[] motors = {
       new TalonFX(WoodBotConstants.FLYWHEEL_RIGHT_ID, WoodBotConstants.CANBUS_NAME),
       new TalonFX(WoodBotConstants.FLYWHEEL_LEFT_ID, WoodBotConstants.CANBUS_NAME)
+    new TalonFX(WoodBotConstants.FLYWHEEL_RIGHT_ID, WoodBotConstants.CANBUS),
+    new TalonFX(WoodBotConstants.FLYWHEEL_LEFT_ID, WoodBotConstants.CANBUS)
   };
   private TalonFXConfiguration rightConfig = new TalonFXConfiguration();
   private TalonFXConfiguration leftConfig = new TalonFXConfiguration();
@@ -108,6 +111,9 @@ public class FlywheelIOWB implements FlywheelIO {
     // Traditional PID control using voltage control (not limited by torque current)
     // Limited only by supply current limit (100A) and voltage saturation
     motors[0].setControl(velocityPID.withVelocity(velocityRPS));
+  public void setVelocity(double rpm) {
+    double rps = rpm / 60.0;
+    motors[0].setControl(velocityTorqueCurrent.withVelocity(rps));
   }
 
   @Override

@@ -28,6 +28,7 @@ public interface FlywheelIO {
 
   /** Stop the flywheel */
   public void stop();
+  public void setVelocity(double rpm);
 
   public default void updateInputs(FlywheelIOInputs inputs) {}
 }

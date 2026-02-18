@@ -144,6 +144,11 @@ public class Flywheel extends SubsystemBase {
   }
 
   public double getLeaderVelocityRPS() {
+  public void setVelocity(double velocity) {
+    io.setVelocity(velocity);
+  }
+
+  public double getVelocity() {
     if (inputs.velocities.length > 0) {
       return inputs.velocities[0];
     }
@@ -152,6 +157,10 @@ public class Flywheel extends SubsystemBase {
 
   public boolean atSetpoint(double targetRPS, double toleranceRPS) {
     return Math.abs(getLeaderVelocityRPS() - targetRPS) < toleranceRPS;
+  }
+
+  public boolean atSetpoint(DoubleSupplier targetRPM, double tolerance) {
+    return atSetpoint(targetRPM.getAsDouble(), tolerance);
   }
 
   private void applyState() {
@@ -173,6 +182,8 @@ public class Flywheel extends SubsystemBase {
         // COAST: Coast mode (no active control)
         currentControlMode = FlywheelControlType.VOLTAGE_VELOCITY;
         io.setVelocityPID(targetVelocityRPS);
+      case SHOOTING:
+        setVelocity(Constants.SPINUP_SHOOTING_FLYWHEEL_RPM);
         break;
 
       case OFF:
@@ -220,5 +231,12 @@ public class Flywheel extends SubsystemBase {
 
   public Command setVelocityCommand(double rps) {
     return this.runEnd(() -> setVelocityRPS(rps), () -> io.stop());
+  public Command setVelocityCommand(DoubleSupplier supplierVelocity) {
+    return this.runEnd(
+        () -> io.setVelocity(supplierVelocity.getAsDouble()), () -> io.setDutyCycle(0.0));
+  }
+
+  public Command setVelocityCommand(double velocity) {
+    return this.setVelocityCommand(() -> velocity);
   }
 }

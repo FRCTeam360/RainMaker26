@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.CANBus;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.hal.HALUtil;
@@ -19,7 +20,19 @@ import edu.wpi.first.hal.HALUtil;
 public final class Constants {
   public static final AprilTagFieldLayout FIELD_LAYOUT =
       AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
-  public static final double SPINUP_SHOOTING_FLYWHEEL_RPM = 3250;
+  public static final double SPINUP_SHOOTING_FLYWHEEL_RPM = 3250.0;
+
+  public static final int IMU_MODE_EXTERNAL_ONLY = 0;
+
+  public static final int IMU_MODE_EXTERNAL_SEED = 1;
+
+  public static final int IMU_MODE_INTERNAL_ONLY = 2;
+
+  public static final int IMU_MODE_INTERNAL_MT1_ASSIST = 3;
+
+  public static final int IMU_MODE_INTERNAL_EXTERNAL_ASSIST = 4;
+
+  public static final double IMU_ASSIST_ALPHA = 0.001;
 
   public static final boolean TUNING_MODE = false;
   public static final boolean DISABLE_HAL = false;
@@ -30,6 +43,8 @@ public final class Constants {
     REPLAY
   }
 
+  public static final CANBus RIO_CANBUS = new CANBus("rio");
+
   public static class WoodBotConstants {
     // === INTAKE ===
     public static final int INTAKE_SENSOR_PORT = 0;
@@ -38,12 +53,11 @@ public final class Constants {
 
     // === HOPPER ===
     public static final int INDEXER_SENSOR_PORT = 1;
-    public static final int INDEXER_SENSOR_ID = 2;
     public static final int INDEXER_ID = 16;
 
     // === FLYWHEEL ===
     public static final int FLYWHEEL_KICKER_ID = 17;
-    public static final int FLYWHEEL_KICKER_SENSOR_ID = 3;
+    public static final int FLYWHEEL_KICKER_SENSOR_ID = 2;
     public static final int FLYWHEEL_RIGHT_ID = 18;
     public static final int FLYWHEEL_LEFT_ID = 19;
 
@@ -51,10 +65,11 @@ public final class Constants {
     public static final int HOOD_ID = 20;
 
     // === LIMELIGHT ===
-    public static final String LIMELIGHT = "limelight";
+    public static final String LIMELIGHT_3 = "limelight";
+    public static final String LIMELIGHT_4 = "limelight-two";
 
     // === CANBUS ===
-    public static final String CANBUS_NAME = "Default Name";
+    public static final CANBus CANBUS = new CANBus("Default Name");
   }
 
   public static class SimulationConstants {
