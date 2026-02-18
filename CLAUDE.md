@@ -43,7 +43,7 @@ When reviewing or writing command compositions, use these exact semantics — do
 ### Common pitfalls
 
 - **PathPlanner NamedCommands must terminate** — an infinite command (e.g., `run()`) will stall the entire auto sequence
-- **`FieldCentricFacingAngle.HeadingController.atSetpoint()`** returns stale/invalid results when the facing-angle request is not actively being applied
+- **`FieldCentricFacingAngle.HeadingController.atSetpoint()`** returns stale/invalid results when the facing-angle request is not actively being applied; ensure that it's being reset when called
 - **CTRE `StatusSignal` values must be refreshed** before reading; stale signals return old data silently
 
 ## Project Structure
