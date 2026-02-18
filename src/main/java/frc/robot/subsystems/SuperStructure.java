@@ -124,7 +124,7 @@ public class SuperStructure extends SubsystemBase {
 
   private void updateShooterStates() {
     previousShooterState = currentShooterState;
-    if (flywheel.atSetpoint(shotCalculator.calculateShot().flywheelSpeed(), FLYWHEEL_TOLERANCE_RPM)
+    if (flywheel.isAtGoal()
         && hood.atSetpoint(shotCalculator.calculateShot().hoodAngle())) {
       currentShooterState = ShooterStates.FIRING;
     } else {
@@ -146,7 +146,7 @@ public class SuperStructure extends SubsystemBase {
   }
 
   private void shooting() {
-    flywheel.setVelocity(shotCalculator.calculateShot().flywheelSpeed());
+    flywheel.setVelocityRPM(shotCalculator.calculateShot().flywheelSpeed());
     hood.setPosition(shotCalculator.calculateShot().hoodAngle());
     if (DriverStation.isTeleopEnabled()) {
       drivetrain.faceAngleWhileDriving(controller, shotCalculator.calculateShot().targetHeading());

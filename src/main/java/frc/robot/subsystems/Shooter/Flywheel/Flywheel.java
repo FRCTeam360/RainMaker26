@@ -23,12 +23,11 @@ public class Flywheel extends SubsystemBase {
     COAST           // Legacy state for compatibility
   }
 
-
-  // These enums are more for logging and debugging purposes - the actual control mode is determined by the state machine logic
+  // These enums are for logging and debugging - actual control mode is determined by state machine
   public enum FlywheelControlType {
-    DUTY_CYCLE_BANG_BANG,   // Startup/Recovery - fast acceleration
-    TORQUE_CURRENT_BANG_BANG, // Idle/Ball - consistent torque
-    VOLTAGE_VELOCITY, // No control, free spinning
+    DUTY_CYCLE_BANG_BANG,      // Startup/Recovery - fast acceleration
+    TORQUE_CURRENT_BANG_BANG,  // Idle/Ball - consistent torque
+    VOLTAGE_VELOCITY,          // Velocity PID control
     STOP 
   }
 
@@ -45,7 +44,7 @@ public class Flywheel extends SubsystemBase {
   private final Debouncer atGoalDebouncer = new Debouncer(
       atGoalDebounceSeconds.get(), DebounceType.kFalling);
 
-  private FlywheelControlType currentControlMode = FlywheelControlType.DUTY_CYCLE_BANG_BANG;
+  private FlywheelControlType currentControlMode = FlywheelControlType.STOP;
   private boolean atGoal = false;
   private double targetVelocityRPS = 0.0;
 
@@ -57,19 +56,20 @@ public class Flywheel extends SubsystemBase {
   /**
    * Set flywheel velocity using 4-phase bang-bang control.
    * State machine handles control mode transitions automatically.
-   * 
    * Can be called repeatedly with different targets - state machine will adapt.
+   * 
+   * @param velocityRPM target velocity in rotations per minute
    */
-  public void setVelocityRPS(double velocityRPS) {
-    targetVelocityRPS = velocityRPS;
+  public void setVelocityRPM(double velocityRPM) {
+    targetVelocityRPS = velocityRPM  / 60.0;
     
     // Only transition states if we're currently OFF or target goes to zero
-    if (velocityRPS > 0.0 && wantedState == FlywheelStates.OFF) {
+    if (velocityRPM > 0.0 && wantedState == FlywheelStates.OFF) {
       setWantedState(FlywheelStates.SPINNING_UP);
-    } else if (velocityRPS == 0.0) {
+    } else if (velocityRPM == 0.0) {
       setWantedState(FlywheelStates.OFF);
     }
-    // Otherwise let state machine handle transitions (SPINNING_UP <-> AT_SPEED)
+    // Otherwise let state machine handle transitions (SPINNING_UP <-> AT_SETPOINT)
   }
 
   public boolean isAtGoal() {
@@ -96,7 +96,7 @@ public class Flywheel extends SubsystemBase {
    */
   private boolean isAtSetpointVelocity() {
     double currentRPS = getLeaderVelocityRPS();
-    boolean inTolerance = Math.abs(currentRPS - targetVelocityRPS) <= toleranceRPS.get();
+    boolean inTolerance = Math.abs(currentRPS - targetVelocityRPS) <= toleranceRPS.get() ;
     
     // Fast debouncer for control mode transitions (25ms default)
     boolean isAtSpeed = controlModeDebouncer.calculate(inTolerance);
@@ -144,46 +144,30 @@ public class Flywheel extends SubsystemBase {
   }
 
   public double getLeaderVelocityRPS() {
-  public void setVelocity(double velocity) {
-    io.setVelocity(velocity);
-  }
-
-  public double getVelocity() {
     if (inputs.velocities.length > 0) {
-      return inputs.velocities[0];
+      return inputs.velocities[0];  // Convert from RPM to RPS
     }
     return 0.0;
   }
 
-  public boolean atSetpoint(double targetRPS, double toleranceRPS) {
-    return Math.abs(getLeaderVelocityRPS() - targetRPS) < toleranceRPS;
-  }
-
-  public boolean atSetpoint(DoubleSupplier targetRPM, double tolerance) {
-    return atSetpoint(targetRPM.getAsDouble(), tolerance);
-  }
-
   private void applyState() {
     switch (currentState) {
-      
       case SPINNING_UP:
-        // SPINNING_UP: Duty cycle bang-bang (fast acceleration while spinning up)
+        // Duty cycle bang-bang for fast acceleration while spinning up
         currentControlMode = FlywheelControlType.DUTY_CYCLE_BANG_BANG;
         io.setVelocityBangBang(targetVelocityRPS);
         break;
       
       case AT_SETPOINT:
-        // AT_SETPOINT: Torque current bang-bang (maintain speed with consistent torque)
+        // Torque current bang-bang to maintain speed with consistent torque
         currentControlMode = FlywheelControlType.TORQUE_CURRENT_BANG_BANG;
         io.setVelocityTorqueCurrentBangBang(targetVelocityRPS);
         break;
 
       case COAST:
-        // COAST: Coast mode (no active control)
+        // Velocity PID control for coast mode
         currentControlMode = FlywheelControlType.VOLTAGE_VELOCITY;
         io.setVelocityPID(targetVelocityRPS);
-      case SHOOTING:
-        setVelocity(Constants.SPINUP_SHOOTING_FLYWHEEL_RPM);
         break;
 
       case OFF:
@@ -230,13 +214,11 @@ public class Flywheel extends SubsystemBase {
   }
 
   public Command setVelocityCommand(double rps) {
-    return this.runEnd(() -> setVelocityRPS(rps), () -> io.stop());
-  public Command setVelocityCommand(DoubleSupplier supplierVelocity) {
-    return this.runEnd(
-        () -> io.setVelocity(supplierVelocity.getAsDouble()), () -> io.setDutyCycle(0.0));
+    return this.runEnd(() -> setVelocityRPM(rps), () -> io.stop());
   }
 
-  public Command setVelocityCommand(double velocity) {
-    return this.setVelocityCommand(() -> velocity);
+  public Command setVelocityCommand(DoubleSupplier supplierVelocity) {
+    return this.runEnd(
+        () -> setVelocityRPM(supplierVelocity.getAsDouble()), () -> io.stop());
   }
 }
