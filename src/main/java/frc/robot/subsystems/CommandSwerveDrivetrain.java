@@ -223,7 +223,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         heading);
   }
 
-  boolean stillAligned = false;
+  private boolean stillAligned = false;
 
   /**
    * Creates a command that faces the target while driving and x-outs the wheels when the robot is
@@ -260,6 +260,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
                 if (hasDriverInput || !stillAligned) {
                   isXOuted = false;
+                  stillAligned = false;
                   m_faceHubRequest.HeadingController.reset();
                 } else {
                   this.setControl(xOutReq);
@@ -293,6 +294,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         .finallyDo(
             () -> {
               isXOuted = false;
+              stillAligned = false;
               m_faceHubRequest.HeadingController.reset();
             });
   }
