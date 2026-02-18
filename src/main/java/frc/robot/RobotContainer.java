@@ -142,7 +142,12 @@ public class RobotContainer {
       registerPathplannerCommand(
           "basic intake", superStructure.setStateCommand(SuperStates.INTAKING));
       registerPathplannerCommand(
-          "shoot at hub", superStructure.setStateCommand(SuperStates.SHOOTING));
+          "shoot at hub",
+          superStructure
+              .setStateCommand(SuperStates.SHOOTING)
+              .alongWith(
+                  drivetrain.faceAngleWhileDrivingCommand(
+                      () -> 0, () -> 0, () -> shotCalculator.calculateShot().targetHeading())));
     }
     registerPathplannerCommand(
         "run flywheel kicker",
