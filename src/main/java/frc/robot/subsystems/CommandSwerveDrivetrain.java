@@ -49,6 +49,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   private double m_lastSimTime;
   private static final String SUBSYSTEM_NAME = "Swerve/";
   private final SwerveRequest xOutReq = new SwerveRequest.SwerveDriveBrake();
+  private boolean isXOuted = false;
 
   // Keep track of when vision measurements are added for logging context
   private boolean hasVisionMeasurements = false;
@@ -81,6 +82,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   private static final double HEADING_KI = 0.00;
   private static final double HEADING_KD = 0.005;
   private static final double HEADING_I_ZONE = 0.0;
+  private static final double HEADING_TOLERANCE_RAD = Math.toRadians(3.0);
+
+  /** Minimum commanded velocity (fraction of max speed) to count as driver input. */
+  private static final double DRIVER_INPUT_THRESHOLD = 0.05;
 
   // Field-centric facing angle request for hub tracking
   private final SwerveRequest.FieldCentricFacingAngle m_faceHubRequest =
@@ -218,6 +223,94 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         heading);
   }
 
+  /**
+   * Creates a command that faces the target while driving and x-outs the wheels when the robot is
+   * stationary and aligned. If the driver provides stick input, the command exits x-out and returns
+   * to face-angle driving to re-align.
+   *
+   * <p>Uses {@link #isAlignedToTarget()} for the alignment check, which is only valid while the
+   * face-angle request is actively applied. The heading controller is reset on every transition out
+   * of x-out so that {@code atSetpoint()} starts fresh and must re-converge before the robot can
+   * x-out again.
+   *
+   * @param velocityXSupplier Supplier for X velocity (field-relative, forward positive) in m/s
+   * @param velocityYSupplier Supplier for Y velocity (field-relative, left positive) in m/s
+   * @param headingSupplier Supplier for the target heading to face
+   * @return Command that x-outs when aligned and stationary, otherwise faces the target
+   */
+  public Command xOutWhileShootingCommand(
+      DoubleSupplier velocityXSupplier,
+      DoubleSupplier velocityYSupplier,
+      Supplier<Rotation2d> headingSupplier) {
+
+    return this.run(
+            () -> {
+              double vx = velocityXSupplier.getAsDouble();
+              double vy = velocityYSupplier.getAsDouble();
+              double commandedSpeedMps = Math.hypot(vx, vy);
+              boolean hasDriverInput =
+                  commandedSpeedMps > maxSpeed.in(MetersPerSecond) * DRIVER_INPUT_THRESHOLD;
+
+              if (isXOuted) {
+                // Heading controller is stale while x-outed, so check alignment manually
+                double headingErrorRad = headingSupplier.get().minus(getRotation2d()).getRadians();
+                boolean stillAligned = Math.abs(headingErrorRad) < HEADING_TOLERANCE_RAD;
+
+                if (hasDriverInput || !stillAligned) {
+                  isXOuted = false;
+                  m_faceHubRequest.HeadingController.reset();
+                } else {
+                  this.setControl(xOutReq);
+                }
+              }
+
+              if (!isXOuted) {
+                // While face-angle is active, isAlignedToTarget() is valid
+                if (!hasDriverInput && isAlignedToTarget()) {
+                  isXOuted = true;
+                  this.setControl(xOutReq);
+                } else {
+                  Rotation2d target = headingSupplier.get();
+                  this.setControl(
+                      m_faceHubRequest
+                          .withVelocityX(
+                              DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
+                                  ? vx
+                                  : -vx)
+                          .withVelocityY(
+                              DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
+                                  ? vy
+                                  : -vy)
+                          .withTargetDirection(target));
+                }
+              }
+
+              Logger.recordOutput(SUBSYSTEM_NAME + "XOutShooting/HasDriverInput", hasDriverInput);
+              Logger.recordOutput(SUBSYSTEM_NAME + "XOutShooting/IsXOuted", isXOuted);
+            })
+        .finallyDo(
+            () -> {
+              isXOuted = false;
+              m_faceHubRequest.HeadingController.reset();
+            });
+  }
+
+  /**
+   * Creates a command that x-outs while shooting using controller input with cubic response curve.
+   *
+   * @param driveCont The Xbox controller for driver input
+   * @param headingSupplier Supplier for the target heading to face
+   * @return Command that x-outs when aligned and stationary, otherwise faces the target
+   * @see #xOutWhileShootingCommand(DoubleSupplier, DoubleSupplier, Supplier)
+   */
+  public Command xOutWhileShootingCommand(
+      CommandXboxController driveCont, Supplier<Rotation2d> headingSupplier) {
+    return xOutWhileShootingCommand(
+        () -> Math.pow(driveCont.getLeftY(), 3) * maxSpeed.in(MetersPerSecond) * -1.0,
+        () -> Math.pow(driveCont.getLeftX(), 3) * maxSpeed.in(MetersPerSecond) * -1.0,
+        headingSupplier);
+  }
+
   /*
    * SysId routine for characterizing translation. This is used to find PID gains
    * for the drive motors.
@@ -295,6 +388,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     m_faceHubRequest.HeadingController.setPID(HEADING_KP, HEADING_KI, HEADING_KD);
     m_faceHubRequest.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
     m_faceHubRequest.HeadingController.setIZone(HEADING_I_ZONE);
+    m_faceHubRequest.HeadingController.setTolerance(HEADING_TOLERANCE_RAD);
     m_faceHubRequest.ForwardPerspective = ForwardPerspectiveValue.BlueAlliance;
     if (Utils.isSimulation()) {
       startSimThread();
@@ -368,6 +462,20 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
   public Rotation2d getRotation2d() {
     return getPose2d().getRotation();
+  }
+
+  /**
+   * Returns whether the heading controller is aligned to its target angle within the configured
+   * tolerance.
+   *
+   * <p>Note: This only returns meaningful results while a {@link
+   * SwerveRequest.FieldCentricFacingAngle} request is actively being applied. Before the first PID
+   * calculation, this returns false.
+   *
+   * @return true if the heading error is within {@link #HEADING_TOLERANCE_RAD}
+   */
+  public boolean isAlignedToTarget() {
+    return m_faceHubRequest.HeadingController.atSetpoint();
   }
 
   public double getAngle() {

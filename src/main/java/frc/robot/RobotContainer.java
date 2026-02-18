@@ -252,8 +252,19 @@ public class RobotContainer {
       driverCont.x().whileTrue(flywheel.setVelocityCommand(2500));
       driverCont.b().whileTrue(flywheel.setVelocityCommand(3000));
       driverCont.y().whileTrue(flywheel.setVelocityCommand(3500));
-      if (Objects.nonNull(superStructure)) {
-        driverCont.rightTrigger().onTrue(superStructure.setStateCommand(SuperStates.SHOOTING));
+      if (Objects.nonNull(superStructure) && Objects.nonNull(drivetrain)) {
+        // Linked pair: whileTrue sets SHOOTING + x-out-aligns, onFalse resets to IDLE.
+        // The InstantCommand (setStateCommand) finishes immediately; the alongWith group
+        // stays alive via xOutWhileShootingCommand until whileTrue interrupts it.
+        driverCont
+            .rightTrigger()
+            .whileTrue(
+                superStructure
+                    .setStateCommand(SuperStates.SHOOTING)
+                    .alongWith(
+                        drivetrain.xOutWhileShootingCommand(
+                            driverCont, () -> shotCalculator.calculateShot().targetHeading())));
+        // Must stay paired with the whileTrue above to reset state on trigger release
         driverCont.rightTrigger().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
       }
     }
