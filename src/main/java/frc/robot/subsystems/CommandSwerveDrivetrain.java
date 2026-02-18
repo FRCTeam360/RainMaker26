@@ -169,17 +169,18 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
       DoubleSupplier velocityYSupplier,
       Supplier<Rotation2d> headingSupplier) {
     return this.applyRequest(
-        () ->
-            m_faceHubRequest
-                .withVelocityX(
-                    DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
-                        ? velocityXSupplier.getAsDouble()
-                        : -velocityXSupplier.getAsDouble())
-                .withVelocityY(
-                    DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
-                        ? velocityYSupplier.getAsDouble()
-                        : -velocityYSupplier.getAsDouble())
-                .withTargetDirection(headingSupplier.get()));
+            () ->
+                m_faceHubRequest
+                    .withVelocityX(
+                        DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
+                            ? velocityXSupplier.getAsDouble()
+                            : -velocityXSupplier.getAsDouble())
+                    .withVelocityY(
+                        DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
+                            ? velocityYSupplier.getAsDouble()
+                            : -velocityYSupplier.getAsDouble())
+                    .withTargetDirection(headingSupplier.get()))
+        .finallyDo(() -> m_faceHubRequest.HeadingController.reset());
   }
 
   public void faceAngleWhileDriving(double velocityX, double velocityY, Rotation2d heading) {
