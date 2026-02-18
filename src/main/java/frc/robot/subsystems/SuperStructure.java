@@ -35,7 +35,6 @@ public class SuperStructure extends SubsystemBase {
     X_OUT, // hold down button to x out wheels or press once and wheels stop X-ing out when moved
     AUTO_ALIGN, // aligns to a target
     X_OUT_SHOOTING, // when robot is aligned, ends when toggled off or shooting stops
-    READY_TO_FIRE, // if robot aligned and flywheel up to proper speed
     FIRING, // while there's still fuel to shoot and ready to fire
     EJECTING, // eject button
     PASSING // has current zone, makes check for !current zone then passes to zone
