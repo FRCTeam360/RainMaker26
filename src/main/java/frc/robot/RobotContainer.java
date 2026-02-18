@@ -203,8 +203,8 @@ public class RobotContainer {
     }
     if (Objects.nonNull(indexer)) {
       testCont1.y().whileTrue(indexer.setDutyCycleCommand(() -> 0.5));
-      operatorController.pov(0).whileTrue(indexer.setDutyCycleCommand(() -> 0.3));
-      operatorController.pov(270).whileTrue(indexer.setDutyCycleCommand(() -> -0.3));
+      operatorController.pov(0).whileTrue(indexer.setDutyCycleCommand());
+      operatorController.pov(270).whileTrue(indexer.setDutyCycleCommand());
     }
     if (Objects.nonNull(intake)) {
       testCont1.leftBumper().whileTrue(intake.setDutyCycleCommand(() -> 0.5));
