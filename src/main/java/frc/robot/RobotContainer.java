@@ -252,7 +252,7 @@ public class RobotContainer {
     // Null checks based on subsystems used by each command
     // basicIntakeCmd uses intake and indexer
     // TODO: Re-enable superStructure bindings
-    if (Objects.nonNull(intake) && Objects.nonNull(indexer)) {
+    if (Objects.nonNull(superStructure) && Objects.nonNull(intake) && Objects.nonNull(indexer)) {
       driverCont.leftBumper().onTrue(superStructure.setStateCommand(SuperStates.INTAKING));
       driverCont.leftBumper().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
       driverCont.a().whileTrue(indexer.setDutyCycleCommand(0.5));

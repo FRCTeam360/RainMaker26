@@ -106,9 +106,16 @@ public class SuperStructure extends SubsystemBase {
         applyShooterStates();
         break;
     }
+    resetShooterStateIfNotShooting();
   }
 
   private static final double FLYWHEEL_TOLERANCE_RPM = 500.0;
+
+  private void resetShooterStateIfNotShooting() {
+    if (currentSuperState != SuperStates.SHOOTING) {
+      currentShooterState = ShooterStates.PREPARING;
+    }
+  }
 
   private void updateShooterStates() {
     previousShooterState = currentShooterState;
