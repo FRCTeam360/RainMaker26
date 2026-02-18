@@ -223,6 +223,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         heading);
   }
 
+  boolean stillAligned = false;
+
   /**
    * Creates a command that faces the target while driving and x-outs the wheels when the robot is
    * stationary and aligned. If the driver provides stick input, the command exits x-out and returns
@@ -254,7 +256,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
               if (isXOuted) {
                 // Heading controller is stale while x-outed, so check alignment manually
                 double headingErrorRad = headingSupplier.get().minus(getRotation2d()).getRadians();
-                boolean stillAligned = Math.abs(headingErrorRad) < HEADING_TOLERANCE_RAD;
+                stillAligned = Math.abs(headingErrorRad) < HEADING_TOLERANCE_RAD;
 
                 if (hasDriverInput || !stillAligned) {
                   isXOuted = false;
@@ -475,7 +477,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
    * @return true if the heading error is within {@link #HEADING_TOLERANCE_RAD}
    */
   public boolean isAlignedToTarget() {
-    return m_faceHubRequest.HeadingController.atSetpoint();
+    return m_faceHubRequest.HeadingController.atSetpoint() || stillAligned;
   }
 
   public double getAngle() {
