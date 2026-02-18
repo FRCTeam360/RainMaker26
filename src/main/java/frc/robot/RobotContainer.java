@@ -234,6 +234,9 @@ public class RobotContainer {
     }
 
     if (Objects.nonNull(superStructure) && Objects.nonNull(drivetrain)) {
+      // Linked pair: whileTrue sets SHOOTING + aims, onFalse resets to IDLE.
+      // The InstantCommand (setStateCommand) finishes immediately; the alongWith group
+      // stays alive via faceAngleWhileDrivingCommand until whileTrue interrupts it.
       driverCont
           .rightTrigger()
           .whileTrue(
@@ -242,6 +245,7 @@ public class RobotContainer {
                   .alongWith(
                       drivetrain.faceAngleWhileDrivingCommand(
                           driverCont, () -> shotCalculator.calculateShot().targetHeading())));
+      // Must stay paired with the whileTrue above to reset state on trigger release
       driverCont.rightTrigger().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
     }
 
