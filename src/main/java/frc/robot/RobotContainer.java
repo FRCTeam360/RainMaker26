@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.commands.XOutWhileShootingCommand;
 import frc.robot.generated.WoodBotDrivetrain;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKicker;
@@ -262,8 +263,10 @@ public class RobotContainer {
                 superStructure
                     .setStateCommand(SuperStates.SHOOTING)
                     .alongWith(
-                        drivetrain.xOutWhileShootingCommand(
-                            driverCont, () -> shotCalculator.calculateShot().targetHeading())));
+                        new XOutWhileShootingCommand(
+                            drivetrain,
+                            driverCont,
+                            () -> shotCalculator.calculateShot().targetHeading())));
         // Must stay paired with the whileTrue above to reset state on trigger release
         driverCont.rightTrigger().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
       }
