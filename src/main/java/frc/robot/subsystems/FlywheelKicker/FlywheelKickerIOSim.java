@@ -145,7 +145,7 @@ public class FlywheelKickerIOSim implements FlywheelKickerIO {
     inputs.voltage = motorVoltage;
     inputs.statorCurrent = motorControllerSim.getStatorCurrent().getValueAsDouble();
     inputs.supplyCurrent = motorControllerSim.getSupplyCurrent().getValueAsDouble();
-    inputs.sensor = sensorSim.getValue();
+    inputs.sensorActivated = sensorSim.getValue();
   }
 
   @Override
