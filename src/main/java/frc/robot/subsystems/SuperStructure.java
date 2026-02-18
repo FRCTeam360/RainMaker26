@@ -13,6 +13,7 @@ import frc.robot.subsystems.Shooter.Flywheel.Flywheel.FlywheelStates;
 import frc.robot.subsystems.Shooter.Hood.Hood;
 import frc.robot.subsystems.Shooter.Hood.Hood.HoodStates;
 import frc.robot.subsystems.Shooter.ShotCalculator;
+import frc.robot.subsystems.Shooter.ShotCalculator.ShootingParams;
 import java.util.function.BooleanSupplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -111,9 +112,9 @@ public class SuperStructure extends SubsystemBase {
 
   private void updateShooterStates() {
     previousShooterState = currentShooterState;
-    boolean flywheelReady =
-        flywheel.atSetpoint(shotCalculator.calculateShot().flywheelSpeed(), FLYWHEEL_TOLERANCE_RPM);
-    boolean hoodReady = hood.atSetpoint(shotCalculator.calculateShot().hoodAngle());
+    ShootingParams shotParams = shotCalculator.calculateShot();
+    boolean flywheelReady = flywheel.atSetpoint(shotParams.flywheelSpeed(), FLYWHEEL_TOLERANCE_RPM);
+    boolean hoodReady = hood.atSetpoint(shotParams.hoodAngle());
     boolean aligned = isAlignedToTarget.getAsBoolean();
 
     Logger.recordOutput("Superstructure/Shooting/FlywheelReady", flywheelReady);
