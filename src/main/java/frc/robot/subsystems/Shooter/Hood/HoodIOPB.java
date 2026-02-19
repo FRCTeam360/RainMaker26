@@ -18,7 +18,6 @@ public class HoodIOPB implements HoodIO {
   // /** Creates a new HoodIOWB. */
   private final TalonFXS hoodMotor = new TalonFXS(Constants.PracticeBotConstants.HOOD_ID);
   private TalonFXSConfiguration config = new TalonFXSConfiguration();
-  private MotorOutputConfigs motorOutputConfigs = new MotorOutputConfigs();
 
   private final MotionMagicVoltage motionMagicPosition = new MotionMagicVoltage(0);
 
@@ -58,8 +57,7 @@ public class HoodIOPB implements HoodIO {
         .withMotionMagicCruiseVelocity(0.0)
         .withMotionMagicJerk(0.0);
     config.MotorOutput.withInverted(InvertedValue.Clockwise_Positive);
-    hoodMotor.setNeutralMode(NeutralModeValue.Brake);
-
+    config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     hoodMotor.getConfigurator().apply(config);
   }
 
