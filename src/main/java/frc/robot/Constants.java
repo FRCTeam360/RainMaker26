@@ -75,7 +75,6 @@ public final class Constants {
     public static final int INTAKE_PIVOT_ID = 72;
 
     public static final int INDEXER_SENSOR_ID = 73;
-    public static final int INDEXER_SENSOR_PORT = 74;
     public static final int INDEXER_ID = 75;
 
     public static final int FLYWHEEL_KICKER_ID = 76;
