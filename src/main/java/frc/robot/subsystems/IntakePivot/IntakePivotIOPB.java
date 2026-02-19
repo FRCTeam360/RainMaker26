@@ -41,8 +41,10 @@ public class IntakePivotIOPB implements IntakePivotIO {
         178.0; // TODO: make sure these are correct for prac bots; units are in degrees
     final double reverseLimit = 0.0; // 29.5, units are in degrees
 
-    currentLimitConfig.StatorCurrentLimit = 120.0;
-    currentLimitConfig.SupplyCurrentLimit = 60.0;
+    config.CurrentLimits.StatorCurrentLimit = 120.0;
+    config.CurrentLimits.SupplyCurrentLimit = 60.0;
+    config.CurrentLimits.StatorCurrentLimitEnable = true;
+    config.CurrentLimits.SupplyCurrentLimitEnable = true;
 
     final double kP = 0.0;
     final double kI = 0.0;
@@ -67,7 +69,7 @@ public class IntakePivotIOPB implements IntakePivotIO {
     motionMagicConfigs.MotionMagicJerk = motionMagicCruiseJerk;
 
     config.Voltage.PeakForwardVoltage = 12.0;
-    config.Voltage.PeakReverseVoltage = 12.0;
+    config.Voltage.PeakReverseVoltage = -12.0;
 
     config.SoftwareLimitSwitch.withForwardSoftLimitThreshold(forwardLimit)
         .withReverseSoftLimitThreshold(reverseLimit)

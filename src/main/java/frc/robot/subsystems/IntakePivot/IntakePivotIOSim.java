@@ -114,7 +114,7 @@ public class IntakePivotIOSim implements IntakePivotIO {
 
   public void updateInputs(IntakePivotIOInputs inputs) {
     // --- AdvantageScope tuning (sim-only) ---
-    
+
     // Step 1: Get the commanded voltage from motor and apply to simulation
     intakePivotSim.setInput(motorControllerSim.getSimState().getMotorVoltage());
 
