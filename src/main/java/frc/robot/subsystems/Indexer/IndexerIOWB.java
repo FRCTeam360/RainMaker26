@@ -23,7 +23,7 @@ public class IndexerIOWB implements IndexerIO {
   private final RelativeEncoder encoder = indexerMotor.getEncoder();
   private final SparkMaxConfig config = new SparkMaxConfig();
 
-  private final DigitalInput sensor = new DigitalInput(WoodBotConstants.INDEXER_SENSOR_ID);
+  private final DigitalInput sensor = new DigitalInput(WoodBotConstants.INDEXER_ID);
 
   private final double CONVERSION_FACTOR = 1.0;
 
