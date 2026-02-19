@@ -29,48 +29,51 @@ public class ClimberIOPB implements ClimberIO {
   private final RelativeEncoder rightClimberEncoder = rightClimberMotor.getEncoder();
 
   private final double positionConversionFactor = 1.0;
-  private final SparkMaxConfig config = new SparkMaxConfig();
+  private final SparkMaxConfig leftConfig = new SparkMaxConfig();
+  private final SparkMaxConfig rightConfig = new SparkMaxConfig();
 
   private static class UnloadedConstants {
-      static final double leftkP = 1.0;
-      static final double leftkI = 0.0001;
-      static final double leftkD = 0;
+      static final double kP = 1.0;
+      static final double kI = 0.0001;
+      static final double kD = 0;
 
-      static final double rightkP = 1.0;
-      static final double rightkI = 0.0001;
-      static final double rightkD = 0;
   }
 
   private static class LoadedConstants {
-        static final double leftkP = 1.0;
-        static final double leftkI = 0.0001;
-        static final double leftkD = 0;
-        static final double leftkFF = -0.03;
-
-        static final double rightkP = 1.0;
-        static final double rightkI = 0.0001;
-        static final double rightkD = 0;
-        static final double rightkFF = -0.03;
+        static final double kP = 1.0;
+        static final double kI = 0.0001;
+        static final double kD = 0;
+        static final double kG = -0.03;
   }
 
   /** Creates a new ClimberIOPB. */
   public ClimberIOPB() {
-    leftMotor.setIdleMode(IdleMode.kBrake);
-    config.inverted(true);
     ClosedLoopConfig closedLoopConfig = new ClosedLoopConfig();
+    EncoderConfig leftEncoderConfig = new EncoderConfig();
+    EncoderConfig rightEncoderConfig = new EncoderConfig();
+
     closedLoopConfig.pid(kP, kI, kD);
-    config.apply(closedLoopConfig);
-    EncoderConfig encoderConfig = new EncoderConfig();
-    encoderConfig.positionConversionFactor(positionConversionFactor);
-    config.apply(encoderConfig);
-    leftClimberMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    leftEncoderConfig.positionConversionFactor(positionConversionFactor);
+    rightEncoderConfig.positionConversionFactor(positionConversionFactor);
+
+    leftConfig.inverted(true);
+    leftConfig.apply(leftEncoderConfig);
+    leftConfig.apply(closedLoopConfig);
+
+    rightConfig.inverted(false);
+    rightConfig.apply(rightEncoderConfig);
+    rightConfig.apply(closedLoopConfig);
+
+    leftClimberMotor.configure(leftConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    rightClimberMotor.configure(rightConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    
   }
 
   public void setLeftDutyCycle(double dutyCycle) {
     leftClimberMotor.set(dutyCycle);
   }
 
-  pulic void setRightDutyCycle(double dutyCycle) {
+  public void setRightDutyCycle(double dutyCycle) {
     rightClimberMotor.set(dutyCycle);
   }
 
