@@ -70,7 +70,6 @@ public class HoodIOPB implements HoodIO {
     inputs.supplyCurrent = hoodMotor.getSupplyCurrent().getValueAsDouble();
     inputs.velocity = hoodMotor.getVelocity().getValueAsDouble();
     inputs.voltage = hoodMotor.getMotorVoltage().getValueAsDouble();
-    ;
   }
 
   public void setDutyCycle(double dutyCycle) {

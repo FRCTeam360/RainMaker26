@@ -48,7 +48,7 @@ public class FlywheelKickerIOPB implements FlywheelKickerIO {
     // this is right
     inputs.velocity = encoder.getVelocity();
     inputs.voltage = flywheelkickerMotor.getBusVoltage() * flywheelkickerMotor.getAppliedOutput();
-    inputs.sensor = sensor.get();
+    inputs.sensorActivated = sensor.get();
   }
 
   public void setDutyCycle(double dutyCycle) {
