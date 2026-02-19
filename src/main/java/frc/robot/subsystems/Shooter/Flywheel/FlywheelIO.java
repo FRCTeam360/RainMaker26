@@ -20,7 +20,7 @@ public interface FlywheelIO {
 
   public void setDutyCycle(double duty);
 
-  public void setRPM(double rpm);
+  public void setVelocity(double rpm);
 
   public default void updateInputs(FlywheelIOInputs inputs) {}
 }
