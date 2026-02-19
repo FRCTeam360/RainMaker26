@@ -3,7 +3,6 @@ package frc.robot.subsystems.Shooter.Flywheel;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
-import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
 import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -55,10 +54,10 @@ public class FlywheelIOPB implements FlywheelIO {
     // do not edit right configs after cloning
     leftConfig.MotorOutput.withInverted(InvertedValue.CounterClockwise_Positive);
 
-    motors[0].getConfigurator().apply(leftConfig);
-    motors[0].setNeutralMode(NeutralModeValue.Coast);
-    motors[1].getConfigurator().apply(rightConfig);
+    motors[1].getConfigurator().apply(leftConfig);
     motors[1].setNeutralMode(NeutralModeValue.Coast);
+    motors[0].getConfigurator().apply(rightConfig);
+    motors[0].setNeutralMode(NeutralModeValue.Coast);
 
     boolean oddFollower = true;
     for (int i = 1; i < motors.length; i++) {
@@ -70,7 +69,6 @@ public class FlywheelIOPB implements FlywheelIO {
     }
   }
 
-  MotionMagicVelocityVoltage velocityVoltage = new MotionMagicVelocityVoltage(0);
   VelocityDutyCycle velocityDutyCycle = new VelocityDutyCycle(0.0);
   VelocityTorqueCurrentFOC velocityTorqueCurrent = new VelocityTorqueCurrentFOC(0.0);
 
