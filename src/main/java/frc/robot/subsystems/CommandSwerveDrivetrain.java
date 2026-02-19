@@ -59,6 +59,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   private double m_lastSimTime;
   private final String CMD_NAME = "Swerve: ";
   private final SwerveRequest xOutReq = new SwerveRequest.SwerveDriveBrake();
+  private final double POSITION_DEADBAND = 0.025;
+  private final double ROTATIONAL_DEADBAND = 0.021;
 
   // Keep track of when vision measurements are added for logging context
   private boolean hasVisionMeasurements = false;
@@ -134,12 +136,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
   public Command xOutCmd() {
     return this.applyRequest(() -> xOutReq);
-  }
-
-  public void addHeadingController(double kP, double kD, double kI) {
-    headingController = new PhoenixPIDController(kP, kI, kD);
-    headingController.enableContinuousInput(-Math.PI, Math.PI);
-    headingController.setTolerance(Math.toRadians(1.5));
   }
 
   /**
@@ -580,8 +576,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
              */
             .withTargetDirection(setpointPose.getRotation());
     request.HeadingController = headingController;
-    request.withDeadband(0.025);
-    request.withRotationalDeadband(0.021);
+    request.withDeadband(POSITION_DEADBAND);
+    request.withRotationalDeadband(ROTATIONAL_DEADBAND);
     request.ForwardPerspective = ForwardPerspectiveValue.BlueAlliance;
     request.withDriveRequestType(DriveRequestType.Velocity);
     this.setControl(request);
