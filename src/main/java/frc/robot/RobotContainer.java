@@ -142,19 +142,21 @@ public class RobotContainer {
     if (Objects.nonNull(superStructure)) {
       registerPathplannerCommand(
           "basic intake", superStructure.setStateCommand(SuperStates.INTAKING));
-      // TODO: add end condition based on state from SuperStructure (based on sensor inputs)
-      registerPathplannerCommand(
-          "shoot at hub",
-          Commands.waitSeconds(10)
-              .deadlineFor(
-                  superStructure
-                      .setStateCommand(SuperStates.SHOOTING)
-                      .alongWith(
-                          drivetrain.faceAngleWhileDrivingCommand(
-                              () -> 0,
-                              () -> 0,
-                              () -> shotCalculator.calculateShot().targetHeading())))
-              .andThen(superStructure.setStateCommand(SuperStates.IDLE)));
+      if (Objects.nonNull(drivetrain)) {
+        // TODO: add end condition based on state from SuperStructure (based on sensor inputs)
+        registerPathplannerCommand(
+            "shoot at hub",
+            Commands.waitSeconds(10)
+                .deadlineFor(
+                    superStructure
+                        .setStateCommand(SuperStates.SHOOTING)
+                        .alongWith(
+                            drivetrain.faceAngleWhileDrivingCommand(
+                                () -> 0,
+                                () -> 0,
+                                () -> shotCalculator.calculateShot().targetHeading())))
+                .andThen(superStructure.setStateCommand(SuperStates.IDLE)));
+      }
     }
     registerPathplannerCommand(
         "run flywheel kicker",
