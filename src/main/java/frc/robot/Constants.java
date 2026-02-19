@@ -102,6 +102,8 @@ public final class Constants {
 
   public static final class SerialAddressConstants {
     public static String WOOD_SERIAL_ADDRESS = "032BE44A";
+    // FIXME: Enter the practice bot roboRIO serial address
+    public static String PRACTICE_SERIAL_ADDRESS = "";
   }
 
   public static double loopPeriodSecs; // add value
@@ -111,6 +113,8 @@ public final class Constants {
 
     if (serialAddress.equals(SerialAddressConstants.WOOD_SERIAL_ADDRESS)) {
       return Constants.RobotType.WOODBOT;
+    } else if (serialAddress.equals(SerialAddressConstants.PRACTICE_SERIAL_ADDRESS)) {
+      return Constants.RobotType.PRACTICEBOT;
     } else if (!Robot.isReal()) { // KEEP AT BOTTOM
       return Constants.RobotType.SIM;
     }
