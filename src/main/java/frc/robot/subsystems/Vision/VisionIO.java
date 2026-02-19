@@ -49,5 +49,5 @@ public interface VisionIO {
 
   public void resetSnapshot();
 
-  public void captureRewind(String eventName);
+  public void captureRewind();
 }

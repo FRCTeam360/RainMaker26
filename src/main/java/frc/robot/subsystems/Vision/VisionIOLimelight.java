@@ -159,9 +159,8 @@ public class VisionIOLimelight implements VisionIO {
     table.getEntry("snapshot").setNumber(0.0);
   }
 
-  public void captureRewind(String eventName) {
+  public void captureRewind() {
     rewindCounter++;
-    table.getEntry("snapname").setString(eventName);
     double[] captureData = {(double) rewindCounter, 10.0};
     table.getEntry("capture_rewind").setDoubleArray(captureData);
   }
