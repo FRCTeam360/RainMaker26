@@ -17,8 +17,6 @@ import edu.wpi.first.hal.HALUtil;
  */
 public final class Constants {
 
-  public static final double SPINUP_SHOOTING_FLYWHEEL_RPM = 3250;
-
   public static final double SPINUP_SHOOTING_FLYWHEEL_RPM = 3250.0;
 
   public static final int IMU_MODE_EXTERNAL_ONLY = 0;
