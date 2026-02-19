@@ -16,6 +16,7 @@ import edu.wpi.first.hal.HALUtil;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
+  
   public static final double SPINUP_SHOOTING_FLYWHEEL_RPM = 3250.0;
 
   public static final int IMU_MODE_EXTERNAL_ONLY = 0;
