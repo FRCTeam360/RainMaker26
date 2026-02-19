@@ -4,8 +4,6 @@
 
 package frc.robot;
 
-import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.hal.HALUtil;
 
 /**
@@ -17,8 +15,6 @@ import edu.wpi.first.hal.HALUtil;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
-  public static final AprilTagFieldLayout FIELD_LAYOUT =
-      AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
   public static final double SPINUP_SHOOTING_FLYWHEEL_RPM = 3250;
 
   public static enum RobotType {
