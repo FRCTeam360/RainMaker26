@@ -36,8 +36,6 @@ public class Hood extends SubsystemBase {
 
   public void setWantedState(HoodStates state) {
     wantedState = state;
-    updateState();
-    applyState();
   }
 
   private void applyState() {
@@ -123,9 +121,11 @@ public class Hood extends SubsystemBase {
 
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
     io.updateInputs(inputs);
     Logger.processInputs("Hood", inputs);
+
+    updateState();
+    applyState();
     Logger.recordOutput("Subsystems/Hood/WantedState", wantedState.toString());
     Logger.recordOutput("Subsystems/Hood/CurrentState", currentState.toString());
     Logger.recordOutput("Subsystems/Hood/PreviousState", previousState.toString());

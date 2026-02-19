@@ -88,14 +88,15 @@ public class Flywheel extends SubsystemBase {
 
   public void setWantedState(FlywheelStates state) {
     wantedState = state;
-    updateState();
-    applyState();
   }
 
   @Override
   public void periodic() {
     io.updateInputs(inputs);
     Logger.processInputs("Flywheel", inputs);
+
+    updateState();
+    applyState();
     Logger.recordOutput("Subsystems/Flywheel/WantedState", wantedState.toString());
     Logger.recordOutput("Subsystems/Flywheel/CurrentState", currentState.toString());
     Logger.recordOutput("Subsystems/Flywheel/PreviousState", previousState.toString());
