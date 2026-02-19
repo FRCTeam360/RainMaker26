@@ -44,7 +44,6 @@ import frc.robot.subsystems.Vision.Vision;
 import frc.robot.subsystems.Vision.VisionIOLimelight;
 import frc.robot.subsystems.Vision.VisionIOPhotonSim;
 import frc.robot.utils.AllianceFlipUtil;
-import frc.robot.utils.CommandLogger;
 import frc.robot.utils.FieldConstants;
 import java.util.Map;
 import java.util.Objects;
