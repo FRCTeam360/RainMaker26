@@ -4,6 +4,7 @@
 
 package frc.robot.commands;
 
+import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
@@ -11,10 +12,11 @@ import frc.robot.subsystems.Vision.Vision;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class AimAtAprilTag extends Command {
+  private final SwerveRequest.RobotCentric driveRequest = new SwerveRequest.RobotCentric();
   private final CommandSwerveDrivetrain m_drive;
   private final Vision m_vision;
   // PID constants need tuning
-  private final PIDController m_turnController = new PIDController(0.03, 0.0, 0.0);  
+  private final PIDController m_turnController = new PIDController(0.03, 0.0, 0.0);
   private static final double kTurnToleranceDeg = 1.0;
 
   /** Creates a new AimAtAprilTag. */
@@ -38,22 +40,24 @@ public class AimAtAprilTag extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
+    double xSpeed = 0;
+    double ySpeed = 0;
+    double turnOutput = 0;
+
     if (m_vision.hasTarget()) {
       double tx = m_vision.getTx();
-      // calc motor output using PID controller, input is tx
-      double turnOutput = m_turnController.calculate(tx);
-
-      // apply angular velocity and command drivetrain to turn to turnOutput
-      m_drive.setTurnSpeed(turnOutput); // all of these r temp until i find out how to use swerve version of this. // TODO fix for swerve
-    } else {
-      m_drive.setTurnSpeed(0); // TODO fix for swerve
+      turnOutput = m_turnController.calculate(tx, 0);
     }
+
+    // Use setControl to move the robot
+    m_drive.setControl(
+        driveRequest.withVelocityX(xSpeed).withVelocityY(ySpeed).withRotationalRate(turnOutput));
   }
 
-  // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    m_drive.setTurnSpeed(0); // TODO fix for swerve
+    // Stop the robot by sending 0 velocities
+    m_drive.setControl(new SwerveRequest.Idle());
   }
 
   // Returns true when the command should end.

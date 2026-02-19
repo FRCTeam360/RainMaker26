@@ -32,7 +32,8 @@ public class Vision extends SubsystemBase {
   private final Map<String, VisionIOInputsAutoLogged> visionInputs;
   private Timer snapshotTimer = new Timer();
   private List<VisionMeasurement> acceptedMeasurements = new ArrayList<>();
-  private final NetworkTable m_limelightTable = NetworkTableInstance.getDefault().getTable("limelight");
+  private final NetworkTable m_limelightTable =
+      NetworkTableInstance.getDefault().getTable("limelight");
   private final NetworkTableEntry m_tx = m_limelightTable.getEntry("tx");
   private final NetworkTableEntry m_ty = m_limelightTable.getEntry("ty");
   private final NetworkTableEntry m_tv = m_limelightTable.getEntry("tv");
@@ -196,7 +197,7 @@ public class Vision extends SubsystemBase {
   public boolean hasTarget() {
     return m_tv.getDouble(0.0) == 1.0;
   }
-  
+
   // horizontal offset (yaw error) to target in degrees
   public double getTx() {
     return m_tx.getDouble(0.0);
