@@ -178,4 +178,22 @@ public class IntakePivotIOSim implements IntakePivotIO {
   public void setDutyCycle(double value) {
     motorControllerSim.set(value);
   }
+
+  @Override
+  public void enableBrakeMode() {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'enableBrakeMode'");
+  }
+
+  @Override
+  public void disableBrakeMode() {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'disableBrakeMode'");
+  }
+
+  @Override
+  public boolean isBrakeMode() {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'isBrakeMode'");
+  }
 }
