@@ -134,6 +134,7 @@ public class RobotContainer {
         break;
       case PRACTICEBOT:
         drivetrain = WoodBotDrivetrain.createDrivetrain(); //FIXME, CHANGE ONCE PRACTICE BOT DRIVETRAIN IS MADE
+        logger = new Telemetry(WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
         flywheel = new Flywheel(new FlywheelIOPB());
         hood = new Hood(new HoodIOPB());
         indexer = new Indexer(new IndexerIOPB());
@@ -146,7 +147,7 @@ public class RobotContainer {
                             Constants.PracticeBotConstants.LIMELIGHT,
                             () -> drivetrain.getAngle(),
                             () -> drivetrain.getAngularRate(),
-                            true))));
+                            true, false))));
         intake = new Intake(new IntakeIOPB());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOPB());
         intakePivot = new IntakePivot(new IntakePivotIOPB());
