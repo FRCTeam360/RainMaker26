@@ -6,17 +6,18 @@ package frc.robot.subsystems.Shooter.Hood;
 
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
-import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.configs.TalonFXSConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
-import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.hardware.TalonFXS;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.MotorArrangementValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import frc.robot.Constants;
 
 public class HoodIOPB implements HoodIO {
   // /** Creates a new HoodIOWB. */
-  private final TalonFX hoodMotor = new TalonFX(Constants.PracticeBotConstants.HOOD_ID);
-  private TalonFXConfiguration config = new TalonFXConfiguration();
+  private final TalonFXS hoodMotor = new TalonFXS(Constants.PracticeBotConstants.HOOD_ID);
+  private TalonFXSConfiguration config = new TalonFXSConfiguration();
   private MotorOutputConfigs motorOutputConfigs = new MotorOutputConfigs();
 
   private final MotionMagicVoltage motionMagicPosition = new MotionMagicVoltage(0);
@@ -43,12 +44,14 @@ public class HoodIOPB implements HoodIO {
     slot0Configs.kS = kS;
     slot0Configs.kV = kV;
 
+    config.Commutation.MotorArrangement = MotorArrangementValue.NEO550_JST;
+
     config.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
     config.SoftwareLimitSwitch.ForwardSoftLimitThreshold = 24.0;
-    config.CurrentLimits.StatorCurrentLimit = 40.0;
-    // not legit vals yet stole from flywheel :sob:
+    config.CurrentLimits.StatorCurrentLimit = 25.0;
+    // NEO 550 has lower current capacity than Falcon 500
     config.CurrentLimits.StatorCurrentLimitEnable = true;
-    config.CurrentLimits.SupplyCurrentLimit = 100.0;
+    config.CurrentLimits.SupplyCurrentLimit = 30.0;
     config.CurrentLimits.SupplyCurrentLimitEnable = true;
 
     config.MotionMagic.withMotionMagicAcceleration(0.0)
