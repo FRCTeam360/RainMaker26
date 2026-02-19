@@ -12,7 +12,6 @@ import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import edu.wpi.first.wpilibj.DigitalInput;
 import frc.robot.Constants;
 
 public class IntakePivotIOPB implements IntakePivotIO {
@@ -75,7 +74,6 @@ public class IntakePivotIOPB implements IntakePivotIO {
         .withForwardSoftLimitEnable(true)
         .withReverseSoftLimitEnable(true);
 
-    
     intakePivot.getConfigurator().apply(config, 0.050);
   }
 
@@ -98,6 +96,7 @@ public class IntakePivotIOPB implements IntakePivotIO {
   public void disableBrakeMode() {
     intakePivot.setNeutralMode(NeutralModeValue.Coast);
   }
+
   // TODO: ASK ELECTRICAL FOR A ZEROING BUTTON OR AN ABSOLUTE ENCODER
 
   public boolean isBrakeMode() {
