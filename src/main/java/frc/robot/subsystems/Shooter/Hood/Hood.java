@@ -13,7 +13,7 @@ import org.littletonrobotics.junction.Logger;
 public class Hood extends SubsystemBase {
   private final HoodIO io;
   private final HoodIOInputsAutoLogged inputs = new HoodIOInputsAutoLogged();
-  private final double TOLERANCE = 0.5;
+  private static final double TOLERANCE = 0.5;
   private DoubleSupplier hoodAngleSupplier = () -> 0.0;
 
   public enum HoodStates {
