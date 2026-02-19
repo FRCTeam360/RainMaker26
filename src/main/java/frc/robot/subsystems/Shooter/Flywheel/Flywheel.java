@@ -45,8 +45,8 @@ public class Flywheel extends SubsystemBase {
     }
   }
 
-  public void setRPM(double rpm) {
-    io.setRPM(rpm);
+  public void setVelocity(double velocity) {
+    io.setVelocity(velocity);
   }
 
   public double getVelocity() {
@@ -61,10 +61,14 @@ public class Flywheel extends SubsystemBase {
     return Math.abs(getVelocity() - targetRPM) < tolerance;
   }
 
+  public boolean atSetpoint(DoubleSupplier targetRPM, double tolerance) {
+    return atSetpoint(targetRPM.getAsDouble(), tolerance);
+  }
+
   private void applyState() {
     switch (currentState) {
       case SHOOTING:
-        setRPM(Constants.SPINUP_SHOOTING_FLYWHEEL_RPM);
+        setVelocity(Constants.SPINUP_SHOOTING_FLYWHEEL_RPM);
         break;
       case OFF:
       default:
@@ -82,7 +86,6 @@ public class Flywheel extends SubsystemBase {
   @Override
   public void periodic() {
     io.updateInputs(inputs);
-    Logger.processInputs("Flywheel", inputs);
     Logger.processInputs("Flywheel", inputs);
     Logger.recordOutput("Subsystems/Flywheel/WantedState", wantedState.toString());
     Logger.recordOutput("Subsystems/Flywheel/CurrentState", currentState.toString());
@@ -105,7 +108,12 @@ public class Flywheel extends SubsystemBase {
     return this.runEnd(() -> io.setDutyCycle(valueSup.getAsDouble()), () -> io.setDutyCycle(0.0));
   }
 
-  public Command setRPMCommand(double rpm) {
-    return this.runEnd(() -> io.setRPM(rpm), () -> io.setDutyCycle(0.0));
+  public Command setVelocityCommand(DoubleSupplier supplierVelocity) {
+    return this.runEnd(
+        () -> io.setVelocity(supplierVelocity.getAsDouble()), () -> io.setDutyCycle(0.0));
+  }
+
+  public Command setVelocityCommand(double velocity) {
+    return this.setVelocityCommand(() -> velocity);
   }
 }
