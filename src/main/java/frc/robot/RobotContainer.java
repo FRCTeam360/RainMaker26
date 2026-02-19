@@ -16,7 +16,6 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
@@ -68,7 +67,6 @@ public class RobotContainer {
   private IntakePivot intakePivot;
   private FlywheelKicker flywheelKicker;
 
-  private CommandFactory commandFactory;
   private SuperStructure superStructure;
 
   private ShotCalculator shotCalculator;
@@ -80,8 +78,9 @@ public class RobotContainer {
   // Replace with CommandPS4Controller or CommandJoystick if needed
 
   private final CommandXboxController driverCont = new CommandXboxController(0);
-
   private final CommandXboxController testCont1 = new CommandXboxController(5);
+
+  private static final double FLYWHEEL_KICKER_WARMUP_VELOCITY_RPM = 4000.0;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -110,11 +109,20 @@ public class RobotContainer {
             new Vision(
                 Map.ofEntries(
                     Map.entry(
-                        Constants.WoodBotConstants.LIMELIGHT,
+                        Constants.WoodBotConstants.LIMELIGHT_3,
                         new VisionIOLimelight(
-                            Constants.WoodBotConstants.LIMELIGHT,
+                            Constants.WoodBotConstants.LIMELIGHT_3,
                             () -> drivetrain.getAngle(),
                             () -> drivetrain.getAngularRate(),
+                            true,
+                            false)),
+                    Map.entry(
+                        Constants.WoodBotConstants.LIMELIGHT_4,
+                        new VisionIOLimelight(
+                            Constants.WoodBotConstants.LIMELIGHT_4,
+                            () -> drivetrain.getAngle(),
+                            () -> drivetrain.getAngularRate(),
+                            true,
                             true))));
         intake = new Intake(new IntakeIOWB());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOWB());
@@ -122,12 +130,17 @@ public class RobotContainer {
     }
     shotCalculator = new ShotCalculator(drivetrain);
     // Configure the trigger bindings
-    commandFactory =
-        new CommandFactory(
-            intake, flywheel, flywheelKicker, hood, indexer, intakePivot, vision, drivetrain);
+    // TODO: Re-enable superStructure construction and PathPlanner commands
     superStructure =
         new SuperStructure(
-            intake, indexer, flywheelKicker, flywheel, hood, drivetrain, shotCalculator);
+            intake,
+            indexer,
+            flywheelKicker,
+            flywheel,
+            hood,
+            drivetrain,
+            shotCalculator,
+            driverCont);
 
     if (Objects.nonNull(superStructure)) {
       registerPathplannerCommand(
@@ -135,10 +148,11 @@ public class RobotContainer {
       registerPathplannerCommand(
           "shoot at hub", superStructure.setStateCommand(SuperStates.SHOOTING));
     }
-    registerPathplannerCommand("run flywheel kicker", flywheelKicker.setVelocityCommand(4000.0));
-    registerPathplannerCommand("spinup flywheel hub shot", commandFactory.shootWithRPM(3000.0));
+    registerPathplannerCommand(
+        "run flywheel kicker",
+        flywheelKicker.setVelocityCommand(FLYWHEEL_KICKER_WARMUP_VELOCITY_RPM));
     configureBindings();
-    configureTestBindings();
+    // configureTestBindings();
 
     PathPlannerLogging.setLogActivePathCallback(
         (poses -> Logger.recordOutput("Swerve/ActivePath", poses.toArray(new Pose2d[0]))));
@@ -176,16 +190,6 @@ public class RobotContainer {
    */
   private void configureTestBindings() {
     if (Objects.nonNull(drivetrain)) {
-      drivetrain.setDefaultCommand(
-          drivetrain
-              .fieldOrientedDrive(testCont1)
-              .alongWith(
-                  Commands.run(
-                      () -> {
-                        shotCalculator.calculateShot();
-                        shotCalculator.clearShootingParams();
-                      })));
-      testCont1.rightTrigger().whileTrue(drivetrain.faceHubWhileDriving(testCont1));
       drivetrain.registerTelemetry(logger::telemeterize);
     }
 
@@ -223,32 +227,36 @@ public class RobotContainer {
 
     // Null checks based on subsystems used by each command
     // basicIntakeCmd uses intake and indexer
-    if (Objects.nonNull(intake) && Objects.nonNull(indexer) && Objects.nonNull(superStructure)) {
+    // TODO: Re-enable superStructure bindings
+    if (Objects.nonNull(intake) && Objects.nonNull(indexer)) {
       driverCont.leftBumper().onTrue(superStructure.setStateCommand(SuperStates.INTAKING));
       driverCont.leftBumper().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
+      driverCont.a().whileTrue(indexer.setDutyCycleCommand(0.5));
     }
 
     // setFlywheelKickerDutyCycle uses flywheelKicker
     if (Objects.nonNull(flywheelKicker)) {
-      driverCont.rightBumper().whileTrue(flywheelKicker.setVelocityCommand(4000.0));
+      driverCont
+          .rightBumper()
+          .whileTrue(flywheelKicker.setVelocityCommand(FLYWHEEL_KICKER_WARMUP_VELOCITY_RPM));
     }
 
     // setHoodPosition uses hood
     if (Objects.nonNull(hood)) {
-      driverCont.pov(0).onTrue(commandFactory.setHoodPosition(0.0));
-      driverCont.pov(90).onTrue(commandFactory.setHoodPosition(4.0));
-      driverCont.pov(180).onTrue(commandFactory.setHoodPosition(16.0));
-      driverCont.pov(270).onTrue(commandFactory.setHoodPosition(23.0));
+      // hood.setDefaultCommand(
+      //     CommandLogger.logCommand(hood.setPositionCmd(0.0), "hood default command"));
+      driverCont.pov(0).onTrue(hood.moveToZeroAndZero());
+      driverCont.pov(90).whileTrue(hood.setPositionCmd(4.0));
+      driverCont.pov(180).whileTrue(hood.setPositionCmd(16.0));
+      driverCont.pov(270).whileTrue(hood.setPositionCmd(23.0));
       driverCont.start().onTrue(hood.zero());
     }
 
     // shootWithRPM uses flywheel
     if (Objects.nonNull(flywheel)) {
-      driverCont.a().whileTrue(commandFactory.shootWithRPM(2000));
-      driverCont.x().whileTrue(commandFactory.shootWithRPM(2500));
-      driverCont.b().whileTrue(commandFactory.shootWithRPM(3000));
-      driverCont.y().whileTrue(commandFactory.shootWithRPM(3500));
-      // driverCont.rightTrigger().whileTrue(commandFactory.shootWithSpinUp(3500.0, 6.0));
+      driverCont.x().whileTrue(flywheel.setVelocityCommand(2500));
+      driverCont.b().whileTrue(flywheel.setVelocityCommand(3000));
+      driverCont.y().whileTrue(flywheel.setVelocityCommand(3500));
       if (Objects.nonNull(superStructure)) {
         driverCont.rightTrigger().onTrue(superStructure.setStateCommand(SuperStates.SHOOTING));
         driverCont.rightTrigger().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
@@ -257,8 +265,7 @@ public class RobotContainer {
 
     // Drivetrain commands
     if (Objects.nonNull(drivetrain)) {
-      drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
-      driverCont.leftTrigger().whileTrue(drivetrain.faceHubWhileDriving(driverCont));
+      // driverCont.leftTrigger().whileTrue(drivetrain.faceHubWhileDriving(driverCont));
       drivetrain.registerTelemetry(logger::telemeterize);
       driverCont.back().onTrue(drivetrain.zeroCommand());
     }
@@ -287,6 +294,14 @@ public class RobotContainer {
     }
     if (Objects.nonNull(flywheelKicker)) {
       flywheelKicker.stop();
+    }
+  }
+
+  /** Runs the given calls on periodic before commands are scheduled */
+  public void periodic() {
+    if (Objects.nonNull(shotCalculator)) {
+      shotCalculator.clearShootingParams();
+      shotCalculator.calculateShot();
     }
   }
 
