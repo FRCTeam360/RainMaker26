@@ -9,22 +9,34 @@ import edu.wpi.first.math.geometry.Pose3d;
 import org.littletonrobotics.junction.AutoLog;
 
 public interface VisionIO {
+  /** Maximum number of AprilTags that can be tracked simultaneously. */
+  public static final int MAX_TAGS = 12;
+
   /** Creates a new VisionIO. */
   @AutoLog
   public static class VisionIOInputs {
     public double tx;
-    public double txAdjusted;
     public double ty;
-    public double tyAdjusted;
     public double tv;
     public int pipeline;
     public double tagID;
     public Pose2d estimatedPose;
     public double timestampSeconds;
-    public int[] targetIds;
-    public double[] distancesToTargets;
     public boolean poseUpdated;
-    public Pose3d[] tagPoses;
+
+    // Fixed-size arrays (preallocated for max possible tags) to avoid allocations at 50Hz
+    public int targetCount = 0; // Number of valid entries in the arrays below
+    public int[] targetIds = new int[MAX_TAGS];
+    public double[] distancesToTargets = new double[MAX_TAGS];
+    public Pose3d[] tagPoses = initTagPoses();
+
+    private static Pose3d[] initTagPoses() {
+      Pose3d[] poses = new Pose3d[MAX_TAGS];
+      for (int i = 0; i < MAX_TAGS; i++) {
+        poses[i] = new Pose3d();
+      }
+      return poses;
+    }
   }
 
   public void updateInputs(VisionIOInputs inputs);

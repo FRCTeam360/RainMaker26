@@ -6,23 +6,46 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
+import com.ctre.phoenix6.swerve.SwerveRequest;
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.commands.FollowPathCommand;
+import com.pathplanner.lib.util.PathPlannerLogging;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.generated.WoodBotDrivetrain;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
-import frc.robot.subsystems.Flywheel.Flywheel;
-import frc.robot.subsystems.Flywheel.FlywheelIOWB;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKicker;
+import frc.robot.subsystems.FlywheelKicker.FlywheelKickerIOSim;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKickerIOWB;
-import frc.robot.subsystems.Hood.Hood;
 import frc.robot.subsystems.Indexer.Indexer;
+import frc.robot.subsystems.Indexer.IndexerIOSim;
 import frc.robot.subsystems.Indexer.IndexerIOWB;
 import frc.robot.subsystems.Intake.Intake;
+import frc.robot.subsystems.Intake.IntakeIOSim;
 import frc.robot.subsystems.Intake.IntakeIOWB;
 import frc.robot.subsystems.IntakePivot.IntakePivot;
 import frc.robot.subsystems.IntakePivot.IntakePivotIOSim;
+import frc.robot.subsystems.Shooter.Flywheel.Flywheel;
+import frc.robot.subsystems.Shooter.Flywheel.FlywheelIOSim;
+import frc.robot.subsystems.Shooter.Flywheel.FlywheelIOWB;
+import frc.robot.subsystems.Shooter.Hood.Hood;
+import frc.robot.subsystems.Shooter.Hood.HoodIOSim;
+import frc.robot.subsystems.Shooter.Hood.HoodIOWB;
+import frc.robot.subsystems.Shooter.ShotCalculator;
+import frc.robot.subsystems.SuperStructure;
+import frc.robot.subsystems.SuperStructure.SuperStates;
+import frc.robot.subsystems.Vision.Vision;
+import frc.robot.subsystems.Vision.VisionIOLimelight;
+import frc.robot.subsystems.Vision.VisionIOPhotonSim;
+import java.util.Map;
 import java.util.Objects;
+import org.littletonrobotics.junction.Logger;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -33,13 +56,18 @@ import java.util.Objects;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private CommandSwerveDrivetrain drivetrain;
+  private SendableChooser<Command> autoChooser;
   private Flywheel flywheel;
   private Hood hood;
   private Indexer indexer;
+  private Vision vision;
   private Intake intake;
   private IntakePivot intakePivot;
   private FlywheelKicker flywheelKicker;
-  private CommandFactory commandFactory;
+
+  private SuperStructure superStructure;
+
+  private ShotCalculator shotCalculator;
 
   // TODO: refactor to allow for more than 1 drivetrain type
 
@@ -48,45 +76,102 @@ public class RobotContainer {
   // Replace with CommandPS4Controller or CommandJoystick if needed
 
   private final CommandXboxController driverCont = new CommandXboxController(0);
-
   private final CommandXboxController testCont1 = new CommandXboxController(5);
+
+  private static final double FLYWHEEL_KICKER_WARMUP_VELOCITY_RPM = 4000.0;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     switch (Constants.getRobotType()) {
-      case WOODBOT:
-        drivetrain = WoodBotDrivetrain.createDrivetrain();
-        logger = new Telemetry(WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
-        flywheel = new Flywheel(new FlywheelIOWB());
-        // hood = new Hood(new HoodIOWB());
-        indexer = new Indexer(new IndexerIOWB());
-        intake = new Intake(new IntakeIOWB());
-        flywheelKicker = new FlywheelKicker(new FlywheelKickerIOWB());
-        // intakePivot = new IntakePivot(new IntakePivotIOPB());
-        break;
       case SIM:
         drivetrain = WoodBotDrivetrain.createDrivetrain();
         logger = new Telemetry(WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
         intakePivot = new IntakePivot(new IntakePivotIOSim());
-
-        // flywheel = new Flywheel(new FlywheelIOSim());
-        // hood = new Hood(new HoodIOWB());
-        // indexer = new Indexer(new IndexerIOSim());
-        // intake = new Intake(new IntakeIOSim());
-        // flywheelKicker = new FlywheelKicker(new FlywheelKickerIOWB());
+        vision =
+            new Vision(
+                Map.of("photonSim", new VisionIOPhotonSim(() -> drivetrain.getState().Pose)));
+        flywheel = new Flywheel(new FlywheelIOSim());
+        hood = new Hood(new HoodIOSim());
+        indexer = new Indexer(new IndexerIOSim());
+        intake = new Intake(new IntakeIOSim());
+        flywheelKicker = new FlywheelKicker(new FlywheelKickerIOSim());
         break;
+      case WOODBOT:
       default:
         drivetrain = WoodBotDrivetrain.createDrivetrain();
         logger = new Telemetry(WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
         flywheel = new Flywheel(new FlywheelIOWB());
-        // hood = new Hood(new HoodIOWB());
+        hood = new Hood(new HoodIOWB());
         indexer = new Indexer(new IndexerIOWB());
+        vision =
+            new Vision(
+                Map.ofEntries(
+                    Map.entry(
+                        Constants.WoodBotConstants.LIMELIGHT_3,
+                        new VisionIOLimelight(
+                            Constants.WoodBotConstants.LIMELIGHT_3,
+                            () -> drivetrain.getAngle(),
+                            () -> drivetrain.getAngularRate(),
+                            true,
+                            false)),
+                    Map.entry(
+                        Constants.WoodBotConstants.LIMELIGHT_4,
+                        new VisionIOLimelight(
+                            Constants.WoodBotConstants.LIMELIGHT_4,
+                            () -> drivetrain.getAngle(),
+                            () -> drivetrain.getAngularRate(),
+                            true,
+                            true))));
         intake = new Intake(new IntakeIOWB());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOWB());
         // intakePivot = new IntakePivot(new IntakePivotIOPB());
     }
+    shotCalculator = new ShotCalculator(drivetrain);
     // Configure the trigger bindings
+    // TODO: Re-enable superStructure construction and PathPlanner commands
+    superStructure =
+        new SuperStructure(
+            intake,
+            indexer,
+            flywheelKicker,
+            flywheel,
+            hood,
+            drivetrain,
+            shotCalculator,
+            driverCont);
+
+    if (Objects.nonNull(superStructure)) {
+      registerPathplannerCommand(
+          "basic intake", superStructure.setStateCommand(SuperStates.INTAKING));
+      registerPathplannerCommand(
+          "shoot at hub", superStructure.setStateCommand(SuperStates.SHOOTING));
+    }
+    registerPathplannerCommand(
+        "run flywheel kicker",
+        flywheelKicker.setVelocityCommand(FLYWHEEL_KICKER_WARMUP_VELOCITY_RPM));
     configureBindings();
+    // configureTestBindings();
+
+    PathPlannerLogging.setLogActivePathCallback(
+        (poses -> Logger.recordOutput("Swerve/ActivePath", poses.toArray(new Pose2d[0]))));
+
+    PathPlannerLogging.setLogTargetPoseCallback(
+        pose -> Logger.recordOutput("Swerve/TargetPathPose", pose));
+
+    autoChooser = AutoBuilder.buildAutoChooser();
+    SmartDashboard.putData("Auto Chooser", autoChooser);
+
+    FollowPathCommand.warmupCommand().schedule();
+  }
+
+  public void registerPathplannerCommand(String name, Command command) {
+    if (Objects.nonNull(command)) {
+      NamedCommands.registerCommand(name, command);
+    } else {
+      System.err.println(name + " is null");
+      NamedCommands.registerCommand(
+          name, new InstantCommand(() -> System.err.println(name + " is null")));
+    }
   }
 
   /**
@@ -98,15 +183,121 @@ public class RobotContainer {
    * PS4} controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
    * joysticks}.
    */
-  private void configureBindings() {
-    driverCont.leftBumper().whileTrue(commandFactory.basicIntakeCmd());
-    driverCont.rightBumper().whileTrue(commandFactory.basicShootCmd());
-    driverCont.a().whileTrue(intake.setDutyCycleCommand(1.0));
-    drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
+  private void configureTestBindings() {
+    if (Objects.nonNull(drivetrain)) {
+      drivetrain.registerTelemetry(logger::telemeterize);
+    }
+
+    if (Objects.nonNull(flywheel)) {
+      testCont1.a().whileTrue(flywheel.setDutyCycleCommand(() -> 0.5));
+    }
+    if (Objects.nonNull(flywheelKicker)) {
+      testCont1.b().whileTrue(flywheelKicker.setDutyCycleCommand(() -> 0.5));
+    }
+    if (Objects.nonNull(hood)) {
+      testCont1.x().whileTrue(hood.setDutyCycleCommand(() -> 0.5));
+    }
+    if (Objects.nonNull(indexer)) {
+      testCont1.y().whileTrue(indexer.setDutyCycleCommand(() -> 0.5));
+    }
+    if (Objects.nonNull(intake)) {
+      testCont1.leftBumper().whileTrue(intake.setDutyCycleCommand(() -> 0.5));
+    }
+    if (Objects.nonNull(intakePivot)) {
+      testCont1.rightBumper().whileTrue(intakePivot.setDutyCycleCommand(() -> 0.5));
+    }
   }
 
+  private void configureBindings() {
+    // Only bind commands if the required subsystems/factories exist
+    if (Objects.nonNull(vision)) {
+      Command consumeVisionMeasurements =
+          vision.consumeVisionMeasurements(
+              measurements -> {
+                drivetrain.addVisionMeasurements(measurements);
+              });
+      vision.setDefaultCommand(consumeVisionMeasurements.ignoringDisable(true));
+    }
+    // TODO: make more elegant solution for null checking subsystems/commands
+
+    // Null checks based on subsystems used by each command
+    // basicIntakeCmd uses intake and indexer
+    // TODO: Re-enable superStructure bindings
+    if (Objects.nonNull(intake) && Objects.nonNull(indexer)) {
+      driverCont.leftBumper().onTrue(superStructure.setStateCommand(SuperStates.INTAKING));
+      driverCont.leftBumper().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
+      driverCont.a().whileTrue(indexer.setDutyCycleCommand(0.5));
+    }
+
+    // setFlywheelKickerDutyCycle uses flywheelKicker
+    if (Objects.nonNull(flywheelKicker)) {
+      driverCont
+          .rightBumper()
+          .whileTrue(flywheelKicker.setVelocityCommand(FLYWHEEL_KICKER_WARMUP_VELOCITY_RPM));
+    }
+
+    // setHoodPosition uses hood
+    if (Objects.nonNull(hood)) {
+      // hood.setDefaultCommand(
+      //     CommandLogger.logCommand(hood.setPositionCmd(0.0), "hood default command"));
+      driverCont.pov(0).onTrue(hood.moveToZeroAndZero());
+      driverCont.pov(90).whileTrue(hood.setPositionCmd(4.0));
+      driverCont.pov(180).whileTrue(hood.setPositionCmd(16.0));
+      driverCont.pov(270).whileTrue(hood.setPositionCmd(23.0));
+      driverCont.start().onTrue(hood.zero());
+    }
+
+    // shootWithRPM uses flywheel
+    if (Objects.nonNull(flywheel)) {
+      driverCont.x().whileTrue(flywheel.setVelocityCommand(2500));
+      driverCont.b().whileTrue(flywheel.setVelocityCommand(3000));
+      driverCont.y().whileTrue(flywheel.setVelocityCommand(3500));
+      if (Objects.nonNull(superStructure)) {
+        driverCont.rightTrigger().onTrue(superStructure.setStateCommand(SuperStates.SHOOTING));
+        driverCont.rightTrigger().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
+      }
+    }
+
+    // Drivetrain commands
+    if (Objects.nonNull(drivetrain)) {
+      // driverCont.leftTrigger().whileTrue(drivetrain.faceHubWhileDriving(driverCont));
+      drivetrain.registerTelemetry(logger::telemeterize);
+      driverCont.back().onTrue(drivetrain.zeroCommand());
+    }
+  }
+
+  /** Stops all subsystems safely when the robot is disabled. */
   public void onDisable() {
-    if (Objects.nonNull(flywheel)) flywheel.stop();
+    if (Objects.nonNull(superStructure)) superStructure.setWantedSuperState(SuperStates.IDLE);
+    if (Objects.nonNull(drivetrain)) {
+      drivetrain.setControl(new SwerveRequest.Idle());
+    }
+    if (Objects.nonNull(flywheel)) {
+      flywheel.stop();
+    }
+    if (Objects.nonNull(hood)) {
+      hood.stop();
+    }
+    if (Objects.nonNull(intake)) {
+      intake.stop();
+    }
+    if (Objects.nonNull(intakePivot)) {
+      intakePivot.stop();
+    }
+    if (Objects.nonNull(indexer)) {
+      indexer.stop();
+    }
+    if (Objects.nonNull(flywheelKicker)) {
+      flywheelKicker.stop();
+    }
+  }
+
+  /** Runs the given calls on periodic before commands are scheduled */
+  public void periodic() {
+    if (Objects.nonNull(shotCalculator)) {
+      shotCalculator.clearShootingParams();
+      shotCalculator.calculateShot();
+    }
   }
 
   /**
@@ -116,6 +307,6 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
-    return null;
+    return autoChooser.getSelected();
   }
 }

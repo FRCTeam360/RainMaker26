@@ -20,6 +20,7 @@ public class VisionIOLimelight implements VisionIO {
   private final String name;
   private final DoubleSupplier gyroAngleSupplier;
   private final DoubleSupplier gyroAngleRateSupplier;
+  private final boolean isLimelight4;
 
   private boolean acceptMeasurements;
 
@@ -32,12 +33,19 @@ public class VisionIOLimelight implements VisionIO {
       String name,
       DoubleSupplier gyroAngleSupplier,
       DoubleSupplier gyroAngleRateSupplier,
-      boolean acceptMeasurements) {
+      boolean acceptMeasurements,
+      boolean isLimelight4) {
     table = NetworkTableInstance.getDefault().getTable(name);
     this.name = name;
     this.gyroAngleSupplier = gyroAngleSupplier;
     this.gyroAngleRateSupplier = gyroAngleRateSupplier;
     this.acceptMeasurements = acceptMeasurements;
+    this.isLimelight4 = isLimelight4;
+
+    if (isLimelight4) {
+      LimelightHelpers.SetIMUAssistAlpha(name, Constants.IMU_ASSIST_ALPHA);
+      LimelightHelpers.SetIMUMode(name, Constants.IMU_MODE_EXTERNAL_SEED);
+    }
   }
 
   public void setLEDMode(int mode) {
@@ -85,23 +93,22 @@ public class VisionIOLimelight implements VisionIO {
 
     inputs.estimatedPose = poseEstimate.pose;
     inputs.timestampSeconds = poseEstimate.timestampSeconds;
-    int[] targetIds = new int[poseEstimate.rawFiducials.length];
-    double[] distancesToTargets = new double[poseEstimate.rawFiducials.length];
-    Pose3d[] tagPoses = new Pose3d[poseEstimate.rawFiducials.length];
+
+    // Fill in target information directly into inputs arrays (zero allocation)
+    int targetCount = 0;
     for (int i = 0; i < poseEstimate.rawFiducials.length; i++) {
       RawFiducial rawFiducial = poseEstimate.rawFiducials[i];
       // if the pose is outside of the field, then skip to the next point
       Optional<Pose3d> tagPose = Constants.FIELD_LAYOUT.getTagPose(rawFiducial.id);
-      if (tagPose.isEmpty()) continue;
+      if (targetCount >= MAX_TAGS || tagPose.isEmpty()) continue;
 
-      targetIds[i] = rawFiducial.id;
-      distancesToTargets[i] = rawFiducial.distToRobot;
-      tagPoses[i] = tagPose.get();
+      inputs.targetIds[targetCount] = rawFiducial.id;
+      inputs.distancesToTargets[targetCount] = rawFiducial.distToRobot;
+      inputs.tagPoses[targetCount] = tagPose.get();
+      targetCount++;
     }
 
-    inputs.targetIds = targetIds;
-    inputs.distancesToTargets = distancesToTargets;
-    inputs.tagPoses = tagPoses;
+    inputs.targetCount = targetCount;
     inputs.poseUpdated = true;
   }
 
@@ -120,7 +127,7 @@ public class VisionIOLimelight implements VisionIO {
   }
 
   public int getAprilTagID() {
-    return (int) table.getEntry("tid").getInteger(0);
+    return (int) table.getEntry("tid").getInteger(-1);
   }
 
   public double getTXRaw() {
@@ -149,5 +156,19 @@ public class VisionIOLimelight implements VisionIO {
 
   public void resetSnapshot() {
     table.getEntry("snapshot").setNumber(0.0);
+  }
+
+  // while enabled
+  public void enableIMUAssist() {
+    if (isLimelight4) {
+      LimelightHelpers.SetIMUMode(name, Constants.IMU_MODE_INTERNAL_EXTERNAL_ASSIST);
+    }
+  }
+
+  // call during disabled
+  public void seedIMU() {
+    if (isLimelight4) {
+      LimelightHelpers.SetIMUMode(name, Constants.IMU_MODE_EXTERNAL_SEED);
+    }
   }
 }
