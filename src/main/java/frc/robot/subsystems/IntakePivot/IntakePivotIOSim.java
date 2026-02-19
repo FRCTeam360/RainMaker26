@@ -114,19 +114,7 @@ public class IntakePivotIOSim implements IntakePivotIO {
 
   public void updateInputs(IntakePivotIOInputs inputs) {
     // --- AdvantageScope tuning (sim-only) ---
-    if (tuningEnabled.get()) {
-      // Apply tunable PID gains (simple: apply every loop when enabled)
-      Slot0Configs slot0 = new Slot0Configs();
-      motorControllerSim.getConfigurator().refresh(slot0);
-      slot0.kP = tunableKp.get();
-      slot0.kI = tunableKi.get();
-      slot0.kD = tunableKd.get();
-      motorControllerSim.getConfigurator().apply(slot0);
-
-      // Command the tunable setpoint
-      motorControllerSim.setControl(positionRequest.withPosition(tunableSetpoint.get()));
-    }
-
+    
     // Step 1: Get the commanded voltage from motor and apply to simulation
     intakePivotSim.setInput(motorControllerSim.getSimState().getMotorVoltage());
 
