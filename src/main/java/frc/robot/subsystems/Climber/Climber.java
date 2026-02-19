@@ -48,7 +48,6 @@ public class Climber extends SubsystemBase {
     io.zeroBoth();
   }
 
-  public void setRightHeight
 
   public void updatePIDF(double P, double I, double D, double F) {
     io.updatePIDF(P, I, D, F);

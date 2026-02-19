@@ -16,7 +16,7 @@ import com.revrobotics.spark.config.ClosedLoopConfig;
 import com.revrobotics.spark.config.EncoderConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
-import frc.robot.Constants.WoodBotConstants;
+import frc.robot.Constants.PracticeBotConstants;
 
 public class ClimberIOPB implements ClimberIO {
 
@@ -28,16 +28,34 @@ public class ClimberIOPB implements ClimberIO {
   private final RelativeEncoder leftClimberEncoder = leftClimberMotor.getEncoder();
   private final RelativeEncoder rightClimberEncoder = rightClimberMotor.getEncoder();
 
-  private final double kP = 0.2;
-  private final double kI = 0.0;
-  private final double kD = 0.0;
-
   private final double positionConversionFactor = 1.0;
   private final SparkMaxConfig config = new SparkMaxConfig();
 
+  private static class UnloadedConstants {
+      static final double leftkP = 1.0;
+      static final double leftkI = 0.0001;
+      static final double leftkD = 0;
+
+      static final double rightkP = 1.0;
+      static final double rightkI = 0.0001;
+      static final double rightkD = 0;
+  }
+
+  private static class LoadedConstants {
+        static final double leftkP = 1.0;
+        static final double leftkI = 0.0001;
+        static final double leftkD = 0;
+        static final double leftkFF = -0.03;
+
+        static final double rightkP = 1.0;
+        static final double rightkI = 0.0001;
+        static final double rightkD = 0;
+        static final double rightkFF = -0.03;
+  }
+
   /** Creates a new ClimberIOPB. */
   public ClimberIOPB() {
-    config.idleMode(IdleMode.kBrake);
+    leftMotor.setIdleMode(IdleMode.kBrake);
     config.inverted(true);
     ClosedLoopConfig closedLoopConfig = new ClosedLoopConfig();
     closedLoopConfig.pid(kP, kI, kD);
@@ -48,13 +66,21 @@ public class ClimberIOPB implements ClimberIO {
     leftClimberMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 
-  public void setDutyCycle(double dutyCycle) {
+  public void setLeftDutyCycle(double dutyCycle) {
     leftClimberMotor.set(dutyCycle);
   }
 
-  public void setPosition(double position) {
+  pulic void setRightDutyCycle(double dutyCycle) {
+    rightClimberMotor.set(dutyCycle);
+  }
+
+  public void setLeftPosition(double position) {
     leftClimberMotor.getClosedLoopController().setReference(position, ControlType.kPosition);
   } 
+
+  public void setRightPosition(double position) {
+    rightClimberMotor.getClosedLoopController().setReference(position, ControlType.kPosition);
+  }
 
   public void updateInputs(ClimberIOInputs inputs) {
     inputs.climberLeftDutyCycle = leftClimberMotor.getAppliedOutput();

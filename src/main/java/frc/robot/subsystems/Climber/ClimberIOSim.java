@@ -60,11 +60,19 @@ public class ClimberIOSim implements ClimberIO {
     inputs.climberDutyCycle = climberSim.getInputVoltage();
   }
 
-  public void setDutyCycle(double dutyCycle) {
+  public void setLeftDutyCycle(double dutyCycle) {
     simClimberMotor.setSpeed(dutyCycle);
   }
 
-  public void setPosition(double position) {
+  public void setRightDutyCycle(double dutyCycle) {
+    simClimberMotor.setSpeed(dutyCycle);
+  }
+
+  public void setLeftPosition(double position) {
+    simClimberMotor.setPosition(position);
+  }
+
+  public void setRightPosition(double position) {
     simClimberMotor.setPosition(position);
   }
 }
