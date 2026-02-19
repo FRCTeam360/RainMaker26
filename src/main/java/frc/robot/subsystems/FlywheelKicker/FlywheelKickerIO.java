@@ -15,10 +15,13 @@ public interface FlywheelKickerIO {
     public double statorCurrent = 0.0;
     public double velocity = 0.0;
     public double position = 0.0;
-    public boolean sensor = false;
+    public boolean sensorActivated = false;
+    public double sensorProximity = 0.0;
   }
 
   public default void updateInputs(FlywheelKickerIOInputs inputs) {}
 
   public void setDutyCycle(double dutyCycle);
+
+  public void setVelocity(double rpm);
 }

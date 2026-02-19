@@ -12,10 +12,16 @@ import org.littletonrobotics.junction.Logger;
 public class Hopper extends SubsystemBase {
   private final HopperIO io;
   private final HopperIOInputsAutoLogged inputs = new HopperIOInputsAutoLogged();
+  private static final double HOPPER_DUTY_CYCLE = 0.4;
 
   public enum HopperStates {
     OFF,
     INTAKING,
+    SHOOTING
+  }
+
+  public HopperStates getState() {
+    return currentState;
   }
 
   private HopperStates wantedState = HopperStates.OFF;
@@ -29,6 +35,10 @@ public class Hopper extends SubsystemBase {
       case INTAKING:
         currentState = HopperStates.INTAKING;
         break;
+
+      case SHOOTING:
+        currentState = HopperStates.SHOOTING;
+        break;
       case OFF:
         currentState = HopperStates.OFF;
         break;
@@ -38,7 +48,10 @@ public class Hopper extends SubsystemBase {
   private void applyState() {
     switch (currentState) {
       case INTAKING:
-        setDutyCycle(0.2);
+        setDutyCycle(HOPPER_DUTY_CYCLE);
+        break;
+      case SHOOTING:
+        setDutyCycle(HOPPER_DUTY_CYCLE);
         break;
       case OFF:
       default:

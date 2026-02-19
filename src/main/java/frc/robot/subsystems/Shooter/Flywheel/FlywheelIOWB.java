@@ -4,12 +4,12 @@
 
 package frc.robot.subsystems.Shooter.Flywheel;
 
-import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
+import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
@@ -19,20 +19,19 @@ import frc.robot.Constants.WoodBotConstants;
 public class FlywheelIOWB implements FlywheelIO {
 
   private final TalonFX[] motors = {
-    new TalonFX(WoodBotConstants.FLYWHEEL_RIGHT_ID, WoodBotConstants.CANBUS_NAME),
-    new TalonFX(WoodBotConstants.FLYWHEEL_LEFT_ID, WoodBotConstants.CANBUS_NAME)
+    new TalonFX(WoodBotConstants.FLYWHEEL_RIGHT_ID, WoodBotConstants.CANBUS),
+    new TalonFX(WoodBotConstants.FLYWHEEL_LEFT_ID, WoodBotConstants.CANBUS)
   };
   private TalonFXConfiguration rightConfig = new TalonFXConfiguration();
   private TalonFXConfiguration leftConfig = new TalonFXConfiguration();
-  private MotorOutputConfigs motorOutputConfigs = new MotorOutputConfigs();
 
   public FlywheelIOWB() {
-    double kP = 0.025;
+    double kP = 3.0;
     double kI = 0.0;
-    double kD = 0.0;
+    double kD = 0.1;
     double kA = 0.0;
     double kG = 0.0;
-    double kS = 0.07;
+    double kS = 3.0;
     double kV = 0.008;
 
     Slot0Configs slot0Configs = rightConfig.Slot0;
@@ -83,11 +82,12 @@ public class FlywheelIOWB implements FlywheelIO {
 
   MotionMagicVelocityVoltage velocityVoltage = new MotionMagicVelocityVoltage(0);
   VelocityDutyCycle velocityDutyCycle = new VelocityDutyCycle(0.0);
+  VelocityTorqueCurrentFOC velocityTorqueCurrent = new VelocityTorqueCurrentFOC(0.0);
 
   @Override
-  public void setRPM(double rpm) {
+  public void setVelocity(double rpm) {
     double rps = rpm / 60.0;
-    motors[0].setControl(velocityDutyCycle.withVelocity(rps));
+    motors[0].setControl(velocityTorqueCurrent.withVelocity(rps));
   }
 
   @Override

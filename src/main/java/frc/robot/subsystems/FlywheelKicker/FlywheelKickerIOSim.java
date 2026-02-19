@@ -144,11 +144,16 @@ public class FlywheelKickerIOSim implements FlywheelKickerIO {
     inputs.voltage = motorVoltage;
     inputs.statorCurrent = motorControllerSim.getStatorCurrent().getValueAsDouble();
     inputs.supplyCurrent = motorControllerSim.getSupplyCurrent().getValueAsDouble();
-    inputs.sensor = sensorSim.getValue();
+    inputs.sensorActivated = sensorSim.getValue();
   }
 
   @Override
   public void setDutyCycle(double duty) {
     motorControllerSim.set(duty);
+  }
+
+  public void setVelocity(double rpm) {
+    // TODO: Implement velocity control for simulation (e.g., use velocityRequest to command the
+    // motor sim)
   }
 }
