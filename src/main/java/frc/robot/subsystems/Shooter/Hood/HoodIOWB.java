@@ -57,6 +57,7 @@ public class HoodIOWB implements HoodIO {
     inputs.supplyCurrent = hoodMotor.getOutputCurrent();
     inputs.velocity = encoder.getVelocity();
     inputs.voltage = hoodMotor.getBusVoltage() * hoodMotor.getAppliedOutput();
+    inputs.setpoint = hoodMotor.getClosedLoopController().getSetpoint();
   }
 
   public void setDutyCycle(double dutyCycle) {
