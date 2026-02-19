@@ -14,7 +14,7 @@ import frc.robot.Constants;
 import frc.robot.Constants.PracticeBotConstants;
 
 public class FlywheelKickerIOPB implements FlywheelKickerIO {
-  /** Creates a new FlywheelKickerIOWB. */
+  /** Creates a new FlywheelKickerIOPB. */
   private final SparkMax flywheelkickerMotor =
       new SparkMax(Constants.PracticeBotConstants.FLYWHEEL_KICKER_ID, MotorType.kBrushless);
 

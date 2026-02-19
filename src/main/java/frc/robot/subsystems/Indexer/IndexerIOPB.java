@@ -10,7 +10,7 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import frc.robot.Constants;
 
 public class IndexerIOPB implements IndexerIO {
-  /** Creates a new IndexerIOWB. */
+  /** Creates a new IndexerIOPB. */
   private final SparkMax indexerMotor =
       new SparkMax(Constants.PracticeBotConstants.INDEXER_ID, MotorType.kBrushless);
 
