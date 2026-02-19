@@ -32,7 +32,8 @@ public class IndexerIOWB implements IndexerIO {
   public void updateInputs(IndexerIOInputs inputs) {
     inputs.position = encoder.getPosition();
     inputs.statorCurrent = indexerMotor.getOutputCurrent();
-    inputs.supplyCurrent = indexerMotor.getOutputCurrent() * indexerMotor.getAppliedOutput(); // TODO: check if
+    inputs.supplyCurrent =
+        indexerMotor.getOutputCurrent() * indexerMotor.getAppliedOutput(); // TODO: check if
     inputs.velocity = encoder.getVelocity();
     inputs.voltage = indexerMotor.getBusVoltage() * indexerMotor.getAppliedOutput();
   }

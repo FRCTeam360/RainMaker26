@@ -45,7 +45,7 @@ public final class Constants {
 
   public static class WoodBotConstants {
     // === INTAKE ===
-    public static final int INTAKE_SENSOR_PORT = 0;
+    public static final int INTAKE_SENSOR_PORT = 95;
     public static final int INTAKE_ID = 15;
     public static final int INTAKE_PIVOT_ID = 0;
 
@@ -71,20 +71,20 @@ public final class Constants {
   }
 
   public static record PracticeBotConstants() {
-    public static final int INTAKE_ID = 0;
-    public static final int INTAKE_PIVOT_ID = 0;
+    public static final int INTAKE_ID = 71;
+    public static final int INTAKE_PIVOT_ID = 72;
 
-    public static final int INDEXER_SENSOR_ID = 0;
-    public static final int INDEXER_SENSOR_PORT = 0;
-    public static final int INDEXER_ID = 0;
+    public static final int INDEXER_SENSOR_ID = 73;
+    public static final int INDEXER_SENSOR_PORT = 74;
+    public static final int INDEXER_ID = 75;
 
-    public static final int FLYWHEEL_KICKER_ID = 0;
-    public static final int FLYWHEEL_KICKER_SENSOR_ID = 0;
+    public static final int FLYWHEEL_KICKER_ID = 76;
+    public static final int FLYWHEEL_KICKER_SENSOR_ID = 77;
 
-    public static final int FLYWHEEL_RIGHT_ID = 0;
-    public static final int FLYWHEEL_LEFT_ID = 0;
+    public static final int FLYWHEEL_RIGHT_ID = 78;
+    public static final int FLYWHEEL_LEFT_ID = 79;
 
-    public static final int HOOD_ID = 0;
+    public static final int HOOD_ID = 80;
 
     public static final String LIMELIGHT = "limelight";
 

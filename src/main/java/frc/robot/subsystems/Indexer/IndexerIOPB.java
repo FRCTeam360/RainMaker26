@@ -29,7 +29,7 @@ public class IndexerIOPB implements IndexerIO {
   public void updateInputs(IndexerIOInputs inputs) {
     inputs.position = encoder.getPosition();
     inputs.statorCurrent = indexerMotor.getOutputCurrent();
-    inputs.supplyCurrent = indexerMotor.getOutputCurrent() * indexerMotor.getAppliedOutput(); 
+    inputs.supplyCurrent = indexerMotor.getOutputCurrent() * indexerMotor.getAppliedOutput();
     inputs.velocity = encoder.getVelocity();
     inputs.voltage = indexerMotor.getBusVoltage() * indexerMotor.getAppliedOutput();
   }
