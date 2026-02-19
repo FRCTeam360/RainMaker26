@@ -131,14 +131,7 @@ public class RobotContainer {
     // TODO: Re-enable superStructure construction and PathPlanner commands
     superStructure =
         new SuperStructure(
-            intake,
-            hopper,
-            flywheelKicker,
-            flywheel,
-            hood,
-            drivetrain,
-            shotCalculator,
-            driverCont);
+            intake, hopper, flywheelKicker, flywheel, hood, drivetrain, shotCalculator, driverCont);
 
     if (Objects.nonNull(superStructure)) {
       registerPathplannerCommand(

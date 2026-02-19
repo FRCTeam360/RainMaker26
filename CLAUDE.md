@@ -101,11 +101,11 @@ Use `ALL_CAPS` with underscores for separation:
 
 **Subsystems** - PascalCase nouns (no "Subsystem" suffix):
 
-- `Intake`, `Flywheel`, `Hood`, `Indexer`, `IntakePivot`, `SuperStructure`
+- `Intake`, `Flywheel`, `Hood`, `Hopper`, `IntakePivot`, `SuperStructure`
 
 **IO interfaces** - `<Subsystem>IO` pattern:
 
-- `IntakeIO`, `FlywheelIO`, `HoodIO`, `IndexerIO`
+- `IntakeIO`, `FlywheelIO`, `HoodIO`, `HopperIO`
 
 **IO implementations** - `<Subsystem>IO<Type>` pattern:
 
