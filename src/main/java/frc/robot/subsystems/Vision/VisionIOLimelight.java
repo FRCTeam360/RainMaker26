@@ -164,6 +164,7 @@ public class VisionIOLimelight implements VisionIO {
     table.getEntry("snapname").setString(eventName);
     double[] captureData = {(double) rewindCounter, 10.0};
     table.getEntry("capture_rewind").setDoubleArray(captureData);
+  }
 
   // while enabled
   public void enableIMUAssist() {
@@ -178,5 +179,4 @@ public class VisionIOLimelight implements VisionIO {
       LimelightHelpers.SetIMUMode(name, Constants.IMU_MODE_EXTERNAL_SEED);
     }
   }
-}
 }
