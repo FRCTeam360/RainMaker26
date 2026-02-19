@@ -14,8 +14,8 @@ import frc.robot.Constants.PracticeBotConstants;
 public class FlywheelIOPB implements FlywheelIO {
 
   private final TalonFX[] motors = {
-    new TalonFX(PracticeBotConstants.FLYWHEEL_RIGHT_ID, PracticeBotConstants.CANBUS_NAME),
-    new TalonFX(PracticeBotConstants.FLYWHEEL_LEFT_ID, PracticeBotConstants.CANBUS_NAME)
+    new TalonFX(PracticeBotConstants.FLYWHEEL_RIGHT_ID, PracticeBotConstants.CANBUS),
+    new TalonFX(PracticeBotConstants.FLYWHEEL_LEFT_ID, PracticeBotConstants.CANBUS)
   };
   private TalonFXConfiguration rightConfig = new TalonFXConfiguration();
   private TalonFXConfiguration leftConfig = new TalonFXConfiguration();

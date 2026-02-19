@@ -20,6 +20,7 @@ public class IndexerIOPB implements IndexerIO {
   public IndexerIOPB() {
     sparkMaxConfig.idleMode(IdleMode.kBrake);
     sparkMaxConfig.inverted(true);
+    sparkMaxConfig.smartCurrentLimit(40);
 
     indexerMotor.configure(
         sparkMaxConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
@@ -28,9 +29,7 @@ public class IndexerIOPB implements IndexerIO {
   public void updateInputs(IndexerIOInputs inputs) {
     inputs.position = encoder.getPosition();
     inputs.statorCurrent = indexerMotor.getOutputCurrent();
-    inputs.supplyCurrent =
-        indexerMotor.getOutputCurrent() * indexerMotor.getAppliedOutput(); // TODO: check if
-    // this is right
+    inputs.supplyCurrent = indexerMotor.getOutputCurrent() * indexerMotor.getAppliedOutput(); 
     inputs.velocity = encoder.getVelocity();
     inputs.voltage = indexerMotor.getBusVoltage() * indexerMotor.getAppliedOutput();
   }

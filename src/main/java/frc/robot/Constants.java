@@ -25,6 +25,7 @@ public final class Constants {
   public static enum RobotType {
     SIM,
     WOODBOT,
+    PRACTICEBOT,
     REPLAY
   }
 
@@ -58,14 +59,12 @@ public final class Constants {
 
   public static record PracticeBotConstants() {
     public static final int INTAKE_ID = 0;
-    public static final int INTAKE_SENSOR_PORT = 0;
     public static final int INTAKE_PIVOT_ID = 0;
 
     public static final int INDEXER_SENSOR_ID = 0;
     public static final int INDEXER_SENSOR_PORT = 0;
     public static final int INDEXER_ID = 0;
 
-    public static final int FLYWHEEL_ID = 0;
     public static final int FLYWHEEL_KICKER_ID = 0;
     public static final int FLYWHEEL_KICKER_SENSOR_ID = 0;
 
@@ -76,7 +75,7 @@ public final class Constants {
 
     public static final String LIMELIGHT = "limelight";
 
-    public static final String CANBUS_NAME = "Default Name";
+    public static final CANBus CANBUS = new CANBus("Default Name");
   }
 
   public static class SimulationConstants {
