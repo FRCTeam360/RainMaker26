@@ -12,7 +12,6 @@ import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import com.revrobotics.spark.config.SoftLimitConfig;
 import edu.wpi.first.wpilibj.DigitalInput;
 import frc.robot.Constants;
 
@@ -24,15 +23,7 @@ public class IntakePivotIOPB implements IntakePivotIO {
   private final MotionMagicVoltage motionMagicPosition = new MotionMagicVoltage(0);
   private final TalonFXConfiguration config = new TalonFXConfiguration();
   private final CurrentLimitsConfigs currentLimitConfig = new CurrentLimitsConfigs();
-  private final SoftLimitConfig softLimitConfig = new SoftLimitConfig();
   private NeutralModeValue neutralMode = NeutralModeValue.Brake;
-
-  // do not call --> will result in null pointer
-  private DigitalInput zeroButton;
-  private DigitalInput brakeButton;
-
-  private boolean zeroPrev = false;
-  private boolean brakePrev = false;
 
   // TODO: UPDATE GEAR RATIO
   private final double GEAR_RATIO = 360.0 / 60.0;
@@ -41,7 +32,6 @@ public class IntakePivotIOPB implements IntakePivotIO {
 
   /** Creates a new IntakePivotIOWB. */
   public IntakePivotIOPB() {
-    intakePivot.getConfigurator().apply(config);
     intakePivot.setNeutralMode(NeutralModeValue.Brake);
 
     final double motionMagicAcceleration = 400.0; // rotations per second squared
@@ -54,11 +44,6 @@ public class IntakePivotIOPB implements IntakePivotIO {
 
     currentLimitConfig.StatorCurrentLimit = 120.0;
     currentLimitConfig.SupplyCurrentLimit = 60.0;
-
-    softLimitConfig.forwardSoftLimitEnabled(true);
-    softLimitConfig.forwardSoftLimit(0.0);
-    softLimitConfig.reverseSoftLimitEnabled(true);
-    softLimitConfig.reverseSoftLimit(50.0);
 
     final double kP = 0.0;
     final double kI = 0.0;
@@ -90,10 +75,7 @@ public class IntakePivotIOPB implements IntakePivotIO {
         .withForwardSoftLimitEnable(true)
         .withReverseSoftLimitEnable(true);
 
-    config.MotionMagic.withMotionMagicAcceleration(motionMagicAcceleration)
-        .withMotionMagicCruiseVelocity(motionMagicCruiseVelocity)
-        .withMotionMagicJerk(motionMagicCruiseJerk);
-
+    
     intakePivot.getConfigurator().apply(config, 0.050);
   }
 
@@ -110,40 +92,16 @@ public class IntakePivotIOPB implements IntakePivotIO {
   }
 
   public void enableBrakeMode() {
-    neutralMode = NeutralModeValue.Brake;
     intakePivot.setNeutralMode(NeutralModeValue.Brake);
   }
 
   public void disableBrakeMode() {
-    neutralMode = NeutralModeValue.Coast;
     intakePivot.setNeutralMode(NeutralModeValue.Coast);
   }
+  // TODO: ASK ELECTRICAL FOR A ZEROING BUTTON OR AN ABSOLUTE ENCODER
 
   public boolean isBrakeMode() {
     return neutralMode == NeutralModeValue.Brake;
-  }
-
-  // TODO: ASK ELECTRICAL FOR A ZEROING BUTTON OR AN ABSOLUTE ENCODER
-  private boolean getRawZeroButton() {
-    return !this.zeroButton.get();
-  }
-
-  public boolean getZeroButton() {
-    boolean zeroCurr = getRawZeroButton();
-    boolean risingEdge = zeroCurr && !zeroPrev;
-    zeroPrev = zeroCurr;
-    return risingEdge;
-  }
-
-  private boolean getRawBrakeButton() {
-    return !this.brakeButton.get();
-  }
-
-  public boolean getBrakeButton() {
-    boolean brakeCurr = getRawBrakeButton();
-    boolean risingEdge = brakeCurr && !brakePrev;
-    brakePrev = brakeCurr;
-    return risingEdge;
   }
 
   public void updateInputs(IntakePivotIOInputs inputs) {

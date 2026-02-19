@@ -23,4 +23,9 @@ public interface IntakePivotIO {
   public void setDutyCycle(double value);
 
   public default void updateInputs(IntakePivotIOInputs inputs) {}
+
+  public void enableBrakeMode();
+  public void disableBrakeMode();
+ public boolean isBrakeMode();
+
 }
