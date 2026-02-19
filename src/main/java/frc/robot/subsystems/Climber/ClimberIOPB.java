@@ -21,9 +21,9 @@ import frc.robot.Constants.WoodBotConstants;
 public class ClimberIOPB implements ClimberIO {
 
   private final SparkMax leftClimberMotor =
-      new SparkMax(WoodBotConstants.CLIMBER_ID, MotorType.kBrushless);
+      new SparkMax(PracticeBotConstants.CLIMBER_ID, MotorType.kBrushless);
   private final SparkMax rightClimberMotor = 
-      new SparkMax(WoodBotConstants.CLIMBER_ID, MotorType.kBrushless);
+      new SparkMax(PracticeBotConstants.CLIMBER_ID, MotorType.kBrushless);
   
   private final RelativeEncoder leftClimberEncoder = leftClimberMotor.getEncoder();
   private final RelativeEncoder rightClimberEncoder = rightClimberMotor.getEncoder();

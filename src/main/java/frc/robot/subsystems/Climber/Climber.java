@@ -25,12 +25,34 @@ public class Climber extends SubsystemBase {
 
   public void stop() {
     io.setLeftDutyCycle(0.0);
+    io.setRightDutyCycle(0.0);
+  }
+
+  public boolean leftAboveMinHeight() {
+    return io.leftAboveMinHeight();
+  }
+
+  public boolean rightAboveMinHeight(){
+    return io.rightAboveMinHeight();
   }
 
   public void setLeftPosition(double position) {
     io.setLeftPosition(position);
   }
 
+  public void setRightPosition(double position) {
+    io.setRightPosition(position);
+  }
+
+  public void zeroBoth() {
+    io.zeroBoth();
+  }
+
+  public void setRightHeight
+
+  public void updatePIDF(double P, double I, double D, double F) {
+    io.updatePIDF(P, I, D, F);
+  }
 
   @Override
   public void periodic() {
