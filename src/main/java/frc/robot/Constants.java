@@ -117,7 +117,7 @@ public final class Constants {
   public static final class SerialAddressConstants {
     public static String WOOD_SERIAL_ADDRESS = "032BE44A";
     // FIXME: Enter the practice bot roboRIO serial address
-    public static String PRACTICE_SERIAL_ADDRESS = "";
+    public static String PRACTICE_SERIAL_ADDRESS = "WRONG_SERIAL_ADDRESS";
   }
 
   public static double loopPeriodSecs; // add value
