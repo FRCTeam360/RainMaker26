@@ -23,5 +23,5 @@ public interface HoodIO {
 
   public void setPosition(double position);
 
-  public void setEncoder();
+  public void setZero();
 }
