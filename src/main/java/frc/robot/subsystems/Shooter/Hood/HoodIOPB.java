@@ -4,6 +4,9 @@
 
 package frc.robot.subsystems.Shooter.Hood;
 
+import static edu.wpi.first.units.Units.RPM;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXSConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
@@ -80,7 +83,7 @@ public class HoodIOPB implements HoodIO {
     inputs.position = Units.rotationsToDegrees(hoodMotor.getPosition().getValueAsDouble());
     inputs.statorCurrent = hoodMotor.getStatorCurrent().getValueAsDouble();
     inputs.supplyCurrent = hoodMotor.getSupplyCurrent().getValueAsDouble();
-    inputs.velocity = Units.rotationsToDegrees(hoodMotor.getVelocity().getValueAsDouble());
+    inputs.velocity = RotationsPerSecond.of(hoodMotor.getVelocity().getValueAsDouble()).in(RPM);
     inputs.voltage = hoodMotor.getMotorVoltage().getValueAsDouble();
   }
 

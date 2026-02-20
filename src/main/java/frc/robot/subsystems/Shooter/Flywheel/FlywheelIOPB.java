@@ -1,5 +1,8 @@
 package frc.robot.subsystems.Shooter.Flywheel;
 
+import static edu.wpi.first.units.Units.RPM;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
@@ -77,8 +80,7 @@ public class FlywheelIOPB implements FlywheelIO {
 
   @Override
   public void setVelocity(double rpm) {
-    double rps = rpm / 60.0;
-    motors[0].setControl(velocityTorqueCurrent.withVelocity(rps));
+    motors[0].setControl(velocityTorqueCurrent.withVelocity(RPM.of(rpm).in(RotationsPerSecond)));
   }
 
   @Override
@@ -91,8 +93,8 @@ public class FlywheelIOPB implements FlywheelIO {
       inputs.statorCurrents[i] = motors[i].getStatorCurrent().getValueAsDouble();
       inputs.supplyCurrents[i] = motors[i].getSupplyCurrent().getValueAsDouble();
       inputs.positions[i] = motors[i].getPosition().getValueAsDouble();
-      // velocities are now in RPM
-      inputs.velocities[i] = motors[i].getVelocity().getValueAsDouble() * 60.0;
+      inputs.velocities[i] =
+          RotationsPerSecond.of(motors[i].getVelocity().getValueAsDouble()).in(RPM);
       inputs.voltages[i] = motors[i].getMotorVoltage().getValueAsDouble();
     }
   }
