@@ -71,6 +71,8 @@ public class IntakePivotIOPB implements IntakePivotIO {
     config.Voltage.PeakForwardVoltage = 12.0;
     config.Voltage.PeakReverseVoltage = -12.0;
 
+    config.Feedback.SensorToMechanismRatio = GEAR_RATIO;
+
     config.SoftwareLimitSwitch.withForwardSoftLimitThreshold(forwardLimit)
         .withReverseSoftLimitThreshold(reverseLimit)
         .withForwardSoftLimitEnable(true)
