@@ -3,10 +3,10 @@ package frc.robot.subsystems.FlywheelKicker;
 import com.ctre.phoenix6.configs.CANrangeConfiguration;
 import com.ctre.phoenix6.hardware.CANrange;
 import com.ctre.phoenix6.signals.UpdateModeValue;
+import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
+import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkBase.ControlType;
-import com.revrobotics.spark.SparkBase.PersistMode;
-import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
@@ -49,10 +49,7 @@ public class FlywheelKickerIOPB implements FlywheelKickerIO {
   public void updateInputs(FlywheelKickerIOInputs inputs) {
     inputs.position = encoder.getPosition();
     inputs.statorCurrent = flywheelkickerMotor.getOutputCurrent();
-    inputs.supplyCurrent =
-        flywheelkickerMotor.getOutputCurrent()
-            * flywheelkickerMotor.getAppliedOutput(); // TODO: check if
-    // this is right
+    inputs.supplyCurrent = 0;
     inputs.velocity = encoder.getVelocity();
     inputs.voltage = flywheelkickerMotor.getBusVoltage() * flywheelkickerMotor.getAppliedOutput();
     inputs.sensorProximity = canSensor.getDistance().getValueAsDouble();

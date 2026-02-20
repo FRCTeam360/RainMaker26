@@ -1,6 +1,8 @@
 package frc.robot.subsystems.Indexer;
 
 import com.revrobotics.sim.SparkMaxSim;
+import com.revrobotics.spark.SparkBase.ControlType;
+import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
@@ -35,6 +37,7 @@ public class IndexerIOSim implements IndexerIO {
 
   // SparkMax simulation object
   private final SparkMaxSim sparkSim = new SparkMaxSim(motorControllerSim, gearbox);
+  private final SparkClosedLoopController closedLoopController;
 
   // Flywheel simulation
   private final LinearSystem<N1, N1, N1> plant =
@@ -45,6 +48,8 @@ public class IndexerIOSim implements IndexerIO {
     // Configure SparkMax with PID and current limits
     configureMotor();
 
+    closedLoopController = motorControllerSim.getClosedLoopController();
+
     // Initialize motor to 0
     motorControllerSim.set(0.0);
   }
@@ -54,6 +59,9 @@ public class IndexerIOSim implements IndexerIO {
     motorConfig.idleMode(IdleMode.kBrake);
     motorConfig.inverted(false);
     motorConfig.smartCurrentLimit(40);
+
+    motorConfig.closedLoop.p(0.0002).i(0.0).d(0.0);
+    motorConfig.closedLoop.feedForward.kV(0.0021).kS(0.04);
   }
 
   @Override
@@ -97,5 +105,10 @@ public class IndexerIOSim implements IndexerIO {
   @Override
   public void setDutyCycle(double value) {
     motorControllerSim.set(value);
+  }
+
+  @Override
+  public void setVelocity(double rpm) {
+    closedLoopController.setSetpoint(rpm, ControlType.kVelocity);
   }
 }

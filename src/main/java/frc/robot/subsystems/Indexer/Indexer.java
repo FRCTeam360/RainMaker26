@@ -83,6 +83,10 @@ public class Indexer extends SubsystemBase {
     return this.runEnd(() -> io.setDutyCycle(valueSup.getAsDouble()), () -> io.setDutyCycle(0.0));
   }
 
+  public void setVelocity(double velocity) {
+    io.setVelocity(velocity);
+  }
+
   public void stop() {
     io.setDutyCycle(0.0);
   }

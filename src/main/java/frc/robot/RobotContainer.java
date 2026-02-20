@@ -103,7 +103,6 @@ public class RobotContainer {
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOSim());
         break;
       case WOODBOT:
-      default:
         drivetrain = WoodBotDrivetrain.createDrivetrain();
         logger = new Telemetry(WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
         flywheel = new Flywheel(new FlywheelIOWB());
@@ -133,6 +132,7 @@ public class RobotContainer {
         // intakePivot = new IntakePivot(new IntakePivotIOPB());
         break;
       case PRACTICEBOT:
+      default:
         drivetrain =
             WoodBotDrivetrain
                 .createDrivetrain(); // FIXME, CHANGE ONCE PRACTICE BOT DRIVETRAIN IS MADE

@@ -12,6 +12,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import frc.robot.Constants.PracticeBotConstants;
 
 public class FlywheelIOPB implements FlywheelIO {
+  private static final double GEAR_RATIO = 1.0; // FIXME: set actual gear ratio
 
   private final TalonFX[] motors = {
     new TalonFX(PracticeBotConstants.FLYWHEEL_RIGHT_ID, PracticeBotConstants.CANBUS),
@@ -42,6 +43,8 @@ public class FlywheelIOPB implements FlywheelIO {
     for (TalonFX i : motors) {
       i.getConfigurator().apply(defaultConfig);
     }
+
+    rightConfig.Feedback.SensorToMechanismRatio = GEAR_RATIO;
 
     rightConfig.CurrentLimits.StatorCurrentLimit = 200.0;
     rightConfig.CurrentLimits.StatorCurrentLimitEnable = true;

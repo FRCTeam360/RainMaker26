@@ -16,6 +16,8 @@ import com.revrobotics.spark.config.SparkFlexConfig;
 import frc.robot.Constants.PracticeBotConstants;
 
 public class IntakeIOPB implements IntakeIO {
+  private static final double GEAR_RATIO = 1.0; // FIXME: set actual gear ratio
+
   private final SparkFlex motor =
       new SparkFlex(PracticeBotConstants.INTAKE_ID, MotorType.kBrushless);
   private final RelativeEncoder encoder = motor.getEncoder();
@@ -27,6 +29,9 @@ public class IntakeIOPB implements IntakeIO {
     config.idleMode(IdleMode.kBrake);
     config.inverted(true);
     config.smartCurrentLimit(40);
+
+    config.encoder.positionConversionFactor(1.0 / GEAR_RATIO);
+    config.encoder.velocityConversionFactor(1.0 / GEAR_RATIO);
 
     config.closedLoop.p(0.0002).i(0.0).d(0.0);
     config.closedLoop.feedForward.kV(0.0018).kS(0.004);
@@ -50,8 +55,7 @@ public class IntakeIOPB implements IntakeIO {
   public void updateInputs(IntakeIOInputs inputs) {
     inputs.position = encoder.getPosition();
     inputs.statorCurrent = motor.getOutputCurrent();
-    inputs.supplyCurrent = motor.getOutputCurrent() * motor.getAppliedOutput(); // TODO: check if
-    // this is right
+    inputs.supplyCurrent = 0;
     inputs.velocity = encoder.getVelocity();
     inputs.voltage = motor.getBusVoltage() * motor.getAppliedOutput();
   }

@@ -15,8 +15,9 @@ import frc.robot.Constants;
 
 public class HoodIOPB implements HoodIO {
   // /** Creates a new HoodIOWB. */
-  private final TalonFXS hoodMotor = new TalonFXS(Constants.PracticeBotConstants.HOOD_ID);
-  private TalonFXSConfiguration config = new TalonFXSConfiguration();
+  private final TalonFXS hoodMotor =
+      new TalonFXS(Constants.PracticeBotConstants.HOOD_ID, Constants.PracticeBotConstants.CANBUS);
+  private final TalonFXSConfiguration config = new TalonFXSConfiguration();
 
   private final MotionMagicVoltage motionMagicPosition = new MotionMagicVoltage(0);
 
