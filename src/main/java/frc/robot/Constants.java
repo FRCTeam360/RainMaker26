@@ -87,6 +87,8 @@ public final class Constants {
 
     public static final int HOOD_ID = 80;
 
+    public static final int HOPPER_ROLLER_ID = 0;
+
     public static final String LIMELIGHT = "limelight";
 
     public static final CANBus CANBUS = new CANBus("Default Name");
@@ -108,10 +110,6 @@ public final class Constants {
 
     // === HOOD ===
     public static final int HOOD_MOTOR = 6;
-  }
-
-  public static class PracticeBotConstants {
-    public static final int HOPPER_ROLLER_ID = 0;
   }
 
   public static class OperatorConstants {
