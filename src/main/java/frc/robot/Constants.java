@@ -71,20 +71,20 @@ public final class Constants {
 
   public static class SimulationConstants {
     // === INTAKE ===
-    public static final int INTAKE_MOTOR = 12;
+    public static final int INTAKE_MOTOR = 30;
     public static final int INTAKE_SENSOR_PORT = 10;
     public static final int INTAKE_PIVOT_MOTOR = 15;
 
     // === HOPPER ===
-    public static final int INDEXER_MOTOR = 9;
+    public static final int INDEXER_MOTOR = 31;
 
     // === FLYWHEEL ===
     public static final int FLYWHEEL_KICKER_MOTOR = 18;
     public static final int FLYWHEEL_KICKER_SENSOR_ID = 19;
-    public static final int FLYWHEEL_MOTOR = 2;
+    public static final int FLYWHEEL_MOTOR = 32;
 
     // === HOOD ===
-    public static final int HOOD_MOTOR = 6;
+    public static final int HOOD_MOTOR = 34;
   }
 
   public static class OperatorConstants {
