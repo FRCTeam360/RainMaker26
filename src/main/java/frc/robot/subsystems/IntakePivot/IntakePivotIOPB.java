@@ -12,11 +12,13 @@ import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import edu.wpi.first.math.util.Units;
 import frc.robot.Constants;
 
 public class IntakePivotIOPB implements IntakePivotIO {
   private final TalonFX intakePivot =
-      new TalonFX(Constants.WoodBotConstants.INTAKE_PIVOT_ID, Constants.WoodBotConstants.CANBUS);
+      new TalonFX(
+          Constants.PracticeBotConstants.INTAKE_PIVOT_ID, Constants.PracticeBotConstants.CANBUS);
 
   private final DutyCycleOut dutyCycleOut = new DutyCycleOut(0);
   private final MotionMagicVoltage motionMagicPosition = new MotionMagicVoltage(0);
@@ -37,9 +39,8 @@ public class IntakePivotIOPB implements IntakePivotIO {
     final double motionMagicCruiseVelocity = 85.0; // rotations per second
     final double motionMagicCruiseJerk = 1750.0; // rotations per second cubed
 
-    final double forwardLimit =
-        178.0; // TODO: make sure these are correct for prac bots; units are in degrees
-    final double reverseLimit = 0.0; // 29.5, units are in degrees
+    final double forwardLimitDegrees = 178.0; // TODO: make sure these are correct for prac bot
+    final double reverseLimitDegrees = 0.0; // 29.5
 
     config.CurrentLimits.StatorCurrentLimit = 120.0;
     config.CurrentLimits.SupplyCurrentLimit = 60.0;
@@ -73,8 +74,9 @@ public class IntakePivotIOPB implements IntakePivotIO {
 
     config.Feedback.SensorToMechanismRatio = GEAR_RATIO;
 
-    config.SoftwareLimitSwitch.withForwardSoftLimitThreshold(forwardLimit)
-        .withReverseSoftLimitThreshold(reverseLimit)
+    config.SoftwareLimitSwitch.withForwardSoftLimitThreshold(
+            Units.degreesToRotations(forwardLimitDegrees))
+        .withReverseSoftLimitThreshold(Units.degreesToRotations(reverseLimitDegrees))
         .withForwardSoftLimitEnable(true)
         .withReverseSoftLimitEnable(true);
 
@@ -85,8 +87,14 @@ public class IntakePivotIOPB implements IntakePivotIO {
     intakePivot.setPosition(0.0);
   }
 
-  public void setPosition(double position) {
-    intakePivot.setControl(motionMagicPosition.withPosition(position));
+  /**
+   * Sets the intake pivot position.
+   *
+   * @param positionDegrees target position in degrees
+   */
+  public void setPosition(double positionDegrees) {
+    intakePivot.setControl(
+        motionMagicPosition.withPosition(Units.degreesToRotations(positionDegrees)));
   }
 
   public void setDutyCycle(double value) {
@@ -106,9 +114,9 @@ public class IntakePivotIOPB implements IntakePivotIO {
   // TODO: ASK ELECTRICAL FOR A ZEROING BUTTON OR AN ABSOLUTE ENCODER
 
   public void updateInputs(IntakePivotIOInputs inputs) {
-    inputs.position = intakePivot.getPosition().getValueAsDouble();
+    inputs.position = Units.rotationsToDegrees(intakePivot.getPosition().getValueAsDouble());
     inputs.statorCurrent = intakePivot.getStatorCurrent().getValueAsDouble();
-    inputs.velocity = intakePivot.getVelocity().getValueAsDouble();
+    inputs.velocity = Units.rotationsToDegrees(intakePivot.getVelocity().getValueAsDouble());
     inputs.voltage = intakePivot.getMotorVoltage().getValueAsDouble();
     inputs.supplyCurrent = intakePivot.getSupplyCurrent().getValueAsDouble();
     inputs.brakeMode = neutralMode == NeutralModeValue.Brake;

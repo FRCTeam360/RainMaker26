@@ -11,10 +11,12 @@ import com.ctre.phoenix6.hardware.TalonFXS;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorArrangementValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import edu.wpi.first.math.util.Units;
 import frc.robot.Constants;
 
 public class HoodIOPB implements HoodIO {
-  // /** Creates a new HoodIOWB. */
+  private static final double GEAR_RATIO = 1.0; // FIXME: set actual gear ratio
+
   private final TalonFXS hoodMotor =
       new TalonFXS(Constants.PracticeBotConstants.HOOD_ID, Constants.PracticeBotConstants.CANBUS);
   private final TalonFXSConfiguration config = new TalonFXSConfiguration();
@@ -45,8 +47,11 @@ public class HoodIOPB implements HoodIO {
 
     config.Commutation.MotorArrangement = MotorArrangementValue.NEO550_JST;
 
+    config.ExternalFeedback.SensorToMechanismRatio = GEAR_RATIO;
+
     config.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
-    config.SoftwareLimitSwitch.ForwardSoftLimitThreshold = 24.0;
+    config.SoftwareLimitSwitch.ForwardSoftLimitThreshold =
+        Units.degreesToRotations(24.0); // FIXME: verify limit in degrees
     config.CurrentLimits.StatorCurrentLimit = 25.0;
     // NEO 550 has lower current capacity than Falcon 500
     config.CurrentLimits.StatorCurrentLimitEnable = true;
@@ -61,15 +66,21 @@ public class HoodIOPB implements HoodIO {
     hoodMotor.getConfigurator().apply(config);
   }
 
-  public void setPosition(double position) {
-    hoodMotor.setControl(motionMagicPosition.withPosition(position));
+  /**
+   * Sets the hood position.
+   *
+   * @param positionDegrees target position in degrees
+   */
+  public void setPosition(double positionDegrees) {
+    hoodMotor.setControl(
+        motionMagicPosition.withPosition(Units.degreesToRotations(positionDegrees)));
   }
 
   public void updateInputs(HoodIOInputs inputs) {
-    inputs.position = hoodMotor.getPosition().getValueAsDouble();
+    inputs.position = Units.rotationsToDegrees(hoodMotor.getPosition().getValueAsDouble());
     inputs.statorCurrent = hoodMotor.getStatorCurrent().getValueAsDouble();
     inputs.supplyCurrent = hoodMotor.getSupplyCurrent().getValueAsDouble();
-    inputs.velocity = hoodMotor.getVelocity().getValueAsDouble();
+    inputs.velocity = Units.rotationsToDegrees(hoodMotor.getVelocity().getValueAsDouble());
     inputs.voltage = hoodMotor.getMotorVoltage().getValueAsDouble();
   }
 

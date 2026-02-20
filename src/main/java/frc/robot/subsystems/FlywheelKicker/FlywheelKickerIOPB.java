@@ -15,6 +15,8 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import frc.robot.Constants;
 
 public class FlywheelKickerIOPB implements FlywheelKickerIO {
+  private static final double GEAR_RATIO = 1.0; // FIXME: set actual gear ratio
+
   /** Creates a new FlywheelKickerIOPB. */
   private final SparkMax flywheelkickerMotor =
       new SparkMax(Constants.PracticeBotConstants.FLYWHEEL_KICKER_ID, MotorType.kBrushless);
@@ -30,6 +32,9 @@ public class FlywheelKickerIOPB implements FlywheelKickerIO {
     sparkMaxConfig.idleMode(IdleMode.kBrake);
     sparkMaxConfig.inverted(true);
     sparkMaxConfig.smartCurrentLimit(40);
+
+    sparkMaxConfig.encoder.positionConversionFactor(1.0 / GEAR_RATIO);
+    sparkMaxConfig.encoder.velocityConversionFactor(1.0 / GEAR_RATIO);
 
     sparkMaxConfig.closedLoop.p(0.0002).i(0.0).d(0.0);
     sparkMaxConfig.closedLoop.feedForward.kV(0.0021).kS(0.04);
