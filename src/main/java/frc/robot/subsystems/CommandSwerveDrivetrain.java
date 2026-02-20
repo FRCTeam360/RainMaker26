@@ -289,6 +289,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
    */
   public CommandSwerveDrivetrain(
       SwerveDrivetrainConstants drivetrainConstants, SwerveModuleConstants<?, ?, ?>... modules) {
+
     super(drivetrainConstants, modules);
     // Registers the subsystem so periodic runs
     CommandScheduler.getInstance().registerSubsystem(this);
@@ -300,6 +301,11 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
       startSimThread();
     }
     configureAutoBuilder();
+    PPHolonomicDriveController.overrideRotationFeedback(
+        () -> {
+          double targetRotation = 1;//temporary
+          return targetRotation;
+        });
   }
 
   /**
