@@ -8,9 +8,9 @@ import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.utils.LoggedTunableNumber;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 public class Flywheel extends SubsystemBase {
   private final FlywheelIO io;
@@ -18,31 +18,31 @@ public class Flywheel extends SubsystemBase {
 
   public enum FlywheelStates {
     OFF,
-    SPINNING_UP,    // Duty cycle bang-bang - fast acceleration
-    AT_SETPOINT,    // Torque current bang-bang - maintaining speed
-    COAST           // Legacy state for compatibility
+    SPINNING_UP, // Duty cycle bang-bang - fast acceleration
+    AT_SETPOINT, // Torque current bang-bang - maintaining speed
+    COAST // Legacy state for compatibility
   }
 
   // These enums are for logging and debugging - actual control mode is determined by state machine
   public enum FlywheelControlType {
-    DUTY_CYCLE_BANG_BANG,      // Startup/Recovery - fast acceleration
-    TORQUE_CURRENT_BANG_BANG,  // Idle/Ball - consistent torque
-    VOLTAGE_VELOCITY,          // Velocity PID control
-    STOP 
+    DUTY_CYCLE_BANG_BANG, // Startup/Recovery - fast acceleration
+    TORQUE_CURRENT_BANG_BANG, // Idle/Ball - consistent torque
+    VOLTAGE_VELOCITY, // Velocity PID control
+    STOP
   }
 
   // Tunable parameters for 4-phase bang-bang control
-  private static final LoggedTunableNumber toleranceRPS = new LoggedTunableNumber(
-      "Flywheel/ToleranceRPS", 0.33);  // ~20 RPM in RPS
-  private static final LoggedTunableNumber controlModeDebounceSeconds = new LoggedTunableNumber(
-      "Flywheel/ControlModeDebounceSeconds", 0.025);
-  private static final LoggedTunableNumber atGoalDebounceSeconds = new LoggedTunableNumber(
-      "Flywheel/AtGoalDebounceSeconds", 0.2);
+  private static final LoggedNetworkNumber toleranceRPS =
+      new LoggedNetworkNumber("Flywheel/ToleranceRPS", 3); // 0.33 RPS ≈ 20 RPM
+  private static final LoggedNetworkNumber controlModeDebounceSeconds =
+      new LoggedNetworkNumber("Flywheel/ControlModeDebounceSeconds", 0.025);
+  private static final LoggedNetworkNumber atGoalDebounceSeconds =
+      new LoggedNetworkNumber("Flywheel/AtGoalDebounceSeconds", 0.2);
 
-  private final Debouncer controlModeDebouncer = new Debouncer(
-      controlModeDebounceSeconds.get(), DebounceType.kFalling);
-  private final Debouncer atGoalDebouncer = new Debouncer(
-      atGoalDebounceSeconds.get(), DebounceType.kFalling);
+  private final Debouncer controlModeDebouncer =
+      new Debouncer(controlModeDebounceSeconds.get(), DebounceType.kFalling);
+  private final Debouncer atGoalDebouncer =
+      new Debouncer(atGoalDebounceSeconds.get(), DebounceType.kFalling);
 
   private FlywheelControlType currentControlMode = FlywheelControlType.STOP;
   private boolean atGoal = false;
@@ -54,22 +54,25 @@ public class Flywheel extends SubsystemBase {
   }
 
   /**
-   * Set flywheel velocity using 4-phase bang-bang control.
-   * State machine handles control mode transitions automatically.
-   * Can be called repeatedly with different targets - state machine will adapt.
-   * 
-   * @param velocityRPM target velocity in rotations per minute
+   * Set flywheel velocity using 4-phase bang-bang control. State machine handles control mode
+   * transitions automatically. Can be called repeatedly with different targets - state machine will
+   * adapt.
+   *
+   * @param velocityRPM target velocity in rotations per minute (RPM). Internally converted to RPS
+   *     for IO layer which expects rotations per second.
    */
   public void setVelocityRPM(double velocityRPM) {
-    targetVelocityRPS = velocityRPM  / 60.0;
-    
-    // Only transition states if we're currently OFF or target goes to zero
+    // Convert RPM to RPS for internal IO layer communication
+    // (Phoenix 6 velocities are in RPS, tolerance is in RPS)
+    targetVelocityRPS = velocityRPM / 60.0;
+
+    // Trigger state transition if starting or stopping
     if (velocityRPM > 0.0 && wantedState == FlywheelStates.OFF) {
-      setWantedState(FlywheelStates.SPINNING_UP);
+      wantedState = FlywheelStates.SPINNING_UP;
     } else if (velocityRPM == 0.0) {
-      setWantedState(FlywheelStates.OFF);
+      wantedState = FlywheelStates.OFF;
     }
-    // Otherwise let state machine handle transitions (SPINNING_UP <-> AT_SETPOINT)
+    // State machine in periodic() will handle remaining transitions (SPINNING_UP <-> AT_SETPOINT)
   }
 
   public boolean isAtGoal() {
@@ -89,21 +92,21 @@ public class Flywheel extends SubsystemBase {
   private FlywheelStates previousState = FlywheelStates.OFF;
 
   /**
-   * Check if flywheel is at setpoint using debounced tolerance checks.
-   * Updates both the fast control mode debouncer and slower at-goal debouncer.
-   * 
+   * Check if flywheel is at setpoint using debounced tolerance checks. Updates both the fast
+   * control mode debouncer and slower at-goal debouncer.
+   *
    * @return true if velocity has been within tolerance for control mode debounce time
    */
   private boolean isAtSetpointVelocity() {
     double currentRPS = getLeaderVelocityRPS();
-    boolean inTolerance = Math.abs(currentRPS - targetVelocityRPS) <= toleranceRPS.get() ;
-    
+    boolean inTolerance = Math.abs(currentRPS - targetVelocityRPS) <= toleranceRPS.get();
+
     // Fast debouncer for control mode transitions (25ms default)
     boolean isAtSpeed = controlModeDebouncer.calculate(inTolerance);
-    
+
     // Slower debouncer for external "ready to shoot" signal (200ms default)
     atGoal = atGoalDebouncer.calculate(inTolerance);
-    
+
     return isAtSpeed;
   }
 
@@ -132,11 +135,11 @@ public class Flywheel extends SubsystemBase {
           currentState = FlywheelStates.AT_SETPOINT;
         }
         break;
-      
+
       case COAST:
         currentState = FlywheelStates.COAST;
         break;
-      
+
       case OFF:
         currentState = FlywheelStates.OFF;
         break;
@@ -145,7 +148,7 @@ public class Flywheel extends SubsystemBase {
 
   public double getLeaderVelocityRPS() {
     if (inputs.velocities.length > 0) {
-      return inputs.velocities[0];  // Convert from RPM to RPS
+      return inputs.velocities[0]; // Convert from RPM to RPS
     }
     return 0.0;
   }
@@ -157,7 +160,7 @@ public class Flywheel extends SubsystemBase {
         currentControlMode = FlywheelControlType.DUTY_CYCLE_BANG_BANG;
         io.setVelocityBangBang(targetVelocityRPS);
         break;
-      
+
       case AT_SETPOINT:
         // Torque current bang-bang to maintain speed with consistent torque
         currentControlMode = FlywheelControlType.TORQUE_CURRENT_BANG_BANG;
@@ -180,14 +183,18 @@ public class Flywheel extends SubsystemBase {
 
   public void setWantedState(FlywheelStates state) {
     wantedState = state;
-    updateState();
-    applyState();
+    // State update will happen in periodic()
   }
 
   @Override
   public void periodic() {
     io.updateInputs(inputs);
     Logger.processInputs("Flywheel", inputs);
+
+    // Update state machine on every cycle to respond to velocity/current state changes
+    updateState();
+    applyState();
+
     Logger.recordOutput("Subsystems/Flywheel/WantedState", wantedState.toString());
     Logger.recordOutput("Subsystems/Flywheel/CurrentState", currentState.toString());
     Logger.recordOutput("Subsystems/Flywheel/PreviousState", previousState.toString());
@@ -218,7 +225,6 @@ public class Flywheel extends SubsystemBase {
   }
 
   public Command setVelocityCommand(DoubleSupplier supplierVelocity) {
-    return this.runEnd(
-        () -> setVelocityRPM(supplierVelocity.getAsDouble()), () -> io.stop());
+    return this.runEnd(() -> setVelocityRPM(supplierVelocity.getAsDouble()), () -> io.stop());
   }
 }

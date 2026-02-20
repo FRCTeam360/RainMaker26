@@ -4,7 +4,6 @@
 
 package frc.robot.subsystems.Shooter.Flywheel;
 
-import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
@@ -14,14 +13,13 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-
 import frc.robot.Constants.WoodBotConstants;
 
 public class FlywheelIOWB implements FlywheelIO {
 
   private final TalonFX[] motors = {
-      new TalonFX(WoodBotConstants.FLYWHEEL_RIGHT_ID, WoodBotConstants.CANBUS),
-      new TalonFX(WoodBotConstants.FLYWHEEL_LEFT_ID, WoodBotConstants.CANBUS)
+    new TalonFX(WoodBotConstants.FLYWHEEL_RIGHT_ID, WoodBotConstants.CANBUS),
+    new TalonFX(WoodBotConstants.FLYWHEEL_LEFT_ID, WoodBotConstants.CANBUS)
   };
   private TalonFXConfiguration rightConfig = new TalonFXConfiguration();
   private TalonFXConfiguration leftConfig = new TalonFXConfiguration();
@@ -57,11 +55,10 @@ public class FlywheelIOWB implements FlywheelIO {
     // Initial value - will be updated via LoggedTunableNumber
     rightConfig.TorqueCurrent.PeakForwardTorqueCurrent = 40.0;
     rightConfig.TorqueCurrent.PeakReverseTorqueCurrent = 0.0;
-    
+
     // Peak duty-cycle for startup/recovery phases (max acceleration)
     rightConfig.MotorOutput.PeakForwardDutyCycle = 1.0;
     rightConfig.MotorOutput.PeakReverseDutyCycle = 0.0;
-
 
     rightConfig.MotorOutput.withInverted(InvertedValue.Clockwise_Positive);
 
@@ -87,8 +84,10 @@ public class FlywheelIOWB implements FlywheelIO {
 
   // Control request objects (reused for efficiency)
   private final VelocityDutyCycle dutyCycleBangBang = new VelocityDutyCycle(0.0).withSlot(0);
-  // Because this uses the VelocityTorqueCurrentFOC control mode, it will be limited by the torque current config (40A limit from config)
-  private final VelocityTorqueCurrentFOC torqueCurrentBangBang = new VelocityTorqueCurrentFOC(0.0).withSlot(0);
+  // Because this uses the VelocityTorqueCurrentFOC control mode, it will be limited by the torque
+  // current config (40A limit from config)
+  private final VelocityTorqueCurrentFOC torqueCurrentBangBang =
+      new VelocityTorqueCurrentFOC(0.0).withSlot(0);
   // PID uses VelocityVoltage instead - not limited by torque current config
   private final VelocityVoltage velocityPID = new VelocityVoltage(0.0).withSlot(2);
 

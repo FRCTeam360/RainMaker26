@@ -9,7 +9,6 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.StrictFollower;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -31,20 +30,26 @@ public class FlywheelIOSim implements FlywheelIO {
   private DCMotor gearbox = DCMotor.getKrakenX60(2);
   private final double flywheelMOI = 0.01; // kg*m^2
 
-  private final LoggedNetworkNumber tunableKp =
-      new LoggedNetworkNumber("/Tuning/FlywheelKicker/kP", 2.0);
-  private final LoggedNetworkNumber tunableKi =
-      new LoggedNetworkNumber("/Tuning/FlywheelKicker/kI", 0.0);
+  private final LoggedNetworkNumber tunableKp = new LoggedNetworkNumber("/Tuning/Flywheel/kP", 5.0);
+  private final LoggedNetworkNumber tunableKi = new LoggedNetworkNumber("/Tuning/Flywheel/kI", 0.0);
   private final LoggedNetworkNumber tunableKd =
-      new LoggedNetworkNumber("/Tuning/FlywheelKicker/kD", 0.1);
+      new LoggedNetworkNumber("/Tuning/Flywheel/kD", 0.01);
   private final LoggedNetworkNumber tunableSetpoint =
-      new LoggedNetworkNumber("/Tuning/FlywheelKicker/SetpointRPM", 0.0);
+      new LoggedNetworkNumber("/Tuning/Flywheel/SetpointRPM", 0.0);
   private final LoggedNetworkBoolean tuningEnabled =
-      new LoggedNetworkBoolean("/Tuning/FlywheelKicker/Enabled", false);
+      new LoggedNetworkBoolean("/Tuning/Flywheel/Enabled", false);
 
-  // Motor and control
-  private final TalonFX motorControllerSim1 = new TalonFX(SimulationConstants.FLYWHEEL_MOTOR);
-  private final TalonFX motorControllerSim2 = new TalonFX(SimulationConstants.FLYWHEEL_MOTOR + 1);
+  // Disturbance injection for testing state machine
+  private final LoggedNetworkBoolean injectDisturbance =
+      new LoggedNetworkBoolean("/Tuning/Flywheel/InjectDisturbance", false);
+  private final LoggedNetworkNumber disturbanceDurationSeconds =
+      new LoggedNetworkNumber("/Tuning/Flywheel/DisturbanceDurationSeconds", 0.5);
+
+  private double disturbanceStartTime = 0.0;
+  private boolean disturbanceActive = false;
+
+  // Single motor controller - gearbox is modeled as 2x Kraken X60 to retain combined power
+  private final TalonFX motorController = new TalonFX(SimulationConstants.FLYWHEEL_MOTOR);
 
   private final VelocityVoltage velocityRequest = new VelocityVoltage(0).withSlot(0);
 
@@ -56,18 +61,11 @@ public class FlywheelIOSim implements FlywheelIO {
   public FlywheelIOSim() {
     // Configure TalonFX with PID gains
     configureMotor();
-    motorControllerSim1
+    motorController
         .getSimState()
         .setRotorVelocity(
             RotationsPerSecond.of(flywheelSim.getAngularVelocityRPM() / 60.0)
                 .in(RotationsPerSecond));
-    motorControllerSim2
-        .getSimState()
-        .setRotorVelocity(
-            RotationsPerSecond.of(flywheelSim.getAngularVelocityRPM() / 60.0)
-                .in(RotationsPerSecond));
-
-    motorControllerSim2.setControl(new StrictFollower(SimulationConstants.FLYWHEEL_MOTOR));
   }
 
   private void configureMotor() {
@@ -89,90 +87,111 @@ public class FlywheelIOSim implements FlywheelIO {
     // Apply sensor-to-mechanism ratio for cleaner encoder readings
     talonConfig.Feedback.SensorToMechanismRatio = gearRatio;
 
-    // Apply configuration to both motors
-    motorControllerSim1.getConfigurator().apply(talonConfig);
-    motorControllerSim2.getConfigurator().apply(talonConfig);
+    // Apply configuration to motor
+    motorController.getConfigurator().apply(talonConfig);
   }
 
   public void updateInputs(FlywheelIOInputs inputs) {
     // --- AdvantageScope tuning (sim-only) ---
     if (tuningEnabled.get()) {
       Slot0Configs slot0 = new Slot0Configs();
-      motorControllerSim1.getConfigurator().refresh(slot0);
+      motorController.getConfigurator().refresh(slot0);
       slot0.kP = tunableKp.get();
       slot0.kI = tunableKi.get();
       slot0.kD = tunableKd.get();
-      motorControllerSim1.getConfigurator().apply(slot0);
+      motorController.getConfigurator().apply(slot0);
 
-      // Command the tunable setpoint to both motors (convert RPM to RPS)
-      this.setVelocity(tunableSetpoint.get());
+      // Command the tunable setpoint (in RPM) converted to RPS for Phoenix 6
+      this.setVelocity(tunableSetpoint.get()); // setVelocity expects RPM and converts internally
     }
 
-    // Step 1: Get the commanded voltage from motors and apply to simulation
-    // Use average voltage from both motors for the flywheel sim
-    // TODO: Verify StrictFollower works in simulation - check if motorVoltage2 tracks
-    // motorVoltage1.
-    //       If motorVoltage2 is always 0, the follower isn't working and we need to command both
-    //       motors directly or use motorVoltage1 * 2 for the physics sim.
-    double motorVoltage1 = motorControllerSim1.getSimState().getMotorVoltage();
-    double motorVoltage2 = motorControllerSim2.getSimState().getMotorVoltage();
-    double averageVoltage = (motorVoltage1 + motorVoltage2) / 2.0;
-    flywheelSim.setInputVoltage(averageVoltage);
+    // Step 1: Get the commanded voltage from the single motor controller.
+    // The gearbox is modeled as 2x Kraken X60, so this voltage already represents
+    // the combined effect of both physical motors on the shared flywheel mechanism.
+    double motorVoltage = motorController.getSimState().getMotorVoltage();
+
+    // Check if disturbance should be injected
+    if (injectDisturbance.get() && !disturbanceActive) {
+      disturbanceStartTime = edu.wpi.first.wpilibj.Timer.getFPGATimestamp();
+      disturbanceActive = true;
+    }
+
+    // Check if disturbance duration has elapsed
+    if (disturbanceActive
+        && edu.wpi.first.wpilibj.Timer.getFPGATimestamp() - disturbanceStartTime
+            > disturbanceDurationSeconds.get()) {
+      disturbanceActive = false;
+      injectDisturbance.set(false); // Reset the toggle
+    }
+
+    // Apply disturbance: zero out the motor voltage during disturbance period
+    double appliedVoltage = disturbanceActive ? 0.0 : motorVoltage;
+    flywheelSim.setInputVoltage(appliedVoltage);
 
     // Step 2: Update the simulation by one timestep
     flywheelSim.update(0.02);
 
+    // Convert RPM from simulation to RPS for consistency with Phoenix 6
+    // (Phoenix 6 returns velocities in rotations per second by default)
     double velocityRPS = flywheelSim.getAngularVelocityRPM() / 60.0;
 
-    // Step 4: Update the motor sim states with the new simulated values
-    motorControllerSim1.getSimState().setRotorVelocity(velocityRPS);
-    motorControllerSim2.getSimState().setRotorVelocity(velocityRPS);
+    // Step 3: Update the motor sim state with the new simulated velocity
+    motorController.getSimState().setRotorVelocity(velocityRPS);
 
-    // Step 5: Update battery voltage based on current draw
+    // Step 4: Update battery voltage based on current draw
     RoboRioSim.setVInVoltage(
         BatterySim.calculateDefaultBatteryLoadedVoltage(flywheelSim.getCurrentDrawAmps()));
 
-    // Step 6: Read all inputs from the SIMULATED VALUES (source of truth)
+    // Step 5: Read all inputs from the simulated values (source of truth).
+    // Mirror readings to both slots since we model both motors as one.
+    double statorCurrent = motorController.getStatorCurrent().getValueAsDouble();
+    double supplyCurrent = motorController.getSupplyCurrent().getValueAsDouble();
     inputs.velocities[0] = velocityRPS;
-    inputs.velocities[1] = velocityRPS; // Both motors have same velocity
-    inputs.voltages[0] = motorVoltage1;
-    inputs.voltages[1] = motorVoltage2;
-    inputs.statorCurrents[0] = motorControllerSim1.getStatorCurrent().getValueAsDouble();
-    inputs.statorCurrents[1] = motorControllerSim2.getStatorCurrent().getValueAsDouble();
-    inputs.supplyCurrents[0] = motorControllerSim1.getSupplyCurrent().getValueAsDouble();
-    inputs.supplyCurrents[1] = motorControllerSim2.getSupplyCurrent().getValueAsDouble();
+    inputs.velocities[1] = velocityRPS; // Both motors share the same shaft velocity
+    inputs.voltages[0] = motorVoltage;
+    inputs.voltages[1] = motorVoltage; // Same command sent to both physical motors
+    inputs.statorCurrents[0] = statorCurrent;
+    inputs.statorCurrents[1] = statorCurrent;
+    inputs.supplyCurrents[0] = supplyCurrent;
+    inputs.supplyCurrents[1] = supplyCurrent;
   }
 
   @Override
   public void setDutyCycle(double duty) {
-    motorControllerSim1.set(duty);
+    motorController.set(duty);
   }
 
   @Override
   public void setVelocityBangBang(double velocityRPS) {
     // Sim uses traditional PID control, not bang-bang
-    motorControllerSim1.setControl(velocityRequest.withVelocity(velocityRPS));
+    motorController.setControl(velocityRequest.withVelocity(velocityRPS));
   }
 
   @Override
   public void setVelocityTorqueCurrentBangBang(double velocityRPS) {
     // Sim uses traditional PID control, not bang-bang
     // For simulation purposes, both methods use the same velocity control
-    motorControllerSim1.setControl(velocityRequest.withVelocity(velocityRPS));
+    motorController.setControl(velocityRequest.withVelocity(velocityRPS));
   }
 
   @Override
   public void setVelocityPID(double velocityRPS) {
     // Traditional PID control (same as other methods in sim)
-    motorControllerSim1.setControl(velocityRequest.withVelocity(velocityRPS));
+    motorController.setControl(velocityRequest.withVelocity(velocityRPS));
   }
 
   @Override
   public void stop() {
-    motorControllerSim1.set(0.0);
+    motorController.set(0.0);
   }
-  public void setVelocity(double rpm) {
-    rpm = rpm / 60;
-    motorControllerSim1.setControl(velocityRequest.withVelocity(rpm));
+
+  /**
+   * Set flywheel velocity for tuning (helper method for AdvantageScope).
+   *
+   * @param velocityRPM target velocity in rotations per minute
+   */
+  public void setVelocity(double velocityRPM) {
+    double velocityRPS = velocityRPM / 60.0; // Convert RPM to RPS for Phoenix 6
+    motorController.setControl(velocityRequest.withVelocity(velocityRPS));
   }
 }
