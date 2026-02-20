@@ -157,19 +157,11 @@ public class IntakePivotIOSim implements IntakePivotIO {
 
   @Override
   public void enableBrakeMode() {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'enableBrakeMode'");
+    System.out.println("IntakePivotIOSim: enableBrakeMode not implemented in simulation");
   }
 
   @Override
   public void disableBrakeMode() {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'disableBrakeMode'");
-  }
-
-  @Override
-  public boolean isBrakeMode() {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'isBrakeMode'");
+    System.out.println("IntakePivotIOSim: disableBrakeMode not implemented in simulation");
   }
 }

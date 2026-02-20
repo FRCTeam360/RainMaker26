@@ -94,18 +94,16 @@ public class IntakePivotIOPB implements IntakePivotIO {
   }
 
   public void enableBrakeMode() {
+    neutralMode = NeutralModeValue.Brake;
     intakePivot.setNeutralMode(NeutralModeValue.Brake);
   }
 
   public void disableBrakeMode() {
+    neutralMode = NeutralModeValue.Coast;
     intakePivot.setNeutralMode(NeutralModeValue.Coast);
   }
 
   // TODO: ASK ELECTRICAL FOR A ZEROING BUTTON OR AN ABSOLUTE ENCODER
-
-  public boolean isBrakeMode() {
-    return neutralMode == NeutralModeValue.Brake;
-  }
 
   public void updateInputs(IntakePivotIOInputs inputs) {
     inputs.position = intakePivot.getPosition().getValueAsDouble();
@@ -113,5 +111,6 @@ public class IntakePivotIOPB implements IntakePivotIO {
     inputs.velocity = intakePivot.getVelocity().getValueAsDouble();
     inputs.voltage = intakePivot.getMotorVoltage().getValueAsDouble();
     inputs.supplyCurrent = intakePivot.getSupplyCurrent().getValueAsDouble();
+    inputs.brakeMode = neutralMode == NeutralModeValue.Brake;
   }
 }
