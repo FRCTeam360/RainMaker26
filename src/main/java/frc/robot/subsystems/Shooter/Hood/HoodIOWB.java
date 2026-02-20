@@ -23,7 +23,7 @@ public class HoodIOWB implements HoodIO {
   private final SparkMaxConfig sparkMaxConfig = new SparkMaxConfig();
   private final SparkClosedLoopController controller;
 
-  public void setZero() {
+  public void setEncoder() {
     encoder.setPosition(0);
   }
 

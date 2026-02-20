@@ -20,7 +20,7 @@ public class HoodIOPB implements HoodIO {
 
   private final MotionMagicVoltage motionMagicPosition = new MotionMagicVoltage(0);
 
-  public void setZero() {
+  public void setEncoder() {
     hoodMotor.setPosition(0);
   }
 

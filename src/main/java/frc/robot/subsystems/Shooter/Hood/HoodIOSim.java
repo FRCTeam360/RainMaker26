@@ -152,7 +152,7 @@ public class HoodIOSim implements HoodIO {
   }
 
   @Override
-  public void setZero() {
+  public void setEncoder() {
     motorControllerSim.getSimState().setRawRotorPosition(0.0);
   }
 }

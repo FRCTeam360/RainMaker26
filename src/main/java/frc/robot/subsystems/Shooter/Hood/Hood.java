@@ -103,8 +103,8 @@ public class Hood extends SubsystemBase {
     return this.setPositionCmd(() -> position);
   }
 
-  public void setZero() {
-    io.setZero();
+  public void setEncoder() {
+    io.setEncoder();
   }
 
   public void stop() {
@@ -148,6 +148,6 @@ public class Hood extends SubsystemBase {
   }
 
   public Command zero() {
-    return this.runOnce(() -> setZero());
+    return this.runOnce(() -> setEncoder());
   }
 }
