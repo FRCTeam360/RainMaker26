@@ -124,8 +124,7 @@ public class SuperStructure extends SubsystemBase {
 
   private void updateShooterStates() {
     previousShooterState = currentShooterState;
-    if (flywheel.atSetpoint(shotCalculator.calculateShot().flywheelSpeed(), FLYWHEEL_TOLERANCE_RPM)
-        && hood.atSetpoint(shotCalculator.calculateShot().hoodAngle())) {
+    if (flywheel.isAtGoal() && hood.atSetpoint(shotCalculator.calculateShot().hoodAngle())) {
       currentShooterState = ShooterStates.FIRING;
     } else {
       currentShooterState = ShooterStates.PREPARING;

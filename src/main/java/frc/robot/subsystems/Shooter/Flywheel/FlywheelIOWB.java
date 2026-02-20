@@ -4,12 +4,11 @@
 
 package frc.robot.subsystems.Shooter.Flywheel;
 
-import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
-import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
 import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
@@ -26,38 +25,41 @@ public class FlywheelIOWB implements FlywheelIO {
   private TalonFXConfiguration leftConfig = new TalonFXConfiguration();
 
   public FlywheelIOWB() {
-    double kP = 3.0;
-    double kI = 0.0;
-    double kD = 0.1;
-    double kA = 0.0;
-    double kG = 0.0;
-    double kS = 3.0;
-    double kV = 0.008;
+    // Slot 0: Bang-bang control configuration
+    // Very high kP creates bang-bang behavior (either full output or zero)
+    rightConfig.Slot0.kP = 999999.0;
+    rightConfig.Slot0.kI = 0.0;
+    rightConfig.Slot0.kD = 0.0;
+    rightConfig.Slot0.kA = 0.0;
+    rightConfig.Slot0.kG = 0.0;
+    rightConfig.Slot0.kS = 0.0;
+    rightConfig.Slot0.kV = 0.0;
 
-    Slot0Configs slot0Configs = rightConfig.Slot0;
-    slot0Configs.kA = kA;
-    slot0Configs.kD = kD;
-    slot0Configs.kG = kG;
-    slot0Configs.kI = kI;
-    slot0Configs.kP = kP;
-    slot0Configs.kS = kS;
-    slot0Configs.kV = kV;
-
-    TalonFXConfiguration defaultConfig = new TalonFXConfiguration();
-    for (TalonFX i : motors) {
-      i.getConfigurator().apply(defaultConfig);
-    }
+    // Slot 2: Traditional PID control configuration
+    // Standard velocity PID gains
+    rightConfig.Slot2.kP = 3.0;
+    rightConfig.Slot2.kI = 0.0;
+    rightConfig.Slot2.kD = 0.1;
+    rightConfig.Slot2.kA = 0.0;
+    rightConfig.Slot2.kG = 0.0;
+    rightConfig.Slot2.kS = 3.0;
+    rightConfig.Slot2.kV = 0.008;
 
     rightConfig.CurrentLimits.StatorCurrentLimit = 200.0;
-    rightConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+    rightConfig.CurrentLimits.StatorCurrentLimitEnable = false;
     rightConfig.CurrentLimits.SupplyCurrentLimit = 100.0;
     rightConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
 
-    rightConfig
-        .MotionMagic
-        .withMotionMagicAcceleration(0.0)
-        .withMotionMagicCruiseVelocity(0.0)
-        .withMotionMagicJerk(0.0);
+    // Bang-bang control limits
+    // Peak torque-current for ball/idle phases (constant torque)
+    // Initial value - will be updated via LoggedTunableNumber
+    rightConfig.TorqueCurrent.PeakForwardTorqueCurrent = 40.0;
+    rightConfig.TorqueCurrent.PeakReverseTorqueCurrent = 0.0;
+
+    // Peak duty-cycle for startup/recovery phases (max acceleration)
+    rightConfig.MotorOutput.PeakForwardDutyCycle = 1.0;
+    rightConfig.MotorOutput.PeakReverseDutyCycle = 0.0;
+
     rightConfig.MotorOutput.withInverted(InvertedValue.Clockwise_Positive);
 
     leftConfig = rightConfig.clone();
@@ -80,14 +82,32 @@ public class FlywheelIOWB implements FlywheelIO {
     }
   }
 
-  MotionMagicVelocityVoltage velocityVoltage = new MotionMagicVelocityVoltage(0);
-  VelocityDutyCycle velocityDutyCycle = new VelocityDutyCycle(0.0);
-  VelocityTorqueCurrentFOC velocityTorqueCurrent = new VelocityTorqueCurrentFOC(0.0);
+  // Control request objects (reused for efficiency)
+  private final VelocityDutyCycle dutyCycleBangBang = new VelocityDutyCycle(0.0).withSlot(0);
+  // Because this uses the VelocityTorqueCurrentFOC control mode, it will be limited by the torque
+  // current config (40A limit from config)
+  private final VelocityTorqueCurrentFOC torqueCurrentBangBang =
+      new VelocityTorqueCurrentFOC(0.0).withSlot(0);
+  // PID uses VelocityVoltage instead - not limited by torque current config
+  private final VelocityVoltage velocityPID = new VelocityVoltage(0.0).withSlot(2);
 
   @Override
-  public void setVelocity(double rpm) {
-    double rps = rpm / 60.0;
-    motors[0].setControl(velocityTorqueCurrent.withVelocity(rps));
+  public void setVelocityBangBang(double velocityRPS) {
+    // Startup/Recovery phase: Duty cycle bang-bang (max acceleration)
+    motors[0].setControl(dutyCycleBangBang.withVelocity(velocityRPS));
+  }
+
+  @Override
+  public void setVelocityTorqueCurrentBangBang(double velocityRPS) {
+    // Idle/Ball phase: Torque current bang-bang (consistent torque, 40A limit from config)
+    motors[0].setControl(torqueCurrentBangBang.withVelocity(velocityRPS));
+  }
+
+  @Override
+  public void setVelocityPID(double velocityRPS) {
+    // Traditional PID control using voltage control (not limited by torque current)
+    // Limited only by supply current limit (100A) and voltage saturation
+    motors[0].setControl(velocityPID.withVelocity(velocityRPS));
   }
 
   @Override
@@ -95,13 +115,17 @@ public class FlywheelIOWB implements FlywheelIO {
     motors[0].set(duty);
   }
 
+  @Override
+  public void stop() {
+    motors[0].set(0.0);
+  }
+
   public void updateInputs(FlywheelIOInputs inputs) {
     for (int i = 0; i < motors.length; i++) {
       inputs.statorCurrents[i] = motors[i].getStatorCurrent().getValueAsDouble();
-      inputs.supplyCurrents[i] = motors[i].getStatorCurrent().getValueAsDouble();
+      inputs.supplyCurrents[i] = motors[i].getSupplyCurrent().getValueAsDouble();
       inputs.positions[i] = motors[i].getPosition().getValueAsDouble();
-      // velocities are now in RPM
-      inputs.velocities[i] = motors[i].getVelocity().getValueAsDouble() * 60.0;
+      inputs.velocities[i] = motors[i].getVelocity().getValueAsDouble();
       inputs.voltages[i] = motors[i].getMotorVoltage().getValueAsDouble();
     }
   }
