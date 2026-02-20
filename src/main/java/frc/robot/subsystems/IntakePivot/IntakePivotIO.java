@@ -18,6 +18,8 @@ public interface IntakePivotIO {
     public boolean brakeMode = true;
   }
 
+  public void setZero();
+
   public void setPosition(double position);
 
   public void setDutyCycle(double value);

@@ -137,6 +137,10 @@ public class IntakePivotIOSim implements IntakePivotIO {
    *
    * @param positionRotations Target position in rotations
    */
+  public void setZero() {
+    motorControllerSim.setPosition(0.0);
+  }
+
   public void setPosition(double positionRotations) {
     motorControllerSim.setControl(positionRequest.withPosition(positionRotations));
   }

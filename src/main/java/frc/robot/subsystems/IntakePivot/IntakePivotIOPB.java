@@ -25,11 +25,11 @@ public class IntakePivotIOPB implements IntakePivotIO {
   private NeutralModeValue neutralMode = NeutralModeValue.Brake;
 
   // TODO: UPDATE GEAR RATIO
-  private final double GEAR_RATIO = 360.0 / 60.0;
+  private static final double GEAR_RATIO = 360.0 / 60.0;
 
   // TODO: ADD CONVERSION FACTOR TO GET MECHANISM INTO DEGREES
 
-  /** Creates a new IntakePivotIOWB. */
+  /** Creates a new IntakePivotIOPB. */
   public IntakePivotIOPB() {
     intakePivot.setNeutralMode(NeutralModeValue.Brake);
 
