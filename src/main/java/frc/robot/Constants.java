@@ -34,9 +34,6 @@ public final class Constants {
 
   public static final double IMU_ASSIST_ALPHA = 0.001;
 
-  public static final boolean TUNING_MODE = false;
-  public static final boolean DISABLE_HAL = false;
-
   public static enum RobotType {
     SIM,
     WOODBOT,

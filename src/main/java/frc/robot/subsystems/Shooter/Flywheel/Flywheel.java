@@ -46,6 +46,8 @@ public class Flywheel extends SubsystemBase {
 
   private FlywheelControlType currentControlMode = FlywheelControlType.STOP;
   private boolean atGoal = false;
+  private boolean lastAtSetpointVelocity =
+      false; // Cached value for logging (computed once per cycle)
   private double targetVelocityRPS = 0.0;
 
   /** Creates a new Flywheel. */
@@ -61,7 +63,7 @@ public class Flywheel extends SubsystemBase {
    * @param velocityRPM target velocity in rotations per minute (RPM). Internally converted to RPS
    *     for IO layer which expects rotations per second.
    */
-  public void setVelocityRPM(double velocityRPM) {
+  public void setVelocity(double velocityRPM) {
     // Convert RPM to RPS for internal IO layer communication
     // (Phoenix 6 velocities are in RPS, tolerance is in RPS)
     targetVelocityRPS = velocityRPM / 60.0;
@@ -93,7 +95,7 @@ public class Flywheel extends SubsystemBase {
 
   /**
    * Check if flywheel is at setpoint using debounced tolerance checks. Updates both the fast
-   * control mode debouncer and slower at-goal debouncer.
+   * control mode debouncer and slower at-goal debouncer. Caches result for logging.
    *
    * @return true if velocity has been within tolerance for control mode debounce time
    */
@@ -102,12 +104,12 @@ public class Flywheel extends SubsystemBase {
     boolean inTolerance = Math.abs(currentRPS - targetVelocityRPS) <= toleranceRPS.get();
 
     // Fast debouncer for control mode transitions (25ms default)
-    boolean isAtSpeed = controlModeDebouncer.calculate(inTolerance);
+    lastAtSetpointVelocity = controlModeDebouncer.calculate(inTolerance);
 
     // Slower debouncer for external "ready to shoot" signal (200ms default)
     atGoal = atGoalDebouncer.calculate(inTolerance);
 
-    return isAtSpeed;
+    return lastAtSetpointVelocity;
   }
 
   private void updateState() {
@@ -201,7 +203,7 @@ public class Flywheel extends SubsystemBase {
     Logger.recordOutput("Subsystems/Flywheel/ControlMode", currentControlMode.toString());
     Logger.recordOutput("Subsystems/Flywheel/AtGoal", atGoal);
     Logger.recordOutput("Subsystems/Flywheel/TargetVelocityRPS", targetVelocityRPS);
-    Logger.recordOutput("Subsystems/Flywheel/AtSetpointVelocity", isAtSetpointVelocity());
+    Logger.recordOutput("Subsystems/Flywheel/AtSetpointVelocity", lastAtSetpointVelocity);
   }
 
   public void setDutyCycle(double duty) {
@@ -221,10 +223,10 @@ public class Flywheel extends SubsystemBase {
   }
 
   public Command setVelocityCommand(double rps) {
-    return this.runEnd(() -> setVelocityRPM(rps), () -> io.stop());
+    return this.runEnd(() -> setVelocity(rps), () -> io.stop());
   }
 
   public Command setVelocityCommand(DoubleSupplier supplierVelocity) {
-    return this.runEnd(() -> setVelocityRPM(supplierVelocity.getAsDouble()), () -> io.stop());
+    return this.runEnd(() -> setVelocity(supplierVelocity.getAsDouble()), () -> io.stop());
   }
 }
