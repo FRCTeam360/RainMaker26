@@ -107,30 +107,7 @@ public final class Constants {
     public static final String LIMELIGHT = "limelight";
 
     public static final CANBus CANBUS = new CANBus("Default Name");
-  }
-
-  public static class PracticeBotConstants {
-
-    // FIXME: update these values TO REAL VALUES
-    public static final int INTAKE_ID = 71;
-    public static final int INTAKE_PIVOT_ID = 72;
-
-    public static final int INDEXER_SENSOR_ID = 73;
-    public static final int INDEXER_ID = 75;
-
-    public static final int FLYWHEEL_KICKER_ID = 76;
-    public static final int FLYWHEEL_KICKER_SENSOR_ID = 77;
-
-    public static final int FLYWHEEL_RIGHT_ID = 78;
-    public static final int FLYWHEEL_LEFT_ID = 79;
-
-    public static final int HOOD_ID = 80;
-
-    public static final int HOPPER_ROLLER_ID = 0;
-
-    public static final String LIMELIGHT = "limelight";
-
-    public static final CANBus CANBUS = new CANBus("Default Name");
+  
   }
 
   public static class SimulationConstants {
