@@ -8,8 +8,8 @@ package frc.robot.subsystems.Climber;
 
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkBase.ControlType;
-import com.revrobotics.spark.SparkBase.PersistMode;
-import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.PersistMode;
+import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.ClosedLoopConfig;
@@ -78,7 +78,7 @@ public class ClimberIOPB implements ClimberIO {
   }
 
   public void setLeftPosition(double position) {
-    leftClimberMotor.getClosedLoopController().setReference(position, ControlType.kPosition);
+    leftClimberMotor.getClosedLoopController().setSetpoint(position, ControlType.kPosition);
   } 
 
   public void setRightPosition(double position) {

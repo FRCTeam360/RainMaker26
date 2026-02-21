@@ -28,4 +28,12 @@ public interface ClimberIO {
 
   public void setRightDutyCycle(double dutyCycle);
   public void setRightPosition(double position);
+  
+  public boolean leftAboveMinHeight();
+  public boolean rightAboveMinHeight();
+
+  public void zeroBoth();
+
+  public void updatePIDF(double P, double I, double D, double F);
+
 }

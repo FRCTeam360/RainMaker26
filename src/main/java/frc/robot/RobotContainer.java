@@ -294,7 +294,7 @@ public class RobotContainer {
       flywheelKicker.stop();
     }
     if (Objects.nonNull(climber)) {
-      flywheelKicker.stop();
+      climber.stop();
     }
   }
 

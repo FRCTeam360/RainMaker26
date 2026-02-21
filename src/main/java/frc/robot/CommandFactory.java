@@ -115,15 +115,34 @@ public class CommandFactory {
   }
 
   public Command setClimberDutyCycleCmd(double dutyCycle) {
-    return climber.runEnd(() -> climber.setDutyCycle(dutyCycle), () -> climber.setDutyCycle(0));
+    return climber.runEnd(() -> {
+      climber.setLeftDutyCycle(dutyCycle);
+      climber.setRightDutyCycle(dutyCycle);
+    }, () -> {
+      climber.setLeftDutyCycle(0);
+      climber.setRightDutyCycle(dutyCycle);
+    });
+    
   }
 
   public Command setClimberDutyCycleCmd(DoubleSupplier dutyCycle) {
     return climber.runEnd(
-        () -> climber.setDutyCycle(dutyCycle.getAsDouble()), () -> climber.setDutyCycle(0));
+        () -> 
+        {climber.setLeftDutyCycle(dutyCycle.getAsDouble());
+         climber.setRightDutyCycle(dutyCycle.getAsDouble());
+        }, () -> {
+          climber.setLeftDutyCycle(0);
+          climber.setRightDutyCycle(0);
+        });
   }
 
   public Command setClimberPositionCmd(double position) {
-    return climber.runEnd(() -> climber.setPosition(position), () -> climber.setPosition(position));
+    return climber.runEnd(() -> {
+      climber.setLeftPosition(position);
+      climber.setRightPosition(position);
+    }, () -> {
+    climber.setLeftPosition(position);
+    climber.setRightPosition(position);
+  });
   }
 }
