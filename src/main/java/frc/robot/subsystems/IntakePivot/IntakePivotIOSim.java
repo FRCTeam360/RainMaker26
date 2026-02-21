@@ -23,8 +23,6 @@ import edu.wpi.first.wpilibj.simulation.BatterySim;
 import edu.wpi.first.wpilibj.simulation.RoboRioSim;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import frc.robot.Constants.SimulationConstants;
-import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
-import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 public class IntakePivotIOSim implements IntakePivotIO {
 
@@ -38,17 +36,9 @@ public class IntakePivotIOSim implements IntakePivotIO {
   private final double armLength = 0.762; // meters (30 inches)
   private final double armMass = 2.0; // kg
 
-  // AdvantageScope tuning (sim-only, under /Tuning table)
-  private final LoggedNetworkNumber tunableKp =
-      new LoggedNetworkNumber("/Tuning/IntakePivot/kP", 7.0);
-  private final LoggedNetworkNumber tunableKi =
-      new LoggedNetworkNumber("/Tuning/IntakePivot/kI", 0.0);
-  private final LoggedNetworkNumber tunableKd =
-      new LoggedNetworkNumber("/Tuning/IntakePivot/kD", 0.5);
-  private final LoggedNetworkNumber tunableSetpoint =
-      new LoggedNetworkNumber("/Tuning/IntakePivot/SetpointRotations", 0.0);
-  private final LoggedNetworkBoolean tuningEnabled =
-      new LoggedNetworkBoolean("/Tuning/IntakePivot/Enabled", false);
+  private static final double KP = 7.0;
+  private static final double KI = 0.0;
+  private static final double KD = 0.5;
 
   // Motor and control
   private final TalonFX motorControllerSim = new TalonFX(SimulationConstants.INTAKE_PIVOT_MOTOR);
@@ -88,9 +78,9 @@ public class IntakePivotIOSim implements IntakePivotIO {
 
     // Configure PID gains for slot 0 (use tunable defaults)
     Slot0Configs slot0 = talonConfig.Slot0;
-    slot0.kP = tunableKp.get();
-    slot0.kI = tunableKi.get();
-    slot0.kD = tunableKd.get();
+    slot0.kP = KP;
+    slot0.kI = KI;
+    slot0.kD = KD;
     slot0.kS = kS;
     slot0.kV = kV;
     slot0.kA = kA;
@@ -113,20 +103,6 @@ public class IntakePivotIOSim implements IntakePivotIO {
   }
 
   public void updateInputs(IntakePivotIOInputs inputs) {
-    // --- AdvantageScope tuning (sim-only) ---
-    if (tuningEnabled.get()) {
-      // Apply tunable PID gains (simple: apply every loop when enabled)
-      Slot0Configs slot0 = new Slot0Configs();
-      motorControllerSim.getConfigurator().refresh(slot0);
-      slot0.kP = tunableKp.get();
-      slot0.kI = tunableKi.get();
-      slot0.kD = tunableKd.get();
-      motorControllerSim.getConfigurator().apply(slot0);
-
-      // Command the tunable setpoint
-      motorControllerSim.setControl(positionRequest.withPosition(tunableSetpoint.get()));
-    }
-
     // Step 1: Get the commanded voltage from motor and apply to simulation
     intakePivotSim.setInput(motorControllerSim.getSimState().getMotorVoltage());
 
@@ -161,6 +137,10 @@ public class IntakePivotIOSim implements IntakePivotIO {
    *
    * @param positionRotations Target position in rotations
    */
+  public void setZero() {
+    motorControllerSim.setPosition(0.0);
+  }
+
   public void setPosition(double positionRotations) {
     motorControllerSim.setControl(positionRequest.withPosition(positionRotations));
   }
@@ -177,5 +157,15 @@ public class IntakePivotIOSim implements IntakePivotIO {
   @Override
   public void setDutyCycle(double value) {
     motorControllerSim.set(value);
+  }
+
+  @Override
+  public void enableBrakeMode() {
+    System.out.println("IntakePivotIOSim: enableBrakeMode not implemented in simulation");
+  }
+
+  @Override
+  public void disableBrakeMode() {
+    System.out.println("IntakePivotIOSim: disableBrakeMode not implemented in simulation");
   }
 }

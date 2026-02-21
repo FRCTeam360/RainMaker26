@@ -67,8 +67,6 @@ public class Indexer extends SubsystemBase {
 
   public void setWantedState(IndexerStates state) {
     wantedState = state;
-    updateState();
-    applyState();
   }
 
   public void setDutyCycle(double dutyCycle) {
@@ -83,15 +81,21 @@ public class Indexer extends SubsystemBase {
     return this.runEnd(() -> io.setDutyCycle(valueSup.getAsDouble()), () -> io.setDutyCycle(0.0));
   }
 
+  public void setVelocity(double velocity) {
+    io.setVelocity(velocity);
+  }
+
   public void stop() {
     io.setDutyCycle(0.0);
   }
 
   @Override
   public void periodic() {
-
     io.updateInputs(inputs);
     Logger.processInputs("Indexer", inputs);
+
+    updateState();
+    applyState();
     Logger.recordOutput("Subsystems/Indexer/WantedState", wantedState.toString());
     Logger.recordOutput("Subsystems/Indexer/CurrentState", currentState.toString());
     Logger.recordOutput("Subsystems/Indexer/PreviousState", previousState.toString());

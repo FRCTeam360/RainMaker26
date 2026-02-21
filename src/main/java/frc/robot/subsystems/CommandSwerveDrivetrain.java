@@ -8,17 +8,14 @@ import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
+import com.ctre.phoenix6.swerve.SwerveRequest.ForwardPerspectiveValue;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
-import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.numbers.N1;
-import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -26,12 +23,12 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.generated.WoodBotDrivetrain.TunerSwerveDrivetrain;
 import frc.robot.subsystems.Vision.VisionMeasurement;
-import frc.robot.utils.FieldConstants;
 import frc.robot.utils.FieldVisualizer;
 import java.util.List;
 import java.util.Optional;
@@ -50,14 +47,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   private static final double kSimLoopPeriod = 0.004; // 4 ms
   private Notifier m_simNotifier = null;
   private double m_lastSimTime;
-  private final String CMD_NAME = "Swerve: ";
+  private static final String SUBSYSTEM_NAME = "Swerve/";
   private final SwerveRequest xOutReq = new SwerveRequest.SwerveDriveBrake();
-
-  public Pose2d getPose() {
-    return new Pose2d();
-  }
-
-  public void drive(double xSpeed, double ySpeed, double rotSpeed) {}
 
   // Keep track of when vision measurements are added for logging context
   private boolean hasVisionMeasurements = false;
@@ -90,6 +81,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   private static final double HEADING_KI = 0.00;
   private static final double HEADING_KD = 0.005;
   private static final double HEADING_I_ZONE = 0.0;
+  private static final double HEADING_TOLERANCE_RAD = Math.toRadians(3.0);
 
   // Field-centric facing angle request for hub tracking
   private final SwerveRequest.FieldCentricFacingAngle m_faceHubRequest =
@@ -98,7 +90,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
           .withRotationalDeadband(0.0)
           .withDriveRequestType(m_driveRequestType); // No deadband for rotation when facing point
 
-  public final Command fieldOrientedDrive(
+  public final Command fieldOrientedDriveCommand(
       CommandXboxController driveCont) { // field oriented drive command!
     SwerveRequest.FieldCentric drive =
         new SwerveRequest.FieldCentric() // creates a fieldcentric drive
@@ -126,6 +118,12 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         );
   }
 
+  private final SwerveRequest.FieldCentric FIELD_CENTRIC_DRIVE =
+      new SwerveRequest.FieldCentric()
+          .withDeadband(maxSpeed.in(MetersPerSecond) * 0.01)
+          .withRotationalDeadband(maxAngularVelocity.in(RadiansPerSecond) * 0.01)
+          .withDriveRequestType(m_driveRequestType);
+
   // Xout Command
   public void xOut() {
     this.setControl(xOutReq);
@@ -144,38 +142,23 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
    * @param velocityYSupplier Supplier for Y velocity (field-relative, left positive) in m/s
    * @return Command that drives while facing the hub
    */
-  public Command faceHubWhileDriving(
-      DoubleSupplier velocityXSupplier, DoubleSupplier velocityYSupplier) {
-
-    // Configure the heading controller with PID values
-    m_faceHubRequest.HeadingController.setPID(HEADING_KP, HEADING_KI, HEADING_KD);
-    m_faceHubRequest.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
-    m_faceHubRequest.HeadingController.setIZone(HEADING_I_ZONE);
-
-    return run(
-        () -> {
-          // Get the hub center position
-          Translation2d hubCenter = FieldConstants.Hub.topCenterPoint.toTranslation2d();
-
-          // Get current robot position
-          Translation2d robotPosition = this.getStateCopy().Pose.getTranslation();
-
-          // Calculate the angle from robot to hub
-          Rotation2d angleToHub =
-              hubCenter.minus(robotPosition).getAngle().rotateBy(Rotation2d.k180deg);
-
-          // Log the target angle for debugging
-          Logger.recordOutput(CMD_NAME + "FaceHub/TargetAngle", angleToHub.getDegrees());
-          Logger.recordOutput(
-              CMD_NAME + "FaceHub/DistanceToHub", robotPosition.getDistance(hubCenter));
-
-          // Apply the field-centric facing angle request
-          this.setControl(
-              m_faceHubRequest
-                  .withVelocityX(velocityXSupplier.getAsDouble())
-                  .withVelocityY(velocityYSupplier.getAsDouble())
-                  .withTargetDirection(angleToHub));
-        });
+  public Command faceAngleWhileDrivingCommand(
+      DoubleSupplier velocityXSupplier,
+      DoubleSupplier velocityYSupplier,
+      Supplier<Rotation2d> headingSupplier) {
+    return this.applyRequest(
+            () ->
+                m_faceHubRequest
+                    .withVelocityX(
+                        DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
+                            ? velocityXSupplier.getAsDouble()
+                            : -velocityXSupplier.getAsDouble())
+                    .withVelocityY(
+                        DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
+                            ? velocityYSupplier.getAsDouble()
+                            : -velocityYSupplier.getAsDouble())
+                    .withTargetDirection(headingSupplier.get()))
+        .finallyDo(() -> m_faceHubRequest.HeadingController.reset());
   }
 
   /**
@@ -185,13 +168,18 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
    * @param driveCont The Xbox controller for driver input
    * @return Command that drives while facing the hub
    */
-  public Command faceHubWhileDriving(CommandXboxController driveCont) {
-    return faceHubWhileDriving(
+  public Command faceAngleWhileDrivingCommand(
+      CommandXboxController driveCont, Supplier<Rotation2d> headingSupplier) {
+    return faceAngleWhileDrivingCommand(
         () -> Math.pow(driveCont.getLeftY(), 3) * maxSpeed.in(MetersPerSecond) * -1.0,
-        () -> Math.pow(driveCont.getLeftX(), 3) * maxSpeed.in(MetersPerSecond) * -1.0);
+        () -> Math.pow(driveCont.getLeftX(), 3) * maxSpeed.in(MetersPerSecond) * -1.0,
+        headingSupplier);
   }
 
-  /* SysId routine for characterizing translation. This is used to find PID gains for the drive motors. */
+  /*
+   * SysId routine for characterizing translation. This is used to find PID gains
+   * for the drive motors.
+   */
   private final SysIdRoutine m_sysIdRoutineTranslation =
       new SysIdRoutine(
           new SysIdRoutine.Config(
@@ -203,7 +191,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
           new SysIdRoutine.Mechanism(
               output -> setControl(m_translationCharacterization.withVolts(output)), null, this));
 
-  /* SysId routine for characterizing steer. This is used to find PID gains for the steer motors. */
+  /*
+   * SysId routine for characterizing steer. This is used to find PID gains for
+   * the steer motors.
+   */
   private final SysIdRoutine m_sysIdRoutineSteer =
       new SysIdRoutine(
           new SysIdRoutine.Config(
@@ -217,8 +208,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
   /*
    * SysId routine for characterizing rotation.
-   * This is used to find PID gains for the FieldCentricFacingAngle HeadingController.
-   * See the documentation of SwerveRequest.SysIdSwerveRotation for info on importing the log to SysId.
+   * This is used to find PID gains for the FieldCentricFacingAngle
+   * HeadingController.
+   * See the documentation of SwerveRequest.SysIdSwerveRotation for info on
+   * importing the log to SysId.
    */
   private final SysIdRoutine m_sysIdRoutineRotation =
       new SysIdRoutine(
@@ -255,6 +248,13 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   public CommandSwerveDrivetrain(
       SwerveDrivetrainConstants drivetrainConstants, SwerveModuleConstants<?, ?, ?>... modules) {
     super(drivetrainConstants, modules);
+    // Registers the subsystem so periodic runs
+    CommandScheduler.getInstance().registerSubsystem(this);
+    m_faceHubRequest.HeadingController.setPID(HEADING_KP, HEADING_KI, HEADING_KD);
+    m_faceHubRequest.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
+    m_faceHubRequest.HeadingController.setIZone(HEADING_I_ZONE);
+    m_faceHubRequest.HeadingController.setTolerance(HEADING_TOLERANCE_RAD);
+    m_faceHubRequest.ForwardPerspective = ForwardPerspectiveValue.BlueAlliance;
     if (Utils.isSimulation()) {
       startSimThread();
     }
@@ -272,16 +272,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
    *     0 Hz, this is 250 Hz on CAN FD, and 100 Hz on CAN 2.0.
    * @param modules Constants for each specific module
    */
-  public CommandSwerveDrivetrain(
-      SwerveDrivetrainConstants drivetrainConstants,
-      double odometryUpdateFrequency,
-      SwerveModuleConstants<?, ?, ?>... modules) {
-    super(drivetrainConstants, odometryUpdateFrequency, modules);
-    if (Utils.isSimulation()) {
-      startSimThread();
-    }
-    configureAutoBuilder();
-  }
 
   /**
    * Constructs a CTRE SwerveDrivetrain using the specified constants.
@@ -298,24 +288,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
    *     theta]ᵀ, with units in meters and radians
    * @param modules Constants for each specific module
    */
-  public CommandSwerveDrivetrain(
-      SwerveDrivetrainConstants drivetrainConstants,
-      double odometryUpdateFrequency,
-      Matrix<N3, N1> odometryStandardDeviation,
-      Matrix<N3, N1> visionStandardDeviation,
-      SwerveModuleConstants<?, ?, ?>... modules) {
-    super(
-        drivetrainConstants,
-        odometryUpdateFrequency,
-        odometryStandardDeviation,
-        visionStandardDeviation,
-        modules);
-    if (Utils.isSimulation()) {
-      startSimThread();
-    }
-    configureAutoBuilder();
-  }
-
   private void configureAutoBuilder() {
     try {
       var config = RobotConfig.fromGUISettings();
@@ -338,7 +310,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
               // PID constants for rotation
               new PIDConstants(8, 0, 0)),
           config,
-          // Assume the path needs to be flipped for Red vs Blue, this is normally the case
+          // Assume the path needs to be flipped for Red vs Blue, this is normally the
+          // case
           () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
           this // Subsystem for requirements
           );
@@ -354,6 +327,21 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
   public Rotation2d getRotation2d() {
     return getPose2d().getRotation();
+  }
+
+  /**
+   * Returns whether the heading controller is aligned to its target angle within the configured
+   * tolerance. Uses the {@link com.ctre.phoenix6.swerve.utility.PhoenixPIDController#atSetpoint()}
+   * method on the facing-angle request's heading controller.
+   *
+   * <p>Note: This only returns meaningful results while a {@link
+   * SwerveRequest.FieldCentricFacingAngle} request is actively being applied (e.g., during
+   * faceAngleWhileDriving). Before the first PID calculation, this returns false.
+   *
+   * @return true if the heading error is within {@link #HEADING_TOLERANCE_RAD}
+   */
+  public boolean isAlignedToTarget() {
+    return m_faceHubRequest.HeadingController.atSetpoint();
   }
 
   public double getAngle() {
@@ -406,13 +394,12 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
   @Override
   public void periodic() {
-
     // Current pose includes vision fusion when vision measurements are added
-    Logger.recordOutput(CMD_NAME + " Current Pose", this.getStateCopy().Pose);
-    Logger.recordOutput(CMD_NAME + " Rotation2d", this.getStateCopy().RawHeading);
-    Logger.recordOutput(CMD_NAME + " CurrentState", this.getStateCopy().ModuleStates);
-    Logger.recordOutput(CMD_NAME + " TargetState", this.getStateCopy().ModuleTargets);
-    Logger.recordOutput(CMD_NAME + " Using Vision", hasVisionMeasurements);
+    Logger.recordOutput(SUBSYSTEM_NAME + "CurrentPose", this.getStateCopy().Pose);
+    Logger.recordOutput(SUBSYSTEM_NAME + "Rotation2d", this.getStateCopy().RawHeading);
+    Logger.recordOutput(SUBSYSTEM_NAME + "CurrentState", this.getStateCopy().ModuleStates);
+    Logger.recordOutput(SUBSYSTEM_NAME + "TargetState", this.getStateCopy().ModuleTargets);
+    Logger.recordOutput(SUBSYSTEM_NAME + "Using Vision", hasVisionMeasurements);
 
     // Update field visualizations (hub points, line from robot to hub, etc.)
     FieldVisualizer.update(this.getStateCopy().Pose);
@@ -420,10 +407,14 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     // Log whether vision measurements have been applied (useful for analysis)
     /*
      * Periodically try to apply the operator perspective.
-     * If we haven't applied the operator perspective before, then we should apply it regardless of DS state.
-     * This allows us to correct the perspective in case the robot code restarts mid-match.
-     * Otherwise, only check and apply the operator perspective if the DS is disabled.
-     * This ensures driving behavior doesn't change until an explicit disable event occurs during testing.
+     * If we haven't applied the operator perspective before, then we should apply
+     * it regardless of DS state.
+     * This allows us to correct the perspective in case the robot code restarts
+     * mid-match.
+     * Otherwise, only check and apply the operator perspective if the DS is
+     * disabled.
+     * This ensures driving behavior doesn't change until an explicit disable event
+     * occurs during testing.
      */
 
     if (!m_hasAppliedOperatorPerspective || DriverStation.isDisabled()) {

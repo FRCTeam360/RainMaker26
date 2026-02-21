@@ -28,11 +28,9 @@ public class FlywheelKicker extends SubsystemBase {
 
   public void setWantedState(FlywheelKickerStates state) {
     wantedState = state;
-    updateState();
-    applyState();
   }
 
-  private static final double KICKER_VELOCITY_RPM = 4000.0;
+  private static final double KICKER_VELOCITY_RPM = 4500.0;
 
   private void applyState() {
     switch (currentState) {
@@ -91,9 +89,11 @@ public class FlywheelKicker extends SubsystemBase {
 
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
     io.updateInputs(inputs);
     Logger.processInputs("FlywheelKicker", inputs);
+
+    updateState();
+    applyState();
     Logger.recordOutput("Subsystems/FlywheelKicker/WantedState", wantedState.toString());
     Logger.recordOutput("Subsystems/FlywheelKicker/CurrentState", currentState.toString());
     Logger.recordOutput("Subsystems/FlywheelKicker/PreviousState", previousState.toString());

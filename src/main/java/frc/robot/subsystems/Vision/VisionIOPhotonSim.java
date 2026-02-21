@@ -63,13 +63,13 @@ public class VisionIOPhotonSim implements VisionIO {
     // Add all the AprilTags inside the tag layout as visible targets to this simulated field
     visionSim.addAprilTags(kTagLayout);
 
-    // Create simulated camera properties to mimic actual camera behavior
+    // Create simulated camera properties with near-perfect accuracy for reliable driving simulation
     SimCameraProperties cameraProp = new SimCameraProperties();
     cameraProp.setCalibration(960, 720, Rotation2d.fromDegrees(90)); // Resolution and FOV
-    cameraProp.setCalibError(0.15, 0.05); // Reduced calibration noise
-    cameraProp.setFPS(30); // Higher FPS to match robot loop better
-    cameraProp.setAvgLatencyMs(30); // Reduced average latency
-    cameraProp.setLatencyStdDevMs(5); // Reduced latency variation
+    cameraProp.setCalibError(0.01, 0.01); // Near-perfect calibration (minimal noise)
+    cameraProp.setFPS(90); // Match common camera FPS
+    cameraProp.setAvgLatencyMs(11); // ~1 frame at 90 FPS
+    cameraProp.setLatencyStdDevMs(0); // No latency variation (deterministic)
 
     // Create a PhotonCameraSim which will update the linked PhotonCamera's values
     cameraSim = new PhotonCameraSim(camera, cameraProp);

@@ -4,8 +4,8 @@
 
 package frc.robot.subsystems.Intake;
 
-import com.revrobotics.spark.SparkBase.PersistMode;
-import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.PersistMode;
+import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
@@ -50,7 +50,7 @@ public class IntakeIOSim implements IntakeIO {
   private final FlywheelSim intakeSim = new FlywheelSim(plant, gearbox, gearRatio);
 
   public IntakeIOSim() {
-    // Configure SparkMax with PID and current limits
+    // Configure motor controller with PID and current limits
     configureMotor();
 
     // Initialize everything to 0
