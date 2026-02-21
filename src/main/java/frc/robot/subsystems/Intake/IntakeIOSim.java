@@ -83,7 +83,7 @@ public class IntakeIOSim implements IntakeIO {
 
     // Step 2: Update simulation
     intakeSim.setInputVoltage(appliedVoltage);
-    intakeSim.update(0.02);
+    intakeSim.update(SimulationConstants.SIM_TICK_RATE_S);
 
     // Step 3: Get simulated values directly
     double velocityRPM = intakeSim.getAngularVelocityRPM();
