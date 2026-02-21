@@ -73,14 +73,6 @@ public final class Constants {
     // === CANBUS ===
     public static final CANBus CANBUS = new CANBus("Default Name");
 
-    // === DEFENSE ===
-    public static final LinearVelocity DEFENSE_MAX_VELOCITY_METERS_PER_SECOND =
-        MetersPerSecond.of(4.5);
-    // ^ In meters/second
-    public static final AngularVelocity DEFENSE_MAX_ANGULAR_VELOCITY =
-        RevolutionsPerSecond.of(12.0);
-    // ^ In radians/second
-
     // === MAXIMUMS ===
     public static final LinearVelocity maxSpeed = MetersPerSecond.of(4.69);
     public static final AngularVelocity maxAngularVelocity = RevolutionsPerSecond.of(4.0);

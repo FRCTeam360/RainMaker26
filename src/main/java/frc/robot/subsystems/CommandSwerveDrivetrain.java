@@ -45,8 +45,9 @@ import org.littletonrobotics.junction.Logger;
  * https://v6.docs.ctr-electronics.com/en/stable/docs/tuner/tuner-swerve/index.html
  */
 public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Subsystem {
-  public static LinearVelocity maxSpeed = WoodBotConstants.maxSpeed;
-  public static AngularVelocity maxAngularVelocity = WoodBotConstants.maxAngularVelocity;
+  public static final LinearVelocity maxSpeed = WoodBotConstants.maxSpeed;
+  public static final AngularVelocity maxAngularVelocity = WoodBotConstants.maxAngularVelocity;
+  public boolean isDefenseMode = false;
   private static final double kSimLoopPeriod = 0.004; // 4 ms
   private Notifier m_simNotifier = null;
   private double m_lastSimTime;
@@ -123,21 +124,21 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
           .withRotationalDeadband(WoodBotConstants.maxAngularVelocity.in(RadiansPerSecond) * 0.01)
           .withDriveRequestType(m_driveRequestType);
 
-  public void fieldOrientedDrive(CommandXboxController driveCont, boolean isDefenseMode) {
-    double defenseModeRotationScaler = (isDefenseMode ? 2.0 : 1.0);
-    double defenseModeTranslationScaler = (isDefenseMode ? 0.5 : 1.0);
+  public void fieldOrientedDrive(CommandXboxController driveCont) {
+    double defenseModeRotationScaler = (isDefenseMode ? 3.0 : 1.0);
+    double defenseModeTranslationScaler = (isDefenseMode ? 0.96 : 1.0);
     FIELD_CENTRIC_DRIVE.ForwardPerspective = ForwardPerspectiveValue.OperatorPerspective;
     this.setControl(
         FIELD_CENTRIC_DRIVE
             .withVelocityX(
                 Math.pow(driveCont.getLeftY(), 3)
                     * WoodBotConstants.maxSpeed.in(MetersPerSecond)
-                    * -1.0 
+                    * -1.0
                     * defenseModeTranslationScaler) // Drive forward with negative Y (forward)
             .withVelocityY(
                 Math.pow(driveCont.getLeftX(), 3)
                     * WoodBotConstants.maxSpeed.in(MetersPerSecond)
-                    * -1.0 
+                    * -1.0
                     * defenseModeTranslationScaler) // Drive left with negative X (left)
             .withRotationalRate(
                 Math.pow(driveCont.getRightX(), 2)
@@ -148,6 +149,19 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         // with negative X
         // (left)
         );
+  }
+
+  // defense mode command
+  public void defenseMode() {
+    if (isDefenseMode) {
+      isDefenseMode = false;
+    } else {
+      isDefenseMode = true;
+    }
+  }
+
+  public Command defenseModeCmd() {
+    return this.runOnce(() -> defenseMode());
   }
 
   // Xout Command
