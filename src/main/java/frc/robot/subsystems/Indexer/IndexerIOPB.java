@@ -13,6 +13,12 @@ import frc.robot.Constants;
 
 public class IndexerIOPB implements IndexerIO {
   private static final double GEAR_RATIO = 1.0; // FIXME: set actual gear ratio
+  private static final int CURRENT_LIMIT_AMPS = 40;
+  private static final double KP = 0.0002;
+  private static final double KI = 0.0;
+  private static final double KD = 0.0;
+  private static final double FF_KV = 0.0021;
+  private static final double FF_KS = 0.04;
 
   /** Creates a new IndexerIOPB. */
   private final SparkMax indexerMotor =
@@ -25,13 +31,13 @@ public class IndexerIOPB implements IndexerIO {
   public IndexerIOPB() {
     sparkMaxConfig.idleMode(IdleMode.kBrake);
     sparkMaxConfig.inverted(true);
-    sparkMaxConfig.smartCurrentLimit(40);
+    sparkMaxConfig.smartCurrentLimit(CURRENT_LIMIT_AMPS);
 
     sparkMaxConfig.encoder.positionConversionFactor(1.0 / GEAR_RATIO);
     sparkMaxConfig.encoder.velocityConversionFactor(1.0 / GEAR_RATIO);
 
-    sparkMaxConfig.closedLoop.p(0.0002).i(0.0).d(0.0);
-    sparkMaxConfig.closedLoop.feedForward.kV(0.0021).kS(0.04);
+    sparkMaxConfig.closedLoop.p(KP).i(KI).d(KD);
+    sparkMaxConfig.closedLoop.feedForward.kV(FF_KV).kS(FF_KS);
 
     indexerMotor.configure(
         sparkMaxConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);

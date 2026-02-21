@@ -16,6 +16,16 @@ import frc.robot.Constants;
 
 public class HoodIOPB implements HoodIO {
   private static final double GEAR_RATIO = 1.0; // FIXME: set actual gear ratio
+  private static final double KP = 0.21;
+  private static final double KI = 0.0;
+  private static final double KD = 0.0;
+  private static final double KA = 0.0;
+  private static final double KG = 0.0;
+  private static final double KS = 0.0;
+  private static final double KV = 0.0;
+  private static final double FORWARD_SOFT_LIMIT_DEGREES = 24.0; // FIXME: verify limit
+  private static final double STATOR_CURRENT_LIMIT_AMPS = 25.0;
+  private static final double SUPPLY_CURRENT_LIMIT_AMPS = 30.0;
 
   private final TalonFXS hoodMotor =
       new TalonFXS(Constants.PracticeBotConstants.HOOD_ID, Constants.PracticeBotConstants.CANBUS);
@@ -28,22 +38,14 @@ public class HoodIOPB implements HoodIO {
   }
 
   public HoodIOPB() {
-    double kP = 0.21;
-    double kI = 0.0;
-    double kD = 0.0;
-    double kA = 0.0;
-    double kG = 0.0;
-    double kS = 0.0;
-    double kV = 0.0;
-
     Slot0Configs slot0Configs = config.Slot0;
-    slot0Configs.kA = kA;
-    slot0Configs.kD = kD;
-    slot0Configs.kG = kG;
-    slot0Configs.kI = kI;
-    slot0Configs.kP = kP;
-    slot0Configs.kS = kS;
-    slot0Configs.kV = kV;
+    slot0Configs.kA = KA;
+    slot0Configs.kD = KD;
+    slot0Configs.kG = KG;
+    slot0Configs.kI = KI;
+    slot0Configs.kP = KP;
+    slot0Configs.kS = KS;
+    slot0Configs.kV = KV;
 
     config.Commutation.MotorArrangement = MotorArrangementValue.NEO550_JST;
 
@@ -51,11 +53,11 @@ public class HoodIOPB implements HoodIO {
 
     config.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
     config.SoftwareLimitSwitch.ForwardSoftLimitThreshold =
-        Units.degreesToRotations(24.0); // FIXME: verify limit in degrees
-    config.CurrentLimits.StatorCurrentLimit = 25.0;
+        Units.degreesToRotations(FORWARD_SOFT_LIMIT_DEGREES);
+    config.CurrentLimits.StatorCurrentLimit = STATOR_CURRENT_LIMIT_AMPS;
     // NEO 550 has lower current capacity than Falcon 500
     config.CurrentLimits.StatorCurrentLimitEnable = true;
-    config.CurrentLimits.SupplyCurrentLimit = 30.0;
+    config.CurrentLimits.SupplyCurrentLimit = SUPPLY_CURRENT_LIMIT_AMPS;
     config.CurrentLimits.SupplyCurrentLimitEnable = true;
 
     config.MotionMagic.withMotionMagicAcceleration(0.0)

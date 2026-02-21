@@ -16,6 +16,14 @@ import frc.robot.Constants;
 
 public class FlywheelKickerIOPB implements FlywheelKickerIO {
   private static final double GEAR_RATIO = 1.0; // FIXME: set actual gear ratio
+  private static final int CURRENT_LIMIT_AMPS = 40;
+  private static final double KP = 0.0002;
+  private static final double KI = 0.0;
+  private static final double KD = 0.0;
+  private static final double FF_KV = 0.0021;
+  private static final double FF_KS = 0.04;
+  private static final double MIN_SIGNAL_STRENGTH = 2000; // unknown unit
+  private static final double PROXIMITY_THRESHOLD_METERS = 0.1;
 
   /** Creates a new FlywheelKickerIOPB. */
   private final SparkMax flywheelkickerMotor =
@@ -31,13 +39,13 @@ public class FlywheelKickerIOPB implements FlywheelKickerIO {
   public FlywheelKickerIOPB() {
     sparkMaxConfig.idleMode(IdleMode.kBrake);
     sparkMaxConfig.inverted(true);
-    sparkMaxConfig.smartCurrentLimit(40);
+    sparkMaxConfig.smartCurrentLimit(CURRENT_LIMIT_AMPS);
 
     sparkMaxConfig.encoder.positionConversionFactor(1.0 / GEAR_RATIO);
     sparkMaxConfig.encoder.velocityConversionFactor(1.0 / GEAR_RATIO);
 
-    sparkMaxConfig.closedLoop.p(0.0002).i(0.0).d(0.0);
-    sparkMaxConfig.closedLoop.feedForward.kV(0.0021).kS(0.04);
+    sparkMaxConfig.closedLoop.p(KP).i(KI).d(KD);
+    sparkMaxConfig.closedLoop.feedForward.kV(FF_KV).kS(FF_KS);
 
     flywheelkickerMotor.configure(
         sparkMaxConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
@@ -45,8 +53,8 @@ public class FlywheelKickerIOPB implements FlywheelKickerIO {
     closedLoopController = flywheelkickerMotor.getClosedLoopController();
 
     CANrangeConfiguration sensorConfig = new CANrangeConfiguration();
-    sensorConfig.ProximityParams.MinSignalStrengthForValidMeasurement = 2000; // unknown unit
-    sensorConfig.ProximityParams.ProximityThreshold = 0.1; // meters
+    sensorConfig.ProximityParams.MinSignalStrengthForValidMeasurement = MIN_SIGNAL_STRENGTH;
+    sensorConfig.ProximityParams.ProximityThreshold = PROXIMITY_THRESHOLD_METERS;
     sensorConfig.ToFParams.withUpdateMode(UpdateModeValue.ShortRangeUserFreq);
     canSensor.getConfigurator().apply(sensorConfig);
   }

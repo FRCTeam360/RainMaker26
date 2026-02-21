@@ -16,6 +16,15 @@ import frc.robot.Constants.PracticeBotConstants;
 
 public class FlywheelIOPB implements FlywheelIO {
   private static final double GEAR_RATIO = 1.0; // FIXME: set actual gear ratio
+  private static final double KP = 3.0;
+  private static final double KI = 0.0;
+  private static final double KD = 0.1;
+  private static final double KA = 0.0;
+  private static final double KG = 0.0;
+  private static final double KS = 3.0;
+  private static final double KV = 0.008;
+  private static final double STATOR_CURRENT_LIMIT_AMPS = 200.0;
+  private static final double SUPPLY_CURRENT_LIMIT_AMPS = 100.0;
 
   private final TalonFX[] motors = {
     new TalonFX(PracticeBotConstants.FLYWHEEL_RIGHT_ID, PracticeBotConstants.CANBUS),
@@ -25,22 +34,14 @@ public class FlywheelIOPB implements FlywheelIO {
   private TalonFXConfiguration leftConfig = new TalonFXConfiguration();
 
   public FlywheelIOPB() {
-    double kP = 3.0;
-    double kI = 0.0;
-    double kD = 0.1;
-    double kA = 0.0;
-    double kG = 0.0;
-    double kS = 3.0;
-    double kV = 0.008;
-
     Slot0Configs slot0Configs = rightConfig.Slot0;
-    slot0Configs.kA = kA;
-    slot0Configs.kD = kD;
-    slot0Configs.kG = kG;
-    slot0Configs.kI = kI;
-    slot0Configs.kP = kP;
-    slot0Configs.kS = kS;
-    slot0Configs.kV = kV;
+    slot0Configs.kA = KA;
+    slot0Configs.kD = KD;
+    slot0Configs.kG = KG;
+    slot0Configs.kI = KI;
+    slot0Configs.kP = KP;
+    slot0Configs.kS = KS;
+    slot0Configs.kV = KV;
 
     TalonFXConfiguration defaultConfig = new TalonFXConfiguration();
     for (TalonFX i : motors) {
@@ -49,9 +50,9 @@ public class FlywheelIOPB implements FlywheelIO {
 
     rightConfig.Feedback.SensorToMechanismRatio = GEAR_RATIO;
 
-    rightConfig.CurrentLimits.StatorCurrentLimit = 200.0;
+    rightConfig.CurrentLimits.StatorCurrentLimit = STATOR_CURRENT_LIMIT_AMPS;
     rightConfig.CurrentLimits.StatorCurrentLimitEnable = true;
-    rightConfig.CurrentLimits.SupplyCurrentLimit = 100.0;
+    rightConfig.CurrentLimits.SupplyCurrentLimit = SUPPLY_CURRENT_LIMIT_AMPS;
     rightConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
 
     rightConfig.MotorOutput.withInverted(InvertedValue.Clockwise_Positive);
