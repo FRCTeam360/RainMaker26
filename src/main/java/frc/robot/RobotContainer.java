@@ -88,6 +88,7 @@ public class RobotContainer {
   private final CommandXboxController driverCont = new CommandXboxController(0);
   private final CommandXboxController testCont1 = new CommandXboxController(5);
 
+  private final CommandXboxController operatorController = new CommandXboxController(1);
   private static final double FLYWHEEL_KICKER_WARMUP_VELOCITY_RPM = 4000.0;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
@@ -235,18 +236,28 @@ public class RobotContainer {
 
     if (Objects.nonNull(flywheel)) {
       testCont1.a().whileTrue(flywheel.setDutyCycleCommand(() -> 0.5));
+      operatorController.b().whileTrue(flywheel.setDutyCycleCommand(0.5));
+      operatorController.x().whileTrue(flywheel.setDutyCycleCommand(-0.5));
     }
     if (Objects.nonNull(flywheelKicker)) {
       testCont1.b().whileTrue(flywheelKicker.setDutyCycleCommand(() -> 0.5));
+      operatorController.rightBumper().whileTrue(flywheelKicker.setDutyCycleCommand(0.5));
+      operatorController.leftBumper().whileTrue(flywheelKicker.setDutyCycleCommand(-0.5));
     }
     if (Objects.nonNull(hood)) {
       testCont1.x().whileTrue(hood.setDutyCycleCommand(() -> 0.5));
+      operatorController.y().whileTrue(hood.setDutyCycleCommand(0.2));
+      operatorController.a().whileTrue(hood.setDutyCycleCommand(-0.2));
     }
     if (Objects.nonNull(indexer)) {
       testCont1.y().whileTrue(indexer.setDutyCycleCommand(() -> 0.5));
+      operatorController.pov(0).whileTrue(indexer.setDutyCycleCommand(0.3));
+      operatorController.pov(270).whileTrue(indexer.setDutyCycleCommand(-0.3));
     }
     if (Objects.nonNull(intake)) {
       testCont1.leftBumper().whileTrue(intake.setDutyCycleCommand(() -> 0.5));
+      operatorController.rightTrigger().whileTrue(intake.setDutyCycleCommand(0.6));
+      operatorController.leftTrigger().whileTrue(intake.setDutyCycleCommand(-0.6));
     }
     if (Objects.nonNull(intakePivot)) {
       testCont1.rightBumper().whileTrue(intakePivot.setDutyCycleCommand(() -> 0.5));
