@@ -22,6 +22,11 @@ import edu.wpi.first.units.measure.LinearVelocity;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
+
+  private static final double POSE_KP = 11.0;
+  private static final double POSE_KI = 0.0;
+  private static final double POSE_KD = 0.0;
+
   public static final AprilTagFieldLayout FIELD_LAYOUT =
       AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
   public static final double SPINUP_SHOOTING_FLYWHEEL_RPM = 3250.0;
@@ -41,11 +46,6 @@ public final class Constants {
   public static final int IMU_MODE_INTERNAL_EXTERNAL_ASSIST = 4;
 
   public static final double IMU_ASSIST_ALPHA = 0.001;
-
-  // public static final LinearVelocity maxSpeed = MetersPerSecond.of(4.69);
-  // public static final AngularVelocity maxAngularVelocity = RevolutionsPerSecond.of(4.0);
-  // Above was copied from CommandSwerveDrivetrain file,
-  // MetersPerSecond errors - and there is no import option.
 
   public static enum RobotType {
     SIM,
@@ -80,6 +80,7 @@ public final class Constants {
 
     // === CANBUS ===
     public static final CANBus CANBUS = new CANBus("Default Name");
+
   }
 
   public static class SimulationConstants {
@@ -98,6 +99,7 @@ public final class Constants {
 
     // === HOOD ===
     public static final int HOOD_MOTOR = 6;
+
   }
 
   public static class OperatorConstants {

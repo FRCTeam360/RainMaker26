@@ -45,9 +45,9 @@ import frc.robot.Constants;
  * https://v6.docs.ctr-electronics.com/en/stable/docs/tuner/tuner-swerve/index.html
  */
 public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Subsystem {
-  public PhoenixPIDController headingController;
-  public PhoenixPIDController poseXController;
-  public PhoenixPIDController poseYController;
+  private PhoenixPIDController headingController;
+  private PhoenixPIDController poseXController;
+  private PhoenixPIDController poseYController;
 
   private static final double kSimLoopPeriod = 0.004; // 4 ms
   private Notifier m_simNotifier = null;
@@ -301,8 +301,12 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     m_faceHubRequest.HeadingController.setIZone(HEADING_I_ZONE);
     m_faceHubRequest.ForwardPerspective = ForwardPerspectiveValue.BlueAlliance;
     headingController = new PhoenixPIDController(HEADING_KP, HEADING_KI, HEADING_KD);
-    poseXController = new PhoenixPIDController(HEADING_KP, HEADING_KI, HEADING_KD);
+    poseXController = new PhoenixPIDController(Constants.POSE_KP, Constants.POSE_KI, Constants.POSE_KD);
     poseYController = new PhoenixPIDController(HEADING_KP, HEADING_KI, HEADING_KD);
+    headingController.enableContinuousInput(-Math.PI, Math.PI);
+    headingController.setTolerance(0.02, 0.05);   // 1 degree position, adjust as needed
+    poseXController.setTolerance(0.05);           // 5cm position tolerance
+    poseYController.setTolerance(0.05);
     if (Utils.isSimulation()) {
       startSimThread();
     }
