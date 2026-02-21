@@ -48,4 +48,10 @@ public interface VisionIO {
   public void takeSnapshot();
 
   public void resetSnapshot();
+
+  /** Seeds the IMU with external orientation data. Only relevant for Limelight 4. */
+  default void seedIMU() {}
+
+  /** Enables IMU assist mode. Only relevant for Limelight 4. */
+  default void enableIMUAssist() {}
 }

@@ -178,6 +178,20 @@ public class Vision extends SubsystemBase {
         totalDetections > 0 ? (double) rejectedMeasurements / totalDetections : 0.0);
   }
 
+  /** Seeds the IMU on all vision IO layers. Call during disabled. */
+  public void seedIMU() {
+    for (VisionIO io : ios.values()) {
+      io.seedIMU();
+    }
+  }
+
+  /** Enables IMU assist on all vision IO layers. Call when robot is enabled. */
+  public void enableIMUAssist() {
+    for (VisionIO io : ios.values()) {
+      io.enableIMUAssist();
+    }
+  }
+
   /**
    * @return Command that consumes vision measurements
    */

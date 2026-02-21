@@ -48,7 +48,7 @@ import frc.robot.subsystems.Shooter.ShotCalculator;
 import frc.robot.subsystems.SuperStructure;
 import frc.robot.subsystems.SuperStructure.SuperStates;
 import frc.robot.subsystems.Vision.Vision;
-import frc.robot.subsystems.Vision.VisionIOLimelight;
+import frc.robot.subsystems.Vision.VisionIOLimelight3;
 import frc.robot.subsystems.Vision.VisionIOPhotonSim;
 import java.util.Map;
 import java.util.Objects;
@@ -114,12 +114,11 @@ public class RobotContainer {
                 Map.ofEntries(
                     Map.entry(
                         Constants.WoodBotConstants.LIMELIGHT_3,
-                        new VisionIOLimelight(
+                        new VisionIOLimelight3(
                             Constants.WoodBotConstants.LIMELIGHT_3,
                             () -> drivetrain.getAngle(),
                             () -> drivetrain.getAngularRate(),
-                            true,
-                            false))));
+                            true))));
         intake = new Intake(new IntakeIOWB());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOWB());
         // intakePivot = new IntakePivot(new IntakePivotIOPB());
@@ -138,12 +137,11 @@ public class RobotContainer {
                 Map.ofEntries(
                     Map.entry(
                         Constants.PracticeBotConstants.LIMELIGHT,
-                        new VisionIOLimelight(
+                        new VisionIOLimelight3(
                             Constants.PracticeBotConstants.LIMELIGHT,
                             () -> drivetrain.getAngle(),
                             () -> drivetrain.getAngularRate(),
-                            true,
-                            false))));
+                            true))));
         intake = new Intake(new IntakeIOPB());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOPB());
         intakePivot = new IntakePivot(new IntakePivotIOPB());
@@ -339,6 +337,16 @@ public class RobotContainer {
     }
     if (Objects.nonNull(flywheelKicker)) {
       flywheelKicker.stop();
+    }
+    if (Objects.nonNull(vision)) {
+      vision.seedIMU();
+    }
+  }
+
+  /** Called when the robot transitions from disabled to an enabled mode. */
+  public void onEnable() {
+    if (Objects.nonNull(vision)) {
+      vision.enableIMUAssist();
     }
   }
 

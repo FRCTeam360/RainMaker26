@@ -15,44 +15,53 @@ import frc.robot.utils.LimelightHelpers.RawFiducial;
 import java.util.Optional;
 import java.util.function.DoubleSupplier;
 
-public class VisionIOLimelight implements VisionIO {
+/**
+ * Abstract base class for Limelight vision IO layers. Contains all shared NetworkTables reads, pose
+ * filtering, and MegaTag2 logic.
+ */
+public abstract class VisionIOLimelightBase implements VisionIO {
   private final NetworkTable table;
   private final String name;
   private final DoubleSupplier gyroAngleSupplier;
   private final DoubleSupplier gyroAngleRateSupplier;
-  private final boolean isLimelight4;
 
-  private boolean acceptMeasurements;
+  private final boolean acceptMeasurements;
 
   /**
    * Creates a new Limelight hardware layer.
    *
-   * @param name the name of the limelight
+   * @param name the NetworkTables name of the Limelight
+   * @param gyroAngleSupplier supplies the robot's gyro angle in degrees
+   * @param gyroAngleRateSupplier supplies the robot's gyro angular rate in degrees per second
+   * @param acceptMeasurements whether to process pose estimates from this Limelight
    */
-  public VisionIOLimelight(
+  protected VisionIOLimelightBase(
       String name,
       DoubleSupplier gyroAngleSupplier,
       DoubleSupplier gyroAngleRateSupplier,
-      boolean acceptMeasurements,
-      boolean isLimelight4) {
+      boolean acceptMeasurements) {
     table = NetworkTableInstance.getDefault().getTable(name);
     this.name = name;
     this.gyroAngleSupplier = gyroAngleSupplier;
     this.gyroAngleRateSupplier = gyroAngleRateSupplier;
     this.acceptMeasurements = acceptMeasurements;
-    this.isLimelight4 = isLimelight4;
-
-    if (isLimelight4) {
-      LimelightHelpers.SetIMUAssistAlpha(name, Constants.IMU_ASSIST_ALPHA);
-      LimelightHelpers.SetIMUMode(name, Constants.IMU_MODE_EXTERNAL_SEED);
-    }
   }
 
+  /** Returns the NetworkTables name of this Limelight. */
+  protected String getName() {
+    return name;
+  }
+
+  @Override
   public void setLEDMode(int mode) {
     table.getEntry("ledMode").setNumber(mode);
   }
 
+  @Override
   public void updateInputs(VisionIOInputs inputs) {
+    // Send robot orientation every frame so MegaTag2 and LL4 IMU stay in sync
+    LimelightHelpers.SetRobotOrientation(
+        name, gyroAngleSupplier.getAsDouble(), gyroAngleRateSupplier.getAsDouble(), 0, 0, 0, 0);
 
     // Assume that the pose hasn't been updated
     inputs.poseUpdated = false;
@@ -113,62 +122,42 @@ public class VisionIOLimelight implements VisionIO {
   }
 
   private Optional<PoseEstimate> getMegatag2PoseEst() {
-    LimelightHelpers.SetRobotOrientation(
-        name, gyroAngleSupplier.getAsDouble(), gyroAngleRateSupplier.getAsDouble(), 0, 0, 0, 0);
     PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(name);
     return Optional.ofNullable(mt2);
   }
 
-  private Optional<PoseEstimate> getMegatag1PoseEst() {
-    LimelightHelpers.SetRobotOrientation(
-        name, gyroAngleSupplier.getAsDouble(), gyroAngleRateSupplier.getAsDouble(), 0, 0, 0, 0);
-    PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue(name);
-    return Optional.ofNullable(mt2);
-  }
-
-  public int getAprilTagID() {
+  private int getAprilTagID() {
     return (int) table.getEntry("tid").getInteger(-1);
   }
 
-  public double getTXRaw() {
+  private double getTXRaw() {
     return table.getEntry("tx").getDouble(0.0);
   }
 
-  public double getTYRaw() {
+  private double getTYRaw() {
     return table.getEntry("ty").getDouble(0.0);
   }
 
-  public double getTV() {
+  private double getTV() {
     return table.getEntry("tv").getDouble(0.0);
   }
 
-  public double getPipeline() {
+  private double getPipeline() {
     return table.getEntry("getpipe").getDouble(0.0);
   }
 
+  @Override
   public void setPipeline(int pipeline) {
     table.getEntry("pipeline").setNumber(pipeline);
   }
 
+  @Override
   public void takeSnapshot() {
     table.getEntry("snapshot").setNumber(1.0);
   }
 
+  @Override
   public void resetSnapshot() {
     table.getEntry("snapshot").setNumber(0.0);
-  }
-
-  // while enabled
-  public void enableIMUAssist() {
-    if (isLimelight4) {
-      LimelightHelpers.SetIMUMode(name, Constants.IMU_MODE_INTERNAL_EXTERNAL_ASSIST);
-    }
-  }
-
-  // call during disabled
-  public void seedIMU() {
-    if (isLimelight4) {
-      LimelightHelpers.SetIMUMode(name, Constants.IMU_MODE_EXTERNAL_SEED);
-    }
   }
 }
