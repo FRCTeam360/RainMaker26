@@ -114,15 +114,7 @@ public class RobotContainer {
                             () -> drivetrain.getAngle(),
                             () -> drivetrain.getAngularRate(),
                             true,
-                            false)),
-                    Map.entry(
-                        Constants.WoodBotConstants.LIMELIGHT_4,
-                        new VisionIOLimelight(
-                            Constants.WoodBotConstants.LIMELIGHT_4,
-                            () -> drivetrain.getAngle(),
-                            () -> drivetrain.getAngularRate(),
-                            true,
-                            true))));
+                            false))));
         intake = new Intake(new IntakeIOWB());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOWB());
         // intakePivot = new IntakePivot(new IntakePivotIOPB());

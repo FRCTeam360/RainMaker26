@@ -15,6 +15,7 @@ public class Intake extends SubsystemBase {
   private static final double INTAKE_VELOCITY_RPM = 4500.0;
   private static final double JAMMED_SUPPLY_CURRENT_DRAW = 35.0;
   private static final double REVERSE_UNJAM_DUTY_CYCLE = -0.5;
+  private static final double INTAKE_DUTY_CYCLE = 0.75;
 
   public enum IntakeStates {
     OFF,
@@ -82,7 +83,7 @@ public class Intake extends SubsystemBase {
   }
 
   private void intaking() {
-    setVelocity(INTAKE_VELOCITY_RPM);
+    setDutyCycle(INTAKE_DUTY_CYCLE);
   }
 
   // private void unjamIntake() {
