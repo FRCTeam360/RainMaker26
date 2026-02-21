@@ -77,7 +77,7 @@ public class ShotCalculator {
       return shootingParams;
     }
     Logger.recordOutput("ShotCalculator/cached", false);
-    Pose2d robotPosition = drivetrain.getPosition();
+    Pose2d robotPosition = drivetrain.getPose();
     Pose2d shooterPosition = robotPosition.plus(ShooterConstants.ROBOT_TO_SHOOTER);
 
     Translation2d hubTranslation =
