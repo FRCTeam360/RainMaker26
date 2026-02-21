@@ -188,8 +188,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                             ? velocityYSupplier.getAsDouble()
                             : -velocityYSupplier.getAsDouble())
                     .withTargetDirection(headingSupplier.get()))
-                    .withDeadband(Constants.maxSpeed.in(MetersPerSecond) * 0.01));
-        .finallyDo(() -> m_faceHubRequest.HeadingController.reset());
+            .finallyDo(() -> m_faceHubRequest.HeadingController.reset());
   }
 
   /**
@@ -284,7 +283,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
    * @param modules Constants for each specific module
    */
 
-  private static final FieldCentricFacingAngle request =
+  private final FieldCentricFacingAngle request =
         new SwerveRequest.FieldCentricFacingAngle().withDeadband(POSITION_DEADBAND_MPS);
 
   public CommandSwerveDrivetrain(
