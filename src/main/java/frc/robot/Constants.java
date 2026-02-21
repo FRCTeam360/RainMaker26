@@ -76,7 +76,6 @@ public final class Constants {
 
     // === CANBUS ===
     public static final CANBus CANBUS = new CANBus("Default Name");
-
   }
 
   public static class SimulationConstants {
@@ -95,7 +94,6 @@ public final class Constants {
 
     // === HOOD ===
     public static final int HOOD_MOTOR = 6;
-
   }
 
   public static class OperatorConstants {

@@ -27,6 +27,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.Constants;
 import frc.robot.generated.WoodBotDrivetrain.TunerSwerveDrivetrain;
 import frc.robot.subsystems.Vision.VisionMeasurement;
 import frc.robot.utils.FieldVisualizer;
@@ -35,7 +36,6 @@ import java.util.Optional;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
-import frc.robot.Constants;
 
 /**
  * Class that extends the Phoenix 6 SwerveDrivetrain class and implements Subsystem so it can easily
@@ -295,9 +295,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
    * @param drivetrainConstants Drivetrain-wide constants for the swerve drive
    * @param modules Constants for each specific module
    */
-
   private final FieldCentricFacingAngle request =
-        new SwerveRequest.FieldCentricFacingAngle().withDeadband(POSITION_DEADBAND_MPS);
+      new SwerveRequest.FieldCentricFacingAngle().withDeadband(POSITION_DEADBAND_MPS);
 
   public CommandSwerveDrivetrain(
       SwerveDrivetrainConstants drivetrainConstants, SwerveModuleConstants<?, ?, ?>... modules) {
@@ -312,8 +311,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     poseXController = new PhoenixPIDController(POSE_KP, POSE_KI, POSE_KD);
     poseYController = new PhoenixPIDController(POSE_KP, POSE_KI, POSE_KD);
     headingController.enableContinuousInput(-Math.PI, Math.PI);
-    headingController.setTolerance(0.02, 0.05);   // 1 degree position, adjust as needed
-    poseXController.setTolerance(0.05);           // 5cm position tolerance
+    headingController.setTolerance(0.02, 0.05); // 1 degree position, adjust as needed
+    poseXController.setTolerance(0.05); // 5cm position tolerance
     poseYController.setTolerance(0.05);
     request.HeadingController = headingController;
     request.withDeadband(POSITION_DEADBAND_MPS);
@@ -594,10 +593,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     double timestamp = getStateCopy().Timestamp;
     double x = poseXController.calculate(currentPose.getX(), setpointPose.getX(), timestamp);
     double y = poseYController.calculate(currentPose.getY(), setpointPose.getY(), timestamp);
-    request
-      .withVelocityX(x)
-      .withVelocityY(y)
-      .withTargetDirection(setpointPose.getRotation());
+    request.withVelocityX(x).withVelocityY(y).withTargetDirection(setpointPose.getRotation());
     this.setControl(request);
   }
 
