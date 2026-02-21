@@ -207,10 +207,12 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   }
 
   public void faceAngleWhileDriving(CommandXboxController driveCont, Rotation2d heading) {
-    faceAngleWhileDriving(
-        Math.pow(driveCont.getLeftY(), 3) * Constants.maxSpeed.in(MetersPerSecond) * -1.0,
-        Math.pow(driveCont.getLeftX(), 3) * Constants.maxSpeed.in(MetersPerSecond) * -1.0,
-        heading);
+    m_faceHubRequest.ForwardPerspective = ForwardPerspectiveValue.OperatorPerspective;
+    this.setControl(
+        m_faceHubRequest
+          .withVelocityX(Math.pow(driveCont.getLeftY(), 3) * Constants.maxSpeed.in(MetersPerSecond) * -1.0),
+          .withVelocityY(Math.pow(driveCont.getLeftX(), 3) * Constants.maxSpeed.in(MetersPerSecond) * -1.0),
+          .withTargetDirection(heading));
   }
 
   /*
