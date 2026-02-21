@@ -23,5 +23,5 @@ public interface FlywheelKickerIO {
 
   public void setDutyCycle(double dutyCycle);
 
-  public void setVelocity(double rpm);
+  public void setVelocity(double velocity);
 }

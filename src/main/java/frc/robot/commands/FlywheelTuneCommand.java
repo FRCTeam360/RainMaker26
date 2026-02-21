@@ -9,15 +9,15 @@ import frc.robot.subsystems.Shooter.Flywheel.Flywheel;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 /**
- * Command to tune the flywheel RPM using a LoggedNetworkNumber.
+ * Command to tune the flywheel Velocity using a LoggedNetworkNumber.
  *
- * <p>This command continuously reads from a NetworkTables tunable value and sets the flywheel RPM
- * accordingly. Useful for testing and tuning flywheel speeds during development.
+ * <p>This command continuously reads from a NetworkTables tunable value and sets the flywheel
+ * Velocity accordingly. Useful for testing and tuning flywheel speeds during development.
  */
 public class FlywheelTuneCommand extends Command {
   private final Flywheel flywheel;
-  private final LoggedNetworkNumber tunableRPM =
-      new LoggedNetworkNumber("/Tuning/Flywheel/TunableRPM", 0.0);
+  private final LoggedNetworkNumber tunableVelocity =
+      new LoggedNetworkNumber("/Tuning/Flywheel/TunableVelocity", 0.0);
 
   /**
    * Creates a new FlywheelTuneCommand.
@@ -34,7 +34,7 @@ public class FlywheelTuneCommand extends Command {
 
   @Override
   public void execute() {
-    flywheel.setVelocity(tunableRPM.get());
+    flywheel.setVelocity(tunableVelocity.get());
   }
 
   @Override

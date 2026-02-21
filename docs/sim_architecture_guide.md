@@ -430,7 +430,7 @@ public void updateInputs(IndexerIOInputs inputs) {
 
   // STEP 4: Use SparkMaxSim.iterate() to update controller state
   sparkSim.iterate(
-      indexerSim.getAngularVelocityRPM(), // Motor velocity in RPM
+      indexerSim.getAngularVelocityRPM(), // Motor velocity in Velocity
       RoboRioSim.getVInVoltage(),         // Simulated battery voltage
       0.02);                              // Time interval (20ms)
 
@@ -629,7 +629,7 @@ When creating a new `*IOSim` class:
 **Best practice:**
 - Physics models use **radians** internally
 - Phoenix 6 uses **rotations** by default
-- SparkMax can use rotations, RPM, or custom units
+- SparkMax can use rotations, Velocity, or custom units
 - Use WPILib's `Units` class and `edu.wpi.first.units` for conversions
 
 ```java
@@ -777,7 +777,7 @@ config.CurrentLimits.StatorCurrentLimitEnable = true;
 | **Control requests** | `PositionVoltage`, `VelocityVoltage` | `getPIDController().setReference()` |
 | **Sim state update** | Manual: `getSimState().setRawRotorPosition()` | Helper: `SparkMaxSim.iterate()` |
 | **Gravity comp** | Built-in: `kG` + `GravityType` | Manual: Add to feedforward |
-| **Units** | Rotations by default | Configurable (rotations, RPM, etc.) |
+| **Units** | Rotations by default | Configurable (rotations, Velocity, etc.) |
 
 ### 9.8. Testing Your Simulation
 

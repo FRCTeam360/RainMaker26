@@ -38,8 +38,8 @@ Traditional FRC code mixes hardware interaction with control logic:
 public class Flywheel extends SubsystemBase {
   private final TalonFX motor = new TalonFX(10);
 
-  public void setRPM(double rpm) {
-    motor.setControl(new VelocityVoltage(rpm));  // Locked to TalonFX
+  public void setVelocity(double velocity) {
+    motor.setControl(new VelocityVoltage(velocity));  // Locked to TalonFX
   }
 }
 ```
@@ -51,8 +51,8 @@ AdvantageKit separates these concerns:
 public class Flywheel extends SubsystemBase {
   private final FlywheelIO io;  // Abstract interface
 
-  public void setRPM(double rpm) {
-    io.setRPM(rpm);  // Works with ANY implementation
+  public void setVelocity(double velocity) {
+    io.setVelocity(velocity);  // Works with ANY implementation
   }
 }
 ```
@@ -76,7 +76,7 @@ Every AdvantageKit subsystem consists of three layers:
                          ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │                        IO LAYER                                 │
-│  • Interface defining methods (setRPM, setPosition, etc.)       │
+│  • Interface defining methods (setVelocity, setPosition, etc.)       │
 │  • IOInputs class with @AutoLog annotation                      │
 │  • No implementation logic - just contracts                     │
 └────────────────────────┬────────────────────────────────────────┘
@@ -148,7 +148,7 @@ The IO interface defines a **contract**:
 
 ```java
 public interface FlywheelIO {
-  void setRPM(double rpm);
+  void setVelocity(double velocity);
   void setDutyCycle(double duty);
   void updateInputs(FlywheelIOInputs inputs);
 }
@@ -159,20 +159,20 @@ Every hardware implementation must fulfill this contract:
 ```java
 public class FlywheelIOReal implements FlywheelIO {
   @Override
-  public void setRPM(double rpm) {
+  public void setVelocity(double velocity) {
     // TalonFX implementation
   }
 }
 
 public class FlywheelIOSim implements FlywheelIO {
   @Override
-  public void setRPM(double rpm) {
+  public void setVelocity(double velocity) {
     // Simulation implementation
   }
 }
 ```
 
-The subsystem calls `io.setRPM(500)` and doesn't know—or need to know—whether it's talking to a real motor or a simulation.
+The subsystem calls `io.setVelocity(500)` and doesn't know—or need to know—whether it's talking to a real motor or a simulation.
 
 ---
 
@@ -194,7 +194,7 @@ public interface IndexerIO {
   // Define the inputs that will be logged
   @AutoLog
   public static class IndexerIOInputs {
-    public double velocity = 0.0;           // RPM
+    public double velocity = 0.0;           // Velocity
     public double voltage = 0.0;            // Volts
     public double statorCurrent = 0.0;      // Amps
     public double supplyCurrent = 0.0;      // Amps
@@ -203,7 +203,7 @@ public interface IndexerIO {
   // Define control methods
   public void setDutyCycle(double duty);
 
-  public void setRPM(double rpm);
+  public void setVelocity(double velocity);
 
   // Update method called every loop
   public default void updateInputs(IndexerIOInputs inputs) {}
@@ -257,7 +257,7 @@ public class IndexerIOReal implements IndexerIO {
 
   @Override
   public void updateInputs(IndexerIOInputs inputs) {
-    inputs.velocity = motor.getVelocity().getValueAsDouble() * 60.0;  // RPS → RPM
+    inputs.velocity = motor.getVelocity().getValueAsDouble() * 60.0;  // RPS → Velocity
     inputs.voltage = motor.getMotorVoltage().getValueAsDouble();
     inputs.statorCurrent = motor.getStatorCurrent().getValueAsDouble();
     inputs.supplyCurrent = motor.getSupplyCurrent().getValueAsDouble();
@@ -269,8 +269,8 @@ public class IndexerIOReal implements IndexerIO {
   }
 
   @Override
-  public void setRPM(double rpm) {
-    motor.setControl(velocityRequest.withVelocity(rpm / 60.0));  // RPM → RPS
+  public void setVelocity(double velocity) {
+    motor.setControl(velocityRequest.withVelocity(velocity / 60.0));  // Velocity → RPS
   }
 }
 ```
@@ -313,10 +313,10 @@ public class IndexerIOSim implements IndexerIO {
   }
 
   @Override
-  public void setRPM(double rpm) {
-    // Simple approximation: use voltage to reach target RPM
+  public void setVelocity(double velocity) {
+    // Simple approximation: use voltage to reach target Velocity
     // In reality, you'd implement PID in simulation
-    double targetVoltage = rpm / 500.0;  // Example scaling
+    double targetVoltage = velocity / 500.0;  // Example scaling
     appliedVoltage = targetVoltage;
     flywheelSim.setInputVoltage(appliedVoltage);
   }
@@ -353,8 +353,8 @@ public class Indexer extends SubsystemBase {
   }
 
   // High-level control methods
-  public void setRPM(double rpm) {
-    io.setRPM(rpm);
+  public void setVelocity(double velocity) {
+    io.setVelocity(velocity);
   }
 
   public void setDutyCycle(double duty) {
@@ -366,8 +366,8 @@ public class Indexer extends SubsystemBase {
   }
 
   // Command factories
-  public Command runAtRPM(double rpm) {
-    return this.runEnd(() -> setRPM(rpm), this::stop);
+  public Command runAtVelocity(double velocity) {
+    return this.runEnd(() -> setVelocity(velocity), this::stop);
   }
 }
 ```
@@ -393,7 +393,7 @@ public class RobotContainer {
 
   private void configureBindings() {
     // Example: Run indexer when A button is pressed
-    controller.a().whileTrue(indexer.runAtRPM(3000));
+    controller.a().whileTrue(indexer.runAtVelocity(3000));
   }
 }
 ```
@@ -414,7 +414,7 @@ Defines methods that all hardware implementations must provide:
 
 ```java
 public interface FlywheelIO {
-  void setRPM(double rpm);
+  void setVelocity(double velocity);
   void setDutyCycle(double duty);
   void updateInputs(FlywheelIOInputs inputs);
 }
@@ -428,8 +428,8 @@ public interface FlywheelIO {
 
 ```java
 public interface FlywheelIO {
-  /** Set flywheel velocity in RPM */
-  void setRPM(double rpm);
+  /** Set flywheel velocity in Velocity */
+  void setVelocity(double velocity);
 
   /** Optional: stop the flywheel (default implementation) */
   default void stop() {
@@ -447,7 +447,7 @@ Defines what data gets logged and passed to the subsystem:
 ```java
 @AutoLog
 public static class FlywheelIOInputs {
-  public double velocity = 0.0;        // RPM
+  public double velocity = 0.0;        // Velocity
   public double voltage = 0.0;         // Volts
   public double statorCurrent = 0.0;   // Amps
   public double temperature = 0.0;     // Celsius
@@ -544,8 +544,8 @@ public class FlywheelIOReal implements FlywheelIO {
   }
 
   @Override
-  public void setRPM(double rpm) {
-    motor.setControl(velocityRequest.withVelocity(rpm / 60.0));
+  public void setVelocity(double velocity) {
+    motor.setControl(velocityRequest.withVelocity(velocity / 60.0));
   }
 }
 ```
@@ -578,8 +578,8 @@ public class FlywheelIOSparkMax implements FlywheelIO {
   }
 
   @Override
-  public void setRPM(double rpm) {
-    controller.setReference(rpm, ControlType.kVelocity);
+  public void setVelocity(double velocity) {
+    controller.setReference(velocity, ControlType.kVelocity);
   }
 }
 ```
@@ -613,7 +613,7 @@ public class Flywheel extends SubsystemBase {
   private final FlywheelIOInputsAutoLogged inputs = new FlywheelIOInputsAutoLogged();
 
   // Additional state (not logged through IO)
-  private double targetRPM = 0.0;
+  private double targetVelocity = 0.0;
 
   public Flywheel(FlywheelIO io) {
     this.io = io;
@@ -628,15 +628,15 @@ public class Flywheel extends SubsystemBase {
     Logger.processInputs("Flywheel", inputs);
 
     // 3. Log additional state
-    Logger.recordOutput("Flywheel/TargetRPM", targetRPM);
+    Logger.recordOutput("Flywheel/TargetVelocity", targetVelocity);
 
     // 4. Any periodic logic (state machines, etc.)
   }
 
   // Control methods
-  public void setRPM(double rpm) {
-    targetRPM = rpm;
-    io.setRPM(rpm);
+  public void setVelocity(double velocity) {
+    targetVelocity = velocity;
+    io.setVelocity(velocity);
   }
 
   // Queries
@@ -645,14 +645,14 @@ public class Flywheel extends SubsystemBase {
   }
 
   public boolean atTarget() {
-    return Math.abs(inputs.velocity - targetRPM) < 50.0;  // Within 50 RPM
+    return Math.abs(inputs.velocity - targetVelocity) < 50.0;  // Within 50 Velocity
   }
 
   // Command factories
-  public Command spinUpCommand(double rpm) {
+  public Command spinUpCommand(double velocity) {
     return this.runEnd(
-        () -> setRPM(rpm),
-        () -> setRPM(0))
+        () -> setVelocity(velocity),
+        () -> setVelocity(0))
         .withName("SpinUp");
   }
 }
@@ -663,16 +663,16 @@ public class Flywheel extends SubsystemBase {
 1. **Keep subsystem hardware-agnostic**
    ```java
    // ✅ Good - uses IO interface
-   io.setRPM(rpm);
+   io.setVelocity(velocity);
 
    // ❌ Bad - knows about specific hardware
-   motor.setControl(new VelocityVoltage(rpm));
+   motor.setControl(new VelocityVoltage(velocity));
    ```
 
 2. **Log everything important**
    ```java
    Logger.recordOutput("Flywheel/AtTarget", atTarget());
-   Logger.recordOutput("Flywheel/Error", targetRPM - inputs.velocity);
+   Logger.recordOutput("Flywheel/Error", targetVelocity - inputs.velocity);
    ```
 
 3. **Create command factories**
@@ -795,7 +795,7 @@ public class ArmIOReal implements ArmIO {
 
 Keep units consistent within each layer:
 
-- **IO Interface**: Use mechanism units (rotations, RPM, degrees)
+- **IO Interface**: Use mechanism units (rotations, velocity, degrees)
 - **Hardware Layer**: Convert between mechanism and motor units
 - **Subsystem Layer**: Use mechanism units
 

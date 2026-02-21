@@ -22,6 +22,8 @@ public final class Constants {
   public static final AprilTagFieldLayout FIELD_LAYOUT =
       AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
 
+  public static final double SPINUP_SHOOTING_FLYWHEEL_VELOCITY_RPM = 3250.0;
+
   public static final int IMU_MODE_EXTERNAL_ONLY = 0;
 
   public static final int IMU_MODE_EXTERNAL_SEED = 1;

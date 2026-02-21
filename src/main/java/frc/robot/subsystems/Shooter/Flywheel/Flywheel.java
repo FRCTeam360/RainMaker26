@@ -65,13 +65,13 @@ public class Flywheel extends SubsystemBase {
     return 0.0;
   }
 
-  public boolean atSetpoint(double targetRPM, double tolerance) {
+  public boolean atSetpoint(double targetVelocity, double tolerance) {
     // TODO: make tolerance a constant in hardware layer
-    return Math.abs(getVelocity() - targetRPM) < tolerance;
+    return Math.abs(getVelocity() - targetVelocity) < tolerance;
   }
 
-  public boolean atSetpoint(DoubleSupplier targetRPM, double tolerance) {
-    return atSetpoint(targetRPM.getAsDouble(), tolerance);
+  public boolean atSetpoint(DoubleSupplier targetVelocity, double tolerance) {
+    return atSetpoint(targetVelocity.getAsDouble(), tolerance);
   }
 
   private void applyState() {

@@ -31,7 +31,7 @@ public class IntakeIOSim implements IntakeIO {
 
   // AdvantageScope tuning (sim-only, under /Tuning table)
   private final LoggedNetworkNumber tunableSetpoint =
-      new LoggedNetworkNumber("/Tuning/Intake/SetpointRPM", 0.0);
+      new LoggedNetworkNumber("/Tuning/Intake/SetpointVelocity", 0.0);
   private final LoggedNetworkBoolean tuningEnabled =
       new LoggedNetworkBoolean("/Tuning/Intake/Enabled", false);
 

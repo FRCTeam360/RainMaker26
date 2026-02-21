@@ -311,7 +311,7 @@ public class RobotContainer {
       driverCont.start().onTrue(hood.zero());
     }
 
-    // shootWithRPM uses flywheel
+    // shootWithVelocity uses flywheel
     if (Objects.nonNull(flywheel)) {
       driverCont.x().whileTrue(flywheel.setVelocityCommand(2500));
       driverCont.b().whileTrue(flywheel.setVelocityCommand(3000));
