@@ -12,11 +12,38 @@ import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import edu.wpi.first.math.util.Units;
 import frc.robot.Constants;
 
 public class IntakePivotIOPB implements IntakePivotIO {
+  // TODO: UPDATE GEAR RATIO
+  private static final double GEAR_RATIO = 60.0;
+
+  private static final double KP = 0.0;
+  private static final double KI = 0.0;
+  private static final double KD = 0.0;
+  private static final double KA = 0.0;
+  private static final double KG = 0.0;
+  private static final double KS = 0.0;
+  private static final double KV = 0.0;
+
+  private static final double STATOR_CURRENT_LIMIT_AMPS = 120.0;
+  private static final double SUPPLY_CURRENT_LIMIT_AMPS = 60.0;
+
+  private static final double MOTION_MAGIC_ACCELERATION_RPS2 = 400.0;
+  private static final double MOTION_MAGIC_CRUISE_VELOCITY_RPS = 85.0;
+  private static final double MOTION_MAGIC_JERK_RPS3 = 1750.0;
+
+  private static final double FORWARD_SOFT_LIMIT_DEGREES =
+      178.0; // TODO: make sure these are correct for prac bot
+  private static final double REVERSE_SOFT_LIMIT_DEGREES = 0.0; // 29.5
+
+  private static final double PEAK_FORWARD_VOLTAGE = 12.0;
+  private static final double PEAK_REVERSE_VOLTAGE = -12.0;
+
   private final TalonFX intakePivot =
-      new TalonFX(Constants.WoodBotConstants.INTAKE_PIVOT_ID, Constants.WoodBotConstants.CANBUS);
+      new TalonFX(
+          Constants.PracticeBotConstants.INTAKE_PIVOT_ID, Constants.PracticeBotConstants.CANBUS);
 
   private final DutyCycleOut dutyCycleOut = new DutyCycleOut(0);
   private final MotionMagicVoltage motionMagicPosition = new MotionMagicVoltage(0);
@@ -24,57 +51,37 @@ public class IntakePivotIOPB implements IntakePivotIO {
   private final CurrentLimitsConfigs currentLimitConfig = new CurrentLimitsConfigs();
   private NeutralModeValue neutralMode = NeutralModeValue.Brake;
 
-  // TODO: UPDATE GEAR RATIO
-  private static final double GEAR_RATIO = 360.0 / 60.0;
-
-  // TODO: ADD CONVERSION FACTOR TO GET MECHANISM INTO DEGREES
-
   /** Creates a new IntakePivotIOPB. */
   public IntakePivotIOPB() {
     intakePivot.setNeutralMode(NeutralModeValue.Brake);
 
-    final double motionMagicAcceleration = 400.0; // rotations per second squared
-    final double motionMagicCruiseVelocity = 85.0; // rotations per second
-    final double motionMagicCruiseJerk = 1750.0; // rotations per second cubed
-
-    final double forwardLimit =
-        178.0; // TODO: make sure these are correct for prac bots; units are in degrees
-    final double reverseLimit = 0.0; // 29.5, units are in degrees
-
-    config.CurrentLimits.StatorCurrentLimit = 120.0;
-    config.CurrentLimits.SupplyCurrentLimit = 60.0;
+    config.CurrentLimits.StatorCurrentLimit = STATOR_CURRENT_LIMIT_AMPS;
+    config.CurrentLimits.SupplyCurrentLimit = SUPPLY_CURRENT_LIMIT_AMPS;
     config.CurrentLimits.StatorCurrentLimitEnable = true;
     config.CurrentLimits.SupplyCurrentLimitEnable = true;
 
-    final double kP = 0.0;
-    final double kI = 0.0;
-    final double kD = 0.0;
-    final double kA = 0.0;
-    final double kG = 0.0;
-    final double kS = 0.0;
-    final double kV = 0.0;
-
     Slot0Configs slot0Configs = config.Slot0;
-    slot0Configs.kA = kA;
-    slot0Configs.kD = kD;
-    slot0Configs.kG = kG;
-    slot0Configs.kI = kI;
-    slot0Configs.kP = kP;
-    slot0Configs.kS = kS;
-    slot0Configs.kV = kV;
+    slot0Configs.kA = KA;
+    slot0Configs.kD = KD;
+    slot0Configs.kG = KG;
+    slot0Configs.kI = KI;
+    slot0Configs.kP = KP;
+    slot0Configs.kS = KS;
+    slot0Configs.kV = KV;
 
     MotionMagicConfigs motionMagicConfigs = config.MotionMagic;
-    motionMagicConfigs.MotionMagicCruiseVelocity = motionMagicCruiseVelocity;
-    motionMagicConfigs.MotionMagicAcceleration = motionMagicAcceleration;
-    motionMagicConfigs.MotionMagicJerk = motionMagicCruiseJerk;
+    motionMagicConfigs.MotionMagicCruiseVelocity = MOTION_MAGIC_CRUISE_VELOCITY_RPS;
+    motionMagicConfigs.MotionMagicAcceleration = MOTION_MAGIC_ACCELERATION_RPS2;
+    motionMagicConfigs.MotionMagicJerk = MOTION_MAGIC_JERK_RPS3;
 
-    config.Voltage.PeakForwardVoltage = 12.0;
-    config.Voltage.PeakReverseVoltage = -12.0;
+    config.Voltage.PeakForwardVoltage = PEAK_FORWARD_VOLTAGE;
+    config.Voltage.PeakReverseVoltage = PEAK_REVERSE_VOLTAGE;
 
     config.Feedback.SensorToMechanismRatio = GEAR_RATIO;
 
-    config.SoftwareLimitSwitch.withForwardSoftLimitThreshold(forwardLimit)
-        .withReverseSoftLimitThreshold(reverseLimit)
+    config.SoftwareLimitSwitch.withForwardSoftLimitThreshold(
+            Units.degreesToRotations(FORWARD_SOFT_LIMIT_DEGREES))
+        .withReverseSoftLimitThreshold(Units.degreesToRotations(REVERSE_SOFT_LIMIT_DEGREES))
         .withForwardSoftLimitEnable(true)
         .withReverseSoftLimitEnable(true);
 
@@ -85,8 +92,14 @@ public class IntakePivotIOPB implements IntakePivotIO {
     intakePivot.setPosition(0.0);
   }
 
-  public void setPosition(double position) {
-    intakePivot.setControl(motionMagicPosition.withPosition(position));
+  /**
+   * Sets the intake pivot position.
+   *
+   * @param positionDegrees target position in degrees
+   */
+  public void setPosition(double positionDegrees) {
+    intakePivot.setControl(
+        motionMagicPosition.withPosition(Units.degreesToRotations(positionDegrees)));
   }
 
   public void setDutyCycle(double value) {
@@ -106,9 +119,9 @@ public class IntakePivotIOPB implements IntakePivotIO {
   // TODO: ASK ELECTRICAL FOR A ZEROING BUTTON OR AN ABSOLUTE ENCODER
 
   public void updateInputs(IntakePivotIOInputs inputs) {
-    inputs.position = intakePivot.getPosition().getValueAsDouble();
+    inputs.position = Units.rotationsToDegrees(intakePivot.getPosition().getValueAsDouble());
     inputs.statorCurrent = intakePivot.getStatorCurrent().getValueAsDouble();
-    inputs.velocity = intakePivot.getVelocity().getValueAsDouble();
+    inputs.velocity = Units.rotationsToDegrees(intakePivot.getVelocity().getValueAsDouble());
     inputs.voltage = intakePivot.getMotorVoltage().getValueAsDouble();
     inputs.supplyCurrent = intakePivot.getSupplyCurrent().getValueAsDouble();
     inputs.brakeMode = neutralMode == NeutralModeValue.Brake;

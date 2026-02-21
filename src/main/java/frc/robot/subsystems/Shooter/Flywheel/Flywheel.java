@@ -6,13 +6,13 @@ package frc.robot.subsystems.Shooter.Flywheel;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
 public class Flywheel extends SubsystemBase {
   private final FlywheelIO io;
   private final FlywheelIOInputsAutoLogged inputs = new FlywheelIOInputsAutoLogged();
+  private DoubleSupplier velocitySupplier = () -> 0.0;
 
   public enum FlywheelStates {
     OFF,
@@ -22,6 +22,15 @@ public class Flywheel extends SubsystemBase {
   /** Creates a new Flywheel. */
   public Flywheel(FlywheelIO io) {
     this.io = io;
+  }
+
+  /**
+   * Sets the supplier for the flywheel velocity from the shot calculator.
+   *
+   * @param velocitySupplier a DoubleSupplier providing the desired flywheel velocity in RPM
+   */
+  public void setVelocitySupplier(DoubleSupplier velocitySupplier) {
+    this.velocitySupplier = velocitySupplier;
   }
 
   public FlywheelStates getState() {
@@ -68,7 +77,7 @@ public class Flywheel extends SubsystemBase {
   private void applyState() {
     switch (currentState) {
       case SHOOTING:
-        setVelocity(Constants.SPINUP_SHOOTING_FLYWHEEL_VELOCITY_RPM);
+        setVelocity(velocitySupplier.getAsDouble());
         break;
       case OFF:
       default:
@@ -79,14 +88,15 @@ public class Flywheel extends SubsystemBase {
 
   public void setWantedState(FlywheelStates state) {
     wantedState = state;
-    updateState();
-    applyState();
   }
 
   @Override
   public void periodic() {
     io.updateInputs(inputs);
     Logger.processInputs("Flywheel", inputs);
+
+    updateState();
+    applyState();
     Logger.recordOutput("Subsystems/Flywheel/WantedState", wantedState.toString());
     Logger.recordOutput("Subsystems/Flywheel/CurrentState", currentState.toString());
     Logger.recordOutput("Subsystems/Flywheel/PreviousState", previousState.toString());

@@ -4,29 +4,33 @@
 
 package frc.robot.subsystems.HopperRoller;
 
+import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
-import com.revrobotics.spark.SparkBase.PersistMode;
-import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.ResetMode;
+import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.config.SparkFlexConfig;
 import frc.robot.Constants;
 
 public class HopperRollerIOPB implements HopperRollerIO {
+  private static final double GEAR_RATIO = 1.0; // FIXME: set actual gear ratio
 
-  private final SparkMax hopperRollerMotor =
-      new SparkMax(Constants.PracticeBotConstants.HOPPER_ROLLER_ID, MotorType.kBrushless);
+  private final SparkFlex hopperRollerMotor =
+      new SparkFlex(Constants.PracticeBotConstants.HOPPER_ROLLER_ID, MotorType.kBrushless);
 
   private final RelativeEncoder encoder = hopperRollerMotor.getEncoder();
-  private final SparkMaxConfig sparkMaxConfig = new SparkMaxConfig();
+  private final SparkFlexConfig sparkFlexConfig = new SparkFlexConfig();
 
   public HopperRollerIOPB() {
-    sparkMaxConfig.idleMode(IdleMode.kBrake);
-    sparkMaxConfig.inverted(true);
+    sparkFlexConfig.idleMode(IdleMode.kBrake);
+    sparkFlexConfig.inverted(true);
+
+    sparkFlexConfig.encoder.positionConversionFactor(1.0 / GEAR_RATIO);
+    sparkFlexConfig.encoder.velocityConversionFactor(1.0 / GEAR_RATIO);
 
     hopperRollerMotor.configure(
-        sparkMaxConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        sparkFlexConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 
   public void updateInputs(HopperRollerIOInputs inputs) {
