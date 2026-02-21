@@ -18,10 +18,10 @@ public class PIDToPose extends Command {
     addRequirements(drivetrain);
 
     Logger.recordOutput(LOGGING_PREFIX + "isAtRotationSetpoint", false);
-    Logger.recordOutput(LOGGING_PREFIX + "isAtPoseXSetPoint", false);
-    Logger.recordOutput(LOGGING_PREFIX + "isAtPoseYSetPoint", false);
+    Logger.recordOutput(LOGGING_PREFIX + "isAtPoseXSetpoint", false);
+    Logger.recordOutput(LOGGING_PREFIX + "isAtPoseYSetpoint", false);
 
-    Logger.recordOutput(LOGGING_PREFIX + "headingSetPoint", 0.0);
+    Logger.recordOutput(LOGGING_PREFIX + "headingSetpoint", 0.0);
     Logger.recordOutput(LOGGING_PREFIX + "poseXSetpoint", 0.0);
     Logger.recordOutput(LOGGING_PREFIX + "poseYSetpoint", 0.0);
 
@@ -37,11 +37,10 @@ public class PIDToPose extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    drivetrain.driveToPose(setpointPose);
-    final double headingSetPoint = setpointPose.getRotation().getDegrees();
+    final double headingSetpoint = setpointPose.getRotation().getDegrees();
 
     Logger.recordOutput(LOGGING_PREFIX + "positionSetpoint", setpointPose);
-    Logger.recordOutput(LOGGING_PREFIX + "headingSetpoint", headingSetPoint);
+    Logger.recordOutput(LOGGING_PREFIX + "headingSetpoint", headingSetpoint);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -60,8 +59,8 @@ public class PIDToPose extends Command {
   @Override
   public boolean isFinished() {
     final boolean isAtHeadingSetpoint = drivetrain.isAtRotationSetpoint();
-    final boolean isAtPoseXSetPoint = drivetrain.isAtPoseXSetpoint();
-    final boolean isAtPoseYSetPoint = drivetrain.isAtPoseYSetpoint();
+    final boolean isAtPoseXSetpoint = drivetrain.isAtPoseXSetpoint();
+    final boolean isAtPoseYSetpoint = drivetrain.isAtPoseYSetpoint();
 
     final double headingPositionError =
         Math.toDegrees(drivetrain.getHeadingControllerPositionError());
@@ -74,8 +73,8 @@ public class PIDToPose extends Command {
     final double poseYVelocityError = drivetrain.getPoseYControllerVelocityError();
 
     Logger.recordOutput(LOGGING_PREFIX + "isAtRotationSetpoint", isAtHeadingSetpoint);
-    Logger.recordOutput(LOGGING_PREFIX + "isAtPoseXSetPoint", isAtPoseXSetPoint);
-    Logger.recordOutput(LOGGING_PREFIX + "isAtPoseYSetPoint", isAtPoseYSetPoint);
+    Logger.recordOutput(LOGGING_PREFIX + "isAtPoseXSetpoint", isAtPoseXSetpoint);
+    Logger.recordOutput(LOGGING_PREFIX + "isAtPoseYSetpoint", isAtPoseYSetpoint);
 
     Logger.recordOutput(LOGGING_PREFIX + "headingPositionError", headingPositionError);
     Logger.recordOutput(LOGGING_PREFIX + "poseXPositionError", poseXPositionError);
@@ -85,7 +84,7 @@ public class PIDToPose extends Command {
     Logger.recordOutput(LOGGING_PREFIX + "poseXVelocityError", poseXVelocityError);
     Logger.recordOutput(LOGGING_PREFIX + "poseYVelocityError", poseYVelocityError);
 
-    return isAtHeadingSetpoint && isAtPoseXSetPoint && isAtPoseYSetPoint;
+    return isAtHeadingSetpoint && isAtPoseXSetpoint && isAtPoseYSetpoint;
   }
 
   public static Command getCommand(CommandSwerveDrivetrain drivetrain, Pose2d setpointPose) {
