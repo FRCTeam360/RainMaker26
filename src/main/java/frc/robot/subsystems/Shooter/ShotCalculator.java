@@ -19,10 +19,11 @@ public class ShotCalculator {
   private final Supplier<Translation2d> targetSupplier;
   private final InterpolatingDoubleTreeMap shotHoodAngleMap;
   private final InterpolatingDoubleTreeMap launchFlywheelSpeedMap;
+  private final InterpolatingDoubleTreeMap timeOfFlightMap;
   private final Transform2d robotToShooter;
 
-  private static final InterpolatingDoubleTreeMap timeOfFlightMap =
-      new InterpolatingDoubleTreeMap();
+  private double MIN_DISTANCE_METERS;
+  private double MAX_DISTANCE_METERS;
 
   /**
    * Holds the calculated shooting parameters for a given robot position.
@@ -33,10 +34,15 @@ public class ShotCalculator {
    */
   public record ShootingParams(Rotation2d targetHeading, double hoodAngle, double flywheelSpeed) {}
 
-  private ShootingParams latestParameters = null;
+  public record RobotSpecificInfo(
+      InterpolatingDoubleTreeMap shotHoodAngleMap,
+      InterpolatingDoubleTreeMap launchFlywheelSpeedMap,
+      InterpolatingDoubleTreeMap timeOfFlightMap,
+      Transform2d robotToShooter,
+      double MIN_DISTANCE_METERS, // should be 0.0 for hub
+      double MAX_DISTANCE_METERS /* should be 5.0 for hub */) {}
 
-  private static final double MIN_DISTANCE_METERS = 0.0;
-  private static final double MAX_DISTANCE_METERS = 5.0;
+  private ShootingParams latestParameters = null;
 
   /**
    * Creates a new ShotCalculator.
@@ -48,14 +54,13 @@ public class ShotCalculator {
       Supplier<Pose2d> robotPoseSupplier,
       Supplier<Translation2d>
           targetSupplier, // AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint.toTranslation2d());
-      InterpolatingDoubleTreeMap shotHoodAngleMap,
-      InterpolatingDoubleTreeMap launchFlywheelSpeedMap,
-      Transform2d robotToShooter) {
+      RobotSpecificInfo robotSpecificInfo) {
     this.robotPoseSupplier = robotPoseSupplier;
     this.targetSupplier = targetSupplier;
-    this.shotHoodAngleMap = shotHoodAngleMap;
-    this.launchFlywheelSpeedMap = launchFlywheelSpeedMap;
-    this.robotToShooter = robotToShooter;
+    this.shotHoodAngleMap = robotSpecificInfo.shotHoodAngleMap;
+    this.launchFlywheelSpeedMap = robotSpecificInfo.launchFlywheelSpeedMap;
+    this.timeOfFlightMap = robotSpecificInfo.timeOfFlightMap;
+    this.robotToShooter = robotSpecificInfo.robotToShooter;
   }
 
   private ShootingParams cachedShootingParams = null;

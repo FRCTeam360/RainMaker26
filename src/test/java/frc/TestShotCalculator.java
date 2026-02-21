@@ -9,6 +9,7 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import frc.robot.subsystems.Shooter.ShotCalculator;
+import frc.robot.subsystems.Shooter.ShotCalculator.RobotSpecificInfo;
 import frc.robot.subsystems.Shooter.ShotCalculator.ShootingParams;
 import org.junit.jupiter.api.Test;
 
@@ -18,14 +19,22 @@ public class TestShotCalculator {
     final InterpolatingDoubleTreeMap interpolatingTreeMapTestZero =
         new InterpolatingDoubleTreeMap();
     interpolatingTreeMapTestZero.put(1.0, 0.0);
+
+    RobotSpecificInfo robotSpecificInfo =
+        new RobotSpecificInfo(
+            interpolatingTreeMapTestZero,
+            interpolatingTreeMapTestZero,
+            interpolatingTreeMapTestZero,
+            new Transform2d(),
+            0.0,
+            5.0);
+
     ShotCalculator testShotCalculator =
         new ShotCalculator(
             // public Pose2d(double x, double y, Rotation2d rotation)
             () -> new Pose2d(1.0, 0.0, new Rotation2d()),
             () -> new Translation2d(),
-            interpolatingTreeMapTestZero,
-            interpolatingTreeMapTestZero,
-            new Transform2d());
+            robotSpecificInfo);
     ShootingParams cachedShootingParams = testShotCalculator.calculateShot();
 
     assertEquals(0.0, cachedShootingParams.hoodAngle());

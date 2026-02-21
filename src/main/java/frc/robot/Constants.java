@@ -79,6 +79,8 @@ public final class Constants {
         new InterpolatingDoubleTreeMap();
     public static final InterpolatingDoubleTreeMap launchFlywheelSpeedMap =
         new InterpolatingDoubleTreeMap();
+    public static final InterpolatingDoubleTreeMap timeOfFlightMap =
+        new InterpolatingDoubleTreeMap();
 
     static {
       shotHoodAngleMap.put(5.0, 20.0);

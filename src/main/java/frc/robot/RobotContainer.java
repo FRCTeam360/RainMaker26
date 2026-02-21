@@ -46,6 +46,7 @@ import frc.robot.subsystems.Shooter.Hood.HoodIOSim;
 import frc.robot.subsystems.Shooter.Hood.HoodIOWB;
 import frc.robot.subsystems.Shooter.ShooterConstants;
 import frc.robot.subsystems.Shooter.ShotCalculator;
+import frc.robot.subsystems.Shooter.ShotCalculator.RobotSpecificInfo;
 import frc.robot.subsystems.SuperStructure;
 import frc.robot.subsystems.SuperStructure.SuperStates;
 import frc.robot.subsystems.Vision.Vision;
@@ -90,6 +91,8 @@ public class RobotContainer {
 
   private static final double FLYWHEEL_KICKER_WARMUP_VELOCITY_RPM = 4000.0;
 
+  RobotSpecificInfo robotSpecificInfo;
+
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     switch (Constants.getRobotType()) {
@@ -126,6 +129,15 @@ public class RobotContainer {
         intake = new Intake(new IntakeIOWB());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOWB());
         // intakePivot = new IntakePivot(new IntakePivotIOPB());
+
+        robotSpecificInfo =
+            new RobotSpecificInfo(
+                Constants.WoodBotConstants.shotHoodAngleMap,
+                Constants.WoodBotConstants.launchFlywheelSpeedMap,
+                Constants.WoodBotConstants.timeOfFlightMap,
+                ShooterConstants.ROBOT_TO_SHOOTER,
+                0.0,
+                5.0);
         break;
       case PRACTICEBOT:
       default:
@@ -157,9 +169,7 @@ public class RobotContainer {
         new ShotCalculator(
             drivetrain::getPosition,
             () -> AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint.toTranslation2d()),
-            Constants.WoodBotConstants.shotHoodAngleMap,
-            Constants.WoodBotConstants.launchFlywheelSpeedMap,
-            ShooterConstants.ROBOT_TO_SHOOTER);
+            robotSpecificInfo);
     // Configure the trigger bindings
     // TODO: Re-enable superStructure construction and PathPlanner commands
     superStructure =
