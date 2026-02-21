@@ -4,10 +4,14 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.*;
+
 import com.ctre.phoenix6.CANBus;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.hal.HALUtil;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.LinearVelocity;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -21,6 +25,10 @@ public final class Constants {
   public static final AprilTagFieldLayout FIELD_LAYOUT =
       AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
   public static final double SPINUP_SHOOTING_FLYWHEEL_RPM = 3250.0;
+
+  public static final LinearVelocity maxSpeed = MetersPerSecond.of(4.69);
+
+  public static final AngularVelocity maxAngularVelocity = RevolutionsPerSecond.of(4.0);
 
   public static final int IMU_MODE_EXTERNAL_ONLY = 0;
 
