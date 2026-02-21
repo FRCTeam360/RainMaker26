@@ -22,8 +22,8 @@ import java.util.function.DoubleSupplier;
 public abstract class VisionIOLimelightBase implements VisionIO {
   private final NetworkTable table;
   private final String name;
-  private final DoubleSupplier gyroAngleSupplier;
-  private final DoubleSupplier gyroAngleRateSupplier;
+  protected final DoubleSupplier gyroAngleSupplier;
+  protected final DoubleSupplier gyroAngleRateSupplier;
 
   private final boolean acceptMeasurements;
 
@@ -59,10 +59,6 @@ public abstract class VisionIOLimelightBase implements VisionIO {
 
   @Override
   public void updateInputs(VisionIOInputs inputs) {
-    // Send robot orientation every frame so MegaTag2 and LL4 IMU stay in sync
-    LimelightHelpers.SetRobotOrientation(
-        name, gyroAngleSupplier.getAsDouble(), gyroAngleRateSupplier.getAsDouble(), 0, 0, 0, 0);
-
     // Assume that the pose hasn't been updated
     inputs.poseUpdated = false;
 

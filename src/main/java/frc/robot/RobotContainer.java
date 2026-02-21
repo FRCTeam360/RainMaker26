@@ -48,7 +48,7 @@ import frc.robot.subsystems.Shooter.ShotCalculator;
 import frc.robot.subsystems.SuperStructure;
 import frc.robot.subsystems.SuperStructure.SuperStates;
 import frc.robot.subsystems.Vision.Vision;
-import frc.robot.subsystems.Vision.VisionIOLimelight3;
+import frc.robot.subsystems.Vision.VisionIOLimelight3G;
 import frc.robot.subsystems.Vision.VisionIOPhotonSim;
 import java.util.Map;
 import java.util.Objects;
@@ -114,7 +114,7 @@ public class RobotContainer {
                 Map.ofEntries(
                     Map.entry(
                         Constants.WoodBotConstants.LIMELIGHT_3,
-                        new VisionIOLimelight3(
+                        new VisionIOLimelight3G(
                             Constants.WoodBotConstants.LIMELIGHT_3,
                             () -> drivetrain.getAngle(),
                             () -> drivetrain.getAngularRate(),
