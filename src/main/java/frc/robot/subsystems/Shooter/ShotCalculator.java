@@ -54,7 +54,7 @@ public class ShotCalculator {
     this.launchFlywheelSpeedMap = launchFlywheelSpeedMap;
   }
 
-  private ShootingParams shootingParams = null;
+  private ShootingParams cachedShootingParams = null;
 
   /**
    * Calculates and caches the shooting parameters for the current robot position. If parameters
@@ -63,10 +63,10 @@ public class ShotCalculator {
    * @return the {@link ShootingParams} containing drivebase angle, hood angle, and flywheel speed
    */
   public ShootingParams calculateShot() {
-    if (shootingParams != null) {
+    if (cachedShootingParams != null) {
       Logger.recordOutput("ShotCalculator/cached", true);
 
-      return shootingParams;
+      return cachedShootingParams;
     }
     Logger.recordOutput("ShotCalculator/cached", false);
     Pose2d shooterPosition = robotPoseSupplier.get().plus(ShooterConstants.ROBOT_TO_SHOOTER);
@@ -91,9 +91,9 @@ public class ShotCalculator {
     Logger.recordOutput("ShotCalculator/targetHoodAngle", hoodAngle);
     Logger.recordOutput("ShotCalculator/targetHeading", targetHeading);
 
-    shootingParams = new ShootingParams(targetHeading, hoodAngle, flywheelSpeed);
+    cachedShootingParams = new ShootingParams(targetHeading, hoodAngle, flywheelSpeed);
 
-    return shootingParams;
+    return cachedShootingParams;
   }
 
   /**
@@ -101,6 +101,6 @@ public class ShotCalculator {
    * #calculateShot()}.
    */
   public void clearShootingParams() {
-    shootingParams = null;
+    cachedShootingParams = null;
   }
 }
