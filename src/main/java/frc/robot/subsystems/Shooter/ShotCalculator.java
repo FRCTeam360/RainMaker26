@@ -22,8 +22,8 @@ public class ShotCalculator {
   private final InterpolatingDoubleTreeMap timeOfFlightMap;
   private final Transform2d robotToShooter;
 
-  private double MIN_DISTANCE_METERS;
-  private double MAX_DISTANCE_METERS;
+  private double minDistanceMeters;
+  private double maxDistanceMeters;
 
   /**
    * Holds the calculated shooting parameters for a given robot position.
@@ -39,8 +39,8 @@ public class ShotCalculator {
       InterpolatingDoubleTreeMap launchFlywheelSpeedMap,
       InterpolatingDoubleTreeMap timeOfFlightMap,
       Transform2d robotToShooter,
-      double MIN_DISTANCE_METERS, // should be 0.0 for hub
-      double MAX_DISTANCE_METERS /* should be 5.0 for hub */) {}
+      double minDistanceMeters, // should be 0.0 for hub
+      double maxDistanceMeters /* should be 5.0 for hub */) {}
 
   private ShootingParams latestParameters = null;
 
@@ -84,7 +84,7 @@ public class ShotCalculator {
 
     double distanceToTarget = target.getDistance(shooterPosition.getTranslation());
     distanceToTarget =
-        Math.max(MIN_DISTANCE_METERS, Math.min(MAX_DISTANCE_METERS, distanceToTarget));
+        Math.max(minDistanceMeters, Math.min(maxDistanceMeters, distanceToTarget));
 
     // Calculate heading toward hub, then rotate 180° because the shooter
     // is at the back of the robot - robot faces away from hub to shoot at it

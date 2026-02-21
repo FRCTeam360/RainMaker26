@@ -91,7 +91,7 @@ public class RobotContainer {
 
   private static final double FLYWHEEL_KICKER_WARMUP_VELOCITY_RPM = 4000.0;
 
-  RobotSpecificInfo robotSpecificInfo;
+  private RobotSpecificInfo robotSpecificInfo;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
