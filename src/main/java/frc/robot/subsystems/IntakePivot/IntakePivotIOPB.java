@@ -4,9 +4,6 @@
 
 package frc.robot.subsystems.IntakePivot;
 
-import static edu.wpi.first.units.Units.RPM;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
-
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
@@ -119,7 +116,7 @@ public class IntakePivotIOPB implements IntakePivotIO {
   public void updateInputs(IntakePivotIOInputs inputs) {
     inputs.position = Units.rotationsToDegrees(intakePivot.getPosition().getValueAsDouble());
     inputs.statorCurrent = intakePivot.getStatorCurrent().getValueAsDouble();
-    inputs.velocity = RotationsPerSecond.of(intakePivot.getVelocity().getValueAsDouble()).in(RPM);
+    inputs.velocity = Units.rotationsToDegrees(intakePivot.getVelocity().getValueAsDouble());
     inputs.voltage = intakePivot.getMotorVoltage().getValueAsDouble();
     inputs.supplyCurrent = intakePivot.getSupplyCurrent().getValueAsDouble();
     inputs.brakeMode = neutralMode == NeutralModeValue.Brake;
