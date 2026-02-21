@@ -50,7 +50,7 @@ public class IntakeIOSim implements IntakeIO {
   private final FlywheelSim intakeSim = new FlywheelSim(plant, gearbox, gearRatio);
 
   public IntakeIOSim() {
-    // Configure SparkMax with PID and current limits
+    // Configure motor controller with PID and current limits
     configureMotor();
 
     // Initialize everything to 0
