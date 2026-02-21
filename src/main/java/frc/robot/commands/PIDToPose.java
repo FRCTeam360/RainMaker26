@@ -62,10 +62,9 @@ public class PIDToPose extends Command {
     final var poseXState = drivetrain.getPoseXControllerState();
     final var poseYState = drivetrain.getPoseYControllerState();
 
-    Logger.recordOutput(
-        LOGGING_PREFIX + "isAtRotationSetpoint", headingState.isAtRotationSetpoint());
-    Logger.recordOutput(LOGGING_PREFIX + "isAtPoseXSetpoint", poseXState.isAtRotationSetpoint());
-    Logger.recordOutput(LOGGING_PREFIX + "isAtPoseYSetpoint", poseYState.isAtRotationSetpoint());
+    Logger.recordOutput(LOGGING_PREFIX + "isAtRotationSetpoint", headingState.isAtSetpoint());
+    Logger.recordOutput(LOGGING_PREFIX + "isAtPoseXSetpoint", poseXState.isAtSetpoint());
+    Logger.recordOutput(LOGGING_PREFIX + "isAtPoseYSetpoint", poseYState.isAtSetpoint());
 
     Logger.recordOutput(LOGGING_PREFIX + "headingPositionError", headingState.positionError());
     Logger.recordOutput(LOGGING_PREFIX + "poseXPositionError", poseXState.positionError());
@@ -75,9 +74,7 @@ public class PIDToPose extends Command {
     Logger.recordOutput(LOGGING_PREFIX + "poseXVelocityError", poseXState.velocityError());
     Logger.recordOutput(LOGGING_PREFIX + "poseYVelocityError", poseYState.velocityError());
 
-    return headingState.isAtRotationSetpoint()
-        && poseXState.isAtRotationSetpoint()
-        && poseYState.isAtRotationSetpoint();
+    return headingState.isAtSetpoint() && poseXState.isAtSetpoint() && poseYState.isAtSetpoint();
   }
 
   public static Command getCommand(CommandSwerveDrivetrain drivetrain, Pose2d setpointPose) {

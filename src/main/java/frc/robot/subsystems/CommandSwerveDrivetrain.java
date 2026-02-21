@@ -51,8 +51,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   private PhoenixPIDController poseXController;
   private PhoenixPIDController poseYController;
 
-  public record ControllerState(
-      boolean isAtRotationSetpoint, double positionError, double velocityError) {}
+  public record ControllerState(boolean isAtSetpoint, double positionError, double velocityError) {}
 
   private static final double POSE_KP = 11.0;
   private static final double POSE_KI = 0.0;
