@@ -12,6 +12,7 @@ import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -19,6 +20,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.commands.PIDToPose;
 import frc.robot.generated.WoodBotDrivetrain;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKicker;
@@ -240,7 +242,13 @@ public class RobotContainer {
       testCont1.b().whileTrue(flywheelKicker.setDutyCycleCommand(() -> 0.5));
     }
     if (Objects.nonNull(hood)) {
-      testCont1.x().whileTrue(hood.setDutyCycleCommand(() -> 0.5));
+      // The commented code is correct, and should be restored when sim testing is complete
+      // testCont1.x().whileTrue(hood.setDutyCycleCommand(() -> 0.5));
+      // Added code with the sole purpose of testing sim
+      Rotation2d testRotation = new Rotation2d();
+      Pose2d test2dPose = new Pose2d(2.0, 2.0, testRotation);
+      PIDToPose testPIDToPose = new PIDToPose(drivetrain, test2dPose);
+      testCont1.x().whileTrue(testPIDToPose);
     }
     if (Objects.nonNull(indexer)) {
       testCont1.y().whileTrue(indexer.setDutyCycleCommand(() -> 0.5));

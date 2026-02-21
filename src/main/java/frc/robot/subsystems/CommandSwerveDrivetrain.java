@@ -8,7 +8,9 @@ import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
+import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentricFacingAngle;
 import com.ctre.phoenix6.swerve.SwerveRequest.ForwardPerspectiveValue;
+import com.ctre.phoenix6.swerve.utility.PhoenixPIDController;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
@@ -44,11 +46,24 @@ import org.littletonrobotics.junction.Logger;
  * https://v6.docs.ctr-electronics.com/en/stable/docs/tuner/tuner-swerve/index.html
  */
 public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Subsystem {
+  // The following controllers are essential for the PIDToPose methods
+  private PhoenixPIDController headingController;
+  private PhoenixPIDController poseXController;
+  private PhoenixPIDController poseYController;
+
+  private static final double POSE_KP = 11.0;
+  private static final double POSE_KI = 0.0;
+  private static final double POSE_KD = 0.0;
+
   private static final double kSimLoopPeriod = 0.004; // 4 ms
   private Notifier m_simNotifier = null;
   private double m_lastSimTime;
   private static final String SUBSYSTEM_NAME = "Swerve/";
   private final SwerveRequest xOutReq = new SwerveRequest.SwerveDriveBrake();
+
+  // Deadband constants for the initialization of request (line 255)
+  private static final double POSITION_DEADBAND_MPS = 0.025;
+  private static final double ROTATIONAL_DEADBAND_RADS_PER_SEC = 0.021;
 
   // Keep track of when vision measurements are added for logging context
   private boolean hasVisionMeasurements = false;
@@ -236,6 +251,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   /* The SysId routine to test */
   private SysIdRoutine m_sysIdRoutineToApply = m_sysIdRoutineTranslation;
 
+  // The following initializes the request used in the driveToPose method in this file
+  private final FieldCentricFacingAngle request =
+      new SwerveRequest.FieldCentricFacingAngle().withDeadband(POSITION_DEADBAND_MPS);
+
   /**
    * Constructs a CTRE SwerveDrivetrain using the specified constants.
    *
@@ -255,6 +274,19 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     m_faceHubRequest.HeadingController.setIZone(HEADING_I_ZONE);
     m_faceHubRequest.HeadingController.setTolerance(HEADING_TOLERANCE_RAD);
     m_faceHubRequest.ForwardPerspective = ForwardPerspectiveValue.BlueAlliance;
+    // The following code (lines 277-289) - if removed - will not cause the file to error, however:
+    // the code is necessary to give value to the request and to the controllers
+    headingController = new PhoenixPIDController(HEADING_KP, HEADING_KI, HEADING_KD);
+    poseXController = new PhoenixPIDController(POSE_KP, POSE_KI, POSE_KD);
+    poseYController = new PhoenixPIDController(POSE_KP, POSE_KI, POSE_KD);
+    headingController.enableContinuousInput(-Math.PI, Math.PI);
+    headingController.setTolerance(0.02, 0.05); // 1 degree position, adjust as needed
+    poseXController.setTolerance(0.05); // 5cm position tolerance
+    poseYController.setTolerance(0.05);
+    request.HeadingController = headingController;
+    request.withRotationalDeadband(ROTATIONAL_DEADBAND_RADS_PER_SEC);
+    request.ForwardPerspective = ForwardPerspectiveValue.BlueAlliance;
+    request.withDriveRequestType(DriveRequestType.Velocity);
     if (Utils.isSimulation()) {
       startSimThread();
     }
@@ -482,6 +514,16 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     return this.getStateCopy().Speeds;
   }
 
+  // This method is essential for PIDToPose to function
+  public void driveToPose(Pose2d setpointPose) {
+    Pose2d currentPose = getPose();
+    double timestamp = getStateCopy().Timestamp;
+    double x = poseXController.calculate(currentPose.getX(), setpointPose.getX(), timestamp);
+    double y = poseYController.calculate(currentPose.getY(), setpointPose.getY(), timestamp);
+    request.withVelocityX(x).withVelocityY(y).withTargetDirection(setpointPose.getRotation());
+    this.setControl(request);
+  }
+
   /**
    * Return the pose at a given timestamp, if the buffer is not empty.
    *
@@ -491,5 +533,58 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   @Override
   public Optional<Pose2d> samplePoseAt(double timestampSeconds) {
     return super.samplePoseAt(Utils.fpgaToCurrentTime(timestampSeconds));
+  }
+
+  // The following getter methods (505-556) are essential for the various PIDToPose methods
+  public Pose2d getPose() {
+    return this.getStateCopy().Pose;
+  }
+
+  public boolean isAtRotationSetpoint() {
+    return headingController.atSetpoint();
+  }
+
+  public double getHeadingControllerSetpoint() {
+    return headingController.getSetpoint();
+  }
+
+  public double getHeadingControllerPositionError() {
+    return headingController.getPositionError();
+  }
+
+  public double getHeadingControllerVelocityError() {
+    return headingController.getVelocityError();
+  }
+
+  public double getPoseXSetpoint() {
+    return poseXController.getSetpoint();
+  }
+
+  public boolean isAtPoseXSetpoint() {
+    return poseXController.atSetpoint();
+  }
+
+  public double getPoseXControllerPositionError() {
+    return poseXController.getPositionError();
+  }
+
+  public double getPoseXControllerVelocityError() {
+    return poseXController.getVelocityError();
+  }
+
+  public double getPoseYSetpoint() {
+    return poseYController.getSetpoint();
+  }
+
+  public boolean isAtPoseYSetpoint() {
+    return poseYController.atSetpoint();
+  }
+
+  public double getPoseYControllerPositionError() {
+    return poseYController.getPositionError();
+  }
+
+  public double getPoseYControllerVelocityError() {
+    return poseYController.getVelocityError();
   }
 }
