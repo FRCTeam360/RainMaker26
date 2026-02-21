@@ -12,7 +12,8 @@ import org.littletonrobotics.junction.Logger;
 public class Flywheel extends SubsystemBase {
   private final FlywheelIO io;
   private final FlywheelIOInputsAutoLogged inputs = new FlywheelIOInputsAutoLogged();
-  private DoubleSupplier velocitySupplier = () -> 0.0;
+  private DoubleSupplier shootVelocitySupplier = () -> 0.0;
+  private DoubleSupplier passVelocitySupplier = () -> 0.0;
 
   public enum FlywheelStates {
     OFF,
@@ -29,8 +30,8 @@ public class Flywheel extends SubsystemBase {
    *
    * @param velocitySupplier a DoubleSupplier providing the desired flywheel velocity in RPM
    */
-  public void setVelocitySupplier(DoubleSupplier velocitySupplier) {
-    this.velocitySupplier = velocitySupplier;
+  public void setShootVelocitySupplier(DoubleSupplier velocitySupplier) {
+    this.shootVelocitySupplier = velocitySupplier;
   }
 
   public FlywheelStates getState() {
@@ -77,7 +78,7 @@ public class Flywheel extends SubsystemBase {
   private void applyState() {
     switch (currentState) {
       case SHOOTING:
-        setVelocity(velocitySupplier.getAsDouble());
+        setVelocity(shootVelocitySupplier.getAsDouble());
         break;
       case OFF:
       default:
