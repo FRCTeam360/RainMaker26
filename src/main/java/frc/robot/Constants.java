@@ -4,10 +4,14 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.*;
+
 import com.ctre.phoenix6.CANBus;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.hal.HALUtil;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.LinearVelocity;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -68,6 +72,18 @@ public final class Constants {
 
     // === CANBUS ===
     public static final CANBus CANBUS = new CANBus("Default Name");
+
+    // === DEFENSE ===
+    public static final LinearVelocity DEFENSE_MAX_VELOCITY_METERS_PER_SECOND =
+        MetersPerSecond.of(4.5);
+    // ^ In meters/second
+    public static final AngularVelocity DEFENSE_MAX_ANGULAR_VELOCITY =
+        RevolutionsPerSecond.of(12.0);
+    // ^ In radians/second
+
+    // === MAXIMUMS ===
+    public static final LinearVelocity maxSpeed = MetersPerSecond.of(4.69);
+    public static final AngularVelocity maxAngularVelocity = RevolutionsPerSecond.of(4.0);
   }
 
   public static class PracticeBotConstants {
@@ -92,6 +108,9 @@ public final class Constants {
     public static final String LIMELIGHT = "limelight";
 
     public static final CANBus CANBUS = new CANBus("Default Name");
+
+    public static final LinearVelocity maxSpeed = MetersPerSecond.of(4.69);
+    public static final AngularVelocity maxAngularVelocity = RevolutionsPerSecond.of(4.0);
   }
 
   public static class SimulationConstants {
@@ -110,6 +129,10 @@ public final class Constants {
 
     // === HOOD ===
     public static final int HOOD_MOTOR = 34;
+
+    // === MAXIMUMS ===
+    public static final LinearVelocity maxSpeed = MetersPerSecond.of(4.69);
+    public static final AngularVelocity maxAngularVelocity = RevolutionsPerSecond.of(4.0);
   }
 
   public static class OperatorConstants {

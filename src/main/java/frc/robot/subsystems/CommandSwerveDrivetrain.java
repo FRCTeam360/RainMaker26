@@ -27,6 +27,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.Constants.WoodBotConstants;
 import frc.robot.generated.WoodBotDrivetrain.TunerSwerveDrivetrain;
 import frc.robot.subsystems.Vision.VisionMeasurement;
 import frc.robot.utils.FieldVisualizer;
@@ -44,6 +45,8 @@ import org.littletonrobotics.junction.Logger;
  * https://v6.docs.ctr-electronics.com/en/stable/docs/tuner/tuner-swerve/index.html
  */
 public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Subsystem {
+  public static LinearVelocity maxSpeed = WoodBotConstants.maxSpeed;
+  public static AngularVelocity maxAngularVelocity = WoodBotConstants.maxAngularVelocity;
   private static final double kSimLoopPeriod = 0.004; // 4 ms
   private Notifier m_simNotifier = null;
   private double m_lastSimTime;
@@ -72,9 +75,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   private final SwerveRequest.SysIdSwerveRotation m_rotationCharacterization =
       new SwerveRequest.SysIdSwerveRotation();
   private final DriveRequestType m_driveRequestType = DriveRequestType.Velocity;
-  // TODO refactor into a constants file
-  public static final LinearVelocity maxSpeed = MetersPerSecond.of(4.69);
-  public static final AngularVelocity maxAngularVelocity = RevolutionsPerSecond.of(4.0);
 
   // Heading controller PID gains (from example code)
   private static final double HEADING_KP = 6.0;
@@ -85,7 +85,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   // Field-centric facing angle request for hub tracking
   private final SwerveRequest.FieldCentricFacingAngle m_faceHubRequest =
       new SwerveRequest.FieldCentricFacingAngle()
-          .withDeadband(maxSpeed.in(MetersPerSecond) * 0.01)
+          .withDeadband(WoodBotConstants.maxSpeed.in(MetersPerSecond) * 0.01)
           .withRotationalDeadband(0.0)
           .withDriveRequestType(m_driveRequestType); // No deadband for rotation when facing point
 
@@ -93,23 +93,23 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
       CommandXboxController driveCont) { // field oriented drive command!
     SwerveRequest.FieldCentric drive =
         new SwerveRequest.FieldCentric() // creates a fieldcentric drive
-            .withDeadband(maxSpeed.in(MetersPerSecond) * 0.01)
-            .withRotationalDeadband(maxAngularVelocity.in(RadiansPerSecond) * 0.01)
+            .withDeadband(WoodBotConstants.maxSpeed.in(MetersPerSecond) * 0.01)
+            .withRotationalDeadband(WoodBotConstants.maxAngularVelocity.in(RadiansPerSecond) * 0.01)
             .withDriveRequestType(m_driveRequestType);
     return this.applyRequest(
         () ->
             drive
                 .withVelocityX(
                     Math.pow(driveCont.getLeftY(), 3)
-                        * maxSpeed.in(MetersPerSecond)
+                        * WoodBotConstants.maxSpeed.in(MetersPerSecond)
                         * -1.0) // Drive forward with negative Y (forward)
                 .withVelocityY(
                     Math.pow(driveCont.getLeftX(), 3)
-                        * maxSpeed.in(MetersPerSecond)
+                        * WoodBotConstants.maxSpeed.in(MetersPerSecond)
                         * -1.0) // Drive left with negative X (left)
                 .withRotationalRate(
                     Math.pow(driveCont.getRightX(), 2)
-                        * (maxAngularVelocity.in(RadiansPerSecond) / 2.0)
+                        * (WoodBotConstants.maxAngularVelocity.in(RadiansPerSecond) / 2.0)
                         * -Math.signum(driveCont.getRightX())) // Drive
         // counterclockwise
         // with negative X
@@ -119,26 +119,31 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
   private final SwerveRequest.FieldCentric FIELD_CENTRIC_DRIVE =
       new SwerveRequest.FieldCentric()
-          .withDeadband(maxSpeed.in(MetersPerSecond) * 0.01)
-          .withRotationalDeadband(maxAngularVelocity.in(RadiansPerSecond) * 0.01)
+          .withDeadband(WoodBotConstants.maxSpeed.in(MetersPerSecond) * 0.01)
+          .withRotationalDeadband(WoodBotConstants.maxAngularVelocity.in(RadiansPerSecond) * 0.01)
           .withDriveRequestType(m_driveRequestType);
 
-  public void fieldOrientedDrive(CommandXboxController driveCont) {
+  public void fieldOrientedDrive(CommandXboxController driveCont, boolean isDefenseMode) {
+    double defenseModeRotationScaler = (isDefenseMode ? 2.0 : 1.0);
+    double defenseModeTranslationScaler = (isDefenseMode ? 0.5 : 1.0);
     FIELD_CENTRIC_DRIVE.ForwardPerspective = ForwardPerspectiveValue.OperatorPerspective;
     this.setControl(
         FIELD_CENTRIC_DRIVE
             .withVelocityX(
                 Math.pow(driveCont.getLeftY(), 3)
-                    * maxSpeed.in(MetersPerSecond)
-                    * -1.0) // Drive forward with negative Y (forward)
+                    * WoodBotConstants.maxSpeed.in(MetersPerSecond)
+                    * -1.0 
+                    * defenseModeTranslationScaler) // Drive forward with negative Y (forward)
             .withVelocityY(
                 Math.pow(driveCont.getLeftX(), 3)
-                    * maxSpeed.in(MetersPerSecond)
-                    * -1.0) // Drive left with negative X (left)
+                    * WoodBotConstants.maxSpeed.in(MetersPerSecond)
+                    * -1.0 
+                    * defenseModeTranslationScaler) // Drive left with negative X (left)
             .withRotationalRate(
                 Math.pow(driveCont.getRightX(), 2)
-                    * (maxAngularVelocity.in(RadiansPerSecond) / 2.0)
-                    * -Math.signum(driveCont.getRightX())) // Drive
+                    * (WoodBotConstants.maxAngularVelocity.in(RadiansPerSecond) / 2.0)
+                    * -Math.signum(driveCont.getRightX())
+                    * defenseModeRotationScaler) // Drive
         // counterclockwise
         // with negative X
         // (left)
@@ -193,7 +198,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                     ? velocityY
                     : -velocityY)
             .withTargetDirection(heading)
-            .withDeadband(maxSpeed.in(MetersPerSecond) * 0.01));
+            .withDeadband(WoodBotConstants.maxSpeed.in(MetersPerSecond) * 0.01));
   }
 
   /**
@@ -206,15 +211,21 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   public Command faceAngleWhileDrivingCommand(
       CommandXboxController driveCont, Supplier<Rotation2d> headingSupplier) {
     return faceAngleWhileDrivingCommand(
-        () -> Math.pow(driveCont.getLeftY(), 3) * maxSpeed.in(MetersPerSecond) * -1.0,
-        () -> Math.pow(driveCont.getLeftX(), 3) * maxSpeed.in(MetersPerSecond) * -1.0,
+        () ->
+            Math.pow(driveCont.getLeftY(), 3)
+                * WoodBotConstants.maxSpeed.in(MetersPerSecond)
+                * -1.0,
+        () ->
+            Math.pow(driveCont.getLeftX(), 3)
+                * WoodBotConstants.maxSpeed.in(MetersPerSecond)
+                * -1.0,
         headingSupplier);
   }
 
   public void faceAngleWhileDriving(CommandXboxController driveCont, Rotation2d heading) {
     faceAngleWhileDriving(
-        Math.pow(driveCont.getLeftY(), 3) * maxSpeed.in(MetersPerSecond) * -1.0,
-        Math.pow(driveCont.getLeftX(), 3) * maxSpeed.in(MetersPerSecond) * -1.0,
+        Math.pow(driveCont.getLeftY(), 3) * WoodBotConstants.maxSpeed.in(MetersPerSecond) * -1.0,
+        Math.pow(driveCont.getLeftX(), 3) * WoodBotConstants.maxSpeed.in(MetersPerSecond) * -1.0,
         heading);
   }
 

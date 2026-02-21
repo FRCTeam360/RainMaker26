@@ -12,12 +12,15 @@ import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Constants.WoodBotConstants;
 import frc.robot.generated.WoodBotDrivetrain;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKicker;
@@ -238,6 +241,48 @@ public class RobotContainer {
       testCont1.rightBumper().whileTrue(intakePivot.setDutyCycleCommand(() -> 0.5));
     }
   }
+/* 
+  private void setDefenseMode(boolean enabled) {
+    // Updates drivetrain limits for defense mode using values from Constants
+    if (Objects.nonNull(drivetrain)) {
+      if (enabled == true) {
+        // Sets defense limits
+        drivetrain.setMaxVelocity(
+            Constants.WoodBotConstants.DEFENSE_MAX_VELOCITY_METERS_PER_SECOND);
+        drivetrain.setMaxAngularVelocity(Constants.WoodBotConstants.DEFENSE_MAX_ANGULAR_VELOCITY);
+      } else {
+        // Restores to defaults
+        LinearVelocity defaultVelocity = WoodBotConstants.maxSpeed;
+        AngularVelocity defaultAngularVelocity = WoodBotConstants.maxAngularVelocity;
+        drivetrain.setMaxVelocity(defaultVelocity);
+        drivetrain.setMaxAngularVelocity(defaultAngularVelocity);
+      }
+    }
+
+    // Stows mechanisms
+    if (Objects.nonNull(superStructure)) {
+      superStructure.setWantedSuperState(SuperStates.IDLE);
+    }
+    if (Objects.nonNull(flywheel)) {
+      flywheel.stop();
+    }
+    if (Objects.nonNull(hood)) {
+      hood.stop();
+    }
+    if (Objects.nonNull(intake)) {
+      intake.stop();
+    }
+    if (Objects.nonNull(intakePivot)) {
+      intakePivot.stop();
+    }
+    if (Objects.nonNull(indexer)) {
+      indexer.stop();
+    }
+    if (Objects.nonNull(flywheelKicker)) {
+      flywheelKicker.stop();
+    }
+  }
+    */
 
   private void configureBindings() {
     // Only bind commands if the required subsystems/factories exist
