@@ -8,6 +8,7 @@ import com.ctre.phoenix6.CANBus;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.hal.HALUtil;
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -72,6 +73,27 @@ public final class Constants {
 
     // === CANBUS ===
     public static final CANBus CANBUS = new CANBus("Default Name");
+
+    // === SHOT CALCULATOR ===
+    public static final InterpolatingDoubleTreeMap shotHoodAngleMap =
+        new InterpolatingDoubleTreeMap();
+    public static final InterpolatingDoubleTreeMap launchFlywheelSpeedMap =
+        new InterpolatingDoubleTreeMap();
+
+    static {
+      shotHoodAngleMap.put(5.0, 20.0);
+      shotHoodAngleMap.put(4.0, 18.0);
+      shotHoodAngleMap.put(3.0, 16.0);
+      shotHoodAngleMap.put(2.0, 11.0); // THIS IS GOOD
+      shotHoodAngleMap.put(1.0, 8.0); // THIS IS GOOD
+      shotHoodAngleMap.put(0.0, 6.0);
+
+      launchFlywheelSpeedMap.put(5.0, 3750.0);
+      launchFlywheelSpeedMap.put(4.0, 3750.0);
+      launchFlywheelSpeedMap.put(3.0, 3375.0);
+      launchFlywheelSpeedMap.put(2.0, 3000.0); // THIS IS GOOD
+      launchFlywheelSpeedMap.put(0.0, 2750.0);
+    }
   }
 
   public static class PracticeBotConstants {
