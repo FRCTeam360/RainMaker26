@@ -11,11 +11,12 @@ import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import frc.robot.subsystems.Shooter.ShotCalculator;
 import frc.robot.subsystems.Shooter.ShotCalculator.RobotSpecificInfo;
 import frc.robot.subsystems.Shooter.ShotCalculator.ShootingParams;
+import java.util.function.Supplier;
 import org.junit.jupiter.api.Test;
 
 public class TestShotCalculator {
   @Test
-  void shotCalculatorTest() {
+  void shotCalculatorTestZero() {
     final InterpolatingDoubleTreeMap interpolatingTreeMapTestZero =
         new InterpolatingDoubleTreeMap();
     interpolatingTreeMapTestZero.put(1.0, 0.0);
@@ -41,14 +42,37 @@ public class TestShotCalculator {
 
     assertEquals(0.0, cachedShootingParams.flywheelSpeed());
 
-    System.out.println(cachedShootingParams.targetHeading().getDegrees());
-    System.out.println(new Rotation2d().getDegrees());
     assertTrue(cachedShootingParams.targetHeading().equals(new Rotation2d()));
+  }
 
-    ShootingParams cachedShootingParams2 = testShotCalculator.calculateShot();
+  @Test
+  void shotCalculatorTestCache() {
+    final InterpolatingDoubleTreeMap interpolatingTreeMapTest1 = new InterpolatingDoubleTreeMap();
+    final InterpolatingDoubleTreeMap interpolatingTreeMapTest2 = new InterpolatingDoubleTreeMap();
+    final InterpolatingDoubleTreeMap interpolatingTreeMapTest3 = new InterpolatingDoubleTreeMap();
+    interpolatingTreeMapTest1.put(1.0, 0.0);
+    interpolatingTreeMapTest2.put(3.5, 2.0);
+    interpolatingTreeMapTest3.put(2.3, 4.25);
 
-    assertEquals(0.0, cachedShootingParams2.hoodAngle());
-    assertEquals(0.0, cachedShootingParams2.flywheelSpeed());
-    assertTrue(cachedShootingParams2.targetHeading().equals(new Rotation2d()));
+    RobotSpecificInfo robotSpecificInfo =
+        new RobotSpecificInfo(
+            interpolatingTreeMapTest1,
+            interpolatingTreeMapTest2,
+            interpolatingTreeMapTest3,
+            new Transform2d(),
+            0.0,
+            5.0);
+    Supplier<Pose2d> testPose = () -> new Pose2d(1.0, 0.0, new Rotation2d());
+    ShotCalculator testShotCalculator =
+        new ShotCalculator(
+            // public Pose2d(double x, double y, Rotation2d rotation)
+            testPose, () -> new Translation2d(), robotSpecificInfo);
+    ShootingParams cachedShootingParams = testShotCalculator.calculateShot();
+
+    testPose = () -> (new Pose2d(430987523953.984213, 9832572384.3249874, new Rotation2d()));
+
+    ShootingParams cashedShootingParams2 = testShotCalculator.calculateShot();
+
+    assertEquals(cachedShootingParams, cashedShootingParams2);
   }
 }
