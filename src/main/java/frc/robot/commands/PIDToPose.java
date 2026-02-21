@@ -9,7 +9,7 @@ import org.littletonrobotics.junction.Logger;
 public class PIDToPose extends Command {
   private final CommandSwerveDrivetrain drivetrain;
   private final Pose2d setpointPose;
-  private final String LOGGING_PREFIX = "PIDToPose: ";
+  private static final String LOGGING_PREFIX = "PIDToPose: ";
 
   /** Creates a new PIDToPose. */
   public PIDToPose(CommandSwerveDrivetrain drivetrain, Pose2d setpointPose) {

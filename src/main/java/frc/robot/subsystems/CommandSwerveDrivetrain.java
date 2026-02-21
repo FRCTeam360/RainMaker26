@@ -315,7 +315,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     poseXController.setTolerance(0.05); // 5cm position tolerance
     poseYController.setTolerance(0.05);
     request.HeadingController = headingController;
-    request.withDeadband(POSITION_DEADBAND_MPS);
     request.withRotationalDeadband(ROTATIONAL_DEADBAND_RADS_PER_SEC);
     request.ForwardPerspective = ForwardPerspectiveValue.BlueAlliance;
     request.withDriveRequestType(DriveRequestType.Velocity);
@@ -511,12 +510,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   }
 
   /**
-   * Returns the current estimated pose of the robot on the field.
-   *
-   * @return the current {@link Pose2d} of the robot
-   */
-
-  /**
    * Returns the current chassis speeds of the robot.
    *
    * @return the current {@link ChassisSpeeds} of the robot
@@ -536,6 +529,11 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     return super.samplePoseAt(Utils.fpgaToCurrentTime(timestampSeconds));
   }
 
+  /**
+   * Returns the current estimated pose of the robot on the field.
+   *
+   * @return the current {@link Pose2d} of the robot
+   */
   public Pose2d getPose() {
     return this.getStateCopy().Pose;
   }
