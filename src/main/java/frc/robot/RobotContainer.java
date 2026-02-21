@@ -44,6 +44,7 @@ import frc.robot.subsystems.Shooter.Hood.Hood;
 import frc.robot.subsystems.Shooter.Hood.HoodIOPB;
 import frc.robot.subsystems.Shooter.Hood.HoodIOSim;
 import frc.robot.subsystems.Shooter.Hood.HoodIOWB;
+import frc.robot.subsystems.Shooter.ShooterConstants;
 import frc.robot.subsystems.Shooter.ShotCalculator;
 import frc.robot.subsystems.SuperStructure;
 import frc.robot.subsystems.SuperStructure.SuperStates;
@@ -157,7 +158,8 @@ public class RobotContainer {
             drivetrain::getPosition,
             () -> AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint.toTranslation2d()),
             Constants.WoodBotConstants.shotHoodAngleMap,
-            Constants.WoodBotConstants.launchFlywheelSpeedMap);
+            Constants.WoodBotConstants.launchFlywheelSpeedMap,
+            ShooterConstants.ROBOT_TO_SHOOTER);
     // Configure the trigger bindings
     // TODO: Re-enable superStructure construction and PathPlanner commands
     superStructure =

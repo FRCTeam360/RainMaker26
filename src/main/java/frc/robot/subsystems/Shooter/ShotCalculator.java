@@ -2,6 +2,7 @@ package frc.robot.subsystems.Shooter;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import frc.robot.utils.FieldConstants;
@@ -18,6 +19,7 @@ public class ShotCalculator {
   private final Supplier<Translation2d> targetSupplier;
   private final InterpolatingDoubleTreeMap shotHoodAngleMap;
   private final InterpolatingDoubleTreeMap launchFlywheelSpeedMap;
+  private final Transform2d robotToShooter;
 
   private static final InterpolatingDoubleTreeMap timeOfFlightMap =
       new InterpolatingDoubleTreeMap();
@@ -47,11 +49,13 @@ public class ShotCalculator {
       Supplier<Translation2d>
           targetSupplier, // AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint.toTranslation2d());
       InterpolatingDoubleTreeMap shotHoodAngleMap,
-      InterpolatingDoubleTreeMap launchFlywheelSpeedMap) {
+      InterpolatingDoubleTreeMap launchFlywheelSpeedMap,
+      Transform2d robotToShooter) {
     this.robotPoseSupplier = robotPoseSupplier;
     this.targetSupplier = targetSupplier;
     this.shotHoodAngleMap = shotHoodAngleMap;
     this.launchFlywheelSpeedMap = launchFlywheelSpeedMap;
+    this.robotToShooter = robotToShooter;
   }
 
   private ShootingParams cachedShootingParams = null;
@@ -69,7 +73,7 @@ public class ShotCalculator {
       return cachedShootingParams;
     }
     Logger.recordOutput("ShotCalculator/cached", false);
-    Pose2d shooterPosition = robotPoseSupplier.get().plus(ShooterConstants.ROBOT_TO_SHOOTER);
+    Pose2d shooterPosition = robotPoseSupplier.get().plus(robotToShooter);
 
     Translation2d target = targetSupplier.get();
 
