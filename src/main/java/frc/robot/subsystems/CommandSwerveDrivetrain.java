@@ -29,7 +29,6 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.generated.WoodBotDrivetrain.TunerSwerveDrivetrain;
 import frc.robot.subsystems.Vision.VisionMeasurement;
-import frc.robot.utils.FieldVisualizer;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.DoubleSupplier;
@@ -400,9 +399,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     Logger.recordOutput(SUBSYSTEM_NAME + "CurrentState", this.getStateCopy().ModuleStates);
     Logger.recordOutput(SUBSYSTEM_NAME + "TargetState", this.getStateCopy().ModuleTargets);
     Logger.recordOutput(SUBSYSTEM_NAME + "Using Vision", hasVisionMeasurements);
-
-    // Update field visualizations (hub points, line from robot to hub, etc.)
-    FieldVisualizer.update(this.getStateCopy().Pose);
 
     // Log whether vision measurements have been applied (useful for analysis)
     /*
