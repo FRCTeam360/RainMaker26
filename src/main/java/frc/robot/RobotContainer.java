@@ -15,26 +15,33 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.generated.WoodBotDrivetrain;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKicker;
+import frc.robot.subsystems.FlywheelKicker.FlywheelKickerIOPB;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKickerIOSim;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKickerIOWB;
 import frc.robot.subsystems.Indexer.Indexer;
+import frc.robot.subsystems.Indexer.IndexerIOPB;
 import frc.robot.subsystems.Indexer.IndexerIOSim;
 import frc.robot.subsystems.Indexer.IndexerIOWB;
 import frc.robot.subsystems.Intake.Intake;
+import frc.robot.subsystems.Intake.IntakeIOPB;
 import frc.robot.subsystems.Intake.IntakeIOSim;
 import frc.robot.subsystems.Intake.IntakeIOWB;
 import frc.robot.subsystems.IntakePivot.IntakePivot;
+import frc.robot.subsystems.IntakePivot.IntakePivotIOPB;
 import frc.robot.subsystems.IntakePivot.IntakePivotIOSim;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel;
+import frc.robot.subsystems.Shooter.Flywheel.FlywheelIOPB;
 import frc.robot.subsystems.Shooter.Flywheel.FlywheelIOSim;
 import frc.robot.subsystems.Shooter.Flywheel.FlywheelIOWB;
 import frc.robot.subsystems.Shooter.Hood.Hood;
+import frc.robot.subsystems.Shooter.Hood.HoodIOPB;
 import frc.robot.subsystems.Shooter.Hood.HoodIOSim;
 import frc.robot.subsystems.Shooter.Hood.HoodIOWB;
 import frc.robot.subsystems.Shooter.ShotCalculator;
@@ -99,7 +106,6 @@ public class RobotContainer {
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOSim());
         break;
       case WOODBOT:
-      default:
         drivetrain = WoodBotDrivetrain.createDrivetrain();
         logger = new Telemetry(WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
         flywheel = new Flywheel(new FlywheelIOWB());
@@ -115,18 +121,36 @@ public class RobotContainer {
                             () -> drivetrain.getAngle(),
                             () -> drivetrain.getAngularRate(),
                             true,
-                            false)),
-                    Map.entry(
-                        Constants.WoodBotConstants.LIMELIGHT_4,
-                        new VisionIOLimelight(
-                            Constants.WoodBotConstants.LIMELIGHT_4,
-                            () -> drivetrain.getAngle(),
-                            () -> drivetrain.getAngularRate(),
-                            true,
-                            true))));
+                            false))));
         intake = new Intake(new IntakeIOWB());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOWB());
         // intakePivot = new IntakePivot(new IntakePivotIOPB());
+        break;
+      case PRACTICEBOT:
+      default:
+        drivetrain =
+            WoodBotDrivetrain
+                .createDrivetrain(); // FIXME, CHANGE ONCE PRACTICE BOT DRIVETRAIN IS MADE
+        logger = new Telemetry(WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
+        flywheel = new Flywheel(new FlywheelIOPB());
+        hood = new Hood(new HoodIOPB());
+        indexer = new Indexer(new IndexerIOPB());
+        vision = // TODO ADD OTHER LIMELIGHTS
+            new Vision(
+                Map.ofEntries(
+                    Map.entry(
+                        Constants.PracticeBotConstants.LIMELIGHT,
+                        new VisionIOLimelight(
+                            Constants.PracticeBotConstants.LIMELIGHT,
+                            () -> drivetrain.getAngle(),
+                            () -> drivetrain.getAngularRate(),
+                            true,
+                            false))));
+        intake = new Intake(new IntakeIOPB());
+        flywheelKicker = new FlywheelKicker(new FlywheelKickerIOPB());
+        intakePivot = new IntakePivot(new IntakePivotIOPB());
+        // TODO ADD CLIMBERS
+        break;
     }
     shotCalculator =
         new ShotCalculator(
@@ -143,15 +167,27 @@ public class RobotContainer {
             flywheelKicker,
             flywheel,
             hood,
-            drivetrain,
             shotCalculator,
-            driverCont);
+            drivetrain::isAlignedToTarget);
 
     if (Objects.nonNull(superStructure)) {
       registerPathplannerCommand(
           "basic intake", superStructure.setStateCommand(SuperStates.INTAKING));
-      registerPathplannerCommand(
-          "shoot at hub", superStructure.setStateCommand(SuperStates.SHOOTING));
+      if (Objects.nonNull(drivetrain)) {
+        // TODO: add end condition based on state from SuperStructure (based on sensor inputs)
+        registerPathplannerCommand(
+            "shoot at hub",
+            Commands.waitSeconds(10)
+                .deadlineFor(
+                    superStructure
+                        .setStateCommand(SuperStates.SHOOTING)
+                        .alongWith(
+                            drivetrain.faceAngleWhileDrivingCommand(
+                                () -> 0,
+                                () -> 0,
+                                () -> shotCalculator.calculateShot().targetHeading())))
+                .andThen(superStructure.setStateCommand(SuperStates.IDLE)));
+      }
     }
     registerPathplannerCommand(
         "run flywheel kicker",
@@ -226,11 +262,30 @@ public class RobotContainer {
       vision.setDefaultCommand(consumeVisionMeasurements.ignoringDisable(true));
     }
     // TODO: make more elegant solution for null checking subsystems/commands
+    if (Objects.nonNull(drivetrain)) {
+      drivetrain.setDefaultCommand(drivetrain.fieldOrientedDriveCommand(driverCont));
+    }
+
+    if (Objects.nonNull(superStructure) && Objects.nonNull(drivetrain)) {
+      // Linked pair: whileTrue sets SHOOTING + aims, onFalse resets to IDLE.
+      // The InstantCommand (setStateCommand) finishes immediately; the alongWith group
+      // stays alive via faceAngleWhileDrivingCommand until whileTrue interrupts it.
+      driverCont
+          .rightTrigger()
+          .whileTrue(
+              superStructure
+                  .setStateCommand(SuperStates.SHOOTING)
+                  .alongWith(
+                      drivetrain.faceAngleWhileDrivingCommand(
+                          driverCont, () -> shotCalculator.calculateShot().targetHeading())));
+      // Must stay paired with the whileTrue above to reset state on trigger release
+      driverCont.rightTrigger().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
+    }
 
     // Null checks based on subsystems used by each command
     // basicIntakeCmd uses intake and indexer
     // TODO: Re-enable superStructure bindings
-    if (Objects.nonNull(intake) && Objects.nonNull(indexer)) {
+    if (Objects.nonNull(superStructure) && Objects.nonNull(intake) && Objects.nonNull(indexer)) {
       driverCont.leftBumper().onTrue(superStructure.setStateCommand(SuperStates.INTAKING));
       driverCont.leftBumper().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
       driverCont.a().whileTrue(indexer.setDutyCycleCommand(0.5));
@@ -259,10 +314,6 @@ public class RobotContainer {
       driverCont.x().whileTrue(flywheel.setVelocityCommand(2500));
       driverCont.b().whileTrue(flywheel.setVelocityCommand(3000));
       driverCont.y().whileTrue(flywheel.setVelocityCommand(3500));
-      if (Objects.nonNull(superStructure)) {
-        driverCont.rightTrigger().onTrue(superStructure.setStateCommand(SuperStates.SHOOTING));
-        driverCont.rightTrigger().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
-      }
     }
 
     // Drivetrain commands
@@ -299,8 +350,12 @@ public class RobotContainer {
     }
   }
 
-  /** Runs the given calls on periodic before commands are scheduled */
-  public void periodic() {
+  /**
+   * Pre-computes cached values (e.g. shot parameters) before the command scheduler runs. Must be
+   * called in {@link Robot#robotPeriodic()} before {@link
+   * edu.wpi.first.wpilibj2.command.CommandScheduler#run()}.
+   */
+  public void preSchedulerUpdate() {
     if (Objects.nonNull(shotCalculator)) {
       shotCalculator.clearShootingParams();
       shotCalculator.calculateShot();
