@@ -26,6 +26,9 @@ public class HoodIOPB implements HoodIO {
   private static final double FORWARD_SOFT_LIMIT_DEGREES = 24.0; // FIXME: verify limit
   private static final double STATOR_CURRENT_LIMIT_AMPS = 25.0;
   private static final double SUPPLY_CURRENT_LIMIT_AMPS = 30.0;
+  private static final double MOTION_MAGIC_ACCELERATION_RPS2 = 0.0; // FIXME: set actual value
+  private static final double MOTION_MAGIC_CRUISE_VELOCITY_RPS = 0.0; // FIXME: set actual value
+  private static final double MOTION_MAGIC_JERK_RPS3 = 0.0; // FIXME: set actual value
 
   private final TalonFXS hoodMotor =
       new TalonFXS(Constants.PracticeBotConstants.HOOD_ID, Constants.PracticeBotConstants.CANBUS);
@@ -60,9 +63,9 @@ public class HoodIOPB implements HoodIO {
     config.CurrentLimits.SupplyCurrentLimit = SUPPLY_CURRENT_LIMIT_AMPS;
     config.CurrentLimits.SupplyCurrentLimitEnable = true;
 
-    config.MotionMagic.withMotionMagicAcceleration(0.0)
-        .withMotionMagicCruiseVelocity(0.0)
-        .withMotionMagicJerk(0.0);
+    config.MotionMagic.withMotionMagicAcceleration(MOTION_MAGIC_ACCELERATION_RPS2)
+        .withMotionMagicCruiseVelocity(MOTION_MAGIC_CRUISE_VELOCITY_RPS)
+        .withMotionMagicJerk(MOTION_MAGIC_JERK_RPS3);
     config.MotorOutput.withInverted(InvertedValue.Clockwise_Positive);
     config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     hoodMotor.getConfigurator().apply(config);
