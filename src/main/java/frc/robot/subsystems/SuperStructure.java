@@ -5,6 +5,8 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKicker;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKicker.FlywheelKickerStates;
+import frc.robot.subsystems.HopperRoller.HopperRoller;
+import frc.robot.subsystems.HopperRoller.HopperRoller.HopperRollerStates;
 import frc.robot.subsystems.Indexer.Indexer;
 import frc.robot.subsystems.Indexer.Indexer.IndexerStates;
 import frc.robot.subsystems.Intake.Intake;
@@ -26,6 +28,7 @@ public class SuperStructure extends SubsystemBase {
   private final Flywheel flywheel;
   private final Hood hood;
   private final IntakePivot intakePivot;
+  private final HopperRoller hopperRoller;
   private final ShotCalculator shotCalculator;
   private final BooleanSupplier isAlignedToTarget;
 
@@ -62,6 +65,7 @@ public class SuperStructure extends SubsystemBase {
       Flywheel flywheel,
       Hood hood,
       IntakePivot intakePivot,
+      HopperRoller hopperRoller,
       ShotCalculator shotCalculator,
       BooleanSupplier isAlignedToTarget) {
     this.intake = intake;
@@ -70,6 +74,7 @@ public class SuperStructure extends SubsystemBase {
     this.flywheel = flywheel;
     this.hood = hood;
     this.intakePivot = intakePivot;
+    this.hopperRoller = hopperRoller;
     this.shotCalculator = shotCalculator;
     this.isAlignedToTarget = isAlignedToTarget;
 
@@ -140,9 +145,11 @@ public class SuperStructure extends SubsystemBase {
     if (currentShooterState == ShooterStates.FIRING) {
       flywheelKicker.setWantedState(FlywheelKickerStates.SHOOTING);
       indexer.setWantedState(IndexerStates.SHOOTING);
+      hopperRoller.setWantedState(HopperRollerStates.ROLLING);
     } else {
       flywheelKicker.setWantedState(FlywheelKickerStates.OFF);
       indexer.setWantedState(IndexerStates.OFF);
+      hopperRoller.setWantedState(HopperRollerStates.OFF);
     }
   }
 

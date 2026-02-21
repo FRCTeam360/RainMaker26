@@ -45,8 +45,10 @@ public class IntakePivot extends SubsystemBase {
     switch (currentState) {
       case DEPLOYED:
         setPosition(DEPLOYED_POSITION);
+        break;
       case STOWED:
         setPosition(STOWED_POSITION);
+        break;
       case OFF:
       default:
         setPosition(0.0);
