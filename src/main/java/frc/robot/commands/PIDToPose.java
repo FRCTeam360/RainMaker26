@@ -58,33 +58,26 @@ public class PIDToPose extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    final boolean isAtHeadingSetpoint = drivetrain.isAtRotationSetpoint();
-    final boolean isAtPoseXSetpoint = drivetrain.isAtPoseXSetpoint();
-    final boolean isAtPoseYSetpoint = drivetrain.isAtPoseYSetpoint();
+    final var headingState = drivetrain.getHeadingControllerState();
+    final var poseXState = drivetrain.getPoseXControllerState();
+    final var poseYState = drivetrain.getPoseYControllerState();
 
-    final double headingPositionError =
-        Math.toDegrees(drivetrain.getHeadingControllerPositionError());
-    final double poseXPositionError = drivetrain.getPoseXControllerPositionError();
-    final double poseYPositionError = drivetrain.getPoseYControllerPositionError();
+    Logger.recordOutput(
+        LOGGING_PREFIX + "isAtRotationSetpoint", headingState.isAtRotationSetpoint());
+    Logger.recordOutput(LOGGING_PREFIX + "isAtPoseXSetpoint", poseXState.isAtRotationSetpoint());
+    Logger.recordOutput(LOGGING_PREFIX + "isAtPoseYSetpoint", poseYState.isAtRotationSetpoint());
 
-    final double headingVelocityError =
-        Math.toDegrees(drivetrain.getHeadingControllerVelocityError());
-    final double poseXVelocityError = drivetrain.getPoseXControllerVelocityError();
-    final double poseYVelocityError = drivetrain.getPoseYControllerVelocityError();
+    Logger.recordOutput(LOGGING_PREFIX + "headingPositionError", headingState.positionError());
+    Logger.recordOutput(LOGGING_PREFIX + "poseXPositionError", poseXState.positionError());
+    Logger.recordOutput(LOGGING_PREFIX + "poseYPositionError", poseYState.positionError());
 
-    Logger.recordOutput(LOGGING_PREFIX + "isAtRotationSetpoint", isAtHeadingSetpoint);
-    Logger.recordOutput(LOGGING_PREFIX + "isAtPoseXSetpoint", isAtPoseXSetpoint);
-    Logger.recordOutput(LOGGING_PREFIX + "isAtPoseYSetpoint", isAtPoseYSetpoint);
+    Logger.recordOutput(LOGGING_PREFIX + "headingVelocityError", headingState.velocityError());
+    Logger.recordOutput(LOGGING_PREFIX + "poseXVelocityError", poseXState.velocityError());
+    Logger.recordOutput(LOGGING_PREFIX + "poseYVelocityError", poseYState.velocityError());
 
-    Logger.recordOutput(LOGGING_PREFIX + "headingPositionError", headingPositionError);
-    Logger.recordOutput(LOGGING_PREFIX + "poseXPositionError", poseXPositionError);
-    Logger.recordOutput(LOGGING_PREFIX + "poseYPositionError", poseYPositionError);
-
-    Logger.recordOutput(LOGGING_PREFIX + "headingVelocityError", headingVelocityError);
-    Logger.recordOutput(LOGGING_PREFIX + "poseXVelocityError", poseXVelocityError);
-    Logger.recordOutput(LOGGING_PREFIX + "poseYVelocityError", poseYVelocityError);
-
-    return isAtHeadingSetpoint && isAtPoseXSetpoint && isAtPoseYSetpoint;
+    return headingState.isAtRotationSetpoint()
+        && poseXState.isAtRotationSetpoint()
+        && poseYState.isAtRotationSetpoint();
   }
 
   public static Command getCommand(CommandSwerveDrivetrain drivetrain, Pose2d setpointPose) {

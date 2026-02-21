@@ -51,6 +51,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   private PhoenixPIDController poseXController;
   private PhoenixPIDController poseYController;
 
+  public record ControllerState(
+      boolean isAtRotationSetpoint, double positionError, double velocityError) {}
+
   private static final double POSE_KP = 11.0;
   private static final double POSE_KI = 0.0;
   private static final double POSE_KD = 0.0;
@@ -535,56 +538,28 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     return super.samplePoseAt(Utils.fpgaToCurrentTime(timestampSeconds));
   }
 
-  // The following getter methods (505-556) are essential for the various PIDToPose methods
   public Pose2d getPose() {
     return this.getStateCopy().Pose;
   }
 
-  public boolean isAtRotationSetpoint() {
-    return headingController.atSetpoint();
+  public ControllerState getHeadingControllerState() {
+    return new ControllerState(
+        headingController.atSetpoint(),
+        headingController.getPositionError(),
+        headingController.getVelocityError());
   }
 
-  public double getHeadingControllerSetpoint() {
-    return headingController.getSetpoint();
+  public ControllerState getPoseXControllerState() {
+    return new ControllerState(
+        poseXController.atSetpoint(),
+        poseXController.getPositionError(),
+        poseXController.getVelocityError());
   }
 
-  public double getHeadingControllerPositionError() {
-    return headingController.getPositionError();
-  }
-
-  public double getHeadingControllerVelocityError() {
-    return headingController.getVelocityError();
-  }
-
-  public double getPoseXSetpoint() {
-    return poseXController.getSetpoint();
-  }
-
-  public boolean isAtPoseXSetpoint() {
-    return poseXController.atSetpoint();
-  }
-
-  public double getPoseXControllerPositionError() {
-    return poseXController.getPositionError();
-  }
-
-  public double getPoseXControllerVelocityError() {
-    return poseXController.getVelocityError();
-  }
-
-  public double getPoseYSetpoint() {
-    return poseYController.getSetpoint();
-  }
-
-  public boolean isAtPoseYSetpoint() {
-    return poseYController.atSetpoint();
-  }
-
-  public double getPoseYControllerPositionError() {
-    return poseYController.getPositionError();
-  }
-
-  public double getPoseYControllerVelocityError() {
-    return poseYController.getVelocityError();
+  public ControllerState getPoseYControllerState() {
+    return new ControllerState(
+        poseYController.atSetpoint(),
+        poseYController.getPositionError(),
+        poseYController.getVelocityError());
   }
 }
