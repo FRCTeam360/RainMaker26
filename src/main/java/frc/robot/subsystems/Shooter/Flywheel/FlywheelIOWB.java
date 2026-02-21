@@ -45,15 +45,15 @@ public class FlywheelIOWB implements FlywheelIO {
     rightConfig.Slot2.kS = 3.0;
     rightConfig.Slot2.kV = 0.008;
 
-    rightConfig.CurrentLimits.StatorCurrentLimit = 200.0;
-    rightConfig.CurrentLimits.StatorCurrentLimitEnable = false;
-    rightConfig.CurrentLimits.SupplyCurrentLimit = 100.0;
+    rightConfig.CurrentLimits.StatorCurrentLimit = 150.0;
+    rightConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+    rightConfig.CurrentLimits.SupplyCurrentLimit = 80.0;
     rightConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
 
     // Bang-bang control limits
     // Peak torque-current for ball/idle phases (constant torque)
     // Initial value - will be updated via LoggedTunableNumber
-    rightConfig.TorqueCurrent.PeakForwardTorqueCurrent = 40.0;
+    rightConfig.TorqueCurrent.PeakForwardTorqueCurrent = 30.0;
     rightConfig.TorqueCurrent.PeakReverseTorqueCurrent = 0.0;
 
     // Peak duty-cycle for startup/recovery phases (max acceleration)

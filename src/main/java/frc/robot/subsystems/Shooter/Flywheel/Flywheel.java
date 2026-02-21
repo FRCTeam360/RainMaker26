@@ -33,9 +33,9 @@ public class Flywheel extends SubsystemBase {
 
   // Tunable parameters for 4-phase bang-bang control
   private static final LoggedNetworkNumber toleranceRPS =
-      new LoggedNetworkNumber("Flywheel/ToleranceRPS", 3); // 0.33 RPS ≈ 20 RPM
+      new LoggedNetworkNumber("Flywheel/ToleranceRPS", 5); // 0.33 RPS ≈ 20 RPM
   private static final LoggedNetworkNumber controlModeDebounceSeconds =
-      new LoggedNetworkNumber("Flywheel/ControlModeDebounceSeconds", 0.025);
+      new LoggedNetworkNumber("Flywheel/ControlModeDebounceSeconds", 0.04);
   private static final LoggedNetworkNumber atGoalDebounceSeconds =
       new LoggedNetworkNumber("Flywheel/AtGoalDebounceSeconds", 0.2);
 
