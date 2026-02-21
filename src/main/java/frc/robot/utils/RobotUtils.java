@@ -3,6 +3,7 @@ package frc.robot.utils;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import java.io.File;
 import java.util.Optional;
+import frc.robot.Constants;
 
 public class RobotUtils {
   public enum ActiveHub {
@@ -12,7 +13,7 @@ public class RobotUtils {
   }
 
   public static boolean isUsbWriteable() {
-    File usb = new File("/U");
+    File usb = new File(Constants.IOConstants.USB_ROOT_DIRECTORY);
     if (usb.exists() && usb.isDirectory()) {
       try {
 
