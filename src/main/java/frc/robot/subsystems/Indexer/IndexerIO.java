@@ -24,4 +24,6 @@ public interface IndexerIO {
   public default void updateInputs(IndexerIOInputs inputs) {}
 
   public void setDutyCycle(double dutyCycle);
+
+  public void setVelocity(double velocity);
 }

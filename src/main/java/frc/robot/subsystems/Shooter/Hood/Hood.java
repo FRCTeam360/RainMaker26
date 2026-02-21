@@ -11,16 +11,14 @@ import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
 public class Hood extends SubsystemBase {
-  private static final double SPINUP_SHOOTING_HOOD_POSITION_DEGREES = 8.0;
   private final HoodIO io;
   private final HoodIOInputsAutoLogged inputs = new HoodIOInputsAutoLogged();
-  private final double TOLERANCE = 0.5;
+  private static final double TOLERANCE = 0.5;
   private DoubleSupplier hoodAngleSupplier = () -> 0.0;
 
   public enum HoodStates {
     OFF,
-    SHOOTING,
-    AIMING
+    SHOOTING
   }
 
   /**
@@ -38,16 +36,11 @@ public class Hood extends SubsystemBase {
 
   public void setWantedState(HoodStates state) {
     wantedState = state;
-    updateState();
-    applyState();
   }
 
   private void applyState() {
     switch (currentState) {
       case SHOOTING:
-        setPosition(SPINUP_SHOOTING_HOOD_POSITION_DEGREES);
-        break;
-      case AIMING:
         setPosition(hoodAngleSupplier.getAsDouble());
         break;
       case OFF:
@@ -67,9 +60,6 @@ public class Hood extends SubsystemBase {
     switch (wantedState) {
       case SHOOTING:
         currentState = HoodStates.SHOOTING;
-        break;
-      case AIMING:
-        currentState = HoodStates.AIMING;
         break;
       case OFF:
       default:
@@ -103,8 +93,8 @@ public class Hood extends SubsystemBase {
     return this.setPositionCmd(() -> position);
   }
 
-  public void setEncoder(double position) {
-    io.setEncoder(position);
+  public void setZero() {
+    io.setZero();
   }
 
   public void stop() {
@@ -131,9 +121,11 @@ public class Hood extends SubsystemBase {
 
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
     io.updateInputs(inputs);
     Logger.processInputs("Hood", inputs);
+
+    updateState();
+    applyState();
     Logger.recordOutput("Subsystems/Hood/WantedState", wantedState.toString());
     Logger.recordOutput("Subsystems/Hood/CurrentState", currentState.toString());
     Logger.recordOutput("Subsystems/Hood/PreviousState", previousState.toString());
@@ -148,6 +140,6 @@ public class Hood extends SubsystemBase {
   }
 
   public Command zero() {
-    return this.runOnce(() -> setEncoder(0.0));
+    return this.runOnce(() -> setZero());
   }
 }
