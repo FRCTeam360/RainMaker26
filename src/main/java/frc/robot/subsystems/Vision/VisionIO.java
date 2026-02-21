@@ -48,4 +48,6 @@ public interface VisionIO {
   public void takeSnapshot();
 
   public void resetSnapshot();
+
+  public void captureRewind();
 }

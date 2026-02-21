@@ -20,6 +20,7 @@ public class VisionIOLimelight implements VisionIO {
   private final String name;
   private final DoubleSupplier gyroAngleSupplier;
   private final DoubleSupplier gyroAngleRateSupplier;
+  private int rewindCounter = 0;
   private final boolean isLimelight4;
 
   private boolean acceptMeasurements;
@@ -156,6 +157,12 @@ public class VisionIOLimelight implements VisionIO {
 
   public void resetSnapshot() {
     table.getEntry("snapshot").setNumber(0.0);
+  }
+
+  public void captureRewind() {
+    rewindCounter++;
+    double[] captureData = {(double) rewindCounter, 10.0};
+    table.getEntry("capture_rewind").setDoubleArray(captureData);
   }
 
   // while enabled
