@@ -89,6 +89,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   private static final double HEADING_KI = 0.00;
   private static final double HEADING_KD = 0.005;
   private static final double HEADING_I_ZONE = 0.0;
+  private static final double HEADING_TOLERANCE_RAD = Math.toRadians(3.0);
 
   // Field-centric facing angle request for hub tracking
   private final SwerveRequest.FieldCentricFacingAngle m_faceHubRequest =
@@ -176,32 +177,19 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
       DoubleSupplier velocityYSupplier,
       Supplier<Rotation2d> headingSupplier) {
     return this.applyRequest(
-        () ->
-            m_faceHubRequest
-                .withVelocityX(
-                    DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
-                        ? velocityXSupplier.getAsDouble()
-                        : -velocityXSupplier.getAsDouble())
-                .withVelocityY(
-                    DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
-                        ? velocityYSupplier.getAsDouble()
-                        : -velocityYSupplier.getAsDouble())
-                .withTargetDirection(headingSupplier.get()));
-  }
-
-  public void faceAngleWhileDriving(double velocityX, double velocityY, Rotation2d heading) {
-    this.setControl(
-        m_faceHubRequest
-            .withVelocityX(
-                DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
-                    ? velocityX
-                    : -velocityX)
-            .withVelocityY(
-                DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
-                    ? velocityY
-                    : -velocityY)
-            .withTargetDirection(heading)
-            .withDeadband(Constants.maxSpeed.in(MetersPerSecond) * 0.01));
+            () ->
+                m_faceHubRequest
+                    .withVelocityX(
+                        DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
+                            ? velocityXSupplier.getAsDouble()
+                            : -velocityXSupplier.getAsDouble())
+                    .withVelocityY(
+                        DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
+                            ? velocityYSupplier.getAsDouble()
+                            : -velocityYSupplier.getAsDouble())
+                    .withTargetDirection(headingSupplier.get()))
+                    .withDeadband(Constants.maxSpeed.in(MetersPerSecond) * 0.01));
+        .finallyDo(() -> m_faceHubRequest.HeadingController.reset());
   }
 
   /**
@@ -307,6 +295,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     m_faceHubRequest.HeadingController.setPID(HEADING_KP, HEADING_KI, HEADING_KD);
     m_faceHubRequest.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
     m_faceHubRequest.HeadingController.setIZone(HEADING_I_ZONE);
+    m_faceHubRequest.HeadingController.setTolerance(HEADING_TOLERANCE_RAD);
     m_faceHubRequest.ForwardPerspective = ForwardPerspectiveValue.BlueAlliance;
     headingController = new PhoenixPIDController(HEADING_KP, HEADING_KI, HEADING_KD);
     poseXController = new PhoenixPIDController(POSE_KP, POSE_KI, POSE_KD);
@@ -389,6 +378,21 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
   public Rotation2d getRotation2d() {
     return getPose().getRotation();
+  }
+
+  /**
+   * Returns whether the heading controller is aligned to its target angle within the configured
+   * tolerance. Uses the {@link com.ctre.phoenix6.swerve.utility.PhoenixPIDController#atSetpoint()}
+   * method on the facing-angle request's heading controller.
+   *
+   * <p>Note: This only returns meaningful results while a {@link
+   * SwerveRequest.FieldCentricFacingAngle} request is actively being applied (e.g., during
+   * faceAngleWhileDriving). Before the first PID calculation, this returns false.
+   *
+   * @return true if the heading error is within {@link #HEADING_TOLERANCE_RAD}
+   */
+  public boolean isAlignedToTarget() {
+    return m_faceHubRequest.HeadingController.atSetpoint();
   }
 
   public double getAngle() {

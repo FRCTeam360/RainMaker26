@@ -1,7 +1,3 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot.subsystems.Indexer;
 
 import com.revrobotics.PersistMode;
@@ -15,21 +11,33 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import frc.robot.Constants;
 
-public class IndexerIOWB implements IndexerIO {
-  /** Creates a new IndexerIOWB. */
+public class IndexerIOPB implements IndexerIO {
+  private static final double GEAR_RATIO = 1.0; // FIXME: set actual gear ratio
+  private static final int CURRENT_LIMIT_AMPS = 40;
+  private static final double KP = 0.0002;
+  private static final double KI = 0.0;
+  private static final double KD = 0.0;
+  private static final double FF_KV = 0.0021;
+  private static final double FF_KS = 0.04;
+
+  /** Creates a new IndexerIOPB. */
   private final SparkMax indexerMotor =
-      new SparkMax(Constants.WoodBotConstants.INDEXER_ID, MotorType.kBrushless);
+      new SparkMax(Constants.PracticeBotConstants.INDEXER_ID, MotorType.kBrushless);
 
   private final RelativeEncoder encoder = indexerMotor.getEncoder();
   private final SparkMaxConfig sparkMaxConfig = new SparkMaxConfig();
   private final SparkClosedLoopController closedLoopController;
 
-  public IndexerIOWB() {
+  public IndexerIOPB() {
     sparkMaxConfig.idleMode(IdleMode.kBrake);
     sparkMaxConfig.inverted(true);
+    sparkMaxConfig.smartCurrentLimit(CURRENT_LIMIT_AMPS);
 
-    sparkMaxConfig.closedLoop.p(0.0002).i(0.0).d(0.0);
-    sparkMaxConfig.closedLoop.feedForward.kV(0.0021).kS(0.04);
+    sparkMaxConfig.encoder.positionConversionFactor(1.0 / GEAR_RATIO);
+    sparkMaxConfig.encoder.velocityConversionFactor(1.0 / GEAR_RATIO);
+
+    sparkMaxConfig.closedLoop.p(KP).i(KI).d(KD);
+    sparkMaxConfig.closedLoop.feedForward.kV(FF_KV).kS(FF_KS);
 
     indexerMotor.configure(
         sparkMaxConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
@@ -40,9 +48,7 @@ public class IndexerIOWB implements IndexerIO {
   public void updateInputs(IndexerIOInputs inputs) {
     inputs.position = encoder.getPosition();
     inputs.statorCurrent = indexerMotor.getOutputCurrent();
-    inputs.supplyCurrent =
-        indexerMotor.getOutputCurrent() * indexerMotor.getAppliedOutput(); // TODO: check if
-    // this is right
+    inputs.supplyCurrent = 0;
     inputs.velocity = encoder.getVelocity();
     inputs.voltage = indexerMotor.getBusVoltage() * indexerMotor.getAppliedOutput();
   }
