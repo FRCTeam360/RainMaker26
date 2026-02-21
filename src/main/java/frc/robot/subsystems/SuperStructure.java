@@ -14,6 +14,7 @@ import frc.robot.subsystems.Shooter.Hood.Hood;
 import frc.robot.subsystems.Shooter.Hood.Hood.HoodStates;
 import frc.robot.subsystems.Shooter.ShotCalculator;
 import frc.robot.subsystems.Shooter.ShotCalculator.ShootingParams;
+import java.util.Objects;
 import java.util.function.BooleanSupplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -69,7 +70,9 @@ public class SuperStructure extends SubsystemBase {
     this.isAlignedToTarget = isAlignedToTarget;
 
     flywheel.setVelocitySupplier(() -> shotCalculator.calculateShot().flywheelSpeed());
-    hood.setHoodAngleSupplier(() -> shotCalculator.calculateShot().hoodAngle());
+    if (Objects.nonNull(hood)) {
+      hood.setHoodAngleSupplier(() -> shotCalculator.calculateShot().hoodAngle());
+    }
   }
 
   private void updateState() {
@@ -116,7 +119,7 @@ public class SuperStructure extends SubsystemBase {
     previousShooterState = currentShooterState;
     ShootingParams shotParams = shotCalculator.calculateShot();
     boolean flywheelReady = flywheel.atSetpoint(shotParams.flywheelSpeed(), FLYWHEEL_TOLERANCE_RPM);
-    boolean hoodReady = hood.atSetpoint(shotParams.hoodAngle());
+    boolean hoodReady = Objects.isNull(hood) || hood.atSetpoint(shotParams.hoodAngle());
     boolean aligned = isAlignedToTarget.getAsBoolean();
 
     Logger.recordOutput("Superstructure/Shooting/FlywheelReady", flywheelReady);
@@ -143,7 +146,9 @@ public class SuperStructure extends SubsystemBase {
 
   private void shooting() {
     flywheel.setWantedState(FlywheelStates.SHOOTING);
-    hood.setWantedState(HoodStates.SHOOTING);
+    if (Objects.nonNull(hood)) {
+      hood.setWantedState(HoodStates.SHOOTING);
+    }
   }
 
   private void intaking() {
@@ -156,7 +161,9 @@ public class SuperStructure extends SubsystemBase {
     indexer.setWantedState(Indexer.IndexerStates.OFF);
     flywheelKicker.setWantedState(FlywheelKickerStates.OFF);
     flywheel.setWantedState(FlywheelStates.OFF);
-    hood.setWantedState(HoodStates.OFF);
+    if (Objects.nonNull(hood)) {
+      hood.setWantedState(HoodStates.OFF);
+    }
   }
 
   public Command setStateCommand(SuperStates superState) {
