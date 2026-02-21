@@ -127,8 +127,8 @@
           },
           {
             "title": "MatchTime",
-            "x": 0.0,
-            "y": 0.0,
+            "x": 256.0,
+            "y": 384.0,
             "width": 128.0,
             "height": 128.0,
             "type": "Match Time",
@@ -152,6 +152,37 @@
               "topic": "/CameraPublisher/YOUR CAMERA NAME-processed",
               "period": 0.06,
               "rotation_turns": 0
+            }
+          },
+          {
+            "title": "HubPhase",
+            "x": 128.0,
+            "y": 256.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/HubPhase",
+              "period": 0.06,
+              "data_type": "string",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "HubActive",
+            "x": 256.0,
+            "y": 256.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/HubActive",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
             }
           }
         ]

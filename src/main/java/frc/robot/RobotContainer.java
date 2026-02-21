@@ -12,6 +12,8 @@ import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -50,6 +52,8 @@ import frc.robot.subsystems.SuperStructure.SuperStates;
 import frc.robot.subsystems.Vision.Vision;
 import frc.robot.subsystems.Vision.VisionIOLimelight;
 import frc.robot.subsystems.Vision.VisionIOPhotonSim;
+import frc.robot.utils.RobotUtils;
+import frc.robot.utils.RobotUtils.ActiveHub;
 import java.util.Map;
 import java.util.Objects;
 import org.littletonrobotics.junction.Logger;
@@ -348,6 +352,14 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.CommandScheduler#run()}.
    */
   public void preSchedulerUpdate() {
+    Alliance autoWinner = RobotUtils.getAutoWinner(DriverStation.getGameSpecificMessage());
+    ActiveHub hubPhase =
+        RobotUtils.getHubPhase(DriverStation.getMatchTime(), DriverStation.isTeleop());
+    Logger.recordOutput("HubPhase", hubPhase);
+    Logger.recordOutput("AutoWinner", autoWinner);
+    Logger.recordOutput(
+        "HubActive", RobotUtils.hubActive(DriverStation.getAlliance(), autoWinner, hubPhase));
+
     if (Objects.nonNull(shotCalculator)) {
       shotCalculator.clearShootingParams();
       shotCalculator.calculateShot();

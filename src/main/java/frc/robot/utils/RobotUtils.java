@@ -1,6 +1,8 @@
 package frc.robot.utils;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants;
 import java.io.File;
 import java.util.Optional;
@@ -44,6 +46,7 @@ public class RobotUtils {
         case 'R':
           return Alliance.Red;
         default:
+          return null;
       }
     }
     // called when no data was received from driver station
@@ -79,6 +82,7 @@ public class RobotUtils {
         return ActiveHub.BOTH; // TRANSITION
       }
     }
+    SmartDashboard.putString("ActiveHub", activeHub.name());
     return activeHub;
   }
 
@@ -96,7 +100,8 @@ public class RobotUtils {
     // alliance is our alliance, autoWinner is the result of getAutoWinner, gamePhase is the result
     // of getHubPhase
     Boolean hubActive = null;
-    if (alliance.isPresent()) {
+
+    if (alliance.isPresent() && autoWinner != null) {
       if (gamePhase == null) {
         return null;
       }
@@ -124,7 +129,9 @@ public class RobotUtils {
       }
     } else {
       // this is called when no alliance has been received from driver station
-      return null;
+      if (!DriverStation.isEnabled()) {
+        return false;
+      }
     }
     return hubActive;
   }
