@@ -8,10 +8,10 @@ import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkClosedLoopController;
+import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.config.SparkFlexConfig;
 import frc.robot.Constants;
 
 public class FlywheelKickerIOPB implements FlywheelKickerIO {
@@ -26,29 +26,29 @@ public class FlywheelKickerIOPB implements FlywheelKickerIO {
   private static final double PROXIMITY_THRESHOLD_METERS = 0.1;
 
   /** Creates a new FlywheelKickerIOPB. */
-  private final SparkMax flywheelkickerMotor =
-      new SparkMax(Constants.PracticeBotConstants.FLYWHEEL_KICKER_ID, MotorType.kBrushless);
+  private final SparkFlex flywheelkickerMotor =
+      new SparkFlex(Constants.PracticeBotConstants.FLYWHEEL_KICKER_ID, MotorType.kBrushless);
 
   private final RelativeEncoder encoder = flywheelkickerMotor.getEncoder();
-  private final SparkMaxConfig sparkMaxConfig = new SparkMaxConfig();
+  private final SparkFlexConfig sparkFlexConfig = new SparkFlexConfig();
   private final SparkClosedLoopController closedLoopController;
 
   private final CANrange canSensor =
       new CANrange(Constants.PracticeBotConstants.FLYWHEEL_KICKER_SENSOR_ID, Constants.RIO_CANBUS);
 
   public FlywheelKickerIOPB() {
-    sparkMaxConfig.idleMode(IdleMode.kBrake);
-    sparkMaxConfig.inverted(true);
-    sparkMaxConfig.smartCurrentLimit(CURRENT_LIMIT_AMPS);
+    sparkFlexConfig.idleMode(IdleMode.kBrake);
+    sparkFlexConfig.inverted(true);
+    sparkFlexConfig.smartCurrentLimit(CURRENT_LIMIT_AMPS);
 
-    sparkMaxConfig.encoder.positionConversionFactor(1.0 / GEAR_RATIO);
-    sparkMaxConfig.encoder.velocityConversionFactor(1.0 / GEAR_RATIO);
+    sparkFlexConfig.encoder.positionConversionFactor(1.0 / GEAR_RATIO);
+    sparkFlexConfig.encoder.velocityConversionFactor(1.0 / GEAR_RATIO);
 
-    sparkMaxConfig.closedLoop.p(KP).i(KI).d(KD);
-    sparkMaxConfig.closedLoop.feedForward.kV(FF_KV).kS(FF_KS);
+    sparkFlexConfig.closedLoop.p(KP).i(KI).d(KD);
+    sparkFlexConfig.closedLoop.feedForward.kV(FF_KV).kS(FF_KS);
 
     flywheelkickerMotor.configure(
-        sparkMaxConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        sparkFlexConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
     closedLoopController = flywheelkickerMotor.getClosedLoopController();
 
