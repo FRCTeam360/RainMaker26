@@ -37,6 +37,7 @@ public final class Constants {
   public static enum RobotType {
     SIM,
     WOODBOT,
+    PRACTICEBOT,
     REPLAY
   }
 
@@ -69,6 +70,30 @@ public final class Constants {
     public static final CANBus CANBUS = new CANBus("Default Name");
   }
 
+  public static class PracticeBotConstants {
+
+    // FIXME: update these values TO REAL VALUES
+    public static final int INTAKE_ID = 71;
+    public static final int INTAKE_PIVOT_ID = 72;
+
+    public static final int INDEXER_SENSOR_ID = 73;
+    public static final int INDEXER_ID = 75;
+
+    public static final int FLYWHEEL_KICKER_ID = 76;
+    public static final int FLYWHEEL_KICKER_SENSOR_ID = 77;
+
+    public static final int FLYWHEEL_RIGHT_ID = 78;
+    public static final int FLYWHEEL_LEFT_ID = 79;
+
+    public static final int HOOD_ID = 80;
+
+    public static final int HOPPER_ROLLER_ID = 0;
+
+    public static final String LIMELIGHT = "limelight";
+
+    public static final CANBus CANBUS = new CANBus("Default Name");
+  }
+
   public static class SimulationConstants {
     // === INTAKE ===
     public static final int INTAKE_MOTOR = 12;
@@ -87,16 +112,14 @@ public final class Constants {
     public static final int HOOD_MOTOR = 6;
   }
 
-  public static class PracticeBotConstants {
-    public static final int HOPPER_ROLLER_ID = 0;
-  }
-
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
   }
 
   public static final class SerialAddressConstants {
-    public static String WOOD_SERIAL_ADDRESS = "032BE44A";
+    public static final String WOOD_SERIAL_ADDRESS = "032BE44A";
+    // FIXME: Enter the practice bot roboRIO serial address
+    public static final String PRACTICE_SERIAL_ADDRESS = "WRONG_SERIAL_ADDRESS";
   }
 
   public static double loopPeriodSecs; // add value
@@ -106,6 +129,8 @@ public final class Constants {
 
     if (serialAddress.equals(SerialAddressConstants.WOOD_SERIAL_ADDRESS)) {
       return Constants.RobotType.WOODBOT;
+    } else if (serialAddress.equals(SerialAddressConstants.PRACTICE_SERIAL_ADDRESS)) {
+      return Constants.RobotType.PRACTICEBOT;
     } else if (!Robot.isReal()) { // KEEP AT BOTTOM
       return Constants.RobotType.SIM;
     }
