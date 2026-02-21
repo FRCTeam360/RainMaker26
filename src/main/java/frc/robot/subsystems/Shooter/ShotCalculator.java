@@ -86,7 +86,7 @@ public class ShotCalculator {
     distanceToTarget =
         Math.max(MIN_DISTANCE_METERS, Math.min(MAX_DISTANCE_METERS, distanceToTarget));
 
-    // Calculate heading toward hub, then rotate 180° because the shooter
+    // Calculate heading toward hub, then rotate 180 degrees because the shooter
     // is at the back of the robot - robot faces away from hub to shoot at it
     Rotation2d targetHeading =
         hubTranslation

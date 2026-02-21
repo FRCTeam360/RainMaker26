@@ -296,7 +296,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
    * @param modules Constants for each specific module
    */
 
-  private static final FieldCentricFacingAngle request =
+  private final FieldCentricFacingAngle request =
         new SwerveRequest.FieldCentricFacingAngle().withDeadband(POSITION_DEADBAND_MPS);
 
   public CommandSwerveDrivetrain(
@@ -594,12 +594,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     double timestamp = getStateCopy().Timestamp;
     double x = poseXController.calculate(currentPose.getX(), setpointPose.getX(), timestamp);
     double y = poseYController.calculate(currentPose.getY(), setpointPose.getY(), timestamp);
-
-    FieldCentricFacingAngle request =
-        new SwerveRequest.FieldCentricFacingAngle()
-            .withVelocityX(x * Constants.maxSpeed.in(MetersPerSecond))
-            .withVelocityY(y * Constants.maxSpeed.in(MetersPerSecond))
-            .withTargetDirection(setpointPose.getRotation());
+    request
+      .withVelocityX(x)
+      .withVelocityY(y)
+      .withTargetDirection(setpointPose.getRotation());
     this.setControl(request);
   }
 
