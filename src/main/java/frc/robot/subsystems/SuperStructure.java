@@ -171,6 +171,7 @@ public class SuperStructure extends SubsystemBase {
     flywheel.setWantedState(FlywheelStates.OFF);
     // hood.setWantedState(HoodStates.OFF); FIX ME WHEN BETTER HOOD
     intakePivot.setWantedState(IntakePivotStates.OFF);
+    hopperRoller.setWantedState(HopperRollerStates.OFF);
   }
 
   public Command setStateCommand(SuperStates superState) {
