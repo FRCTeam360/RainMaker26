@@ -598,11 +598,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     double timestamp = getStateCopy().Timestamp;
     double x = poseXController.calculate(currentPose.getX(), setpointPose.getX(), timestamp);
     double y = poseYController.calculate(currentPose.getY(), setpointPose.getY(), timestamp);
-
-    FieldCentricFacingAngle request =
-        new SwerveRequest.FieldCentricFacingAngle()
-            .withVelocityX(x * Constants.maxSpeed.in(MetersPerSecond))
-            .withVelocityY(y * Constants.maxSpeed.in(MetersPerSecond))
+    request.withVelocityX(x)
+            .withVelocityY(y)
             .withTargetDirection(setpointPose.getRotation());
     this.setControl(request);
   }
