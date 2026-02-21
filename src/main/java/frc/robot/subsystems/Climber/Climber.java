@@ -4,15 +4,63 @@
 
 package frc.robot.subsystems.Climber;
 
+import org.littletonrobotics.junction.Logger;
+
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.Intake.Intake.IntakeStates;
 
 public class Climber extends SubsystemBase {
   private final ClimberIO io;
   private final ClimberIOInputsAutoLogged inputs = new ClimberIOInputsAutoLogged();
 
+  public enum ClimberStates {
+    OFF,
+    ROLLING
+  }
+
+  private ClimberStates wantedState = ClimberStates.OFF;
+  private ClimberStates currentState = ClimberStates.OFF;
+  private ClimberStates previousState = ClimberStates.OFF;
+
   /** Creates a new Climber. */
   public Climber(ClimberIO io) {
     this.io = io;
+  }
+
+  public ClimberStates getState() {
+    return currentState;
+  }
+
+  public void setWantedState(ClimberStates state) {
+    wantedState = state;
+    updateState();
+    applyState();
+  }
+
+  private void updateState() {
+    previousState = currentState;
+
+    switch (wantedState) {
+      case ROLLING:
+        currentState = ClimberStates.ROLLING;
+        break;
+      case OFF:
+      default:
+        currentState = ClimberStates.OFF;
+        break;
+    }
+  }
+
+  private void applyState() {
+    switch (currentState) {
+      case ROLLING:
+        climbing();
+        break;
+      case OFF:
+      default:
+        stop();
+        break;
+    }
   }
 
   public void setLeftDutyCycle(double dutyCycle) {
@@ -21,6 +69,12 @@ public class Climber extends SubsystemBase {
 
   public void setRightDutyCycle(double dutyCycle) {
     io.setRightDutyCycle(dutyCycle);
+  }
+
+  public void climbing() {
+    io.setLeftPosition(0);
+    io.setRightPosition(0);
+    // TODO add actual position and climbing sequence
   }
 
   public void stop() {
@@ -56,5 +110,10 @@ public class Climber extends SubsystemBase {
   @Override
   public void periodic() {
     io.updateInputs(inputs);
+    Logger.processInputs("Climber", inputs);
+
+    Logger.recordOutput("Subsystems/Climber/WantedState", wantedState.toString());
+    Logger.recordOutput("Subsystems/Climber/CurrentState", currentState.toString());
+    Logger.recordOutput("Subsystems/Climber/PreviousState", previousState.toString());
   }
 }
