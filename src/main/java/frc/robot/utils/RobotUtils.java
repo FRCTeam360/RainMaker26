@@ -1,9 +1,9 @@
 package frc.robot.utils;
 
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import frc.robot.Constants;
 import java.io.File;
 import java.util.Optional;
-import frc.robot.Constants;
 
 public class RobotUtils {
   public enum ActiveHub {
