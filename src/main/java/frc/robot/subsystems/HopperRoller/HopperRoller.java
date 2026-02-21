@@ -11,6 +11,47 @@ public class HopperRoller extends SubsystemBase {
   private final HopperRollerIO io;
   private final HopperRollerIOInputsAutoLogged inputs = new HopperRollerIOInputsAutoLogged();
 
+  public enum HopperRollerStates {
+    OFF,
+    ROLLING
+  }
+
+  private HopperRollerStates wantedState = HopperRollerStates.OFF;
+  private HopperRollerStates currentState = HopperRollerStates.OFF;
+  private HopperRollerStates previousState = HopperRollerStates.OFF;
+
+  private static final double ROLLER_DUTY_CYCLE = 1.0;
+
+  public HopperRollerStates getState() {
+    return currentState;
+  }
+
+  private void updateState() {
+    previousState = currentState;
+
+    switch (wantedState) {
+      case ROLLING:
+        currentState = HopperRollerStates.ROLLING;
+        break;
+      case OFF:
+      default:
+        currentState = HopperRollerStates.OFF;
+        break;
+    }
+  }
+
+  private void applyState() {
+    switch (currentState) {
+      case ROLLING:
+        setDutyCycle(ROLLER_DUTY_CYCLE);
+        break;
+      case OFF:
+      default:
+        stop();
+        break;
+    }
+  }
+
   public HopperRoller(HopperRollerIO io) {
     this.io = io;
   }
