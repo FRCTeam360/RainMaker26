@@ -40,6 +40,11 @@ public final class Constants {
     REPLAY
   }
 
+  public static final class IOConstants {
+    // === USB PATHS ===
+    public static final String USB_ROOT_DIRECTORY = "/U";
+  }
+
   public static final CANBus RIO_CANBUS = new CANBus("rio");
 
   public static class WoodBotConstants {
