@@ -97,6 +97,8 @@ public class ShotCalculator {
     double hoodAngle = shotHoodAngleMap.get(distanceToTarget);
     double flywheelSpeed = launchFlywheelSpeedMap.get(distanceToTarget);
 
+    
+
     Logger.recordOutput("ShotCalculator/hubPosition", FieldConstants.Hub.topCenterPoint);
     Logger.recordOutput("ShotCalculator/distanceToTarget", distanceToTarget);
     Logger.recordOutput("ShotCalculator/targetFlywheelSpeed", flywheelSpeed);
@@ -107,6 +109,11 @@ public class ShotCalculator {
 
     return shootingParams;
   }
+  public Rotation2d getHubBearing() {
+    Translation2d hubPosition = AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint.toTranslation2d());
+    Pose2d robotPose = drivetrain.getPosition();
+    return hubPosition.minus(robotPose.getTranslation()).getAngle();
+}
 
   /**
    * Clears the cached shooting parameters, forcing a recalculation on the next call to {@link

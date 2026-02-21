@@ -133,7 +133,6 @@ public class Robot extends LoggedRobot {
     // this line or comment it out.
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
-      PPHolonomicDriveController.overrideRotationFeedback(null);
     }
   }
 

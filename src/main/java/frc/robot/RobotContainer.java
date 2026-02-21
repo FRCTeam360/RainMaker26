@@ -15,6 +15,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -48,9 +49,12 @@ import java.util.Objects;
 import org.littletonrobotics.junction.Logger;
 
 /**
- * This class is where the bulk of the robot should be declared. Since Command-based is a
- * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
- * periodic methods (other than the scheduler calls). Instead, the structure of the robot (including
+ * This class is where the bulk of the robot should be declared. Since
+ * Command-based is a
+ * "declarative" paradigm, very little robot logic should actually be handled in
+ * the {@link Robot}
+ * periodic methods (other than the scheduler calls). Instead, the structure of
+ * the robot (including
  * subsystems, commands, and trigger mappings) should be declared here.
  */
 public class RobotContainer {
@@ -80,16 +84,17 @@ public class RobotContainer {
 
   private static final double FLYWHEEL_KICKER_WARMUP_VELOCITY_RPM = 4000.0;
 
-  /** The container for the robot. Contains subsystems, OI devices, and commands. */
+  /**
+   * The container for the robot. Contains subsystems, OI devices, and commands.
+   */
   public RobotContainer() {
     switch (Constants.getRobotType()) {
       case SIM:
         drivetrain = WoodBotDrivetrain.createDrivetrain();
         logger = new Telemetry(WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
         intakePivot = new IntakePivot(new IntakePivotIOSim());
-        vision =
-            new Vision(
-                Map.of("photonSim", new VisionIOPhotonSim(() -> drivetrain.getState().Pose)));
+        vision = new Vision(
+            Map.of("photonSim", new VisionIOPhotonSim(() -> drivetrain.getState().Pose)));
         flywheel = new Flywheel(new FlywheelIOSim());
         hood = new Hood(new HoodIOSim());
         indexer = new Indexer(new IndexerIOSim());
@@ -103,25 +108,24 @@ public class RobotContainer {
         flywheel = new Flywheel(new FlywheelIOWB());
         hood = new Hood(new HoodIOWB());
         indexer = new Indexer(new IndexerIOWB());
-        vision =
-            new Vision(
-                Map.ofEntries(
-                    Map.entry(
+        vision = new Vision(
+            Map.ofEntries(
+                Map.entry(
+                    Constants.WoodBotConstants.LIMELIGHT_3,
+                    new VisionIOLimelight(
                         Constants.WoodBotConstants.LIMELIGHT_3,
-                        new VisionIOLimelight(
-                            Constants.WoodBotConstants.LIMELIGHT_3,
-                            () -> drivetrain.getAngle(),
-                            () -> drivetrain.getAngularRate(),
-                            true,
-                            false)),
-                    Map.entry(
+                        () -> drivetrain.getAngle(),
+                        () -> drivetrain.getAngularRate(),
+                        true,
+                        false)),
+                Map.entry(
+                    Constants.WoodBotConstants.LIMELIGHT_4,
+                    new VisionIOLimelight(
                         Constants.WoodBotConstants.LIMELIGHT_4,
-                        new VisionIOLimelight(
-                            Constants.WoodBotConstants.LIMELIGHT_4,
-                            () -> drivetrain.getAngle(),
-                            () -> drivetrain.getAngularRate(),
-                            true,
-                            true))));
+                        () -> drivetrain.getAngle(),
+                        () -> drivetrain.getAngularRate(),
+                        true,
+                        true))));
         intake = new Intake(new IntakeIOWB());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOWB());
         // intakePivot = new IntakePivot(new IntakePivotIOPB());
@@ -129,16 +133,15 @@ public class RobotContainer {
     shotCalculator = new ShotCalculator(drivetrain);
     // Configure the trigger bindings
     // TODO: Re-enable superStructure construction and PathPlanner commands
-    superStructure =
-        new SuperStructure(
-            intake,
-            indexer,
-            flywheelKicker,
-            flywheel,
-            hood,
-            drivetrain,
-            shotCalculator,
-            driverCont);
+    superStructure = new SuperStructure(
+        intake,
+        indexer,
+        flywheelKicker,
+        flywheel,
+        hood,
+        drivetrain,
+        shotCalculator,
+        driverCont);
 
     if (Objects.nonNull(superStructure)) {
       registerPathplannerCommand(
@@ -149,6 +152,16 @@ public class RobotContainer {
     registerPathplannerCommand(
         "run flywheel kicker",
         flywheelKicker.setVelocityCommand(FLYWHEEL_KICKER_WARMUP_VELOCITY_RPM));
+
+    registerPathplannerCommand(
+        "disable aim override",
+        Commands.runOnce(drivetrain::disableHeadingOverride));
+    registerPathplannerCommand(
+        "shoot at hub aimed",
+        Commands.sequence(
+            // Wait until aimed, then shoot
+            Commands.waitUntil(() -> drivetrain.isAimedAt(shotCalculator.getHubBearing(), 0.05)),
+            superStructure.setStateCommand(SuperStates.SHOOTING)));
     configureBindings();
     // configureTestBindings();
 
@@ -175,12 +188,17 @@ public class RobotContainer {
   }
 
   /**
-   * Use this method to define your trigger->command mappings. Triggers can be created via the
-   * {@link Trigger#Trigger(java.util.function.BooleanSupplier)} constructor with an arbitrary
+   * Use this method to define your trigger->command mappings. Triggers can be
+   * created via the
+   * {@link Trigger#Trigger(java.util.function.BooleanSupplier)} constructor with
+   * an arbitrary
    * predicate, or via the named factories in {@link
-   * edu.wpi.first.wpilibj2.command.button.CommandGenericHID}'s subclasses for {@link
-   * CommandXboxController Xbox}/{@link edu.wpi.first.wpilibj2.command.button.CommandPS4Controller
-   * PS4} controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
+   * edu.wpi.first.wpilibj2.command.button.CommandGenericHID}'s subclasses for
+   * {@link
+   * CommandXboxController
+   * Xbox}/{@link edu.wpi.first.wpilibj2.command.button.CommandPS4Controller
+   * PS4} controllers or
+   * {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
    * joysticks}.
    */
   private void configureTestBindings() {
@@ -211,11 +229,10 @@ public class RobotContainer {
   private void configureBindings() {
     // Only bind commands if the required subsystems/factories exist
     if (Objects.nonNull(vision)) {
-      Command consumeVisionMeasurements =
-          vision.consumeVisionMeasurements(
-              measurements -> {
-                drivetrain.addVisionMeasurements(measurements);
-              });
+      Command consumeVisionMeasurements = vision.consumeVisionMeasurements(
+          measurements -> {
+            drivetrain.addVisionMeasurements(measurements);
+          });
       vision.setDefaultCommand(consumeVisionMeasurements.ignoringDisable(true));
     }
     // TODO: make more elegant solution for null checking subsystems/commands
@@ -239,7 +256,7 @@ public class RobotContainer {
     // setHoodPosition uses hood
     if (Objects.nonNull(hood)) {
       // hood.setDefaultCommand(
-      //     CommandLogger.logCommand(hood.setPositionCmd(0.0), "hood default command"));
+      // CommandLogger.logCommand(hood.setPositionCmd(0.0), "hood default command"));
       driverCont.pov(0).onTrue(hood.moveToZeroAndZero());
       driverCont.pov(90).whileTrue(hood.setPositionCmd(4.0));
       driverCont.pov(180).whileTrue(hood.setPositionCmd(16.0));
@@ -268,7 +285,8 @@ public class RobotContainer {
 
   /** Stops all subsystems safely when the robot is disabled. */
   public void onDisable() {
-    if (Objects.nonNull(superStructure)) superStructure.setWantedSuperState(SuperStates.IDLE);
+    if (Objects.nonNull(superStructure))
+      superStructure.setWantedSuperState(SuperStates.IDLE);
     if (Objects.nonNull(drivetrain)) {
       drivetrain.setControl(new SwerveRequest.Idle());
     }
@@ -307,6 +325,7 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
-    return autoChooser.getSelected();
+    return autoChooser.getSelected()
+        .finallyDo(() -> drivetrain.disableHeadingOverride());
   }
 }
