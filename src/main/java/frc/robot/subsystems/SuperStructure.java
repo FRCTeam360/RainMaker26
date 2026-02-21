@@ -8,6 +8,8 @@ import frc.robot.subsystems.FlywheelKicker.FlywheelKicker.FlywheelKickerStates;
 import frc.robot.subsystems.Indexer.Indexer;
 import frc.robot.subsystems.Indexer.Indexer.IndexerStates;
 import frc.robot.subsystems.Intake.Intake;
+import frc.robot.subsystems.IntakePivot.IntakePivot;
+import frc.robot.subsystems.IntakePivot.IntakePivot.IntakePivotStates;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel.FlywheelStates;
 import frc.robot.subsystems.Shooter.Hood.Hood;
@@ -23,6 +25,7 @@ public class SuperStructure extends SubsystemBase {
   private final FlywheelKicker flywheelKicker;
   private final Flywheel flywheel;
   private final Hood hood;
+  private final IntakePivot intakePivot;
   private final ShotCalculator shotCalculator;
   private final BooleanSupplier isAlignedToTarget;
 
@@ -58,6 +61,7 @@ public class SuperStructure extends SubsystemBase {
       FlywheelKicker flywheelKicker,
       Flywheel flywheel,
       Hood hood,
+      IntakePivot intakePivot,
       ShotCalculator shotCalculator,
       BooleanSupplier isAlignedToTarget) {
     this.intake = intake;
@@ -65,6 +69,7 @@ public class SuperStructure extends SubsystemBase {
     this.flywheelKicker = flywheelKicker;
     this.flywheel = flywheel;
     this.hood = hood;
+    this.intakePivot = intakePivot;
     this.shotCalculator = shotCalculator;
     this.isAlignedToTarget = isAlignedToTarget;
 
@@ -148,6 +153,7 @@ public class SuperStructure extends SubsystemBase {
 
   private void intaking() {
     intake.setWantedState(Intake.IntakeStates.INTAKING);
+    intakePivot.setWantedState(IntakePivotStates.DEPLOYED);
     // indexer.setWantedState(Indexer.IndexerStates.INTAKING);
   }
 
@@ -157,6 +163,7 @@ public class SuperStructure extends SubsystemBase {
     flywheelKicker.setWantedState(FlywheelKickerStates.OFF);
     flywheel.setWantedState(FlywheelStates.OFF);
     hood.setWantedState(HoodStates.OFF);
+    intakePivot.setWantedState(IntakePivotStates.OFF);
   }
 
   public Command setStateCommand(SuperStates superState) {

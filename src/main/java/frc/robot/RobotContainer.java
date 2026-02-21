@@ -159,6 +159,7 @@ public class RobotContainer {
             flywheelKicker,
             flywheel,
             hood,
+            intakePivot,
             shotCalculator,
             drivetrain::isAlignedToTarget);
 

@@ -13,12 +13,59 @@ public class IntakePivot extends SubsystemBase {
   public final IntakePivotIOInputsAutoLogged inputs = new IntakePivotIOInputsAutoLogged();
   public final IntakePivotIO io;
   private final IntakePivotVisualizer visualizer;
+  private static final double STOWED_POSITION = 0.0;
+  private static final double DEPLOYED_POSITION = 90.0;
+
+  public enum IntakePivotStates {
+    OFF,
+    STOWED,
+    DEPLOYED,
+  }
+
+  private IntakePivotStates wantedState = IntakePivotStates.OFF;
+  private IntakePivotStates previousState = IntakePivotStates.OFF;
+  private IntakePivotStates currentState = IntakePivotStates.OFF;
+
+  private void updateState() {
+    previousState = currentState;
+    switch (wantedState) {
+      case STOWED:
+        currentState = IntakePivotStates.STOWED;
+        break;
+      case DEPLOYED:
+        currentState = IntakePivotStates.DEPLOYED;
+        break;
+      default:
+        currentState = IntakePivotStates.OFF;
+        break;
+    }
+  }
+
+  private void applyState() {
+    switch (currentState) {
+      case DEPLOYED:
+        setPosition(DEPLOYED_POSITION);
+      case STOWED:
+        setPosition(STOWED_POSITION);
+      case OFF:
+      default:
+        setPosition(0.0);
+    }
+  }
 
   /** Creates a new IntakePivot. */
   public IntakePivot(IntakePivotIO io) {
     this.io = io;
     // Initialize visualizer with arm length in meters (30 inches = 0.762 m)
     this.visualizer = new IntakePivotVisualizer(0.762);
+  }
+
+  public IntakePivotStates getState() {
+    return currentState;
+  }
+
+  public void setWantedState(IntakePivotStates state) {
+    wantedState = state;
   }
 
   public void setPosition(double value) {
@@ -46,6 +93,11 @@ public class IntakePivot extends SubsystemBase {
     io.updateInputs(inputs);
     Logger.processInputs("IntakePivot", inputs);
 
+    updateState();
+    applyState();
+    Logger.recordOutput("Subsystems/IntakePivot/WantedState", wantedState.toString());
+    Logger.recordOutput("Subsystems/IntakePivot/CurrentState", currentState.toString());
+    Logger.recordOutput("Subsystems/IntakePivot/PreviousState", previousState.toString());
     // Update visualization with current arm angle (convert rotations to radians)
     visualizer.update(inputs.position * 2.0 * Math.PI);
   }
