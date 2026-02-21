@@ -55,7 +55,7 @@ public class IntakeIOWB implements IntakeIO {
   public void updateInputs(IntakeIOInputs inputs) {
     inputs.position = encoder.getPosition();
     inputs.sensor = sensor.get();
-    inputs.supplyCurrent = motor.getOutputCurrent() * motor.getAppliedOutput();
+    inputs.supplyCurrent = 0;
     inputs.statorCurrent = motor.getOutputCurrent(); // TODO: check i
     // this is right
     inputs.velocity = encoder.getVelocity();
