@@ -12,10 +12,16 @@ import org.littletonrobotics.junction.Logger;
 public class Indexer extends SubsystemBase {
   private final IndexerIO io;
   private final IndexerIOInputsAutoLogged inputs = new IndexerIOInputsAutoLogged();
+  private static final double INDEXER_DUTY_CYCLE = 0.4;
 
   public enum IndexerStates {
     OFF,
     INTAKING,
+    SHOOTING
+  }
+
+  public IndexerStates getState() {
+    return currentState;
   }
 
   private IndexerStates wantedState = IndexerStates.OFF;
@@ -29,6 +35,10 @@ public class Indexer extends SubsystemBase {
       case INTAKING:
         currentState = IndexerStates.INTAKING;
         break;
+
+      case SHOOTING:
+        currentState = IndexerStates.SHOOTING;
+        break;
       case OFF:
         currentState = IndexerStates.OFF;
         break;
@@ -38,7 +48,10 @@ public class Indexer extends SubsystemBase {
   private void applyState() {
     switch (currentState) {
       case INTAKING:
-        setDutyCycle(0.2);
+        setDutyCycle(INDEXER_DUTY_CYCLE);
+        break;
+      case SHOOTING:
+        setDutyCycle(INDEXER_DUTY_CYCLE);
         break;
       case OFF:
       default:
@@ -54,8 +67,6 @@ public class Indexer extends SubsystemBase {
 
   public void setWantedState(IndexerStates state) {
     wantedState = state;
-    updateState();
-    applyState();
   }
 
   public void setDutyCycle(double dutyCycle) {
@@ -70,15 +81,21 @@ public class Indexer extends SubsystemBase {
     return this.runEnd(() -> io.setDutyCycle(valueSup.getAsDouble()), () -> io.setDutyCycle(0.0));
   }
 
+  public void setVelocity(double velocity) {
+    io.setVelocity(velocity);
+  }
+
   public void stop() {
     io.setDutyCycle(0.0);
   }
 
   @Override
   public void periodic() {
-
     io.updateInputs(inputs);
     Logger.processInputs("Indexer", inputs);
+
+    updateState();
+    applyState();
     Logger.recordOutput("Subsystems/Indexer/WantedState", wantedState.toString());
     Logger.recordOutput("Subsystems/Indexer/CurrentState", currentState.toString());
     Logger.recordOutput("Subsystems/Indexer/PreviousState", previousState.toString());

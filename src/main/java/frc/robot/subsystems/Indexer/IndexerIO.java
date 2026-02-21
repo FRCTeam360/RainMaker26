@@ -17,9 +17,13 @@ public interface IndexerIO {
     public double position = 0.0;
     // capacity sensor
     public boolean sensor = false;
+    public double sensorProximity = 0.0;
+    public boolean sensorActivated = false;
   }
 
   public default void updateInputs(IndexerIOInputs inputs) {}
 
   public void setDutyCycle(double dutyCycle);
+
+  public void setVelocity(double velocity);
 }

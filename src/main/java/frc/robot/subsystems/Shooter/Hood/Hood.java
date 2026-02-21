@@ -13,13 +13,12 @@ import org.littletonrobotics.junction.Logger;
 public class Hood extends SubsystemBase {
   private final HoodIO io;
   private final HoodIOInputsAutoLogged inputs = new HoodIOInputsAutoLogged();
-  private final double TOLERANCE = 0.5;
+  private static final double TOLERANCE = 0.5;
   private DoubleSupplier hoodAngleSupplier = () -> 0.0;
 
   public enum HoodStates {
     OFF,
-    SPINUP_SHOOTING,
-    AIMING
+    SHOOTING
   }
 
   /**
@@ -37,16 +36,11 @@ public class Hood extends SubsystemBase {
 
   public void setWantedState(HoodStates state) {
     wantedState = state;
-    updateState();
-    applyState();
   }
 
   private void applyState() {
     switch (currentState) {
-      case SPINUP_SHOOTING:
-        setPosition(6.0);
-        break;
-      case AIMING:
+      case SHOOTING:
         setPosition(hoodAngleSupplier.getAsDouble());
         break;
       case OFF:
@@ -56,15 +50,16 @@ public class Hood extends SubsystemBase {
     }
   }
 
+  public HoodStates getState() {
+    return currentState;
+  }
+
   private void updateState() {
     previousState = currentState;
 
     switch (wantedState) {
-      case SPINUP_SHOOTING:
-        currentState = HoodStates.SPINUP_SHOOTING;
-        break;
-      case AIMING:
-        currentState = HoodStates.AIMING;
+      case SHOOTING:
+        currentState = HoodStates.SHOOTING;
         break;
       case OFF:
       default:
@@ -90,12 +85,16 @@ public class Hood extends SubsystemBase {
     return inputs.position;
   }
 
-  public Command setPositionCmd(double position) {
-    return this.runOnce(() -> io.setPosition(position));
+  public Command setPositionCmd(DoubleSupplier position) {
+    return this.run(() -> io.setPosition(position.getAsDouble()));
   }
 
-  public void setEncoder(double position) {
-    io.setEncoder(position);
+  public Command setPositionCmd(double position) {
+    return this.setPositionCmd(() -> position);
+  }
+
+  public void setZero() {
+    io.setZero();
   }
 
   public void stop() {
@@ -106,19 +105,27 @@ public class Hood extends SubsystemBase {
     return Math.abs(getPosition() - setpoint) < TOLERANCE;
   }
 
+  public boolean atSetpoint(DoubleSupplier setpoint) {
+    return atSetpoint(setpoint.getAsDouble());
+  }
+
   public Command moveToZeroAndZero() {
-    return Commands.waitUntil(
-            () -> Math.abs(inputs.supplyCurrent) >= 30.0 && Math.abs(inputs.velocity) == 0.0)
-        .deadlineFor(this.runEnd(() -> io.setDutyCycle(0.1), () -> io.setDutyCycle(0.0)))
-        // TODO make this call this.zero()
-        .andThen(runOnce(() -> inputs.position = 0.0));
+    final double ZERO_DUTY_CYCLE = -0.03;
+    final double ZERO_TIMEOUT_SECONDS = 3.0;
+    final double ZERO_SETTLE_SECONDS = 2.0;
+    return Commands.runEnd(() -> io.setDutyCycle(ZERO_DUTY_CYCLE), () -> io.setDutyCycle(0.0))
+        .withTimeout(ZERO_TIMEOUT_SECONDS)
+        .andThen(Commands.waitSeconds(ZERO_SETTLE_SECONDS))
+        .andThen(zero());
   }
 
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
     io.updateInputs(inputs);
     Logger.processInputs("Hood", inputs);
+
+    updateState();
+    applyState();
     Logger.recordOutput("Subsystems/Hood/WantedState", wantedState.toString());
     Logger.recordOutput("Subsystems/Hood/CurrentState", currentState.toString());
     Logger.recordOutput("Subsystems/Hood/PreviousState", previousState.toString());
@@ -133,6 +140,6 @@ public class Hood extends SubsystemBase {
   }
 
   public Command zero() {
-    return this.runOnce(() -> setEncoder(0.0));
+    return this.runOnce(() -> setZero());
   }
 }

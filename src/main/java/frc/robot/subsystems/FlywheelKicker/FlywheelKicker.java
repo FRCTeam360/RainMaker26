@@ -15,7 +15,11 @@ public class FlywheelKicker extends SubsystemBase {
 
   public enum FlywheelKickerStates {
     OFF,
-    SPINUP_SHOOTING
+    SHOOTING
+  }
+
+  public FlywheelKickerStates getState() {
+    return currentState;
   }
 
   private FlywheelKickerStates wantedState = FlywheelKickerStates.OFF;
@@ -24,14 +28,14 @@ public class FlywheelKicker extends SubsystemBase {
 
   public void setWantedState(FlywheelKickerStates state) {
     wantedState = state;
-    updateState();
-    applyState();
   }
+
+  private static final double KICKER_VELOCITY_RPM = 4500.0;
 
   private void applyState() {
     switch (currentState) {
-      case SPINUP_SHOOTING:
-        setDutyCycle(1.0);
+      case SHOOTING:
+        setVelocity(KICKER_VELOCITY_RPM);
         break;
       case OFF:
       default:
@@ -44,8 +48,8 @@ public class FlywheelKicker extends SubsystemBase {
     previousState = currentState;
 
     switch (wantedState) {
-      case SPINUP_SHOOTING:
-        currentState = FlywheelKickerStates.SPINUP_SHOOTING;
+      case SHOOTING:
+        currentState = FlywheelKickerStates.SHOOTING;
         break;
       case OFF:
       default:
@@ -85,9 +89,11 @@ public class FlywheelKicker extends SubsystemBase {
 
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
     io.updateInputs(inputs);
     Logger.processInputs("FlywheelKicker", inputs);
+
+    updateState();
+    applyState();
     Logger.recordOutput("Subsystems/FlywheelKicker/WantedState", wantedState.toString());
     Logger.recordOutput("Subsystems/FlywheelKicker/CurrentState", currentState.toString());
     Logger.recordOutput("Subsystems/FlywheelKicker/PreviousState", previousState.toString());
