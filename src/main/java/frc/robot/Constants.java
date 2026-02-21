@@ -43,8 +43,6 @@ public final class Constants {
   public static final class IOConstants {
     // === USB PATHS ===
     public static final String USB_ROOT_DIRECTORY = "/U";
-    public static final String USB_LOGS_DIRECTORY = "/U/logs";
-    public static final String USB_EXPORTS_DIRECTORY = "/U/exports";
   }
 
   public static final CANBus RIO_CANBUS = new CANBus("rio");
