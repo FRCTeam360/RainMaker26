@@ -15,6 +15,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -158,8 +159,7 @@ public class RobotContainer {
         break;
     }
     shotCalculator = new ShotCalculator(drivetrain);
-    // Configure the trigger bindings
-    // TODO: Re-enable superStructure construction and PathPlanner commands
+
     superStructure =
         new SuperStructure(
             intake,
@@ -167,15 +167,27 @@ public class RobotContainer {
             flywheelKicker,
             flywheel,
             hood,
-            drivetrain,
             shotCalculator,
-            driverCont);
+            drivetrain::isAlignedToTarget);
 
     if (Objects.nonNull(superStructure)) {
       registerPathplannerCommand(
           "basic intake", superStructure.setStateCommand(SuperStates.INTAKING));
-      registerPathplannerCommand(
-          "shoot at hub", superStructure.setStateCommand(SuperStates.SHOOTING));
+      if (Objects.nonNull(drivetrain)) {
+        // TODO: add end condition based on state from SuperStructure (based on sensor inputs)
+        registerPathplannerCommand(
+            "shoot at hub",
+            Commands.waitSeconds(10)
+                .deadlineFor(
+                    superStructure
+                        .setStateCommand(SuperStates.SHOOTING)
+                        .alongWith(
+                            drivetrain.faceAngleWhileDrivingCommand(
+                                () -> 0,
+                                () -> 0,
+                                () -> shotCalculator.calculateShot().targetHeading())))
+                .andThen(superStructure.setStateCommand(SuperStates.IDLE)));
+      }
     }
     registerPathplannerCommand(
         "run flywheel kicker",
@@ -250,11 +262,30 @@ public class RobotContainer {
       vision.setDefaultCommand(consumeVisionMeasurements.ignoringDisable(true));
     }
     // TODO: make more elegant solution for null checking subsystems/commands
+    if (Objects.nonNull(drivetrain)) {
+      drivetrain.setDefaultCommand(drivetrain.fieldOrientedDriveCommand(driverCont));
+    }
+
+    if (Objects.nonNull(superStructure) && Objects.nonNull(drivetrain)) {
+      // Linked pair: whileTrue sets SHOOTING + aims, onFalse resets to IDLE.
+      // The InstantCommand (setStateCommand) finishes immediately; the alongWith group
+      // stays alive via faceAngleWhileDrivingCommand until whileTrue interrupts it.
+      driverCont
+          .rightTrigger()
+          .whileTrue(
+              superStructure
+                  .setStateCommand(SuperStates.SHOOTING)
+                  .alongWith(
+                      drivetrain.faceAngleWhileDrivingCommand(
+                          driverCont, () -> shotCalculator.calculateShot().targetHeading())));
+      // Must stay paired with the whileTrue above to reset state on trigger release
+      driverCont.rightTrigger().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
+    }
 
     // Null checks based on subsystems used by each command
     // basicIntakeCmd uses intake and indexer
     // TODO: Re-enable superStructure bindings
-    if (Objects.nonNull(intake) && Objects.nonNull(indexer)) {
+    if (Objects.nonNull(superStructure) && Objects.nonNull(intake) && Objects.nonNull(indexer)) {
       driverCont.leftBumper().onTrue(superStructure.setStateCommand(SuperStates.INTAKING));
       driverCont.leftBumper().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
       driverCont.a().whileTrue(indexer.setDutyCycleCommand(0.5));
@@ -283,10 +314,6 @@ public class RobotContainer {
       driverCont.x().whileTrue(flywheel.setVelocityCommand(2500));
       driverCont.b().whileTrue(flywheel.setVelocityCommand(3000));
       driverCont.y().whileTrue(flywheel.setVelocityCommand(3500));
-      if (Objects.nonNull(superStructure)) {
-        driverCont.rightTrigger().onTrue(superStructure.setStateCommand(SuperStates.SHOOTING));
-        driverCont.rightTrigger().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
-      }
     }
 
     // Drivetrain commands
@@ -323,8 +350,12 @@ public class RobotContainer {
     }
   }
 
-  /** Runs the given calls on periodic before commands are scheduled */
-  public void periodic() {
+  /**
+   * Pre-computes cached values (e.g. shot parameters) before the command scheduler runs. Must be
+   * called in {@link Robot#robotPeriodic()} before {@link
+   * edu.wpi.first.wpilibj2.command.CommandScheduler#run()}.
+   */
+  public void preSchedulerUpdate() {
     if (Objects.nonNull(shotCalculator)) {
       shotCalculator.clearShootingParams();
       shotCalculator.calculateShot();

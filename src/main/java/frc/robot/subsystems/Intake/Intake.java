@@ -38,8 +38,6 @@ public class Intake extends SubsystemBase {
 
   public void setWantedState(IntakeStates state) {
     wantedState = state;
-    updateState();
-    applyState();
   }
 
   private void updateState() {
@@ -125,6 +123,9 @@ public class Intake extends SubsystemBase {
   public void periodic() {
     io.updateInputs(inputs);
     Logger.processInputs("Intake", inputs);
+
+    updateState();
+    applyState();
     Logger.recordOutput("Subsystems/Intake/WantedState", wantedState.toString());
     Logger.recordOutput("Subsystems/Intake/CurrentState", currentState.toString());
     Logger.recordOutput("Subsystems/Intake/PreviousState", previousState.toString());
