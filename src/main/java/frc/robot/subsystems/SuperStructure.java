@@ -15,7 +15,6 @@ import frc.robot.subsystems.IntakePivot.IntakePivot.IntakePivotStates;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel.FlywheelStates;
 import frc.robot.subsystems.Shooter.Hood.Hood;
-import frc.robot.subsystems.Shooter.Hood.Hood.HoodStates;
 import frc.robot.subsystems.Shooter.ShotCalculator;
 import frc.robot.subsystems.Shooter.ShotCalculator.ShootingParams;
 import java.util.function.BooleanSupplier;
@@ -79,7 +78,8 @@ public class SuperStructure extends SubsystemBase {
     this.isAlignedToTarget = isAlignedToTarget;
 
     flywheel.setVelocitySupplier(() -> shotCalculator.calculateShot().flywheelSpeed());
-    hood.setHoodAngleSupplier(() -> shotCalculator.calculateShot().hoodAngle());
+    // hood.setHoodAngleSupplier(() -> shotCalculator.calculateShot().hoodAngle()); FIX ME WHEN
+    // BETTER HOOD
   }
 
   private void updateState() {
@@ -126,14 +126,14 @@ public class SuperStructure extends SubsystemBase {
     previousShooterState = currentShooterState;
     ShootingParams shotParams = shotCalculator.calculateShot();
     boolean flywheelReady = flywheel.atSetpoint(shotParams.flywheelSpeed(), FLYWHEEL_TOLERANCE_RPM);
-    boolean hoodReady = hood.atSetpoint(shotParams.hoodAngle());
+    // boolean hoodReady = hood.atSetpoint(shotParams.hoodAngle()); FIX ME WHEN BETTER HOOD
     boolean aligned = isAlignedToTarget.getAsBoolean();
 
     Logger.recordOutput("Superstructure/Shooting/FlywheelReady", flywheelReady);
-    Logger.recordOutput("Superstructure/Shooting/HoodReady", hoodReady);
+    // Logger.recordOutput("Superstructure/Shooting/HoodReady", hoodReady); FIX ME WHEN BETTER HOOD
     Logger.recordOutput("Superstructure/Shooting/Aligned", aligned);
 
-    if (flywheelReady && hoodReady && aligned) {
+    if (flywheelReady && aligned) { // ADD HOOD CHECK WHEN BETTER HOOD
       currentShooterState = ShooterStates.FIRING;
     } else {
       currentShooterState = ShooterStates.PREPARING;
@@ -155,7 +155,7 @@ public class SuperStructure extends SubsystemBase {
 
   private void shooting() {
     flywheel.setWantedState(FlywheelStates.SHOOTING);
-    hood.setWantedState(HoodStates.SHOOTING);
+    // hood.setWantedState(HoodStates.SHOOTING); FIX ME WHEN BETTER HOOD
   }
 
   private void intaking() {
@@ -169,7 +169,7 @@ public class SuperStructure extends SubsystemBase {
     indexer.setWantedState(Indexer.IndexerStates.OFF);
     flywheelKicker.setWantedState(FlywheelKickerStates.OFF);
     flywheel.setWantedState(FlywheelStates.OFF);
-    hood.setWantedState(HoodStates.OFF);
+    // hood.setWantedState(HoodStates.OFF); FIX ME WHEN BETTER HOOD
     intakePivot.setWantedState(IntakePivotStates.OFF);
   }
 
