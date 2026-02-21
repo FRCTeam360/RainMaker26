@@ -1,3 +1,5 @@
+import com.github.spotbugs.snom.Confidence
+
 plugins {
     id "java"
     id 'com.diffplug.spotless' version '6.25.0'
@@ -57,11 +59,22 @@ gversion {
 
 // SpotBugs static analysis
 spotbugs {
-    ignoreFailures = false
     excludeFilter = file('spotbugs-exclude.xml')
 }
 
-tasks.withType(com.github.spotbugs.snom.SpotBugsTask) {
+// Only run SpotBugs when explicitly invoked (e.g., ./gradlew spotbugsMain or ./gradlew release).
+// Skips automatically during build/check lifecycle.
+// release: fails on HIGH confidence bugs only.
+// Standalone (spotbugsMain): reports MEDIUM+ confidence bugs but does not fail the build.
+tasks.withType(com.github.spotbugs.snom.SpotBugsTask).configureEach {
+    def isRelease = gradle.startParameter.taskNames.any { it.toLowerCase() == 'release' }
+    reportLevel = isRelease ? Confidence.HIGH : Confidence.MEDIUM
+    ignoreFailures = !isRelease
+    onlyIf {
+        gradle.startParameter.taskNames.any { name ->
+            name.toLowerCase().contains('spotbugs') || name.toLowerCase() == 'release'
+        }
+    }
     reports {
         html {
             required = true
@@ -72,12 +85,12 @@ tasks.withType(com.github.spotbugs.snom.SpotBugsTask) {
     }
 }
 
-// Only run SpotBugs when explicitly invoked (e.g., ./gradlew spotbugsMain).
-// Skips automatically during build/check lifecycle.
-tasks.withType(com.github.spotbugs.snom.SpotBugsTask).configureEach {
-    onlyIf {
-        gradle.startParameter.taskNames.any { it.toLowerCase().contains('spotbugs') }
-    }
+// Pre-push release check: compile, and static analysis.
+// Run with: ./gradlew release
+task release {
+    group = 'release'
+    description = 'Full pre-push check: build, test, and SpotBugs static analysis.'
+    dependsOn build, test, spotbugsMain
 }
 
 // Spotless formatting

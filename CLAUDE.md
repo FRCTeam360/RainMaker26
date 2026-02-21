@@ -87,7 +87,11 @@ Apply formatting with: ./gradlew spotlessApply
 
 Run SpotBugs to find potential bugs: ./gradlew spotbugsMain
 View the report: open build/reports/spotbugs/spotbugs.html
-**Note:** SpotBugs is diagnostic only. Findings are informational and should not block PRs from merging.
+
+## Pre-push Release Check
+
+Run before pushing to GitHub: ./gradlew release
+This runs build + tests + SpotBugs static analysis. SpotBugs failures will fail the task.
 
 ## Code Patterns
 
