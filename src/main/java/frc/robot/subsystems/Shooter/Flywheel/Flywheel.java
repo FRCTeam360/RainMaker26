@@ -6,6 +6,8 @@ package frc.robot.subsystems.Shooter.Flywheel;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.Shooter.Hood.Hood.HoodStates;
+
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -13,11 +15,12 @@ public class Flywheel extends SubsystemBase {
   private final FlywheelIO io;
   private final FlywheelIOInputsAutoLogged inputs = new FlywheelIOInputsAutoLogged();
   private DoubleSupplier shootVelocitySupplier = () -> 0.0;
-  private DoubleSupplier passVelocitySupplier = () -> 0.0;
+  private static final double TOLERANCE = 100.0;
 
   public enum FlywheelStates {
     OFF,
-    SHOOTING
+    AT_SETPOINT,
+    MOVING_TO_SETPOINT
   }
 
   /** Creates a new Flywheel. */
@@ -46,9 +49,16 @@ public class Flywheel extends SubsystemBase {
     previousState = currentState;
 
     switch (wantedState) {
-      case SHOOTING:
-        currentState = FlywheelStates.SHOOTING;
+      case AT_SETPOINT:
+      if (atSetpoint(shootVelocitySupplier, TOLERANCE)) {
+          currentState = FlywheelStates.AT_SETPOINT;
+        } else {
+          currentState = FlywheelStates.MOVING_TO_SETPOINT;
+        }
+        currentState = FlywheelStates.AT_SETPOINT;
         break;
+      case MOVING_TO_SETPOINT:
+        currentState = FlywheelStates.MOVING_TO_SETPOINT;
       case OFF:
         currentState = FlywheelStates.OFF;
         break;
@@ -77,7 +87,8 @@ public class Flywheel extends SubsystemBase {
 
   private void applyState() {
     switch (currentState) {
-      case SHOOTING:
+      case MOVING_TO_SETPOINT:
+      case AT_SETPOINT:
         setVelocity(shootVelocitySupplier.getAsDouble());
         break;
       case OFF:

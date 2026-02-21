@@ -132,7 +132,7 @@ public class SuperStructure extends SubsystemBase {
 
   private void updateShooterStates() {
     previousShooterState = currentShooterState;
-    boolean flywheelReady = flywheel.getState() == FlywheelStates.SHOOTING;
+    boolean flywheelReady = flywheel.getState() == FlywheelStates.AT_SETPOINT;
     boolean hoodReady = hood.getState() == HoodStates.AT_SETPOINT;
     boolean aligned = isAlignedToTarget.getAsBoolean();
 
@@ -159,7 +159,7 @@ public class SuperStructure extends SubsystemBase {
   }
 
   private void shooting() {
-    flywheel.setWantedState(FlywheelStates.SHOOTING);
+    flywheel.setWantedState(FlywheelStates.AT_SETPOINT);
     hood.setWantedState(HoodStates.MOVING_TO_SETPOINT);
   }
 
@@ -169,7 +169,7 @@ public class SuperStructure extends SubsystemBase {
   }
 
   private void passing(Translation2d targetPosition) {
-    flywheel.setWantedState(FlywheelStates.SHOOTING);
+    flywheel.setWantedState(FlywheelStates.AT_SETPOINT);
   }
 
   private void stopped() {
