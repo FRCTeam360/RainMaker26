@@ -81,6 +81,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   private static final double HEADING_KI = 0.00;
   private static final double HEADING_KD = 0.005;
   private static final double HEADING_I_ZONE = 0.0;
+  private static final double HEADING_TOLERANCE_RAD = Math.toRadians(3.0);
 
   // Field-centric facing angle request for hub tracking
   private final SwerveRequest.FieldCentricFacingAngle m_faceHubRequest =
@@ -123,28 +124,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
           .withRotationalDeadband(maxAngularVelocity.in(RadiansPerSecond) * 0.01)
           .withDriveRequestType(m_driveRequestType);
 
-  public void fieldOrientedDrive(CommandXboxController driveCont) {
-    FIELD_CENTRIC_DRIVE.ForwardPerspective = ForwardPerspectiveValue.OperatorPerspective;
-    this.setControl(
-        FIELD_CENTRIC_DRIVE
-            .withVelocityX(
-                Math.pow(driveCont.getLeftY(), 3)
-                    * maxSpeed.in(MetersPerSecond)
-                    * -1.0) // Drive forward with negative Y (forward)
-            .withVelocityY(
-                Math.pow(driveCont.getLeftX(), 3)
-                    * maxSpeed.in(MetersPerSecond)
-                    * -1.0) // Drive left with negative X (left)
-            .withRotationalRate(
-                Math.pow(driveCont.getRightX(), 2)
-                    * (maxAngularVelocity.in(RadiansPerSecond) / 2.0)
-                    * -Math.signum(driveCont.getRightX())) // Drive
-        // counterclockwise
-        // with negative X
-        // (left)
-        );
-  }
-
   // Xout Command
   public void xOut() {
     this.setControl(xOutReq);
@@ -168,32 +147,18 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
       DoubleSupplier velocityYSupplier,
       Supplier<Rotation2d> headingSupplier) {
     return this.applyRequest(
-        () ->
-            m_faceHubRequest
-                .withVelocityX(
-                    DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
-                        ? velocityXSupplier.getAsDouble()
-                        : -velocityXSupplier.getAsDouble())
-                .withVelocityY(
-                    DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
-                        ? velocityYSupplier.getAsDouble()
-                        : -velocityYSupplier.getAsDouble())
-                .withTargetDirection(headingSupplier.get()));
-  }
-
-  public void faceAngleWhileDriving(double velocityX, double velocityY, Rotation2d heading) {
-    this.setControl(
-        m_faceHubRequest
-            .withVelocityX(
-                DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
-                    ? velocityX
-                    : -velocityX)
-            .withVelocityY(
-                DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
-                    ? velocityY
-                    : -velocityY)
-            .withTargetDirection(heading)
-            .withDeadband(maxSpeed.in(MetersPerSecond) * 0.01));
+            () ->
+                m_faceHubRequest
+                    .withVelocityX(
+                        DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
+                            ? velocityXSupplier.getAsDouble()
+                            : -velocityXSupplier.getAsDouble())
+                    .withVelocityY(
+                        DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
+                            ? velocityYSupplier.getAsDouble()
+                            : -velocityYSupplier.getAsDouble())
+                    .withTargetDirection(headingSupplier.get()))
+        .finallyDo(() -> m_faceHubRequest.HeadingController.reset());
   }
 
   /**
@@ -209,13 +174,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         () -> Math.pow(driveCont.getLeftY(), 3) * maxSpeed.in(MetersPerSecond) * -1.0,
         () -> Math.pow(driveCont.getLeftX(), 3) * maxSpeed.in(MetersPerSecond) * -1.0,
         headingSupplier);
-  }
-
-  public void faceAngleWhileDriving(CommandXboxController driveCont, Rotation2d heading) {
-    faceAngleWhileDriving(
-        Math.pow(driveCont.getLeftY(), 3) * maxSpeed.in(MetersPerSecond) * -1.0,
-        Math.pow(driveCont.getLeftX(), 3) * maxSpeed.in(MetersPerSecond) * -1.0,
-        heading);
   }
 
   /*
@@ -295,6 +253,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     m_faceHubRequest.HeadingController.setPID(HEADING_KP, HEADING_KI, HEADING_KD);
     m_faceHubRequest.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
     m_faceHubRequest.HeadingController.setIZone(HEADING_I_ZONE);
+    m_faceHubRequest.HeadingController.setTolerance(HEADING_TOLERANCE_RAD);
     m_faceHubRequest.ForwardPerspective = ForwardPerspectiveValue.BlueAlliance;
     if (Utils.isSimulation()) {
       startSimThread();
@@ -368,6 +327,21 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
   public Rotation2d getRotation2d() {
     return getPose2d().getRotation();
+  }
+
+  /**
+   * Returns whether the heading controller is aligned to its target angle within the configured
+   * tolerance. Uses the {@link com.ctre.phoenix6.swerve.utility.PhoenixPIDController#atSetpoint()}
+   * method on the facing-angle request's heading controller.
+   *
+   * <p>Note: This only returns meaningful results while a {@link
+   * SwerveRequest.FieldCentricFacingAngle} request is actively being applied (e.g., during
+   * faceAngleWhileDriving). Before the first PID calculation, this returns false.
+   *
+   * @return true if the heading error is within {@link #HEADING_TOLERANCE_RAD}
+   */
+  public boolean isAlignedToTarget() {
+    return m_faceHubRequest.HeadingController.atSetpoint();
   }
 
   public double getAngle() {

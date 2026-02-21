@@ -7,6 +7,8 @@ package frc.robot.subsystems.Indexer;
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
+import com.revrobotics.spark.SparkBase.ControlType;
+import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
@@ -21,11 +23,8 @@ public class IndexerIOWB implements IndexerIO {
       new SparkMax(Constants.WoodBotConstants.INDEXER_ID, MotorType.kBrushless);
 
   private final RelativeEncoder encoder = indexerMotor.getEncoder();
-  private final SparkMaxConfig config = new SparkMaxConfig();
-
-  private final DigitalInput sensor = new DigitalInput(WoodBotConstants.INDEXER_ID);
-
-  private final double CONVERSION_FACTOR = 1.0;
+  private final SparkMaxConfig sparkMaxConfig = new SparkMaxConfig();
+  private final SparkClosedLoopController closedLoopController;
 
   public IndexerIOWB() {
     config.idleMode(IdleMode.kBrake);
@@ -35,8 +34,13 @@ public class IndexerIOWB implements IndexerIO {
         .analogSensor
         .positionConversionFactor(CONVERSION_FACTOR)
         .velocityConversionFactor(CONVERSION_FACTOR);
+    sparkMaxConfig.closedLoop.p(0.0002).i(0.0).d(0.0);
+    sparkMaxConfig.closedLoop.feedForward.kV(0.0021).kS(0.04);
 
-    indexerMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    indexerMotor.configure(
+        sparkMaxConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
+    closedLoopController = indexerMotor.getClosedLoopController();
   }
 
   public void updateInputs(IndexerIOInputs inputs) {
@@ -51,5 +55,9 @@ public class IndexerIOWB implements IndexerIO {
 
   public void setDutyCycle(double dutyCycle) {
     indexerMotor.set(dutyCycle);
+  }
+
+  public void setVelocity(double rpm) {
+    closedLoopController.setSetpoint(rpm, ControlType.kVelocity);
   }
 }

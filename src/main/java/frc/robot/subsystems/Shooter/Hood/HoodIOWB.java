@@ -24,8 +24,8 @@ public class HoodIOWB implements HoodIO {
   private final SparkClosedLoopController controller;
   private static final double CONVERSION_FACTOR = 1.0;
 
-  public void setEncoder(double position) {
-    encoder.setPosition(position);
+  public void setZero() {
+    encoder.setPosition(0);
   }
 
   public HoodIOWB() {
