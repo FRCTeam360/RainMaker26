@@ -43,7 +43,6 @@ public class Intake extends SubsystemBase {
 
   private void updateState() {
     previousState = currentState;
-
     switch (wantedState) {
       case INTAKING:
         // if (isJammed()) {
