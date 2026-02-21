@@ -23,9 +23,9 @@ import edu.wpi.first.units.measure.LinearVelocity;
  */
 public final class Constants {
 
-  private static final double POSE_KP = 11.0;
-  private static final double POSE_KI = 0.0;
-  private static final double POSE_KD = 0.0;
+  public static final double POSE_KP = 11.0;
+  public static final double POSE_KI = 0.0;
+  public static final double POSE_KD = 0.0;
 
   public static final AprilTagFieldLayout FIELD_LAYOUT =
       AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);

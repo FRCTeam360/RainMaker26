@@ -302,7 +302,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     m_faceHubRequest.ForwardPerspective = ForwardPerspectiveValue.BlueAlliance;
     headingController = new PhoenixPIDController(HEADING_KP, HEADING_KI, HEADING_KD);
     poseXController = new PhoenixPIDController(Constants.POSE_KP, Constants.POSE_KI, Constants.POSE_KD);
-    poseYController = new PhoenixPIDController(HEADING_KP, HEADING_KI, HEADING_KD);
+    poseYController = new PhoenixPIDController(Constants.POSE_KP, Constants.POSE_KI, Constants.POSE_KD);
     headingController.enableContinuousInput(-Math.PI, Math.PI);
     headingController.setTolerance(0.02, 0.05);   // 1 degree position, adjust as needed
     poseXController.setTolerance(0.05);           // 5cm position tolerance
