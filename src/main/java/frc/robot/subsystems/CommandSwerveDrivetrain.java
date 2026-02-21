@@ -49,6 +49,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   private PhoenixPIDController poseXController;
   private PhoenixPIDController poseYController;
 
+  private static final double POSE_KP = 11.0;
+  private static final double POSE_KI = 0.0;
+  private static final double POSE_KD = 0.0;
+
   private static final double kSimLoopPeriod = 0.004; // 4 ms
   private Notifier m_simNotifier = null;
   private double m_lastSimTime;
@@ -291,6 +295,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
    * @param drivetrainConstants Drivetrain-wide constants for the swerve drive
    * @param modules Constants for each specific module
    */
+
+  private static final FieldCentricFacingAngle request =
+        new SwerveRequest.FieldCentricFacingAngle().withDeadband(POSITION_DEADBAND_MPS);
+
   public CommandSwerveDrivetrain(
       SwerveDrivetrainConstants drivetrainConstants, SwerveModuleConstants<?, ?, ?>... modules) {
     super(drivetrainConstants, modules);
@@ -301,12 +309,17 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     m_faceHubRequest.HeadingController.setIZone(HEADING_I_ZONE);
     m_faceHubRequest.ForwardPerspective = ForwardPerspectiveValue.BlueAlliance;
     headingController = new PhoenixPIDController(HEADING_KP, HEADING_KI, HEADING_KD);
-    poseXController = new PhoenixPIDController(Constants.POSE_KP, Constants.POSE_KI, Constants.POSE_KD);
-    poseYController = new PhoenixPIDController(Constants.POSE_KP, Constants.POSE_KI, Constants.POSE_KD);
+    poseXController = new PhoenixPIDController(POSE_KP, POSE_KI, POSE_KD);
+    poseYController = new PhoenixPIDController(POSE_KP, POSE_KI, POSE_KD);
     headingController.enableContinuousInput(-Math.PI, Math.PI);
     headingController.setTolerance(0.02, 0.05);   // 1 degree position, adjust as needed
     poseXController.setTolerance(0.05);           // 5cm position tolerance
     poseYController.setTolerance(0.05);
+    request.HeadingController = headingController;
+    request.withDeadband(POSITION_DEADBAND_MPS);
+    request.withRotationalDeadband(ROTATIONAL_DEADBAND_RADS_PER_SEC);
+    request.ForwardPerspective = ForwardPerspectiveValue.BlueAlliance;
+    request.withDriveRequestType(DriveRequestType.Velocity);
     if (Utils.isSimulation()) {
       startSimThread();
     }
@@ -586,17 +599,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         new SwerveRequest.FieldCentricFacingAngle()
             .withVelocityX(x * Constants.maxSpeed.in(MetersPerSecond))
             .withVelocityY(y * Constants.maxSpeed.in(MetersPerSecond))
-            /* The driveToPose method was imported from 2025 code. That code's maxSpeed variable was a double,
-             * and could thus be multiplied to the (also a double variable) x or y. This year, "maxSpeed" is a
-             * LinearVelocityObject. A method to convert the value into MetersPerSecond was used. This may need
-             * to be converted into a different value, such as Rotations or Feet.
-             */
             .withTargetDirection(setpointPose.getRotation());
-    request.HeadingController = headingController;
-    request.withDeadband(POSITION_DEADBAND_MPS);
-    request.withRotationalDeadband(ROTATIONAL_DEADBAND_RADS_PER_SEC);
-    request.ForwardPerspective = ForwardPerspectiveValue.BlueAlliance;
-    request.withDriveRequestType(DriveRequestType.Velocity);
     this.setControl(request);
   }
 

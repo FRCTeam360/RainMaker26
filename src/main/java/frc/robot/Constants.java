@@ -23,10 +23,6 @@ import edu.wpi.first.units.measure.LinearVelocity;
  */
 public final class Constants {
 
-  public static final double POSE_KP = 11.0;
-  public static final double POSE_KI = 0.0;
-  public static final double POSE_KD = 0.0;
-
   public static final AprilTagFieldLayout FIELD_LAYOUT =
       AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
   public static final double SPINUP_SHOOTING_FLYWHEEL_RPM = 3250.0;
