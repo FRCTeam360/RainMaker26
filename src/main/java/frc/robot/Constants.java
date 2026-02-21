@@ -41,6 +41,11 @@ public final class Constants {
     REPLAY
   }
 
+  public static final class IOConstants {
+    // === USB PATHS ===
+    public static final String USB_ROOT_DIRECTORY = "/U";
+  }
+
   public static final CANBus RIO_CANBUS = new CANBus("rio");
 
   public static class WoodBotConstants {
@@ -92,11 +97,15 @@ public final class Constants {
   }
 
   public static class PracticeBotConstants {
+    // === INTAKE ===
+    public static final int INTAKE_PIVOT_ID = 14;
+    public static final int INTAKE_ID = 15;
+
+    // === CLIMBER ===
+    public static final int CLIMBER_RIGHT_ID = 16;
+    public static final int CLIMBER_LEFT_ID = 17;
 
     // FIXME: update these values TO REAL VALUES
-    public static final int INTAKE_ID = 71;
-    public static final int INTAKE_PIVOT_ID = 72;
-
     public static final int INDEXER_SENSOR_ID = 73;
     public static final int INDEXER_ID = 75;
 
@@ -139,8 +148,7 @@ public final class Constants {
 
   public static final class SerialAddressConstants {
     public static final String WOOD_SERIAL_ADDRESS = "032BE44A";
-    // FIXME: Enter the practice bot roboRIO serial address
-    public static final String PRACTICE_SERIAL_ADDRESS = "WRONG_SERIAL_ADDRESS";
+    public static final String PRACTICE_SERIAL_ADDRESS = "03260AD5";
   }
 
   public static double loopPeriodSecs; // add value
