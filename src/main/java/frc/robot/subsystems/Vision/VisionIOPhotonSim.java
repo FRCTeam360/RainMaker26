@@ -203,6 +203,15 @@ public class VisionIOPhotonSim implements VisionIO {
     // Snapshots are not simulated - no-op
   }
 
+  @Override
+  public void seedIMU() {}
+
+  @Override
+  public void enableIMUAssist() {}
+
+  @Override
+  public void setThrottle(int throttle) {}
+
   // ----- Simulation-specific methods -----
 
   /**

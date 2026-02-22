@@ -50,15 +50,15 @@ public interface VisionIO {
   public void resetSnapshot();
 
   /** Seeds the IMU with external orientation data. Only relevant for Limelight 4. */
-  default void seedIMU() {}
+  void seedIMU();
 
   /** Enables IMU assist mode. Only relevant for Limelight 4. */
-  default void enableIMUAssist() {}
+  void enableIMUAssist();
 
   /**
    * Sets the processing throttle. Only relevant for Limelight 4.
    *
    * @param throttle number of frames to skip between processed frames (0 = full speed)
    */
-  default void setThrottle(int throttle) {}
+  void setThrottle(int throttle);
 }
