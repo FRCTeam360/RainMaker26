@@ -15,10 +15,15 @@ public class Flywheel extends SubsystemBase {
   private DoubleSupplier shootVelocitySupplier = () -> 0.0;
   private static final double TOLERANCE_RPM = 100.0;
 
+  public enum FlywheelWantedStates {
+    IDLE,
+    AIMING
+  }
+
   public enum FlywheelStates {
     OFF,
-    AT_SETPOINT,
-    MOVING
+    MOVING,
+    AT_SETPOINT
   }
 
   /**
@@ -39,7 +44,7 @@ public class Flywheel extends SubsystemBase {
     return currentState;
   }
 
-  private FlywheelStates wantedState = FlywheelStates.OFF;
+  private FlywheelWantedStates wantedState = FlywheelWantedStates.IDLE;
   private FlywheelStates currentState = FlywheelStates.OFF;
   private FlywheelStates previousState = FlywheelStates.OFF;
 
@@ -58,17 +63,15 @@ public class Flywheel extends SubsystemBase {
   private void updateState() {
     previousState = currentState;
 
-    // State machine transitions
     switch (wantedState) {
-      case MOVING:
-      case AT_SETPOINT:
+      case AIMING:
         if (atSetpoint(shootVelocitySupplier.getAsDouble())) {
           currentState = FlywheelStates.AT_SETPOINT;
         } else {
           currentState = FlywheelStates.MOVING;
         }
         break;
-      case OFF:
+      case IDLE:
       default:
         currentState = FlywheelStates.OFF;
         break;
@@ -88,9 +91,8 @@ public class Flywheel extends SubsystemBase {
     }
   }
 
-  public void setWantedState(FlywheelStates state) {
+  public void setWantedState(FlywheelWantedStates state) {
     wantedState = state;
-    // State update will happen in periodic()
   }
 
   @Override

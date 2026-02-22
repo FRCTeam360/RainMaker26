@@ -10,6 +10,7 @@ import frc.robot.subsystems.Indexer.Indexer.IndexerStates;
 import frc.robot.subsystems.Intake.Intake;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel.FlywheelStates;
+import frc.robot.subsystems.Shooter.Flywheel.Flywheel.FlywheelWantedStates;
 import frc.robot.subsystems.Shooter.Hood.Hood;
 import frc.robot.subsystems.Shooter.ShotCalculator;
 import java.util.function.BooleanSupplier;
@@ -146,7 +147,7 @@ public class SuperStructure extends SubsystemBase {
   }
 
   private void applyShooterStates() {
-    shooting();
+    aiming();
     if (currentShooterState == ShooterStates.FIRING) {
       flywheelKicker.setWantedState(FlywheelKickerStates.SHOOTING);
       indexer.setWantedState(IndexerStates.SHOOTING);
@@ -156,9 +157,9 @@ public class SuperStructure extends SubsystemBase {
     }
   }
 
-  private void shooting() {
-    flywheel.setWantedState(FlywheelStates.MOVING);
-    // hood.setWantedState(HoodStates.MOVING);
+  private void aiming() {
+    flywheel.setWantedState(FlywheelWantedStates.AIMING);
+    // hood.setWantedState(HoodWantedStates.AIMING);
   }
 
   private void intaking() {
@@ -170,8 +171,8 @@ public class SuperStructure extends SubsystemBase {
     intake.setWantedState(Intake.IntakeStates.OFF);
     indexer.setWantedState(Indexer.IndexerStates.OFF);
     flywheelKicker.setWantedState(FlywheelKickerStates.OFF);
-    flywheel.setWantedState(FlywheelStates.OFF);
-    // hood.setWantedState(HoodStates.OFF);
+    flywheel.setWantedState(FlywheelWantedStates.IDLE);
+    // hood.setWantedState(HoodWantedStates.IDLE);
   }
 
   public Command setStateCommand(SuperStates superState) {

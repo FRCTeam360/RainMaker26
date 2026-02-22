@@ -34,9 +34,6 @@ public class IntakePivotIOPB implements IntakePivotIO {
   private static final double MOTION_MAGIC_CRUISE_VELOCITY_RPS = 40.0;
   private static final double MOTION_MAGIC_JERK_RPS3 = 1750.0;
 
-  private static final double MOTION_MAGIC_EXPO_KV = 0.12;
-  private static final double MOTION_MAGIC_EXPO_KA = 0.10;
-
   private static final double FORWARD_SOFT_LIMIT_DEGREES =
       178.0; // TODO: make sure these are correct for prac bot
   private static final double REVERSE_SOFT_LIMIT_DEGREES = 0.0; // 29.5
@@ -77,8 +74,6 @@ public class IntakePivotIOPB implements IntakePivotIO {
     motionMagicConfigs.MotionMagicCruiseVelocity = MOTION_MAGIC_CRUISE_VELOCITY_RPS;
     motionMagicConfigs.MotionMagicAcceleration = MOTION_MAGIC_ACCELERATION_RPS2;
     motionMagicConfigs.MotionMagicJerk = MOTION_MAGIC_JERK_RPS3;
-    motionMagicConfigs.MotionMagicExpo_kV = MOTION_MAGIC_EXPO_KV;
-    motionMagicConfigs.MotionMagicExpo_kA = MOTION_MAGIC_EXPO_KA;
 
     config.Voltage.PeakForwardVoltage = PEAK_FORWARD_VOLTAGE;
     config.Voltage.PeakReverseVoltage = PEAK_REVERSE_VOLTAGE;

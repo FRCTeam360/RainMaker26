@@ -16,6 +16,11 @@ public class Hood extends SubsystemBase {
   private static final double TOLERANCE = 0.5;
   private DoubleSupplier hoodAngleSupplier = () -> 0.0;
 
+  public enum HoodWantedStates {
+    IDLE,
+    AIMING
+  }
+
   public enum HoodStates {
     OFF,
     MOVING,
@@ -31,11 +36,11 @@ public class Hood extends SubsystemBase {
     this.hoodAngleSupplier = hoodAngleSupplier;
   }
 
-  private HoodStates wantedState = HoodStates.OFF;
+  private HoodWantedStates wantedState = HoodWantedStates.IDLE;
   private HoodStates currentState = HoodStates.OFF;
   private HoodStates previousState = HoodStates.OFF;
 
-  public void setWantedState(HoodStates state) {
+  public void setWantedState(HoodWantedStates state) {
     wantedState = state;
   }
 
@@ -60,15 +65,14 @@ public class Hood extends SubsystemBase {
     previousState = currentState;
 
     switch (wantedState) {
-      case MOVING:
-      case AT_SETPOINT:
+      case AIMING:
         if (atSetpoint(hoodAngleSupplier)) {
           currentState = HoodStates.AT_SETPOINT;
         } else {
           currentState = HoodStates.MOVING;
         }
         break;
-      case OFF:
+      case IDLE:
       default:
         currentState = HoodStates.OFF;
         break;
