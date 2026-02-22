@@ -87,6 +87,8 @@ public class RobotContainer {
   private final CommandXboxController testCont1 = new CommandXboxController(5);
 
   private static final double FLYWHEEL_KICKER_WARMUP_VELOCITY_RPM = 4000.0;
+  private static final int DISABLED_THROTTLE_SKIP_FRAMES = 200;
+  private static final int ENABLED_THROTTLE_SKIP_FRAMES = 0;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -341,7 +343,7 @@ public class RobotContainer {
     }
     if (Objects.nonNull(vision)) {
       vision.enableIMUSeeding();
-      vision.setThrottle(200);
+      vision.setThrottle(DISABLED_THROTTLE_SKIP_FRAMES);
     }
   }
 
@@ -349,7 +351,7 @@ public class RobotContainer {
   public void onEnable() {
     if (Objects.nonNull(vision)) {
       vision.enableIMUAssist();
-      vision.setThrottle(0);
+      vision.setThrottle(ENABLED_THROTTLE_SKIP_FRAMES);
     }
   }
 
