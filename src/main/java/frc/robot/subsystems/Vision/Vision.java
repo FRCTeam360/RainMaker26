@@ -127,7 +127,6 @@ public class Vision extends SubsystemBase {
           input.tagPoses[i] = input.tagPoses[0];
         }
       }
-
       Logger.processInputs("Limelight: " + key, input.clone());
     }
 
@@ -176,6 +175,31 @@ public class Vision extends SubsystemBase {
     Logger.recordOutput(
         VISION_LOGGING_PREFIX + "Rejection Rate",
         totalDetections > 0 ? (double) rejectedMeasurements / totalDetections : 0.0);
+  }
+
+  /** Enables IMU seeding on all vision IO layers. Call during disabled. */
+  public void enableIMUSeeding() {
+    for (VisionIO io : ios.values()) {
+      io.enableIMUSeeding();
+    }
+  }
+
+  /** Enables IMU assist on all vision IO layers. Call when robot is enabled. */
+  public void enableIMUAssist() {
+    for (VisionIO io : ios.values()) {
+      io.enableIMUAssist();
+    }
+  }
+
+  /**
+   * Sets the processing throttle on all vision IO layers.
+   *
+   * @param throttle number of frames to skip between processed frames (0 = full speed)
+   */
+  public void setThrottle(int throttle) {
+    for (VisionIO io : ios.values()) {
+      io.setThrottle(throttle);
+    }
   }
 
   /**

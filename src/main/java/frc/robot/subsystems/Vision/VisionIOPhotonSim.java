@@ -193,16 +193,6 @@ public class VisionIOPhotonSim implements VisionIO {
     currentPipeline = pipeline;
   }
 
-  @Override
-  public void takeSnapshot() {
-    // Snapshots are not simulated - no-op
-  }
-
-  @Override
-  public void resetSnapshot() {
-    // Snapshots are not simulated - no-op
-  }
-
   // ----- Simulation-specific methods -----
 
   /**
