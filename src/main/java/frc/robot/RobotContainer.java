@@ -78,7 +78,8 @@ public class RobotContainer {
 
   private SuperStructure superStructure;
 
-  private ShotCalculator shotCalculator;
+  private ShotCalculator hubShotCalculator;
+  private ShotCalculator outpostPassCalculator;
 
   // TODO: refactor to allow for more than 1 drivetrain type
 
@@ -91,7 +92,7 @@ public class RobotContainer {
 
   private static final double FLYWHEEL_KICKER_WARMUP_VELOCITY_RPM = 4000.0;
 
-  private RobotShootingInfo RobotShootingInfo;
+  private RobotShootingInfo robotShootingInfo;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -109,10 +110,10 @@ public class RobotContainer {
         intake = new Intake(new IntakeIOSim());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOSim());
 
-        RobotShootingInfo =
+        robotShootingInfo =
             new RobotShootingInfo(
                 Constants.WoodBotConstants.shotHoodAngleMap,
-                Constants.WoodBotConstants.launchFlywheelSpeedMap,
+                Constants.WoodBotConstants.shotFlywheelSpeedMap,
                 Constants.WoodBotConstants.timeOfFlightMap,
                 ShooterConstants.ROBOT_TO_SHOOTER,
                 0.0,
@@ -139,10 +140,10 @@ public class RobotContainer {
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOWB());
         // intakePivot = new IntakePivot(new IntakePivotIOPB());
 
-        RobotShootingInfo =
+        robotShootingInfo =
             new RobotShootingInfo(
                 Constants.WoodBotConstants.shotHoodAngleMap,
-                Constants.WoodBotConstants.launchFlywheelSpeedMap,
+                Constants.WoodBotConstants.shotFlywheelSpeedMap,
                 Constants.WoodBotConstants.timeOfFlightMap,
                 ShooterConstants.ROBOT_TO_SHOOTER,
                 0.0,
@@ -172,10 +173,10 @@ public class RobotContainer {
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOPB());
         intakePivot = new IntakePivot(new IntakePivotIOPB());
 
-        RobotShootingInfo =
+        robotShootingInfo =
             new RobotShootingInfo(
                 Constants.WoodBotConstants.shotHoodAngleMap,
-                Constants.WoodBotConstants.launchFlywheelSpeedMap,
+                Constants.WoodBotConstants.shotFlywheelSpeedMap,
                 Constants.WoodBotConstants.timeOfFlightMap,
                 ShooterConstants.ROBOT_TO_SHOOTER,
                 0.0,
@@ -183,11 +184,16 @@ public class RobotContainer {
         // TODO ADD CLIMBERS
         break;
     }
-    shotCalculator =
+    hubShotCalculator =
         new ShotCalculator(
             drivetrain::getPosition,
             () -> AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint.toTranslation2d()),
-            RobotShootingInfo);
+            robotShootingInfo);
+    outpostPassCalculator =
+        new ShotCalculator(
+            drivetrain::getPosition,
+            () -> AllianceFlipUtil.apply(FieldConstants.Outpost.centerPoint),
+            robotShootingInfo);
     // Configure the trigger bindings
     // TODO: Re-enable superStructure construction and PathPlanner commands
     superStructure =
@@ -197,7 +203,8 @@ public class RobotContainer {
             flywheelKicker,
             flywheel,
             hood,
-            shotCalculator,
+            hubShotCalculator,
+            outpostPassCalculator,
             drivetrain::isAlignedToTarget);
 
     if (Objects.nonNull(superStructure)) {
@@ -210,12 +217,12 @@ public class RobotContainer {
             Commands.waitSeconds(10)
                 .deadlineFor(
                     superStructure
-                        .setStateCommand(SuperStates.SHOOTING)
+                        .setStateCommand(SuperStates.SHOOT_AT_HUB)
                         .alongWith(
                             drivetrain.faceAngleWhileDrivingCommand(
                                 () -> 0,
                                 () -> 0,
-                                () -> shotCalculator.calculateShot().targetHeading())))
+                                () -> hubShotCalculator.calculateShot().targetHeading())))
                 .andThen(superStructure.setStateCommand(SuperStates.IDLE)));
       }
     }
@@ -304,12 +311,24 @@ public class RobotContainer {
           .rightTrigger()
           .whileTrue(
               superStructure
-                  .setStateCommand(SuperStates.SHOOTING)
+                  .setStateCommand(SuperStates.SHOOT_AT_HUB)
                   .alongWith(
                       drivetrain.faceAngleWhileDrivingCommand(
-                          driverCont, () -> shotCalculator.calculateShot().targetHeading())));
+                          driverCont, () -> hubShotCalculator.calculateShot().targetHeading())));
       // Must stay paired with the whileTrue above to reset state on trigger release
       driverCont.rightTrigger().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
+
+      driverCont
+          .leftTrigger()
+          .whileTrue(
+              superStructure
+                  .setStateCommand(SuperStates.SHOOT_AT_OUTPOST)
+                  .alongWith(
+                      drivetrain.faceAngleWhileDrivingCommand(
+                          driverCont,
+                          () -> outpostPassCalculator.calculateShot().targetHeading())));
+      // Must stay paired with the whileTrue above to reset state on trigger release
+      driverCont.leftTrigger().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
     }
 
     // Null checks based on subsystems used by each command
@@ -386,9 +405,13 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.CommandScheduler#run()}.
    */
   public void preSchedulerUpdate() {
-    if (Objects.nonNull(shotCalculator)) {
-      shotCalculator.clearShootingParams();
-      shotCalculator.calculateShot();
+    if (Objects.nonNull(hubShotCalculator)) {
+      hubShotCalculator.clearShootingParams();
+      hubShotCalculator.calculateShot();
+    }
+    if (Objects.nonNull(outpostPassCalculator)) {
+      outpostPassCalculator.clearShootingParams();
+      outpostPassCalculator.calculateShot();
     }
   }
 
