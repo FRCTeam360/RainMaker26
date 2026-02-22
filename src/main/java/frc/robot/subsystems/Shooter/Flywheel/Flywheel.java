@@ -6,6 +6,7 @@ package frc.robot.subsystems.Shooter.Flywheel;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.ControlState;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -47,6 +48,7 @@ public class Flywheel extends SubsystemBase {
   private FlywheelWantedStates wantedState = FlywheelWantedStates.IDLE;
   private FlywheelStates currentState = FlywheelStates.OFF;
   private FlywheelStates previousState = FlywheelStates.OFF;
+  private ControlState controlState = ControlState.SUPERSTRUCTURE;
 
   private boolean atSetpoint(double targetRPM) {
     // TODO: make tolerance a constant in hardware layer
@@ -100,9 +102,11 @@ public class Flywheel extends SubsystemBase {
     io.updateInputs(inputs);
     Logger.processInputs("Flywheel", inputs);
 
-    // Update state machine on every cycle to respond to velocity/current state changes
-    updateState();
-    applyState();
+    if (controlState == ControlState.SUPERSTRUCTURE) {
+      // Update state machine on every cycle to respond to velocity/current state changes
+      updateState();
+      applyState();
+    }
 
     Logger.recordOutput("Subsystems/Flywheel/WantedState", wantedState.toString());
     Logger.recordOutput("Subsystems/Flywheel/CurrentState", currentState.toString());

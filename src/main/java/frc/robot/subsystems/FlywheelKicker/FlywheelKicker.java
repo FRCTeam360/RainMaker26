@@ -6,6 +6,7 @@ package frc.robot.subsystems.FlywheelKicker;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.ControlState;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -25,6 +26,7 @@ public class FlywheelKicker extends SubsystemBase {
   private FlywheelKickerStates wantedState = FlywheelKickerStates.OFF;
   private FlywheelKickerStates currentState = FlywheelKickerStates.OFF;
   private FlywheelKickerStates previousState = FlywheelKickerStates.OFF;
+  private ControlState controlState = ControlState.SUPERSTRUCTURE;
 
   public void setWantedState(FlywheelKickerStates state) {
     wantedState = state;
@@ -92,8 +94,10 @@ public class FlywheelKicker extends SubsystemBase {
     io.updateInputs(inputs);
     Logger.processInputs("FlywheelKicker", inputs);
 
-    updateState();
-    applyState();
+    if (controlState == ControlState.SUPERSTRUCTURE) {
+      updateState();
+      applyState();
+    }
     Logger.recordOutput("Subsystems/FlywheelKicker/WantedState", wantedState.toString());
     Logger.recordOutput("Subsystems/FlywheelKicker/CurrentState", currentState.toString());
     Logger.recordOutput("Subsystems/FlywheelKicker/PreviousState", previousState.toString());

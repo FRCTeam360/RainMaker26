@@ -6,6 +6,7 @@ package frc.robot.subsystems.Indexer;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.ControlState;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -27,6 +28,7 @@ public class Indexer extends SubsystemBase {
   private IndexerStates wantedState = IndexerStates.OFF;
   private IndexerStates currentState = IndexerStates.OFF;
   private IndexerStates previousState = IndexerStates.OFF;
+  private ControlState controlState = ControlState.SUPERSTRUCTURE;
 
   private void updateState() {
     previousState = currentState;
@@ -94,8 +96,10 @@ public class Indexer extends SubsystemBase {
     io.updateInputs(inputs);
     Logger.processInputs("Indexer", inputs);
 
-    updateState();
-    applyState();
+    if (controlState == ControlState.SUPERSTRUCTURE) {
+      updateState();
+      applyState();
+    }
     Logger.recordOutput("Subsystems/Indexer/WantedState", wantedState.toString());
     Logger.recordOutput("Subsystems/Indexer/CurrentState", currentState.toString());
     Logger.recordOutput("Subsystems/Indexer/PreviousState", previousState.toString());

@@ -7,6 +7,7 @@ package frc.robot.subsystems.Shooter.Hood;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.ControlState;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -39,6 +40,7 @@ public class Hood extends SubsystemBase {
   private HoodWantedStates wantedState = HoodWantedStates.IDLE;
   private HoodStates currentState = HoodStates.OFF;
   private HoodStates previousState = HoodStates.OFF;
+  private ControlState controlState = ControlState.SUPERSTRUCTURE;
 
   public void setWantedState(HoodWantedStates state) {
     wantedState = state;
@@ -135,8 +137,10 @@ public class Hood extends SubsystemBase {
     io.updateInputs(inputs);
     Logger.processInputs("Hood", inputs);
 
-    updateState();
-    applyState();
+    if (controlState == ControlState.SUPERSTRUCTURE) {
+      updateState();
+      applyState();
+    }
     Logger.recordOutput("Subsystems/Hood/WantedState", wantedState.toString());
     Logger.recordOutput("Subsystems/Hood/CurrentState", currentState.toString());
     Logger.recordOutput("Subsystems/Hood/PreviousState", previousState.toString());
