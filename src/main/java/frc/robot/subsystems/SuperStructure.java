@@ -14,6 +14,8 @@ import frc.robot.subsystems.Shooter.Flywheel.Flywheel;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel.FlywheelInternalStates;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel.FlywheelWantedStates;
 import frc.robot.subsystems.Shooter.Hood.Hood;
+import frc.robot.subsystems.Shooter.Hood.Hood.HoodInternalStates;
+import frc.robot.subsystems.Shooter.Hood.Hood.HoodWantedStates;
 import frc.robot.subsystems.Shooter.ShotCalculator;
 import java.util.function.BooleanSupplier;
 import org.littletonrobotics.junction.Logger;
@@ -90,13 +92,13 @@ public class SuperStructure extends SubsystemBase {
           }
           return this.hubShotCalculator.calculateShot().flywheelSpeed();
         });
-    // hood.setHoodAngleSupplier(
-    //     () -> {
-    //       if (currentSuperState == SuperStates.SHOOT_AT_OUTPOST) {
-    //         return this.outpostPassCalculator.calculateShot().hoodAngle();
-    //       }
-    //       return this.hubShotCalculator.calculateShot().hoodAngle();
-    //     });
+    hood.setHoodAngleSupplier(
+        () -> {
+          if (currentSuperState == SuperStates.SHOOT_AT_OUTPOST) {
+            return this.outpostPassCalculator.calculateShot().hoodAngle();
+          }
+          return this.hubShotCalculator.calculateShot().hoodAngle();
+        });
   }
 
   // State machine methods
@@ -147,14 +149,14 @@ public class SuperStructure extends SubsystemBase {
   private void updateShooterStates() {
     previousShooterState = currentShooterState;
     boolean flywheelReady = flywheel.getState() == FlywheelInternalStates.AT_SETPOINT;
-    // boolean hoodReady = hood.getState() == HoodStates.AT_SETPOINT;
+    boolean hoodReady = hood.getState() == HoodInternalStates.AT_SETPOINT;
     boolean aligned = isAlignedToTarget.getAsBoolean();
 
     Logger.recordOutput("Superstructure/Shooting/FlywheelReady", flywheelReady);
-    // Logger.recordOutput("Superstructure/Shooting/HoodReady", hoodReady);
+    Logger.recordOutput("Superstructure/Shooting/HoodReady", hoodReady);
     Logger.recordOutput("Superstructure/Shooting/Aligned", aligned);
 
-    if (flywheelReady && aligned) { // TODO: ADD HOOD CHECK BACK WHEN GOOD AGAIN
+    if (flywheelReady && hoodReady && aligned) {
       currentShooterState = ShooterStates.FIRING;
     } else {
       currentShooterState = ShooterStates.PREPARING;
@@ -163,7 +165,7 @@ public class SuperStructure extends SubsystemBase {
 
   private void applyShooterStates() {
     flywheel.setWantedState(FlywheelWantedStates.SHOOTING);
-    // hood.setWantedState(HoodWantedStates.SHOOTING);
+    hood.setWantedState(HoodWantedStates.SHOOTING);
     if (currentShooterState == ShooterStates.FIRING) {
       flywheelKicker.setWantedState(FlywheelKickerStates.SHOOTING);
       indexer.setWantedState(IndexerStates.SHOOTING);
@@ -185,7 +187,7 @@ public class SuperStructure extends SubsystemBase {
     indexer.setWantedState(Indexer.IndexerStates.OFF);
     flywheelKicker.setWantedState(FlywheelKickerStates.OFF);
     flywheel.setWantedState(FlywheelWantedStates.IDLE);
-    // hood.setWantedState(HoodWantedStates.IDLE);
+    hood.setWantedState(HoodWantedStates.IDLE);
   }
 
   // Public API
