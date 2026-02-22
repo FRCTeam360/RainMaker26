@@ -51,7 +51,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   private PhoenixPIDController poseXController;
   private PhoenixPIDController poseYController;
 
-  public record ControllerState(boolean isAtSetpoint, double positionError, double velocityError) {}
+  public record ControllerState(
+      boolean isAtSetpoint, double positionError, double velocityError, double setpoint) {}
 
   private static final double POSE_KP = 11.0;
   private static final double POSE_KI = 0.0;
@@ -545,20 +546,23 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     return new ControllerState(
         headingController.atSetpoint(),
         headingController.getPositionError(),
-        headingController.getVelocityError());
+        headingController.getVelocityError(),
+        headingController.getSetpoint());
   }
 
   public ControllerState getPoseXControllerState() {
     return new ControllerState(
         poseXController.atSetpoint(),
         poseXController.getPositionError(),
-        poseXController.getVelocityError());
+        poseXController.getVelocityError(),
+        poseXController.getSetpoint());
   }
 
   public ControllerState getPoseYControllerState() {
     return new ControllerState(
         poseYController.atSetpoint(),
         poseYController.getPositionError(),
-        poseYController.getVelocityError());
+        poseYController.getVelocityError(),
+        poseYController.getSetpoint());
   }
 }

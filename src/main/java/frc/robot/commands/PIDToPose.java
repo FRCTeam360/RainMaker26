@@ -62,6 +62,10 @@ public class PIDToPose extends Command {
     final var poseXState = drivetrain.getPoseXControllerState();
     final var poseYState = drivetrain.getPoseYControllerState();
 
+    Logger.recordOutput(LOGGING_PREFIX + "headingSetpoint", headingState.setpoint());
+    Logger.recordOutput(LOGGING_PREFIX + "poseXSetpoint", poseXState.setpoint());
+    Logger.recordOutput(LOGGING_PREFIX + "poseYSetpoint", poseYState.setpoint());
+
     Logger.recordOutput(LOGGING_PREFIX + "isAtRotationSetpoint", headingState.isAtSetpoint());
     Logger.recordOutput(LOGGING_PREFIX + "isAtPoseXSetpoint", poseXState.isAtSetpoint());
     Logger.recordOutput(LOGGING_PREFIX + "isAtPoseYSetpoint", poseYState.isAtSetpoint());
