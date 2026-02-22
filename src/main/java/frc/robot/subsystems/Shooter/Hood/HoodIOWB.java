@@ -20,28 +20,38 @@ public class HoodIOWB implements HoodIO {
   private final SparkMax hoodMotor =
       new SparkMax(Constants.WoodBotConstants.HOOD_ID, MotorType.kBrushless);
   private final RelativeEncoder encoder = hoodMotor.getEncoder();
-  private final SparkMaxConfig sparkMaxConfig = new SparkMaxConfig();
+  private final SparkMaxConfig config = new SparkMaxConfig();
   private final SparkClosedLoopController controller;
+  private static final double CONVERSION_FACTOR = 1.0;
 
   public void setZero() {
     encoder.setPosition(0);
   }
 
   public HoodIOWB() {
-    sparkMaxConfig.idleMode(IdleMode.kBrake);
-    sparkMaxConfig.inverted(false);
+
+    config.idleMode(IdleMode.kBrake);
+    config.inverted(false);
+    config
+        .analogSensor
+        .positionConversionFactor(CONVERSION_FACTOR)
+        .velocityConversionFactor(CONVERSION_FACTOR);
 
     // Smart current limit
-    sparkMaxConfig.smartCurrentLimit(40);
+    config.smartCurrentLimit(40);
 
     // PID gains
-    sparkMaxConfig.closedLoop.p(0.21).i(0.0).d(0.0);
+    config.closedLoop.p(0.1).i(0.0).d(0.0);
 
     // Soft limits
-    sparkMaxConfig.softLimit.forwardSoftLimitEnabled(true).forwardSoftLimit(24.0);
+    config
+        .softLimit
+        .forwardSoftLimitEnabled(true)
+        .forwardSoftLimit(10.0)
+        .reverseSoftLimitEnabled(true)
+        .reverseSoftLimit(0.0);
 
-    hoodMotor.configure(
-        sparkMaxConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    hoodMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
     controller = hoodMotor.getClosedLoopController();
   }

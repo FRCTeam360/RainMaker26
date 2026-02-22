@@ -24,10 +24,16 @@ public class IndexerIOWB implements IndexerIO {
   private final SparkMaxConfig sparkMaxConfig = new SparkMaxConfig();
   private final SparkClosedLoopController closedLoopController;
 
+  private final double CONVERSION_FACTOR = 1.0;
+
   public IndexerIOWB() {
     sparkMaxConfig.idleMode(IdleMode.kBrake);
     sparkMaxConfig.inverted(true);
-
+    sparkMaxConfig.smartCurrentLimit(40);
+    sparkMaxConfig
+        .analogSensor
+        .positionConversionFactor(CONVERSION_FACTOR)
+        .velocityConversionFactor(CONVERSION_FACTOR);
     sparkMaxConfig.closedLoop.p(0.0002).i(0.0).d(0.0);
     sparkMaxConfig.closedLoop.feedForward.kV(0.0021).kS(0.04);
 
