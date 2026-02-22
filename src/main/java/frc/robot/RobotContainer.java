@@ -171,16 +171,16 @@ public class RobotContainer {
             ShooterConstants.ROBOT_TO_SHOOTER);
     // Configure the trigger bindings
     // TODO: Re-enable superStructure construction and PathPlanner commands
-    superStructure =
-        new SuperStructure(
-            intake,
-            indexer,
-            flywheelKicker,
-            flywheel,
-            hood,
-            hubShotCalculator,
-            outpostPassCalculator,
-            drivetrain::isAlignedToTarget);
+    // superStructure =
+    //     new SuperStructure(
+    //         intake,
+    //         indexer,
+    //         flywheelKicker,
+    //         flywheel,
+    //         hood,
+    //         hubShotCalculator,
+    //         outpostPassCalculator,
+    //         drivetrain::isAlignedToTarget);
 
     if (Objects.nonNull(superStructure)) {
       registerPathplannerCommand(
@@ -278,48 +278,52 @@ public class RobotContainer {
       drivetrain.setDefaultCommand(drivetrain.fieldOrientedDriveCommand(driverCont));
     }
 
-    if (Objects.nonNull(superStructure) && Objects.nonNull(drivetrain)) {
+    if (Objects.nonNull(drivetrain)) {
       // Linked pair: whileTrue sets SHOOTING + aims, onFalse resets to IDLE.
       // The InstantCommand (setStateCommand) finishes immediately; the alongWith group
       // stays alive via faceAngleWhileDrivingCommand until whileTrue interrupts it.
+
+      // Must stay paired with the whileTrue above to reset state on trigger release
+      // driverCont.rightTrigger().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
+
       driverCont
           .rightTrigger()
           .whileTrue(
-              superStructure
-                  .setStateCommand(SuperStates.SHOOT_AT_HUB)
+              hood.setPositionCmd(8.0)
+                  .alongWith(flywheel.setVelocityCommand(3250))
                   .alongWith(
-                      drivetrain.faceAngleWhileDrivingCommand(
-                          driverCont, () -> hubShotCalculator.calculateShot().targetHeading())));
-      // Must stay paired with the whileTrue above to reset state on trigger release
-      driverCont.rightTrigger().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
+                      Commands.waitUntil(() -> flywheel.atSetpoint(3250.0) && hood.atSetpoint(8.0))
+                          .andThen(flywheelKicker.setDutyCycleCommand(1.0))));
 
-      driverCont
-          .leftTrigger()
-          .whileTrue(
-              superStructure
-                  .setStateCommand(SuperStates.SHOOT_AT_OUTPOST)
-                  .alongWith(
-                      drivetrain.faceAngleWhileDrivingCommand(
-                          driverCont,
-                          () -> outpostPassCalculator.calculateShot().targetHeading())));
-      // Must stay paired with the whileTrue above to reset state on trigger release
-      driverCont.leftTrigger().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
+      // driverCont
+      //     .leftTrigger()
+      //     .whileTrue(
+      //         superStructure
+      //             .setStateCommand(SuperStates.SHOOT_AT_OUTPOST)
+      //             .alongWith(
+      //                 drivetrain.faceAngleWhileDrivingCommand(
+      //                     driverCont,
+      //                     () -> outpostPassCalculator.calculateShot().targetHeading())));
+      // // Must stay paired with the whileTrue above to reset state on trigger release
+      // driverCont.leftTrigger().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
     }
 
     // Null checks based on subsystems used by each command
     // basicIntakeCmd uses intake and indexer
     // TODO: Re-enable superStructure bindings
-    if (Objects.nonNull(superStructure) && Objects.nonNull(intake) && Objects.nonNull(indexer)) {
-      driverCont.leftBumper().onTrue(superStructure.setStateCommand(SuperStates.INTAKING));
-      driverCont.leftBumper().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
-      driverCont.a().whileTrue(indexer.setDutyCycleCommand(0.5));
+    if (Objects.nonNull(intake) && Objects.nonNull(indexer)) {
+      // driverCont.leftBumper().onTrue(superStructure.setStateCommand(SuperStates.INTAKING));
+      // driverCont.leftBumper().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
+      driverCont.leftBumper().whileTrue(intake.setDutyCycleCommand(0.75));
+
+      // driverCont.a().whileTrue(indexer.setDutyCycleCommand(0.5));
     }
 
     // setFlywheelKickerDutyCycle uses flywheelKicker
     if (Objects.nonNull(flywheelKicker)) {
-      driverCont
-          .rightBumper()
-          .whileTrue(flywheelKicker.setVelocityCommand(FLYWHEEL_KICKER_WARMUP_VELOCITY_RPM));
+      // driverCont
+      //     .rightBumper()
+      //     .whileTrue(flywheelKicker.setVelocityCommand(FLYWHEEL_KICKER_WARMUP_VELOCITY_RPM));
     }
 
     // setHoodPosition uses hood

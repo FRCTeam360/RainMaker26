@@ -48,7 +48,7 @@ public class Flywheel extends SubsystemBase {
   private FlywheelStates currentState = FlywheelStates.OFF;
   private FlywheelStates previousState = FlywheelStates.OFF;
 
-  private boolean atSetpoint(double targetRPM) {
+  public boolean atSetpoint(double targetRPM) {
     // TODO: make tolerance a constant in hardware layer
     if (inputs.velocities.length > 0) {
       return Math.abs(inputs.velocities[0] - targetRPM) < TOLERANCE_RPM;
@@ -56,7 +56,7 @@ public class Flywheel extends SubsystemBase {
     return false;
   }
 
-  private boolean atSetpoint(DoubleSupplier targetRPM) {
+  public boolean atSetpoint(DoubleSupplier targetRPM) {
     return atSetpoint(targetRPM.getAsDouble());
   }
 
