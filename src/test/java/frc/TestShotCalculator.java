@@ -46,6 +46,8 @@ public class TestShotCalculator {
     assertTrue(cachedShootingParams.targetHeading().equals(new Rotation2d()));
   }
 
+  private Pose2d testPose;
+
   @Test
   void shotCalculatorTestCache() {
     final InterpolatingDoubleTreeMap interpolatingTreeMapTest1 = new InterpolatingDoubleTreeMap();
@@ -63,13 +65,14 @@ public class TestShotCalculator {
             new Transform2d(),
             0.0,
             5.0);
-    Pose2d testPose = new Pose2d(1.0, 0.0, new Rotation2d());
+    testPose = new Pose2d(1.0, 0.0, new Rotation2d());
     Supplier<Pose2d> testPoseSupplier = () -> testPose;
     ShotCalculator testShotCalculator =
         new ShotCalculator(testPoseSupplier, () -> new Translation2d(), RobotShootingInfo);
     ShootingParams cachedShootingParams = testShotCalculator.calculateShot();
 
-    testPose.plus(new Transform2d(430987523953.984213, 9832572384.3249874, new Rotation2d()));
+    testPose =
+        testPose.plus(new Transform2d(430987523953.984213, 9832572384.3249874, new Rotation2d()));
 
     ShootingParams cashedShootingParams2 = testShotCalculator.calculateShot();
 
@@ -93,17 +96,17 @@ public class TestShotCalculator {
             new Transform2d(),
             0.0,
             5.0);
-    Pose2d testPose = new Pose2d(1.0, 0.0, new Rotation2d());
+    testPose = new Pose2d(1.0, 0.0, new Rotation2d());
     Supplier<Pose2d> testPoseSupplier = () -> testPose;
     ShotCalculator testShotCalculator =
         new ShotCalculator(testPoseSupplier, () -> new Translation2d(), RobotShootingInfo);
     ShootingParams cachedShootingParams = testShotCalculator.calculateShot();
 
     testShotCalculator.clearShootingParams();
-    testPose.plus(new Transform2d(430987523953.984213, 9832572384.3249874, new Rotation2d()));
+    testPose =
+        testPose.plus(new Transform2d(430987523953.984213, 9832572384.3249874, new Rotation2d()));
 
     ShootingParams cachedShootingParams2 = testShotCalculator.calculateShot();
-    System.out.println(cachedShootingParams2);
 
     assertNotEquals(cachedShootingParams, cachedShootingParams2);
   }
