@@ -95,6 +95,8 @@ public final class Constants {
       launchFlywheelSpeedMap.put(3.0, 3375.0);
       launchFlywheelSpeedMap.put(2.0, 3000.0); // THIS IS GOOD
       launchFlywheelSpeedMap.put(0.0, 2750.0);
+
+      timeOfFlightMap.put(0.0, 0.0);
     }
   }
 
