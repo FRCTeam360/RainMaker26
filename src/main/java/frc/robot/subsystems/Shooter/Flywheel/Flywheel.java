@@ -18,10 +18,10 @@ public class Flywheel extends SubsystemBase {
 
   public enum FlywheelWantedStates {
     IDLE,
-    AIMING
+    SHOOTING
   }
 
-  public enum FlywheelStates {
+  public enum FlywheelInternalStates {
     OFF,
     MOVING,
     AT_SETPOINT
@@ -41,13 +41,13 @@ public class Flywheel extends SubsystemBase {
     this.io = io;
   }
 
-  public FlywheelStates getState() {
+  public FlywheelInternalStates getState() {
     return currentState;
   }
 
   private FlywheelWantedStates wantedState = FlywheelWantedStates.IDLE;
-  private FlywheelStates currentState = FlywheelStates.OFF;
-  private FlywheelStates previousState = FlywheelStates.OFF;
+  private FlywheelInternalStates currentState = FlywheelInternalStates.OFF;
+  private FlywheelInternalStates previousState = FlywheelInternalStates.OFF;
   private ControlState controlState = ControlState.SUPERSTRUCTURE;
 
   public void setControlState(ControlState controlState) {
@@ -70,16 +70,16 @@ public class Flywheel extends SubsystemBase {
     previousState = currentState;
 
     switch (wantedState) {
-      case AIMING:
+      case SHOOTING:
         if (atSetpoint(shootVelocitySupplier.getAsDouble())) {
-          currentState = FlywheelStates.AT_SETPOINT;
+          currentState = FlywheelInternalStates.AT_SETPOINT;
         } else {
-          currentState = FlywheelStates.MOVING;
+          currentState = FlywheelInternalStates.MOVING;
         }
         break;
       case IDLE:
       default:
-        currentState = FlywheelStates.OFF;
+        currentState = FlywheelInternalStates.OFF;
         break;
     }
   }

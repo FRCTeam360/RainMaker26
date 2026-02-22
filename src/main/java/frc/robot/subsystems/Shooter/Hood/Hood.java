@@ -19,10 +19,10 @@ public class Hood extends SubsystemBase {
 
   public enum HoodWantedStates {
     IDLE,
-    AIMING
+    SHOOTING
   }
 
-  public enum HoodStates {
+  public enum HoodInternalStates {
     OFF,
     MOVING,
     AT_SETPOINT
@@ -38,8 +38,8 @@ public class Hood extends SubsystemBase {
   }
 
   private HoodWantedStates wantedState = HoodWantedStates.IDLE;
-  private HoodStates currentState = HoodStates.OFF;
-  private HoodStates previousState = HoodStates.OFF;
+  private HoodInternalStates currentState = HoodInternalStates.OFF;
+  private HoodInternalStates previousState = HoodInternalStates.OFF;
   private ControlState controlState = ControlState.SUPERSTRUCTURE;
 
   public void setControlState(ControlState controlState) {
@@ -63,7 +63,7 @@ public class Hood extends SubsystemBase {
     }
   }
 
-  public HoodStates getState() {
+  public HoodInternalStates getState() {
     return currentState;
   }
 
@@ -71,16 +71,16 @@ public class Hood extends SubsystemBase {
     previousState = currentState;
 
     switch (wantedState) {
-      case AIMING:
+      case SHOOTING:
         if (atSetpoint(hoodAngleSupplier)) {
-          currentState = HoodStates.AT_SETPOINT;
+          currentState = HoodInternalStates.AT_SETPOINT;
         } else {
-          currentState = HoodStates.MOVING;
+          currentState = HoodInternalStates.MOVING;
         }
         break;
       case IDLE:
       default:
-        currentState = HoodStates.OFF;
+        currentState = HoodInternalStates.OFF;
         break;
     }
   }
