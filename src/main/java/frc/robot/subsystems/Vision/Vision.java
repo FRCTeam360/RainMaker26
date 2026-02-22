@@ -178,10 +178,10 @@ public class Vision extends SubsystemBase {
         totalDetections > 0 ? (double) rejectedMeasurements / totalDetections : 0.0);
   }
 
-  /** Seeds the IMU on all vision IO layers. Call during disabled. */
-  public void seedIMU() {
+  /** Enables IMU seeding on all vision IO layers. Call during disabled. */
+  public void enableIMUSeeding() {
     for (VisionIO io : ios.values()) {
-      io.seedIMU();
+      io.enableIMUSeeding();
     }
   }
 

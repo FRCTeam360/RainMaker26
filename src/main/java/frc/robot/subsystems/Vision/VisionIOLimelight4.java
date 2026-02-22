@@ -8,8 +8,8 @@ import frc.robot.utils.LimelightHelpers;
 import java.util.function.DoubleSupplier;
 
 /**
- * Vision IO layer for Limelight 4. Adds IMU initialization and provides {@link #seedIMU()} and
- * {@link #enableIMUAssist()} overrides.
+ * Vision IO layer for Limelight 4. Adds IMU initialization and provides {@link #enableIMUSeeding()}
+ * and {@link #enableIMUAssist()} overrides.
  */
 public class VisionIOLimelight4 extends VisionIOLimelightBase {
 
@@ -45,7 +45,7 @@ public class VisionIOLimelight4 extends VisionIOLimelightBase {
   }
 
   @Override
-  public void seedIMU() {
+  public void enableIMUSeeding() {
     LimelightHelpers.SetIMUMode(getName(), IMU_MODE_EXTERNAL_SEED);
   }
 

@@ -154,7 +154,7 @@ public abstract class VisionIOLimelightBase implements VisionIO {
     table.getEntry("snapshot").setNumber(0.0);
   }
 
-  public void seedIMU() {}
+  public void enableIMUSeeding() {}
 
   public void enableIMUAssist() {}
 

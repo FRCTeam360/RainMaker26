@@ -204,7 +204,7 @@ public class VisionIOPhotonSim implements VisionIO {
   }
 
   @Override
-  public void seedIMU() {}
+  public void enableIMUSeeding() {}
 
   @Override
   public void enableIMUAssist() {}

@@ -339,7 +339,7 @@ public class RobotContainer {
       flywheelKicker.stop();
     }
     if (Objects.nonNull(vision)) {
-      vision.seedIMU();
+      vision.enableIMUSeeding();
       vision.setThrottle(200);
     }
   }
