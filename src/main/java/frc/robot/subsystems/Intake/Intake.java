@@ -30,6 +30,10 @@ public class Intake extends SubsystemBase {
   private IntakeStates previousState = IntakeStates.OFF;
   private ControlState controlState = ControlState.SUPERSTRUCTURE;
 
+  public void setControlState(ControlState controlState) {
+    this.controlState = controlState;
+  }
+
   /** Creates a new Intake. */
   public Intake(IntakeIO io) {
     this.io = io;

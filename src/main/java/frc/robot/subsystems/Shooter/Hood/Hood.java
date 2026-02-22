@@ -42,6 +42,10 @@ public class Hood extends SubsystemBase {
   private HoodStates previousState = HoodStates.OFF;
   private ControlState controlState = ControlState.SUPERSTRUCTURE;
 
+  public void setControlState(ControlState controlState) {
+    this.controlState = controlState;
+  }
+
   public void setWantedState(HoodWantedStates state) {
     wantedState = state;
   }

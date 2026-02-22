@@ -22,6 +22,10 @@ public class HopperRoller extends SubsystemBase {
   private HopperRollerStates previousState = HopperRollerStates.OFF;
   private ControlState controlState = ControlState.SUPERSTRUCTURE;
 
+  public void setControlState(ControlState controlState) {
+    this.controlState = controlState;
+  }
+
   private static final double ROLLER_DUTY_CYCLE = 1.0;
 
   public HopperRollerStates getState() {

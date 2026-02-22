@@ -50,6 +50,10 @@ public class Flywheel extends SubsystemBase {
   private FlywheelStates previousState = FlywheelStates.OFF;
   private ControlState controlState = ControlState.SUPERSTRUCTURE;
 
+  public void setControlState(ControlState controlState) {
+    this.controlState = controlState;
+  }
+
   private boolean atSetpoint(double targetRPM) {
     // TODO: make tolerance a constant in hardware layer
     if (inputs.velocities.length > 0) {

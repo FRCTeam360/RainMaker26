@@ -28,6 +28,10 @@ public class IntakePivot extends SubsystemBase {
   private IntakePivotStates currentState = IntakePivotStates.OFF;
   private ControlState controlState = ControlState.SUPERSTRUCTURE;
 
+  public void setControlState(ControlState controlState) {
+    this.controlState = controlState;
+  }
+
   private void updateState() {
     previousState = currentState;
     switch (wantedState) {

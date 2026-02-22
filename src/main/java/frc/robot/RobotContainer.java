@@ -12,6 +12,7 @@ import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -25,6 +26,8 @@ import frc.robot.subsystems.FlywheelKicker.FlywheelKicker;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKickerIOPB;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKickerIOSim;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKickerIOWB;
+import frc.robot.subsystems.HopperRoller.HopperRoller;
+import frc.robot.subsystems.HopperRoller.HopperRollerIOPB;
 import frc.robot.subsystems.Indexer.Indexer;
 import frc.robot.subsystems.Indexer.IndexerIOPB;
 import frc.robot.subsystems.Indexer.IndexerIOSim;
@@ -75,6 +78,7 @@ public class RobotContainer {
   private Intake intake;
   private IntakePivot intakePivot;
   private FlywheelKicker flywheelKicker;
+  private HopperRoller hopperRoller;
 
   private SuperStructure superStructure;
 
@@ -88,6 +92,7 @@ public class RobotContainer {
   // Replace with CommandPS4Controller or CommandJoystick if needed
 
   private final CommandXboxController driverCont = new CommandXboxController(0);
+  private final CommandXboxController operatorCont = new CommandXboxController(1);
   private final CommandXboxController testCont1 = new CommandXboxController(5);
 
   private static final double FLYWHEEL_KICKER_WARMUP_VELOCITY_RPM = 4000.0;
@@ -172,6 +177,7 @@ public class RobotContainer {
         intake = new Intake(new IntakeIOPB());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOPB());
         intakePivot = new IntakePivot(new IntakePivotIOPB());
+        hopperRoller = new HopperRoller(new HopperRollerIOPB());
 
         robotShootingInfo =
             new RobotShootingInfo(
@@ -196,16 +202,21 @@ public class RobotContainer {
             robotShootingInfo);
     // Configure the trigger bindings
     // TODO: Re-enable superStructure construction and PathPlanner commands
-    superStructure =
-        new SuperStructure(
-            intake,
-            indexer,
-            flywheelKicker,
-            flywheel,
-            hood,
-            hubShotCalculator,
-            outpostPassCalculator,
-            drivetrain::isAlignedToTarget);
+
+    if (DriverStation.isEnabled() && (DriverStation.isTeleop() || DriverStation.isAutonomous())) {
+      superStructure =
+          new SuperStructure(
+              intake,
+              indexer,
+              flywheelKicker,
+              flywheel,
+              hood,
+              intakePivot,
+              hopperRoller,
+              hubShotCalculator,
+              outpostPassCalculator,
+              drivetrain::isAlignedToTarget);
+    }
 
     if (Objects.nonNull(superStructure)) {
       registerPathplannerCommand(
@@ -229,6 +240,7 @@ public class RobotContainer {
     registerPathplannerCommand(
         "run flywheel kicker",
         flywheelKicker.setVelocityCommand(FLYWHEEL_KICKER_WARMUP_VELOCITY_RPM));
+
     configureBindings();
     // configureTestBindings();
 
@@ -263,29 +275,33 @@ public class RobotContainer {
    * PS4} controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
    * joysticks}.
    */
-  private void configureTestBindings() {
-    if (Objects.nonNull(drivetrain)) {
-      drivetrain.registerTelemetry(logger::telemeterize);
-    }
-
+  private void systemsTestBindings() {
     if (Objects.nonNull(flywheel)) {
-      testCont1.a().whileTrue(flywheel.setDutyCycleCommand(() -> 0.5));
+      driverCont.a().whileTrue(flywheel.setVelocityCommand(() -> 2000.0));
+      driverCont.b().whileTrue(flywheel.setVelocityCommand(() -> 4000.0));
     }
     if (Objects.nonNull(flywheelKicker)) {
-      testCont1.b().whileTrue(flywheelKicker.setDutyCycleCommand(() -> 0.5));
+      driverCont.x().whileTrue(flywheelKicker.setDutyCycleCommand(() -> 0.5));
+      driverCont.y().whileTrue(flywheelKicker.setDutyCycleCommand(() -> -0.5));
     }
     if (Objects.nonNull(hood)) {
-      testCont1.x().whileTrue(hood.setDutyCycleCommand(() -> 0.5));
+      driverCont.pov(0).whileTrue(hood.setDutyCycleCommand(() -> 0.2));
+      driverCont.pov(180).whileTrue(hood.setDutyCycleCommand(() -> -0.2));
+      driverCont
+          .pov(90)
+          .whileTrue(hood.setPositionCmd(0.0)); // TODO change placeholder values for PB
+      driverCont
+          .pov(270)
+          .whileTrue(hood.setPositionCmd(0.0)); // TODO change placeholder values for PB
+      operatorCont.pov(0).whileTrue(hood.zero());
     }
-    if (Objects.nonNull(indexer)) {
-      testCont1.y().whileTrue(indexer.setDutyCycleCommand(() -> 0.5));
-    }
-    if (Objects.nonNull(intake)) {
-      testCont1.leftBumper().whileTrue(intake.setDutyCycleCommand(() -> 0.5));
-    }
-    if (Objects.nonNull(intakePivot)) {
-      testCont1.rightBumper().whileTrue(intakePivot.setDutyCycleCommand(() -> 0.5));
-    }
+    if (Objects.nonNull(indexer)) {}
+
+    if (Objects.nonNull(intake)) {}
+
+    if (Objects.nonNull(intakePivot)) {}
+
+    if (Objects.nonNull(hopperRoller)) {}
   }
 
   private void configureBindings() {

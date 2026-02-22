@@ -28,6 +28,10 @@ public class FlywheelKicker extends SubsystemBase {
   private FlywheelKickerStates previousState = FlywheelKickerStates.OFF;
   private ControlState controlState = ControlState.SUPERSTRUCTURE;
 
+  public void setControlState(ControlState controlState) {
+    this.controlState = controlState;
+  }
+
   public void setWantedState(FlywheelKickerStates state) {
     wantedState = state;
   }
