@@ -133,8 +133,8 @@ public class FlywheelIOSim implements FlywheelIO {
         BatterySim.calculateDefaultBatteryLoadedVoltage(flywheelSim.getCurrentDrawAmps()));
 
     // Step 6: Read all inputs from the SIMULATED VALUES (source of truth)
-    inputs.velocities[0] = velocityRPS;
-    inputs.velocities[1] = velocityRPS; // Both motors have same velocity
+    inputs.velocities[0] = velocityRPS * 60.0;
+    inputs.velocities[1] = velocityRPS * 60.0; // Both motors have same velocity
     inputs.voltages[0] = motorVoltage1;
     inputs.voltages[1] = motorVoltage2;
     inputs.statorCurrents[0] = motorControllerSim1.getStatorCurrent().getValueAsDouble();
