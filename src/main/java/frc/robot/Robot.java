@@ -97,6 +97,7 @@ public class Robot extends LoggedRobot {
     m_timeAndJoystickReplay.update();
     m_robotContainer.preSchedulerUpdate();
     CommandScheduler.getInstance().run();
+    m_robotContainer.postSchedulerUpdate();
   }
 
   /** This function is called once each time the robot enters Disabled mode. */

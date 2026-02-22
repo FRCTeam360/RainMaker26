@@ -61,17 +61,4 @@ public interface VisionIO {
    * @param throttle number of frames to skip between processed frames (0 = full speed)
    */
   default void setThrottle(int throttle) {}
-
-  /**
-   * Sets the robot's orientation without flushing the network tables entry. This is a non-blocking
-   * operation and should be ran on all visionIOs before calling the flush version on the last
-   * visionIO to be updated.
-   */
-  default void setRobotOrientationNoFlush() {}
-
-  /**
-   * Sets the robot's orientation while flushing the network tables entry. This is a blocking
-   * operation and should be ran on the last visionIO to be updated.
-   */
-  default void setRobotOrientationFlush() {}
 }

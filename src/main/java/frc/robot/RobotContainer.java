@@ -12,6 +12,7 @@ import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -362,6 +363,16 @@ public class RobotContainer {
       shotCalculator.clearShootingParams();
       shotCalculator.calculateShot();
     }
+  }
+
+  /**
+   * Flushes NetworkTables after the command scheduler runs. This ensures all values written during
+   * subsystem periodic methods (e.g., robot orientation for Limelights) are sent in a single batch.
+   * Must be called in {@link Robot#robotPeriodic()} after {@link
+   * edu.wpi.first.wpilibj2.command.CommandScheduler#run()}.
+   */
+  public void postSchedulerUpdate() {
+    NetworkTableInstance.getDefault().flush();
   }
 
   /**

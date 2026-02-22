@@ -59,6 +59,10 @@ public abstract class VisionIOLimelightBase implements VisionIO {
 
   @Override
   public void updateInputs(VisionIOInputs inputs) {
+    // Set robot orientation for MegaTag2 (flushed by postSchedulerUpdate)
+    LimelightHelpers.SetRobotOrientation_NoFlush(
+        name, gyroAngleSupplier.getAsDouble(), gyroAngleRateSupplier.getAsDouble(), 0, 0, 0, 0);
+
     // Assume that the pose hasn't been updated
     inputs.poseUpdated = false;
 
@@ -155,17 +159,5 @@ public abstract class VisionIOLimelightBase implements VisionIO {
   @Override
   public void resetSnapshot() {
     table.getEntry("snapshot").setNumber(0.0);
-  }
-
-  @Override
-  public void setRobotOrientationNoFlush() {
-    LimelightHelpers.SetRobotOrientation_NoFlush(
-        name, gyroAngleSupplier.getAsDouble(), gyroAngleRateSupplier.getAsDouble(), 0, 0, 0, 0);
-  }
-
-  @Override
-  public void setRobotOrientationFlush() {
-    LimelightHelpers.SetRobotOrientation(
-        name, gyroAngleSupplier.getAsDouble(), gyroAngleRateSupplier.getAsDouble(), 0, 0, 0, 0);
   }
 }
