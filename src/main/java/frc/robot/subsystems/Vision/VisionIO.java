@@ -39,39 +39,39 @@ public interface VisionIO {
     }
   }
 
-  public void updateInputs(VisionIOInputs inputs);
+  default void updateInputs(VisionIOInputs inputs) {}
 
-  public void setLEDMode(int mode);
+  default void setLEDMode(int mode) {}
 
-  public void setPipeline(int pipeline);
+  default void setPipeline(int pipeline) {}
 
-  public void takeSnapshot();
+  default void takeSnapshot() {}
 
-  public void resetSnapshot();
+  default void resetSnapshot() {}
 
   /** Enables IMU seeding from external orientation data. Only relevant for Limelight 4. */
-  public void enableIMUSeeding();
+  default void enableIMUSeeding() {}
 
   /** Enables IMU assist mode. Only relevant for Limelight 4. */
-  public void enableIMUAssist();
+  default void enableIMUAssist() {}
 
   /**
    * Sets the processing throttle. Only relevant for Limelight 4.
    *
    * @param throttle number of frames to skip between processed frames (0 = full speed)
    */
-  public void setThrottle(int throttle);
+  default void setThrottle(int throttle) {}
 
   /**
    * Sets the robot's orientation without flushing the network tables entry. This is a non-blocking
    * operation and should be ran on all visionIOs before calling the flush version on the last
    * visionIO to be updated.
    */
-  public void setRobotOrientationNoFlush();
+  default void setRobotOrientationNoFlush() {}
 
   /**
    * Sets the robot's orientation while flushing the network tables entry. This is a blocking
    * operation and should be ran on the last visionIO to be updated.
    */
-  public void setRobotOrientationFlush();
+  default void setRobotOrientationFlush() {}
 }

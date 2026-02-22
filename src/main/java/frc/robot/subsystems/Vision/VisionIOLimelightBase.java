@@ -142,23 +142,20 @@ public abstract class VisionIOLimelightBase implements VisionIO {
     return table.getEntry("getpipe").getDouble(0.0);
   }
 
+  @Override
   public void setPipeline(int pipeline) {
     table.getEntry("pipeline").setNumber(pipeline);
   }
 
+  @Override
   public void takeSnapshot() {
     table.getEntry("snapshot").setNumber(1.0);
   }
 
+  @Override
   public void resetSnapshot() {
     table.getEntry("snapshot").setNumber(0.0);
   }
-
-  public void enableIMUSeeding() {}
-
-  public void enableIMUAssist() {}
-
-  public void setThrottle(int throttle) {}
 
   @Override
   public void setRobotOrientationNoFlush() {

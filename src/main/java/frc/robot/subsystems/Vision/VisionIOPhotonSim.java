@@ -92,6 +92,7 @@ public class VisionIOPhotonSim implements VisionIO {
     inputs.targetCount = 0;
   }
 
+  @Override
   public void updateInputs(VisionIOInputs inputs) {
     // Update the vision simulation with the current robot pose
     Pose2d robotPose = robotPoseSupplier.get();
@@ -181,32 +182,16 @@ public class VisionIOPhotonSim implements VisionIO {
     }
   }
 
+  @Override
   public void setLEDMode(int mode) {
     // LEDs are not simulated - no-op
   }
 
+  @Override
   public void setPipeline(int pipeline) {
     // Store the pipeline value (pipelines are not simulated)
     currentPipeline = pipeline;
   }
-
-  public void takeSnapshot() {
-    // Snapshots are not simulated - no-op
-  }
-
-  public void resetSnapshot() {
-    // Snapshots are not simulated - no-op
-  }
-
-  public void enableIMUSeeding() {}
-
-  public void enableIMUAssist() {}
-
-  public void setThrottle(int throttle) {}
-
-  public void setRobotOrientationNoFlush() {}
-
-  public void setRobotOrientationFlush() {}
 
   // ----- Simulation-specific methods -----
 
