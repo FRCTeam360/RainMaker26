@@ -46,7 +46,7 @@ import frc.robot.subsystems.Shooter.Hood.HoodIOSim;
 import frc.robot.subsystems.Shooter.Hood.HoodIOWB;
 import frc.robot.subsystems.Shooter.ShooterConstants;
 import frc.robot.subsystems.Shooter.ShotCalculator;
-import frc.robot.subsystems.Shooter.ShotCalculator.RobotSpecificInfo;
+import frc.robot.subsystems.Shooter.ShotCalculator.RobotShootingInfo;
 import frc.robot.subsystems.SuperStructure;
 import frc.robot.subsystems.SuperStructure.SuperStates;
 import frc.robot.subsystems.Vision.Vision;
@@ -91,7 +91,7 @@ public class RobotContainer {
 
   private static final double FLYWHEEL_KICKER_WARMUP_VELOCITY_RPM = 4000.0;
 
-  private RobotSpecificInfo robotSpecificInfo;
+  private RobotShootingInfo RobotShootingInfo;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -109,8 +109,8 @@ public class RobotContainer {
         intake = new Intake(new IntakeIOSim());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOSim());
 
-        robotSpecificInfo =
-            new RobotSpecificInfo(
+        RobotShootingInfo =
+            new RobotShootingInfo(
                 Constants.WoodBotConstants.shotHoodAngleMap,
                 Constants.WoodBotConstants.launchFlywheelSpeedMap,
                 Constants.WoodBotConstants.timeOfFlightMap,
@@ -139,8 +139,8 @@ public class RobotContainer {
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOWB());
         // intakePivot = new IntakePivot(new IntakePivotIOPB());
 
-        robotSpecificInfo =
-            new RobotSpecificInfo(
+        RobotShootingInfo =
+            new RobotShootingInfo(
                 Constants.WoodBotConstants.shotHoodAngleMap,
                 Constants.WoodBotConstants.launchFlywheelSpeedMap,
                 Constants.WoodBotConstants.timeOfFlightMap,
@@ -172,8 +172,8 @@ public class RobotContainer {
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOPB());
         intakePivot = new IntakePivot(new IntakePivotIOPB());
 
-        robotSpecificInfo =
-            new RobotSpecificInfo(
+        RobotShootingInfo =
+            new RobotShootingInfo(
                 Constants.WoodBotConstants.shotHoodAngleMap,
                 Constants.WoodBotConstants.launchFlywheelSpeedMap,
                 Constants.WoodBotConstants.timeOfFlightMap,
@@ -187,7 +187,7 @@ public class RobotContainer {
         new ShotCalculator(
             drivetrain::getPosition,
             () -> AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint.toTranslation2d()),
-            robotSpecificInfo);
+            RobotShootingInfo);
     // Configure the trigger bindings
     // TODO: Re-enable superStructure construction and PathPlanner commands
     superStructure =

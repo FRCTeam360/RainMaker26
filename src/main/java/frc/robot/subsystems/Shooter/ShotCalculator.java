@@ -34,7 +34,7 @@ public class ShotCalculator {
    */
   public record ShootingParams(Rotation2d targetHeading, double hoodAngle, double flywheelSpeed) {}
 
-  public record RobotSpecificInfo(
+  public record RobotShootingInfo(
       InterpolatingDoubleTreeMap shotHoodAngleMap,
       InterpolatingDoubleTreeMap launchFlywheelSpeedMap,
       InterpolatingDoubleTreeMap timeOfFlightMap,
@@ -54,13 +54,13 @@ public class ShotCalculator {
       Supplier<Pose2d> robotPoseSupplier,
       Supplier<Translation2d>
           targetSupplier, // AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint.toTranslation2d());
-      RobotSpecificInfo robotSpecificInfo) {
+      RobotShootingInfo RobotShootingInfo) {
     this.robotPoseSupplier = robotPoseSupplier;
     this.targetSupplier = targetSupplier;
-    this.shotHoodAngleMap = robotSpecificInfo.shotHoodAngleMap;
-    this.launchFlywheelSpeedMap = robotSpecificInfo.launchFlywheelSpeedMap;
-    this.timeOfFlightMap = robotSpecificInfo.timeOfFlightMap;
-    this.robotToShooter = robotSpecificInfo.robotToShooter;
+    this.shotHoodAngleMap = RobotShootingInfo.shotHoodAngleMap;
+    this.launchFlywheelSpeedMap = RobotShootingInfo.launchFlywheelSpeedMap;
+    this.timeOfFlightMap = RobotShootingInfo.timeOfFlightMap;
+    this.robotToShooter = RobotShootingInfo.robotToShooter;
   }
 
   private ShootingParams cachedShootingParams = null;
