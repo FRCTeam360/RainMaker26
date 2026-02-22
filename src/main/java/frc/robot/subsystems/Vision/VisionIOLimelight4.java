@@ -58,18 +58,4 @@ public class VisionIOLimelight4 extends VisionIOLimelightBase {
   public void setThrottle(int throttle) {
     LimelightHelpers.SetThrottle(getName(), throttle);
   }
-
-  @Override
-  public void updateInputs(VisionIOInputs inputs) {
-    // LL4 needs robot orientation sent every frame for internal IMU correction
-    LimelightHelpers.SetRobotOrientation(
-        getName(),
-        gyroAngleSupplier.getAsDouble(),
-        gyroAngleRateSupplier.getAsDouble(),
-        0,
-        0,
-        0,
-        0);
-    super.updateInputs(inputs);
-  }
 }

@@ -118,7 +118,7 @@ public class Vision extends SubsystemBase {
       VisionIO io = ios.get(key);
       VisionIOInputsAutoLogged input = visionInputs.get(key);
 
-      if(count < ios.keySet().size() - 1){
+      if (count < ios.keySet().size() - 1) {
         io.setRobotOrientationNoFlush();
       } else {
         io.setRobotOrientationFlush();

@@ -159,4 +159,16 @@ public abstract class VisionIOLimelightBase implements VisionIO {
   public void enableIMUAssist() {}
 
   public void setThrottle(int throttle) {}
+
+  @Override
+  public void setRobotOrientationNoFlush() {
+    LimelightHelpers.SetRobotOrientation_NoFlush(
+        name, gyroAngleSupplier.getAsDouble(), gyroAngleRateSupplier.getAsDouble(), 0, 0, 0, 0);
+  }
+
+  @Override
+  public void setRobotOrientationFlush() {
+    LimelightHelpers.SetRobotOrientation(
+        name, gyroAngleSupplier.getAsDouble(), gyroAngleRateSupplier.getAsDouble(), 0, 0, 0, 0);
+  }
 }

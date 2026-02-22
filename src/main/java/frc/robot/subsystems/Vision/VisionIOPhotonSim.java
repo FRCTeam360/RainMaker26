@@ -212,6 +212,12 @@ public class VisionIOPhotonSim implements VisionIO {
   @Override
   public void setThrottle(int throttle) {}
 
+  @Override
+  public void setRobotOrientationNoFlush() {}
+
+  @Override
+  public void setRobotOrientationFlush() {}
+
   // ----- Simulation-specific methods -----
 
   /**

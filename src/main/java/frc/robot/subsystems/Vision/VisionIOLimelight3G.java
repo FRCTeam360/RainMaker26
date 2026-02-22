@@ -4,14 +4,13 @@
 
 package frc.robot.subsystems.Vision;
 
-import frc.robot.utils.LimelightHelpers;
 import java.util.function.DoubleSupplier;
 
-/** Vision IO layer for Limelight 3. Sends robot orientation every frame for MegaTag2. */
+/** Vision IO layer for Limelight 3G. Inherits robot orientation handling from the base class. */
 public class VisionIOLimelight3G extends VisionIOLimelightBase {
 
   /**
-   * Creates a new Limelight 3 hardware layer.
+   * Creates a new Limelight 3G hardware layer.
    *
    * @param name the NetworkTables name of the Limelight
    * @param gyroAngleSupplier supplies the robot's gyro angle in degrees
@@ -24,19 +23,5 @@ public class VisionIOLimelight3G extends VisionIOLimelightBase {
       DoubleSupplier gyroAngleRateSupplier,
       boolean acceptMeasurements) {
     super(name, gyroAngleSupplier, gyroAngleRateSupplier, acceptMeasurements);
-  }
-
-  @Override
-  public void updateInputs(VisionIOInputs inputs) {
-    // LL3 needs robot orientation sent every frame for MegaTag2
-    LimelightHelpers.SetRobotOrientation(
-        getName(),
-        gyroAngleSupplier.getAsDouble(),
-        gyroAngleRateSupplier.getAsDouble(),
-        0,
-        0,
-        0,
-        0);
-    super.updateInputs(inputs);
   }
 }
