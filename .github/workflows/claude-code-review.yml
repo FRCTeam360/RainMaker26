@@ -2,7 +2,7 @@ name: Claude Code Review
 
 on:
   pull_request:
-    types: [opened, synchronize, ready_for_review, reopened]
+    types: [opened, ready_for_review]
     # Optional: Only run on specific file changes
     paths:
       - "src/**/*.java"
@@ -35,19 +35,55 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           prompt: |
-            REPO: ${{ github.repository }}
-            PR NUMBER: ${{ github.event.pull_request.number }}
+            You are reviewing PR #${{ github.event.pull_request.number }} in ${{ github.repository }}.
+            The PR branch is already checked out in the current working directory.
 
-            Please review this pull request with a focus on:
-            - Code quality and best practices
-            - Potential bugs or issues
-            - Security implications
-            - Performance considerations
+            ## Instructions
 
-            Note: The PR branch is already checked out in the current working directory.
+            1. First, check for your own previous reviews on this PR to avoid repeating feedback:
+               gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews
+               gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/comments
 
-            Use `gh pr comment` for top-level feedback.
-            Use `mcp__github_inline_comment__create_inline_comment` to highlight specific code issues.
-            Only post GitHub comments - don't submit review text as messages.
+            2. Get the diff and the HEAD commit SHA:
+               gh pr diff ${{ github.event.pull_request.number }}
+               gh pr view ${{ github.event.pull_request.number }} --json commits --jq '.commits[-1].oid'
+
+            3. Read the changed files and review them against the project guidelines in CLAUDE.md.
+               Only review lines that are part of the PR diff. Do not flag pre-existing issues.
+
+            4. Compile ALL your feedback into a SINGLE GitHub review submission using `gh api`.
+               Do NOT post individual comments — submit everything in one API call.
+               Do NOT use `gh pr comment` for separate messages.
+
+               Use this format:
+               ```
+               gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews \
+                 --method POST \
+                 --input - <<'EOF'
+               {
+                 "commit_id": "<HEAD_COMMIT_SHA>",
+                 "body": "<Short summary: 2-3 sentences of overall feedback>",
+                 "event": "COMMENT",
+                 "comments": [
+                   {
+                     "path": "relative/file/path.java",
+                     "line": <line_number_in_new_file>,
+                     "side": "RIGHT",
+                     "body": "<Concise inline comment>"
+                   }
+                 ]
+               }
+               EOF
+               ```
+
+            ## Rules
+            - Submit exactly ONE review via `gh api`. No other comments or messages.
+            - The review "body" should be a short summary (2-3 sentences max).
+            - Add an inline comment for EVERY issue you find — be comprehensive.
+            - Inline comments should be concise and actionable.
+            - Use "line" (absolute line number in the new file) with "side": "RIGHT" for additions/changes.
+            - Skip feedback that duplicates your previous reviews on this PR.
+            - Only flag real issues — do not nitpick style if it matches project conventions.
+            - If there are no issues worth flagging, submit a review with just a short approving body and an empty comments array.
           claude_args: |
-            --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*)"
+            --allowedTools "Bash(gh api:*),Bash(gh pr diff:*),Bash(gh pr view:*),Read,Glob,Grep"

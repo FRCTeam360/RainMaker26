@@ -15,12 +15,18 @@ public interface IntakePivotIO {
     public double voltage = 0.0;
     public double velocity = 0.0;
     public double position = 0.0;
-    // insert inputs
+    public boolean brakeMode = true;
   }
+
+  public void setZero();
 
   public void setPosition(double position);
 
   public void setDutyCycle(double value);
 
   public default void updateInputs(IntakePivotIOInputs inputs) {}
+
+  public void enableBrakeMode();
+
+  public void disableBrakeMode();
 }

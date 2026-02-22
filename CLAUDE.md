@@ -20,6 +20,32 @@ This is the robot code for RainMaker26 FRC 360's 26th robot for the 2026 season,
 | PathplannerLib | 2026.1.2 | [Javadoc](https://pathplanner.dev/api/java/)                                          | [Docs](https://pathplanner.dev/home.html)              |
 | AdvantageKit   | 26.0.0   | [Javadoc](https://docs.advantagekit.org/javadoc/)                                     | [Docs](https://docs.advantagekit.org/)                 |
 
+## WPILib Command Composition Quick Reference
+
+When reviewing or writing command compositions, use these exact semantics — do not guess:
+
+| Method          | Group Type               | Ends When                                                          |
+| --------------- | ------------------------ | ------------------------------------------------------------------ |
+| `alongWith()`   | `ParallelCommandGroup`   | **ALL** commands finish                                            |
+| `raceWith()`    | `ParallelRaceGroup`      | **ANY** command finishes                                           |
+| `deadlineFor()` | `ParallelDeadlineGroup`  | The **deadline** (calling) command finishes, interrupts all others |
+| `andThen()`     | `SequentialCommandGroup` | Commands run in order, ends when last finishes                     |
+
+### Command lifecycle types
+
+| Factory / Class                | Behavior                                                                                        |
+| ------------------------------ | ----------------------------------------------------------------------------------------------- |
+| `InstantCommand` / `runOnce()` | Runs once, finishes immediately                                                                 |
+| `RunCommand` / `run()`         | Runs every cycle, **never finishes on its own**                                                 |
+| `runEnd()`                     | Runs every cycle with an end action, **never finishes on its own**                              |
+| `startEnd()`                   | Runs a start action on init; runs an end action when interrupted, **never finishes on its own** |
+
+### Common pitfalls
+
+- **PathPlanner NamedCommands must terminate** — an infinite command (e.g., `run()`) will stall the entire auto sequence
+- **`FieldCentricFacingAngle.HeadingController.atSetpoint()`** returns stale/invalid results when the facing-angle request is not actively being applied; ensure that it's being reset when called
+- **CTRE `StatusSignal` values must be refreshed** before reading; stale signals return old data silently
+
 ## Project Structure
 
 ```
@@ -65,12 +91,15 @@ View the report: open build/reports/spotbugs/spotbugs.html
 
 ## Code Patterns
 
-- Use Command-based programming: subsystems own hardware, commands define actions
+- Use Command-based programming controlling the drivetrain and superstructure for competition code: superstructure owns non-drivetrain subsystems which own hardware, commands define actions
+- Superstructure state transition commands are fire and forget
+- Subsystems are controlled by the superstructure through setting wanted states and can be unhooked from that and ran by commands through a separate state for testing
 - **Infrastructure constants** (CAN IDs, sensor ports, physical hardware config) always go in Constants.java
 - **Tuning constants** (PID gains, setpoints, tolerances, speeds) should be named `private static final` variables in the file where they're used
 - Avoid unnamed literals - give values descriptive names **with units** (e.g., `MAX_VELOCITY_MPS`, `STALL_CURRENT_AMPS`, `TIMEOUT_SECONDS`)
-- Use AdvantageKit's @AutoLogOutput for telemetry on important values
-- Subsystems extend SubsystemBase; commands extend Command or use robot action methods
+- Use AdvantageKit's @AutoLog on IO input classes for hardware telemetry
+- Use AdvantageKit's Logger.recordOutput() for all other values, grouping them by subsystem, class, or state type
+- Subsystems extend SubsystemBase
 - Subsystems have IO layers with specific hardware implementations (other than the superstructure) following FRC 6328's architecture
 
 ## Naming Conventions
@@ -120,9 +149,8 @@ Use `ALL_CAPS` with underscores for separation:
 When reviewing a PR, follow these rules strictly:
 
 - **Only review lines that are part of the PR diff.** Do not flag pre-existing issues in files the PR touches. If a line was not added or modified in the diff, do not comment on it.
-- **Do not block merges on SpotBugs findings.** SpotBugs is diagnostic only — mention findings as informational if they appear in changed lines, but never mark them as blockers or recommend against merging because of them.
 - **Focus on correctness and intent of the PR.** Evaluate whether the changed code does what the PR description says, follows project conventions, and doesn't introduce new issues. Do not expand scope beyond the PR's purpose.
-- **CI status:** Only Build, Test, Format Check, and Simulation Test are merge blockers. SpotBugs is not.
+- **CI status:** Only Build, Test, Format Check, and Simulation Test are merge blockers.
 
 ## Code Review Checklist
 
