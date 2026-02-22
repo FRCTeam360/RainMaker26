@@ -11,24 +11,42 @@ import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
 public class Indexer extends SubsystemBase {
-  private final IndexerIO io;
-  private final IndexerIOInputsAutoLogged inputs = new IndexerIOInputsAutoLogged();
+  // Constants
   private static final double INDEXER_DUTY_CYCLE = 0.4;
 
+  // IO fields
+  private final IndexerIO io;
+  private final IndexerIOInputsAutoLogged inputs = new IndexerIOInputsAutoLogged();
+
+  // Enums
   public enum IndexerStates {
     OFF,
     INTAKING,
     SHOOTING
   }
 
-  public IndexerStates getState() {
-    return currentState;
-  }
-
+  // State variables
   private IndexerStates wantedState = IndexerStates.OFF;
   private IndexerStates currentState = IndexerStates.OFF;
   private IndexerStates previousState = IndexerStates.OFF;
   private ControlState controlState = ControlState.SUPERSTRUCTURE;
+
+  // Constructor
+
+  /** Creates a new Indexer. */
+  public Indexer(IndexerIO io) {
+    this.io = io;
+  }
+
+  // State machine methods
+
+  public IndexerStates getState() {
+    return currentState;
+  }
+
+  public void setWantedState(IndexerStates state) {
+    wantedState = state;
+  }
 
   public void setControlState(ControlState controlState) {
     this.controlState = controlState;
@@ -66,25 +84,10 @@ public class Indexer extends SubsystemBase {
     }
   }
 
-  /** Creates a new Indexer. */
-  public Indexer(IndexerIO io) {
-    this.io = io;
-  }
-
-  public void setWantedState(IndexerStates state) {
-    wantedState = state;
-  }
+  // IO delegation methods
 
   public void setDutyCycle(double dutyCycle) {
     io.setDutyCycle(dutyCycle);
-  }
-
-  public Command setDutyCycleCommand(double value) {
-    return this.setDutyCycleCommand(() -> value);
-  }
-
-  public Command setDutyCycleCommand(DoubleSupplier valueSup) {
-    return this.runEnd(() -> io.setDutyCycle(valueSup.getAsDouble()), () -> io.setDutyCycle(0.0));
   }
 
   public void setVelocity(double velocity) {
@@ -94,6 +97,18 @@ public class Indexer extends SubsystemBase {
   public void stop() {
     io.setDutyCycle(0.0);
   }
+
+  // Command factory methods
+
+  public Command setDutyCycleCommand(double value) {
+    return this.setDutyCycleCommand(() -> value);
+  }
+
+  public Command setDutyCycleCommand(DoubleSupplier valueSup) {
+    return this.runEnd(() -> io.setDutyCycle(valueSup.getAsDouble()), () -> io.setDutyCycle(0.0));
+  }
+
+  // periodic
 
   @Override
   public void periodic() {

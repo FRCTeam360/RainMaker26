@@ -11,22 +11,48 @@ import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
 public class IntakePivot extends SubsystemBase {
-  public final IntakePivotIOInputsAutoLogged inputs = new IntakePivotIOInputsAutoLogged();
-  public final IntakePivotIO io;
-  private final IntakePivotVisualizer visualizer;
+  // Constants
   private static final double STOWED_POSITION = 0.0;
   private static final double DEPLOYED_POSITION = 90.0;
 
+  // IO fields
+  private final IntakePivotIO io;
+  private final IntakePivotIOInputsAutoLogged inputs = new IntakePivotIOInputsAutoLogged();
+
+  // Other fields
+  private final IntakePivotVisualizer visualizer;
+
+  // Enums
   public enum IntakePivotStates {
     OFF,
     STOWED,
     DEPLOYED,
   }
 
+  // State variables
   private IntakePivotStates wantedState = IntakePivotStates.OFF;
-  private IntakePivotStates previousState = IntakePivotStates.OFF;
   private IntakePivotStates currentState = IntakePivotStates.OFF;
+  private IntakePivotStates previousState = IntakePivotStates.OFF;
   private ControlState controlState = ControlState.SUPERSTRUCTURE;
+
+  // Constructor
+
+  /** Creates a new IntakePivot. */
+  public IntakePivot(IntakePivotIO io) {
+    this.io = io;
+    // Initialize visualizer with arm length in meters (30 inches = 0.762 m)
+    this.visualizer = new IntakePivotVisualizer(0.762);
+  }
+
+  // State machine methods
+
+  public IntakePivotStates getState() {
+    return currentState;
+  }
+
+  public void setWantedState(IntakePivotStates state) {
+    wantedState = state;
+  }
 
   public void setControlState(ControlState controlState) {
     this.controlState = controlState;
@@ -61,20 +87,7 @@ public class IntakePivot extends SubsystemBase {
     }
   }
 
-  /** Creates a new IntakePivot. */
-  public IntakePivot(IntakePivotIO io) {
-    this.io = io;
-    // Initialize visualizer with arm length in meters (30 inches = 0.762 m)
-    this.visualizer = new IntakePivotVisualizer(0.762);
-  }
-
-  public IntakePivotStates getState() {
-    return currentState;
-  }
-
-  public void setWantedState(IntakePivotStates state) {
-    wantedState = state;
-  }
+  // IO delegation methods
 
   public void setPosition(double value) {
     io.setPosition(value);
@@ -88,6 +101,8 @@ public class IntakePivot extends SubsystemBase {
     this.setDutyCycle(0.0);
   }
 
+  // Command factory methods
+
   public Command setDutyCycleCommand(DoubleSupplier dutySupplier) {
     return this.runEnd(() -> this.setDutyCycle(dutySupplier.getAsDouble()), () -> this.stop());
   }
@@ -95,6 +110,8 @@ public class IntakePivot extends SubsystemBase {
   public Command setPosition(DoubleSupplier positionSupplier) {
     return this.runEnd(() -> this.setPosition(positionSupplier.getAsDouble()), () -> this.stop());
   }
+
+  // periodic
 
   @Override
   public void periodic() {

@@ -289,10 +289,10 @@ public class RobotContainer {
       driverCont.pov(180).whileTrue(hood.setDutyCycleCommand(() -> -0.2));
       driverCont
           .pov(90)
-          .whileTrue(hood.setPositionCmd(0.0)); // TODO change placeholder values for PB
+          .whileTrue(hood.setPositionCommand(0.0)); // TODO change placeholder values for PB
       driverCont
           .pov(270)
-          .whileTrue(hood.setPositionCmd(0.0)); // TODO change placeholder values for PB
+          .whileTrue(hood.setPositionCommand(0.0)); // TODO change placeholder values for PB
       operatorCont.pov(0).whileTrue(hood.zero());
     }
     if (Objects.nonNull(indexer)) {}
@@ -366,11 +366,11 @@ public class RobotContainer {
     // setHoodPosition uses hood
     if (Objects.nonNull(hood)) {
       // hood.setDefaultCommand(
-      //     CommandLogger.logCommand(hood.setPositionCmd(0.0), "hood default command"));
+      //     CommandLogger.logCommand(hood.setPositionCommand(0.0), "hood default command"));
       driverCont.pov(0).onTrue(hood.moveToZeroAndZero());
-      driverCont.pov(90).whileTrue(hood.setPositionCmd(4.0));
-      driverCont.pov(180).whileTrue(hood.setPositionCmd(16.0));
-      driverCont.pov(270).whileTrue(hood.setPositionCmd(23.0));
+      driverCont.pov(90).whileTrue(hood.setPositionCommand(4.0));
+      driverCont.pov(180).whileTrue(hood.setPositionCommand(16.0));
+      driverCont.pov(270).whileTrue(hood.setPositionCommand(23.0));
       driverCont.start().onTrue(hood.zero());
     }
 

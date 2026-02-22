@@ -12,11 +12,17 @@ import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
 public class Hood extends SubsystemBase {
+  // Constants
+  private static final double TOLERANCE = 0.5;
+
+  // IO fields
   private final HoodIO io;
   private final HoodIOInputsAutoLogged inputs = new HoodIOInputsAutoLogged();
-  private static final double TOLERANCE = 0.5;
+
+  // Other fields
   private DoubleSupplier hoodAngleSupplier = () -> 0.0;
 
+  // Enums
   public enum HoodWantedStates {
     IDLE,
     SHOOTING
@@ -28,6 +34,33 @@ public class Hood extends SubsystemBase {
     AT_SETPOINT
   }
 
+  // State variables
+  private HoodWantedStates wantedState = HoodWantedStates.IDLE;
+  private HoodInternalStates currentState = HoodInternalStates.OFF;
+  private HoodInternalStates previousState = HoodInternalStates.OFF;
+  private ControlState controlState = ControlState.SUPERSTRUCTURE;
+
+  // Constructor
+
+  /** Creates a new Hood. */
+  public Hood(HoodIO io) {
+    this.io = io;
+  }
+
+  // State machine methods
+
+  public HoodInternalStates getState() {
+    return currentState;
+  }
+
+  public void setWantedState(HoodWantedStates state) {
+    wantedState = state;
+  }
+
+  public void setControlState(ControlState controlState) {
+    this.controlState = controlState;
+  }
+
   /**
    * Sets the supplier for the hood angle from the shot calculator.
    *
@@ -35,36 +68,6 @@ public class Hood extends SubsystemBase {
    */
   public void setHoodAngleSupplier(DoubleSupplier hoodAngleSupplier) {
     this.hoodAngleSupplier = hoodAngleSupplier;
-  }
-
-  private HoodWantedStates wantedState = HoodWantedStates.IDLE;
-  private HoodInternalStates currentState = HoodInternalStates.OFF;
-  private HoodInternalStates previousState = HoodInternalStates.OFF;
-  private ControlState controlState = ControlState.SUPERSTRUCTURE;
-
-  public void setControlState(ControlState controlState) {
-    this.controlState = controlState;
-  }
-
-  public void setWantedState(HoodWantedStates state) {
-    wantedState = state;
-  }
-
-  private void applyState() {
-    switch (currentState) {
-      case MOVING:
-      case AT_SETPOINT:
-        setPosition(hoodAngleSupplier.getAsDouble());
-        break;
-      case OFF:
-      default:
-        setPosition(0.0);
-        break;
-    }
-  }
-
-  public HoodInternalStates getState() {
-    return currentState;
   }
 
   private void updateState() {
@@ -85,10 +88,28 @@ public class Hood extends SubsystemBase {
     }
   }
 
-  /** Creates a new Hood. */
-  public Hood(HoodIO io) {
-    this.io = io;
+  private void applyState() {
+    switch (currentState) {
+      case MOVING:
+      case AT_SETPOINT:
+        setPosition(hoodAngleSupplier.getAsDouble());
+        break;
+      case OFF:
+      default:
+        setPosition(0.0);
+        break;
+    }
   }
+
+  public boolean atSetpoint(double setpoint) {
+    return Math.abs(getPosition() - setpoint) < TOLERANCE;
+  }
+
+  public boolean atSetpoint(DoubleSupplier setpoint) {
+    return atSetpoint(setpoint.getAsDouble());
+  }
+
+  // IO delegation methods
 
   public void setDutyCycle(double dutyCycle) {
     io.setDutyCycle(dutyCycle);
@@ -102,14 +123,6 @@ public class Hood extends SubsystemBase {
     return inputs.position;
   }
 
-  public Command setPositionCmd(DoubleSupplier position) {
-    return this.run(() -> io.setPosition(position.getAsDouble()));
-  }
-
-  public Command setPositionCmd(double position) {
-    return this.setPositionCmd(() -> position);
-  }
-
   public void setZero() {
     io.setZero();
   }
@@ -118,12 +131,26 @@ public class Hood extends SubsystemBase {
     io.setDutyCycle(0);
   }
 
-  public boolean atSetpoint(double setpoint) {
-    return Math.abs(getPosition() - setpoint) < TOLERANCE;
+  // Command factory methods
+
+  public Command setDutyCycleCommand(double value) {
+    return this.setDutyCycleCommand(() -> value);
   }
 
-  public boolean atSetpoint(DoubleSupplier setpoint) {
-    return atSetpoint(setpoint.getAsDouble());
+  public Command setDutyCycleCommand(DoubleSupplier valueSup) {
+    return this.runEnd(() -> io.setDutyCycle(valueSup.getAsDouble()), () -> io.setDutyCycle(0.0));
+  }
+
+  public Command setPositionCommand(DoubleSupplier position) {
+    return this.run(() -> io.setPosition(position.getAsDouble()));
+  }
+
+  public Command setPositionCommand(double position) {
+    return this.setPositionCommand(() -> position);
+  }
+
+  public Command zero() {
+    return this.runOnce(() -> setZero());
   }
 
   public Command moveToZeroAndZero() {
@@ -135,6 +162,8 @@ public class Hood extends SubsystemBase {
         .andThen(Commands.waitSeconds(ZERO_SETTLE_SECONDS))
         .andThen(zero());
   }
+
+  // periodic
 
   @Override
   public void periodic() {
@@ -148,17 +177,5 @@ public class Hood extends SubsystemBase {
     Logger.recordOutput("Subsystems/Hood/WantedState", wantedState.toString());
     Logger.recordOutput("Subsystems/Hood/CurrentState", currentState.toString());
     Logger.recordOutput("Subsystems/Hood/PreviousState", previousState.toString());
-  }
-
-  public Command setDutyCycleCommand(double value) {
-    return this.setDutyCycleCommand(() -> value);
-  }
-
-  public Command setDutyCycleCommand(DoubleSupplier valueSup) {
-    return this.runEnd(() -> io.setDutyCycle(valueSup.getAsDouble()), () -> io.setDutyCycle(0.0));
-  }
-
-  public Command zero() {
-    return this.runOnce(() -> setZero());
   }
 }

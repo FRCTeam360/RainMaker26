@@ -19,6 +19,7 @@ import java.util.function.BooleanSupplier;
 import org.littletonrobotics.junction.Logger;
 
 public class SuperStructure extends SubsystemBase {
+  // Fields (subsystem refs, calculators, suppliers)
   private final Intake intake;
   private final Indexer indexer;
   private final FlywheelKicker flywheelKicker;
@@ -30,6 +31,7 @@ public class SuperStructure extends SubsystemBase {
   private final ShotCalculator outpostPassCalculator;
   private final BooleanSupplier isAlignedToTarget;
 
+  // Enums
   public enum SuperStates {
     IDLE, // everything is stopped when nothing else happens
     INTAKING, // while intake button pressed
@@ -49,12 +51,15 @@ public class SuperStructure extends SubsystemBase {
     PREPARING
   }
 
+  // State variables
   private SuperStates wantedSuperState = SuperStates.IDLE;
   private SuperStates currentSuperState = SuperStates.IDLE;
   private SuperStates previousSuperState = SuperStates.IDLE;
 
   private ShooterStates currentShooterState = ShooterStates.PREPARING;
   private ShooterStates previousShooterState = ShooterStates.PREPARING;
+
+  // Constructor
 
   public SuperStructure(
       Intake intake,
@@ -94,15 +99,7 @@ public class SuperStructure extends SubsystemBase {
     //     });
   }
 
-  public void setAllControlStates(ControlState controlState) {
-    flywheel.setControlState(controlState);
-    indexer.setControlState(controlState);
-    flywheelKicker.setControlState(controlState);
-    intake.setControlState(controlState);
-    intakePivot.setControlState(controlState);
-    hopperRoller.setControlState(controlState);
-    hood.setControlState(controlState);
-  }
+  // State machine methods
 
   private void updateState() {
     previousSuperState = currentSuperState;
@@ -176,6 +173,8 @@ public class SuperStructure extends SubsystemBase {
     }
   }
 
+  // Subsystem state helpers
+
   private void intaking() {
     intake.setWantedState(Intake.IntakeStates.INTAKING);
     // indexer.setWantedState(Indexer.IndexerStates.INTAKING);
@@ -189,6 +188,18 @@ public class SuperStructure extends SubsystemBase {
     // hood.setWantedState(HoodWantedStates.IDLE);
   }
 
+  // Public API
+
+  public void setAllControlStates(ControlState controlState) {
+    flywheel.setControlState(controlState);
+    indexer.setControlState(controlState);
+    flywheelKicker.setControlState(controlState);
+    intake.setControlState(controlState);
+    intakePivot.setControlState(controlState);
+    hopperRoller.setControlState(controlState);
+    hood.setControlState(controlState);
+  }
+
   public Command setStateCommand(SuperStates superState) {
     return new InstantCommand(() -> setWantedSuperState(superState), this);
   }
@@ -196,6 +207,8 @@ public class SuperStructure extends SubsystemBase {
   public void setWantedSuperState(SuperStates superState) {
     this.wantedSuperState = superState;
   }
+
+  // periodic
 
   @Override
   public void periodic() {

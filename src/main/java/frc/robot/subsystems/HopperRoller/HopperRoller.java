@@ -9,27 +9,43 @@ import frc.robot.subsystems.ControlState;
 import org.littletonrobotics.junction.Logger;
 
 public class HopperRoller extends SubsystemBase {
+  // Constants
+  private static final double ROLLER_DUTY_CYCLE = 1.0;
+
+  // IO fields
   private final HopperRollerIO io;
   private final HopperRollerIOInputsAutoLogged inputs = new HopperRollerIOInputsAutoLogged();
 
+  // Enums
   public enum HopperRollerStates {
     OFF,
     ROLLING
   }
 
+  // State variables
   private HopperRollerStates wantedState = HopperRollerStates.OFF;
   private HopperRollerStates currentState = HopperRollerStates.OFF;
   private HopperRollerStates previousState = HopperRollerStates.OFF;
   private ControlState controlState = ControlState.SUPERSTRUCTURE;
 
-  public void setControlState(ControlState controlState) {
-    this.controlState = controlState;
+  // Constructor
+
+  public HopperRoller(HopperRollerIO io) {
+    this.io = io;
   }
 
-  private static final double ROLLER_DUTY_CYCLE = 1.0;
+  // State machine methods
 
   public HopperRollerStates getState() {
     return currentState;
+  }
+
+  public void setWantedState(HopperRollerStates state) {
+    wantedState = state;
+  }
+
+  public void setControlState(ControlState controlState) {
+    this.controlState = controlState;
   }
 
   private void updateState() {
@@ -58,13 +74,7 @@ public class HopperRoller extends SubsystemBase {
     }
   }
 
-  public HopperRoller(HopperRollerIO io) {
-    this.io = io;
-  }
-
-  public void setWantedState(HopperRollerStates state) {
-    wantedState = state;
-  }
+  // IO delegation methods
 
   public void setDutyCycle(double dutyCycle) {
     io.setDutyCycle(dutyCycle);
@@ -74,9 +84,10 @@ public class HopperRoller extends SubsystemBase {
     io.setDutyCycle(0.0);
   }
 
+  // periodic
+
   @Override
   public void periodic() {
-
     io.updateInputs(inputs);
     Logger.processInputs("HopperRoller", inputs);
 

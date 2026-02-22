@@ -11,43 +11,44 @@ import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
 public class FlywheelKicker extends SubsystemBase {
+  // Constants
+  private static final double KICKER_VELOCITY_RPM = 4500.0;
+
+  // IO fields
   private final FlywheelKickerIO io;
   private final FlywheelKickerIOInputsAutoLogged inputs = new FlywheelKickerIOInputsAutoLogged();
 
+  // Enums
   public enum FlywheelKickerStates {
     OFF,
     SHOOTING
   }
 
-  public FlywheelKickerStates getState() {
-    return currentState;
-  }
-
+  // State variables
   private FlywheelKickerStates wantedState = FlywheelKickerStates.OFF;
   private FlywheelKickerStates currentState = FlywheelKickerStates.OFF;
   private FlywheelKickerStates previousState = FlywheelKickerStates.OFF;
   private ControlState controlState = ControlState.SUPERSTRUCTURE;
 
-  public void setControlState(ControlState controlState) {
-    this.controlState = controlState;
+  // Constructor
+
+  /** Creates a new FlywheelKicker. */
+  public FlywheelKicker(FlywheelKickerIO io) {
+    this.io = io;
+  }
+
+  // State machine methods
+
+  public FlywheelKickerStates getState() {
+    return currentState;
   }
 
   public void setWantedState(FlywheelKickerStates state) {
     wantedState = state;
   }
 
-  private static final double KICKER_VELOCITY_RPM = 4500.0;
-
-  private void applyState() {
-    switch (currentState) {
-      case SHOOTING:
-        setVelocity(KICKER_VELOCITY_RPM);
-        break;
-      case OFF:
-      default:
-        stop();
-        break;
-    }
+  public void setControlState(ControlState controlState) {
+    this.controlState = controlState;
   }
 
   private void updateState() {
@@ -64,14 +65,33 @@ public class FlywheelKicker extends SubsystemBase {
     }
   }
 
-  /** Creates a new FlywheelKicker. */
-  public FlywheelKicker(FlywheelKickerIO io) {
-    this.io = io;
+  private void applyState() {
+    switch (currentState) {
+      case SHOOTING:
+        setVelocity(KICKER_VELOCITY_RPM);
+        break;
+      case OFF:
+      default:
+        stop();
+        break;
+    }
   }
+
+  // IO delegation methods
 
   public void setDutyCycle(double dutyCycle) {
     io.setDutyCycle(dutyCycle);
   }
+
+  public void setVelocity(double veloicty) {
+    io.setVelocity(veloicty);
+  }
+
+  public void stop() {
+    io.setDutyCycle(0.0);
+  }
+
+  // Command factory methods
 
   public Command setDutyCycleCommand(double value) {
     return this.setDutyCycleCommand(() -> value);
@@ -81,17 +101,11 @@ public class FlywheelKicker extends SubsystemBase {
     return this.runEnd(() -> io.setDutyCycle(valueSup.getAsDouble()), () -> io.setDutyCycle(0.0));
   }
 
-  public void setVelocity(double veloicty) {
-    io.setVelocity(veloicty);
-  }
-
   public Command setVelocityCommand(double rpm) {
     return this.runEnd(() -> setVelocity(rpm), () -> setVelocity(0.0));
   }
 
-  public void stop() {
-    io.setDutyCycle(0.0);
-  }
+  // periodic
 
   @Override
   public void periodic() {
