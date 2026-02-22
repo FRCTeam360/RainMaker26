@@ -159,7 +159,7 @@ public class SuperStructure extends SubsystemBase {
 
   private void shooting() {
     flywheel.setWantedState(FlywheelStates.MOVING);
-    hood.setWantedState(HoodStates.MOVING_TO_SETPOINT);
+    hood.setWantedState(HoodStates.MOVING);
   }
 
   private void intaking() {

@@ -18,7 +18,7 @@ public class Hood extends SubsystemBase {
 
   public enum HoodStates {
     OFF,
-    MOVING_TO_SETPOINT,
+    MOVING,
     AT_SETPOINT
   }
 
@@ -41,7 +41,7 @@ public class Hood extends SubsystemBase {
 
   private void applyState() {
     switch (currentState) {
-      case MOVING_TO_SETPOINT:
+      case MOVING:
       case AT_SETPOINT:
         setPosition(hoodAngleSupplier.getAsDouble());
         break;
@@ -60,12 +60,12 @@ public class Hood extends SubsystemBase {
     previousState = currentState;
 
     switch (wantedState) {
-      case MOVING_TO_SETPOINT:
+      case MOVING:
       case AT_SETPOINT:
         if (atSetpoint(hoodAngleSupplier)) {
           currentState = HoodStates.AT_SETPOINT;
         } else {
-          currentState = HoodStates.MOVING_TO_SETPOINT;
+          currentState = HoodStates.MOVING;
         }
         break;
       case OFF:

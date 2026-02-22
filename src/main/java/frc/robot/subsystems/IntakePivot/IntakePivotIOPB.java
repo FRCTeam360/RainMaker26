@@ -6,12 +6,10 @@ package frc.robot.subsystems.IntakePivot;
 
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
-import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.MotionMagicTorqueCurrentFOC;
-import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.util.Units;
@@ -19,7 +17,7 @@ import frc.robot.Constants;
 
 public class IntakePivotIOPB implements IntakePivotIO {
   // TODO: UPDATE GEAR RATIO
-  private static final double GEAR_RATIO = 60.0;
+  private static final double GEAR_RATIO = 1.0; // was 60.0 before ice cream social
 
   private static final double KP = 3.0;
   private static final double KI = 0.0;
@@ -51,7 +49,8 @@ public class IntakePivotIOPB implements IntakePivotIO {
           Constants.PracticeBotConstants.INTAKE_PIVOT_ID, Constants.PracticeBotConstants.CANBUS);
 
   private final DutyCycleOut dutyCycleOut = new DutyCycleOut(0);
-  private final MotionMagicTorqueCurrentFOC motionMagicPosition = new MotionMagicTorqueCurrentFOC(0.0);
+  private final MotionMagicTorqueCurrentFOC motionMagicPosition =
+      new MotionMagicTorqueCurrentFOC(0.0);
   private final TalonFXConfiguration config = new TalonFXConfiguration();
   private final CurrentLimitsConfigs currentLimitConfig = new CurrentLimitsConfigs();
   private NeutralModeValue neutralMode = NeutralModeValue.Brake;
