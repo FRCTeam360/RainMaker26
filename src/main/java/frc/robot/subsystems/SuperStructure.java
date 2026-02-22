@@ -77,13 +77,13 @@ public class SuperStructure extends SubsystemBase {
           }
           return this.hubShotCalculator.calculateShot().flywheelSpeed();
         });
-    hood.setHoodAngleSupplier(
-        () -> {
-          if (currentSuperState == SuperStates.SHOOT_AT_OUTPOST) {
-            return this.outpostPassCalculator.calculateShot().hoodAngle();
-          }
-          return this.hubShotCalculator.calculateShot().hoodAngle();
-        });
+    // hood.setHoodAngleSupplier(
+    //     () -> {
+    //       if (currentSuperState == SuperStates.SHOOT_AT_OUTPOST) {
+    //         return this.outpostPassCalculator.calculateShot().hoodAngle();
+    //       }
+    //       return this.hubShotCalculator.calculateShot().hoodAngle();
+    //     });
   }
 
   private void updateState() {
@@ -132,14 +132,14 @@ public class SuperStructure extends SubsystemBase {
   private void updateShooterStates() {
     previousShooterState = currentShooterState;
     boolean flywheelReady = flywheel.getState() == FlywheelStates.AT_SETPOINT;
-    boolean hoodReady = hood.getState() == HoodStates.AT_SETPOINT;
+    // boolean hoodReady = hood.getState() == HoodStates.AT_SETPOINT;
     boolean aligned = isAlignedToTarget.getAsBoolean();
 
     Logger.recordOutput("Superstructure/Shooting/FlywheelReady", flywheelReady);
-    Logger.recordOutput("Superstructure/Shooting/HoodReady", hoodReady);
+    // Logger.recordOutput("Superstructure/Shooting/HoodReady", hoodReady);
     Logger.recordOutput("Superstructure/Shooting/Aligned", aligned);
 
-    if (flywheelReady && hoodReady && aligned) {
+    if (flywheelReady && aligned) { //ADD HOOD CHECK BACK WHEN GOOD AGAIN
       currentShooterState = ShooterStates.FIRING;
     } else {
       currentShooterState = ShooterStates.PREPARING;
@@ -159,7 +159,7 @@ public class SuperStructure extends SubsystemBase {
 
   private void shooting() {
     flywheel.setWantedState(FlywheelStates.MOVING);
-    hood.setWantedState(HoodStates.MOVING);
+    // hood.setWantedState(HoodStates.MOVING);
   }
 
   private void intaking() {
@@ -172,7 +172,7 @@ public class SuperStructure extends SubsystemBase {
     indexer.setWantedState(Indexer.IndexerStates.OFF);
     flywheelKicker.setWantedState(FlywheelKickerStates.OFF);
     flywheel.setWantedState(FlywheelStates.OFF);
-    hood.setWantedState(HoodStates.OFF);
+    // hood.setWantedState(HoodStates.OFF);
   }
 
   public Command setStateCommand(SuperStates superState) {
