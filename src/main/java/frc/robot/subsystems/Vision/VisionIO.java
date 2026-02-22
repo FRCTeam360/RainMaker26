@@ -50,15 +50,28 @@ public interface VisionIO {
   public void resetSnapshot();
 
   /** Enables IMU seeding from external orientation data. Only relevant for Limelight 4. */
-  void enableIMUSeeding();
+  public void enableIMUSeeding();
 
   /** Enables IMU assist mode. Only relevant for Limelight 4. */
-  void enableIMUAssist();
+  public void enableIMUAssist();
 
   /**
    * Sets the processing throttle. Only relevant for Limelight 4.
    *
    * @param throttle number of frames to skip between processed frames (0 = full speed)
    */
-  void setThrottle(int throttle);
+  public void setThrottle(int throttle);
+
+  /**
+   * Sets the robot's orientation without flushing the network tables entry. This is a non-blocking
+   * operation and should be ran on all visionIOs before calling the flush version on the last
+   * visionIO to be updated.
+   */
+  public void setRobotOrientationNoFlush();
+
+  /**
+   * Sets the robot's orientation while flushing the network tables entry. This is a blocking
+   * operation and should be ran on the last visionIO to be updated.
+   */
+  public void setRobotOrientationFlush();
 }
