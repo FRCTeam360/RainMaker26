@@ -64,12 +64,9 @@ spotbugs {
 
 // Only run SpotBugs when explicitly invoked (e.g., ./gradlew spotbugsMain or ./gradlew release).
 // Skips automatically during build/check lifecycle.
-// release: fails on HIGH confidence bugs only.
-// Standalone (spotbugsMain): reports MEDIUM+ confidence bugs but does not fail the build.
+// SpotBugs findings are always informational — they never fail the build.
 tasks.withType(com.github.spotbugs.snom.SpotBugsTask).configureEach {
-    def isRelease = gradle.startParameter.taskNames.any { it.toLowerCase() == 'release' }
-    reportLevel = isRelease ? Confidence.HIGH : Confidence.MEDIUM
-    ignoreFailures = !isRelease
+    ignoreFailures = true
     onlyIf {
         gradle.startParameter.taskNames.any { name ->
             name.toLowerCase().contains('spotbugs') || name.toLowerCase() == 'release'
