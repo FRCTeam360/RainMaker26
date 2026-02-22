@@ -77,10 +77,15 @@ public final class Constants {
     // === SHOT CALCULATOR ===
     public static final InterpolatingDoubleTreeMap shotHoodAngleMap =
         new InterpolatingDoubleTreeMap();
-    public static final InterpolatingDoubleTreeMap launchFlywheelSpeedMap =
+    public static final InterpolatingDoubleTreeMap shotFlywheelSpeedMap =
+        new InterpolatingDoubleTreeMap();
+    public static final InterpolatingDoubleTreeMap passHoodAngleMap =
+        new InterpolatingDoubleTreeMap();
+    public static final InterpolatingDoubleTreeMap passFlywheelSpeedMap =
         new InterpolatingDoubleTreeMap();
 
     static {
+      // === SHOOTING VALUES ===
       shotHoodAngleMap.put(5.0, 20.0);
       shotHoodAngleMap.put(4.0, 18.0);
       shotHoodAngleMap.put(3.0, 16.0);
@@ -88,11 +93,18 @@ public final class Constants {
       shotHoodAngleMap.put(1.0, 8.0); // THIS IS GOOD
       shotHoodAngleMap.put(0.0, 6.0);
 
-      launchFlywheelSpeedMap.put(5.0, 3750.0);
-      launchFlywheelSpeedMap.put(4.0, 3750.0);
-      launchFlywheelSpeedMap.put(3.0, 3375.0);
-      launchFlywheelSpeedMap.put(2.0, 3000.0); // THIS IS GOOD
-      launchFlywheelSpeedMap.put(0.0, 2750.0);
+      // === SHOOTING VALUES ===
+      shotFlywheelSpeedMap.put(5.0, 3750.0);
+      shotFlywheelSpeedMap.put(4.0, 3750.0);
+      shotFlywheelSpeedMap.put(3.0, 3375.0);
+      shotFlywheelSpeedMap.put(2.0, 3000.0); // THIS IS GOOD
+      shotFlywheelSpeedMap.put(0.0, 2750.0);
+
+      // === PASSING VALUES === (TODO: change placeholder values)
+      passFlywheelSpeedMap.put(6.0, 4000.0);
+
+      // === PASSING VALUES === (TODO: change placeholder values)
+      passHoodAngleMap.put(6.0, 22.0);
     }
   }
 
