@@ -193,6 +193,17 @@ public class Vision extends SubsystemBase {
   }
 
   /**
+   * Sets the processing throttle on all vision IO layers.
+   *
+   * @param throttle number of frames to skip between processed frames (0 = full speed)
+   */
+  public void setThrottle(int throttle) {
+    for (VisionIO io : ios.values()) {
+      io.setThrottle(throttle);
+    }
+  }
+
+  /**
    * @return Command that consumes vision measurements
    */
   public Command consumeVisionMeasurements(

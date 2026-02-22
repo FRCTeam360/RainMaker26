@@ -137,7 +137,7 @@ public class RobotContainer {
                 Map.ofEntries(
                     Map.entry(
                         Constants.PracticeBotConstants.LIMELIGHT,
-                        new VisionIOLimelight3(
+                        new VisionIOLimelight3G(
                             Constants.PracticeBotConstants.LIMELIGHT,
                             () -> drivetrain.getAngle(),
                             () -> drivetrain.getAngularRate(),
@@ -340,6 +340,7 @@ public class RobotContainer {
     }
     if (Objects.nonNull(vision)) {
       vision.seedIMU();
+      vision.setThrottle(200);
     }
   }
 
@@ -347,6 +348,7 @@ public class RobotContainer {
   public void onEnable() {
     if (Objects.nonNull(vision)) {
       vision.enableIMUAssist();
+      vision.setThrottle(0);
     }
   }
 

@@ -42,4 +42,9 @@ public class VisionIOLimelight4 extends VisionIOLimelightBase {
   public void enableIMUAssist() {
     LimelightHelpers.SetIMUMode(getName(), Constants.IMU_MODE_INTERNAL_EXTERNAL_ASSIST);
   }
+
+  @Override
+  public void setThrottle(int throttle) {
+    LimelightHelpers.SetThrottle(getName(), throttle);
+  }
 }
