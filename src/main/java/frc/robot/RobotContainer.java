@@ -382,8 +382,10 @@ public class RobotContainer {
   public void preSchedulerUpdate() {
     if (Objects.nonNull(hubShotCalculator)) {
       hubShotCalculator.clearShootingParams();
-      outpostPassCalculator.clearShootingParams();
       hubShotCalculator.calculateShot();
+    }
+    if (Objects.nonNull(outpostPassCalculator)) {
+      outpostPassCalculator.clearShootingParams();
       outpostPassCalculator.calculateShot();
     }
   }
