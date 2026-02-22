@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.commands.AimAtAprilTag;
 import frc.robot.generated.WoodBotDrivetrain;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKicker;
@@ -242,6 +243,9 @@ public class RobotContainer {
     SmartDashboard.putData("Auto Chooser", autoChooser);
 
     FollowPathCommand.warmupCommand().schedule();
+
+    driverCont.x().whileTrue(new AimAtAprilTag(drivetrain, vision));
+    testCont1.x().whileTrue(new AimAtAprilTag(drivetrain, vision));
   }
 
   public void registerPathplannerCommand(String name, Command command) {
