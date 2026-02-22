@@ -21,7 +21,7 @@ public class Intake extends SubsystemBase {
     OFF,
     INTAKING,
     SHOOTING,
-    // JAMMED
+    JAMMED
   }
 
   private IntakeStates wantedState = IntakeStates.OFF;
@@ -46,11 +46,11 @@ public class Intake extends SubsystemBase {
 
     switch (wantedState) {
       case INTAKING:
-        // if (isJammed()) {
-        //   currentState = IntakeStates.JAMMED;
-        // } else {
-        // }
-        currentState = IntakeStates.INTAKING;
+        if (isJammed()) {
+          currentState = IntakeStates.JAMMED;
+        } else {
+          currentState = IntakeStates.INTAKING;
+        }
         break;
 
       case SHOOTING:
@@ -60,8 +60,8 @@ public class Intake extends SubsystemBase {
       default:
         currentState = IntakeStates.OFF;
         break;
-        // case JAMMED:
-        //   currentState = IntakeStates.JAMMED;
+      case JAMMED:
+        currentState = IntakeStates.JAMMED;
     }
   }
 
@@ -77,8 +77,8 @@ public class Intake extends SubsystemBase {
       default:
         stop();
         break;
-        // case JAMMED:
-        //   unjamIntake();
+      case JAMMED:
+        unjamIntake();
     }
   }
 
@@ -86,15 +86,15 @@ public class Intake extends SubsystemBase {
     setDutyCycle(INTAKE_DUTY_CYCLE);
   }
 
-  // private void unjamIntake() {
-  //   if (isJammed()) {
-  //     this.setDutyCycle(REVERSE_UNJAM_DUTY_CYCLE);
-  //   }
-  // }
+  private void unjamIntake() {
+    if (isJammed()) {
+      this.setDutyCycle(REVERSE_UNJAM_DUTY_CYCLE);
+    }
+  }
 
-  // private boolean isJammed() {
-  //   return inputs.supplyCurrent >= JAMMED_SUPPLY_CURRENT_DRAW;
-  // }
+  private boolean isJammed() {
+    return inputs.supplyCurrent >= JAMMED_SUPPLY_CURRENT_DRAW;
+  }
 
   public void setDutyCycle(double value) {
     io.setDutyCycle(value);
@@ -130,6 +130,6 @@ public class Intake extends SubsystemBase {
     Logger.recordOutput("Subsystems/Intake/WantedState", wantedState.toString());
     Logger.recordOutput("Subsystems/Intake/CurrentState", currentState.toString());
     Logger.recordOutput("Subsystems/Intake/PreviousState", previousState.toString());
-    // Logger.recordOutput("Subsystems/Intake/PreviousState", isJammed());
+    Logger.recordOutput("Subsystems/Intake/IsJammed", isJammed());
   }
 }
