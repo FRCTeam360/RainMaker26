@@ -15,7 +15,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -50,10 +50,11 @@ public class Vision extends SubsystemBase {
 
   /** Creates a new Vision. */
   public Vision(Map<String, VisionIO> visionIos) {
-    this.ios = visionIos;
+    this.ios = new LinkedHashMap<>();
     // Creates the same number of inputs as vision IO layers
-    visionInputs = new HashMap<>();
+    visionInputs = new LinkedHashMap<>();
     for (String key : visionIos.keySet()) {
+      this.ios.put(key, visionIos.get(key));
       visionInputs.put(key, new VisionIOInputsAutoLogged());
     }
   }
@@ -114,11 +115,12 @@ public class Vision extends SubsystemBase {
     acceptedMeasurements.clear();
 
     int count = 0;
+    final int numIOs = ios.size();
     for (String key : ios.keySet()) {
       VisionIO io = ios.get(key);
       VisionIOInputsAutoLogged input = visionInputs.get(key);
 
-      if (count < ios.keySet().size() - 1) {
+      if (count < numIOs - 1) {
         io.setRobotOrientationNoFlush();
       } else {
         io.setRobotOrientationFlush();
