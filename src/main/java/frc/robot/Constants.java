@@ -83,6 +83,8 @@ public final class Constants {
         new InterpolatingDoubleTreeMap();
     public static final InterpolatingDoubleTreeMap passFlywheelSpeedMap =
         new InterpolatingDoubleTreeMap();
+    public static final InterpolatingDoubleTreeMap timeOfFlightMap =
+        new InterpolatingDoubleTreeMap();
 
     static {
       // === SHOOTING VALUES ===
@@ -99,6 +101,8 @@ public final class Constants {
       shotFlywheelSpeedMap.put(3.0, 3375.0);
       shotFlywheelSpeedMap.put(2.0, 3000.0); // THIS IS GOOD
       shotFlywheelSpeedMap.put(0.0, 2750.0);
+
+      timeOfFlightMap.put(0.0, 0.0);
 
       // === PASSING VALUES === (TODO: change placeholder values)
       passFlywheelSpeedMap.put(6.0, 4000.0);
