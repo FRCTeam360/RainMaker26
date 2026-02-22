@@ -17,7 +17,8 @@ import frc.robot.Constants;
 
 public class IntakePivotIOPB implements IntakePivotIO {
   // TODO: UPDATE GEAR RATIO
-  private static final double GEAR_RATIO = 1.0; // was 60.0 before ice cream social
+  private static final double GEAR_RATIO = 97.5;
+  // 80-16 * 52-16 * 40-20 * 36-12
 
   private static final double KP = 3.0;
   private static final double KI = 0.0;
