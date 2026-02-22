@@ -1,12 +1,12 @@
 package frc.robot.subsystems.Indexer;
 
-import com.revrobotics.sim.SparkMaxSim;
+import com.revrobotics.sim.SparkFlexSim;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkClosedLoopController;
+import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.config.SparkFlexConfig;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.system.LinearSystem;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -30,13 +30,13 @@ public class IndexerIOSim implements IndexerIO {
   private final LoggedNetworkBoolean tuningEnabled =
       new LoggedNetworkBoolean("/Tuning/Indexer/Enabled", false);
 
-  // Motor and control (using SparkMax like the real hardware)
-  private final SparkMax motorControllerSim =
-      new SparkMax(SimulationConstants.INDEXER_MOTOR, MotorType.kBrushless);
-  private final SparkMaxConfig motorConfig = new SparkMaxConfig();
+  // Motor and control (using SparkFlex like the real hardware)
+  private final SparkFlex motorControllerSim =
+      new SparkFlex(SimulationConstants.INDEXER_MOTOR, MotorType.kBrushless);
+  private final SparkFlexConfig motorConfig = new SparkFlexConfig();
 
-  // SparkMax simulation object
-  private final SparkMaxSim sparkSim = new SparkMaxSim(motorControllerSim, gearbox);
+  // SparkFlex simulation object
+  private final SparkFlexSim sparkSim = new SparkFlexSim(motorControllerSim, gearbox);
   private final SparkClosedLoopController closedLoopController;
 
   // Flywheel simulation
@@ -45,7 +45,7 @@ public class IndexerIOSim implements IndexerIO {
   private final FlywheelSim indexerSim = new FlywheelSim(plant, gearbox, gearRatio);
 
   public IndexerIOSim() {
-    // Configure SparkMax with PID and current limits
+    // Configure SparkFlex with PID and current limits
     configureMotor();
 
     closedLoopController = motorControllerSim.getClosedLoopController();
@@ -84,7 +84,7 @@ public class IndexerIOSim implements IndexerIO {
     // Step 3: Update the physics simulation
     indexerSim.update(0.02);
 
-    // Step 4: Use SparkMaxSim.iterate() to update the Spark MAX with simulated values
+    // Step 4: Use SparkFlexSim.iterate() to update the Spark Flex with simulated values
     sparkSim.iterate(
         indexerSim.getAngularVelocityRPM(), // Motor velocity in RPM
         RoboRioSim.getVInVoltage(), // Simulated battery voltage

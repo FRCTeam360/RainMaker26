@@ -52,7 +52,7 @@ public class Robot extends LoggedRobot {
 
     if (isReal()) {
       if (RobotUtils.isUsbWriteable()) {
-        Logger.addDataReceiver(new WPILOGWriter("/U"));
+        Logger.addDataReceiver(new WPILOGWriter(Constants.IOConstants.USB_ROOT_DIRECTORY));
       } else {
         Logger.addDataReceiver(new WPILOGWriter("/home/lvuser/logs"));
       }

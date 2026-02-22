@@ -8,6 +8,7 @@ import com.ctre.phoenix6.CANBus;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.hal.HALUtil;
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -26,6 +27,11 @@ public final class Constants {
     WOODBOT,
     PRACTICEBOT,
     REPLAY
+  }
+
+  public static final class IOConstants {
+    // === USB PATHS ===
+    public static final String USB_ROOT_DIRECTORY = "/U";
   }
 
   public static final CANBus RIO_CANBUS = new CANBus("rio");
@@ -55,14 +61,55 @@ public final class Constants {
 
     // === CANBUS ===
     public static final CANBus CANBUS = new CANBus("Default Name");
+
+    // === SHOT CALCULATOR ===
+    public static final InterpolatingDoubleTreeMap shotHoodAngleMap =
+        new InterpolatingDoubleTreeMap();
+    public static final InterpolatingDoubleTreeMap shotFlywheelSpeedMap =
+        new InterpolatingDoubleTreeMap();
+    public static final InterpolatingDoubleTreeMap passHoodAngleMap =
+        new InterpolatingDoubleTreeMap();
+    public static final InterpolatingDoubleTreeMap passFlywheelSpeedMap =
+        new InterpolatingDoubleTreeMap();
+    public static final InterpolatingDoubleTreeMap timeOfFlightMap =
+        new InterpolatingDoubleTreeMap();
+
+    static {
+      // === SHOOTING VALUES ===
+      shotHoodAngleMap.put(5.0, 20.0);
+      shotHoodAngleMap.put(4.0, 18.0);
+      shotHoodAngleMap.put(3.0, 16.0);
+      shotHoodAngleMap.put(2.0, 11.0); // THIS IS GOOD
+      shotHoodAngleMap.put(1.0, 8.0); // THIS IS GOOD
+      shotHoodAngleMap.put(0.0, 6.0);
+
+      // === SHOOTING VALUES ===
+      shotFlywheelSpeedMap.put(5.0, 3750.0);
+      shotFlywheelSpeedMap.put(4.0, 3750.0);
+      shotFlywheelSpeedMap.put(3.0, 3375.0);
+      shotFlywheelSpeedMap.put(2.0, 3000.0); // THIS IS GOOD
+      shotFlywheelSpeedMap.put(0.0, 2750.0);
+
+      timeOfFlightMap.put(0.0, 0.0);
+
+      // === PASSING VALUES === (TODO: change placeholder values)
+      passFlywheelSpeedMap.put(6.0, 4000.0);
+
+      // === PASSING VALUES === (TODO: change placeholder values)
+      passHoodAngleMap.put(6.0, 22.0);
+    }
   }
 
   public static class PracticeBotConstants {
+    // === INTAKE ===
+    public static final int INTAKE_PIVOT_ID = 14;
+    public static final int INTAKE_ID = 15;
+
+    // === CLIMBER ===
+    public static final int CLIMBER_RIGHT_ID = 16;
+    public static final int CLIMBER_LEFT_ID = 17;
 
     // FIXME: update these values TO REAL VALUES
-    public static final int INTAKE_ID = 71;
-    public static final int INTAKE_PIVOT_ID = 72;
-
     public static final int INDEXER_SENSOR_ID = 73;
     public static final int INDEXER_ID = 75;
 
@@ -105,8 +152,7 @@ public final class Constants {
 
   public static final class SerialAddressConstants {
     public static final String WOOD_SERIAL_ADDRESS = "032BE44A";
-    // FIXME: Enter the practice bot roboRIO serial address
-    public static final String PRACTICE_SERIAL_ADDRESS = "WRONG_SERIAL_ADDRESS";
+    public static final String PRACTICE_SERIAL_ADDRESS = "03260AD5";
   }
 
   public static double loopPeriodSecs; // add value

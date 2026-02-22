@@ -5,10 +5,10 @@ import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkClosedLoopController;
+import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.config.SparkFlexConfig;
 import frc.robot.Constants;
 
 public class IndexerIOPB implements IndexerIO {
@@ -21,26 +21,26 @@ public class IndexerIOPB implements IndexerIO {
   private static final double FF_KS = 0.04;
 
   /** Creates a new IndexerIOPB. */
-  private final SparkMax indexerMotor =
-      new SparkMax(Constants.PracticeBotConstants.INDEXER_ID, MotorType.kBrushless);
+  private final SparkFlex indexerMotor =
+      new SparkFlex(Constants.PracticeBotConstants.INDEXER_ID, MotorType.kBrushless);
 
   private final RelativeEncoder encoder = indexerMotor.getEncoder();
-  private final SparkMaxConfig sparkMaxConfig = new SparkMaxConfig();
+  private final SparkFlexConfig sparkFlexConfig = new SparkFlexConfig();
   private final SparkClosedLoopController closedLoopController;
 
   public IndexerIOPB() {
-    sparkMaxConfig.idleMode(IdleMode.kBrake);
-    sparkMaxConfig.inverted(true);
-    sparkMaxConfig.smartCurrentLimit(CURRENT_LIMIT_AMPS);
+    sparkFlexConfig.idleMode(IdleMode.kBrake);
+    sparkFlexConfig.inverted(true);
+    sparkFlexConfig.smartCurrentLimit(CURRENT_LIMIT_AMPS);
 
-    sparkMaxConfig.encoder.positionConversionFactor(1.0 / GEAR_RATIO);
-    sparkMaxConfig.encoder.velocityConversionFactor(1.0 / GEAR_RATIO);
+    sparkFlexConfig.encoder.positionConversionFactor(1.0 / GEAR_RATIO);
+    sparkFlexConfig.encoder.velocityConversionFactor(1.0 / GEAR_RATIO);
 
-    sparkMaxConfig.closedLoop.p(KP).i(KI).d(KD);
-    sparkMaxConfig.closedLoop.feedForward.kV(FF_KV).kS(FF_KS);
+    sparkFlexConfig.closedLoop.p(KP).i(KI).d(KD);
+    sparkFlexConfig.closedLoop.feedForward.kV(FF_KV).kS(FF_KS);
 
     indexerMotor.configure(
-        sparkMaxConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        sparkFlexConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
     closedLoopController = indexerMotor.getClosedLoopController();
   }
