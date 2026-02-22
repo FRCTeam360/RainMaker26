@@ -1,0 +1,24 @@
+%% Hood State Machine
+%% Reflects actual code in Hood.java
+%% Currently commented out in SuperStructure — not actively orchestrated
+stateDiagram-v2
+    state "Wanted: IDLE" as WIDLE
+    state "Wanted: AIMING" as WAIMING
+
+    [*] --> WIDLE
+    WIDLE --> WAIMING : SuperStructure sets AIMING
+    WAIMING --> WIDLE : SuperStructure sets IDLE
+
+    state WAIMING {
+        [*] --> MOVING
+        MOVING --> AT_SETPOINT : |position - target| < 0.5
+        AT_SETPOINT --> MOVING : |position - target| >= 0.5
+    }
+
+    note right of WIDLE : Position set to 0.0
+    note right of WAIMING : Position set to ShotCalculator angle
+    note left of WAIMING
+        Hood is currently commented out
+        in SuperStructure and is not
+        actively controlled.
+    end note
