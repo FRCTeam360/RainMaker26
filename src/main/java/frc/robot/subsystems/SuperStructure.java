@@ -139,7 +139,7 @@ public class SuperStructure extends SubsystemBase {
     // Logger.recordOutput("Superstructure/Shooting/HoodReady", hoodReady);
     Logger.recordOutput("Superstructure/Shooting/Aligned", aligned);
 
-    if (flywheelReady && aligned) { // ADD HOOD CHECK BACK WHEN GOOD AGAIN
+    if (flywheelReady && aligned) { // TODO: ADD HOOD CHECK BACK WHEN GOOD AGAIN
       currentShooterState = ShooterStates.FIRING;
     } else {
       currentShooterState = ShooterStates.PREPARING;
