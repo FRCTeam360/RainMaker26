@@ -5,6 +5,7 @@
 package frc.robot.subsystems.HopperRoller;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.ControlState;
 import org.littletonrobotics.junction.Logger;
 
 public class HopperRoller extends SubsystemBase {
@@ -19,6 +20,7 @@ public class HopperRoller extends SubsystemBase {
   private HopperRollerStates wantedState = HopperRollerStates.OFF;
   private HopperRollerStates currentState = HopperRollerStates.OFF;
   private HopperRollerStates previousState = HopperRollerStates.OFF;
+  private ControlState controlState = ControlState.SUPERSTRUCTURE;
 
   private static final double ROLLER_DUTY_CYCLE = 1.0;
 
@@ -74,8 +76,10 @@ public class HopperRoller extends SubsystemBase {
     io.updateInputs(inputs);
     Logger.processInputs("HopperRoller", inputs);
 
-    updateState();
-    applyState();
+    if (controlState == ControlState.SUPERSTRUCTURE) {
+      updateState();
+      applyState();
+    }
     Logger.recordOutput("Subsystems/HopperRoller/WantedState", wantedState.toString());
     Logger.recordOutput("Subsystems/HopperRoller/CurrentState", currentState.toString());
     Logger.recordOutput("Subsystems/HopperRoller/PreviousState", previousState.toString());
