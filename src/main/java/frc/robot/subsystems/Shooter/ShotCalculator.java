@@ -22,8 +22,8 @@ public class ShotCalculator {
   private final InterpolatingDoubleTreeMap timeOfFlightMap;
   private final Transform2d robotToShooter;
 
-  private double minDistanceMeters;
-  private double maxDistanceMeters;
+  private double minDistanceMeters = 0.0;
+  private double maxDistanceMeters = Double.MAX_VALUE;
 
   /**
    * Holds the calculated shooting parameters for a given robot position.
@@ -42,8 +42,6 @@ public class ShotCalculator {
       double minDistanceMeters, // should be 0.0 for hub
       double maxDistanceMeters /* should be 5.0 for hub */) {}
 
-  private ShootingParams latestParameters = null;
-
   /**
    * Creates a new ShotCalculator.
    *
@@ -54,13 +52,15 @@ public class ShotCalculator {
       Supplier<Pose2d> robotPoseSupplier,
       Supplier<Translation2d>
           targetSupplier, // AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint.toTranslation2d());
-      RobotShootingInfo RobotShootingInfo) {
+      RobotShootingInfo robotShootingInfo) {
     this.robotPoseSupplier = robotPoseSupplier;
     this.targetSupplier = targetSupplier;
-    this.shotHoodAngleMap = RobotShootingInfo.shotHoodAngleMap;
-    this.shotFlywheelSpeedMap = RobotShootingInfo.shotFlywheelSpeedMap;
-    this.timeOfFlightMap = RobotShootingInfo.timeOfFlightMap;
-    this.robotToShooter = RobotShootingInfo.robotToShooter;
+    this.shotHoodAngleMap = robotShootingInfo.shotHoodAngleMap;
+    this.shotFlywheelSpeedMap = robotShootingInfo.shotFlywheelSpeedMap;
+    this.timeOfFlightMap = robotShootingInfo.timeOfFlightMap;
+    this.robotToShooter = robotShootingInfo.robotToShooter;
+    this.minDistanceMeters = robotShootingInfo.minDistanceMeters;
+    this.maxDistanceMeters = robotShootingInfo.maxDistanceMeters;
   }
 
   private ShootingParams cachedShootingParams = null;

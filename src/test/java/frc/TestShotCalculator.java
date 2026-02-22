@@ -74,9 +74,9 @@ public class TestShotCalculator {
     testPose =
         testPose.plus(new Transform2d(430987523953.984213, 9832572384.3249874, new Rotation2d()));
 
-    ShootingParams cashedShootingParams2 = testShotCalculator.calculateShot();
+    ShootingParams cachedShootingParams2 = testShotCalculator.calculateShot();
 
-    assertEquals(cachedShootingParams, cashedShootingParams2);
+    assertEquals(cachedShootingParams, cachedShootingParams2);
   }
 
   @Test
