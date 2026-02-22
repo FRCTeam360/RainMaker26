@@ -1,5 +1,6 @@
 plugins {
     id "java"
+    id 'jacoco'
     id 'com.diffplug.spotless' version '6.25.0'
     id "edu.wpi.first.GradleRIO" version "2026.2.1"
     id "com.peterabeles.gversion" version "1.10"
@@ -214,6 +215,22 @@ dependencies {
 test {
     useJUnitPlatform()
     systemProperty 'junit.jupiter.extensions.autodetection.enabled', 'true'
+    finalizedBy jacocoTestReport
+}
+
+// JaCoCo coverage report — generated automatically after each test run.
+// View the report: open build/reports/jacoco/test/html/index.html
+jacocoTestReport {
+    dependsOn test
+    reports {
+        html.required = true
+        xml.required = false
+        csv.required = false
+    }
+    doLast {
+        def reportPath = layout.buildDirectory.file("reports/jacoco/test/html/index.html").get().asFile.toURI()
+        println "Coverage report: $reportPath"
+    }
 }
 
 // Simulation configuration (e.g. environment variables).
