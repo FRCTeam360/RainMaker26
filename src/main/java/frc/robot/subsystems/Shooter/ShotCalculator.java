@@ -5,14 +5,19 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.utils.FieldConstants;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
 /**
- * Calculates shooting parameters (hood angle, flywheel speed, and drivebase heading) based on the
- * robot's distance to the hub. Uses interpolation maps to convert distance into mechanism
- * setpoints.
+ * Pure calculation logic for shooting parameters. Takes a target point as input and calculates the
+ * required hood angle, flywheel speed, and drivebase heading. Does not depend on NetworkTables ---
+ * the target point is passed in from the caller.
+ *
+ * <p>Shared calculation logic is used for both hub shots and custom target shots.
  */
 public class ShotCalculator {
   private final Supplier<Pose2d> robotPoseSupplier;
@@ -61,8 +66,8 @@ public class ShotCalculator {
   private ShootingParams cachedShootingParams = null;
 
   /**
-   * Calculates and caches the shooting parameters for the current robot position. If parameters
-   * have already been calculated and not cleared, returns the cached result.
+   * Calculates shooting parameters for the hub center. Convenience method that uses the same
+   * underlying calculation as custom targets.
    *
    * @return the {@link ShootingParams} containing drivebase angle, hood angle, and flywheel speed
    */
@@ -89,7 +94,8 @@ public class ShotCalculator {
     double hoodAngle = shotHoodAngleMap.get(distanceToTarget);
     double flywheelSpeed = launchFlywheelSpeedMap.get(distanceToTarget);
 
-    Logger.recordOutput("ShotCalculator/hubPosition", FieldConstants.Hub.topCenterPoint);
+    // Log computed values
+    Logger.recordOutput("ShotCalculator/targetPosition", new Pose2d(target, new Rotation2d()));
     Logger.recordOutput("ShotCalculator/distanceToTarget", distanceToTarget);
     Logger.recordOutput("ShotCalculator/targetFlywheelSpeed", flywheelSpeed);
     Logger.recordOutput("ShotCalculator/targetHoodAngle", hoodAngle);
@@ -102,7 +108,7 @@ public class ShotCalculator {
 
   /**
    * Clears the cached shooting parameters, forcing a recalculation on the next call to {@link
-   * #calculateShot()}.
+   * #calculateShot(Translation2d)} or {@link #calculateShotToPoint(Translation2d)}.
    */
   public void clearShootingParams() {
     cachedShootingParams = null;

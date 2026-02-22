@@ -36,6 +36,7 @@ import frc.robot.subsystems.Intake.IntakeIOWB;
 import frc.robot.subsystems.IntakePivot.IntakePivot;
 import frc.robot.subsystems.IntakePivot.IntakePivotIOPB;
 import frc.robot.subsystems.IntakePivot.IntakePivotIOSim;
+import frc.robot.subsystems.Shooter.DashboardTargetProvider;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel;
 import frc.robot.subsystems.Shooter.Flywheel.FlywheelIOPB;
 import frc.robot.subsystems.Shooter.Flywheel.FlywheelIOSim;
@@ -78,6 +79,7 @@ public class RobotContainer {
   private SuperStructure superStructure;
 
   private ShotCalculator shotCalculator;
+  private DashboardTargetProvider dashboardTargetProvider;
 
   // TODO: refactor to allow for more than 1 drivetrain type
 
@@ -153,6 +155,8 @@ public class RobotContainer {
         // TODO ADD CLIMBERS
         break;
     }
+    
+    dashboardTargetProvider = new DashboardTargetProvider();
     shotCalculator =
         new ShotCalculator(
             drivetrain::getPosition,
