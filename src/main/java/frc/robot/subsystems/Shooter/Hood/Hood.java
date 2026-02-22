@@ -15,6 +15,7 @@ public class Hood extends SubsystemBase {
   private final HoodIOInputsAutoLogged inputs = new HoodIOInputsAutoLogged();
   private static final double TOLERANCE = 0.5;
   private DoubleSupplier hoodAngleSupplier = () -> 0.0;
+  Hood hood = new Hood(new HoodIONoOp());
 
   public enum HoodWantedStates {
     IDLE,
@@ -25,6 +26,13 @@ public class Hood extends SubsystemBase {
     OFF,
     MOVING,
     AT_SETPOINT
+  }
+
+  public static HoodIONoOp implements HoodIO{
+    public void setDutyCycle(double dutyCycle) {}
+    public void setPosition(double position) {}
+    public double getPosition() { return 0.0;}
+    public void setZero() {}
   }
 
   /**
