@@ -292,6 +292,18 @@ public class RobotContainer {
                           driverCont, () -> hubShotCalculator.calculateShot().targetHeading())));
       // Must stay paired with the whileTrue above to reset state on trigger release
       driverCont.rightTrigger().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
+
+      driverCont
+          .leftTrigger()
+          .whileTrue(
+              superStructure
+                  .setStateCommand(SuperStates.SHOOT_AT_OUTPOST)
+                  .alongWith(
+                      drivetrain.faceAngleWhileDrivingCommand(
+                          driverCont,
+                          () -> outpostPassCalculator.calculateShot().targetHeading())));
+      // Must stay paired with the whileTrue above to reset state on trigger release
+      driverCont.leftTrigger().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
     }
 
     // Null checks based on subsystems used by each command

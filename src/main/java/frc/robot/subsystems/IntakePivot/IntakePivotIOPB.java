@@ -6,9 +6,11 @@ package frc.robot.subsystems.IntakePivot;
 
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.controls.MotionMagicTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -19,20 +21,23 @@ public class IntakePivotIOPB implements IntakePivotIO {
   // TODO: UPDATE GEAR RATIO
   private static final double GEAR_RATIO = 60.0;
 
-  private static final double KP = 0.0;
+  private static final double KP = 3.0;
   private static final double KI = 0.0;
-  private static final double KD = 0.0;
+  private static final double KD = 0.4;
   private static final double KA = 0.0;
-  private static final double KG = 0.0;
-  private static final double KS = 0.0;
+  private static final double KG = 3.0;
+  private static final double KS = 7.0;
   private static final double KV = 0.0;
 
   private static final double STATOR_CURRENT_LIMIT_AMPS = 120.0;
   private static final double SUPPLY_CURRENT_LIMIT_AMPS = 60.0;
 
-  private static final double MOTION_MAGIC_ACCELERATION_RPS2 = 400.0;
-  private static final double MOTION_MAGIC_CRUISE_VELOCITY_RPS = 85.0;
+  private static final double MOTION_MAGIC_ACCELERATION_RPS2 = 200.0;
+  private static final double MOTION_MAGIC_CRUISE_VELOCITY_RPS = 40.0;
   private static final double MOTION_MAGIC_JERK_RPS3 = 1750.0;
+
+  private static final double MOTION_MAGIC_EXPO_KV = 0.12;
+  private static final double MOTION_MAGIC_EXPO_KA = 0.10;
 
   private static final double FORWARD_SOFT_LIMIT_DEGREES =
       178.0; // TODO: make sure these are correct for prac bot
@@ -46,7 +51,7 @@ public class IntakePivotIOPB implements IntakePivotIO {
           Constants.PracticeBotConstants.INTAKE_PIVOT_ID, Constants.PracticeBotConstants.CANBUS);
 
   private final DutyCycleOut dutyCycleOut = new DutyCycleOut(0);
-  private final MotionMagicVoltage motionMagicPosition = new MotionMagicVoltage(0);
+  private final MotionMagicTorqueCurrentFOC motionMagicPosition = new MotionMagicTorqueCurrentFOC(0.0);
   private final TalonFXConfiguration config = new TalonFXConfiguration();
   private final CurrentLimitsConfigs currentLimitConfig = new CurrentLimitsConfigs();
   private NeutralModeValue neutralMode = NeutralModeValue.Brake;
@@ -73,6 +78,8 @@ public class IntakePivotIOPB implements IntakePivotIO {
     motionMagicConfigs.MotionMagicCruiseVelocity = MOTION_MAGIC_CRUISE_VELOCITY_RPS;
     motionMagicConfigs.MotionMagicAcceleration = MOTION_MAGIC_ACCELERATION_RPS2;
     motionMagicConfigs.MotionMagicJerk = MOTION_MAGIC_JERK_RPS3;
+    motionMagicConfigs.MotionMagicExpo_kV = MOTION_MAGIC_EXPO_KV;
+    motionMagicConfigs.MotionMagicExpo_kA = MOTION_MAGIC_EXPO_KA;
 
     config.Voltage.PeakForwardVoltage = PEAK_FORWARD_VOLTAGE;
     config.Voltage.PeakReverseVoltage = PEAK_REVERSE_VOLTAGE;
