@@ -108,6 +108,15 @@ public class RobotContainer {
         indexer = new Indexer(new IndexerIOSim());
         intake = new Intake(new IntakeIOSim());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOSim());
+
+        robotSpecificInfo =
+            new RobotSpecificInfo(
+                Constants.WoodBotConstants.shotHoodAngleMap,
+                Constants.WoodBotConstants.launchFlywheelSpeedMap,
+                Constants.WoodBotConstants.timeOfFlightMap,
+                ShooterConstants.ROBOT_TO_SHOOTER,
+                0.0,
+                5.0);
         break;
       case WOODBOT:
         drivetrain = WoodBotDrivetrain.createDrivetrain();
@@ -162,6 +171,15 @@ public class RobotContainer {
         intake = new Intake(new IntakeIOPB());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOPB());
         intakePivot = new IntakePivot(new IntakePivotIOPB());
+
+        robotSpecificInfo =
+            new RobotSpecificInfo(
+                Constants.WoodBotConstants.shotHoodAngleMap,
+                Constants.WoodBotConstants.launchFlywheelSpeedMap,
+                Constants.WoodBotConstants.timeOfFlightMap,
+                ShooterConstants.ROBOT_TO_SHOOTER,
+                0.0,
+                5.0);
         // TODO ADD CLIMBERS
         break;
     }
