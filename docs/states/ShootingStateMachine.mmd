@@ -4,12 +4,12 @@ stateDiagram-v2
     [*] --> PREPARING
 
     %% Readiness check runs every cycle
-    PREPARING --> FIRING : Flywheel AT_SETPOINT<br>AND drivetrain aligned
-    FIRING --> PREPARING : Flywheel loses speed<br>OR alignment lost
+    PREPARING --> FIRING : Flywheel AT_SETPOINT<br>AND Hood AT_SETPOINT<br>AND drivetrain aligned
+    FIRING --> PREPARING : Flywheel loses speed<br>OR hood loses position<br>OR alignment lost
 
     %% Exit back to SuperStructure IDLE
     PREPARING --> [*] : SuperState leaves<br>SHOOT_AT_HUB / SHOOT_AT_OUTPOST
     FIRING --> [*] : SuperState leaves<br>SHOOT_AT_HUB / SHOOT_AT_OUTPOST
 
-    note right of PREPARING : Flywheel spins to ShotCalculator RPM<br>Drivetrain aligns to target<br>Kicker & Indexer OFF
+    note right of PREPARING : Flywheel spins to ShotCalculator RPM<br>Hood moves to ShotCalculator angle<br>Drivetrain aligns to target<br>Kicker & Indexer OFF
     note right of FIRING : Kicker runs at 4500 RPM<br>Indexer feeds at 40% duty cycle

@@ -15,10 +15,10 @@ stateDiagram-v2
     IDLE --> SHOOT_AT_OUTPOST : Driver holds<br>left trigger
     SHOOT_AT_OUTPOST --> IDLE : Driver releases<br>left trigger
 
-    note right of IDLE : All subsystems stopped
+    note right of IDLE : All subsystems stopped<br>Hood position = 0.0
     note right of INTAKING : Intake runs at 75% duty cycle
-    note right of SHOOT_AT_HUB : See ShootingStateMachine<br>for internal states.<br>Flywheel RPM from hubShotCalculator
-    note right of SHOOT_AT_OUTPOST : Same shooter sub-state machine.<br>Flywheel RPM from outpostPassCalculator
+    note right of SHOOT_AT_HUB : See ShootingStateMachine<br>for internal states.<br>Flywheel RPM & Hood angle<br>from hubShotCalculator
+    note right of SHOOT_AT_OUTPOST : Same shooter sub-state machine.<br>Flywheel RPM & Hood angle<br>from outpostPassCalculator
 
     %% Defined but not yet implemented
     state "Not Yet Implemented" as NYI {

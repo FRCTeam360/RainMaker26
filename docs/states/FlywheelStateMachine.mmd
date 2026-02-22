@@ -3,23 +3,23 @@
 %% Two-layer state: WantedState drives CurrentState
 stateDiagram-v2
     state "Wanted: IDLE" as WIDLE
-    state "Wanted: AIMING" as WAIMING
+    state "Wanted: SHOOTING" as WSHOOTING
 
     state "OFF" as OFF
     state "MOVING" as MOVING
     state "AT_SETPOINT" as ATSP
 
     [*] --> WIDLE
-    WIDLE --> WAIMING : SuperStructure sets<br>AIMING (shooting begins)
-    WAIMING --> WIDLE : SuperStructure sets<br>IDLE (shooting ends)
+    WIDLE --> WSHOOTING : SuperStructure sets<br>SHOOTING (shooting begins)
+    WSHOOTING --> WIDLE : SuperStructure sets<br>IDLE (shooting ends)
 
-    state WAIMING {
+    state WSHOOTING {
         [*] --> MOVING
         MOVING --> AT_SETPOINT : |velocity - target| < 100 RPM
         AT_SETPOINT --> MOVING : |velocity - target| >= 100 RPM
     }
 
     note right of WIDLE : Motor duty cycle = 0.0
-    note right of WAIMING : Motor runs at ShotCalculator RPM<br>(hub or outpost depending on SuperState)
+    note right of WSHOOTING : Motor runs at ShotCalculator RPM<br>(hub or outpost depending on SuperState)
     note right of MOVING : Spinning up to target RPM
     note right of AT_SETPOINT : Ready — SuperStructure checks<br>this to transition to FIRING
