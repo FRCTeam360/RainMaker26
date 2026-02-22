@@ -61,6 +61,7 @@ public class Hood extends SubsystemBase {
 
     switch (wantedState) {
       case MOVING_TO_SETPOINT:
+      case AT_SETPOINT:
         if (atSetpoint(hoodAngleSupplier)) {
           currentState = HoodStates.AT_SETPOINT;
         } else {

@@ -13,7 +13,7 @@ public class Flywheel extends SubsystemBase {
   private final FlywheelIO io;
   private final FlywheelIOInputsAutoLogged inputs = new FlywheelIOInputsAutoLogged();
   private DoubleSupplier shootVelocitySupplier = () -> 0.0;
-  private static final double TOLERANCE = 100.0;
+  private static final double TOLERANCE_RPM = 100.0;
 
   public enum FlywheelStates {
     OFF,
@@ -43,13 +43,16 @@ public class Flywheel extends SubsystemBase {
   private FlywheelStates currentState = FlywheelStates.OFF;
   private FlywheelStates previousState = FlywheelStates.OFF;
 
-  public boolean atSetpoint(double targetRPM, double tolerance) {
+  private boolean atSetpoint(double targetRPM) {
     // TODO: make tolerance a constant in hardware layer
-    return Math.abs(inputs.velocities[0] - targetRPM) < tolerance;
+    if (inputs.velocities.length > 0) {
+      return Math.abs(inputs.velocities[0] - targetRPM) < TOLERANCE_RPM;
+    }
+    return false;
   }
 
-  public boolean atSetpoint(DoubleSupplier targetRPM, double tolerance) {
-    return atSetpoint(targetRPM.getAsDouble(), tolerance);
+  private boolean atSetpoint(DoubleSupplier targetRPM) {
+    return atSetpoint(targetRPM.getAsDouble());
   }
 
   private void updateState() {
@@ -58,7 +61,8 @@ public class Flywheel extends SubsystemBase {
     // State machine transitions
     switch (wantedState) {
       case MOVING:
-        if (atSetpoint(shootVelocitySupplier.getAsDouble(), TOLERANCE)) {
+      case AT_SETPOINT:
+        if (atSetpoint(shootVelocitySupplier.getAsDouble())) {
           currentState = FlywheelStates.AT_SETPOINT;
         } else {
           currentState = FlywheelStates.MOVING;
@@ -71,13 +75,6 @@ public class Flywheel extends SubsystemBase {
     }
   }
 
-  public double getLeaderVelocityRPS() {
-    if (inputs.velocities.length > 0) {
-      return inputs.velocities[0]; // Convert from RPM to RPS
-    }
-    return 0.0;
-  }
-
   private void applyState() {
     switch (currentState) {
       case MOVING:
@@ -86,7 +83,7 @@ public class Flywheel extends SubsystemBase {
         break;
       case OFF:
       default:
-        io.setDutyCycle(0.0);
+        setDutyCycle(0.0);
         break;
     }
   }
@@ -110,7 +107,7 @@ public class Flywheel extends SubsystemBase {
     Logger.recordOutput("Subsystems/Flywheel/PreviousState", previousState.toString());
   }
 
-  public void setDutyCycle(double duty) {
+  private void setDutyCycle(double duty) {
     io.setDutyCycle(duty);
   }
 
@@ -127,15 +124,14 @@ public class Flywheel extends SubsystemBase {
   }
 
   public Command setDutyCycleCommand(DoubleSupplier valueSup) {
-    return this.runEnd(() -> io.setDutyCycle(valueSup.getAsDouble()), () -> io.setDutyCycle(0.0));
+    return this.runEnd(() -> setDutyCycle(valueSup.getAsDouble()), () -> setDutyCycle(0.0));
   }
 
   public Command setVelocityCommand(double rpm) {
-    return this.runEnd(() -> setVelocity(rpm), () -> io.setDutyCycle(0.0));
+    return this.runEnd(() -> setVelocity(rpm), () -> setDutyCycle(0.0));
   }
 
   public Command setVelocityCommand(DoubleSupplier supplierVelocity) {
-    return this.runEnd(
-        () -> setVelocity(supplierVelocity.getAsDouble()), () -> io.setDutyCycle(0.0));
+    return this.runEnd(() -> setVelocity(supplierVelocity.getAsDouble()), () -> setDutyCycle(0.0));
   }
 }

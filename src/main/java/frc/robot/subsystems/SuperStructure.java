@@ -1,6 +1,5 @@
 package frc.robot.subsystems;
 
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -99,6 +98,7 @@ public class SuperStructure extends SubsystemBase {
         break;
       case SHOOT_AT_OUTPOST:
         currentSuperState = SuperStates.SHOOT_AT_OUTPOST;
+        break;
       case IDLE:
       default:
         currentSuperState = SuperStates.IDLE;
@@ -122,10 +122,9 @@ public class SuperStructure extends SubsystemBase {
     resetShooterStateIfNotShooting();
   }
 
-  private static final double FLYWHEEL_TOLERANCE_RPM = 500.0;
-
   private void resetShooterStateIfNotShooting() {
-    if (currentSuperState != SuperStates.SHOOT_AT_HUB) {
+    if (currentSuperState != SuperStates.SHOOT_AT_HUB
+        && currentSuperState != SuperStates.SHOOT_AT_OUTPOST) {
       currentShooterState = ShooterStates.PREPARING;
     }
   }
@@ -159,17 +158,13 @@ public class SuperStructure extends SubsystemBase {
   }
 
   private void shooting() {
-    flywheel.setWantedState(FlywheelStates.AT_SETPOINT);
+    flywheel.setWantedState(FlywheelStates.MOVING);
     hood.setWantedState(HoodStates.MOVING_TO_SETPOINT);
   }
 
   private void intaking() {
     intake.setWantedState(Intake.IntakeStates.INTAKING);
     // indexer.setWantedState(Indexer.IndexerStates.INTAKING);
-  }
-
-  private void passing(Translation2d targetPosition) {
-    flywheel.setWantedState(FlywheelStates.AT_SETPOINT);
   }
 
   private void stopped() {
