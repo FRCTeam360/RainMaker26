@@ -24,7 +24,6 @@ import java.io.IOException;
  */
 public class FieldConstants {
   public static final FieldType fieldType = FieldType.WELDED;
-
   // AprilTag related constants
   public static final int aprilTagCount = AprilTagLayoutType.OFFICIAL.getLayout().getTags().size();
   public static final double aprilTagWidth = Units.inchesToMeters(6.5);
@@ -33,6 +32,7 @@ public class FieldConstants {
   // Field dimensions
   public static final double fieldLength = AprilTagLayoutType.OFFICIAL.getLayout().getFieldLength();
   public static final double fieldWidth = AprilTagLayoutType.OFFICIAL.getLayout().getFieldWidth();
+  public static final AprilTagFieldLayout FIELD_LAYOUT = AprilTagLayoutType.OFFICIAL.getLayout();
 
   /**
    * Officially defined and relevant vertical lines found on the field (defined by X-axis offset)
