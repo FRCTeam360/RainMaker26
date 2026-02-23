@@ -25,7 +25,7 @@ public class Hood extends SubsystemBase {
   // Enums
   public enum HoodWantedStates {
     IDLE,
-    SHOOTING
+    AIMING
   }
 
   public enum HoodInternalStates {
@@ -74,7 +74,7 @@ public class Hood extends SubsystemBase {
     previousState = currentState;
 
     switch (wantedState) {
-      case SHOOTING:
+      case AIMING:
         if (atSetpoint(hoodAngleSupplier)) {
           currentState = HoodInternalStates.AT_SETPOINT;
         } else {

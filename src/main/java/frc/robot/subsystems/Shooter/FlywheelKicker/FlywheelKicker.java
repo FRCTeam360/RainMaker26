@@ -20,14 +20,14 @@ public class FlywheelKicker extends SubsystemBase {
 
   // Enums
   public enum FlywheelKickerStates {
-    OFF,
-    SHOOTING
+    IDLE,
+    KICKING
   }
 
   // State variables
-  private FlywheelKickerStates wantedState = FlywheelKickerStates.OFF;
-  private FlywheelKickerStates currentState = FlywheelKickerStates.OFF;
-  private FlywheelKickerStates previousState = FlywheelKickerStates.OFF;
+  private FlywheelKickerStates wantedState = FlywheelKickerStates.IDLE;
+  private FlywheelKickerStates currentState = FlywheelKickerStates.IDLE;
+  private FlywheelKickerStates previousState = FlywheelKickerStates.IDLE;
   private ControlState controlState = ControlState.SUPERSTRUCTURE;
 
   // Constructor
@@ -55,22 +55,22 @@ public class FlywheelKicker extends SubsystemBase {
     previousState = currentState;
 
     switch (wantedState) {
-      case SHOOTING:
-        currentState = FlywheelKickerStates.SHOOTING;
+      case KICKING:
+        currentState = FlywheelKickerStates.KICKING;
         break;
-      case OFF:
+      case IDLE:
       default:
-        currentState = FlywheelKickerStates.OFF;
+        currentState = FlywheelKickerStates.IDLE;
         break;
     }
   }
 
   private void applyState() {
     switch (currentState) {
-      case SHOOTING:
+      case KICKING:
         setVelocity(KICKER_VELOCITY_RPM);
         break;
-      case OFF:
+      case IDLE:
       default:
         stop();
         break;
