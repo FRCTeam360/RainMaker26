@@ -205,7 +205,6 @@ public class RobotContainer {
     // Configure the trigger bindings
     // TODO: Re-enable superStructure construction and PathPlanner commands
 
-    if (DriverStation.isEnabled() && (DriverStation.isTeleop() || DriverStation.isAutonomous())) {
       superStructure =
           new SuperStructure(
               intake,
@@ -218,7 +217,6 @@ public class RobotContainer {
               hubShotCalculator,
               outpostPassCalculator,
               drivetrain::isAlignedToTarget);
-    }
 
     if (Objects.nonNull(superStructure)) {
       registerPathplannerCommand(
@@ -432,6 +430,13 @@ public class RobotContainer {
   public void onTestEnable() {
     if (Objects.nonNull(superStructure)) {
       superStructure.setControlState(ControlState.INDEPENDENT);
+    }
+  }
+
+  /** Ensures superstructure control mode is active when enabled. */
+  public void onEnableSuperstructure() {
+    if (Objects.nonNull(superStructure)) {
+      superStructure.setControlState(ControlState.SUPERSTRUCTURE);
     }
   }
 
