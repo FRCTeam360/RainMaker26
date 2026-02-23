@@ -83,7 +83,6 @@ public class RobotContainer {
   private IntakePivot intakePivot;
   private HopperRoller hopperRoller;
   private FlywheelKicker flywheelKicker;
-  private HopperRoller hopperRoller;
 
   private SuperStructure superStructure;
 

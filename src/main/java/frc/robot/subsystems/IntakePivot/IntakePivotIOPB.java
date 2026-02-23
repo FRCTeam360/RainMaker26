@@ -47,8 +47,7 @@ public class IntakePivotIOPB implements IntakePivotIO {
           Constants.PracticeBotConstants.INTAKE_PIVOT_ID, Constants.PracticeBotConstants.CANBUS);
 
   private final DutyCycleOut dutyCycleOut = new DutyCycleOut(0);
-  private final MotionMagicVoltage motionMagicPosition =
-      new MotionMagicVoltage(0.0);
+  private final MotionMagicVoltage motionMagicPosition = new MotionMagicVoltage(0.0);
   private final TalonFXConfiguration config = new TalonFXConfiguration();
   private final CurrentLimitsConfigs currentLimitConfig = new CurrentLimitsConfigs();
   private NeutralModeValue neutralMode = NeutralModeValue.Brake;
@@ -56,7 +55,7 @@ public class IntakePivotIOPB implements IntakePivotIO {
   /** Creates a new IntakePivotIOPB. */
   public IntakePivotIOPB() {
     intakePivot.setNeutralMode(NeutralModeValue.Brake);
-    // FIXME: NUETRAL MODE BRAKE 
+    // FIXME: NUETRAL MODE BRAKE
     config.CurrentLimits.StatorCurrentLimit = STATOR_CURRENT_LIMIT_AMPS;
     config.CurrentLimits.SupplyCurrentLimit = SUPPLY_CURRENT_LIMIT_AMPS;
     config.CurrentLimits.StatorCurrentLimitEnable = true;
