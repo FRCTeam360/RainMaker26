@@ -128,9 +128,6 @@ public class SuperStructure extends SubsystemBase {
         break;
     }
 
-    // Always run the shooter state machine — it handles IDLE internally
-    shooterStateMachine.update();
-    shooterStateMachine.apply();
   }
 
   private void shooting() {
@@ -194,6 +191,10 @@ public class SuperStructure extends SubsystemBase {
   public void periodic() {
     updateState();
     applyStates();
+
+    // Always run the shooter state machine — it handles IDLE internally
+    shooterStateMachine.update();
+    shooterStateMachine.apply();
 
     Logger.recordOutput("Superstructure/WantedSuperState", wantedSuperState.toString());
     Logger.recordOutput("Superstructure/CurrentSuperState", currentSuperState.toString());
