@@ -29,7 +29,6 @@ public class HopperRoller extends SubsystemBase {
   private ControlState controlState = ControlState.SUPERSTRUCTURE;
 
   // Constructor
-
   public HopperRoller(HopperRollerIO io) {
     this.io = io;
   }

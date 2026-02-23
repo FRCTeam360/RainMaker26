@@ -81,6 +81,7 @@ public class RobotContainer {
   private Vision vision;
   private Intake intake;
   private IntakePivot intakePivot;
+  private HopperRoller hopperRoller;
   private FlywheelKicker flywheelKicker;
   private HopperRoller hopperRoller;
 
@@ -115,6 +116,7 @@ public class RobotContainer {
                 Map.of("photonSim", new VisionIOPhotonSim(() -> drivetrain.getState().Pose)));
         flywheel = new Flywheel(new FlywheelIOSim());
         hood = new Hood(new HoodIOSim());
+        hopperRoller = new HopperRoller(new HopperRollerIOSim());
         indexer = new Indexer(new IndexerIOSim());
         intake = new Intake(new IntakeIOSim());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOSim());

@@ -21,8 +21,9 @@ public class IntakePivot extends SubsystemBase {
 
   // Other fields
   private final IntakePivotVisualizer visualizer;
+  private static final double STOWED_POSITION = 0.0;
+  private static final double DEPLOYED_POSITION = 90.0;
 
-  // Enums
   public enum IntakePivotStates {
     OFF,
     STOWED,
