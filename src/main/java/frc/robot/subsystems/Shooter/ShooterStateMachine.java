@@ -17,6 +17,11 @@ import org.littletonrobotics.junction.Logger;
  */
 public class ShooterStateMachine {
   // Enums
+  public enum ShooterWantedStates {
+    IDLE,
+    SHOOTING
+  }
+
   public enum ShooterStates {
     PREPARING,
     FIRING,
@@ -30,8 +35,9 @@ public class ShooterStateMachine {
   private final BooleanSupplier isAlignedToTarget;
 
   // State variables
-  private ShooterStates currentState = ShooterStates.PREPARING;
-  private ShooterStates previousState = ShooterStates.PREPARING;
+  private ShooterWantedStates wantedState = ShooterWantedStates.IDLE;
+  private ShooterStates currentState = ShooterStates.IDLE;
+  private ShooterStates previousState = ShooterStates.IDLE;
 
   /**
    * Creates a new ShooterStateMachine.
@@ -58,57 +64,73 @@ public class ShooterStateMachine {
   }
 
   /**
-   * Updates the shooter state based on subsystem readiness and alignment. Should be called by the
-   * SuperStructure when in a shooting super state.
+   * Sets the wanted state of the shooter state machine.
+   *
+   * @param state the desired shooter state
+   */
+  public void setWantedState(ShooterWantedStates state) {
+    wantedState = state;
+  }
+
+  /**
+   * Updates the shooter state based on wanted state, subsystem readiness, and alignment. Should be
+   * called every cycle by the SuperStructure.
    */
   public void update() {
     previousState = currentState;
 
-    boolean flywheelReady = flywheel.getState() == FlywheelInternalStates.AT_SETPOINT;
-    boolean hoodReady = hood.getState() == HoodInternalStates.AT_SETPOINT;
-    boolean aligned = isAlignedToTarget.getAsBoolean();
+    switch (wantedState) {
+      case SHOOTING:
+        boolean flywheelReady = flywheel.getState() == FlywheelInternalStates.AT_SETPOINT;
+        boolean hoodReady = hood.getState() == HoodInternalStates.AT_SETPOINT;
+        boolean aligned = isAlignedToTarget.getAsBoolean();
 
-    Logger.recordOutput("Superstructure/Shooting/FlywheelReady", flywheelReady);
-    Logger.recordOutput("Superstructure/Shooting/HoodReady", hoodReady);
-    Logger.recordOutput("Superstructure/Shooting/Aligned", aligned);
+        Logger.recordOutput("Superstructure/Shooting/FlywheelReady", flywheelReady);
+        Logger.recordOutput("Superstructure/Shooting/HoodReady", hoodReady);
+        Logger.recordOutput("Superstructure/Shooting/Aligned", aligned);
 
-    if (flywheelReady && hoodReady && aligned) {
-      currentState = ShooterStates.FIRING;
-    } else {
-      currentState = ShooterStates.PREPARING;
+        if (flywheelReady && hoodReady && aligned) {
+          currentState = ShooterStates.FIRING;
+        } else {
+          currentState = ShooterStates.PREPARING;
+        }
+        break;
+      case IDLE:
+      default:
+        currentState = ShooterStates.IDLE;
+        break;
     }
   }
 
   /**
-   * Applies the current shooter state to subsystems. Sets flywheel and hood to SHOOTING, and
-   * controls the flywheel kicker based on whether we are FIRING or PREPARING.
+   * Applies the current shooter state to subsystems. Sets flywheel, hood, and flywheel kicker
+   * wanted states based on the current state.
    */
   public void apply() {
-    flywheel.setWantedState(FlywheelWantedStates.SHOOTING);
-    hood.setWantedState(HoodWantedStates.SHOOTING);
-
-    if (currentState == ShooterStates.FIRING) {
-      flywheelKicker.setWantedState(FlywheelKickerStates.SHOOTING);
-    } else {
-      flywheelKicker.setWantedState(FlywheelKickerStates.OFF);
+    switch (currentState) {
+      case PREPARING:
+        flywheel.setWantedState(FlywheelWantedStates.SHOOTING);
+        hood.setWantedState(HoodWantedStates.SHOOTING);
+        flywheelKicker.setWantedState(FlywheelKickerStates.OFF);
+        break;
+      case FIRING:
+        flywheel.setWantedState(FlywheelWantedStates.SHOOTING);
+        hood.setWantedState(HoodWantedStates.SHOOTING);
+        flywheelKicker.setWantedState(FlywheelKickerStates.SHOOTING);
+        break;
+      case IDLE:
+      default:
+        flywheel.setWantedState(FlywheelWantedStates.IDLE);
+        hood.setWantedState(HoodWantedStates.IDLE);
+        flywheelKicker.setWantedState(FlywheelKickerStates.OFF);
+        break;
     }
   }
 
-  /** Resets the shooter state to PREPARING. Called when the robot exits a shooting super state. */
-  public void reset() {
-    currentState = ShooterStates.IDLE;
-  }
-
-  /** Stops all controlled subsystems */
-  public void stop() {
-    flywheelKicker.setWantedState(FlywheelKicker.FlywheelKickerStates.OFF);
-    flywheel.setWantedState(FlywheelWantedStates.IDLE);
-    hood.setWantedState(HoodWantedStates.IDLE);
-  }
-
-  /** Logs the current and previous shooter states. */
+  /** Logs the wanted, current, and previous shooter states. */
   public void log() {
-    Logger.recordOutput("Superstructure/PreviousShooterState", previousState.toString());
+    Logger.recordOutput("Superstructure/WantedShooterState", wantedState.toString());
     Logger.recordOutput("Superstructure/CurrentShooterState", currentState.toString());
+    Logger.recordOutput("Superstructure/PreviousShooterState", previousState.toString());
   }
 }

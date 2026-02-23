@@ -13,6 +13,7 @@ import frc.robot.subsystems.Shooter.FlywheelKicker.FlywheelKicker;
 import frc.robot.subsystems.Shooter.Hood.Hood;
 import frc.robot.subsystems.Shooter.ShooterStateMachine;
 import frc.robot.subsystems.Shooter.ShooterStateMachine.ShooterStates;
+import frc.robot.subsystems.Shooter.ShooterStateMachine.ShooterWantedStates;
 import frc.robot.subsystems.Shooter.ShotCalculator;
 import java.util.function.BooleanSupplier;
 import org.littletonrobotics.junction.Logger;
@@ -126,19 +127,14 @@ public class SuperStructure extends SubsystemBase {
         shooting();
         break;
     }
-    resetShooterStateIfNotShooting();
-  }
 
-  private void resetShooterStateIfNotShooting() {
-    if (currentSuperState != SuperStates.SHOOT_AT_HUB
-        && currentSuperState != SuperStates.SHOOT_AT_OUTPOST) {
-      shooterStateMachine.reset();
-    }
+    // Always run the shooter state machine — it handles IDLE internally
+    shooterStateMachine.update();
+    shooterStateMachine.apply();
   }
 
   private void shooting() {
-    shooterStateMachine.update();
-    shooterStateMachine.apply();
+    shooterStateMachine.setWantedState(ShooterWantedStates.SHOOTING);
 
     if (shooterStateMachine.getState() == ShooterStates.FIRING) {
       indexer.setWantedState(IndexerStates.SHOOTING);
@@ -151,13 +147,14 @@ public class SuperStructure extends SubsystemBase {
 
   private void intaking() {
     intake.setWantedState(Intake.IntakeStates.INTAKING);
+    shooterStateMachine.setWantedState(ShooterWantedStates.IDLE);
     // indexer.setWantedState(Indexer.IndexerStates.INTAKING);
   }
 
   private void stopped() {
     intake.setWantedState(Intake.IntakeStates.OFF);
     indexer.setWantedState(Indexer.IndexerStates.OFF);
-    shooterStateMachine.stop();
+    shooterStateMachine.setWantedState(ShooterWantedStates.IDLE);
   }
 
   // Public API
