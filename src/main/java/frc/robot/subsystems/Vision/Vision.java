@@ -56,6 +56,7 @@ public class Vision extends SubsystemBase {
     for (String key : visionIos.keySet()) {
       visionInputs.put(key, new VisionIOInputsAutoLogged());
     }
+    enableIMUSeeding();
   }
 
   public void turnOnLights(String name) {

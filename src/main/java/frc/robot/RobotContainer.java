@@ -58,6 +58,7 @@ import frc.robot.subsystems.SuperStructure;
 import frc.robot.subsystems.SuperStructure.SuperStates;
 import frc.robot.subsystems.Vision.Vision;
 import frc.robot.subsystems.Vision.VisionIOLimelight3G;
+import frc.robot.subsystems.Vision.VisionIOLimelight4;
 import frc.robot.subsystems.Vision.VisionIOPhotonSim;
 import frc.robot.utils.AllianceFlipUtil;
 import frc.robot.utils.FieldConstants;
@@ -150,6 +151,13 @@ public class RobotContainer {
                         Constants.WoodBotConstants.LIMELIGHT_3,
                         new VisionIOLimelight3G(
                             Constants.WoodBotConstants.LIMELIGHT_3,
+                            () -> drivetrain.getAngle(),
+                            () -> drivetrain.getAngularRate(),
+                            true)),
+                    Map.entry(
+                        Constants.WoodBotConstants.LIMELIGHT_4,
+                        new VisionIOLimelight4(
+                            Constants.WoodBotConstants.LIMELIGHT_4,
                             () -> drivetrain.getAngle(),
                             () -> drivetrain.getAngularRate(),
                             true))));

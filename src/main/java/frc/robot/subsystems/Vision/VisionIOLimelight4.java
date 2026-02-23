@@ -13,21 +13,11 @@ import java.util.function.DoubleSupplier;
  */
 public class VisionIOLimelight4 extends VisionIOLimelightBase {
 
-  /** Seeds the LL4 internal IMU from the external gyro (Pigeon). Use while disabled. */
-  private static final int IMU_MODE_EXTERNAL_SEED = 1;
-
-  /** Fuses the LL4 internal IMU with external gyro corrections. Use while enabled. */
-  private static final int IMU_MODE_INTERNAL_EXTERNAL_ASSIST = 4;
+  /** Uses only the external gyro (Pigeon) for IMU data, ignoring the LL4 internal IMU. */
+  private static final int IMU_MODE_EXTERNAL = 2;
 
   /**
-   * Complementary filter alpha for IMU assist. Higher values converge onto the external source
-   * faster. 0.001 is the Limelight default.
-   */
-  private static final double IMU_ASSIST_ALPHA = 0.001;
-
-  /**
-   * Creates a new Limelight 4 hardware layer. Configures IMU assist alpha and sets initial IMU mode
-   * to external seed.
+   * Creates a new Limelight 4 hardware layer. Sets IMU mode to use external gyro data only.
    *
    * @param name the NetworkTables name of the Limelight
    * @param gyroAngleSupplier supplies the robot's gyro angle in degrees
@@ -40,18 +30,17 @@ public class VisionIOLimelight4 extends VisionIOLimelightBase {
       DoubleSupplier gyroAngleRateSupplier,
       boolean acceptMeasurements) {
     super(name, gyroAngleSupplier, gyroAngleRateSupplier, acceptMeasurements);
-    LimelightHelpers.SetIMUAssistAlpha(name, IMU_ASSIST_ALPHA);
-    LimelightHelpers.SetIMUMode(name, IMU_MODE_EXTERNAL_SEED);
+    LimelightHelpers.SetIMUMode(name, IMU_MODE_EXTERNAL);
   }
 
   @Override
   public void enableIMUSeeding() {
-    LimelightHelpers.SetIMUMode(getName(), IMU_MODE_EXTERNAL_SEED);
+    LimelightHelpers.SetIMUMode(getName(), IMU_MODE_EXTERNAL);
   }
 
   @Override
   public void enableIMUAssist() {
-    LimelightHelpers.SetIMUMode(getName(), IMU_MODE_INTERNAL_EXTERNAL_ASSIST);
+    LimelightHelpers.SetIMUMode(getName(), IMU_MODE_EXTERNAL);
   }
 
   @Override
