@@ -223,25 +223,21 @@ public class RobotContainer {
             outpostPassCalculator,
             drivetrain::isAlignedToTarget);
 
-    if (Objects.nonNull(superStructure)) {
-      registerPathplannerCommand(
-          "basic intake", superStructure.setStateCommand(SuperStates.INTAKING));
-      if (Objects.nonNull(drivetrain)) {
-        // TODO: add end condition based on state from SuperStructure (based on sensor inputs)
-        registerPathplannerCommand(
-            "shoot at hub",
-            Commands.waitSeconds(10)
-                .deadlineFor(
-                    superStructure
-                        .setStateCommand(SuperStates.SHOOT_AT_HUB)
-                        .alongWith(
-                            drivetrain.faceAngleWhileDrivingCommand(
-                                () -> 0,
-                                () -> 0,
-                                () -> hubShotCalculator.calculateShot().targetHeading())))
-                .andThen(superStructure.setStateCommand(SuperStates.IDLE)));
-      }
-    }
+    registerPathplannerCommand(
+        "basic intake", superStructure.setStateCommand(SuperStates.INTAKING));
+    // TODO: add end condition based on state from SuperStructure (based on sensor inputs)
+    registerPathplannerCommand(
+        "shoot at hub",
+        Commands.waitSeconds(10)
+            .deadlineFor(
+                superStructure
+                    .setStateCommand(SuperStates.SHOOT_AT_HUB)
+                    .alongWith(
+                        drivetrain.faceAngleWhileDrivingCommand(
+                            () -> 0,
+                            () -> 0,
+                            () -> hubShotCalculator.calculateShot().targetHeading())))
+            .andThen(superStructure.setStateCommand(SuperStates.IDLE)));
 
     configureBindings();
     // configureTestBindings();
@@ -278,170 +274,109 @@ public class RobotContainer {
    * joysticks}.
    */
   private void systemsTestBindings() {
-    if (Objects.nonNull(flywheel)) {
-      driverCont.a().whileTrue(flywheel.setVelocityCommand(() -> 2000.0));
-      driverCont.b().whileTrue(flywheel.setVelocityCommand(() -> 4000.0));
-    }
-    if (Objects.nonNull(flywheelKicker)) {
-      driverCont.x().whileTrue(flywheelKicker.setDutyCycleCommand(() -> 0.5));
-      driverCont.y().whileTrue(flywheelKicker.setDutyCycleCommand(() -> -0.5));
-    }
-    if (Objects.nonNull(hood)) {
-      driverCont.pov(0).whileTrue(hood.setDutyCycleCommand(() -> 0.2));
-      driverCont.pov(180).whileTrue(hood.setDutyCycleCommand(() -> -0.2));
-      driverCont
-          .pov(90)
-          .whileTrue(hood.setPositionCommand(0.0)); // TODO change placeholder values for PB
-      driverCont
-          .pov(270)
-          .whileTrue(hood.setPositionCommand(0.0)); // TODO change placeholder values for PB
-      operatorCont.pov(0).whileTrue(hood.zero());
-    }
-    if (Objects.nonNull(indexer)) {}
+    driverCont.a().whileTrue(flywheel.setVelocityCommand(() -> 2000.0));
+    driverCont.b().whileTrue(flywheel.setVelocityCommand(() -> 4000.0));
 
-    if (Objects.nonNull(intake)) {}
+    driverCont.x().whileTrue(flywheelKicker.setDutyCycleCommand(() -> 0.5));
+    driverCont.y().whileTrue(flywheelKicker.setDutyCycleCommand(() -> -0.5));
 
-    if (Objects.nonNull(intakePivot)) {}
-
-    if (Objects.nonNull(hopperRoller)) {}
+    driverCont.pov(0).whileTrue(hood.setDutyCycleCommand(() -> 0.2));
+    driverCont.pov(180).whileTrue(hood.setDutyCycleCommand(() -> -0.2));
+    driverCont
+        .pov(90)
+        .whileTrue(hood.setPositionCommand(0.0)); // TODO change placeholder values for PB
+    driverCont
+        .pov(270)
+        .whileTrue(hood.setPositionCommand(0.0)); // TODO change placeholder values for PB
+    operatorCont.pov(0).whileTrue(hood.zero());
   }
 
   private void configureBindings() {
-    // Only bind commands if the required subsystems/factories exist
-    if (Objects.nonNull(vision)) {
-      Command consumeVisionMeasurements =
-          vision.consumeVisionMeasurements(
-              measurements -> {
-                drivetrain.addVisionMeasurements(measurements);
-              });
-      vision.setDefaultCommand(consumeVisionMeasurements.ignoringDisable(true));
-    }
-    // TODO: make more elegant solution for null checking subsystems/commands
-    if (Objects.nonNull(drivetrain)) {
-      drivetrain.setDefaultCommand(drivetrain.fieldOrientedDriveCommand(driverCont));
-    }
+    Command consumeVisionMeasurements =
+        vision.consumeVisionMeasurements(
+            measurements -> {
+              drivetrain.addVisionMeasurements(measurements);
+            });
+    vision.setDefaultCommand(consumeVisionMeasurements.ignoringDisable(true));
+
+    drivetrain.setDefaultCommand(drivetrain.fieldOrientedDriveCommand(driverCont));
 
     BooleanSupplier isSuperstructureMode =
-        () ->
-            Objects.nonNull(superStructure)
-                && superStructure.getControlState() == ControlState.SUPERSTRUCTURE;
+        () -> superStructure.getControlState() == ControlState.SUPERSTRUCTURE;
     BooleanSupplier isIndependentMode =
-        () ->
-            Objects.isNull(superStructure)
-                || superStructure.getControlState() == ControlState.INDEPENDENT;
+        () -> superStructure.getControlState() == ControlState.INDEPENDENT;
 
-    if (Objects.nonNull(superStructure) && Objects.nonNull(drivetrain)) {
-      // Linked pair: whileTrue sets SHOOTING + aims, onFalse resets to IDLE.
-      // The InstantCommand (setStateCommand) finishes immediately; the alongWith group
-      // stays alive via faceAngleWhileDrivingCommand until whileTrue interrupts it.
-      Trigger shootAtHubTrigger = driverCont.rightTrigger().and(isSuperstructureMode);
-      shootAtHubTrigger.whileTrue(
-          superStructure
-              .setStateCommand(SuperStates.SHOOT_AT_HUB)
-              .alongWith(
-                  drivetrain.faceAngleWhileDrivingCommand(
-                      driverCont, () -> hubShotCalculator.calculateShot().targetHeading())));
-      // Must stay paired with the whileTrue above to reset state on trigger release
-      shootAtHubTrigger.onFalse(superStructure.setStateCommand(SuperStates.IDLE));
+    // Linked pair: whileTrue sets SHOOTING + aims, onFalse resets to IDLE.
+    // The InstantCommand (setStateCommand) finishes immediately; the alongWith group
+    // stays alive via faceAngleWhileDrivingCommand until whileTrue interrupts it.
+    Trigger shootAtHubTrigger = driverCont.rightTrigger().and(isSuperstructureMode);
+    shootAtHubTrigger.whileTrue(
+        superStructure
+            .setStateCommand(SuperStates.SHOOT_AT_HUB)
+            .alongWith(
+                drivetrain.faceAngleWhileDrivingCommand(
+                    driverCont, () -> hubShotCalculator.calculateShot().targetHeading())));
+    // Must stay paired with the whileTrue above to reset state on trigger release
+    shootAtHubTrigger.onFalse(superStructure.setStateCommand(SuperStates.IDLE));
 
-      Trigger shootAtOutpostTrigger = driverCont.leftTrigger().and(isSuperstructureMode);
-      shootAtOutpostTrigger.whileTrue(
-          superStructure
-              .setStateCommand(SuperStates.SHOOT_AT_OUTPOST)
-              .alongWith(
-                  drivetrain.faceAngleWhileDrivingCommand(
-                      driverCont, () -> outpostPassCalculator.calculateShot().targetHeading())));
-      // Must stay paired with the whileTrue above to reset state on trigger release
-      shootAtOutpostTrigger.onFalse(superStructure.setStateCommand(SuperStates.IDLE));
-    }
+    Trigger shootAtOutpostTrigger = driverCont.leftTrigger().and(isSuperstructureMode);
+    shootAtOutpostTrigger.whileTrue(
+        superStructure
+            .setStateCommand(SuperStates.SHOOT_AT_OUTPOST)
+            .alongWith(
+                drivetrain.faceAngleWhileDrivingCommand(
+                    driverCont, () -> outpostPassCalculator.calculateShot().targetHeading())));
+    // Must stay paired with the whileTrue above to reset state on trigger release
+    shootAtOutpostTrigger.onFalse(superStructure.setStateCommand(SuperStates.IDLE));
 
-    // Null checks based on subsystems used by each command
-    // basicIntakeCmd uses intake and indexer
     // TODO: Re-enable superStructure bindings
-    if (Objects.nonNull(superStructure) && Objects.nonNull(intake) && Objects.nonNull(indexer)) {
-      Trigger intakeTrigger = driverCont.leftBumper().and(isSuperstructureMode);
-      intakeTrigger.onTrue(superStructure.setStateCommand(SuperStates.INTAKING));
-      intakeTrigger.onFalse(superStructure.setStateCommand(SuperStates.IDLE));
-    }
+    Trigger intakeTrigger = driverCont.leftBumper().and(isSuperstructureMode);
+    intakeTrigger.onTrue(superStructure.setStateCommand(SuperStates.INTAKING));
+    intakeTrigger.onFalse(superStructure.setStateCommand(SuperStates.IDLE));
 
-    if (Objects.nonNull(intake)) {
-      driverCont.leftBumper().and(isIndependentMode).whileTrue(intake.setDutyCycleCommand(0.2));
-    }
+    driverCont.leftBumper().and(isIndependentMode).whileTrue(intake.setDutyCycleCommand(0.2));
 
-    if (Objects.nonNull(indexer)) {
-      driverCont.a().and(isIndependentMode).whileTrue(indexer.setDutyCycleCommand(0.5));
-    }
+    driverCont.a().and(isIndependentMode).whileTrue(indexer.setDutyCycleCommand(0.5));
 
-    // setFlywheelKickerDutyCycle uses flywheelKicker
-    if (Objects.nonNull(flywheelKicker)) {}
+    // hood bindings
+    driverCont.pov(0).and(isIndependentMode).onTrue(hood.moveToZeroAndZero());
+    driverCont.pov(90).and(isIndependentMode).whileTrue(hood.setPositionCommand(4.0));
+    driverCont.pov(180).and(isIndependentMode).whileTrue(hood.setPositionCommand(16.0));
+    driverCont.pov(270).and(isIndependentMode).whileTrue(hood.setPositionCommand(23.0));
+    driverCont.start().and(isIndependentMode).onTrue(hood.zero());
 
-    // setHoodPosition uses hood
-    if (Objects.nonNull(hood)) {
-      // hood.setDefaultCommand(
-      //     CommandLogger.logCommand(hood.setPositionCommand(0.0), "hood default command"));
-      driverCont.pov(0).and(isIndependentMode).onTrue(hood.moveToZeroAndZero());
-      driverCont.pov(90).and(isIndependentMode).whileTrue(hood.setPositionCommand(4.0));
-      driverCont.pov(180).and(isIndependentMode).whileTrue(hood.setPositionCommand(16.0));
-      driverCont.pov(270).and(isIndependentMode).whileTrue(hood.setPositionCommand(23.0));
-      driverCont.start().and(isIndependentMode).onTrue(hood.zero());
-    }
-
-    // shootWithRPM uses flywheel
-    if (Objects.nonNull(flywheel)) {
-      driverCont.x().and(isIndependentMode).whileTrue(flywheel.setVelocityCommand(2500));
-      driverCont.b().and(isIndependentMode).whileTrue(flywheel.setVelocityCommand(3000));
-      driverCont.y().and(isIndependentMode).whileTrue(flywheel.setVelocityCommand(3500));
-    }
+    // flywheel bindings
+    driverCont.x().and(isIndependentMode).whileTrue(flywheel.setVelocityCommand(2500));
+    driverCont.b().and(isIndependentMode).whileTrue(flywheel.setVelocityCommand(3000));
+    driverCont.y().and(isIndependentMode).whileTrue(flywheel.setVelocityCommand(3500));
 
     // Drivetrain commands
-    if (Objects.nonNull(drivetrain)) {
-      // driverCont.leftTrigger().whileTrue(drivetrain.faceHubWhileDriving(driverCont));
-      drivetrain.registerTelemetry(logger::telemeterize);
-      driverCont.back().onTrue(drivetrain.zeroCommand());
-    }
+    // driverCont.leftTrigger().whileTrue(drivetrain.faceHubWhileDriving(driverCont));
+    drivetrain.registerTelemetry(logger::telemeterize);
+    driverCont.back().onTrue(drivetrain.zeroCommand());
   }
 
   /** Stops all subsystems safely when the robot is disabled. */
   public void onDisable() {
-    if (Objects.nonNull(superStructure)) {
-      superStructure.setControlState(ControlState.SUPERSTRUCTURE);
-      superStructure.setWantedSuperState(SuperStates.IDLE);
-    }
-    if (Objects.nonNull(drivetrain)) {
-      drivetrain.setControl(new SwerveRequest.Idle());
-    }
-    if (Objects.nonNull(flywheel)) {
-      flywheel.stop();
-    }
-    if (Objects.nonNull(hood)) {
-      hood.stop();
-    }
-    if (Objects.nonNull(intake)) {
-      intake.stop();
-    }
-    if (Objects.nonNull(intakePivot)) {
-      intakePivot.stop();
-    }
-    if (Objects.nonNull(indexer)) {
-      indexer.stop();
-    }
-    if (Objects.nonNull(flywheelKicker)) {
-      flywheelKicker.stop();
-    }
+    superStructure.setControlState(ControlState.SUPERSTRUCTURE);
+    superStructure.setWantedSuperState(SuperStates.IDLE);
+    drivetrain.setControl(new SwerveRequest.Idle());
+    flywheel.stop();
+    hood.stop();
+    intake.stop();
+    intakePivot.stop();
+    indexer.stop();
+    flywheelKicker.stop();
   }
 
   /** Decouples the superstructure from subsystems for test mode. */
   public void onTestEnable() {
-    if (Objects.nonNull(superStructure)) {
-      superStructure.setControlState(ControlState.INDEPENDENT);
-    }
+    superStructure.setControlState(ControlState.INDEPENDENT);
   }
 
   /** Ensures superstructure control mode is active when enabled. */
   public void onEnableSuperstructure() {
-    if (Objects.nonNull(superStructure)) {
-      superStructure.setControlState(ControlState.SUPERSTRUCTURE);
-    }
+    superStructure.setControlState(ControlState.SUPERSTRUCTURE);
   }
 
   /**
@@ -450,14 +385,10 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.CommandScheduler#run()}.
    */
   public void preSchedulerUpdate() {
-    if (Objects.nonNull(hubShotCalculator)) {
-      hubShotCalculator.clearShootingParams();
-      hubShotCalculator.calculateShot();
-    }
-    if (Objects.nonNull(outpostPassCalculator)) {
-      outpostPassCalculator.clearShootingParams();
-      outpostPassCalculator.calculateShot();
-    }
+    hubShotCalculator.clearShootingParams();
+    hubShotCalculator.calculateShot();
+    outpostPassCalculator.clearShootingParams();
+    outpostPassCalculator.calculateShot();
   }
 
   /**
