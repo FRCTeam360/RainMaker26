@@ -5,7 +5,9 @@ stateDiagram-v2
         [*] --> idle_subsystems
         state "All Subsystems" as idle_subsystems {
             idle_intake: Intake → OFF
+            idle_pivot: IntakePivot → OFF
             idle_indexer: Indexer → OFF
+            idle_hopper: HopperRoller → OFF
             idle_kicker: FlywheelKicker → OFF
             idle_flywheel: Flywheel → OFF
             idle_hood: Hood → OFF (position 0.0)
@@ -16,6 +18,8 @@ stateDiagram-v2
         [*] --> intaking_subsystems
         state "Active Subsystems" as intaking_subsystems {
             int_intake: Intake → INTAKING (75%)
+            int_pivot: IntakePivot → not driven
+            int_hopper: HopperRoller → not driven
         }
     }
 
