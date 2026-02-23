@@ -46,12 +46,16 @@ import frc.robot.subsystems.Shooter.Hood.Hood;
 import frc.robot.subsystems.Shooter.Hood.HoodIOPB;
 import frc.robot.subsystems.Shooter.Hood.HoodIOSim;
 import frc.robot.subsystems.Shooter.Hood.HoodIOWB;
+import frc.robot.subsystems.Shooter.ShooterConstants;
 import frc.robot.subsystems.Shooter.ShotCalculator;
+import frc.robot.subsystems.Shooter.ShotCalculator.RobotShootingInfo;
 import frc.robot.subsystems.SuperStructure;
 import frc.robot.subsystems.SuperStructure.SuperStates;
 import frc.robot.subsystems.Vision.Vision;
 import frc.robot.subsystems.Vision.VisionIOLimelight;
 import frc.robot.subsystems.Vision.VisionIOPhotonSim;
+import frc.robot.utils.AllianceFlipUtil;
+import frc.robot.utils.FieldConstants;
 import java.util.Map;
 import java.util.Objects;
 import org.littletonrobotics.junction.Logger;
@@ -77,7 +81,8 @@ public class RobotContainer {
 
   private SuperStructure superStructure;
 
-  private ShotCalculator shotCalculator;
+  private ShotCalculator hubShotCalculator;
+  private ShotCalculator outpostPassCalculator;
 
   // TODO: refactor to allow for more than 1 drivetrain type
 
@@ -89,6 +94,8 @@ public class RobotContainer {
   private final CommandXboxController testCont1 = new CommandXboxController(5);
 
   private static final double FLYWHEEL_KICKER_WARMUP_VELOCITY_RPM = 4000.0;
+
+  private RobotShootingInfo robotShootingInfo;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -106,6 +113,15 @@ public class RobotContainer {
         indexer = new Indexer(new IndexerIOSim());
         intake = new Intake(new IntakeIOSim());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOSim());
+
+        robotShootingInfo =
+            new RobotShootingInfo(
+                Constants.WoodBotConstants.shotHoodAngleMap,
+                Constants.WoodBotConstants.shotFlywheelSpeedMap,
+                Constants.WoodBotConstants.timeOfFlightMap,
+                ShooterConstants.ROBOT_TO_SHOOTER,
+                0.0,
+                5.0);
         break;
       case WOODBOT:
         drivetrain = WoodBotDrivetrain.createDrivetrain();
@@ -127,6 +143,15 @@ public class RobotContainer {
         intake = new Intake(new IntakeIOWB());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOWB());
         // intakePivot = new IntakePivot(new IntakePivotIOPB());
+
+        robotShootingInfo =
+            new RobotShootingInfo(
+                Constants.WoodBotConstants.shotHoodAngleMap,
+                Constants.WoodBotConstants.shotFlywheelSpeedMap,
+                Constants.WoodBotConstants.timeOfFlightMap,
+                ShooterConstants.ROBOT_TO_SHOOTER,
+                0.0,
+                5.0);
         break;
       case PRACTICEBOT:
       default:
@@ -151,11 +176,30 @@ public class RobotContainer {
         intake = new Intake(new IntakeIOPB());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOPB());
         intakePivot = new IntakePivot(new IntakePivotIOPB());
+
+        robotShootingInfo =
+            new RobotShootingInfo(
+                Constants.WoodBotConstants.shotHoodAngleMap,
+                Constants.WoodBotConstants.shotFlywheelSpeedMap,
+                Constants.WoodBotConstants.timeOfFlightMap,
+                ShooterConstants.ROBOT_TO_SHOOTER,
+                0.0,
+                5.0);
         // TODO ADD CLIMBERS
         break;
     }
-    shotCalculator = new ShotCalculator(drivetrain);
-
+    hubShotCalculator =
+        new ShotCalculator(
+            drivetrain::getPosition,
+            () -> AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint.toTranslation2d()),
+            robotShootingInfo);
+    outpostPassCalculator =
+        new ShotCalculator(
+            drivetrain::getPosition,
+            () -> AllianceFlipUtil.apply(FieldConstants.Outpost.centerPoint),
+            robotShootingInfo);
+    // Configure the trigger bindings
+    // TODO: Re-enable superStructure construction and PathPlanner commands
     superStructure =
         new SuperStructure(
             intake,
@@ -165,7 +209,8 @@ public class RobotContainer {
             hood,
             intakePivot,
             hopperRoller,
-            shotCalculator,
+            hubShotCalculator,
+            outpostPassCalculator,
             drivetrain::isAlignedToTarget);
 
     if (Objects.nonNull(superStructure)) {
@@ -178,12 +223,12 @@ public class RobotContainer {
             Commands.waitSeconds(10)
                 .deadlineFor(
                     superStructure
-                        .setStateCommand(SuperStates.SHOOTING)
+                        .setStateCommand(SuperStates.SHOOT_AT_HUB)
                         .alongWith(
                             drivetrain.faceAngleWhileDrivingCommand(
                                 () -> 0,
                                 () -> 0,
-                                () -> shotCalculator.calculateShot().targetHeading())))
+                                () -> hubShotCalculator.calculateShot().targetHeading())))
                 .andThen(superStructure.setStateCommand(SuperStates.IDLE)));
       }
     }
@@ -272,12 +317,24 @@ public class RobotContainer {
           .rightTrigger()
           .whileTrue(
               superStructure
-                  .setStateCommand(SuperStates.SHOOTING)
+                  .setStateCommand(SuperStates.SHOOT_AT_HUB)
                   .alongWith(
                       drivetrain.faceAngleWhileDrivingCommand(
-                          driverCont, () -> shotCalculator.calculateShot().targetHeading())));
+                          driverCont, () -> hubShotCalculator.calculateShot().targetHeading())));
       // Must stay paired with the whileTrue above to reset state on trigger release
       driverCont.rightTrigger().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
+
+      driverCont
+          .leftTrigger()
+          .whileTrue(
+              superStructure
+                  .setStateCommand(SuperStates.SHOOT_AT_OUTPOST)
+                  .alongWith(
+                      drivetrain.faceAngleWhileDrivingCommand(
+                          driverCont,
+                          () -> outpostPassCalculator.calculateShot().targetHeading())));
+      // Must stay paired with the whileTrue above to reset state on trigger release
+      driverCont.leftTrigger().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
     }
 
     // Null checks based on subsystems used by each command
@@ -354,9 +411,13 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.CommandScheduler#run()}.
    */
   public void preSchedulerUpdate() {
-    if (Objects.nonNull(shotCalculator)) {
-      shotCalculator.clearShootingParams();
-      shotCalculator.calculateShot();
+    if (Objects.nonNull(hubShotCalculator)) {
+      hubShotCalculator.clearShootingParams();
+      hubShotCalculator.calculateShot();
+    }
+    if (Objects.nonNull(outpostPassCalculator)) {
+      outpostPassCalculator.clearShootingParams();
+      outpostPassCalculator.calculateShot();
     }
   }
 
