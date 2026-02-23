@@ -5,9 +5,13 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKicker;
 import frc.robot.subsystems.FlywheelKicker.FlywheelKicker.FlywheelKickerStates;
+import frc.robot.subsystems.HopperRoller.HopperRoller;
+import frc.robot.subsystems.HopperRoller.HopperRoller.HopperRollerStates;
 import frc.robot.subsystems.Indexer.Indexer;
 import frc.robot.subsystems.Indexer.Indexer.IndexerStates;
 import frc.robot.subsystems.Intake.Intake;
+import frc.robot.subsystems.IntakePivot.IntakePivot;
+import frc.robot.subsystems.IntakePivot.IntakePivot.IntakePivotStates;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel.FlywheelStates;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel.FlywheelWantedStates;
@@ -22,6 +26,8 @@ public class SuperStructure extends SubsystemBase {
   private final FlywheelKicker flywheelKicker;
   private final Flywheel flywheel;
   private final Hood hood;
+  private final IntakePivot intakePivot;
+  private final HopperRoller hopperRoller;
   private final ShotCalculator hubShotCalculator;
   private final ShotCalculator outpostPassCalculator;
   private final BooleanSupplier isAlignedToTarget;
@@ -58,6 +64,8 @@ public class SuperStructure extends SubsystemBase {
       FlywheelKicker flywheelKicker,
       Flywheel flywheel,
       Hood hood,
+      IntakePivot intakePivot,
+      HopperRoller hopperRoller,
       ShotCalculator hubShotCalculator,
       ShotCalculator outpostPassCalculator,
       BooleanSupplier isAlignedToTarget) {
@@ -66,6 +74,8 @@ public class SuperStructure extends SubsystemBase {
     this.flywheelKicker = flywheelKicker;
     this.flywheel = flywheel;
     this.hood = hood;
+    this.intakePivot = intakePivot;
+    this.hopperRoller = hopperRoller;
     this.hubShotCalculator = hubShotCalculator;
     this.outpostPassCalculator = outpostPassCalculator;
     this.isAlignedToTarget = isAlignedToTarget;
@@ -151,9 +161,11 @@ public class SuperStructure extends SubsystemBase {
     if (currentShooterState == ShooterStates.FIRING) {
       flywheelKicker.setWantedState(FlywheelKickerStates.SHOOTING);
       indexer.setWantedState(IndexerStates.SHOOTING);
+      hopperRoller.setWantedState(HopperRollerStates.ROLLING);
     } else {
       flywheelKicker.setWantedState(FlywheelKickerStates.OFF);
       indexer.setWantedState(IndexerStates.OFF);
+      hopperRoller.setWantedState(HopperRollerStates.OFF);
     }
   }
 
@@ -164,6 +176,7 @@ public class SuperStructure extends SubsystemBase {
 
   private void intaking() {
     intake.setWantedState(Intake.IntakeStates.INTAKING);
+    intakePivot.setWantedState(IntakePivotStates.DEPLOYED);
     // indexer.setWantedState(Indexer.IndexerStates.INTAKING);
   }
 
@@ -173,6 +186,8 @@ public class SuperStructure extends SubsystemBase {
     flywheelKicker.setWantedState(FlywheelKickerStates.OFF);
     flywheel.setWantedState(FlywheelWantedStates.IDLE);
     // hood.setWantedState(HoodWantedStates.IDLE);
+    intakePivot.setWantedState(IntakePivotStates.OFF);
+    hopperRoller.setWantedState(HopperRollerStates.OFF);
   }
 
   public Command setStateCommand(SuperStates superState) {
