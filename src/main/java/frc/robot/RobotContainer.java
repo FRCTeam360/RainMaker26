@@ -117,6 +117,7 @@ public class RobotContainer {
         indexer = new Indexer(new IndexerIOSim());
         intake = new Intake(new IntakeIOSim());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOSim());
+        hopperRoller = new HopperRoller(new HopperRollerIONoop());
 
         robotShootingInfo =
             new RobotShootingInfo(
