@@ -12,7 +12,6 @@ import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -205,18 +204,18 @@ public class RobotContainer {
     // Configure the trigger bindings
     // TODO: Re-enable superStructure construction and PathPlanner commands
 
-      superStructure =
-          new SuperStructure(
-              intake,
-              indexer,
-              flywheelKicker,
-              flywheel,
-              hood,
-              intakePivot,
-              hopperRoller,
-              hubShotCalculator,
-              outpostPassCalculator,
-              drivetrain::isAlignedToTarget);
+    superStructure =
+        new SuperStructure(
+            intake,
+            indexer,
+            flywheelKicker,
+            flywheel,
+            hood,
+            intakePivot,
+            hopperRoller,
+            hubShotCalculator,
+            outpostPassCalculator,
+            drivetrain::isAlignedToTarget);
 
     if (Objects.nonNull(superStructure)) {
       registerPathplannerCommand(
