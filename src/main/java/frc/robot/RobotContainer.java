@@ -101,7 +101,10 @@ public class RobotContainer {
   private final CommandXboxController testCont1 = new CommandXboxController(5);
 
   private static final double FLYWHEEL_KICKER_WARMUP_VELOCITY_RPM = 4000.0;
+  /** Frames to skip between processed frames while disabled. Only affects Limelight 4. */
   private static final int DISABLED_THROTTLE_SKIP_FRAMES = 200;
+
+  /** Frames to skip between processed frames while enabled. Only affects Limelight 4. */
   private static final int ENABLED_THROTTLE_SKIP_FRAMES = 0;
 
   private RobotShootingInfo robotShootingInfo;
@@ -406,7 +409,9 @@ public class RobotContainer {
   /**
    * Flushes NetworkTables after the command scheduler runs. This ensures all values written during
    * subsystem periodic methods (e.g., robot orientation for Limelights) are sent in a single batch.
-   * Must be called in {@link Robot#robotPeriodic()} after {@link
+   * Required for all Limelights (not just LL4) because {@link
+   * VisionIOLimelightBase#updateInputs(VisionIO.VisionIOInputs)} uses {@code
+   * SetRobotOrientation_NoFlush}. Must be called in {@link Robot#robotPeriodic()} after {@link
    * edu.wpi.first.wpilibj2.command.CommandScheduler#run()}.
    */
   public void postSchedulerUpdate() {

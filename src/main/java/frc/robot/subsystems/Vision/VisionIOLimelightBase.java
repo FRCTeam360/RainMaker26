@@ -72,7 +72,7 @@ public abstract class VisionIOLimelightBase implements VisionIO {
     inputs.pipeline = (int) getPipeline();
     inputs.tagID = getAprilTagID();
 
-    if (acceptMeasurements == false) {
+    if (!acceptMeasurements) {
       return;
     }
 
