@@ -184,11 +184,11 @@ public class SuperStructure extends SubsystemBase {
 
   @Override
   public void periodic() {
+    // Runs both the superstructure and shooter state machines
     updateState();
-    applyStates();
-
-    // Always run the shooter state machine — it handles IDLE internally
     shooterStateMachine.update();
+
+    applyStates();
     shooterStateMachine.apply();
 
     Logger.recordOutput("Superstructure/WantedSuperState", wantedSuperState.toString());
