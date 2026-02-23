@@ -101,6 +101,7 @@ public class RobotContainer {
   private final CommandXboxController testCont1 = new CommandXboxController(5);
 
   private static final double FLYWHEEL_KICKER_WARMUP_VELOCITY_RPM = 4000.0;
+
   /** Frames to skip between processed frames while disabled. Only affects Limelight 4. */
   private static final int DISABLED_THROTTLE_SKIP_FRAMES = 200;
 
