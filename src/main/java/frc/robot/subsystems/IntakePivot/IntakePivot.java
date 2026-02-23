@@ -12,8 +12,8 @@ import org.littletonrobotics.junction.Logger;
 
 public class IntakePivot extends SubsystemBase {
   // Constants
-  private static final double STOWED_POSITION = 0.0;
-  private static final double DEPLOYED_POSITION = 90.0;
+  private static final double STOWED_POSITION_DEGREES = 0.0;
+  private static final double DEPLOYED_POSITION_DEGREES = 90.0;
 
   // IO fields
   private final IntakePivotIO io;
@@ -76,14 +76,14 @@ public class IntakePivot extends SubsystemBase {
   private void applyState() {
     switch (currentState) {
       case DEPLOYED:
-        setPosition(DEPLOYED_POSITION);
+        setPosition(DEPLOYED_POSITION_DEGREES);
         break;
       case STOWED:
-        setPosition(STOWED_POSITION);
+        setPosition(STOWED_POSITION_DEGREES);
         break;
       case OFF:
       default:
-        setPosition(0.0);
+        stop();
     }
   }
 
