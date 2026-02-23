@@ -7,20 +7,58 @@ package frc.robot.subsystems.Shooter.Hood;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.ControlState;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
 public class Hood extends SubsystemBase {
-  private static final double SPINUP_SHOOTING_HOOD_POSITION_DEGREES = 8.0;
+  // Constants
+  private static final double TOLERANCE = 0.5;
+
+  // IO fields
   private final HoodIO io;
   private final HoodIOInputsAutoLogged inputs = new HoodIOInputsAutoLogged();
-  private final double TOLERANCE = 0.5;
+
+  // Other fields
   private DoubleSupplier hoodAngleSupplier = () -> 0.0;
 
-  public enum HoodStates {
-    OFF,
-    SHOOTING,
+  // Enums
+  public enum HoodWantedStates {
+    IDLE,
     AIMING
+  }
+
+  public enum HoodInternalStates {
+    OFF,
+    MOVING,
+    AT_SETPOINT
+  }
+
+  // State variables
+  private HoodWantedStates wantedState = HoodWantedStates.IDLE;
+  private HoodInternalStates currentState = HoodInternalStates.OFF;
+  private HoodInternalStates previousState = HoodInternalStates.OFF;
+  private ControlState controlState = ControlState.SUPERSTRUCTURE;
+
+  // Constructor
+
+  /** Creates a new Hood. */
+  public Hood(HoodIO io) {
+    this.io = io;
+  }
+
+  // State machine methods
+
+  public HoodInternalStates getState() {
+    return currentState;
+  }
+
+  public void setWantedState(HoodWantedStates state) {
+    wantedState = state;
+  }
+
+  public void setControlState(ControlState controlState) {
+    this.controlState = controlState;
   }
 
   /**
@@ -32,22 +70,28 @@ public class Hood extends SubsystemBase {
     this.hoodAngleSupplier = hoodAngleSupplier;
   }
 
-  private HoodStates wantedState = HoodStates.OFF;
-  private HoodStates currentState = HoodStates.OFF;
-  private HoodStates previousState = HoodStates.OFF;
+  private void updateState() {
+    previousState = currentState;
 
-  public void setWantedState(HoodStates state) {
-    wantedState = state;
-    updateState();
-    applyState();
+    switch (wantedState) {
+      case AIMING:
+        if (atSetpoint(hoodAngleSupplier)) {
+          currentState = HoodInternalStates.AT_SETPOINT;
+        } else {
+          currentState = HoodInternalStates.MOVING;
+        }
+        break;
+      case IDLE:
+      default:
+        currentState = HoodInternalStates.OFF;
+        break;
+    }
   }
 
   private void applyState() {
     switch (currentState) {
-      case SHOOTING:
-        setPosition(SPINUP_SHOOTING_HOOD_POSITION_DEGREES);
-        break;
-      case AIMING:
+      case MOVING:
+      case AT_SETPOINT:
         setPosition(hoodAngleSupplier.getAsDouble());
         break;
       case OFF:
@@ -57,31 +101,15 @@ public class Hood extends SubsystemBase {
     }
   }
 
-  public HoodStates getState() {
-    return currentState;
+  public boolean atSetpoint(double setpoint) {
+    return Math.abs(getPosition() - setpoint) < TOLERANCE;
   }
 
-  private void updateState() {
-    previousState = currentState;
-
-    switch (wantedState) {
-      case SHOOTING:
-        currentState = HoodStates.SHOOTING;
-        break;
-      case AIMING:
-        currentState = HoodStates.AIMING;
-        break;
-      case OFF:
-      default:
-        currentState = HoodStates.OFF;
-        break;
-    }
+  public boolean atSetpoint(DoubleSupplier setpoint) {
+    return atSetpoint(setpoint.getAsDouble());
   }
 
-  /** Creates a new Hood. */
-  public Hood(HoodIO io) {
-    this.io = io;
-  }
+  // IO delegation methods
 
   public void setDutyCycle(double dutyCycle) {
     io.setDutyCycle(dutyCycle);
@@ -95,28 +123,34 @@ public class Hood extends SubsystemBase {
     return inputs.position;
   }
 
-  public Command setPositionCmd(DoubleSupplier position) {
-    return this.run(() -> io.setPosition(position.getAsDouble()));
-  }
-
-  public Command setPositionCmd(double position) {
-    return this.setPositionCmd(() -> position);
-  }
-
-  public void setEncoder(double position) {
-    io.setEncoder(position);
+  public void setZero() {
+    io.setZero();
   }
 
   public void stop() {
     io.setDutyCycle(0);
   }
 
-  public boolean atSetpoint(double setpoint) {
-    return Math.abs(getPosition() - setpoint) < TOLERANCE;
+  // Command factory methods
+
+  public Command setDutyCycleCommand(double value) {
+    return this.setDutyCycleCommand(() -> value);
   }
 
-  public boolean atSetpoint(DoubleSupplier setpoint) {
-    return atSetpoint(setpoint.getAsDouble());
+  public Command setDutyCycleCommand(DoubleSupplier valueSup) {
+    return this.runEnd(() -> io.setDutyCycle(valueSup.getAsDouble()), () -> io.setDutyCycle(0.0));
+  }
+
+  public Command setPositionCommand(DoubleSupplier position) {
+    return this.run(() -> io.setPosition(position.getAsDouble()));
+  }
+
+  public Command setPositionCommand(double position) {
+    return this.setPositionCommand(() -> position);
+  }
+
+  public Command zero() {
+    return this.runOnce(() -> setZero());
   }
 
   public Command moveToZeroAndZero() {
@@ -129,25 +163,20 @@ public class Hood extends SubsystemBase {
         .andThen(zero());
   }
 
+  // periodic
+
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
     io.updateInputs(inputs);
     Logger.processInputs("Hood", inputs);
+
+    if (controlState == ControlState.SUPERSTRUCTURE) {
+      updateState();
+      applyState();
+    }
     Logger.recordOutput("Subsystems/Hood/WantedState", wantedState.toString());
     Logger.recordOutput("Subsystems/Hood/CurrentState", currentState.toString());
     Logger.recordOutput("Subsystems/Hood/PreviousState", previousState.toString());
-  }
-
-  public Command setDutyCycleCommand(double value) {
-    return this.setDutyCycleCommand(() -> value);
-  }
-
-  public Command setDutyCycleCommand(DoubleSupplier valueSup) {
-    return this.runEnd(() -> io.setDutyCycle(valueSup.getAsDouble()), () -> io.setDutyCycle(0.0));
-  }
-
-  public Command zero() {
-    return this.runOnce(() -> setEncoder(0.0));
+    Logger.recordOutput("Subsystems/Hood/ControlState", controlState.toString());
   }
 }

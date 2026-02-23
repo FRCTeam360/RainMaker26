@@ -6,27 +6,43 @@ package frc.robot.subsystems.Intake;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.ControlState;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
 public class Intake extends SubsystemBase {
+  // Constants
+  private static final double INTAKE_VELOCITY_RPM = 4500.0;
+  private static final double JAMMED_SUPPLY_CURRENT_DRAW = 35.0;
+  private static final double REVERSE_UNJAM_DUTY_CYCLE = -0.5;
+  private static final double INTAKE_DUTY_CYCLE = 0.75;
+
+  // IO fields
   private final IntakeIO io;
   private final IntakeIOInputsAutoLogged inputs = new IntakeIOInputsAutoLogged();
 
+  // Enums
   public enum IntakeStates {
     OFF,
     INTAKING,
-    SHOOTING
+    SHOOTING,
+    // JAMMED
   }
 
+  // State variables
   private IntakeStates wantedState = IntakeStates.OFF;
   private IntakeStates currentState = IntakeStates.OFF;
   private IntakeStates previousState = IntakeStates.OFF;
+  private ControlState controlState = ControlState.SUPERSTRUCTURE;
+
+  // Constructor
 
   /** Creates a new Intake. */
   public Intake(IntakeIO io) {
     this.io = io;
   }
+
+  // State machine methods
 
   public IntakeStates getState() {
     return currentState;
@@ -34,15 +50,20 @@ public class Intake extends SubsystemBase {
 
   public void setWantedState(IntakeStates state) {
     wantedState = state;
-    updateState();
-    applyState();
+  }
+
+  public void setControlState(ControlState controlState) {
+    this.controlState = controlState;
   }
 
   private void updateState() {
     previousState = currentState;
-
     switch (wantedState) {
       case INTAKING:
+        // if (isJammed()) {
+        //   currentState = IntakeStates.JAMMED;
+        // } else {
+        // }
         currentState = IntakeStates.INTAKING;
         break;
 
@@ -53,6 +74,8 @@ public class Intake extends SubsystemBase {
       default:
         currentState = IntakeStates.OFF;
         break;
+        // case JAMMED:
+        //   currentState = IntakeStates.JAMMED;
     }
   }
 
@@ -68,16 +91,40 @@ public class Intake extends SubsystemBase {
       default:
         stop();
         break;
+        // case JAMMED:
+        //   unjamIntake();
     }
   }
 
   private void intaking() {
-    setDutyCycle(0.75);
+    setDutyCycle(INTAKE_DUTY_CYCLE);
   }
+
+  // private void unjamIntake() {
+  //   if (isJammed()) {
+  //     this.setDutyCycle(REVERSE_UNJAM_DUTY_CYCLE);
+  //   }
+  // }
+
+  // private boolean isJammed() {
+  //   return inputs.supplyCurrent >= JAMMED_SUPPLY_CURRENT_DRAW;
+  // }
+
+  // IO delegation methods
 
   public void setDutyCycle(double value) {
     io.setDutyCycle(value);
   }
+
+  public void setVelocity(double velocity) {
+    io.setVelocity(velocity);
+  }
+
+  public void stop() {
+    this.setDutyCycle(0.0);
+  }
+
+  // Command factory methods
 
   public Command setDutyCycleCommand(double value) {
     return this.setDutyCycleCommand(() -> value);
@@ -87,25 +134,25 @@ public class Intake extends SubsystemBase {
     return this.runEnd(() -> io.setDutyCycle(valueSup.getAsDouble()), () -> io.setDutyCycle(0.0));
   }
 
-  public void setVelocity(double velocity) {
-    io.setVelocity(velocity);
-  }
-
   public Command setVelocityCommand(double velocity) {
     return this.runEnd(() -> setVelocity(velocity), () -> setVelocity(0.0));
   }
 
-  public void stop() {
-    this.setDutyCycle(0.0);
-  }
+  // periodic
 
   @Override
   public void periodic() {
     io.updateInputs(inputs);
     Logger.processInputs("Intake", inputs);
 
+    if (controlState == ControlState.SUPERSTRUCTURE) {
+      updateState();
+      applyState();
+    }
     Logger.recordOutput("Subsystems/Intake/WantedState", wantedState.toString());
     Logger.recordOutput("Subsystems/Intake/CurrentState", currentState.toString());
     Logger.recordOutput("Subsystems/Intake/PreviousState", previousState.toString());
+    Logger.recordOutput("Subsystems/Intake/ControlState", controlState.toString());
+    // Logger.recordOutput("Subsystems/Intake/PreviousState", isJammed());
   }
 }

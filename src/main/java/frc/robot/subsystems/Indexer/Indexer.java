@@ -6,27 +6,51 @@ package frc.robot.subsystems.Indexer;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.ControlState;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
 public class Indexer extends SubsystemBase {
-  private final IndexerIO io;
-  private final IndexerIOInputsAutoLogged inputs = new IndexerIOInputsAutoLogged();
+  // Constants
   private static final double INDEXER_DUTY_CYCLE = 0.4;
 
+  // IO fields
+  private final IndexerIO io;
+  private final IndexerIOInputsAutoLogged inputs = new IndexerIOInputsAutoLogged();
+
+  // Enums
   public enum IndexerStates {
     OFF,
     INTAKING,
     SHOOTING
   }
 
+  // State variables
+  private IndexerStates wantedState = IndexerStates.OFF;
+  private IndexerStates currentState = IndexerStates.OFF;
+  private IndexerStates previousState = IndexerStates.OFF;
+  private ControlState controlState = ControlState.SUPERSTRUCTURE;
+
+  // Constructor
+
+  /** Creates a new Indexer. */
+  public Indexer(IndexerIO io) {
+    this.io = io;
+  }
+
+  // State machine methods
+
   public IndexerStates getState() {
     return currentState;
   }
 
-  private IndexerStates wantedState = IndexerStates.OFF;
-  private IndexerStates currentState = IndexerStates.OFF;
-  private IndexerStates previousState = IndexerStates.OFF;
+  public void setWantedState(IndexerStates state) {
+    wantedState = state;
+  }
+
+  public void setControlState(ControlState controlState) {
+    this.controlState = controlState;
+  }
 
   private void updateState() {
     previousState = currentState;
@@ -60,20 +84,21 @@ public class Indexer extends SubsystemBase {
     }
   }
 
-  /** Creates a new Indexer. */
-  public Indexer(IndexerIO io) {
-    this.io = io;
-  }
-
-  public void setWantedState(IndexerStates state) {
-    wantedState = state;
-    updateState();
-    applyState();
-  }
+  // IO delegation methods
 
   public void setDutyCycle(double dutyCycle) {
     io.setDutyCycle(dutyCycle);
   }
+
+  public void setVelocity(double velocity) {
+    io.setVelocity(velocity);
+  }
+
+  public void stop() {
+    io.setDutyCycle(0.0);
+  }
+
+  // Command factory methods
 
   public Command setDutyCycleCommand(double value) {
     return this.setDutyCycleCommand(() -> value);
@@ -83,17 +108,20 @@ public class Indexer extends SubsystemBase {
     return this.runEnd(() -> io.setDutyCycle(valueSup.getAsDouble()), () -> io.setDutyCycle(0.0));
   }
 
-  public void stop() {
-    io.setDutyCycle(0.0);
-  }
+  // periodic
 
   @Override
   public void periodic() {
-
     io.updateInputs(inputs);
     Logger.processInputs("Indexer", inputs);
+
+    if (controlState == ControlState.SUPERSTRUCTURE) {
+      updateState();
+      applyState();
+    }
     Logger.recordOutput("Subsystems/Indexer/WantedState", wantedState.toString());
     Logger.recordOutput("Subsystems/Indexer/CurrentState", currentState.toString());
     Logger.recordOutput("Subsystems/Indexer/PreviousState", previousState.toString());
+    Logger.recordOutput("Subsystems/Indexer/ControlState", controlState.toString());
   }
 }

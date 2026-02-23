@@ -5,12 +5,12 @@ package frc.robot.subsystems.Shooter;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import frc.robot.subsystems.CommandSwerveDrivetrain;
-import frc.robot.utils.AllianceFlipUtil;
 import frc.robot.utils.FieldConstants;
+import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
 /**
@@ -20,14 +20,16 @@ import org.littletonrobotics.junction.Logger;
  * lookahead.
  */
 public class ShotCalculator {
-  private final CommandSwerveDrivetrain drivetrain;
+  private final Supplier<Pose2d> robotPoseSupplier;
+  private final Supplier<Translation2d> targetSupplier;
+  private final Supplier<ChassisSpeeds> velocitySupplier;
+  private final InterpolatingDoubleTreeMap shotHoodAngleMap;
+  private final InterpolatingDoubleTreeMap shotFlywheelSpeedMap;
+  private final InterpolatingDoubleTreeMap timeOfFlightMap;
+  private final Transform2d robotToShooter;
 
-  private static final InterpolatingDoubleTreeMap shotHoodAngleMap =
-      new InterpolatingDoubleTreeMap();
-  private static final InterpolatingDoubleTreeMap launchFlywheelSpeedMap =
-      new InterpolatingDoubleTreeMap();
-  private static final InterpolatingDoubleTreeMap timeOfFlightMap =
-      new InterpolatingDoubleTreeMap();
+  private double minDistanceMeters = 0.0;
+  private double maxDistanceMeters = Double.MAX_VALUE;
 
   /**
    * Holds the calculated shooting parameters for a given robot position.
@@ -40,45 +42,40 @@ public class ShotCalculator {
   public record ShootingParams(
       Rotation2d targetHeading, double hoodAngle, double flywheelSpeed, boolean isValid) {}
 
-  private static final double MIN_DISTANCE_METERS = 0.0;
-  private static final double MAX_DISTANCE_METERS = 5.0;
-
-  static {
-    // Hood angle map (distance in meters -> hood angle in degrees)
-    shotHoodAngleMap.put(5.0, 20.0);
-    shotHoodAngleMap.put(4.0, 18.0);
-    shotHoodAngleMap.put(3.0, 16.0);
-    shotHoodAngleMap.put(2.0, 11.0);
-    shotHoodAngleMap.put(1.0, 8.0);
-    shotHoodAngleMap.put(0.0, 6.0);
-
-    // Flywheel speed map (distance in meters -> flywheel speed in RPM)
-    launchFlywheelSpeedMap.put(5.0, 3750.0);
-    launchFlywheelSpeedMap.put(4.0, 3750.0);
-    launchFlywheelSpeedMap.put(3.0, 3375.0);
-    launchFlywheelSpeedMap.put(2.0, 3000.0);
-    launchFlywheelSpeedMap.put(0.0, 2750.0);
-
-    // Time of flight map (distance in meters -> time of flight in seconds)
-    // TODO: Fill with measured values from field testing
-    timeOfFlightMap.put(0.0, 0.0);
-    timeOfFlightMap.put(1.0, 0.0);
-    timeOfFlightMap.put(2.0, 0.0);
-    timeOfFlightMap.put(3.0, 0.0);
-    timeOfFlightMap.put(4.0, 0.0);
-    timeOfFlightMap.put(5.0, 0.0);
-  }
+  public record RobotShootingInfo(
+      InterpolatingDoubleTreeMap shotHoodAngleMap,
+      InterpolatingDoubleTreeMap shotFlywheelSpeedMap,
+      InterpolatingDoubleTreeMap timeOfFlightMap,
+      Transform2d robotToShooter,
+      double minDistanceMeters, // should be 0.0 for hub
+      double maxDistanceMeters /* should be 5.0 for hub */) {}
 
   /**
    * Creates a new ShotCalculator.
    *
-   * @param drivetrain the swerve drivetrain used to obtain the robot's current pose and velocity
+   * @param robotPoseSupplier the supplier used to obtain the robot's current pose
+   * @param targetSupplier the supplier used to obtain the target position
+   * @param velocitySupplier the supplier used to obtain the robot's current chassis speeds for
+   *     shoot-on-the-move compensation
+   * @param robotShootingInfo the shooting configuration (maps, offsets, range limits)
    */
-  public ShotCalculator(CommandSwerveDrivetrain drivetrain) {
-    this.drivetrain = drivetrain;
+  public ShotCalculator(
+      Supplier<Pose2d> robotPoseSupplier,
+      Supplier<Translation2d> targetSupplier,
+      Supplier<ChassisSpeeds> velocitySupplier,
+      RobotShootingInfo robotShootingInfo) {
+    this.robotPoseSupplier = robotPoseSupplier;
+    this.targetSupplier = targetSupplier;
+    this.velocitySupplier = velocitySupplier;
+    this.shotHoodAngleMap = robotShootingInfo.shotHoodAngleMap;
+    this.shotFlywheelSpeedMap = robotShootingInfo.shotFlywheelSpeedMap;
+    this.timeOfFlightMap = robotShootingInfo.timeOfFlightMap;
+    this.robotToShooter = robotShootingInfo.robotToShooter;
+    this.minDistanceMeters = robotShootingInfo.minDistanceMeters;
+    this.maxDistanceMeters = robotShootingInfo.maxDistanceMeters;
   }
 
-  private ShootingParams shootingParams = null;
+  private ShootingParams cachedShootingParams = null;
 
   /**
    * Calculates and caches the shooting parameters for the current robot position. Compensates for
@@ -90,29 +87,28 @@ public class ShotCalculator {
    *     and validity
    */
   public ShootingParams calculateShot() {
-    if (shootingParams != null) {
+    if (cachedShootingParams != null) {
       Logger.recordOutput("ShotCalculator/cached", true);
-      return shootingParams;
+      return cachedShootingParams;
     }
     Logger.recordOutput("ShotCalculator/cached", false);
 
-    Pose2d robotPosition = drivetrain.getPosition();
-    Pose2d shooterPosition = robotPosition.plus(ShooterConstants.ROBOT_TO_SHOOTER);
-    Translation2d hubTranslation =
-        AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint.toTranslation2d());
+    Pose2d robotPosition = robotPoseSupplier.get();
+    Pose2d shooterPosition = robotPosition.plus(robotToShooter);
+    Translation2d target = targetSupplier.get();
 
     // Compute field-relative shooter velocity for shoot-on-the-move compensation.
     // Start with the robot's translational velocity rotated into the field frame,
     // then add the rotational contribution at the shooter offset from the robot center.
-    ChassisSpeeds robotSpeeds = drivetrain.getVelocity();
+    ChassisSpeeds robotSpeeds = velocitySupplier.get();
     Rotation2d robotHeading = robotPosition.getRotation();
     Translation2d robotFieldVelocity =
         new Translation2d(robotSpeeds.vxMetersPerSecond, robotSpeeds.vyMetersPerSecond)
             .rotateBy(robotHeading);
 
     double robotAngleRad = robotHeading.getRadians();
-    double shooterOffsetX = ShooterConstants.ROBOT_TO_SHOOTER.getX();
-    double shooterOffsetY = ShooterConstants.ROBOT_TO_SHOOTER.getY();
+    double shooterOffsetX = robotToShooter.getX();
+    double shooterOffsetY = robotToShooter.getY();
     double omegaRadPerSec = robotSpeeds.omegaRadiansPerSecond;
     double shooterVelXMps =
         robotFieldVelocity.getX()
@@ -126,8 +122,7 @@ public class ShotCalculator {
                     - shooterOffsetY * Math.sin(robotAngleRad));
 
     // Calculate the initial distance from the shooter to the target
-    double shooterToTargetDistanceMeters =
-        hubTranslation.getDistance(shooterPosition.getTranslation());
+    double shooterToTargetDistanceMeters = target.getDistance(shooterPosition.getTranslation());
 
     // Use time of flight to project where the shooter will be when the ball arrives.
     // The robot imparts its velocity onto the ball, so we offset the aiming point
@@ -139,21 +134,21 @@ public class ShotCalculator {
             .plus(
                 new Translation2d(
                     shooterVelXMps * timeOfFlightSecs, shooterVelYMps * timeOfFlightSecs));
-    double lookaheadDistanceMeters = hubTranslation.getDistance(lookaheadPosition);
+    double lookaheadDistanceMeters = target.getDistance(lookaheadPosition);
 
     double effectiveDistanceMeters =
-        Math.max(MIN_DISTANCE_METERS, Math.min(MAX_DISTANCE_METERS, lookaheadDistanceMeters));
+        Math.max(minDistanceMeters, Math.min(maxDistanceMeters, lookaheadDistanceMeters));
 
     // Calculate heading from lookahead position to target, then rotate 180°
     // because the shooter is at the back of the robot
     Rotation2d targetHeading =
-        hubTranslation.minus(lookaheadPosition).getAngle().rotateBy(Rotation2d.k180deg);
+        target.minus(lookaheadPosition).getAngle().rotateBy(Rotation2d.k180deg);
 
     double hoodAngle = shotHoodAngleMap.get(effectiveDistanceMeters);
-    double flywheelSpeed = launchFlywheelSpeedMap.get(effectiveDistanceMeters);
+    double flywheelSpeed = shotFlywheelSpeedMap.get(effectiveDistanceMeters);
     boolean isValid =
-        lookaheadDistanceMeters >= MIN_DISTANCE_METERS
-            && lookaheadDistanceMeters <= MAX_DISTANCE_METERS;
+        lookaheadDistanceMeters >= minDistanceMeters
+            && lookaheadDistanceMeters <= maxDistanceMeters;
 
     Logger.recordOutput("ShotCalculator/hubPosition", FieldConstants.Hub.topCenterPoint);
     Logger.recordOutput("ShotCalculator/distanceToTarget", lookaheadDistanceMeters);
@@ -165,8 +160,8 @@ public class ShotCalculator {
     Logger.recordOutput("ShotCalculator/timeOfFlightSecs", timeOfFlightSecs);
     Logger.recordOutput("ShotCalculator/isValid", isValid);
 
-    shootingParams = new ShootingParams(targetHeading, hoodAngle, flywheelSpeed, isValid);
-    return shootingParams;
+    cachedShootingParams = new ShootingParams(targetHeading, hoodAngle, flywheelSpeed, isValid);
+    return cachedShootingParams;
   }
 
   /**
@@ -174,6 +169,6 @@ public class ShotCalculator {
    * #calculateShot()}.
    */
   public void clearShootingParams() {
-    shootingParams = null;
+    cachedShootingParams = null;
   }
 }

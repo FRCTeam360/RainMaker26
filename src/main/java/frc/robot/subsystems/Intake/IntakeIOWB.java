@@ -27,7 +27,7 @@ public class IntakeIOWB implements IntakeIO {
 
     config.idleMode(IdleMode.kBrake);
     config.inverted(true);
-    config.smartCurrentLimit(40);
+    config.smartCurrentLimit(50);
 
     config.closedLoop.p(0.0002).i(0.0).d(0.0);
     config.closedLoop.feedForward.kV(0.0018).kS(0.004);
@@ -55,8 +55,8 @@ public class IntakeIOWB implements IntakeIO {
   public void updateInputs(IntakeIOInputs inputs) {
     inputs.position = encoder.getPosition();
     inputs.sensor = sensor.get();
-    inputs.statorCurrent = motor.getOutputCurrent();
-    inputs.supplyCurrent = motor.getOutputCurrent() * motor.getAppliedOutput(); // TODO: check if
+    inputs.statorCurrent = motor.getOutputCurrent() * motor.getAppliedOutput();
+    inputs.supplyCurrent = motor.getOutputCurrent(); // TODO: check if
     // this is right
     inputs.velocity = encoder.getVelocity();
     inputs.voltage = motor.getBusVoltage() * motor.getAppliedOutput();

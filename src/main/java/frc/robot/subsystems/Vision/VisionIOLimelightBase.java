@@ -15,20 +15,27 @@ import frc.robot.utils.LimelightHelpers.RawFiducial;
 import java.util.Optional;
 import java.util.function.DoubleSupplier;
 
-public class VisionIOLimelight implements VisionIO {
+/**
+ * Abstract base class for Limelight vision IO layers. Contains all shared NetworkTables reads, pose
+ * filtering, and MegaTag2 logic.
+ */
+public abstract class VisionIOLimelightBase implements VisionIO {
   private final NetworkTable table;
   private final String name;
-  private final DoubleSupplier gyroAngleSupplier;
-  private final DoubleSupplier gyroAngleRateSupplier;
+  protected final DoubleSupplier gyroAngleSupplier;
+  protected final DoubleSupplier gyroAngleRateSupplier;
 
-  private boolean acceptMeasurements;
+  private final boolean acceptMeasurements;
 
   /**
    * Creates a new Limelight hardware layer.
    *
-   * @param name the name of the limelight
+   * @param name the NetworkTables name of the Limelight
+   * @param gyroAngleSupplier supplies the robot's gyro angle in degrees
+   * @param gyroAngleRateSupplier supplies the robot's gyro angular rate in degrees per second
+   * @param acceptMeasurements whether to process pose estimates from this Limelight
    */
-  public VisionIOLimelight(
+  protected VisionIOLimelightBase(
       String name,
       DoubleSupplier gyroAngleSupplier,
       DoubleSupplier gyroAngleRateSupplier,
@@ -40,11 +47,21 @@ public class VisionIOLimelight implements VisionIO {
     this.acceptMeasurements = acceptMeasurements;
   }
 
+  /** Returns the NetworkTables name of this Limelight. */
+  protected String getName() {
+    return name;
+  }
+
+  @Override
   public void setLEDMode(int mode) {
     table.getEntry("ledMode").setNumber(mode);
   }
 
+  @Override
   public void updateInputs(VisionIOInputs inputs) {
+    // Set robot orientation for MegaTag2 (flushed by postSchedulerUpdate)
+    LimelightHelpers.SetRobotOrientation_NoFlush(
+        name, gyroAngleSupplier.getAsDouble(), gyroAngleRateSupplier.getAsDouble(), 0, 0, 0, 0);
 
     // Assume that the pose hasn't been updated
     inputs.poseUpdated = false;
@@ -55,7 +72,7 @@ public class VisionIOLimelight implements VisionIO {
     inputs.pipeline = (int) getPipeline();
     inputs.tagID = getAprilTagID();
 
-    if (acceptMeasurements == false) {
+    if (!acceptMeasurements) {
       return;
     }
 
@@ -105,47 +122,41 @@ public class VisionIOLimelight implements VisionIO {
   }
 
   private Optional<PoseEstimate> getMegatag2PoseEst() {
-    LimelightHelpers.SetRobotOrientation(
-        name, gyroAngleSupplier.getAsDouble(), gyroAngleRateSupplier.getAsDouble(), 0, 0, 0, 0);
     PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(name);
     return Optional.ofNullable(mt2);
   }
 
-  private Optional<PoseEstimate> getMegatag1PoseEst() {
-    LimelightHelpers.SetRobotOrientation(
-        name, gyroAngleSupplier.getAsDouble(), gyroAngleRateSupplier.getAsDouble(), 0, 0, 0, 0);
-    PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue(name);
-    return Optional.ofNullable(mt2);
-  }
-
-  public int getAprilTagID() {
+  private int getAprilTagID() {
     return (int) table.getEntry("tid").getInteger(-1);
   }
 
-  public double getTXRaw() {
+  private double getTXRaw() {
     return table.getEntry("tx").getDouble(0.0);
   }
 
-  public double getTYRaw() {
+  private double getTYRaw() {
     return table.getEntry("ty").getDouble(0.0);
   }
 
-  public double getTV() {
+  private double getTV() {
     return table.getEntry("tv").getDouble(0.0);
   }
 
-  public double getPipeline() {
+  private double getPipeline() {
     return table.getEntry("getpipe").getDouble(0.0);
   }
 
+  @Override
   public void setPipeline(int pipeline) {
     table.getEntry("pipeline").setNumber(pipeline);
   }
 
+  @Override
   public void takeSnapshot() {
     table.getEntry("snapshot").setNumber(1.0);
   }
 
+  @Override
   public void resetSnapshot() {
     table.getEntry("snapshot").setNumber(0.0);
   }

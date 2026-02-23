@@ -1,0 +1,10 @@
+%% FlywheelKicker State Machine
+%% Reflects actual code in FlywheelKicker.java
+stateDiagram-v2
+    [*] --> OFF
+
+    OFF --> SHOOTING : SuperStructure shooter<br>sub-state = FIRING
+    SHOOTING --> OFF : SuperStructure shooter<br>sub-state = PREPARING<br>or SuperState leaves shooting
+
+    note right of OFF : Duty cycle = 0.0
+    note right of SHOOTING : Velocity = 4500 RPM
