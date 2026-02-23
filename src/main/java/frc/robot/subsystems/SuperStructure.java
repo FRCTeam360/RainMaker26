@@ -127,7 +127,6 @@ public class SuperStructure extends SubsystemBase {
         shooting();
         break;
     }
-
   }
 
   private void shooting() {

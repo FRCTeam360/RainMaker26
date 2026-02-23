@@ -9,7 +9,7 @@ import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
-import com.ctre.phoenix6.controls.MotionMagicTorqueCurrentFOC;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.util.Units;
@@ -20,19 +20,19 @@ public class IntakePivotIOPB implements IntakePivotIO {
   private static final double GEAR_RATIO = 97.5;
   // 80-16 * 52-16 * 40-20 * 36-12
 
-  private static final double KP = 3.0;
+  private static final double KP = 175.0;
   private static final double KI = 0.0;
-  private static final double KD = 0.4;
+  private static final double KD = 0.0;
   private static final double KA = 0.0;
-  private static final double KG = 3.0;
-  private static final double KS = 7.0;
+  private static final double KG = 0.15;
+  private static final double KS = 0.35;
   private static final double KV = 0.0;
 
   private static final double STATOR_CURRENT_LIMIT_AMPS = 120.0;
   private static final double SUPPLY_CURRENT_LIMIT_AMPS = 60.0;
 
-  private static final double MOTION_MAGIC_ACCELERATION_RPS2 = 200.0;
-  private static final double MOTION_MAGIC_CRUISE_VELOCITY_RPS = 40.0;
+  private static final double MOTION_MAGIC_ACCELERATION_RPS2 = 2.0;
+  private static final double MOTION_MAGIC_CRUISE_VELOCITY_RPS = 1.0;
   private static final double MOTION_MAGIC_JERK_RPS3 = 1750.0;
 
   private static final double FORWARD_SOFT_LIMIT_DEGREES =
@@ -47,8 +47,8 @@ public class IntakePivotIOPB implements IntakePivotIO {
           Constants.PracticeBotConstants.INTAKE_PIVOT_ID, Constants.PracticeBotConstants.CANBUS);
 
   private final DutyCycleOut dutyCycleOut = new DutyCycleOut(0);
-  private final MotionMagicTorqueCurrentFOC motionMagicPosition =
-      new MotionMagicTorqueCurrentFOC(0.0);
+  private final MotionMagicVoltage motionMagicPosition =
+      new MotionMagicVoltage(0.0);
   private final TalonFXConfiguration config = new TalonFXConfiguration();
   private final CurrentLimitsConfigs currentLimitConfig = new CurrentLimitsConfigs();
   private NeutralModeValue neutralMode = NeutralModeValue.Brake;
@@ -56,7 +56,7 @@ public class IntakePivotIOPB implements IntakePivotIO {
   /** Creates a new IntakePivotIOPB. */
   public IntakePivotIOPB() {
     intakePivot.setNeutralMode(NeutralModeValue.Brake);
-
+    // FIXME: NUETRAL MODE BRAKE 
     config.CurrentLimits.StatorCurrentLimit = STATOR_CURRENT_LIMIT_AMPS;
     config.CurrentLimits.SupplyCurrentLimit = SUPPLY_CURRENT_LIMIT_AMPS;
     config.CurrentLimits.StatorCurrentLimitEnable = true;
@@ -78,7 +78,7 @@ public class IntakePivotIOPB implements IntakePivotIO {
 
     config.Voltage.PeakForwardVoltage = PEAK_FORWARD_VOLTAGE;
     config.Voltage.PeakReverseVoltage = PEAK_REVERSE_VOLTAGE;
-
+    // TODO: GRAVITY TYPE COSINE / ARM
     config.Feedback.SensorToMechanismRatio = GEAR_RATIO;
 
     config.SoftwareLimitSwitch.withForwardSoftLimitThreshold(

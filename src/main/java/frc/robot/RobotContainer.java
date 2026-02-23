@@ -361,17 +361,16 @@ public class RobotContainer {
       intakeTrigger.onFalse(superStructure.setStateCommand(SuperStates.IDLE));
     }
 
+    if (Objects.nonNull(intake)) {
+      driverCont.leftBumper().and(isIndependentMode).whileTrue(intake.setDutyCycleCommand(0.2));
+    }
+
     if (Objects.nonNull(indexer)) {
       driverCont.a().and(isIndependentMode).whileTrue(indexer.setDutyCycleCommand(0.5));
     }
 
     // setFlywheelKickerDutyCycle uses flywheelKicker
-    if (Objects.nonNull(flywheelKicker)) {
-      driverCont
-          .leftBumper()
-          .and(isIndependentMode)
-          .whileTrue(flywheelKicker.setVelocityCommand(FLYWHEEL_KICKER_WARMUP_VELOCITY_RPM));
-    }
+    if (Objects.nonNull(flywheelKicker)) {}
 
     // setHoodPosition uses hood
     if (Objects.nonNull(hood)) {
