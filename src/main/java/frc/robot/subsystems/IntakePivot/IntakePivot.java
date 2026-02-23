@@ -125,6 +125,7 @@ public class IntakePivot extends SubsystemBase {
     Logger.recordOutput("Subsystems/IntakePivot/WantedState", wantedState.toString());
     Logger.recordOutput("Subsystems/IntakePivot/CurrentState", currentState.toString());
     Logger.recordOutput("Subsystems/IntakePivot/PreviousState", previousState.toString());
+    Logger.recordOutput("Subsystems/IntakePivot/ControlState", controlState.toString());
     // Update visualization with current arm angle (convert rotations to radians)
     visualizer.update(inputs.position * 2.0 * Math.PI);
   }

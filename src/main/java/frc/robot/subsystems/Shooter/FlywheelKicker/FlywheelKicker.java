@@ -119,5 +119,6 @@ public class FlywheelKicker extends SubsystemBase {
     Logger.recordOutput("Subsystems/FlywheelKicker/WantedState", wantedState.toString());
     Logger.recordOutput("Subsystems/FlywheelKicker/CurrentState", currentState.toString());
     Logger.recordOutput("Subsystems/FlywheelKicker/PreviousState", previousState.toString());
+    Logger.recordOutput("Subsystems/FlywheelKicker/ControlState", controlState.toString());
   }
 }

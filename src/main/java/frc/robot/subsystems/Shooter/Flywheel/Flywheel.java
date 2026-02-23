@@ -160,5 +160,6 @@ public class Flywheel extends SubsystemBase {
     Logger.recordOutput("Subsystems/Flywheel/WantedState", wantedState.toString());
     Logger.recordOutput("Subsystems/Flywheel/CurrentState", currentState.toString());
     Logger.recordOutput("Subsystems/Flywheel/PreviousState", previousState.toString());
+    Logger.recordOutput("Subsystems/Flywheel/ControlState", controlState.toString());
   }
 }
