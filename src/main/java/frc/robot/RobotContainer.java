@@ -23,6 +23,7 @@ import frc.robot.generated.WoodBotDrivetrain;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.ControlState;
 import frc.robot.subsystems.HopperRoller.HopperRoller;
+import frc.robot.subsystems.HopperRoller.HopperRollerIONoop;
 import frc.robot.subsystems.HopperRoller.HopperRollerIOPB;
 import frc.robot.subsystems.Indexer.Indexer;
 import frc.robot.subsystems.Indexer.IndexerIOPB;
@@ -33,6 +34,7 @@ import frc.robot.subsystems.Intake.IntakeIOPB;
 import frc.robot.subsystems.Intake.IntakeIOSim;
 import frc.robot.subsystems.Intake.IntakeIOWB;
 import frc.robot.subsystems.IntakePivot.IntakePivot;
+import frc.robot.subsystems.IntakePivot.IntakePivotIONoop;
 import frc.robot.subsystems.IntakePivot.IntakePivotIOPB;
 import frc.robot.subsystems.IntakePivot.IntakePivotIOSim;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel;
@@ -144,7 +146,8 @@ public class RobotContainer {
                             false))));
         intake = new Intake(new IntakeIOWB());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOWB());
-        // intakePivot = new IntakePivot(new IntakePivotIOPB());
+        intakePivot = new IntakePivot(new IntakePivotIONoop());
+        hopperRoller = new HopperRoller(new HopperRollerIONoop());
 
         robotShootingInfo =
             new RobotShootingInfo(
@@ -365,7 +368,7 @@ public class RobotContainer {
     // setFlywheelKickerDutyCycle uses flywheelKicker
     if (Objects.nonNull(flywheelKicker)) {
       driverCont
-          .rightBumper()
+          .leftBumper()
           .and(isIndependentMode)
           .whileTrue(flywheelKicker.setVelocityCommand(FLYWHEEL_KICKER_WARMUP_VELOCITY_RPM));
     }
