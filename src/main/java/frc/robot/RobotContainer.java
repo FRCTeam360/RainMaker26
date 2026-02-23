@@ -25,6 +25,7 @@ import frc.robot.subsystems.ControlState;
 import frc.robot.subsystems.HopperRoller.HopperRoller;
 import frc.robot.subsystems.HopperRoller.HopperRollerIONoop;
 import frc.robot.subsystems.HopperRoller.HopperRollerIOPB;
+import frc.robot.subsystems.HopperRoller.HopperRollerIOSim;
 import frc.robot.subsystems.Indexer.Indexer;
 import frc.robot.subsystems.Indexer.IndexerIOPB;
 import frc.robot.subsystems.Indexer.IndexerIOSim;
@@ -117,7 +118,7 @@ public class RobotContainer {
         indexer = new Indexer(new IndexerIOSim());
         intake = new Intake(new IntakeIOSim());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOSim());
-        hopperRoller = new HopperRoller(new HopperRollerIONoop());
+        hopperRoller = new HopperRoller(new HopperRollerIOSim());
 
         robotShootingInfo =
             new RobotShootingInfo(

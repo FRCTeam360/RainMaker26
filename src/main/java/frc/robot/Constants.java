@@ -154,6 +154,9 @@ public final class Constants {
     public static final int FLYWHEEL_KICKER_SENSOR_ID = 19;
     public static final int FLYWHEEL_MOTOR = 32;
 
+    // === HOPPER ROLLER ===
+    public static final int HOPPER_ROLLER_MOTOR = 35;
+
     // === HOOD ===
     public static final int HOOD_MOTOR = 34;
   }
