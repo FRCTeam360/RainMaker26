@@ -12,6 +12,7 @@ import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -56,7 +57,8 @@ import frc.robot.subsystems.Shooter.ShotCalculator.RobotShootingInfo;
 import frc.robot.subsystems.SuperStructure;
 import frc.robot.subsystems.SuperStructure.SuperStates;
 import frc.robot.subsystems.Vision.Vision;
-import frc.robot.subsystems.Vision.VisionIOLimelight;
+import frc.robot.subsystems.Vision.VisionIOLimelight3G;
+import frc.robot.subsystems.Vision.VisionIOLimelight4;
 import frc.robot.subsystems.Vision.VisionIOPhotonSim;
 import frc.robot.utils.AllianceFlipUtil;
 import frc.robot.utils.FieldConstants;
@@ -101,6 +103,12 @@ public class RobotContainer {
 
   private static final double FLYWHEEL_KICKER_WARMUP_VELOCITY_RPM = 4000.0;
 
+  /** Frames to skip between processed frames while disabled. Only affects Limelight 4. */
+  private static final int DISABLED_THROTTLE_SKIP_FRAMES = 200;
+
+  /** Frames to skip between processed frames while enabled. Only affects Limelight 4. */
+  private static final int ENABLED_THROTTLE_SKIP_FRAMES = 0;
+
   private RobotShootingInfo robotShootingInfo;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
@@ -141,11 +149,17 @@ public class RobotContainer {
                 Map.ofEntries(
                     Map.entry(
                         Constants.WoodBotConstants.LIMELIGHT_3,
-                        new VisionIOLimelight(
+                        new VisionIOLimelight3G(
                             Constants.WoodBotConstants.LIMELIGHT_3,
                             () -> drivetrain.getAngle(),
                             () -> drivetrain.getAngularRate(),
-                            true,
+                            true)),
+                    Map.entry(
+                        Constants.WoodBotConstants.LIMELIGHT_4,
+                        new VisionIOLimelight4(
+                            Constants.WoodBotConstants.LIMELIGHT_4,
+                            () -> drivetrain.getAngle(),
+                            () -> drivetrain.getAngularRate(),
                             false))));
         intake = new Intake(new IntakeIOWB());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOWB());
@@ -175,12 +189,11 @@ public class RobotContainer {
                 Map.ofEntries(
                     Map.entry(
                         Constants.PracticeBotConstants.LIMELIGHT,
-                        new VisionIOLimelight(
+                        new VisionIOLimelight3G(
                             Constants.PracticeBotConstants.LIMELIGHT,
                             () -> drivetrain.getAngle(),
                             () -> drivetrain.getAngularRate(),
-                            true,
-                            false))));
+                            true))));
         intake = new Intake(new IntakeIOPB());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOPB());
         intakePivot = new IntakePivot(new IntakePivotIOPB());
@@ -367,16 +380,27 @@ public class RobotContainer {
     intakePivot.stop();
     indexer.stop();
     flywheelKicker.stop();
+    vision.enableIMUSeeding();
+    vision.setThrottle(DISABLED_THROTTLE_SKIP_FRAMES);
+  }
+
+  /** Called when the robot transitions from disabled to an enabled mode. */
+  public void onEnable() {
+    // Ensures superstructure control mode is active when enabled
+    superStructure.setControlState(ControlState.SUPERSTRUCTURE);
+    onEnableVision();
+  }
+
+  /** Sets up vision to run at full performance and temperature */
+  private void onEnableVision() {
+    vision.enableIMUAssist();
+    vision.setThrottle(ENABLED_THROTTLE_SKIP_FRAMES);
   }
 
   /** Decouples the superstructure from subsystems for test mode. */
   public void onTestEnable() {
     superStructure.setControlState(ControlState.INDEPENDENT);
-  }
-
-  /** Ensures superstructure control mode is active when enabled. */
-  public void onEnableSuperstructure() {
-    superStructure.setControlState(ControlState.SUPERSTRUCTURE);
+    onEnableVision();
   }
 
   /**
@@ -389,6 +413,18 @@ public class RobotContainer {
     hubShotCalculator.calculateShot();
     outpostPassCalculator.clearShootingParams();
     outpostPassCalculator.calculateShot();
+  }
+
+  /**
+   * Flushes NetworkTables after the command scheduler runs. This ensures all values written during
+   * subsystem periodic methods (e.g., robot orientation for Limelights) are sent in a single batch.
+   * Required for all Limelights (not just LL4) because {@link
+   * VisionIOLimelightBase#updateInputs(VisionIO.VisionIOInputs)} uses {@code
+   * SetRobotOrientation_NoFlush}. Must be called in {@link Robot#robotPeriodic()} after {@link
+   * edu.wpi.first.wpilibj2.command.CommandScheduler#run()}.
+   */
+  public void postSchedulerUpdate() {
+    NetworkTableInstance.getDefault().flush();
   }
 
   /**

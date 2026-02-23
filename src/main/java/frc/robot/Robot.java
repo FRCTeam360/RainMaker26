@@ -97,6 +97,7 @@ public class Robot extends LoggedRobot {
     m_timeAndJoystickReplay.update();
     m_robotContainer.preSchedulerUpdate();
     CommandScheduler.getInstance().run();
+    m_robotContainer.postSchedulerUpdate();
   }
 
   /** This function is called once each time the robot enters Disabled mode. */
@@ -111,7 +112,7 @@ public class Robot extends LoggedRobot {
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
   public void autonomousInit() {
-    m_robotContainer.onEnableSuperstructure();
+    m_robotContainer.onEnable();
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
     // schedule the autonomous command (example)
@@ -126,11 +127,11 @@ public class Robot extends LoggedRobot {
 
   @Override
   public void teleopInit() {
+    m_robotContainer.onEnable();
     // This makes sure that the autonomous stops running when
     // teleop starts running. If you want the autonomous to
     // continue until interrupted by another command, remove
     // this line or comment it out.
-    m_robotContainer.onEnableSuperstructure();
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
