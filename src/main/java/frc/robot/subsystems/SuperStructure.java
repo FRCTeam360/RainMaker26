@@ -158,15 +158,6 @@ public class SuperStructure extends SubsystemBase {
   /** Sets the control mode and propagates it to managed subsystems. */
   public void setControlState(ControlState controlState) {
     this.controlState = controlState;
-    setAllControlStates(controlState);
-  }
-
-  /** Returns the current control mode. */
-  public ControlState getControlState() {
-    return controlState;
-  }
-
-  public void setAllControlStates(ControlState controlState) {
     flywheel.setControlState(controlState);
     indexer.setControlState(controlState);
     flywheelKicker.setControlState(controlState);
@@ -174,6 +165,11 @@ public class SuperStructure extends SubsystemBase {
     intakePivot.setControlState(controlState);
     hopperRoller.setControlState(controlState);
     hood.setControlState(controlState);
+  }
+
+  /** Returns the current control mode. */
+  public ControlState getControlState() {
+    return controlState;
   }
 
   public Command setStateCommand(SuperStates superState) {
@@ -188,16 +184,17 @@ public class SuperStructure extends SubsystemBase {
 
   @Override
   public void periodic() {
+    // Runs both the superstructure and shooter state machines
     updateState();
-    applyStates();
-
-    // Always run the shooter state machine — it handles IDLE internally
     shooterStateMachine.update();
+
+    applyStates();
     shooterStateMachine.apply();
 
     Logger.recordOutput("Superstructure/WantedSuperState", wantedSuperState.toString());
     Logger.recordOutput("Superstructure/CurrentSuperState", currentSuperState.toString());
     Logger.recordOutput("Superstructure/PreviousSuperState", previousSuperState.toString());
+    Logger.recordOutput("Superstructure/ControlState", controlState.toString());
     shooterStateMachine.log();
   }
 }
