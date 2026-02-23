@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.generated.WoodBotDrivetrain;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.ControlState;
 import frc.robot.subsystems.HopperRoller.HopperRoller;
 import frc.robot.subsystems.HopperRoller.HopperRollerIOPB;
 import frc.robot.subsystems.Indexer.Indexer;
@@ -59,6 +60,7 @@ import frc.robot.utils.AllianceFlipUtil;
 import frc.robot.utils.FieldConstants;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.BooleanSupplier;
 import org.littletonrobotics.junction.Logger;
 
 /**
@@ -316,47 +318,58 @@ public class RobotContainer {
       drivetrain.setDefaultCommand(drivetrain.fieldOrientedDriveCommand(driverCont));
     }
 
+    BooleanSupplier isSuperstructureMode =
+        () ->
+            Objects.nonNull(superStructure)
+                && superStructure.getControlState() == ControlState.SUPERSTRUCTURE;
+    BooleanSupplier isIndependentMode =
+        () ->
+            Objects.isNull(superStructure)
+                || superStructure.getControlState() == ControlState.INDEPENDENT;
+
     if (Objects.nonNull(superStructure) && Objects.nonNull(drivetrain)) {
       // Linked pair: whileTrue sets SHOOTING + aims, onFalse resets to IDLE.
       // The InstantCommand (setStateCommand) finishes immediately; the alongWith group
       // stays alive via faceAngleWhileDrivingCommand until whileTrue interrupts it.
-      driverCont
-          .rightTrigger()
-          .whileTrue(
-              superStructure
-                  .setStateCommand(SuperStates.SHOOT_AT_HUB)
-                  .alongWith(
-                      drivetrain.faceAngleWhileDrivingCommand(
-                          driverCont, () -> hubShotCalculator.calculateShot().targetHeading())));
+      Trigger shootAtHubTrigger = driverCont.rightTrigger().and(isSuperstructureMode);
+      shootAtHubTrigger.whileTrue(
+          superStructure
+              .setStateCommand(SuperStates.SHOOT_AT_HUB)
+              .alongWith(
+                  drivetrain.faceAngleWhileDrivingCommand(
+                      driverCont, () -> hubShotCalculator.calculateShot().targetHeading())));
       // Must stay paired with the whileTrue above to reset state on trigger release
-      driverCont.rightTrigger().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
+      shootAtHubTrigger.onFalse(superStructure.setStateCommand(SuperStates.IDLE));
 
-      driverCont
-          .leftTrigger()
-          .whileTrue(
-              superStructure
-                  .setStateCommand(SuperStates.SHOOT_AT_OUTPOST)
-                  .alongWith(
-                      drivetrain.faceAngleWhileDrivingCommand(
-                          driverCont,
-                          () -> outpostPassCalculator.calculateShot().targetHeading())));
+      Trigger shootAtOutpostTrigger = driverCont.leftTrigger().and(isSuperstructureMode);
+      shootAtOutpostTrigger.whileTrue(
+          superStructure
+              .setStateCommand(SuperStates.SHOOT_AT_OUTPOST)
+              .alongWith(
+                  drivetrain.faceAngleWhileDrivingCommand(
+                      driverCont, () -> outpostPassCalculator.calculateShot().targetHeading())));
       // Must stay paired with the whileTrue above to reset state on trigger release
-      driverCont.leftTrigger().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
+      shootAtOutpostTrigger.onFalse(superStructure.setStateCommand(SuperStates.IDLE));
     }
 
     // Null checks based on subsystems used by each command
     // basicIntakeCmd uses intake and indexer
     // TODO: Re-enable superStructure bindings
     if (Objects.nonNull(superStructure) && Objects.nonNull(intake) && Objects.nonNull(indexer)) {
-      driverCont.leftBumper().onTrue(superStructure.setStateCommand(SuperStates.INTAKING));
-      driverCont.leftBumper().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
-      driverCont.a().whileTrue(indexer.setDutyCycleCommand(0.5));
+      Trigger intakeTrigger = driverCont.leftBumper().and(isSuperstructureMode);
+      intakeTrigger.onTrue(superStructure.setStateCommand(SuperStates.INTAKING));
+      intakeTrigger.onFalse(superStructure.setStateCommand(SuperStates.IDLE));
+    }
+
+    if (Objects.nonNull(indexer)) {
+      driverCont.a().and(isIndependentMode).whileTrue(indexer.setDutyCycleCommand(0.5));
     }
 
     // setFlywheelKickerDutyCycle uses flywheelKicker
     if (Objects.nonNull(flywheelKicker)) {
       driverCont
           .rightBumper()
+          .and(isIndependentMode)
           .whileTrue(flywheelKicker.setVelocityCommand(FLYWHEEL_KICKER_WARMUP_VELOCITY_RPM));
     }
 
@@ -364,18 +377,18 @@ public class RobotContainer {
     if (Objects.nonNull(hood)) {
       // hood.setDefaultCommand(
       //     CommandLogger.logCommand(hood.setPositionCommand(0.0), "hood default command"));
-      driverCont.pov(0).onTrue(hood.moveToZeroAndZero());
-      driverCont.pov(90).whileTrue(hood.setPositionCommand(4.0));
-      driverCont.pov(180).whileTrue(hood.setPositionCommand(16.0));
-      driverCont.pov(270).whileTrue(hood.setPositionCommand(23.0));
-      driverCont.start().onTrue(hood.zero());
+      driverCont.pov(0).and(isIndependentMode).onTrue(hood.moveToZeroAndZero());
+      driverCont.pov(90).and(isIndependentMode).whileTrue(hood.setPositionCommand(4.0));
+      driverCont.pov(180).and(isIndependentMode).whileTrue(hood.setPositionCommand(16.0));
+      driverCont.pov(270).and(isIndependentMode).whileTrue(hood.setPositionCommand(23.0));
+      driverCont.start().and(isIndependentMode).onTrue(hood.zero());
     }
 
     // shootWithRPM uses flywheel
     if (Objects.nonNull(flywheel)) {
-      driverCont.x().whileTrue(flywheel.setVelocityCommand(2500));
-      driverCont.b().whileTrue(flywheel.setVelocityCommand(3000));
-      driverCont.y().whileTrue(flywheel.setVelocityCommand(3500));
+      driverCont.x().and(isIndependentMode).whileTrue(flywheel.setVelocityCommand(2500));
+      driverCont.b().and(isIndependentMode).whileTrue(flywheel.setVelocityCommand(3000));
+      driverCont.y().and(isIndependentMode).whileTrue(flywheel.setVelocityCommand(3500));
     }
 
     // Drivetrain commands
@@ -388,7 +401,10 @@ public class RobotContainer {
 
   /** Stops all subsystems safely when the robot is disabled. */
   public void onDisable() {
-    if (Objects.nonNull(superStructure)) superStructure.setWantedSuperState(SuperStates.IDLE);
+    if (Objects.nonNull(superStructure)) {
+      superStructure.setControlState(ControlState.SUPERSTRUCTURE);
+      superStructure.setWantedSuperState(SuperStates.IDLE);
+    }
     if (Objects.nonNull(drivetrain)) {
       drivetrain.setControl(new SwerveRequest.Idle());
     }
@@ -409,6 +425,13 @@ public class RobotContainer {
     }
     if (Objects.nonNull(flywheelKicker)) {
       flywheelKicker.stop();
+    }
+  }
+
+  /** Decouples the superstructure from subsystems for test mode. */
+  public void onTestEnable() {
+    if (Objects.nonNull(superStructure)) {
+      superStructure.setControlState(ControlState.INDEPENDENT);
     }
   }
 

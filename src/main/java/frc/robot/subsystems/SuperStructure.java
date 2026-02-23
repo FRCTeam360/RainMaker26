@@ -49,6 +49,7 @@ public class SuperStructure extends SubsystemBase {
   private SuperStates wantedSuperState = SuperStates.IDLE;
   private SuperStates currentSuperState = SuperStates.IDLE;
   private SuperStates previousSuperState = SuperStates.IDLE;
+  private ControlState controlState = ControlState.SUPERSTRUCTURE;
 
   // Constructor
 
@@ -160,6 +161,17 @@ public class SuperStructure extends SubsystemBase {
   }
 
   // Public API
+
+  /** Sets the control mode and propagates it to managed subsystems. */
+  public void setControlState(ControlState controlState) {
+    this.controlState = controlState;
+    setAllControlStates(controlState);
+  }
+
+  /** Returns the current control mode. */
+  public ControlState getControlState() {
+    return controlState;
+  }
 
   public void setAllControlStates(ControlState controlState) {
     flywheel.setControlState(controlState);

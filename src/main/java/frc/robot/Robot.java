@@ -9,8 +9,6 @@ import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.subsystems.ControlState;
-import frc.robot.subsystems.SuperStructure;
 import frc.robot.utils.RobotUtils;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
@@ -28,7 +26,6 @@ public class Robot extends LoggedRobot {
   private Command m_autonomousCommand;
 
   private final RobotContainer m_robotContainer;
-  private SuperStructure superStructure;
 
   /* log and replay timestamp and joystick data */
   private final HootAutoReplay m_timeAndJoystickReplay =
@@ -114,7 +111,6 @@ public class Robot extends LoggedRobot {
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
   public void autonomousInit() {
-    superStructure.setAllControlStates(ControlState.SUPERSTRUCTURE);
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
     // schedule the autonomous command (example)
@@ -133,7 +129,6 @@ public class Robot extends LoggedRobot {
     // teleop starts running. If you want the autonomous to
     // continue until interrupted by another command, remove
     // this line or comment it out.
-    superStructure.setAllControlStates(ControlState.SUPERSTRUCTURE);
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
@@ -146,8 +141,8 @@ public class Robot extends LoggedRobot {
   @Override
   public void testInit() {
     // Cancels all running commands at the start of test mode.
-    superStructure.setAllControlStates(ControlState.INDEPENDENT);
     CommandScheduler.getInstance().cancelAll();
+    m_robotContainer.onTestEnable();
   }
 
   /** This function is called periodically during test mode. */
