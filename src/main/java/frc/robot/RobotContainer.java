@@ -374,15 +374,21 @@ public class RobotContainer {
 
   /** Called when the robot transitions from disabled to an enabled mode. */
   public void onEnable() {
-    vision.enableIMUAssist();
-    vision.setThrottle(ENABLED_THROTTLE_SKIP_FRAMES);
     // Ensures superstructure control mode is active when enabled
     superStructure.setControlState(ControlState.SUPERSTRUCTURE);
+    onEnableVision();
+  }
+
+  /** Sets up vision to run at full performance and temperature */
+  private void onEnableVision() {
+    vision.enableIMUAssist();
+    vision.setThrottle(ENABLED_THROTTLE_SKIP_FRAMES);
   }
 
   /** Decouples the superstructure from subsystems for test mode. */
   public void onTestEnable() {
     superStructure.setControlState(ControlState.INDEPENDENT);
+    onEnableVision();
   }
 
   /**

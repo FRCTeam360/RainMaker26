@@ -143,7 +143,6 @@ public class Robot extends LoggedRobot {
 
   @Override
   public void testInit() {
-    m_robotContainer.onEnable();
     // Cancels all running commands at the start of test mode.
     CommandScheduler.getInstance().cancelAll();
     m_robotContainer.onTestEnable();
