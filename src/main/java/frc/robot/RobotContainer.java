@@ -237,9 +237,6 @@ public class RobotContainer {
                 .andThen(superStructure.setStateCommand(SuperStates.IDLE)));
       }
     }
-    registerPathplannerCommand(
-        "run flywheel kicker",
-        flywheelKicker.setVelocityCommand(FLYWHEEL_KICKER_WARMUP_VELOCITY_RPM));
 
     configureBindings();
     // configureTestBindings();
