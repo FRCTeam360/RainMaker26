@@ -61,7 +61,6 @@ public class Hood extends SubsystemBase {
     this.controlState = controlState;
   }
 
-
   /**
    * Sets the supplier for the hood angle from the shot calculator.
    *
