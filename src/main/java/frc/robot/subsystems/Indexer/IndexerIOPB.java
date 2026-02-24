@@ -22,7 +22,7 @@ public class IndexerIOPB implements IndexerIO {
 
   /** Creates a new IndexerIOPB. */
   private final SparkFlex indexerMotor =
-      new SparkFlex(Constants.PracticeBotConstants.INDEXER_ID, MotorType.kBrushless);
+      new SparkFlex(Constants.PracticeBotConstants.TWININDEXER_ID, MotorType.kBrushless);
 
   private final RelativeEncoder encoder = indexerMotor.getEncoder();
   private final SparkFlexConfig sparkFlexConfig = new SparkFlexConfig();
