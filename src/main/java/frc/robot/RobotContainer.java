@@ -347,6 +347,16 @@ public class RobotContainer {
     intakeTrigger.onTrue(superStructure.setStateCommand(SuperStates.INTAKING));
     intakeTrigger.onFalse(superStructure.setStateCommand(SuperStates.IDLE));
 
+    configureIndependentModeBindings(isIndependentMode);
+
+    // Drivetrain commands
+    // driverCont.leftTrigger().whileTrue(drivetrain.faceHubWhileDriving(driverCont));
+    drivetrain.registerTelemetry(logger::telemeterize);
+    driverCont.back().onTrue(drivetrain.zeroCommand());
+  }
+
+  /** Configures bindings that are active only in independent (test) mode. */
+  private void configureIndependentModeBindings(BooleanSupplier isIndependentMode) {
     driverCont.leftBumper().and(isIndependentMode).whileTrue(intake.setDutyCycleCommand(0.2));
 
     driverCont.a().and(isIndependentMode).whileTrue(indexer.setDutyCycleCommand(0.5));
@@ -362,11 +372,6 @@ public class RobotContainer {
     driverCont.x().and(isIndependentMode).whileTrue(flywheel.setVelocityCommand(2500));
     driverCont.b().and(isIndependentMode).whileTrue(flywheel.setVelocityCommand(3000));
     driverCont.y().and(isIndependentMode).whileTrue(flywheel.setVelocityCommand(3500));
-
-    // Drivetrain commands
-    // driverCont.leftTrigger().whileTrue(drivetrain.faceHubWhileDriving(driverCont));
-    drivetrain.registerTelemetry(logger::telemeterize);
-    driverCont.back().onTrue(drivetrain.zeroCommand());
   }
 
   /** Stops all subsystems safely when the robot is disabled. */
