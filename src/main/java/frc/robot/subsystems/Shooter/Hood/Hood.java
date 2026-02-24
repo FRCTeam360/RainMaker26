@@ -21,7 +21,6 @@ public class Hood extends SubsystemBase {
 
   // Other fields
   private DoubleSupplier hoodAngleSupplier = () -> 0.0;
-  Hood hood = new Hood(new HoodIONoOp());
 
   // Enums
   public enum HoodWantedStates {
@@ -34,6 +33,34 @@ public class Hood extends SubsystemBase {
     MOVING,
     AT_SETPOINT
   }
+
+  // State variables
+  private HoodWantedStates wantedState = HoodWantedStates.IDLE;
+  private HoodInternalStates currentState = HoodInternalStates.OFF;
+  private HoodInternalStates previousState = HoodInternalStates.OFF;
+  private ControlState controlState = ControlState.SUPERSTRUCTURE;
+
+  // Constructor
+
+  /** Creates a new Hood. */
+  public Hood(HoodIO io) {
+    this.io = io;
+  }
+
+  // State machine methods
+
+  public HoodInternalStates getState() {
+    return currentState;
+  }
+
+  public void setWantedState(HoodWantedStates state) {
+    wantedState = state;
+  }
+
+  public void setControlState(ControlState controlState) {
+    this.controlState = controlState;
+  }
+
 
   /**
    * Sets the supplier for the hood angle from the shot calculator.
