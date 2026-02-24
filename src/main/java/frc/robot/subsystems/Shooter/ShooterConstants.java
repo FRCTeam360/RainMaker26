@@ -11,4 +11,6 @@ import edu.wpi.first.math.util.Units;
 public class ShooterConstants {
   public static Transform2d ROBOT_TO_SHOOTER =
       new Transform2d(Units.inchesToMeters(-7.0), 0.0, new Rotation2d());
+  public static final double ALLIANCE_PHASE_DURATION_SECONDS = 25.0;
+  public static final double ALLIANCE_PHASE_START_MODULO = 5.0;
 }

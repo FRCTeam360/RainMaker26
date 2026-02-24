@@ -2,6 +2,8 @@ package frc.robot.utils;
 
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.robot.Constants;
+import frc.robot.subsystems.Shooter.ShooterConstants;
+
 import java.io.File;
 import java.util.Optional;
 
@@ -136,7 +138,7 @@ public class RobotUtils {
         return null;
       } else if (hubActive == true) {
         return true;
-      } else if (gameTime % 25 <= (timeOfFlight + 5.0)) {
+      } else if (gameTime % ShooterConstants.ALLIANCE_PHASE_DURATION_SECONDS <= (timeOfFlight + ShooterConstants.ALLIANCE_PHASE_START_MODULO)) {
         return true;
       } else {
         return false;
