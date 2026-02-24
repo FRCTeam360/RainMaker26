@@ -194,7 +194,7 @@ public interface IndexerIO {
   // Define the inputs that will be logged
   @AutoLog
   public static class IndexerIOInputs {
-    public double velocity = 0.0;           // Velocity
+    public double velocity = 0.0;           // RPM
     public double voltage = 0.0;            // Volts
     public double statorCurrent = 0.0;      // Amps
     public double supplyCurrent = 0.0;      // Amps
@@ -257,7 +257,7 @@ public class IndexerIOReal implements IndexerIO {
 
   @Override
   public void updateInputs(IndexerIOInputs inputs) {
-    inputs.velocity = motor.getVelocity().getValueAsDouble() * 60.0;  // RPS → Velocity
+    inputs.velocity = motor.getVelocity().getValueAsDouble() * 60.0;  // RPS → RPM
     inputs.voltage = motor.getMotorVoltage().getValueAsDouble();
     inputs.statorCurrent = motor.getStatorCurrent().getValueAsDouble();
     inputs.supplyCurrent = motor.getSupplyCurrent().getValueAsDouble();
@@ -270,7 +270,7 @@ public class IndexerIOReal implements IndexerIO {
 
   @Override
   public void setVelocity(double velocity) {
-    motor.setControl(velocityRequest.withVelocity(velocity / 60.0));  // Velocity → RPS
+    motor.setControl(velocityRequest.withVelocity(velocity / 60.0));  // RPM → RPS
   }
 }
 ```
@@ -314,7 +314,7 @@ public class IndexerIOSim implements IndexerIO {
 
   @Override
   public void setVelocity(double velocity) {
-    // Simple approximation: use voltage to reach target Velocity
+    // Simple approximation: use voltage to reach target velocity
     // In reality, you'd implement PID in simulation
     double targetVoltage = velocity / 500.0;  // Example scaling
     appliedVoltage = targetVoltage;
@@ -428,7 +428,7 @@ public interface FlywheelIO {
 
 ```java
 public interface FlywheelIO {
-  /** Set flywheel velocity in Velocity */
+  /** Set flywheel velocity in RPM */
   void setVelocity(double velocity);
 
   /** Optional: stop the flywheel (default implementation) */
@@ -447,7 +447,7 @@ Defines what data gets logged and passed to the subsystem:
 ```java
 @AutoLog
 public static class FlywheelIOInputs {
-  public double velocity = 0.0;        // Velocity
+  public double velocity = 0.0;        // RPM
   public double voltage = 0.0;         // Volts
   public double statorCurrent = 0.0;   // Amps
   public double temperature = 0.0;     // Celsius
@@ -645,7 +645,7 @@ public class Flywheel extends SubsystemBase {
   }
 
   public boolean atTarget() {
-    return Math.abs(inputs.velocity - targetVelocity) < 50.0;  // Within 50 Velocity
+    return Math.abs(inputs.velocity - targetVelocity) < 50.0;  // Within 50 RPM
   }
 
   // Command factories
@@ -795,7 +795,7 @@ public class ArmIOReal implements ArmIO {
 
 Keep units consistent within each layer:
 
-- **IO Interface**: Use mechanism units (rotations, velocity, degrees)
+- **IO Interface**: Use mechanism units (rotations, RPM, degrees)
 - **Hardware Layer**: Convert between mechanism and motor units
 - **Subsystem Layer**: Use mechanism units
 

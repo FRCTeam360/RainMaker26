@@ -9,10 +9,10 @@ import frc.robot.subsystems.Shooter.Flywheel.Flywheel;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 /**
- * Command to tune the flywheel Velocity using a LoggedNetworkNumber.
+ * Command to tune the flywheel velocity using a LoggedNetworkNumber.
  *
  * <p>This command continuously reads from a NetworkTables tunable value and sets the flywheel
- * Velocity accordingly. Useful for testing and tuning flywheel speeds during development.
+ * velocity accordingly. Useful for testing and tuning flywheel speeds during development.
  */
 public class FlywheelTuneCommand extends Command {
   private final Flywheel flywheel;
