@@ -27,7 +27,7 @@ public class IntakeIOWB implements IntakeIO {
 
     config.idleMode(IdleMode.kBrake);
     config.inverted(true);
-    config.smartCurrentLimit(50);
+    config.smartCurrentLimit(55);
 
     config.closedLoop.p(0.0002).i(0.0).d(0.0);
     config.closedLoop.feedForward.kV(0.0018).kS(0.004);
