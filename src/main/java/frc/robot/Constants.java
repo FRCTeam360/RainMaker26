@@ -106,8 +106,8 @@ public final class Constants {
     public static final int INTAKE_ID = 15;
 
     // === CLIMBER ===
-    public static final int CLIMBER_RIGHT_ID = 19;
-    public static final int CLIMBER_LEFT_ID = 18;
+    public static final int CLIMBER_RIGHT_ID = 16;
+    public static final int CLIMBER_LEFT_ID = 17;
 
     public static final int FLYWHEEL_RIGHT_ID = 18;
     public static final int FLYWHEEL_LEFT_ID = 19;
