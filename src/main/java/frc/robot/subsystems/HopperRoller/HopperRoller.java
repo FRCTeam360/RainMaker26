@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems.HopperRoller;
 
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.ControlState;
 import org.littletonrobotics.junction.Logger;
@@ -81,6 +82,10 @@ public class HopperRoller extends SubsystemBase {
 
   public void stop() {
     io.setDutyCycle(0.0);
+  }
+
+  public Command setDutyCycleCommand(double dutyCycle) {
+    return runEnd(() -> setDutyCycle(dutyCycle), () -> setDutyCycle(0.0));
   }
 
   // periodic

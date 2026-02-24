@@ -30,7 +30,7 @@ public class IndexerIOPB implements IndexerIO {
 
   public IndexerIOPB() {
     sparkFlexConfig.idleMode(IdleMode.kBrake);
-    sparkFlexConfig.inverted(true);
+    sparkFlexConfig.inverted(false);
     sparkFlexConfig.smartCurrentLimit(CURRENT_LIMIT_AMPS);
 
     sparkFlexConfig.encoder.positionConversionFactor(1.0 / GEAR_RATIO);

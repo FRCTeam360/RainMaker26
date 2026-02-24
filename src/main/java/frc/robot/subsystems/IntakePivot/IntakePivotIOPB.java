@@ -4,13 +4,13 @@
 
 package frc.robot.subsystems.IntakePivot;
 
-import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.util.Units;
 import frc.robot.Constants;
@@ -35,9 +35,8 @@ public class IntakePivotIOPB implements IntakePivotIO {
   private static final double MOTION_MAGIC_CRUISE_VELOCITY_RPS = 1.0;
   private static final double MOTION_MAGIC_JERK_RPS3 = 1750.0;
 
-  private static final double FORWARD_SOFT_LIMIT_DEGREES =
-      178.0; // TODO: make sure these are correct for prac bot
-  private static final double REVERSE_SOFT_LIMIT_DEGREES = 0.0; // 29.5
+  private static final double FORWARD_SOFT_LIMIT_DEGREES = 94.0;
+  private static final double REVERSE_SOFT_LIMIT_DEGREES = 0.0;
 
   private static final double PEAK_FORWARD_VOLTAGE = 12.0;
   private static final double PEAK_REVERSE_VOLTAGE = -12.0;
@@ -49,7 +48,6 @@ public class IntakePivotIOPB implements IntakePivotIO {
   private final DutyCycleOut dutyCycleOut = new DutyCycleOut(0);
   private final MotionMagicVoltage motionMagicPosition = new MotionMagicVoltage(0.0);
   private final TalonFXConfiguration config = new TalonFXConfiguration();
-  private final CurrentLimitsConfigs currentLimitConfig = new CurrentLimitsConfigs();
   private NeutralModeValue neutralMode = NeutralModeValue.Brake;
 
   /** Creates a new IntakePivotIOPB. */
@@ -79,6 +77,7 @@ public class IntakePivotIOPB implements IntakePivotIO {
     config.Voltage.PeakReverseVoltage = PEAK_REVERSE_VOLTAGE;
     // TODO: GRAVITY TYPE COSINE / ARM
     config.Feedback.SensorToMechanismRatio = GEAR_RATIO;
+    config.MotorOutput.withInverted(InvertedValue.Clockwise_Positive);
 
     config.SoftwareLimitSwitch.withForwardSoftLimitThreshold(
             Units.degreesToRotations(FORWARD_SOFT_LIMIT_DEGREES))
@@ -87,6 +86,8 @@ public class IntakePivotIOPB implements IntakePivotIO {
         .withReverseSoftLimitEnable(true);
 
     intakePivot.getConfigurator().apply(config, 0.050);
+
+    enableBrakeMode();
   }
 
   public void setZero() {
