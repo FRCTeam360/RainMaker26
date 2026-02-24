@@ -4,8 +4,6 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.MetersPerSecond;
-
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
@@ -93,8 +91,6 @@ public class RobotContainer {
 
   // TODO: refactor to allow for more than 1 drivetrain type
 
-  private Telemetry logger;
-
   // Replace with CommandPS4Controller or CommandJoystick if needed
 
   private final CommandXboxController driverCont = new CommandXboxController(0);
@@ -116,7 +112,6 @@ public class RobotContainer {
     switch (Constants.getRobotType()) {
       case SIM:
         drivetrain = WoodBotDrivetrain.createDrivetrain();
-        logger = new Telemetry(WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
         intakePivot = new IntakePivot(new IntakePivotIOSim());
         vision =
             new Vision(
@@ -140,7 +135,6 @@ public class RobotContainer {
         break;
       case WOODBOT:
         drivetrain = WoodBotDrivetrain.createDrivetrain();
-        logger = new Telemetry(WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
         flywheel = new Flywheel(new FlywheelIOWB());
         hood = new Hood(new HoodIOWB());
         indexer = new Indexer(new IndexerIOWB());
@@ -364,9 +358,15 @@ public class RobotContainer {
     driverCont.y().and(isIndependentMode).whileTrue(flywheel.setVelocityCommand(3500));
 
     // Drivetrain commands
+<<<<<<< Updated upstream
     // driverCont.leftTrigger().whileTrue(drivetrain.faceHubWhileDriving(driverCont));
     drivetrain.registerTelemetry(logger::telemeterize);
     driverCont.back().onTrue(drivetrain.zeroCommand());
+=======
+    if (Objects.nonNull(drivetrain)) {
+      drivetrain.setDefaultCommand(drivetrain.fieldOrientedDrive(driverCont));
+    }
+>>>>>>> Stashed changes
   }
 
   /** Stops all subsystems safely when the robot is disabled. */
