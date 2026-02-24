@@ -16,6 +16,7 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 public class Flywheel extends SubsystemBase {
   // Constants
   private boolean atGoal = false;
+  private long launchCount = 0;
 
   // IO fields
   private final FlywheelIO io;
@@ -45,9 +46,9 @@ public class Flywheel extends SubsystemBase {
       new LoggedNetworkNumber("Flywheel/AtGoalDebounceSeconds", 0.2);
 
   private final Debouncer controlModeDebouncer =
-      new Debouncer(controlModeDebounceSeconds.get(), DebounceType.kFalling );
+      new Debouncer(controlModeDebounceSeconds.get(), DebounceType.kFalling);
   private final Debouncer setpointDebouncer =
-      new Debouncer(atGoalDebounceSeconds.get(), DebounceType.kFalling );
+      new Debouncer(atGoalDebounceSeconds.get(), DebounceType.kFalling);
 
   // State variables
   private FlywheelWantedStates wantedState = FlywheelWantedStates.IDLE;
@@ -93,6 +94,9 @@ public class Flywheel extends SubsystemBase {
         if (atSetpoint(shootVelocitySupplier.getAsDouble())) {
           currentState = FlywheelInternalStates.AT_SETPOINT;
         } else {
+          if (previousState == FlywheelInternalStates.AT_SETPOINT) {
+            launchCount++;
+          }
           currentState = FlywheelInternalStates.SPINNING_UP;
         }
         break;
@@ -141,7 +145,7 @@ public class Flywheel extends SubsystemBase {
     io.setDutyCycle(duty);
   }
 
-  public void  setSpinupVelocityControl (double rpm) {
+  public void setSpinupVelocityControl(double rpm) {
     io.setSpinupVelocityControl(rpm);
   }
 
@@ -189,5 +193,6 @@ public class Flywheel extends SubsystemBase {
     Logger.recordOutput("Subsystems/Flywheel/CurrentState", currentState.toString());
     Logger.recordOutput("Subsystems/Flywheel/PreviousState", previousState.toString());
     Logger.recordOutput("Subsystems/Flywheel/ControlState", controlState.toString());
+    Logger.recordOutput("Subsystems/Flywheel/LaunchCount", launchCount);
   }
 }

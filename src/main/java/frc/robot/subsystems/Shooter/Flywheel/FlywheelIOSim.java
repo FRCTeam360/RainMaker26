@@ -146,8 +146,9 @@ public class FlywheelIOSim implements FlywheelIO {
     // Mirror readings to both slots since we model both motors as one.
     double statorCurrent = motorController.getStatorCurrent().getValueAsDouble();
     double supplyCurrent = motorController.getSupplyCurrent().getValueAsDouble();
-    inputs.velocities[0] = velocityRPS;
-    inputs.velocities[1] = velocityRPS; // Both motors share the same shaft velocity
+    inputs.velocities[0] = flywheelSim.getAngularVelocityRPM();
+    inputs.velocities[1] =
+        flywheelSim.getAngularVelocityRPM(); // Both motors share the same shaft velocity
     inputs.voltages[0] = motorVoltage;
     inputs.voltages[1] = motorVoltage; // Same command sent to both physical motors
     inputs.statorCurrents[0] = statorCurrent;
@@ -162,22 +163,22 @@ public class FlywheelIOSim implements FlywheelIO {
   }
 
   @Override
-  public void setSpinupVelocityControl(double velocityRPS) {
+  public void setSpinupVelocityControl(double velocityRPM) {
     // Sim uses traditional PID control, not bang-bang
-    motorController.setControl(velocityRequest.withVelocity(velocityRPS));
+    motorController.setControl(velocityRequest.withVelocity(velocityRPM / 60.0));
   }
 
   @Override
-  public void setHoldVelocityControl(double velocityRPS) {
+  public void setHoldVelocityControl(double velocityRPM) {
     // Sim uses traditional PID control, not bang-bang
     // For simulation purposes, both methods use the same velocity control
-    motorController.setControl(velocityRequest.withVelocity(velocityRPS));
+    motorController.setControl(velocityRequest.withVelocity(velocityRPM / 60.0));
   }
 
   @Override
-  public void setCoastVelocityControl(double velocityRPS) {
+  public void setCoastVelocityControl(double velocityRPM) {
     // Traditional PID control (same as other methods in sim)
-    motorController.setControl(velocityRequest.withVelocity(velocityRPS));
+    motorController.setControl(velocityRequest.withVelocity(velocityRPM / 60.0));
   }
 
   /**

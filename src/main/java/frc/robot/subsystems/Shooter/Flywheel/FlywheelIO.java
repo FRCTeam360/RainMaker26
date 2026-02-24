@@ -10,18 +10,18 @@ public interface FlywheelIO {
     public double[] statorCurrents = new double[MAX_MOTORS];
     public double[] supplyCurrents = new double[MAX_MOTORS];
     public double[] voltages = new double[MAX_MOTORS];
-    public double[] velocities = new double[MAX_MOTORS]; // RPS (rotations per second)
+    public double[] velocities = new double[MAX_MOTORS]; // RPM (rotations per minute)
     public double[] positions = new double[MAX_MOTORS];
   }
 
   /** Set flywheel velocity using duty cycle bang-bang control (fast acceleration) */
-  public void setSpinupVelocityControl(double velocityRPS);
+  public void setSpinupVelocityControl(double velocityRPM);
 
   /** Set flywheel velocity using torque current bang-bang control (consistent torque) */
-  public void setHoldVelocityControl(double velocityRPS);
+  public void setHoldVelocityControl(double velocityRPM);
 
   /** Set flywheel velocity using traditional PID control with torque current (Slot 2) */
-  public void setCoastVelocityControl(double velocityRPS);
+  public void setCoastVelocityControl(double velocityRPM);
 
   /** Set flywheel duty cycle directly (open loop) */
   public void setDutyCycle(double duty);
