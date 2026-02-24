@@ -52,7 +52,6 @@ public class Climber extends SubsystemBase {
       default:
         currentState = ClimberStates.IDLE;
         break;
-      
     }
   }
 
@@ -66,7 +65,7 @@ public class Climber extends SubsystemBase {
       case LOCKED:
         break;
       case IDLE:
-      
+
       default:
         stop();
         break;

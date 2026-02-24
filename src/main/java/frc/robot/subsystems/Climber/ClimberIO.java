@@ -35,7 +35,4 @@ public interface ClimberIO {
 
   public boolean rightAboveMinHeight();
 
-  public void zeroBoth();
-
-  public void updatePIDF(double P, double I, double D, double F);
 }
