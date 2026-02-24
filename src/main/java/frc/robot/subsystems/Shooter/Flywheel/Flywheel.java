@@ -15,7 +15,6 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 public class Flywheel extends SubsystemBase {
   // Constants
-  private static final double TOLERANCE_RPM = 100.0;
   private boolean atGoal = false;
 
   // IO fields
@@ -28,7 +27,7 @@ public class Flywheel extends SubsystemBase {
   // Enums
   public enum FlywheelWantedStates {
     IDLE,
-    SHOOTING
+    RUNNING
   }
 
   public enum FlywheelInternalStates {
@@ -38,17 +37,17 @@ public class Flywheel extends SubsystemBase {
   }
 
   // Tunable parameters for 4-phase bang-bang control
-  private static final LoggedNetworkNumber toleranceRPS =
-      new LoggedNetworkNumber("Flywheel/ToleranceRPS", 5); // 0.33 RPS ≈ 20 RPM
+  private static final LoggedNetworkNumber toleranceRPM =
+      new LoggedNetworkNumber("Flywheel/ToleranceRPM", 100);
   private static final LoggedNetworkNumber controlModeDebounceSeconds =
       new LoggedNetworkNumber("Flywheel/ControlModeDebounceSeconds", 0.04);
   private static final LoggedNetworkNumber atGoalDebounceSeconds =
       new LoggedNetworkNumber("Flywheel/AtGoalDebounceSeconds", 0.2);
 
   private final Debouncer controlModeDebouncer =
-      new Debouncer(controlModeDebounceSeconds.get(), DebounceType.kFalling);
-  private final Debouncer atGoalDebouncer =
-      new Debouncer(atGoalDebounceSeconds.get(), DebounceType.kFalling);
+      new Debouncer(controlModeDebounceSeconds.get(), DebounceType.kFalling );
+  private final Debouncer setpointDebouncer =
+      new Debouncer(atGoalDebounceSeconds.get(), DebounceType.kFalling );
 
   // State variables
   private FlywheelWantedStates wantedState = FlywheelWantedStates.IDLE;
@@ -90,7 +89,7 @@ public class Flywheel extends SubsystemBase {
     previousState = currentState;
 
     switch (wantedState) {
-      case SHOOTING:
+      case RUNNING:
         if (atSetpoint(shootVelocitySupplier.getAsDouble())) {
           currentState = FlywheelInternalStates.AT_SETPOINT;
         } else {
@@ -107,36 +106,32 @@ public class Flywheel extends SubsystemBase {
   private void applyState() {
     switch (currentState) {
       case SPINNING_UP:
-        setBangBangRecoveryVelocity(shootVelocitySupplier.getAsDouble());
+        setSpinupVelocityControl(shootVelocitySupplier.getAsDouble());
         break;
       case AT_SETPOINT:
-        setShootVelocity(shootVelocitySupplier.getAsDouble());
+        setHoldVelocityControl(shootVelocitySupplier.getAsDouble());
         break;
       case OFF:
       default:
+        atGoal = false;
         setDutyCycle(0.0);
         break;
     }
   }
 
   private boolean atSetpoint(double targetRPM) {
-    boolean lastAtSetpointVelocity;
+    boolean controlModeAtSetpoint;
     boolean inTolerance;
-    // TODO: make tolerance a constant in hardware layer
     if (inputs.velocities.length > 0) {
-      // Fast debouncer for control mode transitions (25ms default)
-      inTolerance = Math.abs(inputs.velocities[0] - targetRPM) < TOLERANCE_RPM;
-      lastAtSetpointVelocity = controlModeDebouncer.calculate(inTolerance);
-      atGoal = atGoalDebouncer.calculate(inTolerance);
-      return lastAtSetpointVelocity;
+      inTolerance = Math.abs(inputs.velocities[0] - targetRPM) < toleranceRPM.get();
+      controlModeAtSetpoint = controlModeDebouncer.calculate(inTolerance);
+      atGoal = setpointDebouncer.calculate(inTolerance);
+      return controlModeAtSetpoint;
     }
-
-    // Slower debouncer for external "ready to shoot" signal (200ms default)
-
     return false;
   }
 
-  public boolean isAtGoal() {
+  public boolean isReadyToShoot() {
     return atGoal;
   }
 
@@ -146,12 +141,12 @@ public class Flywheel extends SubsystemBase {
     io.setDutyCycle(duty);
   }
 
-  public void setShootVelocity(double rpm) {
-    io.setShootVelocity(rpm);
+  public void  setSpinupVelocityControl (double rpm) {
+    io.setSpinupVelocityControl(rpm);
   }
 
-  public void setBangBangRecoveryVelocity(double rpm) {
-    io.setShootVelocity(rpm);
+  public void setHoldVelocityControl(double rpm) {
+    io.setHoldVelocityControl(rpm);
   }
 
   public void stop() {
@@ -169,12 +164,12 @@ public class Flywheel extends SubsystemBase {
   }
 
   public Command setVelocityCommand(double rpm) {
-    return this.runEnd(() -> setShootVelocity(rpm), () -> setDutyCycle(0.0));
+    return this.runEnd(() -> setHoldVelocityControl(rpm), () -> setDutyCycle(0.0));
   }
 
   public Command setVelocityCommand(DoubleSupplier supplierVelocity) {
     return this.runEnd(
-        () -> setShootVelocity(supplierVelocity.getAsDouble()), () -> setDutyCycle(0.0));
+        () -> setHoldVelocityControl(supplierVelocity.getAsDouble()), () -> setDutyCycle(0.0));
   }
 
   // periodic

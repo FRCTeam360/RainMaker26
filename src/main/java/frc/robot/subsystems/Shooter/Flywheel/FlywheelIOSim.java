@@ -162,20 +162,20 @@ public class FlywheelIOSim implements FlywheelIO {
   }
 
   @Override
-  public void setShootVelocity(double velocityRPS) {
+  public void setSpinupVelocityControl(double velocityRPS) {
     // Sim uses traditional PID control, not bang-bang
     motorController.setControl(velocityRequest.withVelocity(velocityRPS));
   }
 
   @Override
-  public void setBangBangRecoveryVelocity(double velocityRPS) {
+  public void setHoldVelocityControl(double velocityRPS) {
     // Sim uses traditional PID control, not bang-bang
     // For simulation purposes, both methods use the same velocity control
     motorController.setControl(velocityRequest.withVelocity(velocityRPS));
   }
 
   @Override
-  public void setCoastVelocity(double velocityRPS) {
+  public void setCoastVelocityControl(double velocityRPS) {
     // Traditional PID control (same as other methods in sim)
     motorController.setControl(velocityRequest.withVelocity(velocityRPS));
   }

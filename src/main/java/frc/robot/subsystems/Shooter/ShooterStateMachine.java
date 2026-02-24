@@ -22,7 +22,7 @@ public class ShooterStateMachine {
   }
 
   public enum ShooterStates {
-    PREPARING,
+    PREPARING_TO_FIRE,
     FIRING,
     IDLE
   }
@@ -80,18 +80,18 @@ public class ShooterStateMachine {
 
     switch (wantedState) {
       case SHOOTING:
-        boolean flywheelReady = flywheel.isAtGoal();
+        boolean flywheelReady = flywheel.isReadyToShoot();
         boolean hoodReady = hood.getState() == HoodInternalStates.AT_SETPOINT;
-        boolean aligned = isAlignedToTarget.getAsBoolean();
+        boolean drivetrainAligned = isAlignedToTarget.getAsBoolean();
 
         Logger.recordOutput("Superstructure/Shooting/FlywheelReady", flywheelReady);
         Logger.recordOutput("Superstructure/Shooting/HoodReady", hoodReady);
-        Logger.recordOutput("Superstructure/Shooting/Aligned", aligned);
+        Logger.recordOutput("Superstructure/Shooting/DrivetrainAligned", drivetrainAligned);
 
-        if (flywheelReady && hoodReady && aligned) {
+        if (flywheelReady && hoodReady && drivetrainAligned) {
           currentState = ShooterStates.FIRING;
         } else {
-          currentState = ShooterStates.PREPARING;
+          currentState = ShooterStates.PREPARING_TO_FIRE;
         }
         break;
       case IDLE:
@@ -107,13 +107,13 @@ public class ShooterStateMachine {
    */
   public void apply() {
     switch (currentState) {
-      case PREPARING:
-        flywheel.setWantedState(FlywheelWantedStates.SHOOTING);
+      case PREPARING_TO_FIRE:
+        flywheel.setWantedState(FlywheelWantedStates.RUNNING);
         hood.setWantedState(HoodWantedStates.AIMING);
         flywheelKicker.setWantedState(FlywheelKickerStates.IDLE);
         break;
       case FIRING:
-        flywheel.setWantedState(FlywheelWantedStates.SHOOTING);
+        flywheel.setWantedState(FlywheelWantedStates.RUNNING);
         hood.setWantedState(HoodWantedStates.AIMING);
         flywheelKicker.setWantedState(FlywheelKickerStates.KICKING);
         break;
