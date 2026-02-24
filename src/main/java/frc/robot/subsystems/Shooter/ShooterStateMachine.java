@@ -1,7 +1,6 @@
 package frc.robot.subsystems.Shooter;
 
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel;
-import frc.robot.subsystems.Shooter.Flywheel.Flywheel.FlywheelInternalStates;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel.FlywheelWantedStates;
 import frc.robot.subsystems.Shooter.FlywheelKicker.FlywheelKicker;
 import frc.robot.subsystems.Shooter.FlywheelKicker.FlywheelKicker.FlywheelKickerStates;
@@ -81,7 +80,7 @@ public class ShooterStateMachine {
 
     switch (wantedState) {
       case SHOOTING:
-        boolean flywheelReady = flywheel.getState() == FlywheelInternalStates.AT_SETPOINT;
+        boolean flywheelReady = flywheel.isAtGoal();
         boolean hoodReady = hood.getState() == HoodInternalStates.AT_SETPOINT;
         boolean aligned = isAlignedToTarget.getAsBoolean();
 

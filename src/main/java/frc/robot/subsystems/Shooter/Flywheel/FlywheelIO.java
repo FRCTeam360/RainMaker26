@@ -26,6 +26,5 @@ public interface FlywheelIO {
   /** Set flywheel duty cycle directly (open loop) */
   public void setDutyCycle(double duty);
 
-
   public default void updateInputs(FlywheelIOInputs inputs) {}
 }

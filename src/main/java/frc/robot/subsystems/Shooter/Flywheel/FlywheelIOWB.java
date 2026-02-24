@@ -90,14 +90,13 @@ public class FlywheelIOWB implements FlywheelIO {
     motors[0].setControl(velocityTorqueCurrent.withVelocity(rps));
   }
 
-    @Override
+  @Override
   public void setBangBangRecoveryVelocity(double rpm) {
     double rps = rpm / 60.0;
     motors[0].setControl(velocityTorqueCurrent.withVelocity(rps));
   }
 
-
-      @Override
+  @Override
   public void setCoastVelocity(double rpm) {
     double rps = rpm / 60.0;
     motors[0].setControl(velocityTorqueCurrent.withVelocity(rps));

@@ -115,14 +115,12 @@ public class FlywheelIOBangBang implements FlywheelIO {
     motors[0].set(duty);
   }
 
-
-
   public void updateInputs(FlywheelIOInputs inputs) {
     for (int i = 0; i < motors.length; i++) {
       inputs.statorCurrents[i] = motors[i].getStatorCurrent().getValueAsDouble();
       inputs.supplyCurrents[i] = motors[i].getSupplyCurrent().getValueAsDouble();
       inputs.positions[i] = motors[i].getPosition().getValueAsDouble();
-      inputs.velocities[i] = motors[i].getVelocity().getValueAsDouble();
+      inputs.velocities[i] = motors[i].getVelocity().getValueAsDouble() * 60;
       inputs.voltages[i] = motors[i].getMotorVoltage().getValueAsDouble();
     }
   }
