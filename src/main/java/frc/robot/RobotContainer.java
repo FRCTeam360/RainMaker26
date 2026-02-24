@@ -295,7 +295,7 @@ public class RobotContainer {
     driverCont.b().whileTrue(flywheel.setVelocityCommand(() -> 4000.0));
 
     // The commented code is correct, and should be restored when sim testing is complete:
-    //driverCont.x().whileTrue(flywheelKicker.setDutyCycleCommand(() -> 0.5));
+    // driverCont.x().whileTrue(flywheelKicker.setDutyCycleCommand(() -> 0.5));
     // === FOR SIM === === === === === === === === === === === === ===
     Rotation2d testRotation = new Rotation2d();
     Pose2d test2dPose = new Pose2d(2.0, 2.0, testRotation);
@@ -314,7 +314,7 @@ public class RobotContainer {
         .whileTrue(hood.setPositionCommand(0.0)); // TODO change placeholder values for PB
     operatorCont.pov(0).whileTrue(hood.zero());
   }
-  
+
   private void configureBindings() {
     Command consumeVisionMeasurements =
         vision.consumeVisionMeasurements(

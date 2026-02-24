@@ -253,10 +253,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   /* The SysId routine to test */
   private SysIdRoutine m_sysIdRoutineToApply = m_sysIdRoutineTranslation;
 
-  // The following initializes the request used in the driveToPose method in this file
-  private final FieldCentricFacingAngle request =
-      new SwerveRequest.FieldCentricFacingAngle().withDeadband(POSITION_DEADBAND_MPS);
-
   /**
    * Constructs a CTRE SwerveDrivetrain using the specified constants.
    *
@@ -512,6 +508,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   public ChassisSpeeds getVelocity() {
     return this.getStateCopy().Speeds;
   }
+
+  // The following initializes the request used in the driveToPose method in this file
+  private final FieldCentricFacingAngle request =
+      new SwerveRequest.FieldCentricFacingAngle().withDeadband(POSITION_DEADBAND_MPS);
 
   // This method is essential for PIDToPose to function
   public void driveToPose(Pose2d setpointPose) {
