@@ -12,8 +12,8 @@ import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -59,8 +59,10 @@ import frc.robot.subsystems.Shooter.ShotCalculator.RobotShootingInfo;
 import frc.robot.subsystems.SuperStructure;
 import frc.robot.subsystems.SuperStructure.SuperStates;
 import frc.robot.subsystems.Vision.Vision;
+import frc.robot.subsystems.Vision.VisionIO;
 import frc.robot.subsystems.Vision.VisionIOLimelight3G;
 import frc.robot.subsystems.Vision.VisionIOLimelight4;
+import frc.robot.subsystems.Vision.VisionIOLimelightBase;
 import frc.robot.subsystems.Vision.VisionIOPhotonSim;
 import frc.robot.utils.AllianceFlipUtil;
 import frc.robot.utils.FieldConstants;
@@ -292,7 +294,14 @@ public class RobotContainer {
     driverCont.a().whileTrue(flywheel.setVelocityCommand(() -> 2000.0));
     driverCont.b().whileTrue(flywheel.setVelocityCommand(() -> 4000.0));
 
-    driverCont.x().whileTrue(flywheelKicker.setDutyCycleCommand(() -> 0.5));
+    // The commented code is correct, and should be restored when sim testing is complete:
+    //driverCont.x().whileTrue(flywheelKicker.setDutyCycleCommand(() -> 0.5));
+    // === FOR SIM === === === === === === === === === === === === ===
+    Rotation2d testRotation = new Rotation2d();
+    Pose2d test2dPose = new Pose2d(2.0, 2.0, testRotation);
+    PIDToPose testPIDToPose = new PIDToPose(drivetrain, test2dPose);
+    driverCont.x().whileTrue(testPIDToPose);
+    // === === === === === === === === === === === === === === === ===
     driverCont.y().whileTrue(flywheelKicker.setDutyCycleCommand(() -> -0.5));
 
     driverCont.pov(0).whileTrue(hood.setDutyCycleCommand(() -> 0.2));
@@ -305,7 +314,7 @@ public class RobotContainer {
         .whileTrue(hood.setPositionCommand(0.0)); // TODO change placeholder values for PB
     operatorCont.pov(0).whileTrue(hood.zero());
   }
-
+  
   private void configureBindings() {
     Command consumeVisionMeasurements =
         vision.consumeVisionMeasurements(
