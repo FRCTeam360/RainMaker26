@@ -129,10 +129,12 @@ public class RobotUtils {
     return hubActive;
   }
 
-  public static boolean isHubShootable(
+  public static Boolean isHubShootable(
       double timeOfFlight, double gameTime, Boolean isTele, Boolean hubActive) {
     if (isTele == true) {
-      if (hubActive == true) {
+      if (hubActive == null) {
+        return null;
+      } else if (hubActive == true) {
         return true;
       } else if (gameTime % 25 <= (timeOfFlight + 5.0)) {
         return true;
