@@ -28,5 +28,7 @@ public class ClimberIONoop implements ClimberIO {
 
   public boolean rightAboveMinHeight() {
       return false;}
+
+  public void zeroBoth() {}
   
 }
