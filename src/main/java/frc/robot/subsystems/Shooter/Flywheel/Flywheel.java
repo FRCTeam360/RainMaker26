@@ -12,7 +12,7 @@ import org.littletonrobotics.junction.Logger;
 
 public class Flywheel extends SubsystemBase {
   // Constants
-  private static final double TOLERANCE_RPM = 100.0;
+  private static final double TOLERANCE_RPM = 500.0;
 
   // IO fields
   private final FlywheelIO io;
