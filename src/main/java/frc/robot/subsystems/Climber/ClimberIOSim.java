@@ -42,9 +42,6 @@ public class ClimberIOSim implements ClimberIO {
 
   public void updatePIDF(double P, double I, double D, double F) {}
 
-  private final LinearSystem<N1, N1, N1> plant =
-      LinearSystemId.createFlywheelSystem(gearbox, JKgMetersSquared, 1.0);
-
   // FIXME: Assign real values. Ensure it uses the constructor mentioning carriage and drum
   private final ElevatorSim climberSim =
       new ElevatorSim(
@@ -73,7 +70,7 @@ public class ClimberIOSim implements ClimberIO {
     // rotational data into meters.
     climberSim.setInput(simClimberMotor.getSpeed() * RobotController.getBatteryVoltage());
     climberSim.update(0.02);
-    simClimberEncoder.setDistance(simClimberMotor.getPosition());
+    simClimberEncoder.setDistance(climberSim.getPositionMeters());
 
     RoboRioSim.setVInVoltage(
         BatterySim.calculateDefaultBatteryLoadedVoltage(climberSim.getCurrentDrawAmps()));

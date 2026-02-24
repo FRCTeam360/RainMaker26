@@ -376,6 +376,7 @@ public class RobotContainer {
     superStructure.setControlState(ControlState.SUPERSTRUCTURE);
     superStructure.setWantedSuperState(SuperStates.IDLE);
     drivetrain.setControl(new SwerveRequest.Idle());
+    climber.stop();
     flywheel.stop();
     hood.stop();
     intake.stop();

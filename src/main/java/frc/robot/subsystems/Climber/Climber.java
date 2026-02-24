@@ -46,8 +46,10 @@ public class Climber extends SubsystemBase {
         break;
       case RETRACTING:
         currentState = ClimberStates.RETRACTING;
+        break;
       case LOCKED:
         currentState = ClimberStates.LOCKED;
+        break;
       case IDLE:
       default:
         currentState = ClimberStates.IDLE;
