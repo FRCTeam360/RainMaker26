@@ -104,6 +104,7 @@ public final class Constants {
     // === CLIMBER ===
     public static final int CLIMBER_RIGHT_ID = 16;
     public static final int CLIMBER_LEFT_ID = 17;
+    
 
     // FIXME: update these values TO REAL VALUES
     public static final int INDEXER_SENSOR_ID = 73;
