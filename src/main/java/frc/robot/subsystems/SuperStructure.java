@@ -10,7 +10,7 @@ import frc.robot.subsystems.FlywheelKicker.FlywheelKicker.FlywheelKickerStates;
 import frc.robot.subsystems.Indexer.Indexer;
 import frc.robot.subsystems.Intake.Intake;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel;
-import frc.robot.subsystems.Shooter.Flywheel.Flywheel.FlywheelStates;
+import frc.robot.subsystems.Shooter.Flywheel.Flywheel.FlywheelInternalStates;
 import frc.robot.subsystems.Shooter.Hood.Hood;
 import frc.robot.subsystems.Shooter.Hood.Hood.HoodStates;
 import frc.robot.subsystems.Shooter.ShotCalculator;
@@ -167,7 +167,7 @@ public class SuperStructure extends SubsystemBase {
     intake.setWantedState(Intake.IntakeStates.OFF);
     indexer.setWantedState(Indexer.IndexerStates.OFF);
     flywheelKicker.setWantedState(FlywheelKickerStates.OFF);
-    flywheel.setWantedState(FlywheelStates.OFF);
+    flywheel.setWantedState(FlywheelInternalStates.OFF);
     hood.setWantedState(HoodStates.OFF);
   }
 

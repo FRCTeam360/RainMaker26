@@ -15,7 +15,7 @@ import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import frc.robot.Constants.WoodBotConstants;
 
-public class FlywheelIOWB implements FlywheelIO {
+public class FlywheelIOBangBang implements FlywheelIO {
 
   private final TalonFX[] motors = {
     new TalonFX(WoodBotConstants.FLYWHEEL_RIGHT_ID, WoodBotConstants.CANBUS),
@@ -24,7 +24,7 @@ public class FlywheelIOWB implements FlywheelIO {
   private TalonFXConfiguration rightConfig = new TalonFXConfiguration();
   private TalonFXConfiguration leftConfig = new TalonFXConfiguration();
 
-  public FlywheelIOWB() {
+  public FlywheelIOBangBang() {
     // Slot 0: Bang-bang control configuration
     // Very high kP creates bang-bang behavior (either full output or zero)
     rightConfig.Slot0.kP = 999999.0;

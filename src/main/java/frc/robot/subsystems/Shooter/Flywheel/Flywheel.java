@@ -16,7 +16,7 @@ public class Flywheel extends SubsystemBase {
   private final FlywheelIO io;
   private final FlywheelIOInputsAutoLogged inputs = new FlywheelIOInputsAutoLogged();
 
-  public enum FlywheelStates {
+  public enum FlywheelInternalStates {
     OFF,
     SPINNING_UP, // Duty cycle bang-bang - fast acceleration
     AT_SETPOINT, // Torque current bang-bang - maintaining speed
@@ -69,10 +69,10 @@ public class Flywheel extends SubsystemBase {
     targetVelocityRPS = velocityRPM / 60.0;
 
     // Trigger state transition if starting or stopping
-    if (velocityRPM > 0.0 && wantedState == FlywheelStates.OFF) {
-      wantedState = FlywheelStates.SPINNING_UP;
+    if (velocityRPM > 0.0 && wantedState == FlywheelInternalStates.OFF) {
+      wantedState = FlywheelInternalStates.SPINNING_UP;
     } else if (velocityRPM == 0.0) {
-      wantedState = FlywheelStates.OFF;
+      wantedState = FlywheelInternalStates.OFF;
     }
     // State machine in periodic() will handle remaining transitions (SPINNING_UP <-> AT_SETPOINT)
   }
@@ -85,13 +85,13 @@ public class Flywheel extends SubsystemBase {
     return currentControlMode;
   }
 
-  public FlywheelStates getState() {
+  public FlywheelInternalStates getState() {
     return currentState;
   }
 
-  private FlywheelStates wantedState = FlywheelStates.OFF;
-  private FlywheelStates currentState = FlywheelStates.OFF;
-  private FlywheelStates previousState = FlywheelStates.OFF;
+  private FlywheelInternalStates wantedState = FlywheelInternalStates.OFF;
+  private FlywheelInternalStates currentState = FlywheelInternalStates.OFF;
+  private FlywheelInternalStates previousState = FlywheelInternalStates.OFF;
 
   /**
    * Check if flywheel is at setpoint using debounced tolerance checks. Updates both the fast
@@ -119,31 +119,31 @@ public class Flywheel extends SubsystemBase {
     switch (wantedState) {
       case SPINNING_UP:
         if (targetVelocityRPS == 0.0) {
-          currentState = FlywheelStates.OFF;
+          currentState = FlywheelInternalStates.OFF;
         } else if (isAtSetpointVelocity()) {
-          currentState = FlywheelStates.AT_SETPOINT;
+          currentState = FlywheelInternalStates.AT_SETPOINT;
         } else {
-          currentState = FlywheelStates.SPINNING_UP;
+          currentState = FlywheelInternalStates.SPINNING_UP;
         }
         break;
 
       case AT_SETPOINT:
         // Automatic transitions based on velocity
         if (targetVelocityRPS == 0.0) {
-          currentState = FlywheelStates.OFF;
+          currentState = FlywheelInternalStates.OFF;
         } else if (!isAtSetpointVelocity()) {
-          currentState = FlywheelStates.SPINNING_UP;
+          currentState = FlywheelInternalStates.SPINNING_UP;
         } else {
-          currentState = FlywheelStates.AT_SETPOINT;
+          currentState = FlywheelInternalStates.AT_SETPOINT;
         }
         break;
 
       case COAST:
-        currentState = FlywheelStates.COAST;
+        currentState = FlywheelInternalStates.COAST;
         break;
 
       case OFF:
-        currentState = FlywheelStates.OFF;
+        currentState = FlywheelInternalStates.OFF;
         break;
     }
   }
@@ -183,7 +183,7 @@ public class Flywheel extends SubsystemBase {
     }
   }
 
-  public void setWantedState(FlywheelStates state) {
+  public void setWantedState(FlywheelInternalStates state) {
     wantedState = state;
     // State update will happen in periodic()
   }
