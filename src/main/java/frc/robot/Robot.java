@@ -52,7 +52,7 @@ public class Robot extends LoggedRobot {
 
     if (isReal()) {
       if (RobotUtils.isUsbWriteable()) {
-        Logger.addDataReceiver(new WPILOGWriter("/U"));
+        Logger.addDataReceiver(new WPILOGWriter(Constants.IOConstants.USB_ROOT_DIRECTORY));
       } else {
         Logger.addDataReceiver(new WPILOGWriter("/home/lvuser/logs"));
       }
@@ -95,9 +95,9 @@ public class Robot extends LoggedRobot {
     // and running subsystem periodic() methods.  This must be called from the robot's periodic
     // block in order for anything in the Command-based framework to work.
     m_timeAndJoystickReplay.update();
-    m_robotContainer.periodic();
-
+    m_robotContainer.preSchedulerUpdate();
     CommandScheduler.getInstance().run();
+    m_robotContainer.postSchedulerUpdate();
   }
 
   /** This function is called once each time the robot enters Disabled mode. */
@@ -112,6 +112,7 @@ public class Robot extends LoggedRobot {
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
   public void autonomousInit() {
+    m_robotContainer.onEnable();
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
     // schedule the autonomous command (example)
@@ -126,6 +127,7 @@ public class Robot extends LoggedRobot {
 
   @Override
   public void teleopInit() {
+    m_robotContainer.onEnable();
     // This makes sure that the autonomous stops running when
     // teleop starts running. If you want the autonomous to
     // continue until interrupted by another command, remove
@@ -143,6 +145,7 @@ public class Robot extends LoggedRobot {
   public void testInit() {
     // Cancels all running commands at the start of test mode.
     CommandScheduler.getInstance().cancelAll();
+    m_robotContainer.onTestEnable();
   }
 
   /** This function is called periodically during test mode. */

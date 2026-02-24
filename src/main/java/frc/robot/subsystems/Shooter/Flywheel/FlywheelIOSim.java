@@ -129,7 +129,7 @@ public class FlywheelIOSim implements FlywheelIO {
     flywheelSim.setInputVoltage(appliedVoltage);
 
     // Step 2: Update the simulation by one timestep
-    flywheelSim.update(0.02);
+    flywheelSim.update(SimulationConstants.SIM_TICK_RATE_S);
 
     // Convert RPM from simulation to RPS for consistency with Phoenix 6
     // (Phoenix 6 returns velocities in rotations per second by default)
