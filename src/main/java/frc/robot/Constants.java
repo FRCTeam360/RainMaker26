@@ -119,7 +119,7 @@ public final class Constants {
 
     // === HOPPER ===
     public static final int HOPPER_ROLLER_ID = 22;
-    public static final int TWININDEXER_ID = 23;
+    public static final int TWINDEXER_ID = 23;
     // public static final int HOPPER_SENSOR_ID = 25;
 
     // === HOOD ===

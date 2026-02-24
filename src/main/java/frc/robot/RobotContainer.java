@@ -359,9 +359,9 @@ public class RobotContainer {
     // configureFullShootingTestBindings(isIndependentMode);
   }
 
-  /** Configures intake and intake pivot test bindings for independent mode. */
+  /** Configures full intake to shooting test bindings for independent mode. */
   private void configureFullShootingTestBindings(BooleanSupplier isIndependentMode) {
-    driverCont.rightTrigger().and(isIndependentMode).whileTrue(flywheel.setDutyCycleCommand(01.0));
+    driverCont.rightTrigger().and(isIndependentMode).whileTrue(flywheel.setDutyCycleCommand(1.0));
     driverCont
         .a()
         .and(isIndependentMode)
