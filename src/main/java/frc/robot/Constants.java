@@ -22,18 +22,6 @@ public final class Constants {
   public static final AprilTagFieldLayout FIELD_LAYOUT =
       AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
 
-  public static final int IMU_MODE_EXTERNAL_ONLY = 0;
-
-  public static final int IMU_MODE_EXTERNAL_SEED = 1;
-
-  public static final int IMU_MODE_INTERNAL_ONLY = 2;
-
-  public static final int IMU_MODE_INTERNAL_MT1_ASSIST = 3;
-
-  public static final int IMU_MODE_INTERNAL_EXTERNAL_ASSIST = 4;
-
-  public static final double IMU_ASSIST_ALPHA = 0.001;
-
   public static enum RobotType {
     SIM,
     WOODBOT,
@@ -83,6 +71,8 @@ public final class Constants {
         new InterpolatingDoubleTreeMap();
     public static final InterpolatingDoubleTreeMap passFlywheelSpeedMap =
         new InterpolatingDoubleTreeMap();
+    public static final InterpolatingDoubleTreeMap timeOfFlightMap =
+        new InterpolatingDoubleTreeMap();
 
     static {
       // === SHOOTING VALUES ===
@@ -100,6 +90,8 @@ public final class Constants {
       shotFlywheelSpeedMap.put(2.0, 3000.0); // THIS IS GOOD
       shotFlywheelSpeedMap.put(0.0, 2750.0);
 
+      timeOfFlightMap.put(0.0, 0.0);
+
       // === PASSING VALUES === (TODO: change placeholder values)
       passFlywheelSpeedMap.put(6.0, 4000.0);
 
@@ -114,8 +106,8 @@ public final class Constants {
     public static final int INTAKE_ID = 15;
 
     // === CLIMBER ===
-    public static final int CLIMBER_RIGHT_ID = 16;
-    public static final int CLIMBER_LEFT_ID = 17;
+    public static final int CLIMBER_RIGHT_ID = 19;
+    public static final int CLIMBER_LEFT_ID = 18;
 
     // FIXME: update these values TO REAL VALUES
     public static final int INDEXER_SENSOR_ID = 73;
@@ -124,10 +116,10 @@ public final class Constants {
     public static final int FLYWHEEL_KICKER_ID = 76;
     public static final int FLYWHEEL_KICKER_SENSOR_ID = 77;
 
-    public static final int FLYWHEEL_RIGHT_ID = 78;
-    public static final int FLYWHEEL_LEFT_ID = 79;
+    public static final int FLYWHEEL_RIGHT_ID = 18;
+    public static final int FLYWHEEL_LEFT_ID = 19;
 
-    public static final int HOOD_ID = 80;
+    public static final int HOOD_ID = 16;
 
     public static final int HOPPER_ROLLER_ID = 0;
 
@@ -149,6 +141,9 @@ public final class Constants {
     public static final int FLYWHEEL_KICKER_MOTOR = 18;
     public static final int FLYWHEEL_KICKER_SENSOR_ID = 19;
     public static final int FLYWHEEL_MOTOR = 32;
+
+    // === HOPPER ROLLER ===
+    public static final int HOPPER_ROLLER_MOTOR = 35;
 
     // === HOOD ===
     public static final int HOOD_MOTOR = 34;
