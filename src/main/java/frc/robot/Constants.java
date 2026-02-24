@@ -121,7 +121,7 @@ public final class Constants {
 
     public static final int HOOD_ID = 24;
 
-    public static final int HOPPER_SENSOR_ID = 25;
+    // public static final int HOPPER_SENSOR_ID = 25;
 
     public static final String LIMELIGHT = "limelight";
 
