@@ -101,6 +101,7 @@ View the report: open build/reports/spotbugs/spotbugs.html
 - Use AdvantageKit's Logger.recordOutput() for all other values, grouping them by subsystem, class, or state type
 - Subsystems extend SubsystemBase
 - Subsystems have IO layers with specific hardware implementations (other than the superstructure) following FRC 6328's architecture
+- Every robot configuration in `RobotContainer` must initialize all subsystems. Use Noop IO implementations (e.g., `IntakePivotIONoop`) for hardware not present on a given robot. This eliminates null checks and ensures SuperStructure and bindings work uniformly across configs.
 
 ## Naming Conventions
 
@@ -185,6 +186,7 @@ When reviewing PRs, apply the checklist below **only to lines added or modified 
 - [ ] Sensor values validated/clamped before use
 - [ ] Units documented in variable names or comments (meters, radians, etc.)
 - [ ] Resource ownership clear (one subsystem per hardware device)
+- [ ] All subsystems initialized in every robot config (SIM, WoodBot, PracticeBot) — use Noop IOs for missing hardware
 
 ## Do
 
@@ -198,7 +200,7 @@ When reviewing PRs, apply the checklist below **only to lines added or modified 
 
 - Hard-code CAN IDs or port numbers (use Constants.java)
 - Use unnamed numeric literals - always use named constants with descriptive names
-- Skip null checks on hardware initialization in RobotContainer.java
+- Leave any subsystem uninitialized in RobotContainer.java — use a Noop IO implementation if the hardware is not present
 - Delete existing tests
 - Modify vendor dependencies without team discussion
 
