@@ -294,14 +294,7 @@ public class RobotContainer {
     driverCont.a().whileTrue(flywheel.setVelocityCommand(() -> 2000.0));
     driverCont.b().whileTrue(flywheel.setVelocityCommand(() -> 4000.0));
 
-    // The commented code is correct, and should be restored when sim testing is complete:
-    // driverCont.x().whileTrue(flywheelKicker.setDutyCycleCommand(() -> 0.5));
-    // === FOR SIM === === === === === === === === === === === === ===
-    Rotation2d testRotation = new Rotation2d();
-    Pose2d test2dPose = new Pose2d(2.0, 2.0, testRotation);
-    PIDToPose testPIDToPose = new PIDToPose(drivetrain, test2dPose);
-    driverCont.x().whileTrue(testPIDToPose);
-    // === === === === === === === === === === === === === === === ===
+    driverCont.x().whileTrue(flywheelKicker.setDutyCycleCommand(() -> 0.5));
     driverCont.y().whileTrue(flywheelKicker.setDutyCycleCommand(() -> -0.5));
 
     driverCont.pov(0).whileTrue(hood.setDutyCycleCommand(() -> 0.2));
