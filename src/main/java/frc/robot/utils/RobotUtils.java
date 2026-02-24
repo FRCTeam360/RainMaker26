@@ -130,6 +130,14 @@ public class RobotUtils {
     return hubActive;
   }
 
+  /**
+   * Returns if we can shoot at the hub and have the ball land directly when our hub switches on
+   *
+   * @param timeOfFlight how long the ball is going to fly
+   * @param gameTime the game time from driver station
+   * @param isTele the boolean on if the game is in teleop from driver station
+   * @return if we can shoot into our hub and score the ball
+   */
   public static Boolean isHubShootable(
       double timeOfFlight, double gameTime, Boolean isTele, Boolean hubActive) {
     if (isTele == true) {
@@ -137,6 +145,8 @@ public class RobotUtils {
         return null;
       } else if (hubActive == true) {
         return true;
+        // when gameTime is divided by 25, the modulo when the next alliance shift/end game starts
+        // will always be 5
       } else if (gameTime % ShooterConstants.ALLIANCE_PHASE_DURATION_SECONDS
           <= (timeOfFlight + ShooterConstants.ALLIANCE_PHASE_START_MODULO)) {
         return true;
