@@ -109,22 +109,26 @@ public final class Constants {
     public static final int CLIMBER_RIGHT_ID = 16;
     public static final int CLIMBER_LEFT_ID = 17;
 
+    // === FLYWHEEL ===
     public static final int FLYWHEEL_RIGHT_ID = 18;
     public static final int FLYWHEEL_LEFT_ID = 19;
 
+    // === FLYWHEEL KICKER ===
     public static final int FLYWHEEL_KICKER_ID = 20;
     public static final int FLYWHEEL_KICKER_SENSOR_ID = 21;
 
+    // === HOPPER ===
     public static final int HOPPER_ROLLER_ID = 22;
-
     public static final int TWININDEXER_ID = 23;
-
-    public static final int HOOD_ID = 24;
-
     // public static final int HOPPER_SENSOR_ID = 25;
 
+    // === HOOD ===
+    public static final int HOOD_ID = 24;
+
+    // === LIMELIGHT ===
     public static final String LIMELIGHT = "limelight";
 
+    // === CANBUS ===
     public static final CANBus CANBUS = new CANBus("Default Name");
   }
 
