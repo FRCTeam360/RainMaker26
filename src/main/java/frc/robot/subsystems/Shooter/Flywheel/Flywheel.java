@@ -48,7 +48,7 @@ public class Flywheel extends SubsystemBase {
   private final Debouncer controlModeDebouncer =
       new Debouncer(controlModeDebounceSeconds.get(), DebounceType.kFalling);
   private final Debouncer setpointDebouncer =
-      new Debouncer(atGoalDebounceSeconds.get(), DebounceType.kFalling);
+      new Debouncer(atGoalDebounceSeconds.get(), DebounceType.kRising);
 
   // State variables
   private FlywheelWantedStates wantedState = FlywheelWantedStates.IDLE;
