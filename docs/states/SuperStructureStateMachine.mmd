@@ -1,0 +1,31 @@
+%% SuperStructure Top-Level State Machine
+%% Reflects actual code in SuperStructure.java
+stateDiagram-v2
+    [*] --> IDLE
+
+    %% Intake flow
+    IDLE --> INTAKING : Driver holds<br>intake button
+    INTAKING --> IDLE : Driver releases<br>intake button
+
+    %% Hub shooting flow
+    IDLE --> SHOOT_AT_HUB : Driver holds<br>right trigger
+    SHOOT_AT_HUB --> IDLE : Driver releases<br>right trigger
+
+    %% Outpost pass flow
+    IDLE --> SHOOT_AT_OUTPOST : Driver holds<br>left trigger
+    SHOOT_AT_OUTPOST --> IDLE : Driver releases<br>left trigger
+
+    note right of IDLE : All subsystems stopped<br>Hood position = 0.0
+    note right of INTAKING : Intake runs at 75% duty cycle
+    note right of SHOOT_AT_HUB : See ShootingStateMachine<br>for internal states.<br>Flywheel RPM & Hood angle<br>from hubShotCalculator
+    note right of SHOOT_AT_OUTPOST : Same shooter sub-state machine.<br>Flywheel RPM & Hood angle<br>from outpostPassCalculator
+
+    %% Defined but not yet implemented
+    state "Not Yet Implemented" as NYI {
+        DEFENSE
+        X_OUT
+        AUTO_ALIGN
+        X_OUT_SHOOTING
+        FIRING
+        EJECTING
+    }

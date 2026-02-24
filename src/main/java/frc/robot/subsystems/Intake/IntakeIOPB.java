@@ -31,7 +31,7 @@ public class IntakeIOPB implements IntakeIO {
   private final SparkClosedLoopController closedLoopController;
 
   public IntakeIOPB() {
-    config.idleMode(IdleMode.kBrake);
+    config.idleMode(IdleMode.kCoast);
     config.inverted(true);
     config.smartCurrentLimit(CURRENT_LIMIT_AMPS);
 
