@@ -312,7 +312,7 @@ public class RobotContainer {
             });
     vision.setDefaultCommand(consumeVisionMeasurements.ignoringDisable(true));
 
-    drivetrain.setDefaultCommand(drivetrain.fieldOrientedDriveCommand(driverCont));
+    // drivetrain.setDefaultCommand(drivetrain.fieldOrientedDriveCommand(driverCont));
 
     BooleanSupplier isSuperstructureMode =
         () -> superStructure.getControlState() == ControlState.SUPERSTRUCTURE;
