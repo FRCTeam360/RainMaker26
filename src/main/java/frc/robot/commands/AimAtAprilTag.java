@@ -18,6 +18,7 @@ public class AimAtAprilTag extends Command {
   // PID constants need tuning
   private final PIDController m_turnController = new PIDController(0.03, 0.0, 0.0);
   private static final double kTurnToleranceDeg = 1.0;
+  private static final double TARGET_TX_DEG = 0.0;
 
   /** Creates a new AimAtAprilTag. */
   public AimAtAprilTag(CommandSwerveDrivetrain drive, Vision vision) {
@@ -46,7 +47,7 @@ public class AimAtAprilTag extends Command {
 
     if (m_vision.hasTarget()) {
       double tx = m_vision.getTx();
-      turnOutput = m_turnController.calculate(tx, 0);
+      turnOutput = m_turnController.calculate(tx, TARGET_TX_DEG);
     }
 
     // Use setControl to move the robot
@@ -56,9 +57,14 @@ public class AimAtAprilTag extends Command {
 
   @Override
   public void end(boolean interrupted) {
-    // Stop the robot by sending 0 velocities
-    m_drive.setControl(new SwerveRequest.Idle());
+      m_drive.setControl(
+          driveRequest
+              .withVelocityX(0)
+              .withVelocityY(0)
+              .withRotationalRate(0)
+      );
   }
+
 
   // Returns true when the command should end.
   @Override
