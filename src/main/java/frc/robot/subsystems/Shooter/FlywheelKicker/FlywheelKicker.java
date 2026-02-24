@@ -2,70 +2,96 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.subsystems.FlywheelKicker;
+package frc.robot.subsystems.Shooter.FlywheelKicker;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.ControlState;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
 public class FlywheelKicker extends SubsystemBase {
+  // Constants
+  private static final double KICKER_VELOCITY_RPM = 4500.0;
+
+  // IO fields
   private final FlywheelKickerIO io;
   private final FlywheelKickerIOInputsAutoLogged inputs = new FlywheelKickerIOInputsAutoLogged();
 
+  // Enums
   public enum FlywheelKickerStates {
-    OFF,
-    SHOOTING
+    IDLE,
+    KICKING
   }
 
-  public FlywheelKickerStates getState() {
-    return currentState;
-  }
+  // State variables
+  private FlywheelKickerStates wantedState = FlywheelKickerStates.IDLE;
+  private FlywheelKickerStates currentState = FlywheelKickerStates.IDLE;
+  private FlywheelKickerStates previousState = FlywheelKickerStates.IDLE;
+  private ControlState controlState = ControlState.SUPERSTRUCTURE;
 
-  private FlywheelKickerStates wantedState = FlywheelKickerStates.OFF;
-  private FlywheelKickerStates currentState = FlywheelKickerStates.OFF;
-  private FlywheelKickerStates previousState = FlywheelKickerStates.OFF;
-
-  public void setWantedState(FlywheelKickerStates state) {
-    wantedState = state;
-  }
-
-  private static final double KICKER_VELOCITY_RPM = 4500.0;
-
-  private void applyState() {
-    switch (currentState) {
-      case SHOOTING:
-        setVelocity(KICKER_VELOCITY_RPM);
-        break;
-      case OFF:
-      default:
-        stop();
-        break;
-    }
-  }
-
-  private void updateState() {
-    previousState = currentState;
-
-    switch (wantedState) {
-      case SHOOTING:
-        currentState = FlywheelKickerStates.SHOOTING;
-        break;
-      case OFF:
-      default:
-        currentState = FlywheelKickerStates.OFF;
-        break;
-    }
-  }
+  // Constructor
 
   /** Creates a new FlywheelKicker. */
   public FlywheelKicker(FlywheelKickerIO io) {
     this.io = io;
   }
 
+  // State machine methods
+
+  public FlywheelKickerStates getState() {
+    return currentState;
+  }
+
+  public void setWantedState(FlywheelKickerStates state) {
+    wantedState = state;
+  }
+
+  public void setControlState(ControlState controlState) {
+    this.controlState = controlState;
+  }
+
+  private void updateState() {
+    previousState = currentState;
+
+    switch (wantedState) {
+      case KICKING:
+        currentState = FlywheelKickerStates.KICKING;
+        break;
+      case IDLE:
+      default:
+        currentState = FlywheelKickerStates.IDLE;
+        break;
+    }
+  }
+
+  private void applyState() {
+    switch (currentState) {
+      case KICKING:
+        setVelocity(KICKER_VELOCITY_RPM);
+        break;
+      case IDLE:
+      default:
+        stop();
+        break;
+    }
+  }
+
+  // IO delegation methods
+
   public void setDutyCycle(double dutyCycle) {
     io.setDutyCycle(dutyCycle);
   }
+
+  public void setVelocity(double veloicty) {
+    io.setVelocity(veloicty);
+  }
+
+  public void stop() {
+    io.setDutyCycle(0.0);
+  }
+
+  // Command factory methods
 
   public Command setDutyCycleCommand(double value) {
     return this.setDutyCycleCommand(() -> value);
@@ -75,27 +101,24 @@ public class FlywheelKicker extends SubsystemBase {
     return this.runEnd(() -> io.setDutyCycle(valueSup.getAsDouble()), () -> io.setDutyCycle(0.0));
   }
 
-  public void setVelocity(double veloicty) {
-    io.setVelocity(veloicty);
-  }
-
   public Command setVelocityCommand(double rpm) {
     return this.runEnd(() -> setVelocity(rpm), () -> setVelocity(0.0));
   }
 
-  public void stop() {
-    io.setDutyCycle(0.0);
-  }
+  // periodic
 
   @Override
   public void periodic() {
     io.updateInputs(inputs);
     Logger.processInputs("FlywheelKicker", inputs);
 
-    updateState();
-    applyState();
+    if (controlState == ControlState.SUPERSTRUCTURE) {
+      updateState();
+      applyState();
+    }
     Logger.recordOutput("Subsystems/FlywheelKicker/WantedState", wantedState.toString());
     Logger.recordOutput("Subsystems/FlywheelKicker/CurrentState", currentState.toString());
     Logger.recordOutput("Subsystems/FlywheelKicker/PreviousState", previousState.toString());
+    Logger.recordOutput("Subsystems/FlywheelKicker/ControlState", controlState.toString());
   }
 }

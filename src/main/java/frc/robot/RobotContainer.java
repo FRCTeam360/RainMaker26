@@ -12,6 +12,7 @@ import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -23,10 +24,11 @@ import frc.robot.generated.WoodBotDrivetrain;
 import frc.robot.subsystems.Climber.Climber;
 import frc.robot.subsystems.Climber.ClimberIOSim;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
-import frc.robot.subsystems.FlywheelKicker.FlywheelKicker;
-import frc.robot.subsystems.FlywheelKicker.FlywheelKickerIOPB;
-import frc.robot.subsystems.FlywheelKicker.FlywheelKickerIOSim;
-import frc.robot.subsystems.FlywheelKicker.FlywheelKickerIOWB;
+import frc.robot.subsystems.ControlState;
+import frc.robot.subsystems.HopperRoller.HopperRoller;
+import frc.robot.subsystems.HopperRoller.HopperRollerIONoop;
+import frc.robot.subsystems.HopperRoller.HopperRollerIOPB;
+import frc.robot.subsystems.HopperRoller.HopperRollerIOSim;
 import frc.robot.subsystems.Indexer.Indexer;
 import frc.robot.subsystems.Indexer.IndexerIOPB;
 import frc.robot.subsystems.Indexer.IndexerIOSim;
@@ -36,27 +38,35 @@ import frc.robot.subsystems.Intake.IntakeIOPB;
 import frc.robot.subsystems.Intake.IntakeIOSim;
 import frc.robot.subsystems.Intake.IntakeIOWB;
 import frc.robot.subsystems.IntakePivot.IntakePivot;
+import frc.robot.subsystems.IntakePivot.IntakePivotIONoop;
 import frc.robot.subsystems.IntakePivot.IntakePivotIOPB;
 import frc.robot.subsystems.IntakePivot.IntakePivotIOSim;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel;
 import frc.robot.subsystems.Shooter.Flywheel.FlywheelIOPB;
 import frc.robot.subsystems.Shooter.Flywheel.FlywheelIOSim;
 import frc.robot.subsystems.Shooter.Flywheel.FlywheelIOWB;
+import frc.robot.subsystems.Shooter.FlywheelKicker.FlywheelKicker;
+import frc.robot.subsystems.Shooter.FlywheelKicker.FlywheelKickerIOPB;
+import frc.robot.subsystems.Shooter.FlywheelKicker.FlywheelKickerIOSim;
+import frc.robot.subsystems.Shooter.FlywheelKicker.FlywheelKickerIOWB;
 import frc.robot.subsystems.Shooter.Hood.Hood;
 import frc.robot.subsystems.Shooter.Hood.HoodIOPB;
 import frc.robot.subsystems.Shooter.Hood.HoodIOSim;
 import frc.robot.subsystems.Shooter.Hood.HoodIOWB;
 import frc.robot.subsystems.Shooter.ShooterConstants;
 import frc.robot.subsystems.Shooter.ShotCalculator;
+import frc.robot.subsystems.Shooter.ShotCalculator.RobotShootingInfo;
 import frc.robot.subsystems.SuperStructure;
 import frc.robot.subsystems.SuperStructure.SuperStates;
 import frc.robot.subsystems.Vision.Vision;
-import frc.robot.subsystems.Vision.VisionIOLimelight;
+import frc.robot.subsystems.Vision.VisionIOLimelight3G;
+import frc.robot.subsystems.Vision.VisionIOLimelight4;
 import frc.robot.subsystems.Vision.VisionIOPhotonSim;
 import frc.robot.utils.AllianceFlipUtil;
 import frc.robot.utils.FieldConstants;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.BooleanSupplier;
 import org.littletonrobotics.junction.Logger;
 
 /**
@@ -75,12 +85,14 @@ public class RobotContainer {
   private Vision vision;
   private Intake intake;
   private IntakePivot intakePivot;
+  private HopperRoller hopperRoller;
   private FlywheelKicker flywheelKicker;
   private Climber climber;
 
   private SuperStructure superStructure;
 
-  private ShotCalculator shotCalculator;
+  private ShotCalculator hubShotCalculator;
+  private ShotCalculator outpostPassCalculator;
 
   // TODO: refactor to allow for more than 1 drivetrain type
 
@@ -89,9 +101,18 @@ public class RobotContainer {
   // Replace with CommandPS4Controller or CommandJoystick if needed
 
   private final CommandXboxController driverCont = new CommandXboxController(0);
+  private final CommandXboxController operatorCont = new CommandXboxController(1);
   private final CommandXboxController testCont1 = new CommandXboxController(5);
 
   private static final double FLYWHEEL_KICKER_WARMUP_VELOCITY_RPM = 4000.0;
+
+  /** Frames to skip between processed frames while disabled. Only affects Limelight 4. */
+  private static final int DISABLED_THROTTLE_SKIP_FRAMES = 200;
+
+  /** Frames to skip between processed frames while enabled. Only affects Limelight 4. */
+  private static final int ENABLED_THROTTLE_SKIP_FRAMES = 0;
+
+  private RobotShootingInfo robotShootingInfo;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -105,10 +126,20 @@ public class RobotContainer {
                 Map.of("photonSim", new VisionIOPhotonSim(() -> drivetrain.getState().Pose)));
         flywheel = new Flywheel(new FlywheelIOSim());
         hood = new Hood(new HoodIOSim());
+        hopperRoller = new HopperRoller(new HopperRollerIOSim());
         indexer = new Indexer(new IndexerIOSim());
         intake = new Intake(new IntakeIOSim());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOSim());
-        climber = new Climber(new ClimberIOSim());
+        hopperRoller = new HopperRoller(new HopperRollerIOSim());
+
+        robotShootingInfo =
+            new RobotShootingInfo(
+                Constants.WoodBotConstants.shotHoodAngleMap,
+                Constants.WoodBotConstants.shotFlywheelSpeedMap,
+                Constants.WoodBotConstants.timeOfFlightMap,
+                ShooterConstants.ROBOT_TO_SHOOTER,
+                0.0,
+                5.0);
         break;
       case WOODBOT:
         drivetrain = WoodBotDrivetrain.createDrivetrain();
@@ -121,15 +152,31 @@ public class RobotContainer {
                 Map.ofEntries(
                     Map.entry(
                         Constants.WoodBotConstants.LIMELIGHT_3,
-                        new VisionIOLimelight(
+                        new VisionIOLimelight3G(
                             Constants.WoodBotConstants.LIMELIGHT_3,
                             () -> drivetrain.getAngle(),
                             () -> drivetrain.getAngularRate(),
-                            true,
+                            true)),
+                    Map.entry(
+                        Constants.WoodBotConstants.LIMELIGHT_4,
+                        new VisionIOLimelight4(
+                            Constants.WoodBotConstants.LIMELIGHT_4,
+                            () -> drivetrain.getAngle(),
+                            () -> drivetrain.getAngularRate(),
                             false))));
         intake = new Intake(new IntakeIOWB());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOWB());
-        // intakePivot = new IntakePivot(new IntakePivotIOPB());
+        intakePivot = new IntakePivot(new IntakePivotIONoop());
+        hopperRoller = new HopperRoller(new HopperRollerIONoop());
+
+        robotShootingInfo =
+            new RobotShootingInfo(
+                Constants.WoodBotConstants.shotHoodAngleMap,
+                Constants.WoodBotConstants.shotFlywheelSpeedMap,
+                Constants.WoodBotConstants.timeOfFlightMap,
+                ShooterConstants.ROBOT_TO_SHOOTER,
+                0.0,
+                5.0);
         break;
       case PRACTICEBOT:
       default:
@@ -145,27 +192,40 @@ public class RobotContainer {
                 Map.ofEntries(
                     Map.entry(
                         Constants.PracticeBotConstants.LIMELIGHT,
-                        new VisionIOLimelight(
+                        new VisionIOLimelight3G(
                             Constants.PracticeBotConstants.LIMELIGHT,
                             () -> drivetrain.getAngle(),
                             () -> drivetrain.getAngularRate(),
-                            true,
-                            false))));
+                            true))));
         intake = new Intake(new IntakeIOPB());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOPB());
         intakePivot = new IntakePivot(new IntakePivotIOPB());
+        hopperRoller = new HopperRoller(new HopperRollerIOPB());
+
+        robotShootingInfo =
+            new RobotShootingInfo(
+                Constants.WoodBotConstants.shotHoodAngleMap,
+                Constants.WoodBotConstants.shotFlywheelSpeedMap,
+                Constants.WoodBotConstants.timeOfFlightMap,
+                ShooterConstants.ROBOT_TO_SHOOTER,
+                0.0,
+                5.0);
         // TODO ADD CLIMBERS
         break;
     }
-    shotCalculator =
+    hubShotCalculator =
         new ShotCalculator(
             drivetrain::getPosition,
             () -> AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint.toTranslation2d()),
-            Constants.WoodBotConstants.shotHoodAngleMap,
-            Constants.WoodBotConstants.launchFlywheelSpeedMap,
-            ShooterConstants.ROBOT_TO_SHOOTER);
+            robotShootingInfo);
+    outpostPassCalculator =
+        new ShotCalculator(
+            drivetrain::getPosition,
+            () -> AllianceFlipUtil.apply(FieldConstants.Outpost.centerPoint),
+            robotShootingInfo);
     // Configure the trigger bindings
     // TODO: Re-enable superStructure construction and PathPlanner commands
+
     superStructure =
         new SuperStructure(
             intake,
@@ -173,31 +233,28 @@ public class RobotContainer {
             flywheelKicker,
             flywheel,
             hood,
-            shotCalculator,
+            intakePivot,
+            hopperRoller,
+            hubShotCalculator,
+            outpostPassCalculator,
             drivetrain::isAlignedToTarget);
 
-    if (Objects.nonNull(superStructure)) {
-      registerPathplannerCommand(
-          "basic intake", superStructure.setStateCommand(SuperStates.INTAKING));
-      if (Objects.nonNull(drivetrain)) {
-        // TODO: add end condition based on state from SuperStructure (based on sensor inputs)
-        registerPathplannerCommand(
-            "shoot at hub",
-            Commands.waitSeconds(10)
-                .deadlineFor(
-                    superStructure
-                        .setStateCommand(SuperStates.SHOOTING)
-                        .alongWith(
-                            drivetrain.faceAngleWhileDrivingCommand(
-                                () -> 0,
-                                () -> 0,
-                                () -> shotCalculator.calculateShot().targetHeading())))
-                .andThen(superStructure.setStateCommand(SuperStates.IDLE)));
-      }
-    }
     registerPathplannerCommand(
-        "run flywheel kicker",
-        flywheelKicker.setVelocityCommand(FLYWHEEL_KICKER_WARMUP_VELOCITY_RPM));
+        "basic intake", superStructure.setStateCommand(SuperStates.INTAKING));
+    // TODO: add end condition based on state from SuperStructure (based on sensor inputs)
+    registerPathplannerCommand(
+        "shoot at hub",
+        Commands.waitSeconds(10)
+            .deadlineFor(
+                superStructure
+                    .setStateCommand(SuperStates.SHOOT_AT_HUB)
+                    .alongWith(
+                        drivetrain.faceAngleWhileDrivingCommand(
+                            () -> 0,
+                            () -> 0,
+                            () -> hubShotCalculator.calculateShot().targetHeading())))
+            .andThen(superStructure.setStateCommand(SuperStates.IDLE)));
+
     configureBindings();
     // configureTestBindings();
 
@@ -232,131 +289,121 @@ public class RobotContainer {
    * PS4} controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
    * joysticks}.
    */
-  private void configureTestBindings() {
-    if (Objects.nonNull(drivetrain)) {
-      drivetrain.registerTelemetry(logger::telemeterize);
-    }
+  private void systemsTestBindings() {
+    driverCont.a().whileTrue(flywheel.setVelocityCommand(() -> 2000.0));
+    driverCont.b().whileTrue(flywheel.setVelocityCommand(() -> 4000.0));
 
-    if (Objects.nonNull(flywheel)) {
-      testCont1.a().whileTrue(flywheel.setDutyCycleCommand(() -> 0.5));
-    }
-    if (Objects.nonNull(flywheelKicker)) {
-      testCont1.b().whileTrue(flywheelKicker.setDutyCycleCommand(() -> 0.5));
-    }
-    if (Objects.nonNull(hood)) {
-      testCont1.x().whileTrue(hood.setDutyCycleCommand(() -> 0.5));
-    }
-    if (Objects.nonNull(indexer)) {
-      testCont1.y().whileTrue(indexer.setDutyCycleCommand(() -> 0.5));
-    }
-    if (Objects.nonNull(intake)) {
-      testCont1.leftBumper().whileTrue(intake.setDutyCycleCommand(() -> 0.5));
-    }
-    if (Objects.nonNull(intakePivot)) {
-      testCont1.rightBumper().whileTrue(intakePivot.setDutyCycleCommand(() -> 0.5));
-    }
+    driverCont.x().whileTrue(flywheelKicker.setDutyCycleCommand(() -> 0.5));
+    driverCont.y().whileTrue(flywheelKicker.setDutyCycleCommand(() -> -0.5));
+
+    driverCont.pov(0).whileTrue(hood.setDutyCycleCommand(() -> 0.2));
+    driverCont.pov(180).whileTrue(hood.setDutyCycleCommand(() -> -0.2));
+    driverCont
+        .pov(90)
+        .whileTrue(hood.setPositionCommand(0.0)); // TODO change placeholder values for PB
+    driverCont
+        .pov(270)
+        .whileTrue(hood.setPositionCommand(0.0)); // TODO change placeholder values for PB
+    operatorCont.pov(0).whileTrue(hood.zero());
   }
 
   private void configureBindings() {
-    // Only bind commands if the required subsystems/factories exist
-    if (Objects.nonNull(vision)) {
-      Command consumeVisionMeasurements =
-          vision.consumeVisionMeasurements(
-              measurements -> {
-                drivetrain.addVisionMeasurements(measurements);
-              });
-      vision.setDefaultCommand(consumeVisionMeasurements.ignoringDisable(true));
-    }
-    // TODO: make more elegant solution for null checking subsystems/commands
-    if (Objects.nonNull(drivetrain)) {
-      drivetrain.setDefaultCommand(drivetrain.fieldOrientedDriveCommand(driverCont));
-    }
+    Command consumeVisionMeasurements =
+        vision.consumeVisionMeasurements(
+            measurements -> {
+              drivetrain.addVisionMeasurements(measurements);
+            });
+    vision.setDefaultCommand(consumeVisionMeasurements.ignoringDisable(true));
 
-    if (Objects.nonNull(superStructure) && Objects.nonNull(drivetrain)) {
-      // Linked pair: whileTrue sets SHOOTING + aims, onFalse resets to IDLE.
-      // The InstantCommand (setStateCommand) finishes immediately; the alongWith group
-      // stays alive via faceAngleWhileDrivingCommand until whileTrue interrupts it.
-      driverCont
-          .rightTrigger()
-          .whileTrue(
-              superStructure
-                  .setStateCommand(SuperStates.SHOOTING)
-                  .alongWith(
-                      drivetrain.faceAngleWhileDrivingCommand(
-                          driverCont, () -> shotCalculator.calculateShot().targetHeading())));
-      // Must stay paired with the whileTrue above to reset state on trigger release
-      driverCont.rightTrigger().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
-    }
+    drivetrain.setDefaultCommand(drivetrain.fieldOrientedDriveCommand(driverCont));
 
-    // Null checks based on subsystems used by each command
-    // basicIntakeCmd uses intake and indexer
+    BooleanSupplier isSuperstructureMode =
+        () -> superStructure.getControlState() == ControlState.SUPERSTRUCTURE;
+    BooleanSupplier isIndependentMode =
+        () -> superStructure.getControlState() == ControlState.INDEPENDENT;
+
+    // Linked pair: whileTrue sets SHOOTING + aims, onFalse resets to IDLE.
+    // The InstantCommand (setStateCommand) finishes immediately; the alongWith group
+    // stays alive via faceAngleWhileDrivingCommand until whileTrue interrupts it.
+    Trigger shootAtHubTrigger = driverCont.rightTrigger().and(isSuperstructureMode);
+    shootAtHubTrigger.whileTrue(
+        superStructure
+            .setStateCommand(SuperStates.SHOOT_AT_HUB)
+            .alongWith(
+                drivetrain.faceAngleWhileDrivingCommand(
+                    driverCont, () -> hubShotCalculator.calculateShot().targetHeading())));
+    // Must stay paired with the whileTrue above to reset state on trigger release
+    shootAtHubTrigger.onFalse(superStructure.setStateCommand(SuperStates.IDLE));
+
+    Trigger shootAtOutpostTrigger = driverCont.leftTrigger().and(isSuperstructureMode);
+    shootAtOutpostTrigger.whileTrue(
+        superStructure
+            .setStateCommand(SuperStates.SHOOT_AT_OUTPOST)
+            .alongWith(
+                drivetrain.faceAngleWhileDrivingCommand(
+                    driverCont, () -> outpostPassCalculator.calculateShot().targetHeading())));
+    // Must stay paired with the whileTrue above to reset state on trigger release
+    shootAtOutpostTrigger.onFalse(superStructure.setStateCommand(SuperStates.IDLE));
+
     // TODO: Re-enable superStructure bindings
-    if (Objects.nonNull(superStructure) && Objects.nonNull(intake) && Objects.nonNull(indexer)) {
-      driverCont.leftBumper().onTrue(superStructure.setStateCommand(SuperStates.INTAKING));
-      driverCont.leftBumper().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
-      driverCont.a().whileTrue(indexer.setDutyCycleCommand(0.5));
-    }
+    Trigger intakeTrigger = driverCont.leftBumper().and(isSuperstructureMode);
+    intakeTrigger.onTrue(superStructure.setStateCommand(SuperStates.INTAKING));
+    intakeTrigger.onFalse(superStructure.setStateCommand(SuperStates.IDLE));
 
-    // setFlywheelKickerDutyCycle uses flywheelKicker
-    if (Objects.nonNull(flywheelKicker)) {
-      driverCont
-          .rightBumper()
-          .whileTrue(flywheelKicker.setVelocityCommand(FLYWHEEL_KICKER_WARMUP_VELOCITY_RPM));
-    }
+    driverCont.leftBumper().and(isIndependentMode).whileTrue(intake.setDutyCycleCommand(0.2));
 
-    // setHoodPosition uses hood
-    if (Objects.nonNull(hood)) {
-      // hood.setDefaultCommand(
-      //     CommandLogger.logCommand(hood.setPositionCmd(0.0), "hood default command"));
-      driverCont.pov(0).onTrue(hood.moveToZeroAndZero());
-      driverCont.pov(90).whileTrue(hood.setPositionCmd(4.0));
-      driverCont.pov(180).whileTrue(hood.setPositionCmd(16.0));
-      driverCont.pov(270).whileTrue(hood.setPositionCmd(23.0));
-      driverCont.start().onTrue(hood.zero());
-    }
+    driverCont.a().and(isIndependentMode).whileTrue(indexer.setDutyCycleCommand(0.5));
 
-    // shootWithRPM uses flywheel
-    if (Objects.nonNull(flywheel)) {
-      driverCont.x().whileTrue(flywheel.setVelocityCommand(2500));
-      driverCont.b().whileTrue(flywheel.setVelocityCommand(3000));
-      driverCont.y().whileTrue(flywheel.setVelocityCommand(3500));
-    }
+    // hood bindings
+    driverCont.pov(0).and(isIndependentMode).onTrue(hood.moveToZeroAndZero());
+    driverCont.pov(90).and(isIndependentMode).whileTrue(hood.setPositionCommand(4.0));
+    driverCont.pov(180).and(isIndependentMode).whileTrue(hood.setPositionCommand(16.0));
+    driverCont.pov(270).and(isIndependentMode).whileTrue(hood.setPositionCommand(23.0));
+    driverCont.start().and(isIndependentMode).onTrue(hood.zero());
+
+    // flywheel bindings
+    driverCont.x().and(isIndependentMode).whileTrue(flywheel.setVelocityCommand(2500));
+    driverCont.b().and(isIndependentMode).whileTrue(flywheel.setVelocityCommand(3000));
+    driverCont.y().and(isIndependentMode).whileTrue(flywheel.setVelocityCommand(3500));
 
     // Drivetrain commands
-    if (Objects.nonNull(drivetrain)) {
-      // driverCont.leftTrigger().whileTrue(drivetrain.faceHubWhileDriving(driverCont));
-      drivetrain.registerTelemetry(logger::telemeterize);
-      driverCont.back().onTrue(drivetrain.zeroCommand());
-    }
+    // driverCont.leftTrigger().whileTrue(drivetrain.faceHubWhileDriving(driverCont));
+    drivetrain.registerTelemetry(logger::telemeterize);
+    driverCont.back().onTrue(drivetrain.zeroCommand());
   }
 
   /** Stops all subsystems safely when the robot is disabled. */
   public void onDisable() {
-    if (Objects.nonNull(superStructure)) superStructure.setWantedSuperState(SuperStates.IDLE);
-    if (Objects.nonNull(drivetrain)) {
-      drivetrain.setControl(new SwerveRequest.Idle());
-    }
-    if (Objects.nonNull(flywheel)) {
-      flywheel.stop();
-    }
-    if (Objects.nonNull(hood)) {
-      hood.stop();
-    }
-    if (Objects.nonNull(intake)) {
-      intake.stop();
-    }
-    if (Objects.nonNull(intakePivot)) {
-      intakePivot.stop();
-    }
-    if (Objects.nonNull(indexer)) {
-      indexer.stop();
-    }
-    if (Objects.nonNull(flywheelKicker)) {
-      flywheelKicker.stop();
-    }
-    if (Objects.nonNull(climber)) {
-      climber.stop();
-    }
+    superStructure.setControlState(ControlState.SUPERSTRUCTURE);
+    superStructure.setWantedSuperState(SuperStates.IDLE);
+    drivetrain.setControl(new SwerveRequest.Idle());
+    flywheel.stop();
+    hood.stop();
+    intake.stop();
+    intakePivot.stop();
+    indexer.stop();
+    flywheelKicker.stop();
+    vision.enableIMUSeeding();
+    vision.setThrottle(DISABLED_THROTTLE_SKIP_FRAMES);
+  }
+
+  /** Called when the robot transitions from disabled to an enabled mode. */
+  public void onEnable() {
+    // Ensures superstructure control mode is active when enabled
+    superStructure.setControlState(ControlState.SUPERSTRUCTURE);
+    onEnableVision();
+  }
+
+  /** Sets up vision to run at full performance and temperature */
+  private void onEnableVision() {
+    vision.enableIMUAssist();
+    vision.setThrottle(ENABLED_THROTTLE_SKIP_FRAMES);
+  }
+
+  /** Decouples the superstructure from subsystems for test mode. */
+  public void onTestEnable() {
+    superStructure.setControlState(ControlState.INDEPENDENT);
+    onEnableVision();
   }
 
   /**
@@ -365,10 +412,22 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.CommandScheduler#run()}.
    */
   public void preSchedulerUpdate() {
-    if (Objects.nonNull(shotCalculator)) {
-      shotCalculator.clearShootingParams();
-      shotCalculator.calculateShot();
-    }
+    hubShotCalculator.clearShootingParams();
+    hubShotCalculator.calculateShot();
+    outpostPassCalculator.clearShootingParams();
+    outpostPassCalculator.calculateShot();
+  }
+
+  /**
+   * Flushes NetworkTables after the command scheduler runs. This ensures all values written during
+   * subsystem periodic methods (e.g., robot orientation for Limelights) are sent in a single batch.
+   * Required for all Limelights (not just LL4) because {@link
+   * VisionIOLimelightBase#updateInputs(VisionIO.VisionIOInputs)} uses {@code
+   * SetRobotOrientation_NoFlush}. Must be called in {@link Robot#robotPeriodic()} after {@link
+   * edu.wpi.first.wpilibj2.command.CommandScheduler#run()}.
+   */
+  public void postSchedulerUpdate() {
+    NetworkTableInstance.getDefault().flush();
   }
 
   /**
