@@ -34,5 +34,4 @@ public interface ClimberIO {
   public boolean leftAboveMinHeight();
 
   public boolean rightAboveMinHeight();
-
 }
