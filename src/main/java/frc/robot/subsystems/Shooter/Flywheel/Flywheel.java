@@ -4,229 +4,162 @@
 
 package frc.robot.subsystems.Shooter.Flywheel;
 
-import edu.wpi.first.math.filter.Debouncer;
-import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.ControlState;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
-import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 public class Flywheel extends SubsystemBase {
+  // Constants
+  private static final double TOLERANCE_RPM = 100.0;
+
+  // IO fields
   private final FlywheelIO io;
   private final FlywheelIOInputsAutoLogged inputs = new FlywheelIOInputsAutoLogged();
 
+  // Other fields
+  private DoubleSupplier shootVelocitySupplier = () -> 0.0;
+
+  // Enums
+  public enum FlywheelWantedStates {
+    IDLE,
+    SHOOTING
+  }
+
   public enum FlywheelInternalStates {
     OFF,
-    SPINNING_UP, // Duty cycle bang-bang - fast acceleration
-    AT_SETPOINT, // Torque current bang-bang - maintaining speed
-    COAST // Legacy state for compatibility
+    MOVING,
+    AT_SETPOINT
   }
 
-  // These enums are for logging and debugging - actual control mode is determined by state machine
-  public enum FlywheelControlType {
-    DUTY_CYCLE_BANG_BANG, // Startup/Recovery - fast acceleration
-    TORQUE_CURRENT_BANG_BANG, // Idle/Ball - consistent torque
-    VOLTAGE_VELOCITY, // Velocity PID control
-    STOP
-  }
+  // State variables
+  private FlywheelWantedStates wantedState = FlywheelWantedStates.IDLE;
+  private FlywheelInternalStates currentState = FlywheelInternalStates.OFF;
+  private FlywheelInternalStates previousState = FlywheelInternalStates.OFF;
+  private ControlState controlState = ControlState.SUPERSTRUCTURE;
 
-  // Tunable parameters for 4-phase bang-bang control
-  private static final LoggedNetworkNumber toleranceRPS =
-      new LoggedNetworkNumber("Flywheel/ToleranceRPS", 5); // 0.33 RPS ≈ 20 RPM
-  private static final LoggedNetworkNumber controlModeDebounceSeconds =
-      new LoggedNetworkNumber("Flywheel/ControlModeDebounceSeconds", 0.04);
-  private static final LoggedNetworkNumber atGoalDebounceSeconds =
-      new LoggedNetworkNumber("Flywheel/AtGoalDebounceSeconds", 0.2);
-
-  private final Debouncer controlModeDebouncer =
-      new Debouncer(controlModeDebounceSeconds.get(), DebounceType.kFalling);
-  private final Debouncer atGoalDebouncer =
-      new Debouncer(atGoalDebounceSeconds.get(), DebounceType.kFalling);
-
-  private FlywheelControlType currentControlMode = FlywheelControlType.STOP;
-  private boolean atGoal = false;
-  private boolean lastAtSetpointVelocity =
-      false; // Cached value for logging (computed once per cycle)
-  private double targetVelocityRPS = 0.0;
+  // Constructor
 
   /** Creates a new Flywheel. */
   public Flywheel(FlywheelIO io) {
     this.io = io;
   }
 
-  /**
-   * Set flywheel velocity using 4-phase bang-bang control. State machine handles control mode
-   * transitions automatically. Can be called repeatedly with different targets - state machine will
-   * adapt.
-   *
-   * @param velocityRPM target velocity in rotations per minute (RPM). Internally converted to RPS
-   *     for IO layer which expects rotations per second.
-   */
-  public void setVelocity(double velocityRPM) {
-    // Convert RPM to RPS for internal IO layer communication
-    // (Phoenix 6 velocities are in RPS, tolerance is in RPS)
-    targetVelocityRPS = velocityRPM / 60.0;
-
-    // Trigger state transition if starting or stopping
-    if (velocityRPM > 0.0 && wantedState == FlywheelInternalStates.OFF) {
-      wantedState = FlywheelInternalStates.SPINNING_UP;
-    } else if (velocityRPM == 0.0) {
-      wantedState = FlywheelInternalStates.OFF;
-    }
-    // State machine in periodic() will handle remaining transitions (SPINNING_UP <-> AT_SETPOINT)
-  }
-
-  public boolean isAtGoal() {
-    return atGoal;
-  }
-
-  public FlywheelControlType getControlMode() {
-    return currentControlMode;
-  }
+  // State machine methods
 
   public FlywheelInternalStates getState() {
     return currentState;
   }
 
-  private FlywheelInternalStates wantedState = FlywheelInternalStates.OFF;
-  private FlywheelInternalStates currentState = FlywheelInternalStates.OFF;
-  private FlywheelInternalStates previousState = FlywheelInternalStates.OFF;
+  public void setWantedState(FlywheelWantedStates state) {
+    wantedState = state;
+  }
+
+  public void setControlState(ControlState controlState) {
+    this.controlState = controlState;
+  }
 
   /**
-   * Check if flywheel is at setpoint using debounced tolerance checks. Updates both the fast
-   * control mode debouncer and slower at-goal debouncer. Caches result for logging.
+   * Sets the supplier for the shoot velocity from the shot calculator.
    *
-   * @return true if velocity has been within tolerance for control mode debounce time
+   * @param shootVelocitySupplier a DoubleSupplier providing the desired flywheel velocity in RPM
    */
-  private boolean isAtSetpointVelocity() {
-    double currentRPS = getLeaderVelocityRPS();
-    boolean inTolerance = Math.abs(currentRPS - targetVelocityRPS) <= toleranceRPS.get();
-
-    // Fast debouncer for control mode transitions (25ms default)
-    lastAtSetpointVelocity = controlModeDebouncer.calculate(inTolerance);
-
-    // Slower debouncer for external "ready to shoot" signal (200ms default)
-    atGoal = atGoalDebouncer.calculate(inTolerance);
-
-    return lastAtSetpointVelocity;
+  public void setShootVelocitySupplier(DoubleSupplier shootVelocitySupplier) {
+    this.shootVelocitySupplier = shootVelocitySupplier;
   }
 
   private void updateState() {
     previousState = currentState;
 
-    // State machine transitions
     switch (wantedState) {
-      case SPINNING_UP:
-        if (targetVelocityRPS == 0.0) {
-          currentState = FlywheelInternalStates.OFF;
-        } else if (isAtSetpointVelocity()) {
+      case SHOOTING:
+        if (atSetpoint(shootVelocitySupplier.getAsDouble())) {
           currentState = FlywheelInternalStates.AT_SETPOINT;
         } else {
-          currentState = FlywheelInternalStates.SPINNING_UP;
+          currentState = FlywheelInternalStates.MOVING;
         }
         break;
-
-      case AT_SETPOINT:
-        // Automatic transitions based on velocity
-        if (targetVelocityRPS == 0.0) {
-          currentState = FlywheelInternalStates.OFF;
-        } else if (!isAtSetpointVelocity()) {
-          currentState = FlywheelInternalStates.SPINNING_UP;
-        } else {
-          currentState = FlywheelInternalStates.AT_SETPOINT;
-        }
-        break;
-
-      case COAST:
-        currentState = FlywheelInternalStates.COAST;
-        break;
-
-      case OFF:
+      case IDLE:
+      default:
         currentState = FlywheelInternalStates.OFF;
         break;
     }
   }
 
-  public double getLeaderVelocityRPS() {
-    if (inputs.velocities.length > 0) {
-      return inputs.velocities[0]; // Convert from RPM to RPS
-    }
-    return 0.0;
-  }
-
   private void applyState() {
     switch (currentState) {
-      case SPINNING_UP:
-        // Duty cycle bang-bang for fast acceleration while spinning up
-        currentControlMode = FlywheelControlType.DUTY_CYCLE_BANG_BANG;
-        io.setVelocityBangBang(targetVelocityRPS);
-        break;
-
+      case MOVING:
       case AT_SETPOINT:
-        // Torque current bang-bang to maintain speed with consistent torque
-        currentControlMode = FlywheelControlType.TORQUE_CURRENT_BANG_BANG;
-        io.setVelocityTorqueCurrentBangBang(targetVelocityRPS);
+        setVelocity(shootVelocitySupplier.getAsDouble());
         break;
-
-      case COAST:
-        // Velocity PID control for coast mode
-        currentControlMode = FlywheelControlType.VOLTAGE_VELOCITY;
-        io.setVelocityPID(targetVelocityRPS);
-        break;
-
       case OFF:
       default:
-        currentControlMode = FlywheelControlType.STOP;
-        io.stop();
+        setDutyCycle(0.0);
         break;
     }
   }
 
-  public void setWantedState(FlywheelInternalStates state) {
-    wantedState = state;
-    // State update will happen in periodic()
+  private boolean atSetpoint(double targetRPM) {
+    // TODO: make tolerance a constant in hardware layer
+    if (inputs.velocities.length > 0) {
+      return Math.abs(inputs.velocities[0] - targetRPM) < TOLERANCE_RPM;
+    }
+    return false;
   }
 
-  @Override
-  public void periodic() {
-    io.updateInputs(inputs);
-    Logger.processInputs("Flywheel", inputs);
-
-    // Update state machine on every cycle to respond to velocity/current state changes
-    updateState();
-    applyState();
-
-    Logger.recordOutput("Subsystems/Flywheel/WantedState", wantedState.toString());
-    Logger.recordOutput("Subsystems/Flywheel/CurrentState", currentState.toString());
-    Logger.recordOutput("Subsystems/Flywheel/PreviousState", previousState.toString());
-    Logger.recordOutput("Subsystems/Flywheel/ControlMode", currentControlMode.toString());
-    Logger.recordOutput("Subsystems/Flywheel/AtGoal", atGoal);
-    Logger.recordOutput("Subsystems/Flywheel/TargetVelocityRPS", targetVelocityRPS);
-    Logger.recordOutput("Subsystems/Flywheel/AtSetpointVelocity", lastAtSetpointVelocity);
+  private boolean atSetpoint(DoubleSupplier targetRPM) {
+    return atSetpoint(targetRPM.getAsDouble());
   }
 
-  public void setDutyCycle(double duty) {
+  // IO delegation methods
+
+  private void setDutyCycle(double duty) {
     io.setDutyCycle(duty);
   }
 
-  public void stop() {
-    io.stop();
+  public void setVelocity(double rpm) {
+    io.setVelocity(rpm);
   }
+
+  public void stop() {
+    io.setDutyCycle(0.0);
+  }
+
+  // Command factory methods
 
   public Command setDutyCycleCommand(double value) {
     return this.setDutyCycleCommand(() -> value);
   }
 
   public Command setDutyCycleCommand(DoubleSupplier valueSup) {
-    return this.runEnd(() -> io.setDutyCycle(valueSup.getAsDouble()), () -> io.stop());
+    return this.runEnd(() -> setDutyCycle(valueSup.getAsDouble()), () -> setDutyCycle(0.0));
   }
 
-  public Command setVelocityCommand(double rps) {
-    return this.runEnd(() -> setVelocity(rps), () -> io.stop());
+  public Command setVelocityCommand(double rpm) {
+    return this.runEnd(() -> setVelocity(rpm), () -> setDutyCycle(0.0));
   }
 
   public Command setVelocityCommand(DoubleSupplier supplierVelocity) {
-    return this.runEnd(() -> setVelocity(supplierVelocity.getAsDouble()), () -> io.stop());
+    return this.runEnd(() -> setVelocity(supplierVelocity.getAsDouble()), () -> setDutyCycle(0.0));
+  }
+
+  // periodic
+
+  @Override
+  public void periodic() {
+    io.updateInputs(inputs);
+    Logger.processInputs("Flywheel", inputs);
+
+    if (controlState == ControlState.SUPERSTRUCTURE) {
+      // Update state machine on every cycle to respond to velocity/current state changes
+      updateState();
+      applyState();
+    }
+
+    Logger.recordOutput("Subsystems/Flywheel/WantedState", wantedState.toString());
+    Logger.recordOutput("Subsystems/Flywheel/CurrentState", currentState.toString());
+    Logger.recordOutput("Subsystems/Flywheel/PreviousState", previousState.toString());
+    Logger.recordOutput("Subsystems/Flywheel/ControlState", controlState.toString());
   }
 }
