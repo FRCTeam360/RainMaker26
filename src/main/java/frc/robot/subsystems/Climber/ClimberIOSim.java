@@ -15,10 +15,8 @@ import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
 import edu.wpi.first.wpilibj.simulation.BatterySim;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 import edu.wpi.first.wpilibj.simulation.EncoderSim;
-import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 import edu.wpi.first.wpilibj.simulation.PWMSim;
 import edu.wpi.first.wpilibj.simulation.RoboRioSim;
-import frc.robot.Constants;
 
 public class ClimberIOSim implements ClimberIO {
 
@@ -32,14 +30,33 @@ public class ClimberIOSim implements ClimberIO {
 
   private final double ENCODER_TICKS_PER_REVOLUTION = 4096;
 
+  public boolean rightAboveMinHeight() {
+    return false;
+  }
+
+  public boolean leftAboveMinHeight() {
+    return false;
+  }
+
+  public void zeroBoth() {}
+
+  public void updatePIDF(double P, double I, double D, double F) {}
+
   private final LinearSystem<N1, N1, N1> plant =
       LinearSystemId.createFlywheelSystem(gearbox, JKgMetersSquared, 1.0);
 
-
-    //FIXME: Assign real values. Ensure it uses the constructor mentioning carriage and drum
+  // FIXME: Assign real values. Ensure it uses the constructor mentioning carriage and drum
   private final ElevatorSim climberSim =
-    new ElevatorSim(gearbox, JKgMetersSquared, JKgMetersSquared, JKgMetersSquared, JKgMetersSquared, JKgMetersSquared, false, JKgMetersSquared, null);
-  
+      new ElevatorSim(
+          gearbox,
+          JKgMetersSquared,
+          JKgMetersSquared,
+          JKgMetersSquared,
+          JKgMetersSquared,
+          JKgMetersSquared,
+          false,
+          JKgMetersSquared,
+          null);
 
   private final EncoderSim simClimberEncoder = new EncoderSim(climberEncoder);
   private final PWMSim simClimberMotor = new PWMSim(climberMotor);
@@ -52,7 +69,8 @@ public class ClimberIOSim implements ClimberIO {
         2.0
             * Math.PI
             * (Units.inchesToMeters(2.0))
-            / ENCODER_TICKS_PER_REVOLUTION); // divided by 4096 to convert the encoder's raw rotational data into meters.
+            / ENCODER_TICKS_PER_REVOLUTION); // divided by 4096 to convert the encoder's raw
+    // rotational data into meters.
     climberSim.setInput(simClimberMotor.getSpeed() * RobotController.getBatteryVoltage());
     climberSim.update(0.02);
     simClimberEncoder.setDistance(simClimberMotor.getPosition());
@@ -62,13 +80,6 @@ public class ClimberIOSim implements ClimberIO {
 
     inputs.climberLeftPosition = simClimberMotor.getPosition();
     inputs.climberRightPosition = simClimberMotor.getPosition();
-
-    inputs.climberLeftVelocity = climberSim.getAngularVelocityRPM();    
-    inputs.climberRightVelocity = climberSim.getAngularVelocityRPM();
-
-    inputs.climberLeftDutyCycle = climberSim.getInputVoltage();
-    inputs.climberRightDutyCycle = climberSim.getInputVoltage();
-
   }
 
   public void setLeftDutyCycle(double dutyCycle) {

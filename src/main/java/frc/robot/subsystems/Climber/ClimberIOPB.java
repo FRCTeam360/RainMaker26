@@ -6,25 +6,24 @@
 
 package frc.robot.subsystems.Climber;
 
-import com.revrobotics.RelativeEncoder;
-import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.PersistMode;
+import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
+import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.ClosedLoopConfig;
 import com.revrobotics.spark.config.EncoderConfig;
-import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import frc.robot.Constants.PracticeBotConstants;
 
 public class ClimberIOPB implements ClimberIO {
 
   private final SparkMax leftClimberMotor =
-      new SparkMax(PracticeBotConstants.CLIMBER_ID, MotorType.kBrushless);
-  private final SparkMax rightClimberMotor = 
-      new SparkMax(PracticeBotConstants.CLIMBER_ID, MotorType.kBrushless);
-  
+      new SparkMax(PracticeBotConstants.CLIMBER_LEFT_ID, MotorType.kBrushless);
+  private final SparkMax rightClimberMotor =
+      new SparkMax(PracticeBotConstants.CLIMBER_RIGHT_ID, MotorType.kBrushless);
+
   private final RelativeEncoder leftClimberEncoder = leftClimberMotor.getEncoder();
   private final RelativeEncoder rightClimberEncoder = rightClimberMotor.getEncoder();
 
@@ -32,19 +31,21 @@ public class ClimberIOPB implements ClimberIO {
   private final SparkMaxConfig leftConfig = new SparkMaxConfig();
   private final SparkMaxConfig rightConfig = new SparkMaxConfig();
 
-  private static class UnloadedConstants {
-      static final double kP = 1.0;
-      static final double kI = 0.0001;
-      static final double kD = 0;
+  static final double kP = 1.0;
+  static final double kI = 0.0001;
+  static final double kD = 0;
 
+  public boolean rightAboveMinHeight() {
+    return false;
   }
 
-  private static class LoadedConstants {
-        static final double kP = 1.0;
-        static final double kI = 0.0001;
-        static final double kD = 0;
-        static final double kG = -0.03;
+  public boolean leftAboveMinHeight() {
+    return false;
   }
+
+  public void zeroBoth() {}
+
+  public void updatePIDF(double P, double I, double D, double F) {}
 
   /** Creates a new ClimberIOPB. */
   public ClimberIOPB() {
@@ -64,9 +65,10 @@ public class ClimberIOPB implements ClimberIO {
     rightConfig.apply(rightEncoderConfig);
     rightConfig.apply(closedLoopConfig);
 
-    leftClimberMotor.configure(leftConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    rightClimberMotor.configure(rightConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    
+    leftClimberMotor.configure(
+        leftConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    rightClimberMotor.configure(
+        rightConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 
   public void setLeftDutyCycle(double dutyCycle) {
@@ -79,10 +81,10 @@ public class ClimberIOPB implements ClimberIO {
 
   public void setLeftPosition(double position) {
     leftClimberMotor.getClosedLoopController().setSetpoint(position, ControlType.kPosition);
-  } 
+  }
 
   public void setRightPosition(double position) {
-    rightClimberMotor.getClosedLoopController().setReference(position, ControlType.kPosition);
+    rightClimberMotor.getClosedLoopController().setSetpoint(position, ControlType.kPosition);
   }
 
   public void updateInputs(ClimberIOInputs inputs) {

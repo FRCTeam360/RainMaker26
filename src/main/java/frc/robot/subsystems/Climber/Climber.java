@@ -4,10 +4,8 @@
 
 package frc.robot.subsystems.Climber;
 
-import org.littletonrobotics.junction.Logger;
-
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.subsystems.Intake.Intake.IntakeStates;
+import org.littletonrobotics.junction.Logger;
 
 public class Climber extends SubsystemBase {
   private final ClimberIO io;
@@ -86,7 +84,7 @@ public class Climber extends SubsystemBase {
     return io.leftAboveMinHeight();
   }
 
-  public boolean rightAboveMinHeight(){
+  public boolean rightAboveMinHeight() {
     return io.rightAboveMinHeight();
   }
 
@@ -101,7 +99,6 @@ public class Climber extends SubsystemBase {
   public void zeroBoth() {
     io.zeroBoth();
   }
-
 
   public void updatePIDF(double P, double I, double D, double F) {
     io.updatePIDF(P, I, D, F);

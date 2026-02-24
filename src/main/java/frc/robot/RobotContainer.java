@@ -236,7 +236,7 @@ public class RobotContainer {
     if (Objects.nonNull(drivetrain)) {
       drivetrain.registerTelemetry(logger::telemeterize);
     }
-
+  
     if (Objects.nonNull(flywheel)) {
       testCont1.a().whileTrue(flywheel.setDutyCycleCommand(() -> 0.5));
     }
