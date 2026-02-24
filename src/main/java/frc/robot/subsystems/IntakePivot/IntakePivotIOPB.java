@@ -52,7 +52,6 @@ public class IntakePivotIOPB implements IntakePivotIO {
 
   /** Creates a new IntakePivotIOPB. */
   public IntakePivotIOPB() {
-    intakePivot.setNeutralMode(NeutralModeValue.Brake);
     // FIXME: NUETRAL MODE BRAKE
     config.CurrentLimits.StatorCurrentLimit = STATOR_CURRENT_LIMIT_AMPS;
     config.CurrentLimits.SupplyCurrentLimit = SUPPLY_CURRENT_LIMIT_AMPS;
@@ -84,10 +83,9 @@ public class IntakePivotIOPB implements IntakePivotIO {
         .withReverseSoftLimitThreshold(Units.degreesToRotations(REVERSE_SOFT_LIMIT_DEGREES))
         .withForwardSoftLimitEnable(true)
         .withReverseSoftLimitEnable(true);
+    config.MotorOutput.NeutralMode = neutralMode;
 
     intakePivot.getConfigurator().apply(config, 0.050);
-
-    enableBrakeMode();
   }
 
   public void setZero() {

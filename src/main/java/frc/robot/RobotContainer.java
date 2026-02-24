@@ -373,7 +373,35 @@ public class RobotContainer {
     // driverCont.b().and(isIndependentMode).whileTrue(flywheel.setVelocityCommand(3000));
     // driverCont.y().and(isIndependentMode).whileTrue(flywheel.setVelocityCommand(3500));
 
-    configureIntakeTestBindings(isIndependentMode);
+    // configureIntakeTestBindings(isIndependentMode);
+    configureFullShootingTestBindings(isIndependentMode);
+  }
+
+  /** Configures intake and intake pivot test bindings for independent mode. */
+  private void configureFullShootingTestBindings(BooleanSupplier isIndependentMode) {
+    driverCont.rightTrigger().and(isIndependentMode).whileTrue(flywheel.setDutyCycleCommand(01.0));
+    driverCont
+        .a()
+        .and(isIndependentMode)
+        .whileTrue(
+            indexer
+                .setDutyCycleCommand(0.5)
+                .alongWith(
+                    hopperRoller.setDutyCycleCommand(0.5),
+                    flywheelKicker.setDutyCycleCommand(0.5),
+                    intake.setDutyCycleCommand(0.2)));
+    driverCont
+        .b()
+        .and(isIndependentMode)
+        .whileTrue(
+            indexer
+                .setDutyCycleCommand(-0.2)
+                .alongWith(
+                    hopperRoller.setDutyCycleCommand(-0.2),
+                    flywheelKicker.setDutyCycleCommand(-0.2),
+                    intake.setDutyCycleCommand(-0.2)));
+    driverCont.x().and(isIndependentMode).onTrue(intakePivot.setPositionCommand(() -> 90.0));
+    driverCont.y().and(isIndependentMode).onTrue(intakePivot.setPositionCommand(() -> 0.0));
   }
 
   /** Configures intake and intake pivot test bindings for independent mode. */
@@ -384,6 +412,14 @@ public class RobotContainer {
         .and(isIndependentMode)
         .whileTrue(intakePivot.setDutyCycleCommand(() -> -driverCont.getRightY() * 0.2));
 
+    driverCont
+        .rightBumper()
+        .and(isIndependentMode)
+        .whileTrue(intakePivot.setPositionCommand(() -> 0.0));
+    driverCont
+        .leftBumper()
+        .and(isIndependentMode)
+        .whileTrue(intakePivot.setPositionCommand(() -> 90.0));
     // Intake rollers: A = in, B = out
     driverCont.a().and(isIndependentMode).whileTrue(intake.setDutyCycleCommand(0.2));
     driverCont.b().and(isIndependentMode).whileTrue(intake.setDutyCycleCommand(-0.2));
@@ -430,9 +466,9 @@ public class RobotContainer {
    */
   public void preSchedulerUpdate() {
     hubShotCalculator.clearShootingParams();
-    hubShotCalculator.calculateShot();
+    // hubShotCalculator.calculateShot();
     outpostPassCalculator.clearShootingParams();
-    outpostPassCalculator.calculateShot();
+    // outpostPassCalculator.calculateShot();
   }
 
   /**
