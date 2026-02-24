@@ -12,13 +12,15 @@ public class Climber extends SubsystemBase {
   private final ClimberIOInputsAutoLogged inputs = new ClimberIOInputsAutoLogged();
 
   public enum ClimberStates {
-    OFF,
-    ROLLING
+    IDLE,
+    EXTENDING,
+    RETRACTING,
+    LOCKED
   }
 
-  private ClimberStates wantedState = ClimberStates.OFF;
-  private ClimberStates currentState = ClimberStates.OFF;
-  private ClimberStates previousState = ClimberStates.OFF;
+  private ClimberStates wantedState = ClimberStates.IDLE;
+  private ClimberStates currentState = ClimberStates.IDLE;
+  private ClimberStates previousState = ClimberStates.IDLE;
 
   /** Creates a new Climber. */
   public Climber(ClimberIO io) {
@@ -39,22 +41,32 @@ public class Climber extends SubsystemBase {
     previousState = currentState;
 
     switch (wantedState) {
-      case ROLLING:
-        currentState = ClimberStates.ROLLING;
+      case EXTENDING:
+        currentState = ClimberStates.EXTENDING;
         break;
-      case OFF:
+      case RETRACTING:
+        currentState = ClimberStates.RETRACTING;
+      case LOCKED:
+        currentState = ClimberStates.LOCKED;
+      case IDLE:
       default:
-        currentState = ClimberStates.OFF;
+        currentState = ClimberStates.IDLE;
         break;
+      
     }
   }
 
   private void applyState() {
     switch (currentState) {
-      case ROLLING:
+      case EXTENDING:
         climbing();
         break;
-      case OFF:
+      case RETRACTING:
+        break;
+      case LOCKED:
+        break;
+      case IDLE:
+      
       default:
         stop();
         break;
@@ -98,10 +110,6 @@ public class Climber extends SubsystemBase {
 
   public void zeroBoth() {
     io.zeroBoth();
-  }
-
-  public void updatePIDF(double P, double I, double D, double F) {
-    io.updatePIDF(P, I, D, F);
   }
 
   @Override
