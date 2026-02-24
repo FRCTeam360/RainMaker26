@@ -15,19 +15,17 @@ public interface FlywheelIO {
   }
 
   /** Set flywheel velocity using duty cycle bang-bang control (fast acceleration) */
-  public void setVelocityBangBang(double velocityRPS);
+  public void setShootVelocity(double velocityRPS);
 
   /** Set flywheel velocity using torque current bang-bang control (consistent torque) */
-  public void setVelocityTorqueCurrentBangBang(double velocityRPS);
+  public void setBangBangRecoveryVelocity(double velocityRPS);
 
   /** Set flywheel velocity using traditional PID control with torque current (Slot 2) */
-  public void setVelocityPID(double velocityRPS);
+  public void setCoastVelocity(double velocityRPS);
 
   /** Set flywheel duty cycle directly (open loop) */
   public void setDutyCycle(double duty);
 
-  /** Stop the flywheel */
-  public void stop();
 
   public default void updateInputs(FlywheelIOInputs inputs) {}
 }

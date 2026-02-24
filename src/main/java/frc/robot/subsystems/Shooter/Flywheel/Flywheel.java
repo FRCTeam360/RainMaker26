@@ -29,7 +29,7 @@ public class Flywheel extends SubsystemBase {
 
   public enum FlywheelInternalStates {
     OFF,
-    MOVING,
+    SPINNING_UP,
     AT_SETPOINT
   }
 
@@ -77,7 +77,7 @@ public class Flywheel extends SubsystemBase {
         if (atSetpoint(shootVelocitySupplier.getAsDouble())) {
           currentState = FlywheelInternalStates.AT_SETPOINT;
         } else {
-          currentState = FlywheelInternalStates.MOVING;
+          currentState = FlywheelInternalStates.SPINNING_UP;
         }
         break;
       case IDLE:
@@ -89,10 +89,12 @@ public class Flywheel extends SubsystemBase {
 
   private void applyState() {
     switch (currentState) {
-      case MOVING:
+      case SPINNING_UP:
+      setBangBangRecoveryVelocity(shootVelocitySupplier.getAsDouble());
+      break;
       case AT_SETPOINT:
-        setVelocity(shootVelocitySupplier.getAsDouble());
-        break;
+      setShootVelocity(shootVelocitySupplier.getAsDouble());
+      break;
       case OFF:
       default:
         setDutyCycle(0.0);
@@ -108,9 +110,7 @@ public class Flywheel extends SubsystemBase {
     return false;
   }
 
-  private boolean atSetpoint(DoubleSupplier targetRPM) {
-    return atSetpoint(targetRPM.getAsDouble());
-  }
+
 
   // IO delegation methods
 
@@ -118,8 +118,13 @@ public class Flywheel extends SubsystemBase {
     io.setDutyCycle(duty);
   }
 
-  public void setVelocity(double rpm) {
-    io.setVelocity(rpm);
+  public void setShootVelocity(double rpm) {
+    io.setShootVelocity(rpm);
+  }
+  
+
+    public void setBangBangRecoveryVelocity(double rpm) {
+    io.setShootVelocity(rpm);
   }
 
   public void stop() {
@@ -137,11 +142,11 @@ public class Flywheel extends SubsystemBase {
   }
 
   public Command setVelocityCommand(double rpm) {
-    return this.runEnd(() -> setVelocity(rpm), () -> setDutyCycle(0.0));
+    return this.runEnd(() -> setShootVelocity(rpm), () -> setDutyCycle(0.0));
   }
 
   public Command setVelocityCommand(DoubleSupplier supplierVelocity) {
-    return this.runEnd(() -> setVelocity(supplierVelocity.getAsDouble()), () -> setDutyCycle(0.0));
+    return this.runEnd(() -> setShootVelocity(supplierVelocity.getAsDouble()), () -> setDutyCycle(0.0));
   }
 
   // periodic

@@ -92,19 +92,19 @@ public class FlywheelIOBangBang implements FlywheelIO {
   private final VelocityVoltage velocityPID = new VelocityVoltage(0.0).withSlot(2);
 
   @Override
-  public void setVelocityBangBang(double velocityRPS) {
+  public void setShootVelocity(double velocityRPS) {
     // Startup/Recovery phase: Duty cycle bang-bang (max acceleration)
     motors[0].setControl(dutyCycleBangBang.withVelocity(velocityRPS));
   }
 
   @Override
-  public void setVelocityTorqueCurrentBangBang(double velocityRPS) {
+  public void setBangBangRecoveryVelocity(double velocityRPS) {
     // Idle/Ball phase: Torque current bang-bang (consistent torque, 40A limit from config)
     motors[0].setControl(torqueCurrentBangBang.withVelocity(velocityRPS));
   }
 
   @Override
-  public void setVelocityPID(double velocityRPS) {
+  public void setCoastVelocity(double velocityRPS) {
     // Traditional PID control using voltage control (not limited by torque current)
     // Limited only by supply current limit (100A) and voltage saturation
     motors[0].setControl(velocityPID.withVelocity(velocityRPS));
@@ -115,10 +115,7 @@ public class FlywheelIOBangBang implements FlywheelIO {
     motors[0].set(duty);
   }
 
-  @Override
-  public void stop() {
-    motors[0].set(0.0);
-  }
+
 
   public void updateInputs(FlywheelIOInputs inputs) {
     for (int i = 0; i < motors.length; i++) {
