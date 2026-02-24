@@ -119,7 +119,7 @@ public final class Constants {
 
     public static final int TWININDEXER_ID = 23;
 
-    public static final int HOOD_ID = 16;
+    public static final int HOOD_ID = 24;
 
     public static final int HOPPER_SENSOR_ID = 25;
 
