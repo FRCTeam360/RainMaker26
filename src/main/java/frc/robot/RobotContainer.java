@@ -286,24 +286,6 @@ public class RobotContainer {
    * PS4} controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
    * joysticks}.
    */
-  private void systemsTestBindings() {
-    driverCont.a().whileTrue(flywheel.setVelocityCommand(() -> 2000.0));
-    driverCont.b().whileTrue(flywheel.setVelocityCommand(() -> 4000.0));
-
-    driverCont.x().whileTrue(flywheelKicker.setDutyCycleCommand(() -> 0.5));
-    driverCont.y().whileTrue(flywheelKicker.setDutyCycleCommand(() -> -0.5));
-
-    driverCont.pov(0).whileTrue(hood.setDutyCycleCommand(() -> 0.2));
-    driverCont.pov(180).whileTrue(hood.setDutyCycleCommand(() -> -0.2));
-    driverCont
-        .pov(90)
-        .whileTrue(hood.setPositionCommand(0.0)); // TODO change placeholder values for PB
-    driverCont
-        .pov(270)
-        .whileTrue(hood.setPositionCommand(0.0)); // TODO change placeholder values for PB
-    operatorCont.pov(0).whileTrue(hood.zero());
-  }
-
   private void configureBindings() {
     Command consumeVisionMeasurements =
         vision.consumeVisionMeasurements(
@@ -312,7 +294,7 @@ public class RobotContainer {
             });
     vision.setDefaultCommand(consumeVisionMeasurements.ignoringDisable(true));
 
-    // drivetrain.setDefaultCommand(drivetrain.fieldOrientedDriveCommand(driverCont));
+    drivetrain.setDefaultCommand(drivetrain.fieldOrientedDriveCommand(driverCont));
 
     BooleanSupplier isSuperstructureMode =
         () -> superStructure.getControlState() == ControlState.SUPERSTRUCTURE;
@@ -357,24 +339,24 @@ public class RobotContainer {
 
   /** Configures bindings that are active only in independent (test) mode. */
   private void configureIndependentModeBindings(BooleanSupplier isIndependentMode) {
-    // driverCont.leftBumper().and(isIndependentMode).whileTrue(intake.setDutyCycleCommand(0.2));
+    driverCont.leftBumper().and(isIndependentMode).whileTrue(intake.setDutyCycleCommand(0.2));
 
-    // driverCont.a().and(isIndependentMode).whileTrue(indexer.setDutyCycleCommand(0.5));
+    driverCont.a().and(isIndependentMode).whileTrue(indexer.setDutyCycleCommand(0.5));
 
-    // // hood bindings
-    // driverCont.pov(0).and(isIndependentMode).onTrue(hood.moveToZeroAndZero());
-    // driverCont.pov(90).and(isIndependentMode).whileTrue(hood.setPositionCommand(4.0));
-    // driverCont.pov(180).and(isIndependentMode).whileTrue(hood.setPositionCommand(16.0));
-    // driverCont.pov(270).and(isIndependentMode).whileTrue(hood.setPositionCommand(23.0));
-    // driverCont.start().and(isIndependentMode).onTrue(hood.zero());
+    // hood bindings
+    driverCont.pov(0).and(isIndependentMode).onTrue(hood.moveToZeroAndZero());
+    driverCont.pov(90).and(isIndependentMode).whileTrue(hood.setPositionCommand(4.0));
+    driverCont.pov(180).and(isIndependentMode).whileTrue(hood.setPositionCommand(16.0));
+    driverCont.pov(270).and(isIndependentMode).whileTrue(hood.setPositionCommand(23.0));
+    driverCont.start().and(isIndependentMode).onTrue(hood.zero());
 
-    // // flywheel bindings
-    // driverCont.x().and(isIndependentMode).whileTrue(flywheel.setVelocityCommand(2500));
-    // driverCont.b().and(isIndependentMode).whileTrue(flywheel.setVelocityCommand(3000));
-    // driverCont.y().and(isIndependentMode).whileTrue(flywheel.setVelocityCommand(3500));
+    // flywheel bindings
+    driverCont.x().and(isIndependentMode).whileTrue(flywheel.setVelocityCommand(2500));
+    driverCont.b().and(isIndependentMode).whileTrue(flywheel.setVelocityCommand(3000));
+    driverCont.y().and(isIndependentMode).whileTrue(flywheel.setVelocityCommand(3500));
 
     // configureIntakeTestBindings(isIndependentMode);
-    configureFullShootingTestBindings(isIndependentMode);
+    // configureFullShootingTestBindings(isIndependentMode);
   }
 
   /** Configures intake and intake pivot test bindings for independent mode. */
