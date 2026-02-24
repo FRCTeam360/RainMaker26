@@ -1,4 +1,4 @@
-package frc.robot.subsystems.FlywheelKicker;
+package frc.robot.subsystems.Shooter.FlywheelKicker;
 
 import com.ctre.phoenix6.configs.CANrangeConfiguration;
 import com.ctre.phoenix6.hardware.CANrange;

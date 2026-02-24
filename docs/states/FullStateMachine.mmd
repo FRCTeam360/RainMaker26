@@ -1,0 +1,75 @@
+stateDiagram-v2
+    [*] --> IDLE
+
+    state IDLE {
+        [*] --> idle_subsystems
+        state "All Subsystems" as idle_subsystems {
+            idle_intake: Intake → OFF
+            idle_pivot: IntakePivot → OFF
+            idle_indexer: Indexer → OFF
+            idle_hopper: HopperRoller → OFF
+            idle_kicker: FlywheelKicker → OFF
+            idle_flywheel: Flywheel → OFF
+            idle_hood: Hood → OFF (position 0.0)
+        }
+    }
+
+    state INTAKING {
+        [*] --> intaking_subsystems
+        state "Active Subsystems" as intaking_subsystems {
+            int_intake: Intake → INTAKING (75%)
+            int_pivot: IntakePivot → not driven
+            int_hopper: HopperRoller → not driven
+        }
+    }
+
+    state SHOOT_AT_HUB {
+        [*] --> hub_PREPARING
+
+        state "PREPARING" as hub_PREPARING {
+            hub_prep_fw: Flywheel → SHOOTING (MOVING)
+            hub_prep_hood: Hood → SHOOTING (MOVING)
+            hub_prep_kicker: FlywheelKicker → OFF
+            hub_prep_indexer: Indexer → OFF
+        }
+
+        state "FIRING" as hub_FIRING {
+            hub_fire_fw: Flywheel → SHOOTING (AT_SETPOINT)
+            hub_fire_hood: Hood → SHOOTING (AT_SETPOINT)
+            hub_fire_kicker: FlywheelKicker → SHOOTING (4500 RPM)
+            hub_fire_indexer: Indexer → SHOOTING (40%)
+        }
+
+        hub_PREPARING --> hub_FIRING : Flywheel AT_SETPOINT<br>AND Hood AT_SETPOINT<br>AND aligned
+        hub_FIRING --> hub_PREPARING : Speed lost OR<br>hood position lost OR<br>alignment lost
+    }
+
+    state SHOOT_AT_OUTPOST {
+        [*] --> out_PREPARING
+
+        state "PREPARING" as out_PREPARING {
+            out_prep_fw: Flywheel → SHOOTING (MOVING)
+            out_prep_hood: Hood → SHOOTING (MOVING)
+            out_prep_kicker: FlywheelKicker → OFF
+            out_prep_indexer: Indexer → OFF
+        }
+
+        state "FIRING" as out_FIRING {
+            out_fire_fw: Flywheel → SHOOTING (AT_SETPOINT)
+            out_fire_hood: Hood → SHOOTING (AT_SETPOINT)
+            out_fire_kicker: FlywheelKicker → SHOOTING (4500 RPM)
+            out_fire_indexer: Indexer → SHOOTING (40%)
+        }
+
+        out_PREPARING --> out_FIRING : Flywheel AT_SETPOINT<br>AND Hood AT_SETPOINT<br>AND aligned
+        out_FIRING --> out_PREPARING : Speed lost OR<br>hood position lost OR<br>alignment lost
+    }
+
+    IDLE --> INTAKING : Intake button held
+    INTAKING --> IDLE : Intake button released
+
+    IDLE --> SHOOT_AT_HUB : Right trigger held
+    SHOOT_AT_HUB --> IDLE : Right trigger released
+
+    IDLE --> SHOOT_AT_OUTPOST : Left trigger held
+    SHOOT_AT_OUTPOST --> IDLE : Left trigger released

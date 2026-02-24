@@ -6,124 +6,160 @@ package frc.robot.subsystems.Shooter.Flywheel;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.ControlState;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
 public class Flywheel extends SubsystemBase {
+  // Constants
+  private static final double TOLERANCE_RPM = 100.0;
+
+  // IO fields
   private final FlywheelIO io;
   private final FlywheelIOInputsAutoLogged inputs = new FlywheelIOInputsAutoLogged();
-  private DoubleSupplier velocitySupplier = () -> 0.0;
 
-  public enum FlywheelStates {
-    OFF,
+  // Other fields
+  private DoubleSupplier shootVelocitySupplier = () -> 0.0;
+
+  // Enums
+  public enum FlywheelWantedStates {
+    IDLE,
     SHOOTING
   }
+
+  public enum FlywheelInternalStates {
+    OFF,
+    MOVING,
+    AT_SETPOINT
+  }
+
+  // State variables
+  private FlywheelWantedStates wantedState = FlywheelWantedStates.IDLE;
+  private FlywheelInternalStates currentState = FlywheelInternalStates.OFF;
+  private FlywheelInternalStates previousState = FlywheelInternalStates.OFF;
+  private ControlState controlState = ControlState.SUPERSTRUCTURE;
+
+  // Constructor
 
   /** Creates a new Flywheel. */
   public Flywheel(FlywheelIO io) {
     this.io = io;
   }
 
-  /**
-   * Sets the supplier for the flywheel velocity from the shot calculator.
-   *
-   * @param velocitySupplier a DoubleSupplier providing the desired flywheel velocity in RPM
-   */
-  public void setVelocitySupplier(DoubleSupplier velocitySupplier) {
-    this.velocitySupplier = velocitySupplier;
-  }
+  // State machine methods
 
-  public FlywheelStates getState() {
+  public FlywheelInternalStates getState() {
     return currentState;
   }
 
-  private FlywheelStates wantedState = FlywheelStates.OFF;
-  private FlywheelStates currentState = FlywheelStates.OFF;
-  private FlywheelStates previousState = FlywheelStates.OFF;
+  public void setWantedState(FlywheelWantedStates state) {
+    wantedState = state;
+  }
+
+  public void setControlState(ControlState controlState) {
+    this.controlState = controlState;
+  }
+
+  /**
+   * Sets the supplier for the shoot velocity from the shot calculator.
+   *
+   * @param shootVelocitySupplier a DoubleSupplier providing the desired flywheel velocity in RPM
+   */
+  public void setShootVelocitySupplier(DoubleSupplier shootVelocitySupplier) {
+    this.shootVelocitySupplier = shootVelocitySupplier;
+  }
 
   private void updateState() {
     previousState = currentState;
 
     switch (wantedState) {
       case SHOOTING:
-        currentState = FlywheelStates.SHOOTING;
+        if (atSetpoint(shootVelocitySupplier.getAsDouble())) {
+          currentState = FlywheelInternalStates.AT_SETPOINT;
+        } else {
+          currentState = FlywheelInternalStates.MOVING;
+        }
         break;
-      case OFF:
-        currentState = FlywheelStates.OFF;
+      case IDLE:
+      default:
+        currentState = FlywheelInternalStates.OFF;
         break;
     }
-  }
-
-  public void setVelocity(double velocity) {
-    io.setVelocity(velocity);
-  }
-
-  public double getVelocity() {
-    if (inputs.velocities.length > 0) {
-      return inputs.velocities[0];
-    }
-    return 0.0;
-  }
-
-  public boolean atSetpoint(double targetRPM, double tolerance) {
-    // TODO: make tolerance a constant in hardware layer
-    return Math.abs(getVelocity() - targetRPM) < tolerance;
-  }
-
-  public boolean atSetpoint(DoubleSupplier targetRPM, double tolerance) {
-    return atSetpoint(targetRPM.getAsDouble(), tolerance);
   }
 
   private void applyState() {
     switch (currentState) {
-      case SHOOTING:
-        setVelocity(velocitySupplier.getAsDouble());
+      case MOVING:
+      case AT_SETPOINT:
+        setVelocity(shootVelocitySupplier.getAsDouble());
         break;
       case OFF:
       default:
-        stop();
+        setDutyCycle(0.0);
         break;
     }
   }
 
-  public void setWantedState(FlywheelStates state) {
-    wantedState = state;
+  private boolean atSetpoint(double targetRPM) {
+    // TODO: make tolerance a constant in hardware layer
+    if (inputs.velocities.length > 0) {
+      return Math.abs(inputs.velocities[0] - targetRPM) < TOLERANCE_RPM;
+    }
+    return false;
   }
 
-  @Override
-  public void periodic() {
-    io.updateInputs(inputs);
-    Logger.processInputs("Flywheel", inputs);
-
-    updateState();
-    applyState();
-    Logger.recordOutput("Subsystems/Flywheel/WantedState", wantedState.toString());
-    Logger.recordOutput("Subsystems/Flywheel/CurrentState", currentState.toString());
-    Logger.recordOutput("Subsystems/Flywheel/PreviousState", previousState.toString());
+  private boolean atSetpoint(DoubleSupplier targetRPM) {
+    return atSetpoint(targetRPM.getAsDouble());
   }
 
-  public void setDutyCycle(double duty) {
+  // IO delegation methods
+
+  private void setDutyCycle(double duty) {
     io.setDutyCycle(duty);
+  }
+
+  public void setVelocity(double rpm) {
+    io.setVelocity(rpm);
   }
 
   public void stop() {
     io.setDutyCycle(0.0);
   }
 
+  // Command factory methods
+
   public Command setDutyCycleCommand(double value) {
     return this.setDutyCycleCommand(() -> value);
   }
 
   public Command setDutyCycleCommand(DoubleSupplier valueSup) {
-    return this.runEnd(() -> io.setDutyCycle(valueSup.getAsDouble()), () -> io.setDutyCycle(0.0));
+    return this.runEnd(() -> setDutyCycle(valueSup.getAsDouble()), () -> setDutyCycle(0.0));
+  }
+
+  public Command setVelocityCommand(double rpm) {
+    return this.runEnd(() -> setVelocity(rpm), () -> setDutyCycle(0.0));
   }
 
   public Command setVelocityCommand(DoubleSupplier supplierVelocity) {
-    return this.runEnd(
-        () -> io.setVelocity(supplierVelocity.getAsDouble()), () -> io.setDutyCycle(0.0));
+    return this.runEnd(() -> setVelocity(supplierVelocity.getAsDouble()), () -> setDutyCycle(0.0));
   }
 
-  public Command setVelocityCommand(double velocity) {
-    return this.setVelocityCommand(() -> velocity);
+  // periodic
+
+  @Override
+  public void periodic() {
+    io.updateInputs(inputs);
+    Logger.processInputs("Flywheel", inputs);
+
+    if (controlState == ControlState.SUPERSTRUCTURE) {
+      // Update state machine on every cycle to respond to velocity/current state changes
+      updateState();
+      applyState();
+    }
+
+    Logger.recordOutput("Subsystems/Flywheel/WantedState", wantedState.toString());
+    Logger.recordOutput("Subsystems/Flywheel/CurrentState", currentState.toString());
+    Logger.recordOutput("Subsystems/Flywheel/PreviousState", previousState.toString());
+    Logger.recordOutput("Subsystems/Flywheel/ControlState", controlState.toString());
   }
 }
