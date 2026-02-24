@@ -87,8 +87,8 @@ public class Flywheel extends SubsystemBase {
     }
   }
 
-  public void setVelocity(double velocity) {
-    io.setVelocity(velocity);
+  public void setVelocity(double velocityRPM) {
+    io.setVelocity(velocityRPM);
   }
 
   public double getVelocity() {
@@ -98,13 +98,13 @@ public class Flywheel extends SubsystemBase {
     return 0.0;
   }
 
-  public boolean atSetpoint(double targetVelocity, double tolerance) {
+  public boolean atSetpoint(double targetVelocityRPM, double tolerance) {
     // TODO: make tolerance a constant in hardware layer
-    return Math.abs(getVelocity() - targetVelocity) < tolerance;
+    return Math.abs(getVelocity() - targetVelocityRPM) < tolerance;
   }
 
-  public boolean atSetpoint(DoubleSupplier targetVelocity, double tolerance) {
-    return atSetpoint(targetVelocity.getAsDouble(), tolerance);
+  public boolean atSetpoint(DoubleSupplier targetVelocityRPM, double tolerance) {
+    return atSetpoint(targetVelocityRPM.getAsDouble(), tolerance);
   }
 
   private void applyState() {
@@ -138,10 +138,6 @@ public class Flywheel extends SubsystemBase {
     io.setDutyCycle(duty);
   }
 
-  public void setVelocity(double rpm) {
-    io.setVelocity(rpm);
-  }
-
   public void stop() {
     io.setDutyCycle(0.0);
   }
@@ -156,12 +152,13 @@ public class Flywheel extends SubsystemBase {
     return this.runEnd(() -> setDutyCycle(valueSup.getAsDouble()), () -> setDutyCycle(0.0));
   }
 
-  public Command setVelocityCommand(double rpm) {
-    return this.runEnd(() -> setVelocity(rpm), () -> setDutyCycle(0.0));
+  public Command setVelocityCommand(double velocityRPM) {
+    return this.runEnd(() -> setVelocity(velocityRPM), () -> setDutyCycle(0.0));
   }
 
-  public Command setVelocityCommand(DoubleSupplier supplierVelocity) {
-    return this.runEnd(() -> setVelocity(supplierVelocity.getAsDouble()), () -> setDutyCycle(0.0));
+  public Command setVelocityCommand(DoubleSupplier velocityRPMSupplier) {
+    return this.runEnd(
+        () -> setVelocity(velocityRPMSupplier.getAsDouble()), () -> setDutyCycle(0.0));
   }
 
   // periodic

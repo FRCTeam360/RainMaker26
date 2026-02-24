@@ -38,7 +38,7 @@ public class FlywheelIOSim implements FlywheelIO {
   private final LoggedNetworkNumber tunableKd =
       new LoggedNetworkNumber("/Tuning/FlywheelKicker/kD", 0.1);
   private final LoggedNetworkNumber tunableSetpoint =
-      new LoggedNetworkNumber("/Tuning/FlywheelKicker/SetpointVelocity", 0.0);
+      new LoggedNetworkNumber("/Tuning/FlywheelKicker/SetpointVelocityRPM", 0.0);
   private final LoggedNetworkBoolean tuningEnabled =
       new LoggedNetworkBoolean("/Tuning/FlywheelKicker/Enabled", false);
 
@@ -149,8 +149,8 @@ public class FlywheelIOSim implements FlywheelIO {
   }
 
   @Override
-  public void setVelocity(double velocity) {
-    velocity = velocity / 60;
-    motorControllerSim1.setControl(velocityRequest.withVelocity(velocity));
+  public void setVelocity(double velocityRPM) {
+    double velocityRPS = velocityRPM / 60.0;
+    motorControllerSim1.setControl(velocityRequest.withVelocity(velocityRPS));
   }
 }

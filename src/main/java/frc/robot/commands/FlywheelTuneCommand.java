@@ -16,8 +16,8 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
  */
 public class FlywheelTuneCommand extends Command {
   private final Flywheel flywheel;
-  private final LoggedNetworkNumber tunableVelocity =
-      new LoggedNetworkNumber("/Tuning/Flywheel/TunableVelocity", 0.0);
+  private final LoggedNetworkNumber tunableVelocityRPM =
+      new LoggedNetworkNumber("/Tuning/Flywheel/TunableVelocityRPM", 0.0);
 
   /**
    * Creates a new FlywheelTuneCommand.
@@ -34,7 +34,7 @@ public class FlywheelTuneCommand extends Command {
 
   @Override
   public void execute() {
-    flywheel.setVelocity(tunableVelocity.get());
+    flywheel.setVelocity(tunableVelocityRPM.get());
   }
 
   @Override

@@ -40,7 +40,7 @@ public class FlywheelKickerIOSim implements FlywheelKickerIO {
   private final LoggedNetworkNumber tunableKd =
       new LoggedNetworkNumber("/Tuning/FlywheelKicker/kD", 0.1);
   private final LoggedNetworkNumber tunableSetpoint =
-      new LoggedNetworkNumber("/Tuning/FlywheelKicker/SetpointVelocity", 0.0);
+      new LoggedNetworkNumber("/Tuning/FlywheelKicker/SetpointVelocityRPM", 0.0);
   private final LoggedNetworkBoolean tuningEnabled =
       new LoggedNetworkBoolean("/Tuning/FlywheelKicker/Enabled", false);
 
@@ -137,8 +137,7 @@ public class FlywheelKickerIOSim implements FlywheelKickerIO {
 
     // Step 6: Simple sensor simulation - triggers when flywheel is at speed
     sensorSim.setValue(
-        Math.abs(flywheelKickerSim.getAngularVelocityRPM())
-            > 2000); // Sensor triggers at high RPM
+        Math.abs(flywheelKickerSim.getAngularVelocityRPM()) > 2000); // Sensor triggers at high RPM
 
     // Step 7: Read all inputs from the SIMULATED VALUES (source of truth)
     inputs.velocity = velocityRPS;
@@ -153,7 +152,7 @@ public class FlywheelKickerIOSim implements FlywheelKickerIO {
     motorControllerSim.set(duty);
   }
 
-  public void setVelocity(double velocity) {
+  public void setVelocity(double velocityRPM) {
     // TODO: Implement velocity control for simulation (e.g., use velocityRequest to command the
     // motor sim)
   }

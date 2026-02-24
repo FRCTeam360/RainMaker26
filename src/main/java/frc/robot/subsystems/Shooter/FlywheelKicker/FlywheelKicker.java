@@ -83,8 +83,8 @@ public class FlywheelKicker extends SubsystemBase {
     io.setDutyCycle(dutyCycle);
   }
 
-  public void setVelocity(double veloicty) {
-    io.setVelocity(veloicty);
+  public void setVelocity(double velocityRPM) {
+    io.setVelocity(velocityRPM);
   }
 
   public void stop() {
@@ -101,8 +101,8 @@ public class FlywheelKicker extends SubsystemBase {
     return this.runEnd(() -> io.setDutyCycle(valueSup.getAsDouble()), () -> io.setDutyCycle(0.0));
   }
 
-  public Command setVelocityCommand(double velocity) {
-    return this.runEnd(() -> setVelocity(velocity), () -> setVelocity(0.0));
+  public Command setVelocityCommand(double velocityRPM) {
+    return this.runEnd(() -> setVelocity(velocityRPM), () -> setVelocity(0.0));
   }
 
   // periodic
