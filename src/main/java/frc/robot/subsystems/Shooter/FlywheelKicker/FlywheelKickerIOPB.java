@@ -1,7 +1,6 @@
 package frc.robot.subsystems.Shooter.FlywheelKicker;
 
 import com.ctre.phoenix6.configs.CANrangeConfiguration;
-import com.ctre.phoenix6.hardware.CANrange;
 import com.ctre.phoenix6.signals.UpdateModeValue;
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
@@ -33,12 +32,14 @@ public class FlywheelKickerIOPB implements FlywheelKickerIO {
   private final SparkFlexConfig sparkFlexConfig = new SparkFlexConfig();
   private final SparkClosedLoopController closedLoopController;
 
-  private final CANrange canSensor =
-      new CANrange(Constants.PracticeBotConstants.FLYWHEEL_KICKER_SENSOR_ID, Constants.RIO_CANBUS);
+  // FIXME: reimplement when CANRange is added to practice bot
+  // private final CANrange canSensor =
+  //     new CANrange(Constants.PracticeBotConstants.FLYWHEEL_KICKER_SENSOR_ID,
+  // Constants.RIO_CANBUS);
 
   public FlywheelKickerIOPB() {
     sparkFlexConfig.idleMode(IdleMode.kBrake);
-    sparkFlexConfig.inverted(true);
+    sparkFlexConfig.inverted(false);
     sparkFlexConfig.smartCurrentLimit(CURRENT_LIMIT_AMPS);
 
     sparkFlexConfig.encoder.positionConversionFactor(1.0 / GEAR_RATIO);
@@ -56,7 +57,7 @@ public class FlywheelKickerIOPB implements FlywheelKickerIO {
     sensorConfig.ProximityParams.MinSignalStrengthForValidMeasurement = MIN_SIGNAL_STRENGTH;
     sensorConfig.ProximityParams.ProximityThreshold = PROXIMITY_THRESHOLD_METERS;
     sensorConfig.ToFParams.withUpdateMode(UpdateModeValue.ShortRangeUserFreq);
-    canSensor.getConfigurator().apply(sensorConfig);
+    // canSensor.getConfigurator().apply(sensorConfig);
   }
 
   public void updateInputs(FlywheelKickerIOInputs inputs) {
@@ -65,8 +66,10 @@ public class FlywheelKickerIOPB implements FlywheelKickerIO {
     inputs.supplyCurrent = 0;
     inputs.velocity = encoder.getVelocity();
     inputs.voltage = flywheelkickerMotor.getBusVoltage() * flywheelkickerMotor.getAppliedOutput();
-    inputs.sensorProximity = canSensor.getDistance().getValueAsDouble();
-    inputs.sensorActivated = canSensor.getIsDetected().getValue();
+    inputs.sensorProximity = 0.0;
+    // inputs.sensorProximity = canSensor.getDistance().getValueAsDouble();
+    inputs.sensorActivated = false;
+    // inputs.sensorActivated = canSensor.getIsDetected().getValue();
   }
 
   public void setDutyCycle(double dutyCycle) {

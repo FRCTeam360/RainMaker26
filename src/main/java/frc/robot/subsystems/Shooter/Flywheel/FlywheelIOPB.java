@@ -55,11 +55,11 @@ public class FlywheelIOPB implements FlywheelIO {
     rightConfig.CurrentLimits.SupplyCurrentLimit = SUPPLY_CURRENT_LIMIT_AMPS;
     rightConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
 
-    rightConfig.MotorOutput.withInverted(InvertedValue.Clockwise_Positive);
+    rightConfig.MotorOutput.withInverted(InvertedValue.CounterClockwise_Positive);
 
     leftConfig = rightConfig.clone();
     // do not edit right configs after cloning
-    leftConfig.MotorOutput.withInverted(InvertedValue.CounterClockwise_Positive);
+    leftConfig.MotorOutput.withInverted(InvertedValue.Clockwise_Positive);
 
     motors[1].getConfigurator().apply(leftConfig);
     motors[1].setNeutralMode(NeutralModeValue.Coast);

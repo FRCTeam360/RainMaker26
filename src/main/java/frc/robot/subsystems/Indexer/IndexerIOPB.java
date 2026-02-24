@@ -22,7 +22,7 @@ public class IndexerIOPB implements IndexerIO {
 
   /** Creates a new IndexerIOPB. */
   private final SparkFlex indexerMotor =
-      new SparkFlex(Constants.PracticeBotConstants.INDEXER_ID, MotorType.kBrushless);
+      new SparkFlex(Constants.PracticeBotConstants.TWINDEXER_ID, MotorType.kBrushless);
 
   private final RelativeEncoder encoder = indexerMotor.getEncoder();
   private final SparkFlexConfig sparkFlexConfig = new SparkFlexConfig();
@@ -30,7 +30,7 @@ public class IndexerIOPB implements IndexerIO {
 
   public IndexerIOPB() {
     sparkFlexConfig.idleMode(IdleMode.kBrake);
-    sparkFlexConfig.inverted(true);
+    sparkFlexConfig.inverted(false);
     sparkFlexConfig.smartCurrentLimit(CURRENT_LIMIT_AMPS);
 
     sparkFlexConfig.encoder.positionConversionFactor(1.0 / GEAR_RATIO);
