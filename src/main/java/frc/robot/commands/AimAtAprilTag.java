@@ -57,11 +57,7 @@ public class AimAtAprilTag extends Command {
 
   @Override
   public void end(boolean interrupted) {
-    m_drive.setControl(
-        driveRequest
-            .withVelocityX(0)
-            .withVelocityY(0)
-            .withRotationalRate(0));
+    m_drive.setControl(driveRequest.withVelocityX(0).withVelocityY(0).withRotationalRate(0));
   }
 
   // Returns true when the command should end.
