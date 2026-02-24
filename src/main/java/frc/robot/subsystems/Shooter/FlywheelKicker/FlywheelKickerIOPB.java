@@ -68,7 +68,7 @@ public class FlywheelKickerIOPB implements FlywheelKickerIO {
     inputs.voltage = flywheelkickerMotor.getBusVoltage() * flywheelkickerMotor.getAppliedOutput();
     inputs.sensorProximity = 0.0;
     // inputs.sensorProximity = canSensor.getDistance().getValueAsDouble();
-    inputs.sensorActivated = true;
+    inputs.sensorActivated = false;
     // inputs.sensorActivated = canSensor.getIsDetected().getValue();
   }
 
