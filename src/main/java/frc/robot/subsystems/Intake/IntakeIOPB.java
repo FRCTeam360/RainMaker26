@@ -16,7 +16,7 @@ import com.revrobotics.spark.config.SparkFlexConfig;
 import frc.robot.Constants.PracticeBotConstants;
 
 public class IntakeIOPB implements IntakeIO {
-  private static final double GEAR_RATIO = 1.0; // FIXME: set actual gear ratio
+  private static final double GEAR_RATIO = 1.0;
   private static final int CURRENT_LIMIT_AMPS = 40;
   private static final double KP = 0.0002;
   private static final double KI = 0.0;
@@ -31,7 +31,7 @@ public class IntakeIOPB implements IntakeIO {
   private final SparkClosedLoopController closedLoopController;
 
   public IntakeIOPB() {
-    config.idleMode(IdleMode.kBrake);
+    config.idleMode(IdleMode.kCoast);
     config.inverted(true);
     config.smartCurrentLimit(CURRENT_LIMIT_AMPS);
 

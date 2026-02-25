@@ -14,7 +14,7 @@ import com.revrobotics.spark.config.SparkFlexConfig;
 import frc.robot.Constants;
 
 public class HopperRollerIOPB implements HopperRollerIO {
-  private static final double GEAR_RATIO = 1.0; // FIXME: set actual gear ratio
+  private static final double GEAR_RATIO = 1.0;
 
   private final SparkFlex hopperRollerMotor =
       new SparkFlex(Constants.PracticeBotConstants.HOPPER_ROLLER_ID, MotorType.kBrushless);

@@ -56,6 +56,7 @@ public class Robot extends LoggedRobot {
       } else {
         Logger.addDataReceiver(new WPILOGWriter("/home/lvuser/logs"));
       }
+      // TODO: Re-enable for practice sessions when live dashboard telemetry is needed
       Logger.addDataReceiver(new NT4Publisher());
       new PowerDistribution(1, ModuleType.kRev); // Enables power distribution logging
     }
@@ -97,6 +98,7 @@ public class Robot extends LoggedRobot {
     m_timeAndJoystickReplay.update();
     m_robotContainer.preSchedulerUpdate();
     CommandScheduler.getInstance().run();
+    m_robotContainer.postSchedulerUpdate();
   }
 
   /** This function is called once each time the robot enters Disabled mode. */
@@ -111,6 +113,7 @@ public class Robot extends LoggedRobot {
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
   public void autonomousInit() {
+    m_robotContainer.onEnable();
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
     // schedule the autonomous command (example)
@@ -125,6 +128,7 @@ public class Robot extends LoggedRobot {
 
   @Override
   public void teleopInit() {
+    m_robotContainer.onEnable();
     // This makes sure that the autonomous stops running when
     // teleop starts running. If you want the autonomous to
     // continue until interrupted by another command, remove
@@ -142,6 +146,7 @@ public class Robot extends LoggedRobot {
   public void testInit() {
     // Cancels all running commands at the start of test mode.
     CommandScheduler.getInstance().cancelAll();
+    m_robotContainer.onTestEnable();
   }
 
   /** This function is called periodically during test mode. */

@@ -3,29 +3,37 @@ package frc.robot.subsystems;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.subsystems.FlywheelKicker.FlywheelKicker;
-import frc.robot.subsystems.FlywheelKicker.FlywheelKicker.FlywheelKickerStates;
+import frc.robot.subsystems.HopperRoller.HopperRoller;
+import frc.robot.subsystems.HopperRoller.HopperRoller.HopperRollerStates;
 import frc.robot.subsystems.Indexer.Indexer;
 import frc.robot.subsystems.Indexer.Indexer.IndexerStates;
 import frc.robot.subsystems.Intake.Intake;
+import frc.robot.subsystems.IntakePivot.IntakePivot;
+import frc.robot.subsystems.IntakePivot.IntakePivot.IntakePivotStates;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel;
-import frc.robot.subsystems.Shooter.Flywheel.Flywheel.FlywheelStates;
-import frc.robot.subsystems.Shooter.Flywheel.Flywheel.FlywheelWantedStates;
+import frc.robot.subsystems.Shooter.FlywheelKicker.FlywheelKicker;
 import frc.robot.subsystems.Shooter.Hood.Hood;
+import frc.robot.subsystems.Shooter.ShooterStateMachine;
+import frc.robot.subsystems.Shooter.ShooterStateMachine.ShooterStates;
+import frc.robot.subsystems.Shooter.ShooterStateMachine.ShooterWantedStates;
 import frc.robot.subsystems.Shooter.ShotCalculator;
 import java.util.function.BooleanSupplier;
 import org.littletonrobotics.junction.Logger;
 
 public class SuperStructure extends SubsystemBase {
+  // Fields (subsystem refs, calculators, suppliers)
   private final Intake intake;
   private final Indexer indexer;
   private final FlywheelKicker flywheelKicker;
   private final Flywheel flywheel;
   private final Hood hood;
+  private final IntakePivot intakePivot;
+  private final HopperRoller hopperRoller;
   private final ShotCalculator hubShotCalculator;
   private final ShotCalculator outpostPassCalculator;
-  private final BooleanSupplier isAlignedToTarget;
+  private final ShooterStateMachine shooterStateMachine;
 
+  // Enums
   public enum SuperStates {
     IDLE, // everything is stopped when nothing else happens
     INTAKING, // while intake button pressed
@@ -40,17 +48,13 @@ public class SuperStructure extends SubsystemBase {
     SHOOT_AT_OUTPOST // has current zone, makes check for !current zone then passes to zone
   }
 
-  public enum ShooterStates {
-    FIRING,
-    PREPARING
-  }
-
+  // State variables
   private SuperStates wantedSuperState = SuperStates.IDLE;
   private SuperStates currentSuperState = SuperStates.IDLE;
   private SuperStates previousSuperState = SuperStates.IDLE;
+  private ControlState controlState = ControlState.SUPERSTRUCTURE;
 
-  private ShooterStates currentShooterState = ShooterStates.PREPARING;
-  private ShooterStates previousShooterState = ShooterStates.PREPARING;
+  // Constructor
 
   public SuperStructure(
       Intake intake,
@@ -58,6 +62,8 @@ public class SuperStructure extends SubsystemBase {
       FlywheelKicker flywheelKicker,
       Flywheel flywheel,
       Hood hood,
+      IntakePivot intakePivot,
+      HopperRoller hopperRoller,
       ShotCalculator hubShotCalculator,
       ShotCalculator outpostPassCalculator,
       BooleanSupplier isAlignedToTarget) {
@@ -66,9 +72,12 @@ public class SuperStructure extends SubsystemBase {
     this.flywheelKicker = flywheelKicker;
     this.flywheel = flywheel;
     this.hood = hood;
+    this.intakePivot = intakePivot;
+    this.hopperRoller = hopperRoller;
     this.hubShotCalculator = hubShotCalculator;
     this.outpostPassCalculator = outpostPassCalculator;
-    this.isAlignedToTarget = isAlignedToTarget;
+    this.shooterStateMachine =
+        new ShooterStateMachine(flywheel, hood, flywheelKicker, isAlignedToTarget);
 
     flywheel.setShootVelocitySupplier(
         () -> {
@@ -77,14 +86,16 @@ public class SuperStructure extends SubsystemBase {
           }
           return this.hubShotCalculator.calculateShot().flywheelSpeed();
         });
-    // hood.setHoodAngleSupplier(
-    //     () -> {
-    //       if (currentSuperState == SuperStates.SHOOT_AT_OUTPOST) {
-    //         return this.outpostPassCalculator.calculateShot().hoodAngle();
-    //       }
-    //       return this.hubShotCalculator.calculateShot().hoodAngle();
-    //     });
+    hood.setHoodAngleSupplier(
+        () -> {
+          if (currentSuperState == SuperStates.SHOOT_AT_OUTPOST) {
+            return this.outpostPassCalculator.calculateShot().hoodAngle();
+          }
+          return this.hubShotCalculator.calculateShot().hoodAngle();
+        });
   }
+
+  // State machine methods
 
   private void updateState() {
     previousSuperState = currentSuperState;
@@ -115,64 +126,57 @@ public class SuperStructure extends SubsystemBase {
         break;
       case SHOOT_AT_HUB:
       case SHOOT_AT_OUTPOST:
-        updateShooterStates();
-        applyShooterStates();
+        shooting();
         break;
     }
-    resetShooterStateIfNotShooting();
   }
 
-  private void resetShooterStateIfNotShooting() {
-    if (currentSuperState != SuperStates.SHOOT_AT_HUB
-        && currentSuperState != SuperStates.SHOOT_AT_OUTPOST) {
-      currentShooterState = ShooterStates.PREPARING;
-    }
-  }
+  private void shooting() {
+    shooterStateMachine.setWantedState(ShooterWantedStates.SHOOTING);
 
-  private void updateShooterStates() {
-    previousShooterState = currentShooterState;
-    boolean flywheelReady = flywheel.getState() == FlywheelStates.AT_SETPOINT;
-    // boolean hoodReady = hood.getState() == HoodStates.AT_SETPOINT;
-    boolean aligned = isAlignedToTarget.getAsBoolean();
-
-    Logger.recordOutput("Superstructure/Shooting/FlywheelReady", flywheelReady);
-    // Logger.recordOutput("Superstructure/Shooting/HoodReady", hoodReady);
-    Logger.recordOutput("Superstructure/Shooting/Aligned", aligned);
-
-    if (flywheelReady && aligned) { // TODO: ADD HOOD CHECK BACK WHEN GOOD AGAIN
-      currentShooterState = ShooterStates.FIRING;
-    } else {
-      currentShooterState = ShooterStates.PREPARING;
-    }
-  }
-
-  private void applyShooterStates() {
-    aiming();
-    if (currentShooterState == ShooterStates.FIRING) {
-      flywheelKicker.setWantedState(FlywheelKickerStates.SHOOTING);
+    if (shooterStateMachine.getState() == ShooterStates.FIRING) {
       indexer.setWantedState(IndexerStates.SHOOTING);
+      hopperRoller.setWantedState(HopperRollerStates.ROLLING);
     } else {
-      flywheelKicker.setWantedState(FlywheelKickerStates.OFF);
       indexer.setWantedState(IndexerStates.OFF);
+      hopperRoller.setWantedState(HopperRollerStates.OFF);
     }
   }
 
-  private void aiming() {
-    flywheel.setWantedState(FlywheelWantedStates.AIMING);
-    // hood.setWantedState(HoodWantedStates.AIMING);
-  }
+  // Subsystem state helpers
 
   private void intaking() {
     intake.setWantedState(Intake.IntakeStates.INTAKING);
+    intakePivot.setWantedState(IntakePivotStates.DEPLOYED);
+    shooterStateMachine.setWantedState(ShooterWantedStates.IDLE);
     // indexer.setWantedState(Indexer.IndexerStates.INTAKING);
   }
 
   private void stopped() {
     intake.setWantedState(Intake.IntakeStates.OFF);
     indexer.setWantedState(Indexer.IndexerStates.OFF);
-    flywheelKicker.setWantedState(FlywheelKickerStates.OFF);
-    flywheel.setWantedState(FlywheelWantedStates.IDLE);
-    // hood.setWantedState(HoodWantedStates.IDLE);
+    intakePivot.setWantedState(IntakePivotStates.OFF);
+    hopperRoller.setWantedState(HopperRollerStates.OFF);
+    shooterStateMachine.setWantedState(ShooterWantedStates.IDLE);
+  }
+
+  // Public API
+
+  /** Sets the control mode and propagates it to managed subsystems. */
+  public void setControlState(ControlState controlState) {
+    this.controlState = controlState;
+    flywheel.setControlState(controlState);
+    indexer.setControlState(controlState);
+    flywheelKicker.setControlState(controlState);
+    intake.setControlState(controlState);
+    intakePivot.setControlState(controlState);
+    hopperRoller.setControlState(controlState);
+    hood.setControlState(controlState);
+  }
+
+  /** Returns the current control mode. */
+  public ControlState getControlState() {
+    return controlState;
   }
 
   public Command setStateCommand(SuperStates superState) {
@@ -183,15 +187,21 @@ public class SuperStructure extends SubsystemBase {
     this.wantedSuperState = superState;
   }
 
+  // periodic
+
   @Override
   public void periodic() {
+    // Runs both the superstructure and shooter state machines
     updateState();
-    applyStates();
+    shooterStateMachine.update();
 
-    Logger.recordOutput("Superstructure/WantedSuperState", wantedSuperState.toString());
-    Logger.recordOutput("Superstructure/CurrentSuperState", currentSuperState.toString());
-    Logger.recordOutput("Superstructure/PreviousSuperState", previousSuperState.toString());
-    Logger.recordOutput("Superstructure/PreviousShooterState", previousShooterState.toString());
-    Logger.recordOutput("Superstructure/CurrentShooterState", currentShooterState.toString());
+    applyStates();
+    shooterStateMachine.apply();
+
+    Logger.recordOutput("Superstructure/WantedSuperState", wantedSuperState);
+    Logger.recordOutput("Superstructure/CurrentSuperState", currentSuperState);
+    Logger.recordOutput("Superstructure/PreviousSuperState", previousSuperState);
+    Logger.recordOutput("Superstructure/ControlState", controlState);
+    shooterStateMachine.log();
   }
 }

@@ -394,10 +394,13 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   @Override
   public void periodic() {
     // Current pose includes vision fusion when vision measurements are added
-    Logger.recordOutput(SUBSYSTEM_NAME + "CurrentPose", this.getStateCopy().Pose);
-    Logger.recordOutput(SUBSYSTEM_NAME + "Rotation2d", this.getStateCopy().RawHeading);
-    Logger.recordOutput(SUBSYSTEM_NAME + "CurrentState", this.getStateCopy().ModuleStates);
-    Logger.recordOutput(SUBSYSTEM_NAME + "TargetState", this.getStateCopy().ModuleTargets);
+
+    SwerveDriveState state = this.getStateCopy();
+
+    Logger.recordOutput(SUBSYSTEM_NAME + "CurrentPose", state.Pose);
+    Logger.recordOutput(SUBSYSTEM_NAME + "Rotation2d", state.RawHeading);
+    Logger.recordOutput(SUBSYSTEM_NAME + "CurrentState", state.ModuleStates);
+    Logger.recordOutput(SUBSYSTEM_NAME + "TargetState", state.ModuleTargets);
     Logger.recordOutput(SUBSYSTEM_NAME + "Using Vision", hasVisionMeasurements);
 
     // Log whether vision measurements have been applied (useful for analysis)
