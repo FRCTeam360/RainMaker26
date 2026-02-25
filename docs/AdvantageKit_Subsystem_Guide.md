@@ -298,7 +298,7 @@ public class IndexerIOSim implements IndexerIO {
 
   @Override
   public void updateInputs(IndexerIOInputs inputs) {
-    flywheelSim.update(0.02);  // Advance simulation by 20ms
+    flywheelSim.update(SimulationConstants.SIM_TICK_RATE_S);  // Advance simulation by 20ms
 
     inputs.velocity = flywheelSim.getAngularVelocityRPM();
     inputs.voltage = appliedVoltage;
@@ -591,7 +591,7 @@ public class FlywheelIOSparkMax implements FlywheelIO {
 See Step 3 in the previous section for a complete simulation example. Key elements:
 
 - Use WPILib physics models (`FlywheelSim`, `SingleJointedArmSim`, etc.)
-- Advance simulation in `updateInputs()` with `sim.update(0.02)`
+- Advance simulation in `updateInputs()` with `sim.update(SimulationConstants.SIM_TICK_RATE_S)`
 - Maintain internal state (applied voltage, position, etc.)
 
 ---

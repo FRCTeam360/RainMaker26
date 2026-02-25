@@ -149,10 +149,10 @@ public class Intake extends SubsystemBase {
       updateState();
       applyState();
     }
-    Logger.recordOutput("Subsystems/Intake/WantedState", wantedState.toString());
-    Logger.recordOutput("Subsystems/Intake/CurrentState", currentState.toString());
-    Logger.recordOutput("Subsystems/Intake/PreviousState", previousState.toString());
-    Logger.recordOutput("Subsystems/Intake/ControlState", controlState.toString());
+    Logger.recordOutput("Subsystems/Intake/WantedState", wantedState);
+    Logger.recordOutput("Subsystems/Intake/CurrentState", currentState);
+    Logger.recordOutput("Subsystems/Intake/PreviousState", previousState);
+    Logger.recordOutput("Subsystems/Intake/ControlState", controlState);
     // Logger.recordOutput("Subsystems/Intake/PreviousState", isJammed());
   }
 }

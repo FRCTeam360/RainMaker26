@@ -198,10 +198,10 @@ public class SuperStructure extends SubsystemBase {
     applyStates();
     shooterStateMachine.apply();
 
-    Logger.recordOutput("Superstructure/WantedSuperState", wantedSuperState.toString());
-    Logger.recordOutput("Superstructure/CurrentSuperState", currentSuperState.toString());
-    Logger.recordOutput("Superstructure/PreviousSuperState", previousSuperState.toString());
-    Logger.recordOutput("Superstructure/ControlState", controlState.toString());
+    Logger.recordOutput("Superstructure/WantedSuperState", wantedSuperState);
+    Logger.recordOutput("Superstructure/CurrentSuperState", currentSuperState);
+    Logger.recordOutput("Superstructure/PreviousSuperState", previousSuperState);
+    Logger.recordOutput("Superstructure/ControlState", controlState);
     shooterStateMachine.log();
   }
 }

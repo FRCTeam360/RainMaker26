@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems.Shooter.Hood;
 
+import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXSConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
@@ -12,10 +14,15 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorArrangementValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Voltage;
 import frc.robot.Constants;
 
 public class HoodIOPB implements HoodIO {
-  private static final double GEAR_RATIO = 1.0; // FIXME: set actual gear ratio
+  private static final double GEAR_RATIO = 3.0 / 1.0 * 170.0 / 10.0;
+  // 1/3 * 170/10
   private static final double KP = 0.21;
   private static final double KI = 0.0;
   private static final double KD = 0.0;
@@ -23,7 +30,7 @@ public class HoodIOPB implements HoodIO {
   private static final double KG = 0.0;
   private static final double KS = 0.0;
   private static final double KV = 0.0;
-  private static final double FORWARD_SOFT_LIMIT_DEGREES = 24.0; // FIXME: verify limit
+  private static final double FORWARD_SOFT_LIMIT_DEGREES = 47.0;
   private static final double STATOR_CURRENT_LIMIT_AMPS = 25.0;
   private static final double SUPPLY_CURRENT_LIMIT_AMPS = 30.0;
   private static final double MOTION_MAGIC_ACCELERATION_RPS2 = 0.0; // FIXME: set actual value
@@ -35,6 +42,12 @@ public class HoodIOPB implements HoodIO {
   private final TalonFXSConfiguration config = new TalonFXSConfiguration();
 
   private final MotionMagicVoltage motionMagicPosition = new MotionMagicVoltage(0);
+
+  private final StatusSignal<Angle> positionSignal;
+  private final StatusSignal<AngularVelocity> velocitySignal;
+  private final StatusSignal<Current> statorCurrentSignal;
+  private final StatusSignal<Current> supplyCurrentSignal;
+  private final StatusSignal<Voltage> motorVoltageSignal;
 
   public void setZero() {
     hoodMotor.setPosition(0);
@@ -66,9 +79,24 @@ public class HoodIOPB implements HoodIO {
     config.MotionMagic.withMotionMagicAcceleration(MOTION_MAGIC_ACCELERATION_RPS2)
         .withMotionMagicCruiseVelocity(MOTION_MAGIC_CRUISE_VELOCITY_RPS)
         .withMotionMagicJerk(MOTION_MAGIC_JERK_RPS3);
-    config.MotorOutput.withInverted(InvertedValue.Clockwise_Positive);
+    config.MotorOutput.withInverted(InvertedValue.CounterClockwise_Positive);
     config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     hoodMotor.getConfigurator().apply(config);
+
+    positionSignal = hoodMotor.getPosition();
+    velocitySignal = hoodMotor.getVelocity();
+    statorCurrentSignal = hoodMotor.getStatorCurrent();
+    supplyCurrentSignal = hoodMotor.getSupplyCurrent();
+    motorVoltageSignal = hoodMotor.getMotorVoltage();
+
+    BaseStatusSignal.setUpdateFrequencyForAll(
+        50,
+        positionSignal,
+        velocitySignal,
+        statorCurrentSignal,
+        supplyCurrentSignal,
+        motorVoltageSignal);
+    hoodMotor.optimizeBusUtilization();
   }
 
   /**
@@ -82,11 +110,17 @@ public class HoodIOPB implements HoodIO {
   }
 
   public void updateInputs(HoodIOInputs inputs) {
-    inputs.position = Units.rotationsToDegrees(hoodMotor.getPosition().getValueAsDouble());
-    inputs.statorCurrent = hoodMotor.getStatorCurrent().getValueAsDouble();
-    inputs.supplyCurrent = hoodMotor.getSupplyCurrent().getValueAsDouble();
-    inputs.velocity = Units.rotationsToDegrees(hoodMotor.getVelocity().getValueAsDouble());
-    inputs.voltage = hoodMotor.getMotorVoltage().getValueAsDouble();
+    BaseStatusSignal.refreshAll(
+        positionSignal,
+        velocitySignal,
+        statorCurrentSignal,
+        supplyCurrentSignal,
+        motorVoltageSignal);
+    inputs.position = Units.rotationsToDegrees(positionSignal.getValueAsDouble());
+    inputs.statorCurrent = statorCurrentSignal.getValueAsDouble();
+    inputs.supplyCurrent = supplyCurrentSignal.getValueAsDouble();
+    inputs.velocity = Units.rotationsToDegrees(velocitySignal.getValueAsDouble());
+    inputs.voltage = motorVoltageSignal.getValueAsDouble();
   }
 
   public void setDutyCycle(double dutyCycle) {
