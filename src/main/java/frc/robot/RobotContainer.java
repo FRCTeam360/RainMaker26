@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.generated.PracticeBotDrivetrain;
 import frc.robot.generated.WoodBotDrivetrain;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.ControlState;
@@ -177,10 +178,8 @@ public class RobotContainer {
         break;
       case PRACTICEBOT:
       default:
-        drivetrain =
-            WoodBotDrivetrain
-                .createDrivetrain(); // FIXME, CHANGE ONCE PRACTICE BOT DRIVETRAIN IS MADE
-        logger = new Telemetry(WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
+        drivetrain = PracticeBotDrivetrain.createDrivetrain();
+        logger = new Telemetry(PracticeBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
         flywheel = new Flywheel(new FlywheelIOPB());
         hood = new Hood(new HoodIOPB());
         indexer = new Indexer(new IndexerIOPB());
