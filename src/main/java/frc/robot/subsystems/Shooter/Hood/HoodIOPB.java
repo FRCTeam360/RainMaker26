@@ -21,7 +21,7 @@ import edu.wpi.first.units.measure.Voltage;
 import frc.robot.Constants;
 
 public class HoodIOPB implements HoodIO {
-  private static final double GEAR_RATIO = 3.0 / 1.0 * 170.0 / 10.0; // FIXME: set actual gear ratio
+  private static final double GEAR_RATIO = 3.0 / 1.0 * 170.0 / 10.0;
   // 1/3 * 170/10
   private static final double KP = 0.21;
   private static final double KI = 0.0;
