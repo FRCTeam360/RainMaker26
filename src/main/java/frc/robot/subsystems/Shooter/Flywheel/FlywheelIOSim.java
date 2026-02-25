@@ -30,14 +30,9 @@ public class FlywheelIOSim implements FlywheelIO {
   private DCMotor gearbox = DCMotor.getKrakenX60(2);
   private final double flywheelMOI = 0.01; // kg*m^2
 
-  private final LoggedNetworkNumber tunableKp = new LoggedNetworkNumber("/Tuning/Flywheel/kP", 5.0);
-  private final LoggedNetworkNumber tunableKi = new LoggedNetworkNumber("/Tuning/Flywheel/kI", 0.0);
-  private final LoggedNetworkNumber tunableKd =
-      new LoggedNetworkNumber("/Tuning/Flywheel/kD", 0.01);
-  private final LoggedNetworkNumber tunableSetpoint =
-      new LoggedNetworkNumber("/Tuning/Flywheel/SetpointRPM", 0.0);
-  private final LoggedNetworkBoolean tuningEnabled =
-      new LoggedNetworkBoolean("/Tuning/Flywheel/Enabled", false);
+  private static final double KP = 5.0;
+  private static final double KI = 0.0;
+  private static final double KD = 0.01;
 
   // Disturbance injection for testing state machine
   private final LoggedNetworkBoolean injectDisturbance =
@@ -72,9 +67,9 @@ public class FlywheelIOSim implements FlywheelIO {
     TalonFXConfiguration talonConfig = new TalonFXConfiguration();
 
     Slot0Configs slot0 = talonConfig.Slot0;
-    slot0.kP = tunableKp.get();
-    slot0.kI = tunableKi.get();
-    slot0.kD = tunableKd.get();
+    slot0.kP = KP;
+    slot0.kI = KI;
+    slot0.kD = KD;
 
     // Configure current limits for safety
     CurrentLimitsConfigs currentLimits = talonConfig.CurrentLimits;
@@ -92,19 +87,6 @@ public class FlywheelIOSim implements FlywheelIO {
   }
 
   public void updateInputs(FlywheelIOInputs inputs) {
-    // --- AdvantageScope tuning (sim-only) ---
-    if (tuningEnabled.get()) {
-      Slot0Configs slot0 = new Slot0Configs();
-      motorController.getConfigurator().refresh(slot0);
-      slot0.kP = tunableKp.get();
-      slot0.kI = tunableKi.get();
-      slot0.kD = tunableKd.get();
-      motorController.getConfigurator().apply(slot0);
-
-      // Command the tunable setpoint (in RPM) converted to RPS for Phoenix 6
-      this.setVelocity(tunableSetpoint.get()); // setVelocity expects RPM and converts internally
-    }
-
     // Step 1: Get the commanded voltage from the single motor controller.
     // The gearbox is modeled as 2x Kraken X60, so this voltage already represents
     // the combined effect of both physical motors on the shared flywheel mechanism.
@@ -126,9 +108,9 @@ public class FlywheelIOSim implements FlywheelIO {
 
     // Apply disturbance: zero out the motor voltage during disturbance period
     double appliedVoltage = disturbanceActive ? 0.0 : motorVoltage;
-    flywheelSim.setInputVoltage(appliedVoltage);
 
     // Step 2: Update the simulation by one timestep
+    flywheelSim.setInputVoltage(appliedVoltage);
     flywheelSim.update(SimulationConstants.SIM_TICK_RATE_S);
 
     // Convert RPM from simulation to RPS for consistency with Phoenix 6
@@ -179,15 +161,5 @@ public class FlywheelIOSim implements FlywheelIO {
   public void setCoastVelocityControl(double velocityRPM) {
     // Traditional PID control (same as other methods in sim)
     motorController.setControl(velocityRequest.withVelocity(velocityRPM / 60.0));
-  }
-
-  /**
-   * Set flywheel velocity for tuning (helper method for AdvantageScope).
-   *
-   * @param velocityRPM target velocity in rotations per minute
-   */
-  public void setVelocity(double velocityRPM) {
-    double velocityRPS = velocityRPM / 60.0; // Convert RPM to RPS for Phoenix 6
-    motorController.setControl(velocityRequest.withVelocity(velocityRPS));
   }
 }
