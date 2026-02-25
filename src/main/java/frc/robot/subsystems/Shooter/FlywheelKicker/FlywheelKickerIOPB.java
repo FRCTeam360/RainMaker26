@@ -27,10 +27,10 @@ public class FlywheelKickerIOPB implements FlywheelKickerIO {
   private static final double PROXIMITY_THRESHOLD_METERS = 0.1;
 
   /** Creates a new FlywheelKickerIOPB. */
-  private final SparkFlex flywheelkickerMotor =
+  private final SparkFlex flywheelKickerMotor =
       new SparkFlex(Constants.PracticeBotConstants.FLYWHEEL_KICKER_ID, MotorType.kBrushless);
 
-  private final RelativeEncoder encoder = flywheelkickerMotor.getEncoder();
+  private final RelativeEncoder encoder = flywheelKickerMotor.getEncoder();
   private final SparkFlexConfig sparkFlexConfig = new SparkFlexConfig();
   private final SparkClosedLoopController closedLoopController;
 
@@ -53,10 +53,10 @@ public class FlywheelKickerIOPB implements FlywheelKickerIO {
     sparkFlexConfig.closedLoop.p(KP).i(KI).d(KD);
     sparkFlexConfig.closedLoop.feedForward.kV(FF_KV).kS(FF_KS);
 
-    flywheelkickerMotor.configure(
+    flywheelKickerMotor.configure(
         sparkFlexConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-    closedLoopController = flywheelkickerMotor.getClosedLoopController();
+    closedLoopController = flywheelKickerMotor.getClosedLoopController();
 
     CANrangeConfiguration sensorConfig = new CANrangeConfiguration();
     sensorConfig.ProximityParams.MinSignalStrengthForValidMeasurement = MIN_SIGNAL_STRENGTH;
@@ -73,10 +73,10 @@ public class FlywheelKickerIOPB implements FlywheelKickerIO {
 
   public void updateInputs(FlywheelKickerIOInputs inputs) {
     inputs.position = encoder.getPosition();
-    inputs.statorCurrent = flywheelkickerMotor.getOutputCurrent();
+    inputs.statorCurrent = flywheelKickerMotor.getOutputCurrent();
     inputs.supplyCurrent = 0;
     inputs.velocity = encoder.getVelocity();
-    inputs.voltage = flywheelkickerMotor.getBusVoltage() * flywheelkickerMotor.getAppliedOutput();
+    inputs.voltage = flywheelKickerMotor.getBusVoltage() * flywheelKickerMotor.getAppliedOutput();
     inputs.sensorProximity = 0.0;
     // inputs.sensorProximity = canSensor.getDistance().getValueAsDouble();
     inputs.sensorActivated = false;
@@ -84,7 +84,7 @@ public class FlywheelKickerIOPB implements FlywheelKickerIO {
   }
 
   public void setDutyCycle(double dutyCycle) {
-    flywheelkickerMotor.set(dutyCycle);
+    flywheelKickerMotor.set(dutyCycle);
   }
 
   public void setVelocity(double rpm) {

@@ -60,7 +60,7 @@ public class IntakePivotIOPB implements IntakePivotIO {
 
   /** Creates a new IntakePivotIOPB. */
   public IntakePivotIOPB() {
-    // FIXME: NUETRAL MODE BRAKE
+    // FIXME: NEUTRAL MODE BRAKE
     config.CurrentLimits.StatorCurrentLimit = STATOR_CURRENT_LIMIT_AMPS;
     config.CurrentLimits.SupplyCurrentLimit = SUPPLY_CURRENT_LIMIT_AMPS;
     config.CurrentLimits.StatorCurrentLimitEnable = true;

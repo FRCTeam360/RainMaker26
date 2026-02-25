@@ -22,10 +22,10 @@ import frc.robot.Constants;
 
 public class FlywheelKickerIOWB implements FlywheelKickerIO {
   /** Creates a new FlywheelKickerIOWB. */
-  private final SparkMax flywheelkickerMotor =
+  private final SparkMax flywheelKickerMotor =
       new SparkMax(Constants.WoodBotConstants.FLYWHEEL_KICKER_ID, MotorType.kBrushless);
 
-  private final RelativeEncoder encoder = flywheelkickerMotor.getEncoder();
+  private final RelativeEncoder encoder = flywheelKickerMotor.getEncoder();
   private final SparkMaxConfig sparkMaxConfig = new SparkMaxConfig();
   private final SparkClosedLoopController closedLoopController;
 
@@ -43,10 +43,10 @@ public class FlywheelKickerIOWB implements FlywheelKickerIO {
     sparkMaxConfig.closedLoop.p(0.0002).i(0.0).d(0.0);
     sparkMaxConfig.closedLoop.feedForward.kV(0.0021).kS(0.04);
 
-    flywheelkickerMotor.configure(
+    flywheelKickerMotor.configure(
         sparkMaxConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-    closedLoopController = flywheelkickerMotor.getClosedLoopController();
+    closedLoopController = flywheelKickerMotor.getClosedLoopController();
 
     CANrangeConfiguration sensorConfig = new CANrangeConfiguration();
     sensorConfig.ProximityParams.MinSignalStrengthForValidMeasurement = 2000; // unknown unit
@@ -63,20 +63,20 @@ public class FlywheelKickerIOWB implements FlywheelKickerIO {
 
   public void updateInputs(FlywheelKickerIOInputs inputs) {
     inputs.position = encoder.getPosition();
-    inputs.statorCurrent = flywheelkickerMotor.getOutputCurrent();
+    inputs.statorCurrent = flywheelKickerMotor.getOutputCurrent();
     inputs.supplyCurrent =
-        flywheelkickerMotor.getOutputCurrent()
-            * flywheelkickerMotor.getAppliedOutput(); // TODO: check if
+        flywheelKickerMotor.getOutputCurrent()
+            * flywheelKickerMotor.getAppliedOutput(); // TODO: check if
     // this is right
     inputs.velocity = encoder.getVelocity();
-    inputs.voltage = flywheelkickerMotor.getBusVoltage() * flywheelkickerMotor.getAppliedOutput();
+    inputs.voltage = flywheelKickerMotor.getBusVoltage() * flywheelKickerMotor.getAppliedOutput();
     BaseStatusSignal.refreshAll(distanceSignal, isDetectedSignal);
     inputs.sensorProximity = distanceSignal.getValueAsDouble();
     inputs.sensorActivated = (boolean) isDetectedSignal.getValue();
   }
 
   public void setDutyCycle(double dutyCycle) {
-    flywheelkickerMotor.set(dutyCycle);
+    flywheelKickerMotor.set(dutyCycle);
   }
 
   public void setVelocity(double rpm) {
