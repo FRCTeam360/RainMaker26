@@ -21,7 +21,8 @@ import edu.wpi.first.units.measure.Voltage;
 import frc.robot.Constants;
 
 public class HoodIOPB implements HoodIO {
-  private static final double GEAR_RATIO = 1.0; // FIXME: set actual gear ratio
+  private static final double GEAR_RATIO = 1.0 / 3.0 * 170.0 / 10.0; // FIXME: set actual gear ratio
+  // 3/1 * 10/170
   private static final double KP = 0.21;
   private static final double KI = 0.0;
   private static final double KD = 0.0;
@@ -71,14 +72,14 @@ public class HoodIOPB implements HoodIO {
         Units.degreesToRotations(FORWARD_SOFT_LIMIT_DEGREES);
     config.CurrentLimits.StatorCurrentLimit = STATOR_CURRENT_LIMIT_AMPS;
     // NEO 550 has lower current capacity than Falcon 500
-    config.CurrentLimits.StatorCurrentLimitEnable = true;
+    config.CurrentLimits.StatorCurrentLimitEnable = false;
     config.CurrentLimits.SupplyCurrentLimit = SUPPLY_CURRENT_LIMIT_AMPS;
-    config.CurrentLimits.SupplyCurrentLimitEnable = true;
+    config.CurrentLimits.SupplyCurrentLimitEnable = false;
 
     config.MotionMagic.withMotionMagicAcceleration(MOTION_MAGIC_ACCELERATION_RPS2)
         .withMotionMagicCruiseVelocity(MOTION_MAGIC_CRUISE_VELOCITY_RPS)
         .withMotionMagicJerk(MOTION_MAGIC_JERK_RPS3);
-    config.MotorOutput.withInverted(InvertedValue.Clockwise_Positive);
+    config.MotorOutput.withInverted(InvertedValue.CounterClockwise_Positive);
     config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     hoodMotor.getConfigurator().apply(config);
 

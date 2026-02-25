@@ -361,8 +361,9 @@ public class RobotContainer {
   }
 
   void configureHoodTestBindings(BooleanSupplier isIndependentMode) {
-    driverCont.a().and(isIndependentMode).whileTrue(hood.setDutyCycleCommand(0.05));
-    driverCont.b().and(isIndependentMode).whileTrue(hood.setDutyCycleCommand(-0.05));
+    driverCont.a().and(isIndependentMode).whileTrue(hood.setDutyCycleCommand(0.1));
+    driverCont.b().and(isIndependentMode).whileTrue(hood.setDutyCycleCommand(-0.1));
+    driverCont.y().and(isIndependentMode).whileTrue(hood.zero());
   }
 
   /** Configures full intake to shooting test bindings for independent mode. */
