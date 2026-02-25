@@ -39,7 +39,7 @@ public class FlywheelKickerIOPB implements FlywheelKickerIO {
   //     new CANrange(Constants.PracticeBotConstants.FLYWHEEL_KICKER_SENSOR_ID,
   // Constants.RIO_CANBUS);
 
-  // private final StatusSignal<?> distanceSignal;
+  // private final StatusSignal<Distance> distanceSignal;
   // private final StatusSignal<Boolean> isDetectedSignal;
 
   public FlywheelKickerIOPB() {

@@ -18,6 +18,7 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
+import edu.wpi.first.units.measure.Distance;
 import frc.robot.Constants;
 
 public class FlywheelKickerIOWB implements FlywheelKickerIO {
@@ -32,8 +33,8 @@ public class FlywheelKickerIOWB implements FlywheelKickerIO {
   private final CANrange canSensor =
       new CANrange(Constants.WoodBotConstants.FLYWHEEL_KICKER_SENSOR_ID, Constants.RIO_CANBUS);
 
-  private final StatusSignal<?> distanceSignal;
-  private final StatusSignal<?> isDetectedSignal;
+  private final StatusSignal<Distance> distanceSignal;
+  private final StatusSignal<Boolean> isDetectedSignal;
 
   public FlywheelKickerIOWB() {
     sparkMaxConfig.idleMode(IdleMode.kBrake);
@@ -72,7 +73,7 @@ public class FlywheelKickerIOWB implements FlywheelKickerIO {
     inputs.voltage = flywheelKickerMotor.getBusVoltage() * flywheelKickerMotor.getAppliedOutput();
     BaseStatusSignal.refreshAll(distanceSignal, isDetectedSignal);
     inputs.sensorProximity = distanceSignal.getValueAsDouble();
-    inputs.sensorActivated = (boolean) isDetectedSignal.getValue();
+    inputs.sensorActivated = isDetectedSignal.getValue();
   }
 
   public void setDutyCycle(double dutyCycle) {

@@ -15,6 +15,10 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Voltage;
 import frc.robot.Constants;
 
 public class IntakePivotIOPB implements IntakePivotIO {
@@ -52,11 +56,11 @@ public class IntakePivotIOPB implements IntakePivotIO {
   private final TalonFXConfiguration config = new TalonFXConfiguration();
   private NeutralModeValue neutralMode = NeutralModeValue.Brake;
 
-  private final StatusSignal<?> positionSignal;
-  private final StatusSignal<?> velocitySignal;
-  private final StatusSignal<?> statorCurrentSignal;
-  private final StatusSignal<?> supplyCurrentSignal;
-  private final StatusSignal<?> motorVoltageSignal;
+  private final StatusSignal<Angle> positionSignal;
+  private final StatusSignal<AngularVelocity> velocitySignal;
+  private final StatusSignal<Current> statorCurrentSignal;
+  private final StatusSignal<Current> supplyCurrentSignal;
+  private final StatusSignal<Voltage> motorVoltageSignal;
 
   /** Creates a new IntakePivotIOPB. */
   public IntakePivotIOPB() {

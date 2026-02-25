@@ -14,6 +14,10 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorArrangementValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Voltage;
 import frc.robot.Constants;
 
 public class HoodIOPB implements HoodIO {
@@ -38,11 +42,11 @@ public class HoodIOPB implements HoodIO {
 
   private final MotionMagicVoltage motionMagicPosition = new MotionMagicVoltage(0);
 
-  private final StatusSignal<?> positionSignal;
-  private final StatusSignal<?> velocitySignal;
-  private final StatusSignal<?> statorCurrentSignal;
-  private final StatusSignal<?> supplyCurrentSignal;
-  private final StatusSignal<?> motorVoltageSignal;
+  private final StatusSignal<Angle> positionSignal;
+  private final StatusSignal<AngularVelocity> velocitySignal;
+  private final StatusSignal<Current> statorCurrentSignal;
+  private final StatusSignal<Current> supplyCurrentSignal;
+  private final StatusSignal<Voltage> motorVoltageSignal;
 
   public void setZero() {
     hoodMotor.setPosition(0);
