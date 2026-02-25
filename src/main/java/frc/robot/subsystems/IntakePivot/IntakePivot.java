@@ -116,9 +116,9 @@ public class IntakePivot extends SubsystemBase {
       updateState();
       applyState();
     }
-    Logger.recordOutput("Subsystems/IntakePivot/WantedState", wantedState.toString());
-    Logger.recordOutput("Subsystems/IntakePivot/CurrentState", currentState.toString());
-    Logger.recordOutput("Subsystems/IntakePivot/PreviousState", previousState.toString());
-    Logger.recordOutput("Subsystems/IntakePivot/ControlState", controlState.toString());
+    Logger.recordOutput("Subsystems/IntakePivot/WantedState", wantedState);
+    Logger.recordOutput("Subsystems/IntakePivot/CurrentState", currentState);
+    Logger.recordOutput("Subsystems/IntakePivot/PreviousState", previousState);
+    Logger.recordOutput("Subsystems/IntakePivot/ControlState", controlState);
   }
 }

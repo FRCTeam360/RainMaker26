@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems.IntakePivot;
 
+import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -13,6 +15,10 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Voltage;
 import frc.robot.Constants;
 
 public class IntakePivotIOPB implements IntakePivotIO {
@@ -50,9 +56,15 @@ public class IntakePivotIOPB implements IntakePivotIO {
   private final TalonFXConfiguration config = new TalonFXConfiguration();
   private NeutralModeValue neutralMode = NeutralModeValue.Brake;
 
+  private final StatusSignal<Angle> positionSignal;
+  private final StatusSignal<AngularVelocity> velocitySignal;
+  private final StatusSignal<Current> statorCurrentSignal;
+  private final StatusSignal<Current> supplyCurrentSignal;
+  private final StatusSignal<Voltage> motorVoltageSignal;
+
   /** Creates a new IntakePivotIOPB. */
   public IntakePivotIOPB() {
-    // FIXME: NUETRAL MODE BRAKE
+    // FIXME: NEUTRAL MODE BRAKE
     config.CurrentLimits.StatorCurrentLimit = STATOR_CURRENT_LIMIT_AMPS;
     config.CurrentLimits.SupplyCurrentLimit = SUPPLY_CURRENT_LIMIT_AMPS;
     config.CurrentLimits.StatorCurrentLimitEnable = true;
@@ -86,6 +98,21 @@ public class IntakePivotIOPB implements IntakePivotIO {
     config.MotorOutput.NeutralMode = neutralMode;
 
     intakePivot.getConfigurator().apply(config, 0.050);
+
+    positionSignal = intakePivot.getPosition();
+    velocitySignal = intakePivot.getVelocity();
+    statorCurrentSignal = intakePivot.getStatorCurrent();
+    supplyCurrentSignal = intakePivot.getSupplyCurrent();
+    motorVoltageSignal = intakePivot.getMotorVoltage();
+
+    BaseStatusSignal.setUpdateFrequencyForAll(
+        50,
+        positionSignal,
+        velocitySignal,
+        statorCurrentSignal,
+        supplyCurrentSignal,
+        motorVoltageSignal);
+    intakePivot.optimizeBusUtilization();
   }
 
   public void setZero() {
@@ -119,11 +146,17 @@ public class IntakePivotIOPB implements IntakePivotIO {
   // TODO: ASK ELECTRICAL FOR A ZEROING BUTTON OR AN ABSOLUTE ENCODER
 
   public void updateInputs(IntakePivotIOInputs inputs) {
-    inputs.position = Units.rotationsToDegrees(intakePivot.getPosition().getValueAsDouble());
-    inputs.statorCurrent = intakePivot.getStatorCurrent().getValueAsDouble();
-    inputs.velocity = Units.rotationsToDegrees(intakePivot.getVelocity().getValueAsDouble());
-    inputs.voltage = intakePivot.getMotorVoltage().getValueAsDouble();
-    inputs.supplyCurrent = intakePivot.getSupplyCurrent().getValueAsDouble();
+    BaseStatusSignal.refreshAll(
+        positionSignal,
+        velocitySignal,
+        statorCurrentSignal,
+        supplyCurrentSignal,
+        motorVoltageSignal);
+    inputs.position = Units.rotationsToDegrees(positionSignal.getValueAsDouble());
+    inputs.statorCurrent = statorCurrentSignal.getValueAsDouble();
+    inputs.velocity = Units.rotationsToDegrees(velocitySignal.getValueAsDouble());
+    inputs.voltage = motorVoltageSignal.getValueAsDouble();
+    inputs.supplyCurrent = supplyCurrentSignal.getValueAsDouble();
     inputs.brakeMode = neutralMode == NeutralModeValue.Brake;
   }
 }

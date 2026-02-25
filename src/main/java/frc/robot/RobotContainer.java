@@ -16,10 +16,12 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.generated.PracticeBotDrivetrain;
 import frc.robot.generated.WoodBotDrivetrain;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.ControlState;
@@ -176,10 +178,8 @@ public class RobotContainer {
         break;
       case PRACTICEBOT:
       default:
-        drivetrain =
-            WoodBotDrivetrain
-                .createDrivetrain(); // FIXME, CHANGE ONCE PRACTICE BOT DRIVETRAIN IS MADE
-        logger = new Telemetry(WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
+        drivetrain = PracticeBotDrivetrain.createDrivetrain();
+        logger = new Telemetry(PracticeBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
         flywheel = new Flywheel(new FlywheelIOPB());
         hood = new Hood(new HoodIOPB());
         indexer = new Indexer(new IndexerIOPB());
@@ -263,7 +263,7 @@ public class RobotContainer {
     autoChooser = AutoBuilder.buildAutoChooser();
     SmartDashboard.putData("Auto Chooser", autoChooser);
 
-    FollowPathCommand.warmupCommand().schedule();
+    CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
   }
 
   public void registerPathplannerCommand(String name, Command command) {
@@ -356,6 +356,13 @@ public class RobotContainer {
 
     // configureIntakeTestBindings(isIndependentMode);
     // configureFullShootingTestBindings(isIndependentMode);
+    // configureHoodTestBindings(isIndependentMode);
+  }
+
+  void configureHoodTestBindings(BooleanSupplier isIndependentMode) {
+    driverCont.a().and(isIndependentMode).whileTrue(hood.setDutyCycleCommand(0.1));
+    driverCont.b().and(isIndependentMode).whileTrue(hood.setDutyCycleCommand(-0.1));
+    driverCont.y().and(isIndependentMode).whileTrue(hood.zero());
   }
 
   /** Configures full intake to shooting test bindings for independent mode. */
@@ -366,11 +373,10 @@ public class RobotContainer {
         .and(isIndependentMode)
         .whileTrue(
             indexer
-                .setDutyCycleCommand(0.5)
+                .setDutyCycleCommand(0.75)
                 .alongWith(
-                    hopperRoller.setDutyCycleCommand(0.5),
-                    flywheelKicker.setDutyCycleCommand(0.5),
-                    intake.setDutyCycleCommand(0.2)));
+                    hopperRoller.setDutyCycleCommand(0.75),
+                    flywheelKicker.setDutyCycleCommand(0.75)));
     driverCont
         .b()
         .and(isIndependentMode)
@@ -383,6 +389,7 @@ public class RobotContainer {
                     intake.setDutyCycleCommand(-0.2)));
     driverCont.x().and(isIndependentMode).onTrue(intakePivot.setPositionCommand(() -> 90.0));
     driverCont.y().and(isIndependentMode).onTrue(intakePivot.setPositionCommand(() -> 0.0));
+    driverCont.leftTrigger().and(isIndependentMode).whileTrue(intake.setDutyCycleCommand(0.2));
   }
 
   /** Configures intake and intake pivot test bindings for independent mode. */
