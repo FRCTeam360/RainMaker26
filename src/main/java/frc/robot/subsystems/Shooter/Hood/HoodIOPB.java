@@ -21,7 +21,7 @@ import edu.wpi.first.units.measure.Voltage;
 import frc.robot.Constants;
 
 public class HoodIOPB implements HoodIO {
-  private static final double GEAR_RATIO = 1.0 / 3.0 * 170.0 / 10.0; // FIXME: set actual gear ratio
+  private static final double GEAR_RATIO = 3.0 / 1.0 * 170.0 / 10.0; // FIXME: set actual gear ratio
   // 1/3 * 170/10
   private static final double KP = 0.21;
   private static final double KI = 0.0;
@@ -30,7 +30,7 @@ public class HoodIOPB implements HoodIO {
   private static final double KG = 0.0;
   private static final double KS = 0.0;
   private static final double KV = 0.0;
-  private static final double FORWARD_SOFT_LIMIT_DEGREES = 24.0; // FIXME: verify limit
+  private static final double FORWARD_SOFT_LIMIT_DEGREES = 47.0;
   private static final double STATOR_CURRENT_LIMIT_AMPS = 25.0;
   private static final double SUPPLY_CURRENT_LIMIT_AMPS = 30.0;
   private static final double MOTION_MAGIC_ACCELERATION_RPS2 = 0.0; // FIXME: set actual value
@@ -72,9 +72,9 @@ public class HoodIOPB implements HoodIO {
         Units.degreesToRotations(FORWARD_SOFT_LIMIT_DEGREES);
     config.CurrentLimits.StatorCurrentLimit = STATOR_CURRENT_LIMIT_AMPS;
     // NEO 550 has lower current capacity than Falcon 500
-    config.CurrentLimits.StatorCurrentLimitEnable = false;
+    config.CurrentLimits.StatorCurrentLimitEnable = true;
     config.CurrentLimits.SupplyCurrentLimit = SUPPLY_CURRENT_LIMIT_AMPS;
-    config.CurrentLimits.SupplyCurrentLimitEnable = false;
+    config.CurrentLimits.SupplyCurrentLimitEnable = true;
 
     config.MotionMagic.withMotionMagicAcceleration(MOTION_MAGIC_ACCELERATION_RPS2)
         .withMotionMagicCruiseVelocity(MOTION_MAGIC_CRUISE_VELOCITY_RPS)

@@ -356,8 +356,8 @@ public class RobotContainer {
     // driverCont.y().and(isIndependentMode).whileTrue(flywheel.setVelocityCommand(3500));
 
     // configureIntakeTestBindings(isIndependentMode);
-    configureFullShootingTestBindings(isIndependentMode);
-    // configureHoodTestBindings(isIndependentMode);
+    // configureFullShootingTestBindings(isIndependentMode);
+    configureHoodTestBindings(isIndependentMode);
   }
 
   void configureHoodTestBindings(BooleanSupplier isIndependentMode) {
