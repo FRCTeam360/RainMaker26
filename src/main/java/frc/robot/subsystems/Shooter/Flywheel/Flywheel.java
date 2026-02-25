@@ -40,11 +40,14 @@ public class Flywheel extends SubsystemBase {
     AT_SETPOINT
   }
 
-  // Tunable parameters for 4-phase bang-bang control
+  // controlModeDebouncer: prevents rapid spinup/hold switching when velocity briefly dips below
+  // tolerance due to noise or disturbances that aren't a ball pass-through
   private final Debouncer controlModeDebouncer =
       new Debouncer(CONTROL_MODE_DEBOUNCE_SECONDS, DebounceType.kFalling);
+  // shooterSetpointDebouncer: requires velocity to be in tolerance for a sustained period before
+  // reverting back to preparing to shoot shoot state, filtering out momentary spikes
   private final Debouncer shooterSetpointDebouncer =
-      new Debouncer(AT_GOAL_DEBOUNCE_SECONDS, DebounceType.kRising);
+      new Debouncer(AT_GOAL_DEBOUNCE_SECONDS, DebounceType.kFalling);
 
   // State variables
   private FlywheelWantedStates wantedState = FlywheelWantedStates.IDLE;

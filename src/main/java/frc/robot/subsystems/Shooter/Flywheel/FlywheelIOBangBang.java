@@ -52,7 +52,6 @@ public class FlywheelIOBangBang implements FlywheelIO {
 
     // Bang-bang control limits
     // Peak torque-current for ball/idle phases (constant torque)
-    // Initial value - will be updated via LoggedTunableNumber
     rightConfig.TorqueCurrent.PeakForwardTorqueCurrent = 30.0;
     rightConfig.TorqueCurrent.PeakReverseTorqueCurrent = 0.0;
 
