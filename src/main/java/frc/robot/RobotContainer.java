@@ -339,24 +339,30 @@ public class RobotContainer {
 
   /** Configures bindings that are active only in independent (test) mode. */
   private void configureIndependentModeBindings(BooleanSupplier isIndependentMode) {
-    driverCont.leftBumper().and(isIndependentMode).whileTrue(intake.setDutyCycleCommand(0.2));
-
-    driverCont.a().and(isIndependentMode).whileTrue(indexer.setDutyCycleCommand(0.5));
-
-    // hood bindings
-    driverCont.pov(0).and(isIndependentMode).onTrue(hood.moveToZeroAndZero());
-    driverCont.pov(90).and(isIndependentMode).whileTrue(hood.setPositionCommand(4.0));
-    driverCont.pov(180).and(isIndependentMode).whileTrue(hood.setPositionCommand(16.0));
-    driverCont.pov(270).and(isIndependentMode).whileTrue(hood.setPositionCommand(23.0));
-    driverCont.start().and(isIndependentMode).onTrue(hood.zero());
-
-    // flywheel bindings
-    driverCont.x().and(isIndependentMode).whileTrue(flywheel.setVelocityCommand(2500));
-    driverCont.b().and(isIndependentMode).whileTrue(flywheel.setVelocityCommand(3000));
-    driverCont.y().and(isIndependentMode).whileTrue(flywheel.setVelocityCommand(3500));
+    // driverCont.leftBumper().and(isIndependentMode).whileTrue(intake.setDutyCycleCommand(0.2));
+    //
+    // driverCont.a().and(isIndependentMode).whileTrue(indexer.setDutyCycleCommand(0.5));
+    //
+    // // hood bindings
+    // driverCont.pov(0).and(isIndependentMode).onTrue(hood.moveToZeroAndZero());
+    // driverCont.pov(90).and(isIndependentMode).whileTrue(hood.setPositionCommand(4.0));
+    // driverCont.pov(180).and(isIndependentMode).whileTrue(hood.setPositionCommand(16.0));
+    // driverCont.pov(270).and(isIndependentMode).whileTrue(hood.setPositionCommand(23.0));
+    // driverCont.start().and(isIndependentMode).onTrue(hood.zero());
+    //
+    // // flywheel bindings
+    // driverCont.x().and(isIndependentMode).whileTrue(flywheel.setVelocityCommand(2500));
+    // driverCont.b().and(isIndependentMode).whileTrue(flywheel.setVelocityCommand(3000));
+    // driverCont.y().and(isIndependentMode).whileTrue(flywheel.setVelocityCommand(3500));
 
     // configureIntakeTestBindings(isIndependentMode);
     // configureFullShootingTestBindings(isIndependentMode);
+    configureHoodTestBindings(isIndependentMode);
+  }
+
+  void configureHoodTestBindings(BooleanSupplier isIndependentMode) {
+    driverCont.a().and(isIndependentMode).whileTrue(hood.setDutyCycleCommand(0.05));
+    driverCont.b().and(isIndependentMode).whileTrue(hood.setDutyCycleCommand(-0.05));
   }
 
   /** Configures full intake to shooting test bindings for independent mode. */
