@@ -157,9 +157,9 @@ public class Flywheel extends SubsystemBase {
       applyState();
     }
 
-    Logger.recordOutput("Subsystems/Flywheel/WantedState", wantedState.toString());
-    Logger.recordOutput("Subsystems/Flywheel/CurrentState", currentState.toString());
-    Logger.recordOutput("Subsystems/Flywheel/PreviousState", previousState.toString());
-    Logger.recordOutput("Subsystems/Flywheel/ControlState", controlState.toString());
+    Logger.recordOutput("Subsystems/Flywheel/WantedState", wantedState);
+    Logger.recordOutput("Subsystems/Flywheel/CurrentState", currentState);
+    Logger.recordOutput("Subsystems/Flywheel/PreviousState", previousState);
+    Logger.recordOutput("Subsystems/Flywheel/ControlState", controlState);
   }
 }

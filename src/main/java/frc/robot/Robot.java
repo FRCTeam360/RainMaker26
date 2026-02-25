@@ -56,7 +56,8 @@ public class Robot extends LoggedRobot {
       } else {
         Logger.addDataReceiver(new WPILOGWriter("/home/lvuser/logs"));
       }
-      Logger.addDataReceiver(new NT4Publisher());
+      // TODO: Re-enable for practice sessions when live dashboard telemetry is needed
+      // Logger.addDataReceiver(new NT4Publisher());
       new PowerDistribution(1, ModuleType.kRev); // Enables power distribution logging
     }
     switch (Constants.getRobotType()) {

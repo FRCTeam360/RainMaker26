@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems.Shooter.FlywheelKicker;
 
+import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANrangeConfiguration;
 import com.ctre.phoenix6.hardware.CANrange;
 import com.ctre.phoenix6.signals.UpdateModeValue;
@@ -30,6 +32,9 @@ public class FlywheelKickerIOWB implements FlywheelKickerIO {
   private final CANrange canSensor =
       new CANrange(Constants.WoodBotConstants.FLYWHEEL_KICKER_SENSOR_ID, Constants.RIO_CANBUS);
 
+  private final StatusSignal<?> distanceSignal;
+  private final StatusSignal<?> isDetectedSignal;
+
   public FlywheelKickerIOWB() {
     sparkMaxConfig.idleMode(IdleMode.kBrake);
     sparkMaxConfig.inverted(true);
@@ -48,6 +53,12 @@ public class FlywheelKickerIOWB implements FlywheelKickerIO {
     sensorConfig.ProximityParams.ProximityThreshold = 0.1; // meters
     sensorConfig.ToFParams.withUpdateMode(UpdateModeValue.ShortRangeUserFreq);
     canSensor.getConfigurator().apply(sensorConfig);
+
+    distanceSignal = canSensor.getDistance();
+    isDetectedSignal = canSensor.getIsDetected();
+
+    BaseStatusSignal.setUpdateFrequencyForAll(50, distanceSignal, isDetectedSignal);
+    canSensor.optimizeBusUtilization();
   }
 
   public void updateInputs(FlywheelKickerIOInputs inputs) {
@@ -59,8 +70,9 @@ public class FlywheelKickerIOWB implements FlywheelKickerIO {
     // this is right
     inputs.velocity = encoder.getVelocity();
     inputs.voltage = flywheelkickerMotor.getBusVoltage() * flywheelkickerMotor.getAppliedOutput();
-    inputs.sensorProximity = canSensor.getDistance().getValueAsDouble();
-    inputs.sensorActivated = canSensor.getIsDetected().getValue();
+    BaseStatusSignal.refreshAll(distanceSignal, isDetectedSignal);
+    inputs.sensorProximity = distanceSignal.getValueAsDouble();
+    inputs.sensorActivated = (boolean) isDetectedSignal.getValue();
   }
 
   public void setDutyCycle(double dutyCycle) {

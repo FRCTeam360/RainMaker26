@@ -1,5 +1,7 @@
 package frc.robot.subsystems.Shooter.FlywheelKicker;
 
+// import com.ctre.phoenix6.BaseStatusSignal;
+// import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANrangeConfiguration;
 import com.ctre.phoenix6.signals.UpdateModeValue;
 import com.revrobotics.PersistMode;
@@ -37,6 +39,9 @@ public class FlywheelKickerIOPB implements FlywheelKickerIO {
   //     new CANrange(Constants.PracticeBotConstants.FLYWHEEL_KICKER_SENSOR_ID,
   // Constants.RIO_CANBUS);
 
+  // private final StatusSignal<?> distanceSignal;
+  // private final StatusSignal<Boolean> isDetectedSignal;
+
   public FlywheelKickerIOPB() {
     sparkFlexConfig.idleMode(IdleMode.kBrake);
     sparkFlexConfig.inverted(false);
@@ -58,6 +63,12 @@ public class FlywheelKickerIOPB implements FlywheelKickerIO {
     sensorConfig.ProximityParams.ProximityThreshold = PROXIMITY_THRESHOLD_METERS;
     sensorConfig.ToFParams.withUpdateMode(UpdateModeValue.ShortRangeUserFreq);
     // canSensor.getConfigurator().apply(sensorConfig);
+
+    // distanceSignal = canSensor.getDistance();
+    // isDetectedSignal = canSensor.getIsDetected();
+
+    // BaseStatusSignal.setUpdateFrequencyForAll(50, distanceSignal, isDetectedSignal);
+    // canSensor.optimizeBusUtilization();
   }
 
   public void updateInputs(FlywheelKickerIOInputs inputs) {
