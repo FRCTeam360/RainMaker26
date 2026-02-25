@@ -43,7 +43,7 @@ public class Flywheel extends SubsystemBase {
   // Tunable parameters for 4-phase bang-bang control
   private final Debouncer controlModeDebouncer =
       new Debouncer(CONTROL_MODE_DEBOUNCE_SECONDS, DebounceType.kFalling);
-  private final Debouncer setpointDebouncer =
+  private final Debouncer shooterSetpointDebouncer =
       new Debouncer(AT_GOAL_DEBOUNCE_SECONDS, DebounceType.kRising);
 
   // State variables
@@ -125,7 +125,7 @@ public class Flywheel extends SubsystemBase {
     if (inputs.velocities.length > 0) {
       inTolerance = Math.abs(inputs.velocities[0] - targetRPM) < TOLERANCE_RPM;
       controlModeAtSetpoint = controlModeDebouncer.calculate(inTolerance);
-      atGoal = setpointDebouncer.calculate(inTolerance);
+      atGoal = shooterSetpointDebouncer.calculate(inTolerance);
       return controlModeAtSetpoint;
     }
     return false;
