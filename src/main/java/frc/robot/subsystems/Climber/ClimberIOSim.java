@@ -4,94 +4,118 @@
 
 package frc.robot.subsystems.Climber;
 
-import edu.wpi.first.math.numbers.N1;
-import edu.wpi.first.math.system.LinearSystem;
+import com.revrobotics.PersistMode;
+import com.revrobotics.ResetMode;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.Encoder;
-import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
 import edu.wpi.first.wpilibj.simulation.BatterySim;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
-import edu.wpi.first.wpilibj.simulation.EncoderSim;
-import edu.wpi.first.wpilibj.simulation.PWMSim;
 import edu.wpi.first.wpilibj.simulation.RoboRioSim;
+import frc.robot.Constants.SimulationConstants;
 
 public class ClimberIOSim implements ClimberIO {
+  // Physical constants
+  private static final double GEAR_RATIO = 20.0; // gear reduction
+  private static final double DRUM_RADIUS_METERS = Units.inchesToMeters(0.75); // 3/4 in drum
+  private static final double CARRIAGE_MASS_KG = 4.5; // carriage + arm mass
+  private static final double MIN_HEIGHT_METERS = 0.0;
+  private static final double MAX_HEIGHT_METERS = Units.inchesToMeters(24.0); // 24 in travel
+  private static final double MIN_HEIGHT_THRESHOLD_METERS = 0.01;
 
-  private static final double MEASUREMENT_STD_DEV_METERS = 0.01;
-  private DCMotor gearbox = DCMotor.getNEO(1);
-  private Encoder climberEncoder = new Encoder(4, 5);
+  // Simulated motor controller (single climber sim, reports identical values to both sides)
+  private final SparkMax motorControllerSim =
+      new SparkMax(SimulationConstants.CLIMBER_MOTOR, MotorType.kBrushless);
+  private final SparkMaxConfig motorConfig = new SparkMaxConfig();
 
-  private final PWMSparkMax climberMotor = new PWMSparkMax(5);
-
-  private final double JKgMetersSquared = 0.00113951385;
-
-  private final double ENCODER_TICKS_PER_REVOLUTION = 4096;
-
-  public boolean rightAboveMinHeight() {
-    return false;
-  }
-
-  public boolean leftAboveMinHeight() {
-    return false;
-  }
-
-  public void zeroBoth() {}
-
-  public void updatePIDF(double P, double I, double D, double F) {}
-
-  // FIXME: Assign real values. Ensure it uses the constructor mentioning carriage and drum
+  // Elevator simulation
+  private final DCMotor gearbox = DCMotor.getNEO(1);
   private final ElevatorSim climberSim =
       new ElevatorSim(
           gearbox,
-          JKgMetersSquared,
-          JKgMetersSquared,
-          JKgMetersSquared,
-          JKgMetersSquared,
-          JKgMetersSquared,
-          false,
-          JKgMetersSquared,
-          null);
-
-  private final EncoderSim simClimberEncoder = new EncoderSim(climberEncoder);
-  private final PWMSim simClimberMotor = new PWMSim(climberMotor);
+          GEAR_RATIO,
+          CARRIAGE_MASS_KG,
+          DRUM_RADIUS_METERS,
+          MIN_HEIGHT_METERS,
+          MAX_HEIGHT_METERS,
+          true,
+          MIN_HEIGHT_METERS);
 
   /** Creates a new ClimberIOSim. */
-  public ClimberIOSim() {}
+  public ClimberIOSim() {
+    motorConfig.idleMode(IdleMode.kBrake);
+    motorConfig.inverted(false);
+    motorConfig.smartCurrentLimit(40);
+    motorControllerSim.configure(
+        motorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    motorControllerSim.set(0.0);
+  }
 
+  @Override
   public void updateInputs(ClimberIOInputs inputs) {
-    simClimberEncoder.setDistancePerPulse(
-        2.0
-            * Math.PI
-            * (Units.inchesToMeters(2.0))
-            / ENCODER_TICKS_PER_REVOLUTION); // divided by 4096 to convert the encoder's raw
-    // rotational data into meters.
-    climberSim.setInput(simClimberMotor.getSpeed() * RobotController.getBatteryVoltage());
-    climberSim.update(0.02);
-    simClimberEncoder.setDistance(climberSim.getPositionMeters());
+    // Step 1: Get commanded voltage
+    double motorOutput = motorControllerSim.get();
+    double appliedVoltage = motorOutput * 12.0;
 
+    // Step 2: Update elevator simulation
+    climberSim.setInputVoltage(appliedVoltage);
+    climberSim.update(SimulationConstants.SIM_TICK_RATE_S);
+
+    // Step 3: Read simulated outputs
+    double positionMeters = climberSim.getPositionMeters();
+    double velocityMPS = climberSim.getVelocityMetersPerSecond();
+    double currentAmps = climberSim.getCurrentDrawAmps();
+
+    // Step 4: Update battery sim
     RoboRioSim.setVInVoltage(
-        BatterySim.calculateDefaultBatteryLoadedVoltage(climberSim.getCurrentDrawAmps()));
+        BatterySim.calculateDefaultBatteryLoadedVoltage(currentAmps));
 
-    inputs.climberLeftPosition = simClimberMotor.getPosition();
-    inputs.climberRightPosition = simClimberMotor.getPosition();
+    // Step 5: Report identical values to both left and right inputs
+    inputs.climberLeftPosition = positionMeters;
+    inputs.climberRightPosition = positionMeters;
+    inputs.climberLeftVelocity = velocityMPS;
+    inputs.climberRightVelocity = velocityMPS;
+    inputs.climberLeftDutyCycle = motorOutput;
+    inputs.climberRightDutyCycle = motorOutput;
+    inputs.climberLeftCurrent = currentAmps;
+    inputs.climberRightCurrent = currentAmps;
+    inputs.climberLeftTemp = 0.0;
+    inputs.climberRightTemp = 0.0;
   }
 
+  @Override
   public void setLeftDutyCycle(double dutyCycle) {
-    simClimberMotor.setSpeed(dutyCycle);
+    motorControllerSim.set(dutyCycle);
   }
 
+  @Override
   public void setRightDutyCycle(double dutyCycle) {
-    simClimberMotor.setSpeed(dutyCycle);
+    motorControllerSim.set(dutyCycle);
   }
 
-  public void setLeftPosition(double position) {
-    simClimberMotor.setPosition(position);
+  @Override
+  public void setLeftPosition(double position) {}
+
+  @Override
+  public void setRightPosition(double position) {}
+
+  @Override
+  public boolean leftAboveMinHeight() {
+    return climberSim.getPositionMeters() > MIN_HEIGHT_THRESHOLD_METERS;
   }
 
-  public void setRightPosition(double position) {
-    simClimberMotor.setPosition(position);
+  @Override
+  public boolean rightAboveMinHeight() {
+    return climberSim.getPositionMeters() > MIN_HEIGHT_THRESHOLD_METERS;
+  }
+
+  @Override
+  public void zeroBoth() {
+    climberSim.setState(0.0, 0.0);
+    motorControllerSim.set(0.0);
   }
 }
+

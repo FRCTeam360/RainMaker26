@@ -149,6 +149,9 @@ public final class Constants {
 
     // === HOOD ===
     public static final int HOOD_MOTOR = 34;
+
+    // === CLIMBER ===
+    public static final int CLIMBER_MOTOR = 36;
   }
 
   public static class OperatorConstants {
