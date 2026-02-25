@@ -21,7 +21,7 @@ import edu.wpi.first.units.measure.Voltage;
 import frc.robot.Constants.PracticeBotConstants;
 
 public class FlywheelIOPB implements FlywheelIO {
-  private static final double GEAR_RATIO = 1.0; // FIXME: set actual gear ratio
+  private static final double GEAR_RATIO = 1.0;
   private static final double KP = 3.0;
   private static final double KI = 0.0;
   private static final double KD = 0.1;
