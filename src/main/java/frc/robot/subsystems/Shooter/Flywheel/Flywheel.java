@@ -11,10 +11,13 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.ControlState;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
-import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 public class Flywheel extends SubsystemBase {
   // Constants
+  private static final double TOLERANCE_RPM = 100.0;
+  private static final double CONTROL_MODE_DEBOUNCE_SECONDS = 0.04;
+  private static final double AT_GOAL_DEBOUNCE_SECONDS = 0.2;
+
   private boolean atGoal = false;
   private long launchCount = 0;
 
@@ -38,17 +41,10 @@ public class Flywheel extends SubsystemBase {
   }
 
   // Tunable parameters for 4-phase bang-bang control
-  private static final LoggedNetworkNumber toleranceRPM =
-      new LoggedNetworkNumber("Flywheel/ToleranceRPM", 100);
-  private static final LoggedNetworkNumber controlModeDebounceSeconds =
-      new LoggedNetworkNumber("Flywheel/ControlModeDebounceSeconds", 0.04);
-  private static final LoggedNetworkNumber atGoalDebounceSeconds =
-      new LoggedNetworkNumber("Flywheel/AtGoalDebounceSeconds", 0.2);
-
   private final Debouncer controlModeDebouncer =
-      new Debouncer(controlModeDebounceSeconds.get(), DebounceType.kFalling);
+      new Debouncer(CONTROL_MODE_DEBOUNCE_SECONDS, DebounceType.kFalling);
   private final Debouncer setpointDebouncer =
-      new Debouncer(atGoalDebounceSeconds.get(), DebounceType.kRising);
+      new Debouncer(AT_GOAL_DEBOUNCE_SECONDS, DebounceType.kRising);
 
   // State variables
   private FlywheelWantedStates wantedState = FlywheelWantedStates.IDLE;
@@ -127,7 +123,7 @@ public class Flywheel extends SubsystemBase {
     boolean controlModeAtSetpoint;
     boolean inTolerance;
     if (inputs.velocities.length > 0) {
-      inTolerance = Math.abs(inputs.velocities[0] - targetRPM) < toleranceRPM.get();
+      inTolerance = Math.abs(inputs.velocities[0] - targetRPM) < TOLERANCE_RPM;
       controlModeAtSetpoint = controlModeDebouncer.calculate(inTolerance);
       atGoal = setpointDebouncer.calculate(inTolerance);
       return controlModeAtSetpoint;
