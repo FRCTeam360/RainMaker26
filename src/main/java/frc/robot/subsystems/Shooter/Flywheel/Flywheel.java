@@ -28,7 +28,7 @@ public class Flywheel extends SubsystemBase {
   // Enums
   public enum FlywheelWantedStates {
     IDLE,
-    RUNNING
+    SHOOTING
   }
 
   public enum FlywheelInternalStates {
@@ -90,7 +90,7 @@ public class Flywheel extends SubsystemBase {
     previousState = currentState;
 
     switch (wantedState) {
-      case RUNNING:
+      case SHOOTING:
         if (atSetpoint(shootVelocitySupplier.getAsDouble())) {
           currentState = FlywheelInternalStates.AT_SETPOINT;
         } else {
