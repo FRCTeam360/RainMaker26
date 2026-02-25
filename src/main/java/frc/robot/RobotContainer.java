@@ -356,8 +356,8 @@ public class RobotContainer {
     // driverCont.y().and(isIndependentMode).whileTrue(flywheel.setVelocityCommand(3500));
 
     // configureIntakeTestBindings(isIndependentMode);
-    // configureFullShootingTestBindings(isIndependentMode);
-    configureHoodTestBindings(isIndependentMode);
+    configureFullShootingTestBindings(isIndependentMode);
+    // configureHoodTestBindings(isIndependentMode);
   }
 
   void configureHoodTestBindings(BooleanSupplier isIndependentMode) {
@@ -374,11 +374,10 @@ public class RobotContainer {
         .and(isIndependentMode)
         .whileTrue(
             indexer
-                .setDutyCycleCommand(0.5)
+                .setDutyCycleCommand(0.75)
                 .alongWith(
-                    hopperRoller.setDutyCycleCommand(0.5),
-                    flywheelKicker.setDutyCycleCommand(0.5),
-                    intake.setDutyCycleCommand(0.2)));
+                    hopperRoller.setDutyCycleCommand(0.75),
+                    flywheelKicker.setDutyCycleCommand(0.75)));
     driverCont
         .b()
         .and(isIndependentMode)
@@ -391,6 +390,7 @@ public class RobotContainer {
                     intake.setDutyCycleCommand(-0.2)));
     driverCont.x().and(isIndependentMode).onTrue(intakePivot.setPositionCommand(() -> 90.0));
     driverCont.y().and(isIndependentMode).onTrue(intakePivot.setPositionCommand(() -> 0.0));
+    driverCont.leftTrigger().and(isIndependentMode).whileTrue(intake.setDutyCycleCommand(0.2));
   }
 
   /** Configures intake and intake pivot test bindings for independent mode. */
