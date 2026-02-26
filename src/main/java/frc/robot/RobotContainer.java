@@ -12,6 +12,7 @@ import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -251,8 +252,9 @@ public class RobotContainer {
                             () -> hubShotCalculator.calculateShot().targetHeading())))
             .andThen(superStructure.setStateCommand(SuperStates.IDLE)));
 
-    configureBindings();
+    // configureBindings();
     // configureTestBindings();
+    configureFullShootingTestBindings();
 
     PathPlannerLogging.setLogActivePathCallback(
         (poses -> Logger.recordOutput("Swerve/ActivePath", poses.toArray(new Pose2d[0]))));
@@ -350,9 +352,8 @@ public class RobotContainer {
     driverCont.start().and(isIndependentMode).onTrue(hood.zero());
 
     // flywheel bindings
-    driverCont.x().and(isIndependentMode).whileTrue(flywheel.setVelocityCommand(2500));
-    driverCont.b().and(isIndependentMode).whileTrue(flywheel.setVelocityCommand(3000));
-    driverCont.y().and(isIndependentMode).whileTrue(flywheel.setVelocityCommand(3500));
+    driverCont.x().and(isIndependentMode).whileTrue(flywheel.setVelocityCommand(3000.0));
+    driverCont.y().and(isIndependentMode).whileTrue(flywheel.setVelocityCommand(4000.0));
 
     // configureIntakeTestBindings(isIndependentMode);
     // configureFullShootingTestBindings(isIndependentMode);
@@ -366,8 +367,13 @@ public class RobotContainer {
   }
 
   /** Configures full intake to shooting test bindings for independent mode. */
-  private void configureFullShootingTestBindings(BooleanSupplier isIndependentMode) {
-    driverCont.rightTrigger().and(isIndependentMode).whileTrue(flywheel.setDutyCycleCommand(1.0));
+  private void configureFullShootingTestBindings() {
+    BooleanSupplier isSuperstructureMode =
+        () -> superStructure.getControlState() == ControlState.SUPERSTRUCTURE;
+    BooleanSupplier isIndependentMode =
+        () -> superStructure.getControlState() == ControlState.INDEPENDENT;
+
+    driverCont.rightTrigger().and(isIndependentMode).whileTrue(flywheel.setVelocityCommand(4000));
     driverCont
         .a()
         .and(isIndependentMode)
@@ -376,7 +382,7 @@ public class RobotContainer {
                 .setDutyCycleCommand(0.75)
                 .alongWith(
                     hopperRoller.setDutyCycleCommand(0.75),
-                    flywheelKicker.setDutyCycleCommand(0.75)));
+                    flywheelKicker.setVelocityCommand(4000.0)));
     driverCont
         .b()
         .and(isIndependentMode)
@@ -390,6 +396,31 @@ public class RobotContainer {
     driverCont.x().and(isIndependentMode).onTrue(intakePivot.setPositionCommand(() -> 90.0));
     driverCont.y().and(isIndependentMode).onTrue(intakePivot.setPositionCommand(() -> 0.0));
     driverCont.leftTrigger().and(isIndependentMode).whileTrue(intake.setDutyCycleCommand(0.2));
+    driverCont
+        .pov(0)
+        .and(isIndependentMode)
+        .whileTrue(hood.setPositionCommand(Units.degreesToRotations(20.0)));
+    driverCont
+        .pov(0)
+        .and(isIndependentMode)
+        .whileTrue(hood.setPositionCommand(Units.degreesToRotations(10.0)));
+    // intake stuff
+    // driverCont
+    //     .axisMagnitudeGreaterThan(5, 0.1)
+    //     .and(isIndependentMode)
+    //     .whileTrue(intakePivot.setDutyCycleCommand(() -> -driverCont.getRightY() * 0.2));
+
+    // driverCont
+    //     .rightBumper()
+    //     .and(isIndependentMode)
+    //     .whileTrue(intakePivot.setPositionCommand(() -> 0.0));
+    // driverCont
+    //     .leftBumper()
+    //     .and(isIndependentMode)
+    //     .whileTrue(intakePivot.setPositionCommand(() -> 90.0));
+    // Intake rollers: A = in, B = out
+    // driverCont.a().and(isIndependentMode).whileTrue(intake.setDutyCycleCommand(0.2));
+    // driverCont.b().and(isIndependentMode).whileTrue(intake.setDutyCycleCommand(-0.2));
   }
 
   /** Configures intake and intake pivot test bindings for independent mode. */

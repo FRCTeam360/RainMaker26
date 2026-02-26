@@ -45,7 +45,7 @@ public class FlywheelKickerIOPB implements FlywheelKickerIO {
   // private final StatusSignal<Boolean> isDetectedSignal;
 
   public FlywheelKickerIOPB() {
-    sparkFlexConfig.idleMode(IdleMode.kBrake);
+    sparkFlexConfig.idleMode(IdleMode.kCoast);
     sparkFlexConfig.inverted(false);
     sparkFlexConfig.smartCurrentLimit(CURRENT_LIMIT_AMPS);
 
