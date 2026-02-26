@@ -133,11 +133,9 @@ public class Vision extends SubsystemBase {
       Logger.processInputs("Limelight: " + key, input.clone());
     }
 
-    for (Map.Entry<String, VisionIO> entry : ios.entrySet()) {
-      VisionIO io = entry.getValue();
+    for (Map.Entry<String, VisionIOInputsAutoLogged> entry : visionInputs.entrySet()) {
       String key = entry.getKey();
-
-      VisionIOInputsAutoLogged input = visionInputs.get(key);
+      VisionIOInputsAutoLogged input = entry.getValue();
 
       // Count total detections (pose updates attempted)
       if (input.poseUpdated) {
