@@ -79,6 +79,12 @@ public class FlywheelIOPBBangBang implements FlywheelIO {
 
   /** Constructs the practice bot flywheel IO and configures both TalonFX motors. */
   public FlywheelIOPBBangBang() {
+    // Reset all motors to factory defaults before applying custom config
+    TalonFXConfiguration defaultConfig = new TalonFXConfiguration();
+    for (TalonFX motor : motors) {
+      motor.getConfigurator().apply(defaultConfig);
+    }
+
     // Slot 0: Bang-bang — extremely high kP drives full output below setpoint, zero above
     rightConfig.Slot0.kP = 999999.0;
     rightConfig.Slot0.kI = 0.0;
