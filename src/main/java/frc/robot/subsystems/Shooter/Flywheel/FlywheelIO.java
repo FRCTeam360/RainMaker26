@@ -2,9 +2,15 @@ package frc.robot.subsystems.Shooter.Flywheel;
 
 import org.littletonrobotics.junction.AutoLog;
 
+/**
+ * Hardware IO interface for the flywheel subsystem. Implementations provide motor control and sensor
+ * readings for different robot configurations (real hardware, simulation, noop).
+ */
 public interface FlywheelIO {
-  public static final int MAX_MOTORS = 2; // might become 3 might become 4
+  /** Maximum number of flywheel motors supported. */
+  public static final int MAX_MOTORS = 2;
 
+  /** Logged inputs from the flywheel hardware. */
   @AutoLog
   public static class FlywheelIOInputs {
     public double[] statorCurrents = new double[MAX_MOTORS];
@@ -14,17 +20,32 @@ public interface FlywheelIO {
     public double[] positions = new double[MAX_MOTORS];
   }
 
-  /** Set flywheel velocity using duty cycle bang-bang control (fast acceleration) */
+  /**
+   * Sets flywheel velocity using duty-cycle bang-bang control for maximum acceleration. Used during
+   * spinup and recovery phases.
+   *
+   * @param velocityRPM the target velocity in RPM
+   */
   public void setSpinupVelocityControl(double velocityRPM);
 
-  /** Set flywheel velocity using torque current bang-bang control (consistent torque) */
+  /**
+   * Sets flywheel velocity using torque-current bang-bang control for consistent, bounded torque.
+   * Used when holding at setpoint.
+   *
+   * @param velocityRPM the target velocity in RPM
+   */
   public void setHoldVelocityControl(double velocityRPM);
 
-  /** Set flywheel velocity using traditional PID control with torque current (Slot 2) */
+  /**
+   * Sets flywheel velocity using traditional PID control for smooth operation.
+   *
+   * @param velocityRPM the target velocity in RPM
+   */
   public void setCoastVelocityControl(double velocityRPM);
 
-  /** Set flywheel duty cycle directly (open loop) */
+
   public void setDutyCycle(double duty);
+
 
   public default void updateInputs(FlywheelIOInputs inputs) {}
 }

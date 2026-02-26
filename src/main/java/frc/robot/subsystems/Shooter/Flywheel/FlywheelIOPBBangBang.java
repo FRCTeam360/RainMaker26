@@ -24,9 +24,30 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import frc.robot.Constants.PracticeBotConstants;
 
+/**
+ * Practice bot flywheel IO implementation using bang-bang control on dual TalonFX motors.
+ *
+ * <p>This implementation provides three control modes via separate CTRE control request slots:
+ *
+ * <ul>
+ *   <li><b>Spinup (Slot 0, duty-cycle bang-bang)</b> — extremely high kP drives full duty cycle
+ *       when below setpoint, zero when above. Unconstrained by torque limits for maximum
+ *       acceleration during initial spinup and recovery after shots.
+ *   <li><b>Hold (Slot 0, torque-current bang-bang)</b> — same bang-bang gains but applied through
+ *       FOC torque-current control, clamped to {@value #MAX_POSITIVE_TORQUE_CURRENT}A. Provides
+ *       consistent, bounded torque for holding velocity at setpoint.
+ *   <li><b>Coast (Slot 2, PID voltage)</b> — traditional velocity PID for smooth control when
+ *       precision matters more than response time.
+ * </ul>
+ *
+ * <p>The right motor is the leader; the left motor follows in opposed direction.
+ */
 public class FlywheelIOPBBangBang implements FlywheelIO {
 
+  /** CTRE slot index for bang-bang control (extremely high kP). */
   private static final int BANG_BANG_SLOT = 0;
+
+  /** CTRE slot index for traditional PID velocity control. */
   private static final int PID_SLOT = 2;
 
   private static final double STATOR_CURRENT_LIMIT_AMPS = 200.0;
@@ -56,9 +77,9 @@ public class FlywheelIOPBBangBang implements FlywheelIO {
   private final StatusSignal<AngularVelocity> leftVelocitySignal;
   private final StatusSignal<Voltage> leftMotorVoltageSignal;
 
+  /** Constructs the practice bot flywheel IO and configures both TalonFX motors. */
   public FlywheelIOPBBangBang() {
-    // Slot 0: Bang-bang control configuration
-    // Very high kP creates bang-bang behavior (either full output or zero)
+    // Slot 0: Bang-bang — extremely high kP drives full output below setpoint, zero above
     rightConfig.Slot0.kP = 999999.0;
     rightConfig.Slot0.kI = 0.0;
     rightConfig.Slot0.kD = 0.0;
@@ -67,10 +88,8 @@ public class FlywheelIOPBBangBang implements FlywheelIO {
     rightConfig.Slot0.kS = 0.0;
     rightConfig.Slot0.kV = 0.0;
 
-    // Slot 2: Traditional PID control configuration
-    // Standard velocity PID gains
-
-    // TODO TUNE IF NEEDED
+    // Slot 2: Traditional PID velocity control
+    // TODO: Tune PID gains if needed
     rightConfig.Slot2.kP = 3.0;
     rightConfig.Slot2.kI = 0.0;
     rightConfig.Slot2.kD = 0.1;
@@ -86,19 +105,18 @@ public class FlywheelIOPBBangBang implements FlywheelIO {
 
     rightConfig.Feedback.SensorToMechanismRatio = GEAR_RATIO;
 
-    // Bang-bang control limits
-    // Peak torque-current for ball/idle phases (constant torque)
+    // Torque-current limits for hold phase (bounded torque for consistent hold)
     rightConfig.TorqueCurrent.PeakForwardTorqueCurrent = MAX_POSITIVE_TORQUE_CURRENT;
     rightConfig.TorqueCurrent.PeakReverseTorqueCurrent = MAX_NEGATIVE_TORQUE_CURRENT;
 
-    // Peak duty-cycle for startup/recovery phases (max acceleration)
+    // Duty-cycle limits for spinup/recovery phase (unconstrained acceleration)
     rightConfig.MotorOutput.PeakForwardDutyCycle = MAX_POSITIVE_DUTY_CYCLE;
     rightConfig.MotorOutput.PeakReverseDutyCycle = MAX_NEGATIVE_DUTY_CYCLE;
 
     rightConfig.MotorOutput.withInverted(InvertedValue.Clockwise_Positive);
 
     leftConfig = rightConfig.clone();
-    // do not edit right configs after cloning
+    // Do not edit rightConfig after cloning — leftConfig is an independent copy
     leftConfig.MotorOutput.withInverted(InvertedValue.CounterClockwise_Positive);
 
     motors[1].getConfigurator().apply(leftConfig);
@@ -138,40 +156,45 @@ public class FlywheelIOPBBangBang implements FlywheelIO {
     }
   }
 
-  // Control request objects (reused for efficiency)
+  /** Duty-cycle bang-bang request for spinup/recovery (Slot 0, unconstrained acceleration). */
   private final VelocityDutyCycle dutyCycleBangBang =
       new VelocityDutyCycle(0.0).withSlot(BANG_BANG_SLOT);
-  // Because this uses the VelocityTorqueCurrentFOC control mode, it will be limited by the torque
-  // current config (30A limit from config)
+
+  /**
+   * Torque-current bang-bang request for holding at setpoint (Slot 0, capped at {@value
+   * #MAX_POSITIVE_TORQUE_CURRENT}A by config).
+   */
   private final VelocityTorqueCurrentFOC torqueCurrentBangBang =
       new VelocityTorqueCurrentFOC(0.0).withSlot(BANG_BANG_SLOT);
-  // PID uses VelocityVoltage instead - not limited by torque current config
+
+  /** Traditional PID velocity request for smooth coast control (Slot 2, voltage-based). */
   private final VelocityVoltage velocityPID = new VelocityVoltage(0.0).withSlot(PID_SLOT);
 
+  /** {@inheritDoc} */
   @Override
   public void setSpinupVelocityControl(double velocityRPM) {
-    // Startup/Recovery phase: Duty cycle bang-bang (max acceleration)
     motors[0].setControl(dutyCycleBangBang.withVelocity(velocityRPM / 60.0));
   }
 
+  /** {@inheritDoc} */
   @Override
   public void setHoldVelocityControl(double velocityRPM) {
-    // Idle/Ball phase: Torque current bang-bang (consistent torque, 40A limit from config)
     motors[0].setControl(torqueCurrentBangBang.withVelocity(velocityRPM / 60.0));
   }
 
+  /** {@inheritDoc} */
   @Override
   public void setCoastVelocityControl(double velocityRPM) {
-    // Traditional PID control using voltage control (not limited by torque current)
-    // Limited only by supply current limit (100A) and voltage saturation
     motors[0].setControl(velocityPID.withVelocity(velocityRPM / 60.0));
   }
 
+  /** {@inheritDoc} */
   @Override
   public void setDutyCycle(double duty) {
     motors[0].set(duty);
   }
 
+  /** {@inheritDoc} */
   public void updateInputs(FlywheelIOInputs inputs) {
     BaseStatusSignal.refreshAll(
         rightStatorCurrentSignal,
