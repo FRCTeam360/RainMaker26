@@ -6,9 +6,11 @@ package frc.robot;
 
 import com.ctre.phoenix6.HootAutoReplay;
 import edu.wpi.first.net.WebServer;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.utils.RobotUtils;
@@ -132,6 +134,8 @@ public class Robot extends LoggedRobot {
     // teleop starts running. If you want the autonomous to
     // continue until interrupted by another command, remove
     // this line or comment it out.
+
+    Constants.AUTO_WINNER = RobotUtils.getAutoWinner(DriverStation.getGameSpecificMessage());
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
@@ -139,7 +143,21 @@ public class Robot extends LoggedRobot {
 
   /** This function is called periodically during operator control. */
   @Override
-  public void teleopPeriodic() {}
+  public void teleopPeriodic() {
+    Constants.HUB_PHASE =
+        RobotUtils.getHubPhase(DriverStation.getMatchTime(), DriverStation.isTeleop());
+    Logger.recordOutput("HubPhase", Constants.HUB_PHASE);
+    SmartDashboard.putString("HubPhase", Constants.HUB_PHASE.name());
+    Logger.recordOutput("AutoWinner", Constants.AUTO_WINNER);
+    SmartDashboard.putString("AutoWinner", Constants.AUTO_WINNER.name());
+
+    boolean hubActive =
+        RobotUtils.hubActive(
+            DriverStation.getAlliance(), Constants.AUTO_WINNER, Constants.HUB_PHASE);
+    Constants.HUB_ACTIVE = hubActive;
+    Logger.recordOutput("HubActive", hubActive);
+    SmartDashboard.putBoolean("HubActive", hubActive);
+  }
 
   @Override
   public void testInit() {

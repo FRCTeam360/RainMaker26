@@ -8,6 +8,8 @@ import com.ctre.phoenix6.CANBus;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.hal.HALUtil;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import frc.robot.utils.RobotUtils.ActiveHub;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -20,6 +22,10 @@ import edu.wpi.first.hal.HALUtil;
 public final class Constants {
   public static final AprilTagFieldLayout FIELD_LAYOUT =
       AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
+
+  public static Alliance AUTO_WINNER;
+  public static ActiveHub HUB_PHASE;
+  public static boolean HUB_ACTIVE;
 
   public static final int IMU_MODE_EXTERNAL_ONLY = 0;
 
