@@ -130,7 +130,7 @@ public class Vision extends SubsystemBase {
           input.tagPoses[i] = input.tagPoses[0];
         }
       }
-      Logger.processInputs("Limelight: " + key, input.clone());
+      Logger.processInputs("Limelight: " + key, input);
     }
 
     for (Map.Entry<String, VisionIOInputsAutoLogged> entry : visionInputs.entrySet()) {
