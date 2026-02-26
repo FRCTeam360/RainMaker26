@@ -106,25 +106,29 @@ public final class Constants {
     public static final int INTAKE_ID = 15;
 
     // === CLIMBER ===
-    public static final int CLIMBER_RIGHT_ID = 19;
-    public static final int CLIMBER_LEFT_ID = 18;
+    public static final int CLIMBER_RIGHT_ID = 16;
+    public static final int CLIMBER_LEFT_ID = 17;
 
-    // FIXME: update these values TO REAL VALUES
-    public static final int INDEXER_SENSOR_ID = 73;
-    public static final int INDEXER_ID = 75;
-
-    public static final int FLYWHEEL_KICKER_ID = 76;
-    public static final int FLYWHEEL_KICKER_SENSOR_ID = 77;
-
+    // === FLYWHEEL ===
     public static final int FLYWHEEL_RIGHT_ID = 18;
     public static final int FLYWHEEL_LEFT_ID = 19;
 
-    public static final int HOOD_ID = 16;
+    // === FLYWHEEL KICKER ===
+    public static final int FLYWHEEL_KICKER_ID = 20;
+    public static final int FLYWHEEL_KICKER_SENSOR_ID = 21;
 
-    public static final int HOPPER_ROLLER_ID = 0;
+    // === HOPPER ===
+    public static final int HOPPER_ROLLER_ID = 22;
+    public static final int TWINDEXER_ID = 23;
+    // public static final int HOPPER_SENSOR_ID = 25;
 
+    // === HOOD ===
+    public static final int HOOD_ID = 24;
+
+    // === LIMELIGHT ===
     public static final String LIMELIGHT = "limelight";
 
+    // === CANBUS ===
     public static final CANBus CANBUS = new CANBus("Default Name");
   }
 

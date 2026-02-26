@@ -149,13 +149,35 @@ Use `ALL_CAPS` with underscores for separation:
 
 When reviewing a PR, follow these rules strictly:
 
+- **Focus on breaking changes, not nitpicks.** Flag things that could break the robot, change runtime behavior unexpectedly, or affect other robot configs (SIM, WoodBot, PracticeBot). Do not nitpick style, naming, or minor conventions — trust the author.
 - **Only review lines that are part of the PR diff.** Do not flag pre-existing issues in files the PR touches. If a line was not added or modified in the diff, do not comment on it.
-- **Focus on correctness and intent of the PR.** Evaluate whether the changed code does what the PR description says, follows project conventions, and doesn't introduce new issues. Do not expand scope beyond the PR's purpose.
+- **Focus on correctness and intent of the PR.** Evaluate whether the changed code does what the PR description says and doesn't introduce new issues. Do not expand scope beyond the PR's purpose.
 - **CI status:** Only Build, Test, Format Check, and Simulation Test are merge blockers.
+
+### What counts as a breaking change
+
+Flag these — they can break the robot or other configs:
+
+- **Behavioral changes**: command lifecycle changes (e.g., `runEnd` to `runOnce`), removed cleanup/stop actions, changed motor inversions or sensor polarity
+- **Cross-config impact**: changes to shared code (SuperStructure, RobotContainer bindings, command factories) that affect configs other than the one being modified
+- **Hardcoded sensor overrides**: stubbing out sensor values (e.g., `sensorActivated = true`) that gate state transitions or safety logic
+- **CAN ID conflicts**: two constants sharing the same ID on the same bus
+- **Disabled functionality**: commenting out periodic calculations, safety checks, or sensor reads that other code depends on
+- **API signature changes**: renamed or removed public methods that may have callers outside the diff
+
+### What is NOT worth flagging
+
+Do not comment on these unless they cause a breaking change:
+
+- Style, formatting, or naming preferences
+- Missing Javadoc or comments
+- Unnamed numeric literals in test/tuning bindings
+- Code organization or method extraction choices
+- Conventions from the checklist below that don't affect correctness
 
 ## Code Review Checklist
 
-When reviewing PRs, apply the checklist below **only to lines added or modified in the PR diff** (inspired by NASA's "Power of 10" for safety-critical code). **Only flag items that are violated — do not mention items that pass.**
+Use this checklist as a reference for what good code looks like, but **only flag items from it if they represent a breaking change or correctness issue** — not as standalone nitpicks. Apply **only to lines added or modified in the PR diff**.
 
 ### Static Analysis & Safety
 

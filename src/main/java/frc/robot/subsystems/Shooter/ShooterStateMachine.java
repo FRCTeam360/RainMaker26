@@ -128,8 +128,8 @@ public class ShooterStateMachine {
 
   /** Logs the wanted, current, and previous shooter states. */
   public void log() {
-    Logger.recordOutput("Superstructure/WantedShooterState", wantedState.toString());
-    Logger.recordOutput("Superstructure/CurrentShooterState", currentState.toString());
-    Logger.recordOutput("Superstructure/PreviousShooterState", previousState.toString());
+    Logger.recordOutput("Superstructure/WantedShooterState", wantedState);
+    Logger.recordOutput("Superstructure/CurrentShooterState", currentState);
+    Logger.recordOutput("Superstructure/PreviousShooterState", previousState);
   }
 }
