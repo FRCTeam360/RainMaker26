@@ -13,6 +13,7 @@ import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -21,6 +22,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Constants.WoodBotConstants;
 import frc.robot.generated.PracticeBotDrivetrain;
 import frc.robot.generated.WoodBotDrivetrain;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
@@ -59,11 +61,14 @@ import frc.robot.subsystems.Shooter.ShotCalculator.RobotShootingInfo;
 import frc.robot.subsystems.SuperStructure;
 import frc.robot.subsystems.SuperStructure.SuperStates;
 import frc.robot.subsystems.Vision.Vision;
+import frc.robot.subsystems.Vision.VisionIO;
 import frc.robot.subsystems.Vision.VisionIOLimelight3G;
 import frc.robot.subsystems.Vision.VisionIOLimelight4;
+import frc.robot.subsystems.Vision.VisionIOLimelightBase;
 import frc.robot.subsystems.Vision.VisionIOPhotonSim;
 import frc.robot.utils.AllianceFlipUtil;
 import frc.robot.utils.FieldConstants;
+import frc.robot.utils.RobotUtils;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.BooleanSupplier;
@@ -87,6 +92,7 @@ public class RobotContainer {
   private IntakePivot intakePivot;
   private HopperRoller hopperRoller;
   private FlywheelKicker flywheelKicker;
+  private BooleanSupplier canShootInHub;
 
   private SuperStructure superStructure;
 
@@ -233,7 +239,17 @@ public class RobotContainer {
             hopperRoller,
             hubShotCalculator,
             outpostPassCalculator,
-            drivetrain::isAlignedToTarget);
+            drivetrain::isAlignedToTarget,
+            () ->
+                RobotUtils.isHubShootable(
+                    WoodBotConstants.timeOfFlightMap.get(0.0),
+                    DriverStation.getMatchTime(),
+                    DriverStation.isTeleop(),
+                    RobotUtils.hubActive(
+                        DriverStation.getAlliance(),
+                        RobotUtils.getAutoWinner(DriverStation.getGameSpecificMessage()),
+                        RobotUtils.getHubPhase(
+                            DriverStation.getMatchTime(), DriverStation.isTeleop()))));
 
     registerPathplannerCommand(
         "basic intake", superStructure.setStateCommand(SuperStates.INTAKING));

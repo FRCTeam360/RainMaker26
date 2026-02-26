@@ -66,7 +66,8 @@ public class SuperStructure extends SubsystemBase {
       HopperRoller hopperRoller,
       ShotCalculator hubShotCalculator,
       ShotCalculator outpostPassCalculator,
-      BooleanSupplier isAlignedToTarget) {
+      BooleanSupplier isAlignedToTarget,
+      BooleanSupplier canShootInHub) {
     this.intake = intake;
     this.indexer = indexer;
     this.flywheelKicker = flywheelKicker;
@@ -77,7 +78,7 @@ public class SuperStructure extends SubsystemBase {
     this.hubShotCalculator = hubShotCalculator;
     this.outpostPassCalculator = outpostPassCalculator;
     this.shooterStateMachine =
-        new ShooterStateMachine(flywheel, hood, flywheelKicker, isAlignedToTarget);
+        new ShooterStateMachine(flywheel, hood, flywheelKicker, isAlignedToTarget, canShootInHub);
 
     flywheel.setShootVelocitySupplier(
         () -> {
