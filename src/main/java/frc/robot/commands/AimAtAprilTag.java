@@ -63,6 +63,6 @@ public class AimAtAprilTag extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return m_turnController.atSetpoint();
+    return false; // False (if ever returned true, robot would not align while button is held)
   }
 }
