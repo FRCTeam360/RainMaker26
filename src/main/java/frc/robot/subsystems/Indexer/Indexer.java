@@ -119,9 +119,9 @@ public class Indexer extends SubsystemBase {
       updateState();
       applyState();
     }
-    Logger.recordOutput("Subsystems/Indexer/WantedState", wantedState.toString());
-    Logger.recordOutput("Subsystems/Indexer/CurrentState", currentState.toString());
-    Logger.recordOutput("Subsystems/Indexer/PreviousState", previousState.toString());
-    Logger.recordOutput("Subsystems/Indexer/ControlState", controlState.toString());
+    Logger.recordOutput("Subsystems/Indexer/WantedState", wantedState);
+    Logger.recordOutput("Subsystems/Indexer/CurrentState", currentState);
+    Logger.recordOutput("Subsystems/Indexer/PreviousState", previousState);
+    Logger.recordOutput("Subsystems/Indexer/ControlState", controlState);
   }
 }
