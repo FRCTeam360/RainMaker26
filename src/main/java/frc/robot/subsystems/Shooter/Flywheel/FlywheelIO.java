@@ -10,7 +10,7 @@ public interface FlywheelIO {
     public double[] statorCurrents = new double[MAX_MOTORS];
     public double[] supplyCurrents = new double[MAX_MOTORS];
     public double[] voltages = new double[MAX_MOTORS];
-    public double[] velocities = new double[MAX_MOTORS]; // RPM (rotations per minute)
+    public double[] velocities = new double[MAX_MOTORS]; 
     public double[] positions = new double[MAX_MOTORS];
   }
 

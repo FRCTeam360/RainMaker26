@@ -1,6 +1,7 @@
 package frc.robot.subsystems.Shooter;
 
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel;
+import frc.robot.subsystems.Shooter.Flywheel.Flywheel.FlywheelInternalStates;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel.FlywheelWantedStates;
 import frc.robot.subsystems.Shooter.FlywheelKicker.FlywheelKicker;
 import frc.robot.subsystems.Shooter.FlywheelKicker.FlywheelKicker.FlywheelKickerStates;
@@ -74,21 +75,42 @@ public class ShooterStateMachine {
   /**
    * Updates the shooter state based on wanted state, subsystem readiness, and alignment. Should be
    * called every cycle by the SuperStructure.
+   *
+   * <p>Uses the flywheel's internal state transitions to gate firing:
+   *
+   * <ul>
+   *   <li>{@link FlywheelInternalStates#AT_SETPOINT} — flywheel velocity is sustained in
+   *       tolerance; combined with hood and drivetrain readiness, transitions to FIRING
+   *   <li>{@link FlywheelInternalStates#UNDER_SHOOTING} — sustained RPM drop detected from a shot
+   *       passing through; reverts to PREPARING_TO_FIRE to restart the cycle
+   * </ul>
    */
   public void update() {
     previousState = currentState;
 
     switch (wantedState) {
       case SHOOTING:
-        boolean flywheelReady = flywheel.isReadyToShoot();
+        FlywheelInternalStates flywheelState = flywheel.getState();
+        boolean flywheelReady = flywheelState == FlywheelInternalStates.AT_SETPOINT;
+        boolean flywheelUnderShooting = flywheelState == FlywheelInternalStates.UNDER_SHOOTING;
         boolean hoodReady = hood.getState() == HoodInternalStates.AT_SETPOINT;
         boolean drivetrainAligned = isAlignedToTarget.getAsBoolean();
 
+        Logger.recordOutput("Superstructure/Shooting/FlywheelState", flywheelState);
         Logger.recordOutput("Superstructure/Shooting/FlywheelReady", flywheelReady);
         Logger.recordOutput("Superstructure/Shooting/HoodReady", hoodReady);
         Logger.recordOutput("Superstructure/Shooting/DrivetrainAligned", drivetrainAligned);
 
-        if (flywheelReady && hoodReady && drivetrainAligned) {
+        // Enter FIRING when flywheel reaches AT_SETPOINT (with hood + drivetrain ready).
+        // Stay in FIRING through bang-bang oscillations — only revert to PREPARING_TO_FIRE
+        // when UNDER_SHOOTING signals a sustained RPM drop from too many shots passing through.
+        boolean shouldFire =
+            (flywheelReady
+                    || (previousState == ShooterStates.FIRING && !flywheelUnderShooting))
+                && hoodReady
+                && drivetrainAligned;
+
+        if (shouldFire) {
           currentState = ShooterStates.FIRING;
         } else {
           currentState = ShooterStates.PREPARING_TO_FIRE;

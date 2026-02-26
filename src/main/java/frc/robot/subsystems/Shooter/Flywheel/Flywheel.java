@@ -15,10 +15,10 @@ import org.littletonrobotics.junction.Logger;
 public class Flywheel extends SubsystemBase {
   // Constants
   private static final double TOLERANCE_RPM = 100.0;
-  private static final double CONTROL_MODE_DEBOUNCE_SECONDS = 0.04;
-  private static final double AT_GOAL_DEBOUNCE_SECONDS = 0.2;
+  private static final double BALL_FIRED_DEBOUNCE_SECONDS = 0.04;
+  private static final double SUSTAINED_RPM_DROP_DEBOUNCE_SECONDS = 0.2;
 
-  private boolean atGoal = false;
+  private boolean sustainedRPMDrop = true;
   private long launchCount = 0;
 
   // IO fields
@@ -37,17 +37,20 @@ public class Flywheel extends SubsystemBase {
   public enum FlywheelInternalStates {
     OFF,
     SPINNING_UP,
-    AT_SETPOINT
+    AT_SETPOINT,
+    UNDER_SHOOTING
   }
 
-  // controlModeDebouncer: prevents rapid spinup/hold switching when velocity briefly dips below
-  // tolerance due to noise or disturbances that aren't a ball pass-through
-  private final Debouncer controlModeDebouncer =
-      new Debouncer(CONTROL_MODE_DEBOUNCE_SECONDS, DebounceType.kFalling);
-  // shooterSetpointDebouncer: requires velocity to be in tolerance for a sustained period before
-  // reverting back to preparing to shoot shoot state, filtering out momentary spikes
-  private final Debouncer shooterSetpointDebouncer =
-      new Debouncer(AT_GOAL_DEBOUNCE_SECONDS, DebounceType.kFalling);
+  // ballFiredDebouncer: prevents rapid spinup/hold switching when velocity briefly dips below
+  // tolerance due to noise. Also serves as the shot detection signal — a sustained drop past
+  // this debounce window indicates a ball has passed through the flywheel.
+  private final Debouncer ballFiredDebouncer =
+      new Debouncer(BALL_FIRED_DEBOUNCE_SECONDS, DebounceType.kFalling);
+  // sustainedRpmDropDebouncer: detects when velocity has been below tolerance long enough to
+  // indicate a real shot passed through, not just noise. kFalling means exit (drop detected) is
+  // delayed, so brief dips during firing don't trigger UNDER_SHOOTING prematurely.
+  private final Debouncer sustainedRpmDropDebouncer =
+      new Debouncer(SUSTAINED_RPM_DROP_DEBOUNCE_SECONDS, DebounceType.kFalling);
 
   // State variables
   private FlywheelWantedStates wantedState = FlywheelWantedStates.IDLE;
@@ -90,12 +93,22 @@ public class Flywheel extends SubsystemBase {
 
     switch (wantedState) {
       case SHOOTING:
-        if (atSetpoint(shootVelocitySupplier.getAsDouble())) {
+        boolean atBangBangSetpoint = atSetpoint(shootVelocitySupplier.getAsDouble());
+
+        if (!sustainedRPMDrop) {
+          // Debounced velocity is sustained in tolerance
+          if (currentState != FlywheelInternalStates.AT_SETPOINT) {
+            currentState = FlywheelInternalStates.AT_SETPOINT;
+          }
+        } else if (previousState == FlywheelInternalStates.AT_SETPOINT) {
+          // Was AT_SETPOINT but debounced velocity dropped — sustained RPM loss from a shot
+          launchCount++;
+          currentState = FlywheelInternalStates.UNDER_SHOOTING;
+        } else if (atBangBangSetpoint) {
+          // Within bang-bang tolerance but debouncer hasn't confirmed sustained yet
           currentState = FlywheelInternalStates.AT_SETPOINT;
         } else {
-          if (previousState == FlywheelInternalStates.AT_SETPOINT) {
-            launchCount++;
-          }
+          // Below tolerance, spinning up
           currentState = FlywheelInternalStates.SPINNING_UP;
         }
         break;
@@ -109,6 +122,7 @@ public class Flywheel extends SubsystemBase {
   private void applyState() {
     switch (currentState) {
       case SPINNING_UP:
+      case UNDER_SHOOTING:
         setSpinupVelocityControl(shootVelocitySupplier.getAsDouble());
         break;
       case AT_SETPOINT:
@@ -116,26 +130,22 @@ public class Flywheel extends SubsystemBase {
         break;
       case OFF:
       default:
-        atGoal = false;
+        sustainedRPMDrop = true;
         setDutyCycle(0.0);
         break;
     }
   }
 
   private boolean atSetpoint(double targetRPM) {
-    boolean controlModeAtSetpoint;
+    boolean ballFired;
     boolean inTolerance;
     if (inputs.velocities.length > 0) {
       inTolerance = Math.abs(inputs.velocities[0] - targetRPM) < TOLERANCE_RPM;
-      controlModeAtSetpoint = controlModeDebouncer.calculate(inTolerance);
-      atGoal = shooterSetpointDebouncer.calculate(inTolerance);
-      return controlModeAtSetpoint;
+      ballFired = ballFiredDebouncer.calculate(inTolerance);
+      sustainedRPMDrop = !sustainedRpmDropDebouncer.calculate(inTolerance);
+      return ballFired;
     }
     return false;
-  }
-
-  public boolean isReadyToShoot() {
-    return atGoal;
   }
 
   // IO delegation methods
