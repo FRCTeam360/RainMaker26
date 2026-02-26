@@ -83,8 +83,8 @@ public class FlywheelKicker extends SubsystemBase {
     io.setDutyCycle(dutyCycle);
   }
 
-  public void setVelocity(double veloicty) {
-    io.setVelocity(veloicty);
+  public void setVelocity(double velocity) {
+    io.setVelocity(velocity);
   }
 
   public void stop() {
@@ -116,9 +116,9 @@ public class FlywheelKicker extends SubsystemBase {
       updateState();
       applyState();
     }
-    Logger.recordOutput("Subsystems/FlywheelKicker/WantedState", wantedState.toString());
-    Logger.recordOutput("Subsystems/FlywheelKicker/CurrentState", currentState.toString());
-    Logger.recordOutput("Subsystems/FlywheelKicker/PreviousState", previousState.toString());
-    Logger.recordOutput("Subsystems/FlywheelKicker/ControlState", controlState.toString());
+    Logger.recordOutput("Subsystems/FlywheelKicker/WantedState", wantedState);
+    Logger.recordOutput("Subsystems/FlywheelKicker/CurrentState", currentState);
+    Logger.recordOutput("Subsystems/FlywheelKicker/PreviousState", previousState);
+    Logger.recordOutput("Subsystems/FlywheelKicker/ControlState", controlState);
   }
 }
