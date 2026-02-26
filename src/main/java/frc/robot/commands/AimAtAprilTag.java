@@ -18,7 +18,6 @@ public class AimAtAprilTag extends Command {
   // PID constants need tuning
   private final PIDController m_turnController = new PIDController(0.03, 0.0, 0.0);
   private static final double TURN_TOLERANCE_DEG = 1.0;
-  private static final double kTurnToleranceDeg = 1.0;
   private static final double TARGET_TX_DEG = 0.0;
 
   /** Creates a new AimAtAprilTag. */
@@ -30,7 +29,7 @@ public class AimAtAprilTag extends Command {
 
     // config PID controller for cont input of angles
     m_turnController.enableContinuousInput(-180.0, 180.0);
-    m_turnController.setTolerance(kTurnToleranceDeg);
+    m_turnController.setTolerance(TURN_TOLERANCE_DEG);
   }
 
   // Called when the command is initially scheduled.
