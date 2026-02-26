@@ -37,6 +37,7 @@ public class Flywheel extends SubsystemBase {
     OFF,
     SPINNING_UP,
     AT_SETPOINT,
+    RECOVERING,
     UNDER_SHOOTING
   }
 
@@ -96,15 +97,18 @@ public class Flywheel extends SubsystemBase {
         boolean atBangBangSetpoint = atSetpoint(targetRPM);
         boolean underspeed = isUnderspeed(targetRPM);
         boolean wasAtSetpoint = previousState == FlywheelInternalStates.AT_SETPOINT;
+        boolean wasRecovering = previousState == FlywheelInternalStates.RECOVERING;
         boolean ballFired = wasAtSetpoint && !atBangBangSetpoint;
 
-        if (underspeed) {
+        if (underspeed && wasRecovering) {
           currentState = FlywheelInternalStates.UNDER_SHOOTING;
         } else if (ballFired) {
           launchCount++;
-          currentState = FlywheelInternalStates.SPINNING_UP;
+          currentState = FlywheelInternalStates.RECOVERING;
         } else if (atBangBangSetpoint) {
           currentState = FlywheelInternalStates.AT_SETPOINT;
+        } else if (wasRecovering) {
+          currentState = FlywheelInternalStates.RECOVERING;
         } else {
           currentState = FlywheelInternalStates.SPINNING_UP;
         }
@@ -119,6 +123,7 @@ public class Flywheel extends SubsystemBase {
   private void applyState() {
     switch (currentState) {
       case SPINNING_UP:
+      case RECOVERING:
       case UNDER_SHOOTING:
         setSpinupVelocityControl(shootVelocitySupplier.getAsDouble());
         break;

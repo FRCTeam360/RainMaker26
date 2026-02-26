@@ -38,7 +38,6 @@ public class FlywheelIOPBBangBang implements FlywheelIO {
   private static final double SUPPLY_CURRENT_LIMIT_AMPS = 60.0;
   private static final double GEAR_RATIO = 1.0;
 
-
   private final TalonFX[] motors = {
     new TalonFX(PracticeBotConstants.FLYWHEEL_RIGHT_ID, PracticeBotConstants.CANBUS),
     new TalonFX(PracticeBotConstants.FLYWHEEL_LEFT_ID, PracticeBotConstants.CANBUS)
@@ -71,7 +70,7 @@ public class FlywheelIOPBBangBang implements FlywheelIO {
     // Slot 2: Traditional PID control configuration
     // Standard velocity PID gains
 
-    //TODO TUNE IF NEEDED
+    // TODO TUNE IF NEEDED
     rightConfig.Slot2.kP = 3.0;
     rightConfig.Slot2.kI = 0.0;
     rightConfig.Slot2.kD = 0.1;
@@ -84,7 +83,6 @@ public class FlywheelIOPBBangBang implements FlywheelIO {
     rightConfig.CurrentLimits.StatorCurrentLimitEnable = true;
     rightConfig.CurrentLimits.SupplyCurrentLimit = SUPPLY_CURRENT_LIMIT_AMPS;
     rightConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
-
 
     rightConfig.Feedback.SensorToMechanismRatio = GEAR_RATIO;
 

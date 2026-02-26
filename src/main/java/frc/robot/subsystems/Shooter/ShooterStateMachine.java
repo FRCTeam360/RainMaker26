@@ -79,8 +79,8 @@ public class ShooterStateMachine {
    * <p>Uses the flywheel's internal state transitions to gate firing:
    *
    * <ul>
-   *   <li>{@link FlywheelInternalStates#AT_SETPOINT} — flywheel velocity is sustained in
-   *       tolerance; combined with hood and drivetrain readiness, transitions to FIRING
+   *   <li>{@link FlywheelInternalStates#AT_SETPOINT} — flywheel velocity is sustained in tolerance;
+   *       combined with hood and drivetrain readiness, transitions to FIRING
    *   <li>{@link FlywheelInternalStates#UNDER_SHOOTING} — sustained RPM drop detected from a shot
    *       passing through; reverts to PREPARING_TO_FIRE to restart the cycle
    * </ul>
@@ -105,8 +105,7 @@ public class ShooterStateMachine {
         // Stay in FIRING through bang-bang oscillations — only revert to PREPARING_TO_FIRE
         // when UNDER_SHOOTING signals a sustained RPM drop from too many shots passing through.
         boolean shouldFire =
-            (flywheelReady
-                    || (previousState == ShooterStates.FIRING && !flywheelUnderShooting))
+            (flywheelReady || (previousState == ShooterStates.FIRING && !flywheelUnderShooting))
                 && hoodReady
                 && drivetrainAligned;
 
