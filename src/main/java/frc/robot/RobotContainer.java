@@ -217,7 +217,7 @@ public class RobotContainer {
     outpostPassCalculator =
         new ShotCalculator(
             drivetrain::getPosition,
-            () -> AllianceFlipUtil.apply(FieldConstants.Outpost.centerPoint),
+            () -> AllianceFlipUtil.apply(FieldConstants.RightBump.nearRightCorner),
             robotShootingInfo);
     // Configure the trigger bindings
     // TODO: Re-enable superStructure construction and PathPlanner commands
