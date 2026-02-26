@@ -16,9 +16,8 @@ public class Flywheel extends SubsystemBase {
   // Constants
   private static final double TOLERANCE_RPM = 100.0;
   private static final double BALL_FIRED_DEBOUNCE_SECONDS = 0.04;
-  private static final double SUSTAINED_RPM_DROP_DEBOUNCE_SECONDS = 0.2;
+  private static final double SUSTAINED_RPM_DROP_DEBOUNCE_SECOND = 0.2;
 
-  private boolean sustainedRPMDrop = true;
   private long launchCount = 0;
 
   // IO fields
@@ -46,11 +45,11 @@ public class Flywheel extends SubsystemBase {
   // this debounce window indicates a ball has passed through the flywheel.
   private final Debouncer ballFiredDebouncer =
       new Debouncer(BALL_FIRED_DEBOUNCE_SECONDS, DebounceType.kFalling);
-  // sustainedRpmDropDebouncer: detects when velocity has been below tolerance long enough to
-  // indicate a real shot passed through, not just noise. kFalling means exit (drop detected) is
-  // delayed, so brief dips during firing don't trigger UNDER_SHOOTING prematurely.
-  private final Debouncer sustainedRpmDropDebouncer =
-      new Debouncer(SUSTAINED_RPM_DROP_DEBOUNCE_SECONDS, DebounceType.kFalling);
+  // underspeedDebouncer: detects when RPM has been below tolerance for too long, indicating too
+  // many balls have passed through in rapid succession and the flywheel can't recover between
+  // shots. kFalling means the drop detection is delayed, so single-shot dips don't trigger it.
+  private final Debouncer underspeedDebouncer =
+      new Debouncer(SUSTAINED_RPM_DROP_DEBOUNCE_SECOND, DebounceType.kFalling);
 
   // State variables
   private FlywheelWantedStates wantedState = FlywheelWantedStates.IDLE;
@@ -93,22 +92,20 @@ public class Flywheel extends SubsystemBase {
 
     switch (wantedState) {
       case SHOOTING:
-        boolean atBangBangSetpoint = atSetpoint(shootVelocitySupplier.getAsDouble());
+        double targetRPM = shootVelocitySupplier.getAsDouble();
+        boolean atBangBangSetpoint = atSetpoint(targetRPM);
+        boolean underspeed = isUnderspeed(targetRPM);
+        boolean wasAtSetpoint = previousState == FlywheelInternalStates.AT_SETPOINT;
+        boolean ballFired = wasAtSetpoint && !atBangBangSetpoint;
 
-        if (!sustainedRPMDrop) {
-          // Debounced velocity is sustained in tolerance
-          if (currentState != FlywheelInternalStates.AT_SETPOINT) {
-            currentState = FlywheelInternalStates.AT_SETPOINT;
-          }
-        } else if (previousState == FlywheelInternalStates.AT_SETPOINT) {
-          // Was AT_SETPOINT but debounced velocity dropped — sustained RPM loss from a shot
-          launchCount++;
+        if (underspeed) {
           currentState = FlywheelInternalStates.UNDER_SHOOTING;
+        } else if (ballFired) {
+          launchCount++;
+          currentState = FlywheelInternalStates.SPINNING_UP;
         } else if (atBangBangSetpoint) {
-          // Within bang-bang tolerance but debouncer hasn't confirmed sustained yet
           currentState = FlywheelInternalStates.AT_SETPOINT;
         } else {
-          // Below tolerance, spinning up
           currentState = FlywheelInternalStates.SPINNING_UP;
         }
         break;
@@ -130,22 +127,32 @@ public class Flywheel extends SubsystemBase {
         break;
       case OFF:
       default:
-        sustainedRPMDrop = true;
         setDutyCycle(0.0);
         break;
     }
   }
 
   private boolean atSetpoint(double targetRPM) {
-    boolean ballFired;
-    boolean inTolerance;
     if (inputs.velocities.length > 0) {
-      inTolerance = Math.abs(inputs.velocities[0] - targetRPM) < TOLERANCE_RPM;
-      ballFired = ballFiredDebouncer.calculate(inTolerance);
-      sustainedRPMDrop = !sustainedRpmDropDebouncer.calculate(inTolerance);
-      return ballFired;
+      boolean inTolerance = Math.abs(inputs.velocities[0] - targetRPM) < TOLERANCE_RPM;
+      return ballFiredDebouncer.calculate(inTolerance);
     }
     return false;
+  }
+
+  /**
+   * Returns whether the flywheel RPM has been below tolerance for too long, indicating too many
+   * balls have passed through and the flywheel can't recover between shots.
+   *
+   * @param targetRPM the target velocity in RPM
+   * @return true if the flywheel is underspeed for a sustained period
+   */
+  private boolean isUnderspeed(double targetRPM) {
+    if (inputs.velocities.length > 0) {
+      boolean inTolerance = Math.abs(inputs.velocities[0] - targetRPM) < TOLERANCE_RPM;
+      return !underspeedDebouncer.calculate(inTolerance);
+    }
+    return true;
   }
 
   // IO delegation methods
