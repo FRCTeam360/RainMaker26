@@ -94,7 +94,6 @@ public class Flywheel extends SubsystemBase {
   private FlywheelInternalStates previousState = FlywheelInternalStates.OFF;
   private ControlState controlState = ControlState.SUPERSTRUCTURE;
 
-
   public Flywheel(FlywheelIO io) {
     this.io = io;
   }
@@ -267,11 +266,9 @@ public class Flywheel extends SubsystemBase {
     io.setDutyCycle(0.0);
   }
 
-
   public Command setDutyCycleCommand(double value) {
     return this.setDutyCycleCommand(() -> value);
   }
-
 
   public Command setDutyCycleCommand(DoubleSupplier valueSup) {
     return this.runEnd(() -> setDutyCycle(valueSup.getAsDouble()), () -> setDutyCycle(0.0));
@@ -280,7 +277,6 @@ public class Flywheel extends SubsystemBase {
   public Command setVelocityCommand(double rpm) {
     return this.runEnd(() -> setHoldVelocityControl(rpm), () -> setDutyCycle(0.0));
   }
-
 
   public Command setVelocityCommand(DoubleSupplier supplierVelocity) {
     return this.runEnd(

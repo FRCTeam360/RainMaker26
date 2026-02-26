@@ -3,8 +3,8 @@ package frc.robot.subsystems.Shooter.Flywheel;
 import org.littletonrobotics.junction.AutoLog;
 
 /**
- * Hardware IO interface for the flywheel subsystem. Implementations provide motor control and sensor
- * readings for different robot configurations (real hardware, simulation, noop).
+ * Hardware IO interface for the flywheel subsystem. Implementations provide motor control and
+ * sensor readings for different robot configurations (real hardware, simulation, noop).
  */
 public interface FlywheelIO {
   /** Maximum number of flywheel motors supported. */
@@ -43,9 +43,7 @@ public interface FlywheelIO {
    */
   public void setCoastVelocityControl(double velocityRPM);
 
-
   public void setDutyCycle(double duty);
-
 
   public default void updateInputs(FlywheelIOInputs inputs) {}
 }
