@@ -45,6 +45,7 @@ import frc.robot.subsystems.Shooter.Flywheel.Flywheel;
 import frc.robot.subsystems.Shooter.Flywheel.FlywheelIOPB;
 import frc.robot.subsystems.Shooter.Flywheel.FlywheelIOPBBangBang;
 import frc.robot.subsystems.Shooter.Flywheel.FlywheelIOSim;
+import frc.robot.subsystems.Shooter.Flywheel.FlywheelIOWB;
 import frc.robot.subsystems.Shooter.FlywheelKicker.FlywheelKicker;
 import frc.robot.subsystems.Shooter.FlywheelKicker.FlywheelKickerIOPB;
 import frc.robot.subsystems.Shooter.FlywheelKicker.FlywheelKickerIOSim;
@@ -142,7 +143,7 @@ public class RobotContainer {
       case WOODBOT:
         drivetrain = WoodBotDrivetrain.createDrivetrain();
         logger = new Telemetry(WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
-        flywheel = new Flywheel(new FlywheelIOPBBangBang());
+        flywheel = new Flywheel(new FlywheelIOWB());
         hood = new Hood(new HoodIOWB());
         indexer = new Indexer(new IndexerIOWB());
         vision =
@@ -180,7 +181,7 @@ public class RobotContainer {
       default:
         drivetrain = PracticeBotDrivetrain.createDrivetrain();
         logger = new Telemetry(PracticeBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
-        flywheel = new Flywheel(new FlywheelIOPB());
+        flywheel = new Flywheel(new FlywheelIOPBBangBang());
         hood = new Hood(new HoodIOPB());
         indexer = new Indexer(new IndexerIOPB());
         vision = // TODO ADD OTHER LIMELIGHTS

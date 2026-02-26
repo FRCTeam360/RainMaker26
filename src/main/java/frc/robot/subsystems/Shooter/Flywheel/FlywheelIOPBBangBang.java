@@ -113,11 +113,11 @@ public class FlywheelIOPBBangBang implements FlywheelIO {
     rightConfig.MotorOutput.PeakForwardDutyCycle = MAX_POSITIVE_DUTY_CYCLE;
     rightConfig.MotorOutput.PeakReverseDutyCycle = MAX_NEGATIVE_DUTY_CYCLE;
 
-    rightConfig.MotorOutput.withInverted(InvertedValue.Clockwise_Positive);
+    rightConfig.MotorOutput.withInverted(InvertedValue.CounterClockwise_Positive);
 
     leftConfig = rightConfig.clone();
     // Do not edit rightConfig after cloning — leftConfig is an independent copy
-    leftConfig.MotorOutput.withInverted(InvertedValue.CounterClockwise_Positive);
+    leftConfig.MotorOutput.withInverted(InvertedValue.Clockwise_Positive);
 
     motors[1].getConfigurator().apply(leftConfig);
     motors[1].setNeutralMode(NeutralModeValue.Coast);
