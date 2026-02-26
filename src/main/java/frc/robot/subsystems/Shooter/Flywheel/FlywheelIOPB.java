@@ -22,17 +22,21 @@ import frc.robot.Constants.PracticeBotConstants;
 
 public class FlywheelIOPB implements FlywheelIO {
   private static final double GEAR_RATIO = 1.0;
-  private static final double KP = 3.0;
+  private static final double KP = 20.0;
   private static final double KI = 0.0;
   private static final double KD = 0.1;
   private static final double KA = 0.0;
   private static final double KG = 0.0;
   private static final double KS = 3.0;
-  private static final double KV = 0.008;
+  private static final double KV = 0.0;
   private static final double STATOR_CURRENT_LIMIT_AMPS = 200.0;
+<<<<<<< Updated upstream
   private static final double SUPPLY_CURRENT_LIMIT_AMPS = 100.0;
   private static final double MAX_NEGATIVE_TORQUE_CURRENT = 0.0;
   private static final double MAX_POSITIVE_TORQUE_CURRENT = STATOR_CURRENT_LIMIT_AMPS;
+=======
+  private static final double SUPPLY_CURRENT_LIMIT_AMPS = 60.0;
+>>>>>>> Stashed changes
 
   private final TalonFX[] motors = {
     new TalonFX(PracticeBotConstants.FLYWHEEL_RIGHT_ID, PracticeBotConstants.CANBUS),

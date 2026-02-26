@@ -23,19 +23,19 @@ import frc.robot.Constants;
 public class HoodIOPB implements HoodIO {
   private static final double GEAR_RATIO = 3.0 / 1.0 * 170.0 / 10.0;
   // 1/3 * 170/10
-  private static final double KP = 0.21;
+  private static final double KP = 300.0;
   private static final double KI = 0.0;
   private static final double KD = 0.0;
   private static final double KA = 0.0;
-  private static final double KG = 0.0;
-  private static final double KS = 0.0;
+  private static final double KG = 0.15;
+  private static final double KS = 0.2;
   private static final double KV = 0.0;
   private static final double FORWARD_SOFT_LIMIT_DEGREES = 47.0;
   private static final double STATOR_CURRENT_LIMIT_AMPS = 25.0;
   private static final double SUPPLY_CURRENT_LIMIT_AMPS = 30.0;
-  private static final double MOTION_MAGIC_ACCELERATION_RPS2 = 0.0; // FIXME: set actual value
-  private static final double MOTION_MAGIC_CRUISE_VELOCITY_RPS = 0.0; // FIXME: set actual value
-  private static final double MOTION_MAGIC_JERK_RPS3 = 0.0; // FIXME: set actual value
+  private static final double MOTION_MAGIC_ACCELERATION_RPS2 = 8.0; // FIXME: set actual value
+  private static final double MOTION_MAGIC_CRUISE_VELOCITY_RPS = 4.0; // FIXME: set actual value
+  private static final double MOTION_MAGIC_JERK_RPS3 = 1200.0; // FIXME: set actual value
 
   private final TalonFXS hoodMotor =
       new TalonFXS(Constants.PracticeBotConstants.HOOD_ID, Constants.PracticeBotConstants.CANBUS);
