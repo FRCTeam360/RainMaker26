@@ -17,7 +17,7 @@ public class AimAtAprilTag extends Command {
   private final Vision m_vision;
   // PID constants need tuning
   private final PIDController m_turnController = new PIDController(0.03, 0.0, 0.0);
-  private static final double kTurnToleranceDeg = 1.0;
+  private static final double TURN_TOLERANCE_DEG = 1.0;
 
   /** Creates a new AimAtAprilTag. */
   public AimAtAprilTag(CommandSwerveDrivetrain drive, Vision vision) {
@@ -32,9 +32,10 @@ public class AimAtAprilTag extends Command {
   }
 
   // Called when the command is initially scheduled.
+  private final double TARGET_TX_DEG = 0.0; // change as needed
   @Override
   public void initialize() {
-    m_turnController.setSetpoint(0.0);
+    m_turnController.setSetpoint(TARGET_TX_DEG);
   }
 
   // Called every time the scheduler runs while the command is scheduled.

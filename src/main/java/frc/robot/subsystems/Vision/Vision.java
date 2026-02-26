@@ -17,6 +17,9 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.utils.LimelightHelpers;
+
+import java.security.Key;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -34,9 +37,6 @@ public class Vision extends SubsystemBase {
   private List<VisionMeasurement> acceptedMeasurements = new ArrayList<>();
   private final NetworkTable m_limelightTable =
       NetworkTableInstance.getDefault().getTable("limelight");
-  private final NetworkTableEntry m_tx = m_limelightTable.getEntry("tx");
-  private final NetworkTableEntry m_ty = m_limelightTable.getEntry("ty");
-  private final NetworkTableEntry m_tv = m_limelightTable.getEntry("tv");
 
   private final String VISION_LOGGING_PREFIX = "Vision: ";
 
@@ -195,16 +195,16 @@ public class Vision extends SubsystemBase {
   }
 
   public boolean hasTarget() {
-    return m_tv.getDouble(0.0) == 1.0;
+    return NetworkTableInstance.getDefault().getTable("limelight").getEntry("tv").getDouble(0) == 1.0;
   }
 
   // horizontal offset (yaw error) to target in degrees
   public double getTx() {
-    return m_tx.getDouble(0.0);
+    return LimelightHelpers.getTX("limelight");
   }
 
   // vertical offset (pitch error) to target in degrees
   public double getTy() {
-    return m_ty.getDouble(0.0);
+    return LimelightHelpers.getTY("limelight");
   }
 }
