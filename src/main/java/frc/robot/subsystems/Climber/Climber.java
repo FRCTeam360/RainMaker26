@@ -60,9 +60,9 @@ public class Climber extends SubsystemBase {
   private void applyState() {
     switch (currentState) {
       case EXTENDING:
-        climbing();
         break;
       case RETRACTING:
+        climbing();
         break;
       case LOCKED:
         break;
@@ -93,12 +93,12 @@ public class Climber extends SubsystemBase {
     io.setRightDutyCycle(0.0);
   }
 
-  public boolean leftAboveMinHeight() {
-    return io.leftAboveMinHeight();
+  public boolean rightAboveMinHeight() {
+    return false;
   }
 
-  public boolean rightAboveMinHeight() {
-    return io.rightAboveMinHeight();
+  public boolean leftAboveMinHeight() {
+    return false;
   }
 
   public void setLeftPosition(double position) {

@@ -35,17 +35,9 @@ public class ClimberIOPB implements ClimberIO {
   static final double kI = 0.0001;
   static final double kD = 0;
 
-  public boolean rightAboveMinHeight() {
-    return false;
-  }
-
-  public boolean leftAboveMinHeight() {
-    return false;
-  }
-
-  public void zeroBoth() {}
-
-  public void updatePIDF(double P, double I, double D, double F) {}
+  public void zeroBoth() {
+    leftClimberEncoder.setPosition(0.0);
+    rightClimberEncoder.setPosition(0.0);}
 
   /** Creates a new ClimberIOPB. */
   public ClimberIOPB() {
@@ -98,5 +90,6 @@ public class ClimberIOPB implements ClimberIO {
     inputs.climberRightCurrent = rightClimberMotor.getOutputCurrent();
     inputs.climberLeftTemp = leftClimberMotor.getMotorTemperature();
     inputs.climberRightTemp = rightClimberMotor.getMotorTemperature();
+
   }
 }

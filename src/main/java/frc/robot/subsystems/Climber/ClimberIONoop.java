@@ -5,15 +5,8 @@
 package frc.robot.subsystems.Climber;
 
 public class ClimberIONoop implements ClimberIO {
-  public void setZero() {}
-
-  public void setPosition(double position) {}
 
   public void setDutyCycle(double value) {}
-
-  public void enableBrakeMode() {}
-
-  public void disableBrakeMode() {}
 
   public void setLeftDutyCycle(double dutyCycle) {}
 
