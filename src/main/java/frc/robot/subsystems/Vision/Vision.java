@@ -10,13 +10,10 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-import frc.robot.utils.LimelightHelpers;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,8 +29,6 @@ public class Vision extends SubsystemBase {
   private final Map<String, VisionIOInputsAutoLogged> visionInputs;
   private Timer snapshotTimer = new Timer();
   private List<VisionMeasurement> acceptedMeasurements = new ArrayList<>();
-  private final NetworkTable m_limelightTable =
-      NetworkTableInstance.getDefault().getTable("limelight");
 
   private final String VISION_LOGGING_PREFIX = "Vision: ";
 
@@ -191,18 +186,13 @@ public class Vision extends SubsystemBase {
     return run(() -> visionMeasurementConsumer.accept(acceptedMeasurements));
   }
 
-  public boolean hasTarget() {
-    return NetworkTableInstance.getDefault().getTable("limelight").getEntry("tv").getDouble(0)
-        == 1.0;
+  /** Returns horizontal offset (tx) to target in degrees for the named camera. */
+  public double getTx(String name) {
+      return Optional.ofNullable(visionInputs.get(name)).map(input -> input.tx).orElse(0.0);
   }
 
-  // horizontal offset (yaw error) to target in degrees
-  public double getTx() {
-    return LimelightHelpers.getTX("limelight");
-  }
-
-  // vertical offset (pitch error) to target in degrees
-  public double getTy() {
-    return LimelightHelpers.getTY("limelight");
+  /** Returns vertical offset (ty) to target in degrees for the named camera. */
+  public double getTy(String name) {
+      return Optional.ofNullable(visionInputs.get(name)).map(input -> input.ty).orElse(0.0);
   }
 }

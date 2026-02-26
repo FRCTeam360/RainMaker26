@@ -65,6 +65,7 @@ public class RobotContainer {
   private Intake intake;
   private IntakePivot intakePivot;
   private FlywheelKicker flywheelKicker;
+  private AimAtAprilTag aimAtAprilTag;
 
   private SuperStructure superStructure;
 
@@ -163,9 +164,6 @@ public class RobotContainer {
     SmartDashboard.putData("Auto Chooser", autoChooser);
 
     FollowPathCommand.warmupCommand().schedule();
-
-    driverCont.x().whileTrue(new AimAtAprilTag(drivetrain, vision));
-    testCont1.x().whileTrue(new AimAtAprilTag(drivetrain, vision));
   }
 
   public void registerPathplannerCommand(String name, Command command) {
@@ -209,6 +207,9 @@ public class RobotContainer {
     }
     if (Objects.nonNull(intakePivot)) {
       testCont1.rightBumper().whileTrue(intakePivot.setDutyCycleCommand(() -> 0.5));
+    }
+    if (Objects.nonNull(drivetrain) && Objects.nonNull(vision)) {
+      testCont1.b().whileTrue(new AimAtAprilTag(drivetrain, vision)); // update button as required by driver
     }
   }
 
@@ -260,6 +261,10 @@ public class RobotContainer {
         driverCont.rightTrigger().onTrue(superStructure.setStateCommand(SuperStates.SHOOTING));
         driverCont.rightTrigger().onFalse(superStructure.setStateCommand(SuperStates.IDLE));
       }
+    }
+
+    if (Objects.nonNull(drivetrain) && Objects.nonNull(vision)) {
+      driverCont.b().whileTrue(new AimAtAprilTag(drivetrain, vision)); // update button as required by driver
     }
 
     // Drivetrain commands

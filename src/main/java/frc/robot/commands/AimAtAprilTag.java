@@ -45,8 +45,8 @@ public class AimAtAprilTag extends Command {
     double ySpeed = 0;
     double turnOutput = 0;
 
-    if (m_vision.hasTarget()) {
-      double tx = m_vision.getTx();
+    if (m_vision.isTargetInView(getName())) {
+      double tx = m_vision.getTx(getName());
       turnOutput = m_turnController.calculate(tx, TARGET_TX_DEG);
     }
 
