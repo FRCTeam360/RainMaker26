@@ -42,7 +42,7 @@ import frc.robot.Constants.WoodBotConstants;
  *
  * <p>The right motor is the leader; the left motor follows in opposed direction.
  */
-public class FlywheelIOPBBangBang implements FlywheelIO {
+public class FlywheelIOWBBangBang implements FlywheelIO {
 
   /** CTRE slot index for bang-bang control (extremely high kP). */
   private static final int BANG_BANG_SLOT = 0;
@@ -86,7 +86,7 @@ public class FlywheelIOPBBangBang implements FlywheelIO {
   private static final double CONTROL_UPDATE_FREQUENCY_HZ = 500.0;
 
   /** Constructs the practice bot flywheel IO and configures both TalonFX motors. */
-  public FlywheelIOPBBangBang() {
+  public FlywheelIOWBBangBang() {
     // Reset all motors to factory defaults before applying custom config
     TalonFXConfiguration defaultConfig = new TalonFXConfiguration();
     for (TalonFX motor : motors) {

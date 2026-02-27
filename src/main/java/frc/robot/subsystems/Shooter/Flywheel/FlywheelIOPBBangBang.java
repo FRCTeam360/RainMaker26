@@ -61,8 +61,8 @@ public class FlywheelIOPBBangBang implements FlywheelIO {
   private static final double GEAR_RATIO = 1.0;
 
   private final TalonFX[] motors = {
-    new TalonFX(WoodBotConstants.FLYWHEEL_RIGHT_ID, WoodBotConstants.CANBUS),
-    new TalonFX(WoodBotConstants.FLYWHEEL_LEFT_ID, WoodBotConstants.CANBUS)
+    new TalonFX(PracticeBotConstants.FLYWHEEL_RIGHT_ID, PracticeBotConstants.CANBUS),
+    new TalonFX(PracticeBotConstants.FLYWHEEL_LEFT_ID, PracticeBotConstants.CANBUS)
   };
   private TalonFXConfiguration rightConfig = new TalonFXConfiguration();
   private TalonFXConfiguration leftConfig = new TalonFXConfiguration();
@@ -128,11 +128,11 @@ public class FlywheelIOPBBangBang implements FlywheelIO {
     rightConfig.MotorOutput.PeakForwardDutyCycle = MAX_POSITIVE_DUTY_CYCLE;
     rightConfig.MotorOutput.PeakReverseDutyCycle = MAX_NEGATIVE_DUTY_CYCLE;
 
-    rightConfig.MotorOutput.withInverted(InvertedValue.Clockwise_Positive);
+    rightConfig.MotorOutput.withInverted(InvertedValue.CounterClockwise_Positive);
 
     leftConfig = rightConfig.clone();
     // Do not edit rightConfig after cloning — leftConfig is an independent copy
-    leftConfig.MotorOutput.withInverted(InvertedValue.CounterClockwise_Positive);
+    leftConfig.MotorOutput.withInverted(InvertedValue.Clockwise_Positive);
 
     motors[1].getConfigurator().apply(leftConfig);
     motors[1].setNeutralMode(NeutralModeValue.Coast);
@@ -140,7 +140,7 @@ public class FlywheelIOPBBangBang implements FlywheelIO {
     motors[0].setNeutralMode(NeutralModeValue.Coast);
 
     motors[1].setControl(
-        new Follower(WoodBotConstants.FLYWHEEL_RIGHT_ID, MotorAlignmentValue.Opposed));
+        new Follower(PracticeBotConstants.FLYWHEEL_RIGHT_ID, MotorAlignmentValue.Opposed));
 
     rightStatorCurrentSignal = motors[0].getStatorCurrent();
     rightSupplyCurrentSignal = motors[0].getSupplyCurrent();
