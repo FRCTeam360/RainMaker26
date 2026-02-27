@@ -68,12 +68,18 @@ public class RobotUtils {
     } else if (isTele == true) {
       if (gameTime <= 30) {
         activeHub = ActiveHub.BOTH; // END GAME
-      } else if (gameTime <= 55) {
+      } else if (gameTime < 53) {
         activeHub = ActiveHub.AUTOWINNER; // ALLIANCE SHIFT 4
-      } else if (gameTime <= 80) {
+      } else if (gameTime <= 55 && gameTime >= 53) {
+        activeHub = ActiveHub.BOTH; // ALLIANCE SHIFT GRACE PERIOD
+      } else if (gameTime < 78) {
         activeHub = ActiveHub.AUTOLOSER; // ALLIANCE SHIFT 3
-      } else if (gameTime <= 105) {
+      } else if (gameTime <= 80 && gameTime >= 78) {
+        activeHub = ActiveHub.BOTH; // ALLIANCE SHIFT GRACE PERIOD
+      } else if (gameTime < 103) {
         activeHub = ActiveHub.AUTOWINNER; // ALLIANCE SHIFT 2
+      } else if (gameTime <= 105 && gameTime >= 103) {
+        activeHub = ActiveHub.BOTH; // ALLIANCE SHIFT GRACE PERIOD
       } else if (gameTime <= 130) {
         activeHub = ActiveHub.AUTOLOSER; // ALLIANCE SHIFT 1
       } else {
@@ -100,7 +106,7 @@ public class RobotUtils {
     if (alliance.isPresent()) {
       if (gamePhase == null) {
         return null;
-      }
+      }s
       switch (gamePhase) {
           // during auto, transitional phase, and end game
         case BOTH:
@@ -141,7 +147,7 @@ public class RobotUtils {
   public static Boolean isHubShootable(
       double timeOfFlight, double gameTime, Boolean isTele, Boolean hubActive) {
     if (isTele == true) {
-      if (hubActive == null) {
+      if (hubActive == null || isTele == null) {
         return null;
       } else if (hubActive == true) {
         return true;

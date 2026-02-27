@@ -135,4 +135,34 @@ public class TestWhenCanShootInHubLogic {
     Boolean hubActive = RobotUtils.hubActive(Optional.of(Alliance.Red), Alliance.Red, null);
     assertEquals(null, hubActive);
   }
+
+  // @Test
+  // void hubShouldBeShootableAuto() {
+  //   Boolean hubShootable = RobotUtils.isHubShootable(0.0, 20.0, true, true);
+  //   assertEquals(true, hubShootable);
+  // }
+
+  // @Test
+  // void hubShouldBeShootableActivePhase() {
+  //   Boolean hubShootable = RobotUtils.isHubShootable(0.0, 50.0, true, true);
+  //   assertEquals(true, hubShootable);
+  // }
+
+  // @Test
+  // void hubShouldBeShootableTOF() {
+  //   Boolean hubShootable = RobotUtils.isHubShootable(1.5, 56.0, true, false);
+  //   assertEquals(true, hubShootable);
+  // }
+
+  // @Test
+  // void hubShouldNotBeShootableActivePhase() {
+  //   Boolean hubShootable = RobotUtils.isHubShootable(0.0, 50.0, true, false);
+  //   assertEquals(false, hubShootable);
+  // }
+
+  // @Test
+  // void hubShouldNotBeShootableTOF() {
+  //   Boolean hubShootable = RobotUtils.isHubShootable(1.5, 57.0, true, false);
+  //   assertEquals(false, hubShootable);
+  // }
 }
