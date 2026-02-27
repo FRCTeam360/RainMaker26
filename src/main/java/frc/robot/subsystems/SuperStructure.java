@@ -169,7 +169,7 @@ public class SuperStructure extends SubsystemBase {
         return RobotUtils.hubActive(
             DriverStation.getAlliance(),
             RobotUtils.getAutoWinner(DriverStation.getGameSpecificMessage()),
-            RobotUtils.getHubPhase(
+            RobotUtils.getShootingPhase(
                 DriverStation.getMatchTime(),
                 DriverStation.isTeleop(),
                 hubShotCalculator.calculateShot().timeOfFlight()));
