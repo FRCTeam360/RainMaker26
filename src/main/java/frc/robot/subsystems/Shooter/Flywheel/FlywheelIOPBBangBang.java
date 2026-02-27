@@ -71,11 +71,19 @@ public class FlywheelIOPBBangBang implements FlywheelIO {
   private final StatusSignal<Angle> rightPositionSignal;
   private final StatusSignal<AngularVelocity> rightVelocitySignal;
   private final StatusSignal<Voltage> rightMotorVoltageSignal;
+  private final StatusSignal<Current> rightTorqueCurrentSignal;
+  private final StatusSignal<Double> rightDutyCycleSignal;
   private final StatusSignal<Current> leftStatorCurrentSignal;
   private final StatusSignal<Current> leftSupplyCurrentSignal;
   private final StatusSignal<Angle> leftPositionSignal;
   private final StatusSignal<AngularVelocity> leftVelocitySignal;
   private final StatusSignal<Voltage> leftMotorVoltageSignal;
+
+  /** Frequency for telemetry signals (current, position, supply current). */
+  private static final double TELEMETRY_UPDATE_FREQUENCY_HZ = 100.0;
+
+  /** Frequency for control-critical signals (velocity, voltage, torque current, duty cycle). */
+  private static final double CONTROL_UPDATE_FREQUENCY_HZ = 500.0;
 
   /** Constructs the practice bot flywheel IO and configures both TalonFX motors. */
   public FlywheelIOPBBangBang() {
@@ -138,6 +146,8 @@ public class FlywheelIOPBBangBang implements FlywheelIO {
     rightPositionSignal = motors[0].getPosition();
     rightVelocitySignal = motors[0].getVelocity();
     rightMotorVoltageSignal = motors[0].getMotorVoltage();
+    rightTorqueCurrentSignal = motors[0].getTorqueCurrent();
+    rightDutyCycleSignal = motors[0].getDutyCycle();
 
     leftStatorCurrentSignal = motors[1].getStatorCurrent();
     leftSupplyCurrentSignal = motors[1].getSupplyCurrent();
@@ -145,18 +155,28 @@ public class FlywheelIOPBBangBang implements FlywheelIO {
     leftVelocitySignal = motors[1].getVelocity();
     leftMotorVoltageSignal = motors[1].getMotorVoltage();
 
+
+
+    // Leader signals required by the follower at 500 Hz (per CTRE docs:
+    // DutyCycle, MotorVoltage, and TorqueCurrent must remain enabled on the leader).
     BaseStatusSignal.setUpdateFrequencyForAll(
-        200,
+        CONTROL_UPDATE_FREQUENCY_HZ,
+        rightMotorVoltageSignal,
+        rightTorqueCurrentSignal,
+        rightDutyCycleSignal);
+
+    // Telemetry signals at 200 Hz — all other leader and follower signals
+    BaseStatusSignal.setUpdateFrequencyForAll(
+        TELEMETRY_UPDATE_FREQUENCY_HZ,
+        rightVelocitySignal,
         rightStatorCurrentSignal,
         rightSupplyCurrentSignal,
         rightPositionSignal,
-        rightVelocitySignal,
-        rightMotorVoltageSignal,
+        leftVelocitySignal,
+        leftMotorVoltageSignal,
         leftStatorCurrentSignal,
         leftSupplyCurrentSignal,
-        leftPositionSignal,
-        leftVelocitySignal,
-        leftMotorVoltageSignal);
+        leftPositionSignal);
     for (TalonFX motor : motors) {
       motor.optimizeBusUtilization();
     }
