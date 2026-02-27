@@ -111,7 +111,7 @@ public class Hood extends SubsystemBase {
         setPosition(hoodAngleSupplier.getAsDouble());
         break;
       case DUCKING:
-        setPosition(0.0);
+        moveHoodToZero();
         break;
       case OFF:
       default:
@@ -121,6 +121,9 @@ public class Hood extends SubsystemBase {
   }
 
   // Subsystem state helpers
+  private void moveHoodToZero() {
+    setPosition(0.0);
+  }
 
   private void holdShootingPosition() {
     if (atSetpoint(hoodAngleSupplier)) {
