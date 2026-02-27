@@ -23,7 +23,6 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import frc.robot.Constants.PracticeBotConstants;
-import frc.robot.Constants.WoodBotConstants;
 
 /**
  * Practice bot flywheel IO implementation using bang-bang control on dual TalonFX motors.
@@ -155,8 +154,6 @@ public class FlywheelIOPBBangBang implements FlywheelIO {
     leftPositionSignal = motors[1].getPosition();
     leftVelocitySignal = motors[1].getVelocity();
     leftMotorVoltageSignal = motors[1].getMotorVoltage();
-
-
 
     // Leader signals required by the follower at 500 Hz (per CTRE docs:
     // DutyCycle, MotorVoltage, and TorqueCurrent must remain enabled on the leader).

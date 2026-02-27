@@ -25,7 +25,7 @@ import edu.wpi.first.units.measure.Voltage;
 import frc.robot.Constants.WoodBotConstants;
 
 /**
- * Practice bot flywheel IO implementation using bang-bang control on dual TalonFX motors.
+ * WoodBot flywheel IO implementation using bang-bang control on dual TalonFX motors.
  *
  * <p>This implementation provides three control modes via separate CTRE control request slots:
  *
@@ -85,7 +85,7 @@ public class FlywheelIOWBBangBang implements FlywheelIO {
   /** Frequency for control-critical signals (velocity, voltage, torque current, duty cycle). */
   private static final double CONTROL_UPDATE_FREQUENCY_HZ = 500.0;
 
-  /** Constructs the practice bot flywheel IO and configures both TalonFX motors. */
+  /** Constructs the WoodBot flywheel IO and configures both TalonFX motors. */
   public FlywheelIOWBBangBang() {
     // Reset all motors to factory defaults before applying custom config
     TalonFXConfiguration defaultConfig = new TalonFXConfiguration();
