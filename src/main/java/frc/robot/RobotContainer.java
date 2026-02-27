@@ -233,7 +233,9 @@ public class RobotContainer {
             hopperRoller,
             hubShotCalculator,
             outpostPassCalculator,
-            drivetrain::isAlignedToTarget);
+            drivetrain::isAlignedToTarget,
+            drivetrain::getPosition,
+            robotShootingInfo.robotToShooter());
     intake.setDutyCycleSupplier(driverCont::getLeftTriggerAxis);
 
     registerPathplannerCommand(

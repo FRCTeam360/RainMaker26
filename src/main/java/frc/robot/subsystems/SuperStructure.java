@@ -1,5 +1,7 @@
 package frc.robot.subsystems;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -17,7 +19,9 @@ import frc.robot.subsystems.Shooter.ShooterStateMachine;
 import frc.robot.subsystems.Shooter.ShooterStateMachine.ShooterStates;
 import frc.robot.subsystems.Shooter.ShooterStateMachine.ShooterWantedStates;
 import frc.robot.subsystems.Shooter.ShotCalculator;
+import frc.robot.utils.PositionUtils;
 import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
 public class SuperStructure extends SubsystemBase {
@@ -66,7 +70,9 @@ public class SuperStructure extends SubsystemBase {
       HopperRoller hopperRoller,
       ShotCalculator hubShotCalculator,
       ShotCalculator outpostPassCalculator,
-      BooleanSupplier isAlignedToTarget) {
+      BooleanSupplier isAlignedToTarget,
+      Supplier<Pose2d> robotPoseSupplier,
+      Transform2d robotToShooter) {
     this.intake = intake;
     this.indexer = indexer;
     this.flywheelKicker = flywheelKicker;
@@ -93,6 +99,8 @@ public class SuperStructure extends SubsystemBase {
           }
           return this.hubShotCalculator.calculateShot().hoodAngle();
         });
+    hood.setShouldDuckSupplier(
+        () -> PositionUtils.isInDuckZone(robotPoseSupplier.get(), robotToShooter));
   }
 
   // State machine methods
