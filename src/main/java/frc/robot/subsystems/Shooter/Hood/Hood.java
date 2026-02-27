@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.ControlState;
+import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -21,17 +22,20 @@ public class Hood extends SubsystemBase {
 
   // Other fields
   private DoubleSupplier hoodAngleSupplier = () -> 0.0;
+  private BooleanSupplier shouldDuck = () -> false;
 
   // Enums
   public enum HoodWantedStates {
     IDLE,
-    AIMING
+    AIMING,
+    PASSIVE_PREP
   }
 
   public enum HoodInternalStates {
     OFF,
     MOVING,
-    AT_SETPOINT
+    AT_SETPOINT,
+    DUCKING
   }
 
   // State variables
@@ -70,15 +74,27 @@ public class Hood extends SubsystemBase {
     this.hoodAngleSupplier = hoodAngleSupplier;
   }
 
+  /**
+   * Sets the supplier that determines whether the hood should duck to zero in PASSIVE_PREP state.
+   *
+   * @param shouldDuck a BooleanSupplier returning true when the hood should retract to zero
+   */
+  public void setShouldDuckSupplier(BooleanSupplier shouldDuck) {
+    this.shouldDuck = shouldDuck;
+  }
+
   private void updateState() {
     previousState = currentState;
 
     switch (wantedState) {
       case AIMING:
-        if (atSetpoint(hoodAngleSupplier)) {
-          currentState = HoodInternalStates.AT_SETPOINT;
+        holdShootingPosition();
+        break;
+      case PASSIVE_PREP:
+        if (shouldDuck.getAsBoolean()) {
+          currentState = HoodInternalStates.DUCKING;
         } else {
-          currentState = HoodInternalStates.MOVING;
+          holdShootingPosition();
         }
         break;
       case IDLE:
@@ -94,10 +110,23 @@ public class Hood extends SubsystemBase {
       case AT_SETPOINT:
         setPosition(hoodAngleSupplier.getAsDouble());
         break;
-      case OFF:
-      default:
+      case DUCKING:
         setPosition(0.0);
         break;
+      case OFF:
+      default:
+        setDutyCycle(0.0);
+        break;
+    }
+  }
+
+  // Subsystem state helpers
+
+  private void holdShootingPosition() {
+    if (atSetpoint(hoodAngleSupplier)) {
+      currentState = HoodInternalStates.AT_SETPOINT;
+    } else {
+      currentState = HoodInternalStates.MOVING;
     }
   }
 

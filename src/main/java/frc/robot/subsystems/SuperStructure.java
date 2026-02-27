@@ -131,6 +131,8 @@ public class SuperStructure extends SubsystemBase {
     }
   }
 
+  // Subsystem state helpers
+
   private void shooting() {
     shooterStateMachine.setWantedState(ShooterWantedStates.SHOOTING);
 
@@ -142,8 +144,6 @@ public class SuperStructure extends SubsystemBase {
       hopperRoller.setWantedState(HopperRollerStates.OFF);
     }
   }
-
-  // Subsystem state helpers
 
   private void intaking() {
     intake.setWantedState(Intake.IntakeStates.INTAKING);
