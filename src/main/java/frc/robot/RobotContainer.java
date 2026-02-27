@@ -26,18 +26,22 @@ import frc.robot.generated.WoodBotDrivetrain;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.ControlState;
 import frc.robot.subsystems.HopperRoller.HopperRoller;
+import frc.robot.subsystems.HopperRoller.HopperRollerIOCB;
 import frc.robot.subsystems.HopperRoller.HopperRollerIONoop;
 import frc.robot.subsystems.HopperRoller.HopperRollerIOPB;
 import frc.robot.subsystems.HopperRoller.HopperRollerIOSim;
 import frc.robot.subsystems.Indexer.Indexer;
+import frc.robot.subsystems.Indexer.IndexerIOCB;
 import frc.robot.subsystems.Indexer.IndexerIOPB;
 import frc.robot.subsystems.Indexer.IndexerIOSim;
 import frc.robot.subsystems.Indexer.IndexerIOWB;
 import frc.robot.subsystems.Intake.Intake;
+import frc.robot.subsystems.Intake.IntakeIOCB;
 import frc.robot.subsystems.Intake.IntakeIOPB;
 import frc.robot.subsystems.Intake.IntakeIOSim;
 import frc.robot.subsystems.Intake.IntakeIOWB;
 import frc.robot.subsystems.IntakePivot.IntakePivot;
+import frc.robot.subsystems.IntakePivot.IntakePivotIOCB;
 import frc.robot.subsystems.IntakePivot.IntakePivotIONoop;
 import frc.robot.subsystems.IntakePivot.IntakePivotIOPB;
 import frc.robot.subsystems.IntakePivot.IntakePivotIOSim;
@@ -46,10 +50,12 @@ import frc.robot.subsystems.Shooter.Flywheel.FlywheelIOPB;
 import frc.robot.subsystems.Shooter.Flywheel.FlywheelIOSim;
 import frc.robot.subsystems.Shooter.Flywheel.FlywheelIOWB;
 import frc.robot.subsystems.Shooter.FlywheelKicker.FlywheelKicker;
+import frc.robot.subsystems.Shooter.FlywheelKicker.FlywheelKickerIOCB;
 import frc.robot.subsystems.Shooter.FlywheelKicker.FlywheelKickerIOPB;
 import frc.robot.subsystems.Shooter.FlywheelKicker.FlywheelKickerIOSim;
 import frc.robot.subsystems.Shooter.FlywheelKicker.FlywheelKickerIOWB;
 import frc.robot.subsystems.Shooter.Hood.Hood;
+import frc.robot.subsystems.Shooter.Hood.HoodIOCB;
 import frc.robot.subsystems.Shooter.Hood.HoodIOPB;
 import frc.robot.subsystems.Shooter.Hood.HoodIOSim;
 import frc.robot.subsystems.Shooter.Hood.HoodIOWB;
@@ -175,6 +181,36 @@ public class RobotContainer {
                 ShooterConstants.WOODBOT_TO_SHOOTER,
                 Constants.WoodBotConstants.MIN_SHOT_DISTANCE_METERS,
                 Constants.WoodBotConstants.MAX_SHOT_DISTANCE_METERS);
+        break;
+      case COMPBOT:
+        drivetrain = PracticeBotDrivetrain.createDrivetrain();
+        logger = new Telemetry(PracticeBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
+        flywheel = new Flywheel(new FlywheelIOPB()); // TODO: replace with FlywheelIOCB
+        hood = new Hood(new HoodIOCB());
+        indexer = new Indexer(new IndexerIOCB());
+        vision =
+            new Vision(
+                Map.ofEntries(
+                    Map.entry(
+                        Constants.CompBotConstants.LIMELIGHT,
+                        new VisionIOLimelight4(
+                            Constants.CompBotConstants.LIMELIGHT,
+                            () -> drivetrain.getAngle(),
+                            () -> drivetrain.getAngularRate(),
+                            true))));
+        intake = new Intake(new IntakeIOCB());
+        flywheelKicker = new FlywheelKicker(new FlywheelKickerIOCB());
+        intakePivot = new IntakePivot(new IntakePivotIOCB());
+        hopperRoller = new HopperRoller(new HopperRollerIOCB());
+
+        robotShootingInfo =
+            new RobotShootingInfo(
+                Constants.CompBotConstants.shotHoodAngleMap,
+                Constants.CompBotConstants.shotFlywheelSpeedMap,
+                Constants.CompBotConstants.timeOfFlightMap,
+                ShooterConstants.COMPBOT_TO_SHOOTER,
+                Constants.CompBotConstants.MIN_SHOT_DISTANCE_METERS,
+                Constants.CompBotConstants.MAX_SHOT_DISTANCE_METERS);
         break;
       case PRACTICEBOT:
       default:
