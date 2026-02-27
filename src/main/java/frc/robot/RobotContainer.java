@@ -22,7 +22,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.Constants.WoodBotConstants;
 import frc.robot.generated.PracticeBotDrivetrain;
 import frc.robot.generated.WoodBotDrivetrain;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
@@ -241,15 +240,11 @@ public class RobotContainer {
             outpostPassCalculator,
             drivetrain::isAlignedToTarget,
             () ->
-                RobotUtils.isHubShootable(
-                    WoodBotConstants.timeOfFlightMap.get(0.0),
-                    DriverStation.getMatchTime(),
-                    DriverStation.isTeleop(),
-                    RobotUtils.hubActive(
-                        DriverStation.getAlliance(),
-                        RobotUtils.getAutoWinner(DriverStation.getGameSpecificMessage()),
-                        RobotUtils.getHubPhase(
-                            DriverStation.getMatchTime(), DriverStation.isTeleop()))));
+                RobotUtils.hubActive(
+                    DriverStation.getAlliance(),
+                    RobotUtils.getAutoWinner(DriverStation.getGameSpecificMessage()),
+                    RobotUtils.getHubPhase(
+                        DriverStation.getMatchTime(), DriverStation.isTeleop(), 0.0)));
 
     registerPathplannerCommand(
         "basic intake", superStructure.setStateCommand(SuperStates.INTAKING));

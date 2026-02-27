@@ -16,31 +16,31 @@ import org.junit.jupiter.api.Test;
 public class TestWhenCanShootInHubLogic {
   @Test
   void hubPhaseShouldBeBOTH() {
-    ActiveHub activeHub = RobotUtils.getHubPhase(25.0, true);
+    ActiveHub activeHub = RobotUtils.getHubPhase(25.0, true, 0.0);
     assertEquals(BOTH, activeHub);
   }
 
   @Test
   void hubPhaseShouldBeBOTH2() {
-    ActiveHub activeHub = RobotUtils.getHubPhase(360, true);
+    ActiveHub activeHub = RobotUtils.getHubPhase(360, true, 0.0);
     assertEquals(BOTH, activeHub);
   }
 
   @Test
   void hubPhaseShouldBeBOTHAuto() {
-    ActiveHub activeHub = RobotUtils.getHubPhase(25.0, false);
+    ActiveHub activeHub = RobotUtils.getHubPhase(25.0, false, 0.0);
     assertEquals(BOTH, activeHub);
   }
 
   @Test
   void hubPhaseShouldBeAUTOLOSER() {
-    ActiveHub activeHub = RobotUtils.getHubPhase(75.0, true);
+    ActiveHub activeHub = RobotUtils.getHubPhase(75.0, true, 0.0);
     assertEquals(AUTOLOSER, activeHub);
   }
 
   @Test
   void hubPhaseShouldBeAUTOWINNER() {
-    ActiveHub activeHub = RobotUtils.getHubPhase(50.0, true);
+    ActiveHub activeHub = RobotUtils.getHubPhase(50.0, true, 0.0);
     assertEquals(AUTOWINNER, activeHub);
   }
 

@@ -58,10 +58,11 @@ public class RobotUtils {
    * @param isTele if the game is in teleop or auto. Can be accessed by DriverStation.isTeleop()
    * @return which hub(s) are currently active
    */
-  public static ActiveHub getHubPhase(double gameTime, Boolean isTele) {
+  public static ActiveHub getHubPhase(double gameTime, Boolean isTele, double timeToScan) {
     // gameTime is the getMatchTime() from DriverStation, isTele is the isTeleop() from
     // DriverStation
     ActiveHub activeHub = null;
+    gameTime -= timeToScan;
     // Sets phases based on the current time in the game
     if (isTele == false) {
       activeHub = ActiveHub.BOTH; // AUTO
