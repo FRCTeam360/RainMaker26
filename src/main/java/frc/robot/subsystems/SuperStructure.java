@@ -163,7 +163,7 @@ public class SuperStructure extends SubsystemBase {
   private void intaking() {
     intake.setWantedState(Intake.IntakeStates.INTAKING);
     intakePivot.setWantedState(IntakePivotStates.DEPLOYED);
-    shooterStateMachine.setWantedState(ShooterWantedStates.IDLE);
+    shooterStateMachine.setWantedState(ShooterWantedStates.PASSIVE_PREP);
     // indexer.setWantedState(Indexer.IndexerStates.INTAKING);
   }
 

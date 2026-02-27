@@ -250,7 +250,7 @@ public class RobotContainer {
                             () -> 0,
                             () -> 0,
                             () -> hubShotCalculator.calculateShot().targetHeading())))
-            .andThen(superStructure.setStateCommand(SuperStates.IDLE)));
+            .andThen(superStructure.setStateCommand(SuperStates.PASSIVE_PREP)));
 
     configDefaultCommands();
     configureBindings();
@@ -305,7 +305,7 @@ public class RobotContainer {
     BooleanSupplier isIndependentMode =
         () -> superStructure.getControlState() == ControlState.INDEPENDENT;
 
-    // Linked pair: whileTrue sets SHOOTING + aims, onFalse resets to IDLE.
+    // Linked pair: whileTrue sets SHOOTING + aims, onFalse resets to PASSIVE_PREP.
     // The InstantCommand (setStateCommand) finishes immediately; the alongWith group
     // stays alive via faceAngleWhileDrivingCommand until whileTrue interrupts it.
     Trigger shootAtHubTrigger = driverCont.rightTrigger().and(isSuperstructureMode);
@@ -316,7 +316,7 @@ public class RobotContainer {
                 drivetrain.faceAngleWhileDrivingCommand(
                     driverCont, () -> hubShotCalculator.calculateShot().targetHeading())));
     // Must stay paired with the whileTrue above to reset state on trigger release
-    shootAtHubTrigger.onFalse(superStructure.setStateCommand(SuperStates.IDLE));
+    shootAtHubTrigger.onFalse(superStructure.setStateCommand(SuperStates.PASSIVE_PREP));
 
     // Trigger shootAtOutpostTrigger = driverCont.leftTrigger().and(isSuperstructureMode);
     // shootAtOutpostTrigger.whileTrue(
@@ -326,12 +326,12 @@ public class RobotContainer {
     //             drivetrain.faceAngleWhileDrivingCommand(
     //                 driverCont, () -> outpostPassCalculator.calculateShot().targetHeading())));
     // Must stay paired with the whileTrue above to reset state on trigger release
-    // shootAtOutpostTrigger.onFalse(superStructure.setStateCommand(SuperStates.IDLE));
+    // shootAtOutpostTrigger.onFalse(superStructure.setStateCommand(SuperStates.PASSIVE_PREP));
 
     // TODO: Re-enable superStructure bindings
     Trigger intakeTrigger = driverCont.leftTrigger().and(isSuperstructureMode);
     intakeTrigger.onTrue(superStructure.setStateCommand(SuperStates.INTAKING));
-    intakeTrigger.onFalse(superStructure.setStateCommand(SuperStates.IDLE));
+    intakeTrigger.onFalse(superStructure.setStateCommand(SuperStates.PASSIVE_PREP));
 
     configureIndependentModeBindings(isIndependentMode);
 
@@ -465,6 +465,7 @@ public class RobotContainer {
   public void onEnable() {
     // Ensures superstructure control mode is active when enabled
     superStructure.setControlState(ControlState.SUPERSTRUCTURE);
+    superStructure.setWantedSuperState(SuperStates.PASSIVE_PREP);
     onEnableVision();
   }
 
@@ -476,6 +477,7 @@ public class RobotContainer {
   /** Decouples the superstructure from subsystems for test mode. */
   public void onTestEnable() {
     superStructure.setControlState(ControlState.INDEPENDENT);
+    superStructure.setWantedSuperState(SuperStates.IDLE);
     onEnableVision();
   }
 
