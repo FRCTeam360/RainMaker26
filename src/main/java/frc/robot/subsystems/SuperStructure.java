@@ -90,14 +90,14 @@ public class SuperStructure extends SubsystemBase {
 
     flywheel.setShootVelocitySupplier(
         () -> {
-          if (currentSuperState == SuperStates.SHOOT_AT_OUTPOST) {
+          if (shouldUseOutpostCalculator()) {
             return this.outpostPassCalculator.calculateShot().flywheelSpeed();
           }
           return this.hubShotCalculator.calculateShot().flywheelSpeed();
         });
     hood.setHoodAngleSupplier(
         () -> {
-          if (currentSuperState == SuperStates.SHOOT_AT_OUTPOST) {
+          if (shouldUseOutpostCalculator()) {
             return this.outpostPassCalculator.calculateShot().hoodAngle();
           }
           return this.hubShotCalculator.calculateShot().hoodAngle();
@@ -154,6 +154,23 @@ public class SuperStructure extends SubsystemBase {
         passivePrep();
         break;
     }
+  }
+
+  /**
+   * Returns whether the outpost calculator should be used for flywheel/hood setpoints.
+   *
+   * <p>When actively shooting at the outpost, always use the outpost calculator. During passive
+   * prep, dynamically select based on whether the robot is in its alliance zone (hub) or not
+   * (outpost).
+   */
+  private boolean shouldUseOutpostCalculator() {
+    if (currentSuperState == SuperStates.SHOOT_AT_OUTPOST) {
+      return true;
+    }
+    if (currentSuperState == SuperStates.PASSIVE_PREP) {
+      return !PositionUtils.isInAllianceZone(robotPoseSupplier.get());
+    }
+    return false;
   }
 
   // Subsystem state helpers
