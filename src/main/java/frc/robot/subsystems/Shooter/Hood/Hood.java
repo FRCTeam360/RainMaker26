@@ -92,7 +92,7 @@ public class Hood extends SubsystemBase {
         break;
       case PASSIVE_PREP:
         if (shouldDuck.getAsBoolean()) {
-          currentState = HoodInternalStates.DUCKING;
+          currentState = HoodInternalStates.DUCKING; // quack!
         } else {
           holdShootingPosition();
         }
