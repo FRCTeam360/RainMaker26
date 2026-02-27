@@ -15,11 +15,14 @@ public class Intake extends SubsystemBase {
   private static final double INTAKE_VELOCITY_RPM = 4500.0;
   private static final double JAMMED_SUPPLY_CURRENT_DRAW = 35.0;
   private static final double REVERSE_UNJAM_DUTY_CYCLE = -0.5;
-  private static final double INTAKE_DUTY_CYCLE = 0.2;
+  private static final double SHOOT_ASSIST_DUTY_CYCLE = 0.2;
 
   // IO fields
   private final IntakeIO io;
   private final IntakeIOInputsAutoLogged inputs = new IntakeIOInputsAutoLogged();
+
+  // Other fields
+  private DoubleSupplier dutyCycleSupplier = () -> 0.0;
 
   // Enums
   public enum IntakeStates {
@@ -56,6 +59,10 @@ public class Intake extends SubsystemBase {
     this.controlState = controlState;
   }
 
+  public void setDutyCycleSupplier(DoubleSupplier dutyCycleSupplier) {
+    this.dutyCycleSupplier = dutyCycleSupplier;
+  }
+
   private void updateState() {
     previousState = currentState;
     switch (wantedState) {
@@ -85,7 +92,7 @@ public class Intake extends SubsystemBase {
         intaking();
         break;
       case SHOOTING:
-        intaking();
+        shootAssist();
         break;
       case OFF:
       default:
@@ -96,8 +103,12 @@ public class Intake extends SubsystemBase {
     }
   }
 
+  private void shootAssist() {
+    setDutyCycle(SHOOT_ASSIST_DUTY_CYCLE);
+  }
+
   private void intaking() {
-    setDutyCycle(INTAKE_DUTY_CYCLE);
+    setDutyCycle(dutyCycleSupplier.getAsDouble());
   }
 
   // private void unjamIntake() {

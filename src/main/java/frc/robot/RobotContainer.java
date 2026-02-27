@@ -205,7 +205,7 @@ public class RobotContainer {
                 Constants.PracticeBotConstants.timeOfFlightMap,
                 ShooterConstants.PRACTICEBOT_TO_SHOOTER,
                 0.0,
-                5.0);
+                6.0);
         // TODO ADD CLIMBERS
         break;
     }
@@ -234,6 +234,7 @@ public class RobotContainer {
             hubShotCalculator,
             outpostPassCalculator,
             drivetrain::isAlignedToTarget);
+    intake.setDutyCycleSupplier(driverCont::getLeftTriggerAxis);
 
     registerPathplannerCommand(
         "basic intake", superStructure.setStateCommand(SuperStates.INTAKING));
@@ -317,18 +318,18 @@ public class RobotContainer {
     // Must stay paired with the whileTrue above to reset state on trigger release
     shootAtHubTrigger.onFalse(superStructure.setStateCommand(SuperStates.IDLE));
 
-    Trigger shootAtOutpostTrigger = driverCont.leftTrigger().and(isSuperstructureMode);
-    shootAtOutpostTrigger.whileTrue(
-        superStructure
-            .setStateCommand(SuperStates.SHOOT_AT_OUTPOST)
-            .alongWith(
-                drivetrain.faceAngleWhileDrivingCommand(
-                    driverCont, () -> outpostPassCalculator.calculateShot().targetHeading())));
+    // Trigger shootAtOutpostTrigger = driverCont.leftTrigger().and(isSuperstructureMode);
+    // shootAtOutpostTrigger.whileTrue(
+    //     superStructure
+    //         .setStateCommand(SuperStates.SHOOT_AT_OUTPOST)
+    //         .alongWith(
+    //             drivetrain.faceAngleWhileDrivingCommand(
+    //                 driverCont, () -> outpostPassCalculator.calculateShot().targetHeading())));
     // Must stay paired with the whileTrue above to reset state on trigger release
-    shootAtOutpostTrigger.onFalse(superStructure.setStateCommand(SuperStates.IDLE));
+    // shootAtOutpostTrigger.onFalse(superStructure.setStateCommand(SuperStates.IDLE));
 
     // TODO: Re-enable superStructure bindings
-    Trigger intakeTrigger = driverCont.leftBumper().and(isSuperstructureMode);
+    Trigger intakeTrigger = driverCont.leftTrigger().and(isSuperstructureMode);
     intakeTrigger.onTrue(superStructure.setStateCommand(SuperStates.INTAKING));
     intakeTrigger.onFalse(superStructure.setStateCommand(SuperStates.IDLE));
 
@@ -469,7 +470,6 @@ public class RobotContainer {
 
   /** Sets up vision to run at full performance and temperature */
   private void onEnableVision() {
-    vision.enableIMUAssist();
     vision.setThrottle(ENABLED_THROTTLE_SKIP_FRAMES);
   }
 

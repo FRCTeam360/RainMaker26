@@ -143,19 +143,24 @@ public final class Constants {
     public static final CANBus CANBUS = new CANBus("Default Name");
 
     static {
-      shotHoodAngleMap.put(5.0, 20.0);
-      shotHoodAngleMap.put(4.0, 18.0);
-      shotHoodAngleMap.put(3.0, 16.0);
-      shotHoodAngleMap.put(2.0, 11.0);
-      shotHoodAngleMap.put(1.0, 8.0);
+      shotHoodAngleMap.put(6.0, 18.0);
+      shotHoodAngleMap.put(5.0, 18.0); // TESTED
+      shotHoodAngleMap.put(4.0, 15.0);
+      shotHoodAngleMap.put(3.0, 6.0); // TESTED
+      shotHoodAngleMap.put(2.5, 4.0); // TESTED
+      shotHoodAngleMap.put(2.0, 2.0);
+      shotHoodAngleMap.put(1.0, 0.0);
       shotHoodAngleMap.put(0.0, 0.0);
 
       // === SHOOTING VALUES ===
-      shotFlywheelSpeedMap.put(5.0, 3250.0);
-      shotFlywheelSpeedMap.put(4.0, 3250.0);
-      shotFlywheelSpeedMap.put(3.0, 2875.0);
-      shotFlywheelSpeedMap.put(2.0, 2500.0); // THIS IS GOOD
-      shotFlywheelSpeedMap.put(0.0, 2250.0);
+      shotFlywheelSpeedMap.put(6.0, 2500.0);
+      shotFlywheelSpeedMap.put(5.0, 2500.0); // TESTED
+      shotFlywheelSpeedMap.put(4.0, 2250.0);
+      shotFlywheelSpeedMap.put(3.0, 2250.0); // TESTED
+      shotFlywheelSpeedMap.put(2.5, 2150.0); // TESTED
+      shotFlywheelSpeedMap.put(2.0, 2000.0);
+      shotFlywheelSpeedMap.put(1.0, 1800.0);
+      shotFlywheelSpeedMap.put(0.0, 2000.0);
     }
   }
 
