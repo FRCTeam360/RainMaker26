@@ -29,7 +29,7 @@ public class IndexerIOPB implements IndexerIO {
   private final SparkClosedLoopController closedLoopController;
 
   public IndexerIOPB() {
-    sparkMaxConfig.idleMode(IdleMode.kBrake);
+    sparkMaxConfig.idleMode(IdleMode.kCoast);
     sparkMaxConfig.inverted(false);
     sparkMaxConfig.smartCurrentLimit(CURRENT_LIMIT_AMPS);
 

@@ -21,10 +21,12 @@ public class FlywheelKickerIOPB implements FlywheelKickerIO {
   private static final double KP = 0.0002;
   private static final double KI = 0.0;
   private static final double KD = 0.0;
-  private static final double FF_KV = 0.0021;
-  private static final double FF_KS = 0.04;
+  private static final double KV = 0.0019;
+  private static final double KS = 0.04;
   private static final double MIN_SIGNAL_STRENGTH = 2000; // unknown unit
   private static final double PROXIMITY_THRESHOLD_METERS = 0.1;
+  private static final double MAX_NEGATIVE_OUTPUT = 0.0;
+  private static final double MAX_POSITIVE_OUTPUT = 1.0;
 
   /** Creates a new FlywheelKickerIOPB. */
   private final SparkFlex flywheelKickerMotor =
@@ -43,7 +45,7 @@ public class FlywheelKickerIOPB implements FlywheelKickerIO {
   // private final StatusSignal<Boolean> isDetectedSignal;
 
   public FlywheelKickerIOPB() {
-    sparkFlexConfig.idleMode(IdleMode.kBrake);
+    sparkFlexConfig.idleMode(IdleMode.kCoast);
     sparkFlexConfig.inverted(false);
     sparkFlexConfig.smartCurrentLimit(CURRENT_LIMIT_AMPS);
 
@@ -51,7 +53,8 @@ public class FlywheelKickerIOPB implements FlywheelKickerIO {
     sparkFlexConfig.encoder.velocityConversionFactor(1.0 / GEAR_RATIO);
 
     sparkFlexConfig.closedLoop.p(KP).i(KI).d(KD);
-    sparkFlexConfig.closedLoop.feedForward.kV(FF_KV).kS(FF_KS);
+    sparkFlexConfig.closedLoop.feedForward.kV(KV).kS(KS);
+    sparkFlexConfig.closedLoop.outputRange(MAX_NEGATIVE_OUTPUT, MAX_POSITIVE_OUTPUT);
 
     flywheelKickerMotor.configure(
         sparkFlexConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);

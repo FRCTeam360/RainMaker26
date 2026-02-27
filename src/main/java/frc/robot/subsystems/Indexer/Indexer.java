@@ -12,7 +12,7 @@ import org.littletonrobotics.junction.Logger;
 
 public class Indexer extends SubsystemBase {
   // Constants
-  private static final double INDEXER_DUTY_CYCLE = 0.4;
+  private static final double INDEXER_DUTY_CYCLE = 0.75;
 
   // IO fields
   private final IndexerIO io;
