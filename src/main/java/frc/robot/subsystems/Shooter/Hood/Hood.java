@@ -91,11 +91,11 @@ public class Hood extends SubsystemBase {
         holdShootingPosition();
         break;
       case PASSIVE_PREP:
-        if (shouldDuck.getAsBoolean()) {
-          currentState = HoodInternalStates.DUCKING; // quack!
-        } else {
-          holdShootingPosition();
-        }
+        // TODO: keep as is until we are confident with our localization to not default to ducking
+        // when in PASSIVE_PREP mode. We currently call this for logging purposes to validate the
+        // logic works
+        shouldDuck.getAsBoolean();
+        currentState = HoodInternalStates.DUCKING; // quack!
         break;
       case IDLE:
       default:
