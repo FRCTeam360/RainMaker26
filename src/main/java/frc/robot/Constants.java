@@ -74,6 +74,9 @@ public final class Constants {
     public static final InterpolatingDoubleTreeMap timeOfFlightMap =
         new InterpolatingDoubleTreeMap();
 
+    public static final double MIN_SHOT_DISTANCE_METERS = 0.0;
+    public static final double MAX_SHOT_DISTANCE_METERS = 5.0;
+
     static {
       // === SHOOTING VALUES ===
       shotHoodAngleMap.put(5.0, 20.0);
@@ -112,6 +115,10 @@ public final class Constants {
         new InterpolatingDoubleTreeMap();
     public static final InterpolatingDoubleTreeMap timeOfFlightMap =
         new InterpolatingDoubleTreeMap();
+
+    public static final double MIN_SHOT_DISTANCE_METERS = 0.0;
+    public static final double MAX_SHOT_DISTANCE_METERS = 6.0;
+
     // === INTAKE ===
     public static final int INTAKE_PIVOT_ID = 14;
     public static final int INTAKE_ID = 15;
@@ -161,6 +168,8 @@ public final class Constants {
       shotFlywheelSpeedMap.put(2.0, 2000.0);
       shotFlywheelSpeedMap.put(1.0, 1800.0);
       shotFlywheelSpeedMap.put(0.0, 2000.0);
+
+      timeOfFlightMap.put(0.0, 0.0);
     }
   }
 

@@ -136,8 +136,8 @@ public class RobotContainer {
                 Constants.WoodBotConstants.shotFlywheelSpeedMap,
                 Constants.WoodBotConstants.timeOfFlightMap,
                 ShooterConstants.WOODBOT_TO_SHOOTER,
-                0.0,
-                5.0);
+                Constants.WoodBotConstants.MIN_SHOT_DISTANCE_METERS,
+                Constants.WoodBotConstants.MAX_SHOT_DISTANCE_METERS);
         break;
       case WOODBOT:
         drivetrain = WoodBotDrivetrain.createDrivetrain();
@@ -173,8 +173,8 @@ public class RobotContainer {
                 Constants.WoodBotConstants.shotFlywheelSpeedMap,
                 Constants.WoodBotConstants.timeOfFlightMap,
                 ShooterConstants.WOODBOT_TO_SHOOTER,
-                0.0,
-                5.0);
+                Constants.WoodBotConstants.MIN_SHOT_DISTANCE_METERS,
+                Constants.WoodBotConstants.MAX_SHOT_DISTANCE_METERS);
         break;
       case PRACTICEBOT:
       default:
@@ -204,8 +204,8 @@ public class RobotContainer {
                 Constants.PracticeBotConstants.shotFlywheelSpeedMap,
                 Constants.PracticeBotConstants.timeOfFlightMap,
                 ShooterConstants.PRACTICEBOT_TO_SHOOTER,
-                0.0,
-                6.0);
+                Constants.PracticeBotConstants.MIN_SHOT_DISTANCE_METERS,
+                Constants.PracticeBotConstants.MAX_SHOT_DISTANCE_METERS);
         // TODO ADD CLIMBERS
         break;
     }
