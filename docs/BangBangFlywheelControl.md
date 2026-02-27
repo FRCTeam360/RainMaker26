@@ -45,39 +45,71 @@ The `PeakForwardTorqueCurrent = 30A` cap is the key difference from Phase 1. At 
 
 ## State Machine Integration
 
-The flywheel state machine manages transitions between phases:
+The flywheel uses a 5-state internal state machine managed by `Flywheel.java`. The `ShooterStateMachine` coordinates the flywheel with the hood and kicker at a higher level.
+
+### Flywheel Internal States
 
 ```
-IDLE → wantedState = RUNNING → SPINNING_UP (duty cycle bang-bang)
-                                    ↓ (velocity enters tolerance, debounced)
-                              AT_SETPOINT (torque current bang-bang)
-                                    ↓ (velocity drops below tolerance)
-                              SPINNING_UP (duty cycle bang-bang, recovery)
-                                    ↓ (velocity recovers)
-                              AT_SETPOINT ...
+IDLE → wantedState = SHOOTING → SPINNING_UP (duty cycle bang-bang)
+                                     ↓ (velocity within tolerance, debounced 40ms falling)
+                                AT_SETPOINT (torque current bang-bang)
+                                     ↓ (ball detected: was AT_SETPOINT + debounced velocity drop)
+                                RECOVERING (duty cycle bang-bang, launchCount++)
+                                    ↗↓
+    (velocity recovers)→ AT_SETPOINT  ↓ (underspeed debounce 200ms expires)
+                                UNDER_SHOOTING (duty cycle bang-bang)
+                                     ↓ (velocity recovers)
+                                AT_SETPOINT ...
 ```
 
-During rapid fire, the flywheel cycles between `AT_SETPOINT` and `SPINNING_UP` with each ball. The `AT_SETPOINT → SPINNING_UP` transition is also used to count launches.
+Key transitions:
+- **`AT_SETPOINT → RECOVERING`** — triggered when the debounced velocity drops out of tolerance while previously at setpoint. This indicates a ball has passed through. Increments the launch counter.
+- **`RECOVERING → AT_SETPOINT`** — velocity returns to tolerance. Normal single-shot recovery.
+- **`RECOVERING → UNDER_SHOOTING`** — the underspeed debouncer (200ms) fires, indicating RPM has been below tolerance too long. This means the flywheel can't keep up with rapid fire.
+- **`UNDER_SHOOTING → AT_SETPOINT`** — velocity eventually recovers after the firing rate slows.
+- **`RECOVERING` stays `RECOVERING`** — if not yet at setpoint and underspeed hasn't triggered, the state persists (doesn't fall back to `SPINNING_UP`).
+
+### Motor Output by State
+
+| State | Control Mode | Purpose |
+|---|---|---|
+| `SPINNING_UP` | Duty-cycle bang-bang | Initial spinup, max acceleration |
+| `AT_SETPOINT` | Torque-current bang-bang | Bounded hold at 30A |
+| `RECOVERING` | Duty-cycle bang-bang | Max power recovery after shot |
+| `UNDER_SHOOTING` | Duty-cycle bang-bang | Max power recovery, signals ShooterStateMachine |
+| `OFF` | 0% duty cycle | Motors stopped |
+
+### ShooterStateMachine Integration
+
+The `ShooterStateMachine` reads `flywheel.getState()` to coordinate firing:
+
+- **`PREPARING_TO_FIRE → FIRING`** — requires flywheel `AT_SETPOINT` AND hood `AT_SETPOINT` AND drivetrain aligned
+- **`FIRING` is sticky** — once in `FIRING`, it stays there even if the flywheel enters `RECOVERING` (brief RPM dip from a ball). This allows continuous feeding without pausing between shots.
+- **`FIRING → PREPARING_TO_FIRE`** — only when flywheel reports `UNDER_SHOOTING` (sustained RPM drop), OR hood loses position, OR drivetrain alignment lost. This prevents feeding more balls into a flywheel that can't recover.
 
 ## Debouncing
 
-Two debouncers prevent instability:
+Two debouncers prevent instability in the flywheel state machine:
 
-### Control Mode Debouncer (`kFalling`, 40ms)
+### Ball Fired Debouncer (`kFalling`, 40ms)
 
-Prevents rapid toggling between duty-cycle and torque-current control when velocity oscillates around the tolerance boundary. `kFalling` means:
+**Variable:** `BALL_FIRED_DEBOUNCE_SECONDS = 0.04`
+
+Debounces the "at setpoint" signal to detect when a ball has actually passed through vs. noise. Used by `atSetpoint()` to gate the `AT_SETPOINT → RECOVERING` transition. `kFalling` means:
 - **Entry to `AT_SETPOINT`:** Instant — switches to hold mode the first cycle velocity enters tolerance
 - **Exit from `AT_SETPOINT`:** Delayed 40ms — holds in torque-current mode for 40ms after velocity dips below tolerance
 
-This is intentional: at setpoint, the flywheel should be sticky. Brief noise or measurement jitter shouldn't cause a full-power duty-cycle spike. But a real velocity drop (from a ball) will persist longer than 40ms and trigger the recovery.
+This is intentional: at setpoint, the flywheel should be sticky. Brief noise or measurement jitter shouldn't cause a full-power duty-cycle spike. But a real velocity drop (from a ball) will persist longer than 40ms and trigger the `RECOVERING` state.
 
-### Setpoint Debouncer (`kFalling`, 200ms)
+### Underspeed Debouncer (`kFalling`, 200ms)
 
-Controls the external `isReadyToShoot()` signal consumed by the `ShooterStateMachine`. `kFalling` means:
-- **Entry:** Instant — `isReadyToShoot()` goes true on first in-tolerance sample
-- **Exit:** Delayed 200ms — stays true for 200ms after velocity drops
+**Variable:** `SUSTAINED_RPM_DROP_DEBOUNCE_SECOND = 0.2`
 
-This keeps the shooter state machine's `FIRING` state stable through velocity dips caused by ball feed-through. The `ShooterStateMachine` latches in `FIRING` independently, so `isReadyToShoot()` only matters for the initial `PREPARING_TO_FIRE → FIRING` gate.
+Detects when RPM has been below tolerance for too long, indicating the flywheel can't recover between rapid shots. Used by `isUnderspeed()` to gate the `RECOVERING → UNDER_SHOOTING` transition. `kFalling` means:
+- **Not underspeed:** Instant — clears the moment velocity enters tolerance
+- **Underspeed triggered:** Delayed 200ms — velocity must stay below tolerance for a sustained period
+
+The `ShooterStateMachine` uses `UNDER_SHOOTING` as the signal to revert from `FIRING` → `PREPARING_TO_FIRE`, stopping the kicker from feeding more balls. Single-shot dips (`RECOVERING`) don't trigger this — only sustained RPM loss from too many rapid shots.
 
 ## Phoenix 6 Configuration Details
 
@@ -95,8 +127,9 @@ This effectively creates a relay: any error in either direction produces a satur
 |---|---|---|
 | Output unit | % of supply voltage | Amps of torque current |
 | Peak limit | `PeakForwardDutyCycle = 1.0` | `PeakForwardTorqueCurrent = 30A` |
-| Current limiting | Only stator/supply limits (150A/80A) | 30A hard cap from torque config |
-| Use case | Spin-up: max power, fastest recovery | Hold: consistent torque, bounded current |
+| Current limiting | Only stator/supply limits (200A/60A) | 30A hard cap from torque config |
+| Used in states | `SPINNING_UP`, `RECOVERING`, `UNDER_SHOOTING` | `AT_SETPOINT` |
+| Use case | Spin-up & recovery: max power, fastest response | Hold: consistent torque, bounded current |
 
 The torque current mode is specifically valuable at setpoint because it provides **consistent holding torque regardless of battery voltage**. Duty cycle output varies with voltage — at 12V, 100% duty = 12V, but at 10V it's only 10V. Torque current commands a specific current, so the motor applies the same force regardless of battery state.
 
@@ -116,11 +149,11 @@ The torque current mode is specifically valuable at setpoint because it provides
 | Parameter | Default | Purpose |
 |---|---|---|
 | `TOLERANCE_RPM` | 100 RPM | Bandwidth for considering the flywheel "at setpoint" |
-| `CONTROL_MODE_DEBOUNCE_SECONDS` | 0.04s | Prevents rapid duty-cycle/torque-current toggling |
-| `AT_GOAL_DEBOUNCE_SECONDS` | 0.2s | Stability requirement before declaring ready to shoot |
+| `BALL_FIRED_DEBOUNCE_SECONDS` | 0.04s | Delays `AT_SETPOINT` exit to filter noise from real ball-fired events |
+| `SUSTAINED_RPM_DROP_DEBOUNCE_SECOND` | 0.2s | Time below tolerance before declaring `UNDER_SHOOTING` |
 | `PeakForwardTorqueCurrent` | 30A | Torque limit during hold phase — higher = more aggressive hold, more current |
-| `StatorCurrentLimit` | 150A | Overall stator current safety limit |
-| `SupplyCurrentLimit` | 80A | Battery-side current safety limit |
+| `StatorCurrentLimit` | 200A | Overall stator current safety limit |
+| `SupplyCurrentLimit` | 60A | Battery-side current safety limit |
 
 ## References
 
