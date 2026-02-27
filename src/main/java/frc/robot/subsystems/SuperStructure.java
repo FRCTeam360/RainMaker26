@@ -88,20 +88,8 @@ public class SuperStructure extends SubsystemBase {
     this.shooterStateMachine =
         new ShooterStateMachine(flywheel, hood, flywheelKicker, isAlignedToTarget);
 
-    flywheel.setShootVelocitySupplier(
-        () -> {
-          if (shouldUseOutpostCalculator()) {
-            return this.outpostPassCalculator.calculateShot().flywheelSpeed();
-          }
-          return this.hubShotCalculator.calculateShot().flywheelSpeed();
-        });
-    hood.setHoodAngleSupplier(
-        () -> {
-          if (shouldUseOutpostCalculator()) {
-            return this.outpostPassCalculator.calculateShot().hoodAngle();
-          }
-          return this.hubShotCalculator.calculateShot().hoodAngle();
-        });
+    flywheel.setShootVelocitySupplier(() -> getActiveCalculator().calculateShot().flywheelSpeed());
+    hood.setHoodAngleSupplier(() -> getActiveCalculator().calculateShot().hoodAngle());
     hood.setShouldDuckSupplier(
         () -> PositionUtils.isInDuckZone(robotPoseSupplier.get(), robotToShooter));
   }
@@ -157,20 +145,20 @@ public class SuperStructure extends SubsystemBase {
   }
 
   /**
-   * Returns whether the outpost calculator should be used for flywheel/hood setpoints.
+   * Returns the shot calculator to use for flywheel/hood setpoints based on the current state.
    *
-   * <p>When actively shooting at the outpost, always use the outpost calculator. During passive
-   * prep, dynamically select based on whether the robot is in its alliance zone (hub) or not
-   * (outpost).
+   * <p>Uses the outpost calculator when actively shooting at the outpost, or during passive prep
+   * when the robot is outside its alliance zone. Otherwise uses the hub calculator.
    */
-  private boolean shouldUseOutpostCalculator() {
+  private ShotCalculator getActiveCalculator() {
     if (currentSuperState == SuperStates.SHOOT_AT_OUTPOST) {
-      return true;
+      return outpostPassCalculator;
     }
-    if (currentSuperState == SuperStates.PASSIVE_PREP) {
-      return !PositionUtils.isInAllianceZone(robotPoseSupplier.get());
+    if (currentSuperState == SuperStates.PASSIVE_PREP
+        && !PositionUtils.isInAllianceZone(robotPoseSupplier.get())) {
+      return outpostPassCalculator;
     }
-    return false;
+    return hubShotCalculator;
   }
 
   // Subsystem state helpers
