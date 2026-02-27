@@ -13,7 +13,6 @@ import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -67,7 +66,6 @@ import frc.robot.subsystems.Vision.VisionIOLimelightBase;
 import frc.robot.subsystems.Vision.VisionIOPhotonSim;
 import frc.robot.utils.AllianceFlipUtil;
 import frc.robot.utils.FieldConstants;
-import frc.robot.utils.RobotUtils;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.BooleanSupplier;
@@ -238,13 +236,7 @@ public class RobotContainer {
             hopperRoller,
             hubShotCalculator,
             outpostPassCalculator,
-            drivetrain::isAlignedToTarget,
-            () ->
-                RobotUtils.hubActive(
-                    DriverStation.getAlliance(),
-                    RobotUtils.getAutoWinner(DriverStation.getGameSpecificMessage()),
-                    RobotUtils.getHubPhase(
-                        DriverStation.getMatchTime(), DriverStation.isTeleop(), 0.0)));
+            drivetrain::isAlignedToTarget);
 
     registerPathplannerCommand(
         "basic intake", superStructure.setStateCommand(SuperStates.INTAKING));

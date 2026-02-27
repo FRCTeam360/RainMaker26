@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -17,6 +18,7 @@ import frc.robot.subsystems.Shooter.ShooterStateMachine;
 import frc.robot.subsystems.Shooter.ShooterStateMachine.ShooterStates;
 import frc.robot.subsystems.Shooter.ShooterStateMachine.ShooterWantedStates;
 import frc.robot.subsystems.Shooter.ShotCalculator;
+import frc.robot.utils.RobotUtils;
 import java.util.function.BooleanSupplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -66,8 +68,7 @@ public class SuperStructure extends SubsystemBase {
       HopperRoller hopperRoller,
       ShotCalculator hubShotCalculator,
       ShotCalculator outpostPassCalculator,
-      BooleanSupplier isAlignedToTarget,
-      BooleanSupplier canShootInHub) {
+      BooleanSupplier isAlignedToTarget) {
     this.intake = intake;
     this.indexer = indexer;
     this.flywheelKicker = flywheelKicker;
@@ -78,7 +79,8 @@ public class SuperStructure extends SubsystemBase {
     this.hubShotCalculator = hubShotCalculator;
     this.outpostPassCalculator = outpostPassCalculator;
     this.shooterStateMachine =
-        new ShooterStateMachine(flywheel, hood, flywheelKicker, isAlignedToTarget, canShootInHub);
+        new ShooterStateMachine(
+            flywheel, hood, flywheelKicker, isAlignedToTarget, this::canShootToTarget);
 
     flywheel.setShootVelocitySupplier(
         () -> {
@@ -159,6 +161,20 @@ public class SuperStructure extends SubsystemBase {
     intakePivot.setWantedState(IntakePivotStates.OFF);
     hopperRoller.setWantedState(HopperRollerStates.OFF);
     shooterStateMachine.setWantedState(ShooterWantedStates.IDLE);
+  }
+
+  private Boolean canShootToTarget() {
+    switch (wantedSuperState) {
+      case SHOOT_AT_OUTPOST:
+        return true;
+      case SHOOT_AT_HUB:
+        return RobotUtils.hubActive(
+            DriverStation.getAlliance(),
+            RobotUtils.getAutoWinner(DriverStation.getGameSpecificMessage()),
+            RobotUtils.getHubPhase(DriverStation.getMatchTime(), DriverStation.isTeleop(), 0));
+      default:
+        return null;
+    }
   }
 
   // Public API
