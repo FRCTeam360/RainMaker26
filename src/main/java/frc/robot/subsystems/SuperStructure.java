@@ -36,6 +36,7 @@ public class SuperStructure extends SubsystemBase {
   private final ShotCalculator hubShotCalculator;
   private final ShotCalculator outpostPassCalculator;
   private final ShooterStateMachine shooterStateMachine;
+  private final Supplier<Pose2d> robotPoseSupplier;
 
   // Enums
   public enum SuperStates {
@@ -49,7 +50,8 @@ public class SuperStructure extends SubsystemBase {
     X_OUT_SHOOTING, // when robot is aligned, ends when toggled off or shooting stops
     FIRING, // while there's still fuel to shoot and ready to fire
     EJECTING, // eject button
-    SHOOT_AT_OUTPOST // has current zone, makes check for !current zone then passes to zone
+    SHOOT_AT_OUTPOST, // has current zone, makes check for !current zone then passes to zone
+    AUTO_CYCLE_SHOOTING // auto-selects SHOOT_AT_HUB or SHOOT_AT_OUTPOST based on alliance zone
   }
 
   // State variables
@@ -82,6 +84,7 @@ public class SuperStructure extends SubsystemBase {
     this.hopperRoller = hopperRoller;
     this.hubShotCalculator = hubShotCalculator;
     this.outpostPassCalculator = outpostPassCalculator;
+    this.robotPoseSupplier = robotPoseSupplier;
     this.shooterStateMachine =
         new ShooterStateMachine(flywheel, hood, flywheelKicker, isAlignedToTarget);
 
@@ -117,6 +120,13 @@ public class SuperStructure extends SubsystemBase {
         break;
       case SHOOT_AT_OUTPOST:
         currentSuperState = SuperStates.SHOOT_AT_OUTPOST;
+        break;
+      case AUTO_CYCLE_SHOOTING:
+        if (PositionUtils.isInAllianceZone(robotPoseSupplier.get())) {
+          currentSuperState = SuperStates.SHOOT_AT_HUB;
+        } else {
+          currentSuperState = SuperStates.SHOOT_AT_OUTPOST;
+        }
         break;
       case IDLE:
         currentSuperState = SuperStates.IDLE;
@@ -208,6 +218,11 @@ public class SuperStructure extends SubsystemBase {
 
   public void setWantedSuperState(SuperStates superState) {
     this.wantedSuperState = superState;
+  }
+
+  /** Returns the current (resolved) super state. */
+  public SuperStates getCurrentSuperState() {
+    return currentSuperState;
   }
 
   // periodic

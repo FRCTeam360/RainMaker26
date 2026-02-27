@@ -307,28 +307,42 @@ public class RobotContainer {
     BooleanSupplier isIndependentMode =
         () -> superStructure.getControlState() == ControlState.INDEPENDENT;
 
-    // Linked pair: whileTrue sets SHOOTING + aims, onFalse resets to PASSIVE_PREP.
-    // The InstantCommand (setStateCommand) finishes immediately; the alongWith group
-    // stays alive via faceAngleWhileDrivingCommand until whileTrue interrupts it.
-    Trigger shootAtHubTrigger = driverCont.rightTrigger().and(isSuperstructureMode);
-    shootAtHubTrigger.whileTrue(
+    // Auto-cycle: right trigger auto-selects hub or outpost based on alliance zone position.
+    // The heading supplier dynamically picks the correct calculator based on resolved state.
+    Trigger autoCycleTrigger = driverCont.rightTrigger().and(isSuperstructureMode);
+    autoCycleTrigger.whileTrue(
+        superStructure
+            .setStateCommand(SuperStates.AUTO_CYCLE_SHOOTING)
+            .alongWith(
+                drivetrain.faceAngleWhileDrivingCommand(
+                    driverCont,
+                    () -> {
+                      if (superStructure.getCurrentSuperState() == SuperStates.SHOOT_AT_OUTPOST) {
+                        return outpostPassCalculator.calculateShot().targetHeading();
+                      }
+                      return hubShotCalculator.calculateShot().targetHeading();
+                    })));
+    autoCycleTrigger.onFalse(superStructure.setStateCommand(SuperStates.PASSIVE_PREP));
+
+    // Manual override: force shoot at hub regardless of position
+    Trigger forceHubTrigger = driverCont.rightBumper().and(isSuperstructureMode);
+    forceHubTrigger.whileTrue(
         superStructure
             .setStateCommand(SuperStates.SHOOT_AT_HUB)
             .alongWith(
                 drivetrain.faceAngleWhileDrivingCommand(
                     driverCont, () -> hubShotCalculator.calculateShot().targetHeading())));
-    // Must stay paired with the whileTrue above to reset state on trigger release
-    shootAtHubTrigger.onFalse(superStructure.setStateCommand(SuperStates.PASSIVE_PREP));
+    forceHubTrigger.onFalse(superStructure.setStateCommand(SuperStates.PASSIVE_PREP));
 
-    // Trigger shootAtOutpostTrigger = driverCont.leftTrigger().and(isSuperstructureMode);
-    // shootAtOutpostTrigger.whileTrue(
-    //     superStructure
-    //         .setStateCommand(SuperStates.SHOOT_AT_OUTPOST)
-    //         .alongWith(
-    //             drivetrain.faceAngleWhileDrivingCommand(
-    //                 driverCont, () -> outpostPassCalculator.calculateShot().targetHeading())));
-    // Must stay paired with the whileTrue above to reset state on trigger release
-    // shootAtOutpostTrigger.onFalse(superStructure.setStateCommand(SuperStates.PASSIVE_PREP));
+    // Manual override: force pass to outpost regardless of position
+    Trigger forceOutpostTrigger = driverCont.leftBumper().and(isSuperstructureMode);
+    forceOutpostTrigger.whileTrue(
+        superStructure
+            .setStateCommand(SuperStates.SHOOT_AT_OUTPOST)
+            .alongWith(
+                drivetrain.faceAngleWhileDrivingCommand(
+                    driverCont, () -> outpostPassCalculator.calculateShot().targetHeading())));
+    forceOutpostTrigger.onFalse(superStructure.setStateCommand(SuperStates.PASSIVE_PREP));
 
     // TODO: Re-enable superStructure bindings
     Trigger intakeTrigger = driverCont.leftTrigger().and(isSuperstructureMode);

@@ -61,4 +61,26 @@ public class PositionUtils {
     Logger.recordOutput("PositionUtils/IsInDuckZone", result);
     return result;
   }
+
+  /**
+   * Returns whether the robot is inside its own alliance zone.
+   *
+   * <p>The alliance zone boundary is defined by {@link LinesVertical#allianceZone}. For blue
+   * alliance, the zone is X &lt;= that boundary. For red alliance, the boundary is flipped and the
+   * zone is X &gt;= the flipped boundary. Poses are always in blue-origin coordinates.
+   *
+   * @param robotPose the current blue-origin robot pose
+   * @return true if the robot is within its own alliance zone
+   */
+  public static boolean isInAllianceZone(Pose2d robotPose) {
+    double robotX = robotPose.getX();
+    boolean result;
+    if (AllianceFlipUtil.shouldFlip()) {
+      result = robotX >= AllianceFlipUtil.applyX(LinesVertical.allianceZone);
+    } else {
+      result = robotX <= LinesVertical.allianceZone;
+    }
+    Logger.recordOutput("PositionUtils/IsInAllianceZone", result);
+    return result;
+  }
 }
