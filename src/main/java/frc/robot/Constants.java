@@ -126,7 +126,7 @@ public final class Constants {
     public static final int HOOD_ID = 24;
 
     // === LIMELIGHT ===
-    public static final String LIMELIGHT = "limelight";
+    public static final String LIMELIGHT = "limelight-right";
 
     // === CANBUS ===
     public static final CANBus CANBUS = new CANBus("Default Name");
