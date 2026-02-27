@@ -35,13 +35,13 @@ public class SuperStructure extends SubsystemBase {
 
   // Enums
   public enum SuperStates {
+    PASSIVE_PREP, // default state: flywheel spun up, hood prepping with ducking
     IDLE, // everything is stopped when nothing else happens
     INTAKING, // while intake button pressed
     SHOOT_AT_HUB,
     // TODO: not yet implemented
     DEFENSE, // driver holds defense button -> less desired velocity moving laterally, more rotation
     X_OUT, // hold down button to x out wheels or press once and wheels stop X-ing out when moved
-    AUTO_ALIGN, // aligns to a target
     X_OUT_SHOOTING, // when robot is aligned, ends when toggled off or shooting stops
     FIRING, // while there's still fuel to shoot and ready to fire
     EJECTING, // eject button
@@ -49,9 +49,9 @@ public class SuperStructure extends SubsystemBase {
   }
 
   // State variables
-  private SuperStates wantedSuperState = SuperStates.IDLE;
-  private SuperStates currentSuperState = SuperStates.IDLE;
-  private SuperStates previousSuperState = SuperStates.IDLE;
+  private SuperStates wantedSuperState = SuperStates.PASSIVE_PREP;
+  private SuperStates currentSuperState = SuperStates.PASSIVE_PREP;
+  private SuperStates previousSuperState = SuperStates.PASSIVE_PREP;
   private ControlState controlState = ControlState.SUPERSTRUCTURE;
 
   // Constructor
@@ -111,8 +111,12 @@ public class SuperStructure extends SubsystemBase {
         currentSuperState = SuperStates.SHOOT_AT_OUTPOST;
         break;
       case IDLE:
-      default:
         currentSuperState = SuperStates.IDLE;
+        break;
+      case PASSIVE_PREP:
+      default:
+        currentSuperState = SuperStates.PASSIVE_PREP;
+        break;
     }
   }
 
@@ -127,6 +131,9 @@ public class SuperStructure extends SubsystemBase {
       case SHOOT_AT_HUB:
       case SHOOT_AT_OUTPOST:
         shooting();
+        break;
+      case PASSIVE_PREP:
+        passivePrep();
         break;
     }
   }
@@ -143,6 +150,14 @@ public class SuperStructure extends SubsystemBase {
       indexer.setWantedState(IndexerStates.OFF);
       hopperRoller.setWantedState(HopperRollerStates.OFF);
     }
+  }
+
+  private void passivePrep() {
+    intake.setWantedState(Intake.IntakeStates.OFF);
+    indexer.setWantedState(Indexer.IndexerStates.OFF);
+    intakePivot.setWantedState(IntakePivotStates.OFF);
+    hopperRoller.setWantedState(HopperRollerStates.OFF);
+    shooterStateMachine.setWantedState(ShooterWantedStates.PASSIVE_PREP);
   }
 
   private void intaking() {
