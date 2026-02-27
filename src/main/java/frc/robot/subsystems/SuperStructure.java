@@ -19,6 +19,9 @@ import frc.robot.subsystems.Shooter.ShooterStateMachine;
 import frc.robot.subsystems.Shooter.ShooterStateMachine.ShooterStates;
 import frc.robot.subsystems.Shooter.ShooterStateMachine.ShooterWantedStates;
 import frc.robot.subsystems.Shooter.ShotCalculator;
+import frc.robot.subsystems.Shooter.TargetSelectionStateMachine;
+import frc.robot.subsystems.Shooter.TargetSelectionStateMachine.TargetInternalStates;
+import frc.robot.subsystems.Shooter.TargetSelectionStateMachine.TargetWantedStates;
 import frc.robot.utils.PositionUtils;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
@@ -33,9 +36,8 @@ public class SuperStructure extends SubsystemBase {
   private final Hood hood;
   private final IntakePivot intakePivot;
   private final HopperRoller hopperRoller;
-  private final ShotCalculator hubShotCalculator;
-  private final ShotCalculator outpostPassCalculator;
   private final ShooterStateMachine shooterStateMachine;
+  private final TargetSelectionStateMachine targetSelectionStateMachine;
   private final Supplier<Pose2d> robotPoseSupplier;
 
   // Enums
@@ -47,8 +49,6 @@ public class SuperStructure extends SubsystemBase {
     // TODO: not yet implemented
     DEFENSE, // driver holds defense button -> less desired velocity moving laterally, more rotation
     X_OUT, // hold down button to x out wheels or press once and wheels stop X-ing out when moved
-    X_OUT_SHOOTING, // when robot is aligned, ends when toggled off or shooting stops
-    FIRING, // while there's still fuel to shoot and ready to fire
     EJECTING, // eject button
     SHOOT_AT_OUTPOST, // has current zone, makes check for !current zone then passes to zone
     AUTO_CYCLE_SHOOTING // auto-selects SHOOT_AT_HUB or SHOOT_AT_OUTPOST based on alliance zone
@@ -82,14 +82,17 @@ public class SuperStructure extends SubsystemBase {
     this.hood = hood;
     this.intakePivot = intakePivot;
     this.hopperRoller = hopperRoller;
-    this.hubShotCalculator = hubShotCalculator;
-    this.outpostPassCalculator = outpostPassCalculator;
     this.robotPoseSupplier = robotPoseSupplier;
     this.shooterStateMachine =
         new ShooterStateMachine(flywheel, hood, flywheelKicker, isAlignedToTarget);
+    this.targetSelectionStateMachine =
+        new TargetSelectionStateMachine(
+            hubShotCalculator, outpostPassCalculator, robotPoseSupplier);
 
-    flywheel.setShootVelocitySupplier(() -> getActiveCalculator().calculateShot().flywheelSpeed());
-    hood.setHoodAngleSupplier(() -> getActiveCalculator().calculateShot().hoodAngle());
+    flywheel.setShootVelocitySupplier(
+        () -> targetSelectionStateMachine.getActiveCalculator().calculateShot().flywheelSpeed());
+    hood.setHoodAngleSupplier(
+        () -> targetSelectionStateMachine.getActiveCalculator().calculateShot().hoodAngle());
     hood.setShouldDuckSupplier(
         () -> PositionUtils.isInDuckZone(robotPoseSupplier.get(), robotToShooter));
   }
@@ -104,13 +107,19 @@ public class SuperStructure extends SubsystemBase {
         currentSuperState = SuperStates.INTAKING;
         break;
       case SHOOT_AT_HUB:
+        targetSelectionStateMachine.setWantedState(TargetWantedStates.HUB);
+        targetSelectionStateMachine.update();
         currentSuperState = SuperStates.SHOOT_AT_HUB;
         break;
       case SHOOT_AT_OUTPOST:
+        targetSelectionStateMachine.setWantedState(TargetWantedStates.OUTPOST);
+        targetSelectionStateMachine.update();
         currentSuperState = SuperStates.SHOOT_AT_OUTPOST;
         break;
       case AUTO_CYCLE_SHOOTING:
-        if (PositionUtils.isInAllianceZone(robotPoseSupplier.get())) {
+        targetSelectionStateMachine.setWantedState(TargetWantedStates.AUTO);
+        targetSelectionStateMachine.update();
+        if (targetSelectionStateMachine.getState() == TargetInternalStates.AT_HUB) {
           currentSuperState = SuperStates.SHOOT_AT_HUB;
         } else {
           currentSuperState = SuperStates.SHOOT_AT_OUTPOST;
@@ -121,6 +130,8 @@ public class SuperStructure extends SubsystemBase {
         break;
       case PASSIVE_PREP:
       default:
+        targetSelectionStateMachine.setWantedState(TargetWantedStates.AUTO);
+        targetSelectionStateMachine.update();
         currentSuperState = SuperStates.PASSIVE_PREP;
         break;
     }
@@ -142,23 +153,6 @@ public class SuperStructure extends SubsystemBase {
         passivePrep();
         break;
     }
-  }
-
-  /**
-   * Returns the shot calculator to use for flywheel/hood setpoints based on the current state.
-   *
-   * <p>Uses the outpost calculator when actively shooting at the outpost, or during passive prep
-   * when the robot is outside its alliance zone. Otherwise uses the hub calculator.
-   */
-  private ShotCalculator getActiveCalculator() {
-    if (currentSuperState == SuperStates.SHOOT_AT_OUTPOST) {
-      return outpostPassCalculator;
-    }
-    if (currentSuperState == SuperStates.PASSIVE_PREP
-        && !PositionUtils.isInAllianceZone(robotPoseSupplier.get())) {
-      return outpostPassCalculator;
-    }
-    return hubShotCalculator;
   }
 
   // Subsystem state helpers
@@ -246,5 +240,6 @@ public class SuperStructure extends SubsystemBase {
     Logger.recordOutput("Superstructure/PreviousSuperState", previousSuperState);
     Logger.recordOutput("Superstructure/ControlState", controlState);
     shooterStateMachine.log();
+    targetSelectionStateMachine.log();
   }
 }
