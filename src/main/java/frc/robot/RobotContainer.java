@@ -251,7 +251,7 @@ public class RobotContainer {
                             () -> hubShotCalculator.calculateShot().targetHeading())))
             .andThen(superStructure.setStateCommand(SuperStates.IDLE)));
 
-    // configureBindings();
+    configureBindings();
     // configureTestBindings();
     configureFullShootingTestBindings();
 
