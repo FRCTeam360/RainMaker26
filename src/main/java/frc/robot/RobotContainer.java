@@ -164,7 +164,7 @@ public class RobotContainer {
                             () -> drivetrain.getAngularRate(),
                             false))));
         intake = new Intake(new IntakeIOWB());
-        flywheelKicker = new FlywheelKicker(new FlywheelKickerIOWB());
+        flywheelKicker = new FlywheelKicker(new FlywheelIOPBBangBang());
         intakePivot = new IntakePivot(new IntakePivotIONoop());
         hopperRoller = new HopperRoller(new HopperRollerIONoop());
 
