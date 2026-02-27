@@ -15,6 +15,7 @@ public class Intake extends SubsystemBase {
   private static final double INTAKE_VELOCITY_RPM = 4500.0;
   private static final double JAMMED_SUPPLY_CURRENT_DRAW = 35.0;
   private static final double REVERSE_UNJAM_DUTY_CYCLE = -0.5;
+  private static final double INTAKING_DUTY_CYCLE = 0.75;
   private static final double SHOOT_ASSIST_DUTY_CYCLE = 0.2;
 
   // IO fields
@@ -22,7 +23,7 @@ public class Intake extends SubsystemBase {
   private final IntakeIOInputsAutoLogged inputs = new IntakeIOInputsAutoLogged();
 
   // Other fields
-  private DoubleSupplier dutyCycleSupplier = () -> 0.0;
+  private DoubleSupplier dutyCycleSupplier = () -> INTAKING_DUTY_CYCLE;
 
   // Enums
   public enum IntakeStates {
