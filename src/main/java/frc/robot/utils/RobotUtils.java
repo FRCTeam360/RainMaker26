@@ -106,7 +106,7 @@ public class RobotUtils {
     if (alliance.isPresent()) {
       if (gamePhase == null) {
         return null;
-      }s
+      }
       switch (gamePhase) {
           // during auto, transitional phase, and end game
         case BOTH:
