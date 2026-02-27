@@ -101,6 +101,17 @@ public final class Constants {
   }
 
   public static class PracticeBotConstants {
+    // === SHOT CALCULATOR ===
+    public static final InterpolatingDoubleTreeMap shotHoodAngleMap =
+        new InterpolatingDoubleTreeMap();
+    public static final InterpolatingDoubleTreeMap shotFlywheelSpeedMap =
+        new InterpolatingDoubleTreeMap();
+    public static final InterpolatingDoubleTreeMap passHoodAngleMap =
+        new InterpolatingDoubleTreeMap();
+    public static final InterpolatingDoubleTreeMap passFlywheelSpeedMap =
+        new InterpolatingDoubleTreeMap();
+    public static final InterpolatingDoubleTreeMap timeOfFlightMap =
+        new InterpolatingDoubleTreeMap();
     // === INTAKE ===
     public static final int INTAKE_PIVOT_ID = 14;
     public static final int INTAKE_ID = 15;
@@ -130,6 +141,22 @@ public final class Constants {
 
     // === CANBUS ===
     public static final CANBus CANBUS = new CANBus("Default Name");
+
+    static {
+      shotHoodAngleMap.put(5.0, 20.0);
+      shotHoodAngleMap.put(4.0, 18.0);
+      shotHoodAngleMap.put(3.0, 16.0);
+      shotHoodAngleMap.put(2.0, 11.0);
+      shotHoodAngleMap.put(1.0, 8.0);
+      shotHoodAngleMap.put(0.0, 0.0);
+
+      // === SHOOTING VALUES ===
+      shotFlywheelSpeedMap.put(5.0, 3250.0);
+      shotFlywheelSpeedMap.put(4.0, 3250.0);
+      shotFlywheelSpeedMap.put(3.0, 2875.0);
+      shotFlywheelSpeedMap.put(2.0, 2500.0); // THIS IS GOOD
+      shotFlywheelSpeedMap.put(0.0, 2250.0);
+    }
   }
 
   public static class SimulationConstants {

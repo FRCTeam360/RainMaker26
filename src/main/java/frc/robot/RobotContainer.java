@@ -135,7 +135,7 @@ public class RobotContainer {
                 Constants.WoodBotConstants.shotHoodAngleMap,
                 Constants.WoodBotConstants.shotFlywheelSpeedMap,
                 Constants.WoodBotConstants.timeOfFlightMap,
-                ShooterConstants.ROBOT_TO_SHOOTER,
+                ShooterConstants.WOODBOT_TO_SHOOTER,
                 0.0,
                 5.0);
         break;
@@ -172,7 +172,7 @@ public class RobotContainer {
                 Constants.WoodBotConstants.shotHoodAngleMap,
                 Constants.WoodBotConstants.shotFlywheelSpeedMap,
                 Constants.WoodBotConstants.timeOfFlightMap,
-                ShooterConstants.ROBOT_TO_SHOOTER,
+                ShooterConstants.WOODBOT_TO_SHOOTER,
                 0.0,
                 5.0);
         break;
@@ -200,10 +200,10 @@ public class RobotContainer {
 
         robotShootingInfo =
             new RobotShootingInfo(
-                Constants.WoodBotConstants.shotHoodAngleMap,
-                Constants.WoodBotConstants.shotFlywheelSpeedMap,
-                Constants.WoodBotConstants.timeOfFlightMap,
-                ShooterConstants.ROBOT_TO_SHOOTER,
+                Constants.PracticeBotConstants.shotHoodAngleMap,
+                Constants.PracticeBotConstants.shotFlywheelSpeedMap,
+                Constants.PracticeBotConstants.timeOfFlightMap,
+                ShooterConstants.PRACTICEBOT_TO_SHOOTER,
                 0.0,
                 5.0);
         // TODO ADD CLIMBERS
@@ -251,9 +251,10 @@ public class RobotContainer {
                             () -> hubShotCalculator.calculateShot().targetHeading())))
             .andThen(superStructure.setStateCommand(SuperStates.IDLE)));
 
-    // configureBindings();
+    configDefaultCommands();
+    configureBindings();
     // configureTestBindings();
-    configureFullShootingTestBindings();
+    // configureFullShootingTestBindings();
 
     PathPlannerLogging.setLogActivePathCallback(
         (poses -> Logger.recordOutput("Swerve/ActivePath", poses.toArray(new Pose2d[0]))));
@@ -277,6 +278,17 @@ public class RobotContainer {
     }
   }
 
+  private void configDefaultCommands() {
+    Command consumeVisionMeasurements =
+        vision.consumeVisionMeasurements(
+            measurements -> {
+              drivetrain.addVisionMeasurements(measurements);
+            });
+    vision.setDefaultCommand(consumeVisionMeasurements.ignoringDisable(true));
+
+    drivetrain.setDefaultCommand(drivetrain.fieldOrientedDriveCommand(driverCont));
+  }
+
   /**
    * Use this method to define your trigger->command mappings. Triggers can be created via the
    * {@link Trigger#Trigger(java.util.function.BooleanSupplier)} constructor with an arbitrary
@@ -287,15 +299,6 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    Command consumeVisionMeasurements =
-        vision.consumeVisionMeasurements(
-            measurements -> {
-              drivetrain.addVisionMeasurements(measurements);
-            });
-    vision.setDefaultCommand(consumeVisionMeasurements.ignoringDisable(true));
-
-    // drivetrain.setDefaultCommand(drivetrain.fieldOrientedDriveCommand(driverCont));
-
     BooleanSupplier isSuperstructureMode =
         () -> superStructure.getControlState() == ControlState.SUPERSTRUCTURE;
     BooleanSupplier isIndependentMode =
@@ -371,8 +374,6 @@ public class RobotContainer {
         () -> superStructure.getControlState() == ControlState.SUPERSTRUCTURE;
     BooleanSupplier isIndependentMode =
         () -> superStructure.getControlState() == ControlState.INDEPENDENT;
-
-    drivetrain.setDefaultCommand(drivetrain.fieldOrientedDriveCommand(driverCont));
 
     driverCont.rightTrigger().and(isIndependentMode).whileTrue(flywheel.setVelocityCommand(4000));
     driverCont
