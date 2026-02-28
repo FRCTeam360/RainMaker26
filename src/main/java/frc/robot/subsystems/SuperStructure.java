@@ -9,7 +9,6 @@ import frc.robot.subsystems.Indexer.Indexer;
 import frc.robot.subsystems.Indexer.Indexer.IndexerStates;
 import frc.robot.subsystems.Intake.Intake;
 import frc.robot.subsystems.IntakePivot.IntakePivot;
-import frc.robot.subsystems.IntakePivot.IntakePivot.IntakePivotInternalStates;
 import frc.robot.subsystems.IntakePivot.IntakePivot.IntakePivotWantedStates;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel;
 import frc.robot.subsystems.Shooter.FlywheelKicker.FlywheelKicker;
