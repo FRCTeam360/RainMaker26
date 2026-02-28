@@ -14,21 +14,29 @@ public class IntakePivot extends SubsystemBase {
   // Constants
   private static final double STOWED_POSITION_DEGREES = 0.0;
   private static final double DEPLOYED_POSITION_DEGREES = 93.0;
+  private static final double HIGH_AGITATED_POSITION = 60.0;
+  private static final double LOW_AGITATED_POISTION = 30.0;
 
   // IO fields
   private final IntakePivotIO io;
   private final IntakePivotIOInputsAutoLogged inputs = new IntakePivotIOInputsAutoLogged();
 
-  public enum IntakePivotStates {
-    OFF,
+  public enum IntakeWantedStates {
+    IDLE,
     STOWED,
     DEPLOYED,
   }
 
+  public enum IntakePivotInternalStates {
+    IDLE,
+    MOVING_TO_SETPOINT,
+    AT_SETPOINT
+  }
+
   // State variables
-  private IntakePivotStates wantedState = IntakePivotStates.OFF;
-  private IntakePivotStates currentState = IntakePivotStates.OFF;
-  private IntakePivotStates previousState = IntakePivotStates.OFF;
+  private IntakeWantedStates wantedState = IntakeWantedStates.IDLE;
+  private IntakePivotInternalStates currentState = IntakePivotInternalStates.IDLE;
+  private IntakePivotInternalStates previousState = IntakePivotInternalStates.IDLE;
   private ControlState controlState = ControlState.SUPERSTRUCTURE;
 
   // Constructor
@@ -40,11 +48,11 @@ public class IntakePivot extends SubsystemBase {
 
   // State machine methods
 
-  public IntakePivotStates getState() {
+  public IntakePivotInternalStates getState() {
     return currentState;
   }
 
-  public void setWantedState(IntakePivotStates state) {
+  public void setWantedState(IntakeWantedStates state) {
     wantedState = state;
   }
 
@@ -56,13 +64,13 @@ public class IntakePivot extends SubsystemBase {
     previousState = currentState;
     switch (wantedState) {
       case STOWED:
-        currentState = IntakePivotStates.STOWED;
+        currentState = IntakeWantedStates.STOWED;
         break;
       case DEPLOYED:
-        currentState = IntakePivotStates.DEPLOYED;
+        currentState = IntakeWantedStates.DEPLOYED;
         break;
       default:
-        currentState = IntakePivotStates.OFF;
+        currentState = IntakeWantedStates.IDLE;
         break;
     }
   }
@@ -75,7 +83,7 @@ public class IntakePivot extends SubsystemBase {
       case STOWED:
         setPosition(STOWED_POSITION_DEGREES);
         break;
-      case OFF:
+      case IDLE:
       default:
         stop();
     }

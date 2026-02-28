@@ -9,7 +9,7 @@ import frc.robot.subsystems.Indexer.Indexer;
 import frc.robot.subsystems.Indexer.Indexer.IndexerStates;
 import frc.robot.subsystems.Intake.Intake;
 import frc.robot.subsystems.IntakePivot.IntakePivot;
-import frc.robot.subsystems.IntakePivot.IntakePivot.IntakePivotStates;
+import frc.robot.subsystems.IntakePivot.IntakePivot.IntakeWantedStates;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel;
 import frc.robot.subsystems.Shooter.FlywheelKicker.FlywheelKicker;
 import frc.robot.subsystems.Shooter.Hood.Hood;
@@ -147,7 +147,7 @@ public class SuperStructure extends SubsystemBase {
 
   private void intaking() {
     intake.setWantedState(Intake.IntakeStates.INTAKING);
-    intakePivot.setWantedState(IntakePivotStates.DEPLOYED);
+    intakePivot.setWantedState(IntakeWantedStates.DEPLOYED);
     shooterStateMachine.setWantedState(ShooterWantedStates.IDLE);
     // indexer.setWantedState(Indexer.IndexerStates.INTAKING);
   }
@@ -155,7 +155,7 @@ public class SuperStructure extends SubsystemBase {
   private void stopped() {
     intake.setWantedState(Intake.IntakeStates.OFF);
     indexer.setWantedState(Indexer.IndexerStates.OFF);
-    intakePivot.setWantedState(IntakePivotStates.OFF);
+    intakePivot.setWantedState(IntakeWantedStates.OFF);
     hopperRoller.setWantedState(HopperRollerStates.OFF);
     shooterStateMachine.setWantedState(ShooterWantedStates.IDLE);
   }
