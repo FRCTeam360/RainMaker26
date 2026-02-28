@@ -213,11 +213,12 @@ public class SuperStructure extends SubsystemBase {
     shooterStateMachine.setWantedState(ShooterWantedStates.IDLE);
   }
 
-  private  void unjamming() {
-  indexer.setWantedState(IndexerStates.REVERSING);
-  shooterStateMachine.setWantedState(ShooterWantedStates.REVERSING);
-  hopperRoller.setWantedState(HopperRollerStates.REVERSING);
+  private void unjamming() {
+    indexer.setWantedState(IndexerStates.REVERSING);
+    shooterStateMachine.setWantedState(ShooterWantedStates.REVERSING);
+    hopperRoller.setWantedState(HopperRollerStates.REVERSING);
   }
+
   private boolean canShootToTarget() {
     switch (wantedSuperState) {
       case SHOOT_AT_HUB:

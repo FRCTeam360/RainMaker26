@@ -15,7 +15,6 @@ public class FlywheelKicker extends SubsystemBase {
   private static final double KICKER_VELOCITY_RPM = 4500.0;
   private static final double REVERSE_DUTY_CYCLE = -0.85;
 
-
   // IO fields
   private final FlywheelKickerIO io;
   private final FlywheelKickerIOInputsAutoLogged inputs = new FlywheelKickerIOInputsAutoLogged();
@@ -77,7 +76,7 @@ public class FlywheelKicker extends SubsystemBase {
         setVelocity(KICKER_VELOCITY_RPM);
         break;
       case REVERSING:
-        setDutyCycle(REVERSE_DUTY_CYCLE); 
+        setDutyCycle(REVERSE_DUTY_CYCLE);
         break;
       case IDLE:
       default:

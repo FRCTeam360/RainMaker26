@@ -370,6 +370,15 @@ public class RobotContainer {
     intakeTrigger.onTrue(superStructure.setStateCommand(SuperWantedStates.INTAKING));
     intakeTrigger.onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
 
+    driverCont
+        .a()
+        .and(isSuperstructureMode)
+        .onTrue(superStructure.setStateCommand(SuperWantedStates.UNJAMMING));
+    driverCont
+        .a()
+        .and(isSuperstructureMode)
+        .onFalse(superStructure.setStateCommand(SuperWantedStates.IDLE));
+
     configureIndependentModeBindings(isIndependentMode);
 
     // Drivetrain commands
