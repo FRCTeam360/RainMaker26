@@ -1,5 +1,6 @@
 package frc;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -8,6 +9,7 @@ import edu.wpi.first.hal.HAL;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.simulation.DriverStationSim;
 import frc.robot.utils.AllianceFlipUtil;
 import frc.robot.utils.FieldConstants.LinesHorizontal;
@@ -262,5 +264,76 @@ class PositionUtilsTest {
     assertFalse(
         PositionUtils.isInAllianceZone(poseAt(outsideX, 4.0)),
         "Robot outside red alliance zone should return false");
+  }
+
+  // --- getCloserPassTarget tests ---
+
+  private static final Translation2d TARGET_A = new Translation2d(2.0, 3.0);
+  private static final Translation2d TARGET_B = new Translation2d(8.0, 5.0);
+
+  @Test
+  void returnsCloserTargetWhenRobotNearA() {
+    Pose2d nearA = poseAt(2.5, 3.0);
+    assertEquals(
+        TARGET_A,
+        PositionUtils.getCloserPassTarget(nearA, TARGET_A, TARGET_B),
+        "Should return target A when robot is closer to A");
+  }
+
+  @Test
+  void returnsCloserTargetWhenRobotNearB() {
+    Pose2d nearB = poseAt(7.5, 5.0);
+    assertEquals(
+        TARGET_B,
+        PositionUtils.getCloserPassTarget(nearB, TARGET_A, TARGET_B),
+        "Should return target B when robot is closer to B");
+  }
+
+  @Test
+  void returnsTargetAWhenEquidistant() {
+    // Midpoint between A(2,3) and B(8,5) is (5,4)
+    Pose2d midpoint = poseAt(5.0, 4.0);
+    assertEquals(
+        TARGET_A,
+        PositionUtils.getCloserPassTarget(midpoint, TARGET_A, TARGET_B),
+        "Should return target A when equidistant (tie-break)");
+  }
+
+  @Test
+  void returnsCloserTargetWhenRobotAtTargetA() {
+    Pose2d atA = poseAt(2.0, 3.0);
+    assertEquals(
+        TARGET_A,
+        PositionUtils.getCloserPassTarget(atA, TARGET_A, TARGET_B),
+        "Should return target A when robot is exactly at A");
+  }
+
+  @Test
+  void returnsCloserTargetWhenRobotAtTargetB() {
+    Pose2d atB = poseAt(8.0, 5.0);
+    assertEquals(
+        TARGET_B,
+        PositionUtils.getCloserPassTarget(atB, TARGET_A, TARGET_B),
+        "Should return target B when robot is exactly at B");
+  }
+
+  @Test
+  void argumentOrderDoesNotAffectResult() {
+    Pose2d nearB = poseAt(7.5, 5.0);
+    // Swapped argument order — should still return the closer target (B)
+    assertEquals(
+        TARGET_B,
+        PositionUtils.getCloserPassTarget(nearB, TARGET_B, TARGET_A),
+        "Should return closer target regardless of argument order");
+  }
+
+  @Test
+  void worksWithCoincidentTargets() {
+    Translation2d samePoint = new Translation2d(4.0, 4.0);
+    Pose2d anywhere = poseAt(0.0, 0.0);
+    assertEquals(
+        samePoint,
+        PositionUtils.getCloserPassTarget(anywhere, samePoint, samePoint),
+        "Should return the point when both targets are identical");
   }
 }
