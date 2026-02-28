@@ -2,7 +2,7 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.subsystems.FlywheelKicker;
+package frc.robot.subsystems.Shooter.FlywheelKicker;
 
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
@@ -119,11 +119,12 @@ public class FlywheelKickerIOSim implements FlywheelKickerIO {
     flywheelKickerSim.setInputVoltage(motorVoltage);
 
     // Step 2: Update the simulation by one timestep
-    flywheelKickerSim.update(0.02);
+    flywheelKickerSim.update(SimulationConstants.SIM_TICK_RATE_S);
 
     // Step 3: Update angular position by integrating velocity
     double velocityRPS = flywheelKickerSim.getAngularVelocityRPM() / 60.0;
-    angularPositionRotations += velocityRPS * 0.02; // Integrate velocity over time
+    angularPositionRotations +=
+        velocityRPS * SimulationConstants.SIM_TICK_RATE_S; // Integrate velocity over time
 
     // Step 4: Update the motor sim state with the new simulated values
     motorControllerSim.getSimState().setRawRotorPosition(angularPositionRotations * gearRatio);

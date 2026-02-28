@@ -36,6 +36,8 @@ public class IntakePivotIOSim implements IntakePivotIO {
   private final double armLength = 0.762; // meters (30 inches)
   private final double armMass = 2.0; // kg
 
+  private final IntakePivotVisualizer visualizer = new IntakePivotVisualizer(armLength);
+
   private static final double KP = 7.0;
   private static final double KI = 0.0;
   private static final double KD = 0.5;
@@ -107,7 +109,7 @@ public class IntakePivotIOSim implements IntakePivotIO {
     intakePivotSim.setInput(motorControllerSim.getSimState().getMotorVoltage());
 
     // Step 2: Update the simulation by one timestep
-    intakePivotSim.update(0.02);
+    intakePivotSim.update(SimulationConstants.SIM_TICK_RATE_S);
 
     // Step 3: Update the motor sim state with the new simulated values
     motorControllerSim
@@ -130,6 +132,9 @@ public class IntakePivotIOSim implements IntakePivotIO {
     inputs.voltage = motorControllerSim.getSimState().getMotorVoltage();
     inputs.statorCurrent = motorControllerSim.getStatorCurrent().getValueAsDouble();
     inputs.supplyCurrent = motorControllerSim.getSupplyCurrent().getValueAsDouble();
+
+    // Step 6: Update visualization (sim only)
+    visualizer.update(intakePivotSim.getAngleRads());
   }
 
   /**

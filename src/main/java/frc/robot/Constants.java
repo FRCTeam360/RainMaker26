@@ -22,18 +22,6 @@ public final class Constants {
   public static final AprilTagFieldLayout FIELD_LAYOUT =
       AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
 
-  public static final int IMU_MODE_EXTERNAL_ONLY = 0;
-
-  public static final int IMU_MODE_EXTERNAL_SEED = 1;
-
-  public static final int IMU_MODE_INTERNAL_ONLY = 2;
-
-  public static final int IMU_MODE_INTERNAL_MT1_ASSIST = 3;
-
-  public static final int IMU_MODE_INTERNAL_EXTERNAL_ASSIST = 4;
-
-  public static final double IMU_ASSIST_ALPHA = 0.001;
-
   public static enum RobotType {
     SIM,
     WOODBOT,
@@ -77,10 +65,20 @@ public final class Constants {
     // === SHOT CALCULATOR ===
     public static final InterpolatingDoubleTreeMap shotHoodAngleMap =
         new InterpolatingDoubleTreeMap();
-    public static final InterpolatingDoubleTreeMap launchFlywheelSpeedMap =
+    public static final InterpolatingDoubleTreeMap shotFlywheelSpeedMap =
+        new InterpolatingDoubleTreeMap();
+    public static final InterpolatingDoubleTreeMap passHoodAngleMap =
+        new InterpolatingDoubleTreeMap();
+    public static final InterpolatingDoubleTreeMap passFlywheelSpeedMap =
+        new InterpolatingDoubleTreeMap();
+    public static final InterpolatingDoubleTreeMap timeOfFlightMap =
         new InterpolatingDoubleTreeMap();
 
+    public static final double MIN_SHOT_DISTANCE_METERS = 0.0;
+    public static final double MAX_SHOT_DISTANCE_METERS = 5.0;
+
     static {
+      // === SHOOTING VALUES ===
       shotHoodAngleMap.put(5.0, 20.0);
       shotHoodAngleMap.put(4.0, 18.0);
       shotHoodAngleMap.put(3.0, 16.0);
@@ -88,15 +86,39 @@ public final class Constants {
       shotHoodAngleMap.put(1.0, 8.0); // THIS IS GOOD
       shotHoodAngleMap.put(0.0, 6.0);
 
-      launchFlywheelSpeedMap.put(5.0, 3750.0);
-      launchFlywheelSpeedMap.put(4.0, 3750.0);
-      launchFlywheelSpeedMap.put(3.0, 3375.0);
-      launchFlywheelSpeedMap.put(2.0, 3000.0); // THIS IS GOOD
-      launchFlywheelSpeedMap.put(0.0, 2750.0);
+      // === SHOOTING VALUES ===
+      shotFlywheelSpeedMap.put(5.0, 3750.0);
+      shotFlywheelSpeedMap.put(4.0, 3750.0);
+      shotFlywheelSpeedMap.put(3.0, 3375.0);
+      shotFlywheelSpeedMap.put(2.0, 3000.0); // THIS IS GOOD
+      shotFlywheelSpeedMap.put(0.0, 2750.0);
+
+      timeOfFlightMap.put(0.0, 0.0);
+
+      // === PASSING VALUES === (TODO: change placeholder values)
+      passFlywheelSpeedMap.put(6.0, 4000.0);
+
+      // === PASSING VALUES === (TODO: change placeholder values)
+      passHoodAngleMap.put(6.0, 22.0);
     }
   }
 
   public static class PracticeBotConstants {
+    // === SHOT CALCULATOR ===
+    public static final InterpolatingDoubleTreeMap shotHoodAngleMap =
+        new InterpolatingDoubleTreeMap();
+    public static final InterpolatingDoubleTreeMap shotFlywheelSpeedMap =
+        new InterpolatingDoubleTreeMap();
+    public static final InterpolatingDoubleTreeMap passHoodAngleMap =
+        new InterpolatingDoubleTreeMap();
+    public static final InterpolatingDoubleTreeMap passFlywheelSpeedMap =
+        new InterpolatingDoubleTreeMap();
+    public static final InterpolatingDoubleTreeMap timeOfFlightMap =
+        new InterpolatingDoubleTreeMap();
+
+    public static final double MIN_SHOT_DISTANCE_METERS = 0.0;
+    public static final double MAX_SHOT_DISTANCE_METERS = 6.0;
+
     // === INTAKE ===
     public static final int INTAKE_PIVOT_ID = 14;
     public static final int INTAKE_ID = 15;
@@ -105,26 +127,55 @@ public final class Constants {
     public static final int CLIMBER_RIGHT_ID = 16;
     public static final int CLIMBER_LEFT_ID = 17;
 
-    // FIXME: update these values TO REAL VALUES
-    public static final int INDEXER_SENSOR_ID = 73;
-    public static final int INDEXER_ID = 75;
+    // === FLYWHEEL ===
+    public static final int FLYWHEEL_RIGHT_ID = 18;
+    public static final int FLYWHEEL_LEFT_ID = 19;
 
-    public static final int FLYWHEEL_KICKER_ID = 76;
-    public static final int FLYWHEEL_KICKER_SENSOR_ID = 77;
+    // === FLYWHEEL KICKER ===
+    public static final int FLYWHEEL_KICKER_ID = 20;
+    public static final int FLYWHEEL_KICKER_SENSOR_ID = 21;
 
-    public static final int FLYWHEEL_RIGHT_ID = 78;
-    public static final int FLYWHEEL_LEFT_ID = 79;
+    // === HOPPER ===
+    public static final int HOPPER_ROLLER_ID = 22;
+    public static final int TWINDEXER_ID = 23;
+    // public static final int HOPPER_SENSOR_ID = 25;
 
-    public static final int HOOD_ID = 80;
+    // === HOOD ===
+    public static final int HOOD_ID = 24;
 
-    public static final int HOPPER_ROLLER_ID = 0;
+    // === LIMELIGHT ===
+    public static final String LIMELIGHT = "limelight-right";
 
-    public static final String LIMELIGHT = "limelight";
-
+    // === CANBUS ===
     public static final CANBus CANBUS = new CANBus("Default Name");
+
+    static {
+      shotHoodAngleMap.put(6.0, 18.0);
+      shotHoodAngleMap.put(5.0, 18.0); // TESTED
+      shotHoodAngleMap.put(4.0, 15.0);
+      shotHoodAngleMap.put(3.0, 6.0); // TESTED
+      shotHoodAngleMap.put(2.5, 4.0); // TESTED
+      shotHoodAngleMap.put(2.0, 2.0);
+      shotHoodAngleMap.put(1.0, 0.0);
+      shotHoodAngleMap.put(0.0, 0.0);
+
+      // === SHOOTING VALUES ===
+      shotFlywheelSpeedMap.put(6.0, 2500.0);
+      shotFlywheelSpeedMap.put(5.0, 2500.0); // TESTED
+      shotFlywheelSpeedMap.put(4.0, 2250.0);
+      shotFlywheelSpeedMap.put(3.0, 2250.0); // TESTED
+      shotFlywheelSpeedMap.put(2.5, 2150.0); // TESTED
+      shotFlywheelSpeedMap.put(2.0, 2000.0);
+      shotFlywheelSpeedMap.put(1.0, 1800.0);
+      shotFlywheelSpeedMap.put(0.0, 2000.0);
+
+      timeOfFlightMap.put(0.0, 0.0);
+    }
   }
 
   public static class SimulationConstants {
+    public static final double SIM_TICK_RATE_S = 0.02;
+
     // === INTAKE ===
     public static final int INTAKE_MOTOR = 30;
     public static final int INTAKE_SENSOR_PORT = 10;
@@ -137,6 +188,9 @@ public final class Constants {
     public static final int FLYWHEEL_KICKER_MOTOR = 18;
     public static final int FLYWHEEL_KICKER_SENSOR_ID = 19;
     public static final int FLYWHEEL_MOTOR = 32;
+
+    // === HOPPER ROLLER ===
+    public static final int HOPPER_ROLLER_MOTOR = 35;
 
     // === HOOD ===
     public static final int HOOD_MOTOR = 34;

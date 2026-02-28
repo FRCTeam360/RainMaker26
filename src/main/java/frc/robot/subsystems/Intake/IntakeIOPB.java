@@ -16,13 +16,13 @@ import com.revrobotics.spark.config.SparkFlexConfig;
 import frc.robot.Constants.PracticeBotConstants;
 
 public class IntakeIOPB implements IntakeIO {
-  private static final double GEAR_RATIO = 1.0; // FIXME: set actual gear ratio
+  private static final double GEAR_RATIO = 1.0;
   private static final int CURRENT_LIMIT_AMPS = 40;
   private static final double KP = 0.0002;
   private static final double KI = 0.0;
   private static final double KD = 0.0;
-  private static final double FF_KV = 0.0018;
-  private static final double FF_KS = 0.004;
+  private static final double KV = 0.0019;
+  private static final double KS = 0.04;
 
   private final SparkFlex motor =
       new SparkFlex(PracticeBotConstants.INTAKE_ID, MotorType.kBrushless);
@@ -31,7 +31,7 @@ public class IntakeIOPB implements IntakeIO {
   private final SparkClosedLoopController closedLoopController;
 
   public IntakeIOPB() {
-    config.idleMode(IdleMode.kBrake);
+    config.idleMode(IdleMode.kCoast);
     config.inverted(true);
     config.smartCurrentLimit(CURRENT_LIMIT_AMPS);
 
@@ -39,7 +39,7 @@ public class IntakeIOPB implements IntakeIO {
     config.encoder.velocityConversionFactor(1.0 / GEAR_RATIO);
 
     config.closedLoop.p(KP).i(KI).d(KD);
-    config.closedLoop.feedForward.kV(FF_KV).kS(FF_KS);
+    config.closedLoop.feedForward.kV(KV).kS(KS);
 
     motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     closedLoopController = motor.getClosedLoopController();

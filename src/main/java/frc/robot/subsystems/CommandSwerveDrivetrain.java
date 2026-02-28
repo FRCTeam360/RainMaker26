@@ -29,7 +29,6 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.generated.WoodBotDrivetrain.TunerSwerveDrivetrain;
 import frc.robot.subsystems.Vision.VisionMeasurement;
-import frc.robot.utils.FieldVisualizer;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.DoubleSupplier;
@@ -395,14 +394,14 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   @Override
   public void periodic() {
     // Current pose includes vision fusion when vision measurements are added
-    Logger.recordOutput(SUBSYSTEM_NAME + "CurrentPose", this.getStateCopy().Pose);
-    Logger.recordOutput(SUBSYSTEM_NAME + "Rotation2d", this.getStateCopy().RawHeading);
-    Logger.recordOutput(SUBSYSTEM_NAME + "CurrentState", this.getStateCopy().ModuleStates);
-    Logger.recordOutput(SUBSYSTEM_NAME + "TargetState", this.getStateCopy().ModuleTargets);
-    Logger.recordOutput(SUBSYSTEM_NAME + "Using Vision", hasVisionMeasurements);
 
-    // Update field visualizations (hub points, line from robot to hub, etc.)
-    FieldVisualizer.update(this.getStateCopy().Pose);
+    SwerveDriveState state = this.getStateCopy();
+
+    Logger.recordOutput(SUBSYSTEM_NAME + "CurrentPose", state.Pose);
+    Logger.recordOutput(SUBSYSTEM_NAME + "Rotation2d", state.RawHeading);
+    Logger.recordOutput(SUBSYSTEM_NAME + "CurrentState", state.ModuleStates);
+    Logger.recordOutput(SUBSYSTEM_NAME + "TargetState", state.ModuleTargets);
+    Logger.recordOutput(SUBSYSTEM_NAME + "Using Vision", hasVisionMeasurements);
 
     // Log whether vision measurements have been applied (useful for analysis)
     /*
