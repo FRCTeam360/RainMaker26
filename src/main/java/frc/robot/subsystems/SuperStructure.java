@@ -202,6 +202,7 @@ public class SuperStructure extends SubsystemBase {
     intake.setWantedState(Intake.IntakeStates.INTAKING);
     intakePivot.setWantedState(IntakePivotWantedStates.DEPLOYED);
     shooterStateMachine.setWantedState(ShooterWantedStates.IDLE);
+    hopperRoller.setWantedState(HopperRollerStates.REVERSING);
     // indexer.setWantedState(Indexer.IndexerStates.INTAKING);
   }
 
