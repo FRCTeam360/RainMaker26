@@ -29,13 +29,13 @@ import org.littletonrobotics.junction.Logger;
  */
 public class Flywheel extends SubsystemBase {
   /** Velocity tolerance for bang-bang setpoint detection. */
-  private static final double TOLERANCE_RPM = 100.0;
+  private static final double TOLERANCE_RPM = 150.0;
 
   /** Debounce time for shot detection — filters noise from brief velocity dips. */
   private static final double BALL_FIRED_DEBOUNCE_SECONDS = 0.04;
 
   /** Debounce time for underspeed detection — sustained RPM drop signals too many rapid shots. */
-  private static final double SUSTAINED_RPM_DROP_DEBOUNCE_SECOND = 0.2;
+  private static final double SUSTAINED_RPM_DROP_DEBOUNCE_SECOND = 0.4;
 
   private long launchCount = 0;
 
