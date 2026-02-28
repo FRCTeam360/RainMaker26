@@ -10,12 +10,15 @@ import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.swerve.SwerveRequest.ForwardPerspectiveValue;
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -27,6 +30,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.Constants;
 import frc.robot.generated.WoodBotDrivetrain.TunerSwerveDrivetrain;
 import frc.robot.subsystems.Vision.VisionMeasurement;
 import java.util.List;
@@ -287,9 +291,59 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
    *     theta]ᵀ, with units in meters and radians
    * @param modules Constants for each specific module
    */
+  // === WoodBot PathPlanner Constants (as of Feb 20th tuning) ===
+  private static final double WOODBOT_MASS_KG = 60.0;
+
+  private static final double WOODBOT_MOI = 4.5;
+  private static final double WOODBOT_WHEEL_RADIUS_METERS = 0.048;
+  private static final double WOODBOT_MAX_DRIVE_SPEED_MPS = 4.69;
+  private static final double WOODBOT_WHEEL_COF = 1.3;
+  private static final double WOODBOT_DRIVE_GEARING = 6.03;
+  private static final double WOODBOT_DRIVE_CURRENT_LIMIT_AMPS = 80.0;
+  private static final double WOODBOT_MODULE_OFFSET_METERS = 0.301;
+
+  // PathPlanner AutoBuilder PID gains
+  private static final double PP_TRANSLATION_KP = 11.0;
+  private static final double PP_TRANSLATION_KI = 0.0;
+  private static final double PP_TRANSLATION_KD = 0.0;
+  private static final double PP_ROTATION_KP = 8.0;
+  private static final double PP_ROTATION_KI = 0.0;
+  private static final double PP_ROTATION_KD = 0.0;
+
+  /**
+   * Creates a hardcoded RobotConfig for the WoodBot using known tuned constants.
+   *
+   * @return RobotConfig for the WoodBot
+   */
+  private static RobotConfig createWoodBotConfig() {
+    ModuleConfig moduleConfig =
+        new ModuleConfig(
+            WOODBOT_WHEEL_RADIUS_METERS,
+            WOODBOT_MAX_DRIVE_SPEED_MPS,
+            WOODBOT_WHEEL_COF,
+            DCMotor.getKrakenX60Foc(1),
+            WOODBOT_DRIVE_GEARING,
+            WOODBOT_DRIVE_CURRENT_LIMIT_AMPS,
+            1);
+
+    return new RobotConfig(
+        WOODBOT_MASS_KG,
+        WOODBOT_MOI,
+        moduleConfig,
+        new Translation2d(WOODBOT_MODULE_OFFSET_METERS, WOODBOT_MODULE_OFFSET_METERS),
+        new Translation2d(WOODBOT_MODULE_OFFSET_METERS, -WOODBOT_MODULE_OFFSET_METERS),
+        new Translation2d(-WOODBOT_MODULE_OFFSET_METERS, WOODBOT_MODULE_OFFSET_METERS),
+        new Translation2d(-WOODBOT_MODULE_OFFSET_METERS, -WOODBOT_MODULE_OFFSET_METERS));
+  }
+
   private void configureAutoBuilder() {
     try {
-      var config = RobotConfig.fromGUISettings();
+      RobotConfig config;
+      if (Constants.getRobotType() == Constants.RobotType.PRACTICEBOT) {
+        config = RobotConfig.fromGUISettings();
+      } else {
+        config = createWoodBotConfig();
+      }
 
       AutoBuilder.configure(
           () -> getStateCopy().Pose, // Supplier of current robot pose
@@ -304,10 +358,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                       .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons())
                       .withDriveRequestType(m_driveRequestType)),
           new PPHolonomicDriveController(
-              // PID constants for translation
-              new PIDConstants(11, 0, 0),
-              // PID constants for rotation
-              new PIDConstants(8, 0, 0)),
+              new PIDConstants(PP_TRANSLATION_KP, PP_TRANSLATION_KI, PP_TRANSLATION_KD),
+              new PIDConstants(PP_ROTATION_KP, PP_ROTATION_KI, PP_ROTATION_KD)),
           config,
           // Assume the path needs to be flipped for Red vs Blue, this is normally the
           // case
