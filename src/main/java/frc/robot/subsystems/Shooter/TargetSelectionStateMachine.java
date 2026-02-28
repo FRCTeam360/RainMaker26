@@ -105,8 +105,8 @@ public class TargetSelectionStateMachine {
 
   /** Logs the wanted, current, and previous target selection states. */
   public void log() {
-    Logger.recordOutput("TargetSelection/WantedState", wantedState);
-    Logger.recordOutput("TargetSelection/CurrentState", currentState);
-    Logger.recordOutput("TargetSelection/PreviousState", previousState);
+    Logger.recordOutput("Superstructure/TargetSelection/WantedState", wantedState);
+    Logger.recordOutput("Superstructure/TargetSelection/CurrentState", currentState);
+    Logger.recordOutput("Superstructure/TargetSelection/PreviousState", previousState);
   }
 }

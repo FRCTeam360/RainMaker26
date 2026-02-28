@@ -57,7 +57,8 @@ import frc.robot.subsystems.Shooter.ShooterConstants;
 import frc.robot.subsystems.Shooter.ShotCalculator;
 import frc.robot.subsystems.Shooter.ShotCalculator.RobotShootingInfo;
 import frc.robot.subsystems.SuperStructure;
-import frc.robot.subsystems.SuperStructure.SuperStates;
+import frc.robot.subsystems.SuperStructure.SuperInternalStates;
+import frc.robot.subsystems.SuperStructure.SuperWantedStates;
 import frc.robot.subsystems.Vision.Vision;
 import frc.robot.subsystems.Vision.VisionIOLimelight3G;
 import frc.robot.subsystems.Vision.VisionIOLimelight4;
@@ -239,20 +240,20 @@ public class RobotContainer {
     intake.setDutyCycleSupplier(driverCont::getLeftTriggerAxis);
 
     registerPathplannerCommand(
-        "basic intake", superStructure.setStateCommand(SuperStates.INTAKING));
+        "basic intake", superStructure.setStateCommand(SuperWantedStates.INTAKING));
     // TODO: add end condition based on state from SuperStructure (based on sensor inputs)
     registerPathplannerCommand(
         "shoot at hub",
         Commands.waitSeconds(10)
             .deadlineFor(
                 superStructure
-                    .setStateCommand(SuperStates.SHOOT_AT_HUB)
+                    .setStateCommand(SuperWantedStates.SHOOT_AT_HUB)
                     .alongWith(
                         drivetrain.faceAngleWhileDrivingCommand(
                             () -> 0,
                             () -> 0,
                             () -> hubShotCalculator.calculateShot().targetHeading())))
-            .andThen(superStructure.setStateCommand(SuperStates.PASSIVE_PREP)));
+            .andThen(superStructure.setStateCommand(SuperWantedStates.DEFAULT)));
 
     configDefaultCommands();
     configureBindings();
@@ -312,42 +313,43 @@ public class RobotContainer {
     Trigger autoCycleTrigger = driverCont.rightTrigger().and(isSuperstructureMode);
     autoCycleTrigger.whileTrue(
         superStructure
-            .setStateCommand(SuperStates.AUTO_CYCLE_SHOOTING)
+            .setStateCommand(SuperWantedStates.AUTO_CYCLE_SHOOTING)
             .alongWith(
                 drivetrain.faceAngleWhileDrivingCommand(
                     driverCont,
                     () -> {
-                      if (superStructure.getCurrentSuperState() == SuperStates.SHOOT_AT_OUTPOST) {
+                      if (superStructure.getCurrentSuperState()
+                          == SuperInternalStates.SHOOT_AT_OUTPOST) {
                         return outpostPassCalculator.calculateShot().targetHeading();
                       }
                       return hubShotCalculator.calculateShot().targetHeading();
                     })));
-    autoCycleTrigger.onFalse(superStructure.setStateCommand(SuperStates.PASSIVE_PREP));
+    autoCycleTrigger.onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
 
     // Manual override: force shoot at hub regardless of position
     Trigger forceHubTrigger = driverCont.rightBumper().and(isSuperstructureMode);
     forceHubTrigger.whileTrue(
         superStructure
-            .setStateCommand(SuperStates.SHOOT_AT_HUB)
+            .setStateCommand(SuperWantedStates.SHOOT_AT_HUB)
             .alongWith(
                 drivetrain.faceAngleWhileDrivingCommand(
                     driverCont, () -> hubShotCalculator.calculateShot().targetHeading())));
-    forceHubTrigger.onFalse(superStructure.setStateCommand(SuperStates.PASSIVE_PREP));
+    forceHubTrigger.onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
 
     // Manual override: force pass to outpost regardless of position
     Trigger forceOutpostTrigger = driverCont.leftBumper().and(isSuperstructureMode);
     forceOutpostTrigger.whileTrue(
         superStructure
-            .setStateCommand(SuperStates.SHOOT_AT_OUTPOST)
+            .setStateCommand(SuperWantedStates.SHOOT_AT_OUTPOST)
             .alongWith(
                 drivetrain.faceAngleWhileDrivingCommand(
                     driverCont, () -> outpostPassCalculator.calculateShot().targetHeading())));
-    forceOutpostTrigger.onFalse(superStructure.setStateCommand(SuperStates.PASSIVE_PREP));
+    forceOutpostTrigger.onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
 
     // TODO: Re-enable superStructure bindings
     Trigger intakeTrigger = driverCont.leftTrigger().and(isSuperstructureMode);
-    intakeTrigger.onTrue(superStructure.setStateCommand(SuperStates.INTAKING));
-    intakeTrigger.onFalse(superStructure.setStateCommand(SuperStates.PASSIVE_PREP));
+    intakeTrigger.onTrue(superStructure.setStateCommand(SuperWantedStates.INTAKING));
+    intakeTrigger.onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
 
     configureIndependentModeBindings(isIndependentMode);
 
@@ -465,7 +467,7 @@ public class RobotContainer {
   /** Stops all subsystems safely when the robot is disabled. */
   public void onDisable() {
     superStructure.setControlState(ControlState.SUPERSTRUCTURE);
-    superStructure.setWantedSuperState(SuperStates.IDLE);
+    superStructure.setWantedSuperState(SuperWantedStates.IDLE);
     drivetrain.setControl(new SwerveRequest.Idle());
     flywheel.stop();
     hood.stop();
@@ -481,7 +483,7 @@ public class RobotContainer {
   public void onEnable() {
     // Ensures superstructure control mode is active when enabled
     superStructure.setControlState(ControlState.SUPERSTRUCTURE);
-    superStructure.setWantedSuperState(SuperStates.PASSIVE_PREP);
+    superStructure.setWantedSuperState(SuperWantedStates.DEFAULT);
     onEnableVision();
   }
 
@@ -493,7 +495,7 @@ public class RobotContainer {
   /** Decouples the superstructure from subsystems for test mode. */
   public void onTestEnable() {
     superStructure.setControlState(ControlState.INDEPENDENT);
-    superStructure.setWantedSuperState(SuperStates.IDLE);
+    superStructure.setWantedSuperState(SuperWantedStates.IDLE);
     onEnableVision();
   }
 

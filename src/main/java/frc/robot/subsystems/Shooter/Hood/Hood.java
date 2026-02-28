@@ -35,7 +35,7 @@ public class Hood extends SubsystemBase {
     OFF,
     MOVING,
     AT_SETPOINT,
-    DUCKING
+    ZEROING
   }
 
   // State variables
@@ -95,7 +95,7 @@ public class Hood extends SubsystemBase {
         // when in PASSIVE_PREP mode. We currently call this for logging purposes to validate the
         // logic works
         shouldDuck.getAsBoolean();
-        currentState = HoodInternalStates.DUCKING; // quack!
+        currentState = HoodInternalStates.ZEROING;
         break;
       case IDLE:
       default:
@@ -110,7 +110,7 @@ public class Hood extends SubsystemBase {
       case AT_SETPOINT:
         setPosition(hoodAngleSupplier.getAsDouble());
         break;
-      case DUCKING:
+      case ZEROING:
         moveHoodToZero();
         break;
       case OFF:

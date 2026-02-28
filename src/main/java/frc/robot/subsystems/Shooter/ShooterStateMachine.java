@@ -20,7 +20,7 @@ public class ShooterStateMachine {
   public enum ShooterWantedStates {
     IDLE,
     SHOOTING,
-    PASSIVE_PREP
+    PASSIVE_SHOOTER
   }
 
   public enum ShooterStates {
@@ -97,7 +97,7 @@ public class ShooterStateMachine {
           currentState = ShooterStates.PREPARING;
         }
         break;
-      case PASSIVE_PREP:
+      case PASSIVE_SHOOTER:
         currentState = ShooterStates.PASSIVE_PREPARING;
         break;
       case IDLE:

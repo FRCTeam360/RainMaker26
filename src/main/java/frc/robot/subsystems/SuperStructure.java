@@ -41,23 +41,31 @@ public class SuperStructure extends SubsystemBase {
   private final Supplier<Pose2d> robotPoseSupplier;
 
   // Enums
-  public enum SuperStates {
-    PASSIVE_PREP, // default state: flywheel spun up, hood prepping with ducking
-    IDLE, // everything is stopped when nothing else happens
-    INTAKING, // while intake button pressed
+  public enum SuperWantedStates {
+    DEFAULT,
+    IDLE,
+    INTAKING,
     SHOOT_AT_HUB,
+    SHOOT_AT_OUTPOST,
+    AUTO_CYCLE_SHOOTING, // auto-selects hub or outpost based on alliance zone
     // TODO: not yet implemented
-    DEFENSE, // driver holds defense button -> less desired velocity moving laterally, more rotation
-    X_OUT, // hold down button to x out wheels or press once and wheels stop X-ing out when moved
-    EJECTING, // eject button
-    SHOOT_AT_OUTPOST, // has current zone, makes check for !current zone then passes to zone
-    AUTO_CYCLE_SHOOTING // auto-selects SHOOT_AT_HUB or SHOOT_AT_OUTPOST based on alliance zone
+    DEFENSE,
+    X_OUT,
+    EJECTING
+  }
+
+  public enum SuperInternalStates {
+    DEFAULT, // flywheel spun up, hood prepping with ducking
+    IDLE, // everything is stopped
+    INTAKING, // intake button pressed
+    SHOOT_AT_HUB,
+    SHOOT_AT_OUTPOST
   }
 
   // State variables
-  private SuperStates wantedSuperState = SuperStates.PASSIVE_PREP;
-  private SuperStates currentSuperState = SuperStates.PASSIVE_PREP;
-  private SuperStates previousSuperState = SuperStates.PASSIVE_PREP;
+  private SuperWantedStates wantedSuperState = SuperWantedStates.DEFAULT;
+  private SuperInternalStates currentSuperState = SuperInternalStates.DEFAULT;
+  private SuperInternalStates previousSuperState = SuperInternalStates.DEFAULT;
   private ControlState controlState = ControlState.SUPERSTRUCTURE;
 
   // Constructor
@@ -104,35 +112,35 @@ public class SuperStructure extends SubsystemBase {
 
     switch (wantedSuperState) {
       case INTAKING:
-        currentSuperState = SuperStates.INTAKING;
+        currentSuperState = SuperInternalStates.INTAKING;
         break;
       case SHOOT_AT_HUB:
         targetSelectionStateMachine.setWantedState(TargetWantedStates.HUB);
         targetSelectionStateMachine.update();
-        currentSuperState = SuperStates.SHOOT_AT_HUB;
+        currentSuperState = SuperInternalStates.SHOOT_AT_HUB;
         break;
       case SHOOT_AT_OUTPOST:
         targetSelectionStateMachine.setWantedState(TargetWantedStates.OUTPOST);
         targetSelectionStateMachine.update();
-        currentSuperState = SuperStates.SHOOT_AT_OUTPOST;
+        currentSuperState = SuperInternalStates.SHOOT_AT_OUTPOST;
         break;
       case AUTO_CYCLE_SHOOTING:
         targetSelectionStateMachine.setWantedState(TargetWantedStates.AUTO);
         targetSelectionStateMachine.update();
         if (targetSelectionStateMachine.getState() == TargetInternalStates.AT_HUB) {
-          currentSuperState = SuperStates.SHOOT_AT_HUB;
+          currentSuperState = SuperInternalStates.SHOOT_AT_HUB;
         } else {
-          currentSuperState = SuperStates.SHOOT_AT_OUTPOST;
+          currentSuperState = SuperInternalStates.SHOOT_AT_OUTPOST;
         }
         break;
       case IDLE:
-        currentSuperState = SuperStates.IDLE;
+        currentSuperState = SuperInternalStates.IDLE;
         break;
-      case PASSIVE_PREP:
+      case DEFAULT:
       default:
         targetSelectionStateMachine.setWantedState(TargetWantedStates.AUTO);
         targetSelectionStateMachine.update();
-        currentSuperState = SuperStates.PASSIVE_PREP;
+        currentSuperState = SuperInternalStates.DEFAULT;
         break;
     }
   }
@@ -149,7 +157,7 @@ public class SuperStructure extends SubsystemBase {
       case SHOOT_AT_OUTPOST:
         shooting();
         break;
-      case PASSIVE_PREP:
+      case DEFAULT:
         passivePrep();
         break;
     }
@@ -174,13 +182,13 @@ public class SuperStructure extends SubsystemBase {
     indexer.setWantedState(Indexer.IndexerStates.OFF);
     intakePivot.setWantedState(IntakePivotStates.OFF);
     hopperRoller.setWantedState(HopperRollerStates.OFF);
-    shooterStateMachine.setWantedState(ShooterWantedStates.PASSIVE_PREP);
+    shooterStateMachine.setWantedState(ShooterWantedStates.PASSIVE_SHOOTER);
   }
 
   private void intaking() {
     intake.setWantedState(Intake.IntakeStates.INTAKING);
     intakePivot.setWantedState(IntakePivotStates.DEPLOYED);
-    shooterStateMachine.setWantedState(ShooterWantedStates.PASSIVE_PREP);
+    shooterStateMachine.setWantedState(ShooterWantedStates.PASSIVE_SHOOTER);
     // indexer.setWantedState(Indexer.IndexerStates.INTAKING);
   }
 
@@ -211,16 +219,16 @@ public class SuperStructure extends SubsystemBase {
     return controlState;
   }
 
-  public Command setStateCommand(SuperStates superState) {
+  public Command setStateCommand(SuperWantedStates superState) {
     return new InstantCommand(() -> setWantedSuperState(superState), this);
   }
 
-  public void setWantedSuperState(SuperStates superState) {
+  public void setWantedSuperState(SuperWantedStates superState) {
     this.wantedSuperState = superState;
   }
 
   /** Returns the current (resolved) super state. */
-  public SuperStates getCurrentSuperState() {
+  public SuperInternalStates getCurrentSuperState() {
     return currentSuperState;
   }
 
