@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems.Climber;
 
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
 
@@ -81,6 +82,14 @@ public class Climber extends SubsystemBase {
 
   public void setRightDutyCycle(double dutyCycle) {
     io.setRightDutyCycle(dutyCycle);
+  }
+
+  public Command setRightDutyCycleCommand(double dutyCycle) {
+    return this.runEnd(() -> this.setRightDutyCycle(dutyCycle), () -> this.setRightDutyCycle(0.0));
+  }
+
+  public Command setLeftDutyCycleCommand(double dutyCycle) {
+    return this.runEnd(() -> this.setLeftDutyCycle(dutyCycle), () -> this.setLeftDutyCycle(0.0));
   }
 
   public void climbing() {

@@ -262,7 +262,7 @@ public class RobotContainer {
                             () -> hubShotCalculator.calculateShot().targetHeading())))
             .andThen(superStructure.setStateCommand(SuperStates.IDLE)));
 
-    configDefaultCommands();
+    // configDefaultCommands();
     configureBindings();
     // configureTestBindings();
     // configureFullShootingTestBindings();
@@ -365,8 +365,8 @@ public class RobotContainer {
     driverCont.start().and(isIndependentMode).onTrue(hood.zero());
 
     // flywheel bindings
-    driverCont.x().and(isIndependentMode).whileTrue(flywheel.setVelocityCommand(3000.0));
-    driverCont.y().and(isIndependentMode).whileTrue(flywheel.setVelocityCommand(4000.0));
+    driverCont.x().and(isIndependentMode).whileTrue(climber.setLeftDutyCycleCommand(0.1));
+    driverCont.y().and(isIndependentMode).whileTrue(climber.setRightDutyCycleCommand(0.1));
 
     // configureIntakeTestBindings(isIndependentMode);
     // configureFullShootingTestBindings(isIndependentMode);
