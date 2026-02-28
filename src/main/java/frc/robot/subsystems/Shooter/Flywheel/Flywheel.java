@@ -151,28 +151,29 @@ public class Flywheel extends SubsystemBase {
     previousState = currentState;
 
     switch (wantedState) {
-      case SHOOTING: {
-        double targetRPM = shootVelocitySupplier.getAsDouble();
-        boolean atBangBangSetpoint = atSetpoint(targetRPM);
-        boolean underspeed = isUnderspeed(targetRPM);
-        boolean wasAtSetpoint = previousState == FlywheelInternalStates.AT_SETPOINT;
-        boolean wasRecovering = previousState == FlywheelInternalStates.RECOVERING;
-        boolean ballFired = wasAtSetpoint && !atBangBangSetpoint;
+      case SHOOTING:
+        {
+          double targetRPM = shootVelocitySupplier.getAsDouble();
+          boolean atBangBangSetpoint = atSetpoint(targetRPM);
+          boolean underspeed = isUnderspeed(targetRPM);
+          boolean wasAtSetpoint = previousState == FlywheelInternalStates.AT_SETPOINT;
+          boolean wasRecovering = previousState == FlywheelInternalStates.RECOVERING;
+          boolean ballFired = wasAtSetpoint && !atBangBangSetpoint;
 
-        if (underspeed && wasRecovering) {
-          currentState = FlywheelInternalStates.UNDER_SHOOTING;
-        } else if (ballFired) {
-          launchCount++;
-          currentState = FlywheelInternalStates.RECOVERING;
-        } else if (atBangBangSetpoint) {
-          currentState = FlywheelInternalStates.AT_SETPOINT;
-        } else if (wasRecovering) {
-          currentState = FlywheelInternalStates.RECOVERING;
-        } else {
-          currentState = FlywheelInternalStates.SPINNING_UP;
+          if (underspeed && wasRecovering) {
+            currentState = FlywheelInternalStates.UNDER_SHOOTING;
+          } else if (ballFired) {
+            launchCount++;
+            currentState = FlywheelInternalStates.RECOVERING;
+          } else if (atBangBangSetpoint) {
+            currentState = FlywheelInternalStates.AT_SETPOINT;
+          } else if (wasRecovering) {
+            currentState = FlywheelInternalStates.RECOVERING;
+          } else {
+            currentState = FlywheelInternalStates.SPINNING_UP;
+          }
+          break;
         }
-        break;
-      }
       case COASTING:
         currentState = FlywheelInternalStates.COAST;
         break;
@@ -212,6 +213,7 @@ public class Flywheel extends SubsystemBase {
         break;
     }
   }
+
   /**
    * Sets the flywheel to coast velocity control (for gentle deceleration or low-power holding).
    *

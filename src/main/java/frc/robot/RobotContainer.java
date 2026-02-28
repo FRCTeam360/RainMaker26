@@ -327,8 +327,7 @@ public class RobotContainer {
                 drivetrain.faceAngleWhileDrivingCommand(
                     driverCont,
                     () -> {
-                      if (superStructure.getCurrentSuperState()
-                          == SuperInternalStates.PASSING) {
+                      if (superStructure.getCurrentSuperState() == SuperInternalStates.PASSING) {
                         return passCalculator.calculateShot().targetHeading();
                       }
                       return hubShotCalculator.calculateShot().targetHeading();
