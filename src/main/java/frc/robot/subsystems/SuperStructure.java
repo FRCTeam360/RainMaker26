@@ -217,6 +217,8 @@ public class SuperStructure extends SubsystemBase {
     indexer.setWantedState(IndexerStates.REVERSING);
     shooterStateMachine.setWantedState(ShooterWantedStates.REVERSING);
     hopperRoller.setWantedState(HopperRollerStates.REVERSING);
+    intake.setWantedState(IntakeStates.OFF);
+    intakePivot.setWantedState(IntakePivotWantedStates.DEPLOYED);
   }
 
   private boolean canShootToTarget() {
