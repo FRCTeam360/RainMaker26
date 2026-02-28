@@ -96,30 +96,29 @@ public class IntakePivot extends SubsystemBase {
 
   private void applyState() {
     switch (currentState) {
+      case MOVING_TO_SETPOINT:
+      case AT_SETPOINT:
+        setPosition(getTargetPosition());
+        break;
       case AGITATING_HIGH:
         setPosition(HIGH_AGITATED_POSITION);
         break;
       case AGITATING_LOW:
         setPosition(LOW_AGITATED_POSITION);
         break;
-      case MOVING_TO_SETPOINT:
-      case AT_SETPOINT:
-        switch (wantedState) {
-          case STOWED:
-            setPosition(STOWED_POSITION_DEGREES);
-            break;
-          case DEPLOYED:
-            setPosition(DEPLOYED_POSITION_DEGREES);
-            break;
-          default:
-            stop();
-            break;
-        }
-        break;
-
       case OFF:
       default:
         stop();
+    }
+  }
+
+  private double getTargetPosition() {
+    switch (wantedState) {
+      case DEPLOYED:
+        return DEPLOYED_POSITION_DEGREES;
+      case STOWED:
+      default:
+        return STOWED_POSITION_DEGREES;
     }
   }
 
