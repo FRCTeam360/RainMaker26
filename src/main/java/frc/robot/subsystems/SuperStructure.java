@@ -38,7 +38,6 @@ public class SuperStructure extends SubsystemBase {
   private final HopperRoller hopperRoller;
   private final ShooterStateMachine shooterStateMachine;
   private final TargetSelectionStateMachine targetSelectionStateMachine;
-  private final Supplier<Pose2d> robotPoseSupplier;
 
   // Enums
   public enum SuperWantedStates {
@@ -59,7 +58,7 @@ public class SuperStructure extends SubsystemBase {
     IDLE, // everything is stopped
     INTAKING, // intake button pressed
     SHOOT_AT_HUB,
-    SHOOT_AT_OUTPOST
+    SHOOT_PASSING
   }
 
   // State variables
@@ -90,7 +89,6 @@ public class SuperStructure extends SubsystemBase {
     this.hood = hood;
     this.intakePivot = intakePivot;
     this.hopperRoller = hopperRoller;
-    this.robotPoseSupplier = robotPoseSupplier;
     this.shooterStateMachine =
         new ShooterStateMachine(flywheel, hood, flywheelKicker, isAlignedToTarget);
     this.targetSelectionStateMachine =
@@ -122,7 +120,7 @@ public class SuperStructure extends SubsystemBase {
       case SHOOT_AT_OUTPOST:
         targetSelectionStateMachine.setWantedState(TargetWantedStates.OUTPOST);
         targetSelectionStateMachine.update();
-        currentSuperState = SuperInternalStates.SHOOT_AT_OUTPOST;
+        currentSuperState = SuperInternalStates.SHOOT_PASSING;
         break;
       case AUTO_CYCLE_SHOOTING:
         targetSelectionStateMachine.setWantedState(TargetWantedStates.AUTO);
@@ -130,7 +128,7 @@ public class SuperStructure extends SubsystemBase {
         if (targetSelectionStateMachine.getState() == TargetInternalStates.AT_HUB) {
           currentSuperState = SuperInternalStates.SHOOT_AT_HUB;
         } else {
-          currentSuperState = SuperInternalStates.SHOOT_AT_OUTPOST;
+          currentSuperState = SuperInternalStates.SHOOT_PASSING;
         }
         break;
       case IDLE:
@@ -154,7 +152,7 @@ public class SuperStructure extends SubsystemBase {
         stopped();
         break;
       case SHOOT_AT_HUB:
-      case SHOOT_AT_OUTPOST:
+      case SHOOT_PASSING:
         shooting();
         break;
       case DEFAULT:

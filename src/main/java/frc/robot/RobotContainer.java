@@ -92,7 +92,7 @@ public class RobotContainer {
   private SuperStructure superStructure;
 
   private ShotCalculator hubShotCalculator;
-  private ShotCalculator outpostPassCalculator;
+  private ShotCalculator passCalculator;
 
   // TODO: refactor to allow for more than 1 drivetrain type
 
@@ -215,10 +215,10 @@ public class RobotContainer {
             drivetrain::getPosition,
             () -> AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint.toTranslation2d()),
             robotShootingInfo);
-    outpostPassCalculator =
+    passCalculator =
         new ShotCalculator(
             drivetrain::getPosition,
-            () -> AllianceFlipUtil.apply(FieldConstants.RightBump.nearRightCorner),
+            () -> FieldConstants.LeftBump.farLeftCorner,
             robotShootingInfo);
     // Configure the trigger bindings
     // TODO: Re-enable superStructure construction and PathPlanner commands
@@ -233,7 +233,7 @@ public class RobotContainer {
             intakePivot,
             hopperRoller,
             hubShotCalculator,
-            outpostPassCalculator,
+            passCalculator,
             drivetrain::isAlignedToTarget,
             drivetrain::getPosition,
             robotShootingInfo.robotToShooter());
@@ -319,8 +319,8 @@ public class RobotContainer {
                     driverCont,
                     () -> {
                       if (superStructure.getCurrentSuperState()
-                          == SuperInternalStates.SHOOT_AT_OUTPOST) {
-                        return outpostPassCalculator.calculateShot().targetHeading();
+                          == SuperInternalStates.SHOOT_PASSING) {
+                        return passCalculator.calculateShot().targetHeading();
                       }
                       return hubShotCalculator.calculateShot().targetHeading();
                     })));
@@ -343,7 +343,7 @@ public class RobotContainer {
             .setStateCommand(SuperWantedStates.SHOOT_AT_OUTPOST)
             .alongWith(
                 drivetrain.faceAngleWhileDrivingCommand(
-                    driverCont, () -> outpostPassCalculator.calculateShot().targetHeading())));
+                    driverCont, () -> passCalculator.calculateShot().targetHeading())));
     forceOutpostTrigger.onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
 
     // TODO: Re-enable superStructure bindings
@@ -507,7 +507,7 @@ public class RobotContainer {
   public void preSchedulerUpdate() {
     hubShotCalculator.clearShootingParams();
     // hubShotCalculator.calculateShot();
-    outpostPassCalculator.clearShootingParams();
+    passCalculator.clearShootingParams();
     // outpostPassCalculator.calculateShot();
   }
 
