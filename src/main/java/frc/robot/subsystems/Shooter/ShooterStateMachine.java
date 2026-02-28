@@ -35,6 +35,7 @@ public class ShooterStateMachine {
   private final Hood hood;
   private final FlywheelKicker flywheelKicker;
   private final BooleanSupplier isAlignedToTarget;
+  private final BooleanSupplier canShootToTarget;
 
   // State variables
   private ShooterWantedStates wantedState = ShooterWantedStates.IDLE;
@@ -53,11 +54,13 @@ public class ShooterStateMachine {
       Flywheel flywheel,
       Hood hood,
       FlywheelKicker flywheelKicker,
-      BooleanSupplier isAlignedToTarget) {
+      BooleanSupplier isAlignedToTarget,
+      BooleanSupplier canShootToTarget) {
     this.flywheel = flywheel;
     this.hood = hood;
     this.flywheelKicker = flywheelKicker;
     this.isAlignedToTarget = isAlignedToTarget;
+    this.canShootToTarget = canShootToTarget;
   }
 
   /** Returns the current shooter state. */
@@ -86,12 +89,14 @@ public class ShooterStateMachine {
         boolean flywheelReady = flywheel.getState() == FlywheelInternalStates.AT_SETPOINT;
         boolean hoodReady = hood.getState() == HoodInternalStates.AT_SETPOINT;
         boolean aligned = isAlignedToTarget.getAsBoolean();
+        boolean targetReady = canShootToTarget.getAsBoolean();
 
         Logger.recordOutput("Superstructure/Shooting/FlywheelReady", flywheelReady);
         Logger.recordOutput("Superstructure/Shooting/HoodReady", hoodReady);
         Logger.recordOutput("Superstructure/Shooting/Aligned", aligned);
+        Logger.recordOutput("Superstructure/Shooting/HubShootable", targetReady);
 
-        if (flywheelReady && hoodReady && aligned) {
+        if (flywheelReady && hoodReady && aligned && targetReady) {
           currentState = ShooterStates.FIRING;
         } else {
           currentState = ShooterStates.PREPARING;

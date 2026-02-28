@@ -60,8 +60,10 @@ import frc.robot.subsystems.SuperStructure;
 import frc.robot.subsystems.SuperStructure.SuperInternalStates;
 import frc.robot.subsystems.SuperStructure.SuperWantedStates;
 import frc.robot.subsystems.Vision.Vision;
+import frc.robot.subsystems.Vision.VisionIO;
 import frc.robot.subsystems.Vision.VisionIOLimelight3G;
 import frc.robot.subsystems.Vision.VisionIOLimelight4;
+import frc.robot.subsystems.Vision.VisionIOLimelightBase;
 import frc.robot.subsystems.Vision.VisionIOPhotonSim;
 import frc.robot.utils.AllianceFlipUtil;
 import frc.robot.utils.FieldConstants;
@@ -89,6 +91,7 @@ public class RobotContainer {
   private IntakePivot intakePivot;
   private HopperRoller hopperRoller;
   private FlywheelKicker flywheelKicker;
+  private BooleanSupplier canShootInHub;
 
   private SuperStructure superStructure;
 

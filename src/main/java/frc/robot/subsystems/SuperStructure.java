@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -23,6 +24,7 @@ import frc.robot.subsystems.Shooter.TargetSelectionStateMachine;
 import frc.robot.subsystems.Shooter.TargetSelectionStateMachine.TargetInternalStates;
 import frc.robot.subsystems.Shooter.TargetSelectionStateMachine.TargetWantedStates;
 import frc.robot.utils.PositionUtils;
+import frc.robot.utils.RobotUtils;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
@@ -38,6 +40,7 @@ public class SuperStructure extends SubsystemBase {
   private final HopperRoller hopperRoller;
   private final ShooterStateMachine shooterStateMachine;
   private final TargetSelectionStateMachine targetSelectionStateMachine;
+  private final ShotCalculator hubShotCalculator;
 
   // Enums
   public enum SuperWantedStates {
@@ -89,8 +92,10 @@ public class SuperStructure extends SubsystemBase {
     this.hood = hood;
     this.intakePivot = intakePivot;
     this.hopperRoller = hopperRoller;
+    this.hubShotCalculator = hubShotCalculator;
     this.shooterStateMachine =
-        new ShooterStateMachine(flywheel, hood, flywheelKicker, isAlignedToTarget);
+        new ShooterStateMachine(
+            flywheel, hood, flywheelKicker, isAlignedToTarget, this::canShootToTarget);
     this.targetSelectionStateMachine =
         new TargetSelectionStateMachine(hubShotCalculator, passCalculator, robotPoseSupplier);
 
@@ -195,6 +200,24 @@ public class SuperStructure extends SubsystemBase {
     intakePivot.setWantedState(IntakePivotStates.OFF);
     hopperRoller.setWantedState(HopperRollerStates.OFF);
     shooterStateMachine.setWantedState(ShooterWantedStates.IDLE);
+  }
+
+  private boolean canShootToTarget() {
+    switch (wantedSuperState) {
+      case SHOOT_AT_HUB:
+        if (!DriverStation.isDSAttached()) {
+          return true;
+        }
+        return RobotUtils.hubActive(
+            DriverStation.getAlliance(),
+            RobotUtils.getAutoWinner(DriverStation.getGameSpecificMessage()),
+            RobotUtils.getShootingPhase(
+                DriverStation.getMatchTime(),
+                DriverStation.isTeleop(),
+                hubShotCalculator.calculateShot().timeOfFlight()));
+      default:
+        return true;
+    }
   }
 
   // Public API
