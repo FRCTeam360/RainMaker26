@@ -46,7 +46,7 @@ import frc.robot.subsystems.IntakePivot.IntakePivotIONoop;
 import frc.robot.subsystems.IntakePivot.IntakePivotIOPB;
 import frc.robot.subsystems.IntakePivot.IntakePivotIOSim;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel;
-import frc.robot.subsystems.Shooter.Flywheel.FlywheelIOPBBangBang;
+import frc.robot.subsystems.Shooter.Flywheel.FlywheelIOPB;
 import frc.robot.subsystems.Shooter.Flywheel.FlywheelIOSim;
 import frc.robot.subsystems.Shooter.Flywheel.FlywheelIOWBBangBang;
 import frc.robot.subsystems.Shooter.FlywheelKicker.FlywheelKicker;
@@ -377,7 +377,7 @@ public class RobotContainer {
     driverCont
         .a()
         .and(isSuperstructureMode)
-        .onFalse(superStructure.setStateCommand(SuperWantedStates.IDLE));
+        .onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
 
     configureIndependentModeBindings(isIndependentMode);
 
