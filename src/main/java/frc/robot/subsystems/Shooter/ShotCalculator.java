@@ -5,7 +5,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
-import frc.robot.utils.FieldConstants;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -94,7 +93,7 @@ public class ShotCalculator {
     double flywheelSpeed = shotFlywheelSpeedMap.get(distanceToTarget);
     double timeOfFlight = timeOfFlightMap.get(distanceToTarget);
 
-    Logger.recordOutput("ShotCalculator/hubPosition", FieldConstants.Hub.topCenterPoint);
+    Logger.recordOutput("ShotCalculator/targetPosition", new Pose2d(target, Rotation2d.kZero));
     Logger.recordOutput("ShotCalculator/distanceToTarget", distanceToTarget);
     Logger.recordOutput("ShotCalculator/targetFlywheelSpeed", flywheelSpeed);
     Logger.recordOutput("ShotCalculator/targetHoodAngle", hoodAngle);
