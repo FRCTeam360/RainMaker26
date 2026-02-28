@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.commands.AimAtAprilTag;
 import frc.robot.generated.PracticeBotDrivetrain;
 import frc.robot.generated.WoodBotDrivetrain;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
@@ -87,6 +88,7 @@ public class RobotContainer {
   private IntakePivot intakePivot;
   private HopperRoller hopperRoller;
   private FlywheelKicker flywheelKicker;
+  private AimAtAprilTag aimAtAprilTag;
 
   private SuperStructure superStructure;
 
