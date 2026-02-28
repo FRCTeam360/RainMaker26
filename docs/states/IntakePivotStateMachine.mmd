@@ -19,10 +19,10 @@ stateDiagram-v2
 
     state AGITATE_HOPPER {
         [*] --> MOVING_TO_SETPOINT
-        MOVING_TO_SETPOINT --> SWITCHING_AGITATE_TARGET_HIGH : atSetpoint() & agitateTargetHigh false
-        MOVING_TO_SETPOINT --> SWITCHING_AGITATE_TARGET_LOW : atSetpoint() & agitateTargetHigh true
-        SWITCHING_AGITATE_TARGET_HIGH --> AT_SETPOINT : agitateTargetHigh := true
-        SWITCHING_AGITATE_TARGET_LOW --> AT_SETPOINT : agitateTargetHigh := false
+        MOVING_TO_SETPOINT --> SWITCHING_AGITATE_TARGET_HIGH : atSetpoint, target LOW
+        MOVING_TO_SETPOINT --> SWITCHING_AGITATE_TARGET_LOW : atSetpoint, target HIGH
+        SWITCHING_AGITATE_TARGET_HIGH --> AT_SETPOINT : switch to HIGH
+        SWITCHING_AGITATE_TARGET_LOW --> AT_SETPOINT : switch to LOW
         AT_SETPOINT --> MOVING_TO_SETPOINT : new target set
     }
 
