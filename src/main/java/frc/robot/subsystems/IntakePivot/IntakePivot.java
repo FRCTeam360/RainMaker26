@@ -17,7 +17,7 @@ public class IntakePivot extends SubsystemBase {
   private static final double HIGH_AGITATED_POSITION_DEGREES = 60.0;
   private static final double LOW_AGITATED_POSITION_DEGREES = 30.0;
   private static final double STACK_FUEL_POSITION_DEGREES = 20.0;
-  private static final double TOLERANCE = 0.5;
+  private static final double TOLERANCE_DEGREES = 0.5;
   // IO fields
   private final IntakePivotIO io;
   private final IntakePivotIOInputsAutoLogged inputs = new IntakePivotIOInputsAutoLogged();
@@ -81,18 +81,15 @@ public class IntakePivot extends SubsystemBase {
                 ? IntakePivotInternalStates.AT_SETPOINT
                 : IntakePivotInternalStates.MOVING_TO_SETPOINT;
         break;
-      case AGITATE_HOPPER:
-        {
-          double target =
-              agitateTargetHigh ? HIGH_AGITATED_POSITION_DEGREES : LOW_AGITATED_POSITION_DEGREES;
-          if (atSetpoint(target)) {
-            agitateTargetHigh = !agitateTargetHigh; // Flip for next cycle
-            currentState = IntakePivotInternalStates.AT_SETPOINT;
-          } else {
-            currentState = IntakePivotInternalStates.MOVING_TO_SETPOINT;
-          }
-          break;
+      case AGITATE_HOPPER: {
+        double target = agitateTargetHigh ? HIGH_AGITATED_POSITION_DEGREES : LOW_AGITATED_POSITION_DEGREES;
+        boolean atTarget = atSetpoint(target);
+        if (previousState == IntakePivotInternalStates.MOVING_TO_SETPOINT && atTarget) {
+          agitateTargetHigh = !agitateTargetHigh;
         }
+        currentState = atTarget ? IntakePivotInternalStates.AT_SETPOINT : IntakePivotInternalStates.MOVING_TO_SETPOINT;
+        break;
+      }
       case STACK_FUEL:
       default:
         currentState = IntakePivotInternalStates.OFF;
@@ -131,7 +128,7 @@ public class IntakePivot extends SubsystemBase {
   }
 
   public boolean atSetpoint(double setpoint) {
-    return Math.abs(inputs.position - setpoint) < TOLERANCE;
+    return Math.abs(inputs.position - setpoint) < TOLERANCE_DEGREES;
   }
 
   // No longer needed: shouldLowToHigh/shouldHighToLow
