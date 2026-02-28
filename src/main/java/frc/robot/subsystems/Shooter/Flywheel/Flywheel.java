@@ -205,8 +205,6 @@ public class Flywheel extends SubsystemBase {
         setHoldVelocityControl(shootVelocitySupplier.getAsDouble());
         break;
       case COAST:
-        setCoastVelocityControl(0);
-        break;
       case OFF:
       default:
         setDutyCycle(0.0);
