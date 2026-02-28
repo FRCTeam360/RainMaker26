@@ -4,13 +4,14 @@
 
 package frc.robot.subsystems.HopperRoller;
 
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.ControlState;
 import org.littletonrobotics.junction.Logger;
 
 public class HopperRoller extends SubsystemBase {
   // Constants
-  private static final double ROLLER_DUTY_CYCLE = 1.0;
+  private static final double ROLLER_DUTY_CYCLE = 0.75;
 
   // IO fields
   private final HopperRollerIO io;
@@ -83,6 +84,10 @@ public class HopperRoller extends SubsystemBase {
     io.setDutyCycle(0.0);
   }
 
+  public Command setDutyCycleCommand(double dutyCycle) {
+    return runEnd(() -> setDutyCycle(dutyCycle), () -> setDutyCycle(0.0));
+  }
+
   // periodic
 
   @Override
@@ -94,9 +99,9 @@ public class HopperRoller extends SubsystemBase {
       updateState();
       applyState();
     }
-    Logger.recordOutput("Subsystems/HopperRoller/WantedState", wantedState.toString());
-    Logger.recordOutput("Subsystems/HopperRoller/CurrentState", currentState.toString());
-    Logger.recordOutput("Subsystems/HopperRoller/PreviousState", previousState.toString());
-    Logger.recordOutput("Subsystems/HopperRoller/ControlState", controlState.toString());
+    Logger.recordOutput("Subsystems/HopperRoller/WantedState", wantedState);
+    Logger.recordOutput("Subsystems/HopperRoller/CurrentState", currentState);
+    Logger.recordOutput("Subsystems/HopperRoller/PreviousState", previousState);
+    Logger.recordOutput("Subsystems/HopperRoller/ControlState", controlState);
   }
 }
