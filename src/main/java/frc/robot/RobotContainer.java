@@ -193,7 +193,7 @@ public class RobotContainer {
         drivetrain = PracticeBotDrivetrain.createDrivetrain();
         climber = new Climber(new ClimberIOPB());
         logger = new Telemetry(PracticeBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
-        flywheel = new Flywheel(new FlywheelIOPBBangBang());
+        flywheel = new Flywheel(new FlywheelIOPB());
         hood = new Hood(new HoodIOPB());
         indexer = new Indexer(new IndexerIOPB());
         vision = // TODO ADD OTHER LIMELIGHTS
