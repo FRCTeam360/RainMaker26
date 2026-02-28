@@ -21,7 +21,6 @@ import edu.wpi.first.wpilibj.simulation.RoboRioSim;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import frc.robot.Constants.SimulationConstants;
 
-
 public class HoodIOSim implements HoodIO {
   // Match PracticeBot (PB) config
   private static final double GEAR_RATIO = 3.0 / 1.0 * 170.0 / 10.0;
@@ -46,15 +45,15 @@ public class HoodIOSim implements HoodIO {
   // Simulation
   private final DCMotor gearbox = DCMotor.getKrakenX60(1);
   private final SingleJointedArmSim hoodSim =
-    new SingleJointedArmSim(
-      gearbox,
-      GEAR_RATIO,
-      SingleJointedArmSim.estimateMOI(ARM_LENGTH, ARM_MASS),
-      ARM_LENGTH,
-      Units.degreesToRadians(REVERSE_SOFT_LIMIT_DEGREES),
-      Units.degreesToRadians(FORWARD_SOFT_LIMIT_DEGREES),
-      true, // Simulate gravity
-      0);
+      new SingleJointedArmSim(
+          gearbox,
+          GEAR_RATIO,
+          SingleJointedArmSim.estimateMOI(ARM_LENGTH, ARM_MASS),
+          ARM_LENGTH,
+          Units.degreesToRadians(REVERSE_SOFT_LIMIT_DEGREES),
+          Units.degreesToRadians(FORWARD_SOFT_LIMIT_DEGREES),
+          true, // Simulate gravity
+          0);
 
   public HoodIOSim() {
     // Configure TalonFX with PID and gravity compensation
@@ -121,9 +120,7 @@ public class HoodIOSim implements HoodIO {
     inputs.supplyCurrent = motorControllerSim.getSupplyCurrent().getValueAsDouble();
   }
 
-  /**
-   * Set position in degrees (matches PB IO)
-   */
+  /** Set position in degrees (matches PB IO) */
   @Override
   public void setPosition(double positionDegrees) {
     // Convert degrees to rotations for the sim motor

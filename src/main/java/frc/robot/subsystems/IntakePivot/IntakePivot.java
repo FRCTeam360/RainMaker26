@@ -84,7 +84,7 @@ public class IntakePivot extends SubsystemBase {
           currentState = IntakePivotInternalStates.AGITATING_LOW;
         } else if (shouldLowToHigh()) {
           currentState = IntakePivotInternalStates.AGITATING_HIGH;
-        } else if (!shouldHighToLow()) {
+        } else if (!shouldHighToLow() && !shouldLowToHigh()) {
           currentState = IntakePivotInternalStates.AGITATING_HIGH;
         }
         break;
