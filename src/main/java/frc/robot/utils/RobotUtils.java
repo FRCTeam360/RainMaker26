@@ -60,7 +60,7 @@ public class RobotUtils {
   public static ActiveHub getShootingPhase(double gameTime, Boolean isTele, double timeToScan) {
     // gameTime is the getMatchTime() from DriverStation, isTele is the isTeleop() from
     // DriverStation
-    ActiveHub activeHub = null;
+    ActiveHub activeHub = ActiveHub.BOTH;
     gameTime -= timeToScan;
     // Sets phases based on the current time in the game
     if (!isTele) {
@@ -102,7 +102,7 @@ public class RobotUtils {
       Optional<Alliance> alliance, Alliance autoWinner, ActiveHub gamePhase) {
     // alliance is our alliance, autoWinner is the result of getAutoWinner, gamePhase is the result
     // of getShootingPhase
-    Boolean hubActive = null;
+    Boolean hubActive = true;
     if (alliance.isPresent()) {
       if (gamePhase == null || autoWinner == null) {
         return true;
