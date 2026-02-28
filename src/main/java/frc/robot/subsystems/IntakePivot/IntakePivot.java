@@ -83,7 +83,8 @@ public class IntakePivot extends SubsystemBase {
         break;
       case AGITATE_HOPPER:
         {
-          double target = agitateTargetHigh ? HIGH_AGITATED_POSITION_DEGREES : LOW_AGITATED_POSITION_DEGREES;
+          double target =
+              agitateTargetHigh ? HIGH_AGITATED_POSITION_DEGREES : LOW_AGITATED_POSITION_DEGREES;
           if (atSetpoint(target)) {
             agitateTargetHigh = !agitateTargetHigh; // Flip for next cycle
             currentState = IntakePivotInternalStates.AT_SETPOINT;
@@ -93,7 +94,7 @@ public class IntakePivot extends SubsystemBase {
           break;
         }
       case STACK_FUEL:
-        default:
+      default:
         currentState = IntakePivotInternalStates.OFF;
         break;
     }
