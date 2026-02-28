@@ -174,9 +174,9 @@ public class Hood extends SubsystemBase {
       updateState();
       applyState();
     }
-    Logger.recordOutput("Subsystems/Hood/WantedState", wantedState.toString());
-    Logger.recordOutput("Subsystems/Hood/CurrentState", currentState.toString());
-    Logger.recordOutput("Subsystems/Hood/PreviousState", previousState.toString());
-    Logger.recordOutput("Subsystems/Hood/ControlState", controlState.toString());
+    Logger.recordOutput("Subsystems/Hood/WantedState", wantedState);
+    Logger.recordOutput("Subsystems/Hood/CurrentState", currentState);
+    Logger.recordOutput("Subsystems/Hood/PreviousState", previousState);
+    Logger.recordOutput("Subsystems/Hood/ControlState", controlState);
   }
 }

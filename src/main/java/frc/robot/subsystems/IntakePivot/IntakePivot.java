@@ -13,7 +13,7 @@ import org.littletonrobotics.junction.Logger;
 public class IntakePivot extends SubsystemBase {
   // Constants
   private static final double STOWED_POSITION_DEGREES = 0.0;
-  private static final double DEPLOYED_POSITION_DEGREES = 90.0;
+  private static final double DEPLOYED_POSITION_DEGREES = 93.0;
 
   // IO fields
   private final IntakePivotIO io;
@@ -101,8 +101,8 @@ public class IntakePivot extends SubsystemBase {
     return this.runEnd(() -> this.setDutyCycle(dutySupplier.getAsDouble()), () -> this.stop());
   }
 
-  public Command setPosition(DoubleSupplier positionSupplier) {
-    return this.runEnd(() -> this.setPosition(positionSupplier.getAsDouble()), () -> this.stop());
+  public Command setPositionCommand(DoubleSupplier positionSupplier) {
+    return this.runOnce(() -> this.setPosition(positionSupplier.getAsDouble()));
   }
 
   // periodic
@@ -116,9 +116,9 @@ public class IntakePivot extends SubsystemBase {
       updateState();
       applyState();
     }
-    Logger.recordOutput("Subsystems/IntakePivot/WantedState", wantedState.toString());
-    Logger.recordOutput("Subsystems/IntakePivot/CurrentState", currentState.toString());
-    Logger.recordOutput("Subsystems/IntakePivot/PreviousState", previousState.toString());
-    Logger.recordOutput("Subsystems/IntakePivot/ControlState", controlState.toString());
+    Logger.recordOutput("Subsystems/IntakePivot/WantedState", wantedState);
+    Logger.recordOutput("Subsystems/IntakePivot/CurrentState", currentState);
+    Logger.recordOutput("Subsystems/IntakePivot/PreviousState", previousState);
+    Logger.recordOutput("Subsystems/IntakePivot/ControlState", controlState);
   }
 }
