@@ -391,18 +391,26 @@ public class RobotContainer {
   private void configureIndependentModeBindings(BooleanSupplier isIndependentMode) {
     driverCont.leftBumper().and(isIndependentMode).whileTrue(intake.setDutyCycleCommand(0.2));
 
-    // driverCont.a().and(isIndependentMode).whileTrue(indexer.setDutyCycleCommand(0.5));
+    driverCont.a().and(isIndependentMode).whileTrue(indexer.setDutyCycleCommand(0.5));
+    driverCont.b().and(isIndependentMode).whileTrue(flywheelKicker.setDutyCycleCommand(0.5));
+    driverCont
+        .rightBumper()
+        .and(isIndependentMode)
+        .whileTrue(hopperRoller.setDutyCycleCommand(0.5));
 
     // hood bindings
-    driverCont.pov(0).and(isIndependentMode).onTrue(hood.moveToZeroAndZero());
-    driverCont.pov(90).and(isIndependentMode).whileTrue(hood.setPositionCommand(4.0));
-    driverCont.pov(180).and(isIndependentMode).whileTrue(hood.setPositionCommand(16.0));
-    driverCont.pov(270).and(isIndependentMode).whileTrue(hood.setPositionCommand(23.0));
+    driverCont.pov(0).and(isIndependentMode).whileTrue(intakePivot.setPositionCommand(() -> 0.0));
+    driverCont
+        .pov(180)
+        .and(isIndependentMode)
+        .whileTrue(intakePivot.setPositionCommand(() -> 93.0));
+    driverCont.pov(90).and(isIndependentMode).whileTrue(flywheel.setVelocityCommand(() -> 2000.0));
+
     driverCont.start().and(isIndependentMode).onTrue(hood.zero());
 
     // flywheel bindings
-    driverCont.x().and(isIndependentMode).whileTrue(climber.setLeftDutyCycleCommand(0.1));
-    driverCont.y().and(isIndependentMode).whileTrue(climber.setRightDutyCycleCommand(0.1));
+    driverCont.x().and(isIndependentMode).whileTrue(hood.setPositionCommand(0.0));
+    driverCont.y().and(isIndependentMode).whileTrue(hood.setPositionCommand(20.0));
 
     // configureIntakeTestBindings(isIndependentMode);
     // configureFullShootingTestBindings(isIndependentMode);
