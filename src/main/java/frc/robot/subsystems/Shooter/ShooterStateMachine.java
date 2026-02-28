@@ -24,9 +24,9 @@ public class ShooterStateMachine {
   }
 
   public enum ShooterStates {
-    PREPARING,
+    PREPARING_TO_FIRE,
     FIRING,
-    PASSIVE_PREPARING,
+    WAITING,
     IDLE
   }
 
@@ -80,30 +80,52 @@ public class ShooterStateMachine {
   /**
    * Updates the shooter state based on wanted state, subsystem readiness, and alignment. Should be
    * called every cycle by the SuperStructure.
+   *
+   * <p>Uses the flywheel's internal state transitions to gate firing:
+   *
+   * <ul>
+   *   <li>{@link FlywheelInternalStates#AT_SETPOINT} — flywheel velocity is sustained in tolerance;
+   *       combined with hood and drivetrain readiness, transitions to FIRING
+   *   <li>{@link FlywheelInternalStates#UNDER_SHOOTING} — sustained RPM drop detected from a shot
+   *       passing through; reverts to PREPARING_TO_FIRE to restart the cycle
+   * </ul>
    */
   public void update() {
     previousState = currentState;
 
     switch (wantedState) {
       case SHOOTING:
-        boolean flywheelReady = flywheel.getState() == FlywheelInternalStates.AT_SETPOINT;
+        FlywheelInternalStates flywheelState = flywheel.getState();
+        boolean flywheelReady = flywheelState == FlywheelInternalStates.AT_SETPOINT;
+        boolean flywheelUnderShooting = flywheelState == FlywheelInternalStates.UNDER_SHOOTING;
         boolean hoodReady = hood.getState() == HoodInternalStates.AT_SETPOINT;
-        boolean aligned = isAlignedToTarget.getAsBoolean();
+        boolean drivetrainAligned = isAlignedToTarget.getAsBoolean();
         boolean targetReady = canShootToTarget.getAsBoolean();
 
+        Logger.recordOutput("Superstructure/Shooting/FlywheelState", flywheelState);
         Logger.recordOutput("Superstructure/Shooting/FlywheelReady", flywheelReady);
         Logger.recordOutput("Superstructure/Shooting/HoodReady", hoodReady);
-        Logger.recordOutput("Superstructure/Shooting/Aligned", aligned);
+        Logger.recordOutput("Superstructure/Shooting/DrivetrainAligned", drivetrainAligned);
+
+        // Enter FIRING when flywheel reaches AT_SETPOINT (with hood + drivetrain ready).
+        // Stay in FIRING through bang-bang oscillations — only revert to PREPARING_TO_FIRE
+        // when UNDER_SHOOTING signals a sustained RPM drop from too many shots passing through.
+        boolean shouldFire =
+            (flywheelReady || (previousState == ShooterStates.FIRING && !flywheelUnderShooting))
+                && hoodReady
+                && drivetrainAligned
+                && targetReady;
+        Logger.recordOutput("Superstructure/Shooting/Aligned", drivetrainAligned);
         Logger.recordOutput("Superstructure/Shooting/HubShootable", targetReady);
 
-        if (flywheelReady && hoodReady && aligned && targetReady) {
+        if (shouldFire) {
           currentState = ShooterStates.FIRING;
         } else {
-          currentState = ShooterStates.PREPARING;
+          currentState = ShooterStates.PREPARING_TO_FIRE;
         }
         break;
       case PASSIVE_SHOOTER:
-        currentState = ShooterStates.PASSIVE_PREPARING;
+        currentState = ShooterStates.WAITING;
         break;
       case IDLE:
       default:
@@ -118,7 +140,7 @@ public class ShooterStateMachine {
    */
   public void apply() {
     switch (currentState) {
-      case PREPARING:
+      case PREPARING_TO_FIRE:
         flywheel.setWantedState(FlywheelWantedStates.SHOOTING);
         hood.setWantedState(HoodWantedStates.AIMING);
         flywheelKicker.setWantedState(FlywheelKickerStates.IDLE);
@@ -128,9 +150,9 @@ public class ShooterStateMachine {
         hood.setWantedState(HoodWantedStates.AIMING);
         flywheelKicker.setWantedState(FlywheelKickerStates.KICKING);
         break;
-      case PASSIVE_PREPARING:
-        flywheel.setWantedState(FlywheelWantedStates.SHOOTING);
-        hood.setWantedState(HoodWantedStates.PASSIVE_PREP);
+      case WAITING:
+        flywheel.setWantedState(FlywheelWantedStates.COASTING);
+        hood.setWantedState(HoodWantedStates.DUCKED);
         flywheelKicker.setWantedState(FlywheelKickerStates.IDLE);
         break;
       case IDLE:

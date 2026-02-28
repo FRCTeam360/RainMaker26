@@ -42,9 +42,9 @@ import frc.robot.subsystems.IntakePivot.IntakePivotIONoop;
 import frc.robot.subsystems.IntakePivot.IntakePivotIOPB;
 import frc.robot.subsystems.IntakePivot.IntakePivotIOSim;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel;
-import frc.robot.subsystems.Shooter.Flywheel.FlywheelIOPB;
+import frc.robot.subsystems.Shooter.Flywheel.FlywheelIOPBBangBang;
 import frc.robot.subsystems.Shooter.Flywheel.FlywheelIOSim;
-import frc.robot.subsystems.Shooter.Flywheel.FlywheelIOWB;
+import frc.robot.subsystems.Shooter.Flywheel.FlywheelIOWBBangBang;
 import frc.robot.subsystems.Shooter.FlywheelKicker.FlywheelKicker;
 import frc.robot.subsystems.Shooter.FlywheelKicker.FlywheelKickerIOPB;
 import frc.robot.subsystems.Shooter.FlywheelKicker.FlywheelKickerIOSim;
@@ -147,7 +147,7 @@ public class RobotContainer {
       case WOODBOT:
         drivetrain = WoodBotDrivetrain.createDrivetrain();
         logger = new Telemetry(WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
-        flywheel = new Flywheel(new FlywheelIOWB());
+        flywheel = new Flywheel(new FlywheelIOWBBangBang());
         hood = new Hood(new HoodIOWB());
         indexer = new Indexer(new IndexerIOWB());
         vision =
@@ -185,7 +185,7 @@ public class RobotContainer {
       default:
         drivetrain = PracticeBotDrivetrain.createDrivetrain();
         logger = new Telemetry(PracticeBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
-        flywheel = new Flywheel(new FlywheelIOPB());
+        flywheel = new Flywheel(new FlywheelIOPBBangBang());
         hood = new Hood(new HoodIOPB());
         indexer = new Indexer(new IndexerIOPB());
         vision = // TODO ADD OTHER LIMELIGHTS
@@ -267,6 +267,7 @@ public class RobotContainer {
     configureBindings();
     // configureTestBindings();
     // configureFullShootingTestBindings();
+    // configureFullShootingTestBindings();
 
     PathPlannerLogging.setLogActivePathCallback(
         (poses -> Logger.recordOutput("Swerve/ActivePath", poses.toArray(new Pose2d[0]))));
@@ -326,8 +327,7 @@ public class RobotContainer {
                 drivetrain.faceAngleWhileDrivingCommand(
                     driverCont,
                     () -> {
-                      if (superStructure.getCurrentSuperState()
-                          == SuperInternalStates.SHOOT_PASSING) {
+                      if (superStructure.getCurrentSuperState() == SuperInternalStates.PASSING) {
                         return passCalculator.calculateShot().targetHeading();
                       }
                       return hubShotCalculator.calculateShot().targetHeading();

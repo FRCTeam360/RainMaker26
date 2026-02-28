@@ -1,14 +1,16 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot.subsystems.Shooter.Flywheel;
 
 import org.littletonrobotics.junction.AutoLog;
 
+/**
+ * Hardware IO interface for the flywheel subsystem. Implementations provide motor control and
+ * sensor readings for different robot configurations (real hardware, simulation, noop).
+ */
 public interface FlywheelIO {
-  public static final int MAX_MOTORS = 2; // might become 3 might become 4
+  /** Maximum number of flywheel motors supported. */
+  public static final int MAX_MOTORS = 2;
 
+  /** Logged inputs from the flywheel hardware. */
   @AutoLog
   public static class FlywheelIOInputs {
     public double[] statorCurrents = new double[MAX_MOTORS];
@@ -18,9 +20,30 @@ public interface FlywheelIO {
     public double[] positions = new double[MAX_MOTORS];
   }
 
-  public void setDutyCycle(double duty);
+  /**
+   * Sets flywheel velocity using duty-cycle bang-bang control for maximum acceleration. Used during
+   * spinup and recovery phases.
+   *
+   * @param velocityRPM the target velocity in RPM
+   */
+  public void setSpinupVelocityControl(double velocityRPM);
 
-  public void setVelocity(double rpm);
+  /**
+   * Sets flywheel velocity using torque-current bang-bang control for consistent, bounded torque.
+   * Used when holding at setpoint.
+   *
+   * @param velocityRPM the target velocity in RPM
+   */
+  public void setHoldVelocityControl(double velocityRPM);
+
+  /**
+   * Sets flywheel velocity using traditional PID control for smooth operation.
+   *
+   * @param velocityRPM the target velocity in RPM
+   */
+  public void setCoastVelocityControl(double velocityRPM);
+
+  public void setDutyCycle(double duty);
 
   public default void updateInputs(FlywheelIOInputs inputs) {}
 }
