@@ -91,7 +91,7 @@ public class ShotCalculator {
     double hoodAngle = shotHoodAngleMap.get(distanceToTarget);
     double flywheelSpeed = shotFlywheelSpeedMap.get(distanceToTarget);
 
-    Logger.recordOutput("ShotCalculator/targetPosition", target);
+    Logger.recordOutput("ShotCalculator/targetPosition", new Pose2d(target, Rotation2d.kZero));
     Logger.recordOutput("ShotCalculator/distanceToTarget", distanceToTarget);
     Logger.recordOutput("ShotCalculator/targetFlywheelSpeed", flywheelSpeed);
     Logger.recordOutput("ShotCalculator/targetHoodAngle", hoodAngle);
