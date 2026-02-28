@@ -47,7 +47,8 @@ public class Flywheel extends SubsystemBase {
   /** Wanted states set by the superstructure to command the flywheel. */
   public enum FlywheelWantedStates {
     IDLE,
-    SHOOTING
+    SHOOTING,
+    COASTING
   }
 
   /**
@@ -68,7 +69,8 @@ public class Flywheel extends SubsystemBase {
     SPINNING_UP,
     AT_SETPOINT,
     RECOVERING,
-    UNDER_SHOOTING
+    UNDER_SHOOTING,
+    COAST
   }
 
   /**
@@ -149,7 +151,7 @@ public class Flywheel extends SubsystemBase {
     previousState = currentState;
 
     switch (wantedState) {
-      case SHOOTING:
+      case SHOOTING: {
         double targetRPM = shootVelocitySupplier.getAsDouble();
         boolean atBangBangSetpoint = atSetpoint(targetRPM);
         boolean underspeed = isUnderspeed(targetRPM);
@@ -169,6 +171,10 @@ public class Flywheel extends SubsystemBase {
         } else {
           currentState = FlywheelInternalStates.SPINNING_UP;
         }
+        break;
+      }
+      case COASTING:
+        currentState = FlywheelInternalStates.COAST;
         break;
       case IDLE:
       default:
@@ -197,11 +203,22 @@ public class Flywheel extends SubsystemBase {
       case AT_SETPOINT:
         setHoldVelocityControl(shootVelocitySupplier.getAsDouble());
         break;
+      case COAST:
+        setCoastVelocityControl(shootVelocitySupplier.getAsDouble());
+        break;
       case OFF:
       default:
         setDutyCycle(0.0);
         break;
     }
+  }
+  /**
+   * Sets the flywheel to coast velocity control (for gentle deceleration or low-power holding).
+   *
+   * @param rpm the target velocity in RPM
+   */
+  public void setCoastVelocityControl(double rpm) {
+    io.setCoastVelocityControl(rpm);
   }
 
   /**
