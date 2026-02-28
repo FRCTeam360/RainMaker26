@@ -96,6 +96,12 @@ public class IntakePivot extends SubsystemBase {
 
   private void applyState() {
     switch (currentState) {
+      case AGITATING_HIGH:
+        setPosition(HIGH_AGITATED_POSITION);
+        break;
+      case AGITATING_LOW:
+        setPosition(LOW_AGITATED_POSITION);
+        break;
       case MOVING_TO_SETPOINT:
       case AT_SETPOINT:
         switch (wantedState) {
@@ -105,13 +111,12 @@ public class IntakePivot extends SubsystemBase {
           case DEPLOYED:
             setPosition(DEPLOYED_POSITION_DEGREES);
             break;
-          case AGITATE_HOPPER:
-
           default:
             stop();
             break;
         }
         break;
+
       case OFF:
       default:
         stop();
@@ -130,7 +135,8 @@ public class IntakePivot extends SubsystemBase {
 
   public boolean shouldLowToHigh() {
     boolean isAtLowPosition = false;
-    if (this.getState() == IntakePivotInternalStates.AGITATING_LOW && atSetpoint(LOW_AGITATED_POSITION)) {
+    if (this.getState() == IntakePivotInternalStates.AGITATING_LOW
+        && atSetpoint(LOW_AGITATED_POSITION)) {
       isAtLowPosition = true;
     }
     return isAtLowPosition;
@@ -138,7 +144,8 @@ public class IntakePivot extends SubsystemBase {
 
   public boolean shouldHighToLow() {
     boolean isAtHighPosition = false;
-    if (this.getState() == IntakePivotInternalStates.AGITATING_HIGH && atSetpoint(HIGH_AGITATED_POSITION)) {
+    if (this.getState() == IntakePivotInternalStates.AGITATING_HIGH
+        && atSetpoint(HIGH_AGITATED_POSITION)) {
       isAtHighPosition = true;
     }
     return isAtHighPosition;
