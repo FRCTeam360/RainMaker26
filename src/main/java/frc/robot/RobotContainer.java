@@ -318,15 +318,21 @@ public class RobotContainer {
     // Must stay paired with the whileTrue above to reset state on trigger release
     shootAtHubTrigger.onFalse(superStructure.setStateCommand(SuperStates.IDLE));
 
-    // Trigger shootAtOutpostTrigger = driverCont.leftTrigger().and(isSuperstructureMode);
+    // Trigger shootAtOutpostTrigger = driverCont.rightBumper().and(isSuperstructureMode);
     // shootAtOutpostTrigger.whileTrue(
     //     superStructure
     //         .setStateCommand(SuperStates.SHOOT_AT_OUTPOST)
     //         .alongWith(
     //             drivetrain.faceAngleWhileDrivingCommand(
     //                 driverCont, () -> outpostPassCalculator.calculateShot().targetHeading())));
-    // Must stay paired with the whileTrue above to reset state on trigger release
+    // // Must stay paired with the whileTrue above to reset state on trigger release
     // shootAtOutpostTrigger.onFalse(superStructure.setStateCommand(SuperStates.IDLE));
+
+    // intake pivot positions
+    driverCont.a().whileTrue(intakePivot.setPositionCommand(() -> 93.0));
+    driverCont.y().whileTrue(intakePivot.setPositionCommand(() -> 0.0));
+    driverCont.x().whileTrue(intakePivot.setPositionCommand(() -> 70.0));
+    driverCont.b().whileTrue(intakePivot.setPositionCommand(() -> 35.0));
 
     // TODO: Re-enable superStructure bindings
     Trigger intakeTrigger = driverCont.leftTrigger().and(isSuperstructureMode);
@@ -336,7 +342,6 @@ public class RobotContainer {
     configureIndependentModeBindings(isIndependentMode);
 
     // Drivetrain commands
-    // driverCont.leftTrigger().whileTrue(drivetrain.faceHubWhileDriving(driverCont));
     drivetrain.registerTelemetry(logger::telemeterize);
     driverCont.back().onTrue(drivetrain.zeroCommand());
   }
