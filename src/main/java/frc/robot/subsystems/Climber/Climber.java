@@ -35,8 +35,6 @@ public class Climber extends SubsystemBase {
 
   public void setWantedState(ClimberStates state) {
     wantedState = state;
-    updateState();
-    applyState();
   }
 
   private void updateState() {
@@ -127,6 +125,9 @@ public class Climber extends SubsystemBase {
   public void periodic() {
     io.updateInputs(inputs);
     Logger.processInputs("Climber", inputs);
+
+    updateState();
+    applyState();
 
     Logger.recordOutput("Subsystems/Climber/WantedState", wantedState.toString());
     Logger.recordOutput("Subsystems/Climber/CurrentState", currentState.toString());
