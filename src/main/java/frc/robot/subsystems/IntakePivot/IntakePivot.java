@@ -14,8 +14,9 @@ public class IntakePivot extends SubsystemBase {
   // Constants
   private static final double STOWED_POSITION_DEGREES = 0.0;
   private static final double DEPLOYED_POSITION_DEGREES = 93.0;
-  private static final double HIGH_AGITATED_POSITION = 60.0;
-  private static final double LOW_AGITATED_POSITION = 30.0;
+  private static final double HIGH_AGITATED_POSITION_DEGREES = 60.0;
+  private static final double LOW_AGITATED_POSITION_DEGREES = 30.0;
+  private static final double STACK_FUEL_POSITION_DEGREES = 20.0;
   private static final double TOLERANCE = 0.5;
   // IO fields
   private final IntakePivotIO io;
@@ -25,7 +26,8 @@ public class IntakePivot extends SubsystemBase {
     OFF,
     STOWED,
     DEPLOYED,
-    AGITATE_HOPPER
+    AGITATE_HOPPER,
+    STACK_FUEL
   }
 
   public enum IntakePivotInternalStates {
@@ -81,7 +83,7 @@ public class IntakePivot extends SubsystemBase {
         break;
       case AGITATE_HOPPER:
         {
-          double target = agitateTargetHigh ? HIGH_AGITATED_POSITION : LOW_AGITATED_POSITION;
+          double target = agitateTargetHigh ? HIGH_AGITATED_POSITION_DEGREES : LOW_AGITATED_POSITION_DEGREES;
           if (atSetpoint(target)) {
             agitateTargetHigh = !agitateTargetHigh; // Flip for next cycle
             currentState = IntakePivotInternalStates.AT_SETPOINT;
@@ -90,8 +92,9 @@ public class IntakePivot extends SubsystemBase {
           }
           break;
         }
-      default:
-        currentState = IntakePivotInternalStates.AT_SETPOINT;
+      case STACK_FUEL:
+        default:
+        currentState = IntakePivotInternalStates.OFF;
         break;
     }
   }
@@ -111,7 +114,7 @@ public class IntakePivot extends SubsystemBase {
   private double getTargetPosition() {
     switch (wantedState) {
       case AGITATE_HOPPER:
-        return agitateTargetHigh ? HIGH_AGITATED_POSITION : LOW_AGITATED_POSITION;
+        return agitateTargetHigh ? HIGH_AGITATED_POSITION_DEGREES : LOW_AGITATED_POSITION_DEGREES;
       case DEPLOYED:
         return DEPLOYED_POSITION_DEGREES;
       case STOWED:
