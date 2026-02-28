@@ -19,12 +19,14 @@ public class ShooterStateMachine {
   // Enums
   public enum ShooterWantedStates {
     IDLE,
-    SHOOTING
+    SHOOTING,
+    PASSIVE_SHOOTER
   }
 
   public enum ShooterStates {
     PREPARING_TO_FIRE,
     FIRING,
+    PASSIVE_PREPARING,
     IDLE
   }
 
@@ -33,6 +35,7 @@ public class ShooterStateMachine {
   private final Hood hood;
   private final FlywheelKicker flywheelKicker;
   private final BooleanSupplier isAlignedToTarget;
+  private final BooleanSupplier canShootToTarget;
 
   // State variables
   private ShooterWantedStates wantedState = ShooterWantedStates.IDLE;
@@ -51,11 +54,13 @@ public class ShooterStateMachine {
       Flywheel flywheel,
       Hood hood,
       FlywheelKicker flywheelKicker,
-      BooleanSupplier isAlignedToTarget) {
+      BooleanSupplier isAlignedToTarget,
+      BooleanSupplier canShootToTarget) {
     this.flywheel = flywheel;
     this.hood = hood;
     this.flywheelKicker = flywheelKicker;
     this.isAlignedToTarget = isAlignedToTarget;
+    this.canShootToTarget = canShootToTarget;
   }
 
   /** Returns the current shooter state. */
@@ -95,6 +100,7 @@ public class ShooterStateMachine {
         boolean flywheelUnderShooting = flywheelState == FlywheelInternalStates.UNDER_SHOOTING;
         boolean hoodReady = hood.getState() == HoodInternalStates.AT_SETPOINT;
         boolean drivetrainAligned = isAlignedToTarget.getAsBoolean();
+        boolean targetReady = canShootToTarget.getAsBoolean();
 
         Logger.recordOutput("Superstructure/Shooting/FlywheelState", flywheelState);
         Logger.recordOutput("Superstructure/Shooting/FlywheelReady", flywheelReady);
@@ -107,13 +113,19 @@ public class ShooterStateMachine {
         boolean shouldFire =
             (flywheelReady || (previousState == ShooterStates.FIRING && !flywheelUnderShooting))
                 && hoodReady
-                && drivetrainAligned;
+                && drivetrainAligned
+                && targetReady;
+        Logger.recordOutput("Superstructure/Shooting/Aligned", drivetrainAligned);
+        Logger.recordOutput("Superstructure/Shooting/HubShootable", targetReady);
 
         if (shouldFire) {
           currentState = ShooterStates.FIRING;
         } else {
           currentState = ShooterStates.PREPARING_TO_FIRE;
         }
+        break;
+      case PASSIVE_SHOOTER:
+        currentState = ShooterStates.PASSIVE_PREPARING;
         break;
       case IDLE:
       default:
@@ -137,6 +149,11 @@ public class ShooterStateMachine {
         flywheel.setWantedState(FlywheelWantedStates.SHOOTING);
         hood.setWantedState(HoodWantedStates.AIMING);
         flywheelKicker.setWantedState(FlywheelKickerStates.KICKING);
+        break;
+      case PASSIVE_PREPARING:
+        flywheel.setWantedState(FlywheelWantedStates.SHOOTING);
+        hood.setWantedState(HoodWantedStates.PASSIVE_PREP);
+        flywheelKicker.setWantedState(FlywheelKickerStates.IDLE);
         break;
       case IDLE:
       default:
