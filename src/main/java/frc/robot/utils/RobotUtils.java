@@ -104,8 +104,8 @@ public class RobotUtils {
     // of getShootingPhase
     Boolean hubActive = null;
     if (alliance.isPresent()) {
-      if (gamePhase == null) {
-        return null;
+      if (gamePhase == null || autoWinner == null) {
+        return true;
       }
       switch (gamePhase) {
           // during auto, transitional phase, and end game
@@ -131,7 +131,7 @@ public class RobotUtils {
       }
     } else {
       // this is called when no alliance has been received from driver station
-      return null;
+      return true;
     }
     return hubActive;
   }
