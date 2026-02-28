@@ -148,12 +148,12 @@ public class ShooterStateMachine {
       case PREPARING_TO_FIRE:
         flywheel.setWantedState(FlywheelWantedStates.SHOOTING);
         hood.setWantedState(HoodWantedStates.AIMING);
-        flywheelKicker.setWantedState(FlywheelKickerStates.KICKING);
+        flywheelKicker.setWantedState(FlywheelKickerStates.IDLE);
         break;
       case FIRING:
         flywheel.setWantedState(FlywheelWantedStates.SHOOTING);
         hood.setWantedState(HoodWantedStates.AIMING);
-        flywheelKicker.setWantedState(FlywheelKickerStates.IDLE);
+        flywheelKicker.setWantedState(FlywheelKickerStates.KICKING);
         break;
       case WAITING:
         flywheel.setWantedState(FlywheelWantedStates.IDLE);
