@@ -79,16 +79,17 @@ public class IntakePivot extends SubsystemBase {
                 ? IntakePivotInternalStates.AT_SETPOINT
                 : IntakePivotInternalStates.MOVING_TO_SETPOINT;
         break;
-      case AGITATE_HOPPER: {
-        double target = agitateTargetHigh ? HIGH_AGITATED_POSITION : LOW_AGITATED_POSITION;
-        if (atSetpoint(target)) {
-          agitateTargetHigh = !agitateTargetHigh; // Flip for next cycle
-          currentState = IntakePivotInternalStates.AT_SETPOINT;
-        } else {
-          currentState = IntakePivotInternalStates.MOVING_TO_SETPOINT;
+      case AGITATE_HOPPER:
+        {
+          double target = agitateTargetHigh ? HIGH_AGITATED_POSITION : LOW_AGITATED_POSITION;
+          if (atSetpoint(target)) {
+            agitateTargetHigh = !agitateTargetHigh; // Flip for next cycle
+            currentState = IntakePivotInternalStates.AT_SETPOINT;
+          } else {
+            currentState = IntakePivotInternalStates.MOVING_TO_SETPOINT;
+          }
+          break;
         }
-        break;
-      }
       default:
         currentState = IntakePivotInternalStates.AT_SETPOINT;
         break;
