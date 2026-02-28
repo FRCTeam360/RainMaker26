@@ -75,6 +75,14 @@ public class FieldConstants {
     public static final double leftTrenchOpenStart = fieldWidth;
   }
 
+  // Use something like this to create zones and use zone.contains(robot position) to check if the
+  // robot is inside the zone?
+
+  //   private final Rectangle2d allianceZone = new Rectangle2d(
+  //             new Translation2d(x, y), // Bottom-left corner
+  //             new Translation2d(x, y)  // Top-right corner
+  //   );
+
   /** Hub related constants */
   public static class Hub {
 
