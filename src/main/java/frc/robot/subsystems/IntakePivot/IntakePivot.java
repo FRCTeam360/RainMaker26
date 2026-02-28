@@ -16,7 +16,7 @@ public class IntakePivot extends SubsystemBase {
   private static final double DEPLOYED_POSITION_DEGREES = 93.0;
   private static final double HIGH_AGITATED_POSITION = 60.0;
   private static final double LOW_AGITATED_POISTION = 30.0;
-
+  private static final double TOLERANCE = 0.5;
   // IO fields
   private final IntakePivotIO io;
   private final IntakePivotIOInputsAutoLogged inputs = new IntakePivotIOInputsAutoLogged();
@@ -25,6 +25,7 @@ public class IntakePivot extends SubsystemBase {
     IDLE,
     STOWED,
     DEPLOYED,
+    AGITATE_HOPPER
   }
 
   public enum IntakePivotInternalStates {
@@ -64,24 +65,38 @@ public class IntakePivot extends SubsystemBase {
     previousState = currentState;
     switch (wantedState) {
       case STOWED:
-        currentState = IntakeWantedStates.STOWED;
+        if (atSetpoint(STOWED_POSITION_DEGREES)) {
+          currentState = IntakePivotInternalStates.AT_SETPOINT;
+        } else {
+          currentState = IntakePivotInternalStates.MOVING_TO_SETPOINT;
+        }
         break;
       case DEPLOYED:
-        currentState = IntakeWantedStates.DEPLOYED;
+       currentState= atSetpoint(DEPLOYED_POSITION_DEGREES) ? IntakePivotInternalStates.AT_SETPOINT : IntakePivotInternalStates.MOVING_TO_SETPOINT;
         break;
       default:
-        currentState = IntakeWantedStates.IDLE;
+        currentState = IntakePivotInternalStates.AT_SETPOINT;
         break;
     }
   }
 
   private void applyState() {
     switch (currentState) {
-      case DEPLOYED:
-        setPosition(DEPLOYED_POSITION_DEGREES);
-        break;
-      case STOWED:
-        setPosition(STOWED_POSITION_DEGREES);
+      case MOVING_TO_SETPOINT:
+      case AT_SETPOINT:
+        switch (wantedState) {
+          case STOWED:
+            setPosition(STOWED_POSITION_DEGREES);
+            break;
+          case DEPLOYED:
+            setPosition(DEPLOYED_POSITION_DEGREES);
+            break;
+          case AGITATE_HOPPER:
+
+          default:
+            stop();
+            break;
+        }
         break;
       case IDLE:
       default:
@@ -95,6 +110,9 @@ public class IntakePivot extends SubsystemBase {
     io.setPosition(value);
   }
 
+  public boolean atSetpoint(double setpoint) {
+    return Math.abs(inputs.position - setpoint) < TOLERANCE;
+  }
   public void setDutyCycle(double value) {
     io.setDutyCycle(value);
   }
