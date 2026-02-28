@@ -83,4 +83,14 @@ public class FlywheelKickerIOWB implements FlywheelKickerIO {
   public void setVelocity(double rpm) {
     closedLoopController.setSetpoint(rpm, ControlType.kVelocity);
   }
+
+  public void setSpinupVelocityControl(double rpm) {
+    // WoodBot doesn't have separate configs - use default velocity control
+    closedLoopController.setSetpoint(rpm, ControlType.kVelocity);
+  }
+
+  public void setHoldVelocityControl(double rpm) {
+    // WoodBot doesn't have separate configs - use default velocity control
+    closedLoopController.setSetpoint(rpm, ControlType.kVelocity);
+  }
 }
