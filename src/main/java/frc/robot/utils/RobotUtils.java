@@ -98,7 +98,7 @@ public class RobotUtils {
    * @param gamePhase which hub(s) are active (auto winner's or auto loser's)
    * @return if our alliance's hub is active
    */
-  public static Boolean hubActive(
+  public static boolean hubActive(
       Optional<Alliance> alliance, Alliance autoWinner, ActiveHub gamePhase) {
     // alliance is our alliance, autoWinner is the result of getAutoWinner, gamePhase is the result
     // of getShootingPhase

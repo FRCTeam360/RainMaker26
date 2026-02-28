@@ -131,8 +131,8 @@ public class TestWhenCanShootInHubLogic {
   }
 
   @Test
-  void hubActiveShouldBeNull() {
+  void hubActiveShouldBeTrueByDefault() {
     Boolean hubActive = RobotUtils.hubActive(Optional.of(Alliance.Red), Alliance.Red, null);
-    assertEquals(null, hubActive);
+    assertEquals(true, hubActive);
   }
 }
