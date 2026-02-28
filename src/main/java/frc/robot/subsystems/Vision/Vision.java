@@ -188,11 +188,11 @@ public class Vision extends SubsystemBase {
 
   /** Returns horizontal offset (tx) to target in degrees for the named camera. */
   public double getTx(String name) {
-      return Optional.ofNullable(visionInputs.get(name)).map(input -> input.tx).orElse(0.0);
+    return Optional.ofNullable(visionInputs.get(name)).map(input -> input.tx).orElse(0.0);
   }
 
   /** Returns vertical offset (ty) to target in degrees for the named camera. */
   public double getTy(String name) {
-      return Optional.ofNullable(visionInputs.get(name)).map(input -> input.ty).orElse(0.0);
+    return Optional.ofNullable(visionInputs.get(name)).map(input -> input.ty).orElse(0.0);
   }
 }

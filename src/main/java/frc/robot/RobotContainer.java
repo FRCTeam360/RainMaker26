@@ -209,7 +209,9 @@ public class RobotContainer {
       testCont1.rightBumper().whileTrue(intakePivot.setDutyCycleCommand(() -> 0.5));
     }
     if (Objects.nonNull(drivetrain) && Objects.nonNull(vision)) {
-      testCont1.b().whileTrue(new AimAtAprilTag(drivetrain, vision)); // update button as required by driver
+      testCont1
+          .b()
+          .whileTrue(new AimAtAprilTag(drivetrain, vision)); // update button as required by driver
     }
   }
 
@@ -264,7 +266,9 @@ public class RobotContainer {
     }
 
     if (Objects.nonNull(drivetrain) && Objects.nonNull(vision)) {
-      driverCont.b().whileTrue(new AimAtAprilTag(drivetrain, vision)); // update button as required by driver
+      driverCont
+          .b()
+          .whileTrue(new AimAtAprilTag(drivetrain, vision)); // update button as required by driver
     }
 
     // Drivetrain commands
