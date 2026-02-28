@@ -350,15 +350,6 @@ public class RobotContainer {
                 drivetrain.faceAngleWhileDrivingCommand(
                     driverCont, () -> passCalculator.calculateShot().targetHeading())));
     forceOutpostTrigger.onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
-    // Trigger shootAtOutpostTrigger = driverCont.rightBumper().and(isSuperstructureMode);
-    // shootAtOutpostTrigger.whileTrue(
-    //     superStructure
-    //         .setStateCommand(SuperStates.SHOOT_AT_OUTPOST)
-    //         .alongWith(
-    //             drivetrain.faceAngleWhileDrivingCommand(
-    //                 driverCont, () -> outpostPassCalculator.calculateShot().targetHeading())));
-    // // Must stay paired with the whileTrue above to reset state on trigger release
-    // shootAtOutpostTrigger.onFalse(superStructure.setStateCommand(SuperStates.IDLE));
 
     // intake pivot positions
     driverCont.a().whileTrue(intakePivot.setPositionCommand(() -> 93.0));
