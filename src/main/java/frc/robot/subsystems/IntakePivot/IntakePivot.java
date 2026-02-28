@@ -15,29 +15,31 @@ public class IntakePivot extends SubsystemBase {
   private static final double STOWED_POSITION_DEGREES = 0.0;
   private static final double DEPLOYED_POSITION_DEGREES = 93.0;
   private static final double HIGH_AGITATED_POSITION = 60.0;
-  private static final double LOW_AGITATED_POISTION = 30.0;
+  private static final double LOW_AGITATED_POSITION = 30.0;
   private static final double TOLERANCE = 0.5;
   // IO fields
   private final IntakePivotIO io;
   private final IntakePivotIOInputsAutoLogged inputs = new IntakePivotIOInputsAutoLogged();
 
   public enum IntakeWantedStates {
-    IDLE,
+    OFF,
     STOWED,
     DEPLOYED,
     AGITATE_HOPPER
   }
 
   public enum IntakePivotInternalStates {
-    IDLE,
+    OFF,
     MOVING_TO_SETPOINT,
-    AT_SETPOINT
+    AT_SETPOINT,
+    AGITATING_HIGH,
+    AGITATING_LOW
   }
 
   // State variables
-  private IntakeWantedStates wantedState = IntakeWantedStates.IDLE;
-  private IntakePivotInternalStates currentState = IntakePivotInternalStates.IDLE;
-  private IntakePivotInternalStates previousState = IntakePivotInternalStates.IDLE;
+  private IntakeWantedStates wantedState = IntakeWantedStates.OFF;
+  private IntakePivotInternalStates currentState = IntakePivotInternalStates.OFF;
+  private IntakePivotInternalStates previousState = IntakePivotInternalStates.OFF;
   private ControlState controlState = ControlState.SUPERSTRUCTURE;
 
   // Constructor
@@ -72,7 +74,19 @@ public class IntakePivot extends SubsystemBase {
         }
         break;
       case DEPLOYED:
-       currentState= atSetpoint(DEPLOYED_POSITION_DEGREES) ? IntakePivotInternalStates.AT_SETPOINT : IntakePivotInternalStates.MOVING_TO_SETPOINT;
+        currentState =
+            atSetpoint(DEPLOYED_POSITION_DEGREES)
+                ? IntakePivotInternalStates.AT_SETPOINT
+                : IntakePivotInternalStates.MOVING_TO_SETPOINT;
+        break;
+      case AGITATE_HOPPER:
+        if (shouldHighToLow()) {
+          currentState = IntakePivotInternalStates.AGITATING_LOW;
+        } else if (shouldLowToHigh()) {
+          currentState = IntakePivotInternalStates.AGITATING_HIGH;
+        } else if (!shouldHighToLow()) {
+          currentState = IntakePivotInternalStates.AGITATING_HIGH;
+        }
         break;
       default:
         currentState = IntakePivotInternalStates.AT_SETPOINT;
@@ -98,7 +112,7 @@ public class IntakePivot extends SubsystemBase {
             break;
         }
         break;
-      case IDLE:
+      case OFF:
       default:
         stop();
     }
@@ -113,6 +127,23 @@ public class IntakePivot extends SubsystemBase {
   public boolean atSetpoint(double setpoint) {
     return Math.abs(inputs.position - setpoint) < TOLERANCE;
   }
+
+  public boolean shouldLowToHigh() {
+    boolean isAtLowPosition = false;
+    if (this.getState() == IntakePivotInternalStates.AGITATING_LOW && atSetpoint(LOW_AGITATED_POSITION)) {
+      isAtLowPosition = true;
+    }
+    return isAtLowPosition;
+  }
+
+  public boolean shouldHighToLow() {
+    boolean isAtHighPosition = false;
+    if (this.getState() == IntakePivotInternalStates.AGITATING_HIGH && atSetpoint(HIGH_AGITATED_POSITION)) {
+      isAtHighPosition = true;
+    }
+    return isAtHighPosition;
+  }
+
   public void setDutyCycle(double value) {
     io.setDutyCycle(value);
   }
