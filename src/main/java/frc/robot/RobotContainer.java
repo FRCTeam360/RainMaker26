@@ -46,7 +46,7 @@ import frc.robot.subsystems.IntakePivot.IntakePivotIONoop;
 import frc.robot.subsystems.IntakePivot.IntakePivotIOPB;
 import frc.robot.subsystems.IntakePivot.IntakePivotIOSim;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel;
-import frc.robot.subsystems.Shooter.Flywheel.FlywheelIOPBBangBang;
+import frc.robot.subsystems.Shooter.Flywheel.FlywheelIOPB;
 import frc.robot.subsystems.Shooter.Flywheel.FlywheelIOSim;
 import frc.robot.subsystems.Shooter.Flywheel.FlywheelIOWBBangBang;
 import frc.robot.subsystems.Shooter.FlywheelKicker.FlywheelKicker;
@@ -193,7 +193,7 @@ public class RobotContainer {
         drivetrain = PracticeBotDrivetrain.createDrivetrain();
         climber = new Climber(new ClimberIOPB());
         logger = new Telemetry(PracticeBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
-        flywheel = new Flywheel(new FlywheelIOPBBangBang());
+        flywheel = new Flywheel(new FlywheelIOPB());
         hood = new Hood(new HoodIOPB());
         indexer = new Indexer(new IndexerIOPB());
         vision = // TODO ADD OTHER LIMELIGHTS
@@ -377,7 +377,7 @@ public class RobotContainer {
     driverCont
         .a()
         .and(isSuperstructureMode)
-        .onFalse(superStructure.setStateCommand(SuperWantedStates.IDLE));
+        .onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
 
     configureIndependentModeBindings(isIndependentMode);
 
