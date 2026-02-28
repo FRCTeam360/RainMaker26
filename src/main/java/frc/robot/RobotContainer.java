@@ -22,6 +22,9 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.generated.WoodBotDrivetrain;
 import frc.robot.subsystems.Climber.Climber;
+import frc.robot.subsystems.Climber.ClimberIONoop;
+import frc.robot.subsystems.Climber.ClimberIOPB;
+import frc.robot.subsystems.Climber.ClimberIOSim;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.ControlState;
 import frc.robot.subsystems.HopperRoller.HopperRoller;
@@ -58,8 +61,10 @@ import frc.robot.subsystems.Shooter.ShotCalculator.RobotShootingInfo;
 import frc.robot.subsystems.SuperStructure;
 import frc.robot.subsystems.SuperStructure.SuperStates;
 import frc.robot.subsystems.Vision.Vision;
+import frc.robot.subsystems.Vision.VisionIO;
 import frc.robot.subsystems.Vision.VisionIOLimelight3G;
 import frc.robot.subsystems.Vision.VisionIOLimelight4;
+import frc.robot.subsystems.Vision.VisionIOLimelightBase;
 import frc.robot.subsystems.Vision.VisionIOPhotonSim;
 import frc.robot.utils.AllianceFlipUtil;
 import frc.robot.utils.FieldConstants;
@@ -118,6 +123,7 @@ public class RobotContainer {
     switch (Constants.getRobotType()) {
       case SIM:
         drivetrain = WoodBotDrivetrain.createDrivetrain();
+        climber = new Climber(new ClimberIOSim());
         logger = new Telemetry(WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
         intakePivot = new IntakePivot(new IntakePivotIOSim());
         vision =
@@ -142,6 +148,7 @@ public class RobotContainer {
         break;
       case WOODBOT:
         drivetrain = WoodBotDrivetrain.createDrivetrain();
+        climber = new Climber(new ClimberIONoop());
         logger = new Telemetry(WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
         flywheel = new Flywheel(new FlywheelIOWB());
         hood = new Hood(new HoodIOWB());
@@ -182,6 +189,7 @@ public class RobotContainer {
         drivetrain =
             WoodBotDrivetrain
                 .createDrivetrain(); // FIXME, CHANGE ONCE PRACTICE BOT DRIVETRAIN IS MADE
+        climber = new Climber(new ClimberIOPB());
         logger = new Telemetry(WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
         flywheel = new Flywheel(new FlywheelIOPB());
         hood = new Hood(new HoodIOPB());

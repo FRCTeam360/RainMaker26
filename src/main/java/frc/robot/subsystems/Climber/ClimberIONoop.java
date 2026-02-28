@@ -16,13 +16,5 @@ public class ClimberIONoop implements ClimberIO {
 
   public void setRightPosition(double position) {}
 
-  public boolean leftAboveMinHeight() {
-    return false;
-  }
-
-  public boolean rightAboveMinHeight() {
-    return false;
-  }
-
   public void zeroBoth() {}
 }

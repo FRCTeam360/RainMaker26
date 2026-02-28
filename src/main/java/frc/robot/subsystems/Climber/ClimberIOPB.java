@@ -1,8 +1,6 @@
 // Copyright (c) FIRST and other WPILib contributors.
 // Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
-// TODO: there is no practice bot constants setup.
+// the WPILib BSD license file in the root directory of this project..
 
 package frc.robot.subsystems.Climber;
 
@@ -31,13 +29,14 @@ public class ClimberIOPB implements ClimberIO {
   private final SparkMaxConfig leftConfig = new SparkMaxConfig();
   private final SparkMaxConfig rightConfig = new SparkMaxConfig();
 
-  static final double kP = 1.0;
-  static final double kI = 0.0001;
-  static final double kD = 0;
+  private static final double kP = 0;
+  private static final double kI = 0;
+  private static final double kD = 0;
 
   public void zeroBoth() {
     leftClimberEncoder.setPosition(0.0);
-    rightClimberEncoder.setPosition(0.0);}
+    rightClimberEncoder.setPosition(0.0);
+  }
 
   /** Creates a new ClimberIOPB. */
   public ClimberIOPB() {
@@ -90,6 +89,5 @@ public class ClimberIOPB implements ClimberIO {
     inputs.climberRightCurrent = rightClimberMotor.getOutputCurrent();
     inputs.climberLeftTemp = leftClimberMotor.getMotorTemperature();
     inputs.climberRightTemp = rightClimberMotor.getMotorTemperature();
-
   }
 }

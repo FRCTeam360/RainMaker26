@@ -70,8 +70,7 @@ public class ClimberIOSim implements ClimberIO {
     double currentAmps = climberSim.getCurrentDrawAmps();
 
     // Step 4: Update battery sim
-    RoboRioSim.setVInVoltage(
-        BatterySim.calculateDefaultBatteryLoadedVoltage(currentAmps));
+    RoboRioSim.setVInVoltage(BatterySim.calculateDefaultBatteryLoadedVoltage(currentAmps));
 
     // Step 5: Report identical values to both left and right inputs
     inputs.climberLeftPosition = positionMeters;
@@ -103,19 +102,8 @@ public class ClimberIOSim implements ClimberIO {
   public void setRightPosition(double position) {}
 
   @Override
-  public boolean leftAboveMinHeight() {
-    return climberSim.getPositionMeters() > MIN_HEIGHT_THRESHOLD_METERS;
-  }
-
-  @Override
-  public boolean rightAboveMinHeight() {
-    return climberSim.getPositionMeters() > MIN_HEIGHT_THRESHOLD_METERS;
-  }
-
-  @Override
   public void zeroBoth() {
     climberSim.setState(0.0, 0.0);
     motorControllerSim.set(0.0);
   }
 }
-
