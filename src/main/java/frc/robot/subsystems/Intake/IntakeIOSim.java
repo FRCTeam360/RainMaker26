@@ -50,7 +50,7 @@ public class IntakeIOSim implements IntakeIO {
   private final FlywheelSim intakeSim = new FlywheelSim(plant, gearbox, gearRatio);
 
   public IntakeIOSim() {
-    // Configure SparkMax with PID and current limits
+    // Configure motor controller with PID and current limits
     configureMotor();
 
     // Initialize everything to 0
@@ -83,7 +83,7 @@ public class IntakeIOSim implements IntakeIO {
 
     // Step 2: Update simulation
     intakeSim.setInputVoltage(appliedVoltage);
-    intakeSim.update(0.02);
+    intakeSim.update(SimulationConstants.SIM_TICK_RATE_S);
 
     // Step 3: Get simulated values directly
     double velocityRPM = intakeSim.getAngularVelocityRPM();

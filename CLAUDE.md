@@ -20,6 +20,32 @@ This is the robot code for RainMaker26 FRC 360's 26th robot for the 2026 season,
 | PathplannerLib | 2026.1.2 | [Javadoc](https://pathplanner.dev/api/java/)                                          | [Docs](https://pathplanner.dev/home.html)              |
 | AdvantageKit   | 26.0.0   | [Javadoc](https://docs.advantagekit.org/javadoc/)                                     | [Docs](https://docs.advantagekit.org/)                 |
 
+## WPILib Command Composition Quick Reference
+
+When reviewing or writing command compositions, use these exact semantics — do not guess:
+
+| Method          | Group Type               | Ends When                                                          |
+| --------------- | ------------------------ | ------------------------------------------------------------------ |
+| `alongWith()`   | `ParallelCommandGroup`   | **ALL** commands finish                                            |
+| `raceWith()`    | `ParallelRaceGroup`      | **ANY** command finishes                                           |
+| `deadlineFor()` | `ParallelDeadlineGroup`  | The **deadline** (calling) command finishes, interrupts all others |
+| `andThen()`     | `SequentialCommandGroup` | Commands run in order, ends when last finishes                     |
+
+### Command lifecycle types
+
+| Factory / Class                | Behavior                                                                                        |
+| ------------------------------ | ----------------------------------------------------------------------------------------------- |
+| `InstantCommand` / `runOnce()` | Runs once, finishes immediately                                                                 |
+| `RunCommand` / `run()`         | Runs every cycle, **never finishes on its own**                                                 |
+| `runEnd()`                     | Runs every cycle with an end action, **never finishes on its own**                              |
+| `startEnd()`                   | Runs a start action on init; runs an end action when interrupted, **never finishes on its own** |
+
+### Common pitfalls
+
+- **PathPlanner NamedCommands must terminate** — an infinite command (e.g., `run()`) will stall the entire auto sequence
+- **`FieldCentricFacingAngle.HeadingController.atSetpoint()`** returns stale/invalid results when the facing-angle request is not actively being applied; ensure that it's being reset when called
+- **CTRE `StatusSignal` values must be refreshed** before reading; stale signals return old data silently
+
 ## Project Structure
 
 ```
@@ -65,13 +91,17 @@ View the report: open build/reports/spotbugs/spotbugs.html
 
 ## Code Patterns
 
-- Use Command-based programming: subsystems own hardware, commands define actions
+- Use Command-based programming controlling the drivetrain and superstructure for competition code: superstructure owns non-drivetrain subsystems which own hardware, commands define actions
+- Superstructure state transition commands are fire and forget
+- Subsystems are controlled by the superstructure through setting wanted states and can be unhooked from that and ran by commands through a separate state for testing
 - **Infrastructure constants** (CAN IDs, sensor ports, physical hardware config) always go in Constants.java
 - **Tuning constants** (PID gains, setpoints, tolerances, speeds) should be named `private static final` variables in the file where they're used
 - Avoid unnamed literals - give values descriptive names **with units** (e.g., `MAX_VELOCITY_MPS`, `STALL_CURRENT_AMPS`, `TIMEOUT_SECONDS`)
-- Use AdvantageKit's @AutoLogOutput for telemetry on important values
-- Subsystems extend SubsystemBase; commands extend Command or use robot action methods
+- Use AdvantageKit's @AutoLog on IO input classes for hardware telemetry
+- Use AdvantageKit's Logger.recordOutput() for all other values, grouping them by subsystem, class, or state type
+- Subsystems extend SubsystemBase
 - Subsystems have IO layers with specific hardware implementations (other than the superstructure) following FRC 6328's architecture
+- Every robot configuration in `RobotContainer` must initialize all subsystems. Use Noop IO implementations (e.g., `IntakePivotIONoop`) for hardware not present on a given robot. This eliminates null checks and ensures SuperStructure and bindings work uniformly across configs.
 
 ## Naming Conventions
 
@@ -119,13 +149,35 @@ Use `ALL_CAPS` with underscores for separation:
 
 When reviewing a PR, follow these rules strictly:
 
+- **Focus on breaking changes, not nitpicks.** Flag things that could break the robot, change runtime behavior unexpectedly, or affect other robot configs (SIM, WoodBot, PracticeBot). Do not nitpick style, naming, or minor conventions — trust the author.
 - **Only review lines that are part of the PR diff.** Do not flag pre-existing issues in files the PR touches. If a line was not added or modified in the diff, do not comment on it.
-- **Focus on correctness and intent of the PR.** Evaluate whether the changed code does what the PR description says, follows project conventions, and doesn't introduce new issues. Do not expand scope beyond the PR's purpose.
+- **Focus on correctness and intent of the PR.** Evaluate whether the changed code does what the PR description says and doesn't introduce new issues. Do not expand scope beyond the PR's purpose.
 - **CI status:** Only Build, Test, Format Check, and Simulation Test are merge blockers.
+
+### What counts as a breaking change
+
+Flag these — they can break the robot or other configs:
+
+- **Behavioral changes**: command lifecycle changes (e.g., `runEnd` to `runOnce`), removed cleanup/stop actions, changed motor inversions or sensor polarity
+- **Cross-config impact**: changes to shared code (SuperStructure, RobotContainer bindings, command factories) that affect configs other than the one being modified
+- **Hardcoded sensor overrides**: stubbing out sensor values (e.g., `sensorActivated = true`) that gate state transitions or safety logic
+- **CAN ID conflicts**: two constants sharing the same ID on the same bus
+- **Disabled functionality**: commenting out periodic calculations, safety checks, or sensor reads that other code depends on
+- **API signature changes**: renamed or removed public methods that may have callers outside the diff
+
+### What is NOT worth flagging
+
+Do not comment on these unless they cause a breaking change:
+
+- Style, formatting, or naming preferences
+- Missing Javadoc or comments
+- Unnamed numeric literals in test/tuning bindings
+- Code organization or method extraction choices
+- Conventions from the checklist below that don't affect correctness
 
 ## Code Review Checklist
 
-When reviewing PRs, apply the checklist below **only to lines added or modified in the PR diff** (inspired by NASA's "Power of 10" for safety-critical code). **Only flag items that are violated — do not mention items that pass.**
+Use this checklist as a reference for what good code looks like, but **only flag items from it if they represent a breaking change or correctness issue** — not as standalone nitpicks. Apply **only to lines added or modified in the PR diff**.
 
 ### Static Analysis & Safety
 
@@ -156,6 +208,7 @@ When reviewing PRs, apply the checklist below **only to lines added or modified 
 - [ ] Sensor values validated/clamped before use
 - [ ] Units documented in variable names or comments (meters, radians, etc.)
 - [ ] Resource ownership clear (one subsystem per hardware device)
+- [ ] All subsystems initialized in every robot config (SIM, WoodBot, PracticeBot) — use Noop IOs for missing hardware
 
 ## Do
 
@@ -169,7 +222,7 @@ When reviewing PRs, apply the checklist below **only to lines added or modified 
 
 - Hard-code CAN IDs or port numbers (use Constants.java)
 - Use unnamed numeric literals - always use named constants with descriptive names
-- Skip null checks on hardware initialization in RobotContainer.java
+- Leave any subsystem uninitialized in RobotContainer.java — use a Noop IO implementation if the hardware is not present
 - Delete existing tests
 - Modify vendor dependencies without team discussion
 
