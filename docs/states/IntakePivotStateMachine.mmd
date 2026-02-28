@@ -17,17 +17,14 @@ stateDiagram-v2
     DEPLOYED --> AGITATE_HOPPER : SuperStructure sets AGITATE_HOPPER
     AGITATE_HOPPER --> OFF : SuperStructure sets OFF
 
-    AGITATE_HOPPER : MOVING_TO_SETPOINT
-    AGITATE_HOPPER : AT_SETPOINT
-    AGITATE_HOPPER : SWITCHING_AGITATE_TARGET_HIGH
-    AGITATE_HOPPER : SWITCHING_AGITATE_TARGET_LOW
-
-    %% Agitation sub-state transitions
-    AGITATE_HOPPER_MOVING_TO_SETPOINT --> AGITATE_HOPPER_SWITCHING_AGITATE_TARGET_HIGH : atSetpoint() & agitateTargetHigh false
-    AGITATE_HOPPER_MOVING_TO_SETPOINT --> AGITATE_HOPPER_SWITCHING_AGITATE_TARGET_LOW : atSetpoint() & agitateTargetHigh true
-    AGITATE_HOPPER_SWITCHING_AGITATE_TARGET_HIGH --> AGITATE_HOPPER_AT_SETPOINT : agitateTargetHigh := true
-    AGITATE_HOPPER_SWITCHING_AGITATE_TARGET_LOW --> AGITATE_HOPPER_AT_SETPOINT : agitateTargetHigh := false
-    AGITATE_HOPPER_AT_SETPOINT --> AGITATE_HOPPER_MOVING_TO_SETPOINT : new target set
+    state AGITATE_HOPPER {
+        [*] --> MOVING_TO_SETPOINT
+        MOVING_TO_SETPOINT --> SWITCHING_AGITATE_TARGET_HIGH : atSetpoint() & agitateTargetHigh false
+        MOVING_TO_SETPOINT --> SWITCHING_AGITATE_TARGET_LOW : atSetpoint() & agitateTargetHigh true
+        SWITCHING_AGITATE_TARGET_HIGH --> AT_SETPOINT : agitateTargetHigh := true
+        SWITCHING_AGITATE_TARGET_LOW --> AT_SETPOINT : agitateTargetHigh := false
+        AT_SETPOINT --> MOVING_TO_SETPOINT : new target set
+    }
 
     note right of OFF : Position set to 0.0
     note right of STOWED : Position set to 0.0°
