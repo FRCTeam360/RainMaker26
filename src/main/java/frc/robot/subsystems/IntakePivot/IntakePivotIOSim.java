@@ -24,7 +24,6 @@ import edu.wpi.first.wpilibj.simulation.RoboRioSim;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import frc.robot.Constants.SimulationConstants;
 
-
 public class IntakePivotIOSim implements IntakePivotIO {
   // Match PracticeBot (PB) config
   private static final double GEAR_RATIO = 97.5;
@@ -70,12 +69,12 @@ public class IntakePivotIOSim implements IntakePivotIO {
 
     motorControllerSim
         .getSimState()
-  .setRawRotorPosition(Radians.of(intakePivotSim.getAngleRads() * GEAR_RATIO).in(Rotations));
+        .setRawRotorPosition(Radians.of(intakePivotSim.getAngleRads() * GEAR_RATIO).in(Rotations));
     motorControllerSim
         .getSimState()
         .setRotorVelocity(
-      RadiansPerSecond.of(intakePivotSim.getVelocityRadPerSec() * GEAR_RATIO)
-        .in(RotationsPerSecond));
+            RadiansPerSecond.of(intakePivotSim.getVelocityRadPerSec() * GEAR_RATIO)
+                .in(RotationsPerSecond));
   }
 
   private void configureMotor() {
@@ -110,35 +109,35 @@ public class IntakePivotIOSim implements IntakePivotIO {
   }
 
   public void updateInputs(IntakePivotIOInputs inputs) {
-  // Step 1: Get the commanded voltage from motor and apply to simulation
-  intakePivotSim.setInput(motorControllerSim.getSimState().getMotorVoltage());
+    // Step 1: Get the commanded voltage from motor and apply to simulation
+    intakePivotSim.setInput(motorControllerSim.getSimState().getMotorVoltage());
 
-  // Step 2: Update the simulation by one timestep
-  intakePivotSim.update(SimulationConstants.SIM_TICK_RATE_S);
+    // Step 2: Update the simulation by one timestep
+    intakePivotSim.update(SimulationConstants.SIM_TICK_RATE_S);
 
-  // Step 3: Update the motor sim state with the new simulated values
-  motorControllerSim
-    .getSimState()
-    .setRawRotorPosition(Radians.of(intakePivotSim.getAngleRads() * GEAR_RATIO).in(Rotations));
-  motorControllerSim
-    .getSimState()
-    .setRotorVelocity(
-      RadiansPerSecond.of(intakePivotSim.getVelocityRadPerSec() * GEAR_RATIO)
-        .in(RotationsPerSecond));
+    // Step 3: Update the motor sim state with the new simulated values
+    motorControllerSim
+        .getSimState()
+        .setRawRotorPosition(Radians.of(intakePivotSim.getAngleRads() * GEAR_RATIO).in(Rotations));
+    motorControllerSim
+        .getSimState()
+        .setRotorVelocity(
+            RadiansPerSecond.of(intakePivotSim.getVelocityRadPerSec() * GEAR_RATIO)
+                .in(RotationsPerSecond));
 
-  // Step 4: Update battery voltage based on current draw
-  RoboRioSim.setVInVoltage(
-    BatterySim.calculateDefaultBatteryLoadedVoltage(intakePivotSim.getCurrentDrawAmps()));
+    // Step 4: Update battery voltage based on current draw
+    RoboRioSim.setVInVoltage(
+        BatterySim.calculateDefaultBatteryLoadedVoltage(intakePivotSim.getCurrentDrawAmps()));
 
-  // Step 5: Read all inputs from the SIMULATED VALUES (source of truth)
-  inputs.position = Units.radiansToDegrees(intakePivotSim.getAngleRads());
-  inputs.velocity = Units.radiansToDegrees(intakePivotSim.getVelocityRadPerSec());
-  inputs.voltage = motorControllerSim.getSimState().getMotorVoltage();
-  inputs.statorCurrent = motorControllerSim.getStatorCurrent().getValueAsDouble();
-  inputs.supplyCurrent = motorControllerSim.getSupplyCurrent().getValueAsDouble();
+    // Step 5: Read all inputs from the SIMULATED VALUES (source of truth)
+    inputs.position = Units.radiansToDegrees(intakePivotSim.getAngleRads());
+    inputs.velocity = Units.radiansToDegrees(intakePivotSim.getVelocityRadPerSec());
+    inputs.voltage = motorControllerSim.getSimState().getMotorVoltage();
+    inputs.statorCurrent = motorControllerSim.getStatorCurrent().getValueAsDouble();
+    inputs.supplyCurrent = motorControllerSim.getSupplyCurrent().getValueAsDouble();
 
-  // Step 6: Update visualization (sim only)
-  visualizer.update(intakePivotSim.getAngleRads());
+    // Step 6: Update visualization (sim only)
+    visualizer.update(intakePivotSim.getAngleRads());
   }
 
   /**
@@ -150,9 +149,7 @@ public class IntakePivotIOSim implements IntakePivotIO {
     motorControllerSim.setPosition(0.0);
   }
 
-  /**
-   * Set position in degrees (matches PB IO)
-   */
+  /** Set position in degrees (matches PB IO) */
   public void setPosition(double positionDegrees) {
     // Convert degrees to rotations for the sim motor
     double rotations = positionDegrees / 360.0;
