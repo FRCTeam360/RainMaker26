@@ -2,7 +2,6 @@ package frc.robot.utils;
 
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.robot.Constants;
-import frc.robot.subsystems.Shooter.ShooterConstants;
 import java.io.File;
 import java.util.Optional;
 
