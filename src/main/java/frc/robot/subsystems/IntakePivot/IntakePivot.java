@@ -21,7 +21,7 @@ public class IntakePivot extends SubsystemBase {
   private final IntakePivotIO io;
   private final IntakePivotIOInputsAutoLogged inputs = new IntakePivotIOInputsAutoLogged();
 
-  public enum IntakeWantedStates {
+  public enum IntakePivotWantedStates {
     OFF,
     STOWED,
     DEPLOYED,
@@ -37,7 +37,7 @@ public class IntakePivot extends SubsystemBase {
   }
 
   // State variables
-  private IntakeWantedStates wantedState = IntakeWantedStates.OFF;
+  private IntakePivotWantedStates wantedState = IntakePivotWantedStates.OFF;
   private IntakePivotInternalStates currentState = IntakePivotInternalStates.OFF;
   private IntakePivotInternalStates previousState = IntakePivotInternalStates.OFF;
   private ControlState controlState = ControlState.SUPERSTRUCTURE;
@@ -55,7 +55,7 @@ public class IntakePivot extends SubsystemBase {
     return currentState;
   }
 
-  public void setWantedState(IntakeWantedStates state) {
+  public void setWantedState(IntakePivotWantedStates state) {
     wantedState = state;
   }
 
