@@ -1,6 +1,7 @@
 package frc.robot.utils;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import frc.robot.utils.FieldConstants.LinesHorizontal;
@@ -81,6 +82,24 @@ public class PositionUtils {
       result = robotX <= LinesVertical.allianceZone;
     }
     Logger.recordOutput("PositionUtils/IsInAllianceZone", result);
+    return result;
+  }
+
+  /**
+   * Returns whichever of two candidate targets is closer to the robot.
+   *
+   * @param robotPose the current blue-origin robot pose
+   * @param targetA the first candidate target position
+   * @param targetB the second candidate target position
+   * @return the {@link Translation2d} of the closer target
+   */
+  public static Translation2d getCloserPassTarget(
+      Pose2d robotPose, Translation2d targetA, Translation2d targetB) {
+    double distanceToAMeters = robotPose.getTranslation().getDistance(targetA);
+    double distanceToBMeters = robotPose.getTranslation().getDistance(targetB);
+
+    Translation2d result = distanceToAMeters <= distanceToBMeters ? targetA : targetB;
+    Logger.recordOutput("PositionUtils/CloserPassTarget", new Pose2d(result, Rotation2d.kZero));
     return result;
   }
 }

@@ -65,6 +65,7 @@ import frc.robot.subsystems.Vision.VisionIOLimelight4;
 import frc.robot.subsystems.Vision.VisionIOPhotonSim;
 import frc.robot.utils.AllianceFlipUtil;
 import frc.robot.utils.FieldConstants;
+import frc.robot.utils.PositionUtils;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.BooleanSupplier;
@@ -218,7 +219,11 @@ public class RobotContainer {
     passCalculator =
         new ShotCalculator(
             drivetrain::getPosition,
-            () -> FieldConstants.LeftBump.farLeftCorner,
+            () ->
+                PositionUtils.getCloserPassTarget(
+                    drivetrain.getPosition(),
+                    AllianceFlipUtil.apply(FieldConstants.RightBump.nearRightCorner),
+                    AllianceFlipUtil.apply(FieldConstants.LeftBump.nearLeftCorner)),
             robotShootingInfo);
     // Configure the trigger bindings
     // TODO: Re-enable superStructure construction and PathPlanner commands
