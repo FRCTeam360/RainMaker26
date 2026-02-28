@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems.Climber;
 
+import com.ctre.phoenix6.signals.ForwardLimitTypeValue;
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
@@ -13,6 +14,8 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.ClosedLoopConfig;
 import com.revrobotics.spark.config.EncoderConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.config.LimitSwitchConfig.Behavior;
+
 import frc.robot.Constants.PracticeBotConstants;
 
 public class ClimberIOPB implements ClimberIO {
@@ -25,7 +28,7 @@ public class ClimberIOPB implements ClimberIO {
   private final RelativeEncoder leftClimberEncoder = leftClimberMotor.getEncoder();
   private final RelativeEncoder rightClimberEncoder = rightClimberMotor.getEncoder();
 
-  private final double positionConversionFactor = 1.0;
+  private static final double POSITION_CONVERSION_FACTOR = 1.0;
   private final SparkMaxConfig leftConfig = new SparkMaxConfig();
   private final SparkMaxConfig rightConfig = new SparkMaxConfig();
 
@@ -45,16 +48,19 @@ public class ClimberIOPB implements ClimberIO {
     EncoderConfig rightEncoderConfig = new EncoderConfig();
 
     closedLoopConfig.pid(kP, kI, kD);
-    leftEncoderConfig.positionConversionFactor(positionConversionFactor);
-    rightEncoderConfig.positionConversionFactor(positionConversionFactor);
+    leftEncoderConfig.positionConversionFactor(POSITION_CONVERSION_FACTOR);
+    rightEncoderConfig.positionConversionFactor(POSITION_CONVERSION_FACTOR);
 
     leftConfig.inverted(true);
     leftConfig.apply(leftEncoderConfig);
     leftConfig.apply(closedLoopConfig);
+    leftConfig.limitSwitch.forwardLimitSwitchPosition(0.0).forwardLimitSwitchTriggerBehavior(Behavior.kStopMovingMotor);
 
     rightConfig.inverted(false);
     rightConfig.apply(rightEncoderConfig);
     rightConfig.apply(closedLoopConfig);
+    rightConfig.limitSwitch.forwardLimitSwitchPosition(0.0).forwardLimitSwitchTriggerBehavior(Behavior.kStopMovingMotor);
+
 
     leftClimberMotor.configure(
         leftConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
