@@ -6,20 +6,82 @@ package frc.robot.subsystems.IntakePivot;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.ControlState;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
 public class IntakePivot extends SubsystemBase {
-  public final IntakePivotIOInputsAutoLogged inputs = new IntakePivotIOInputsAutoLogged();
-  public final IntakePivotIO io;
-  private final IntakePivotVisualizer visualizer;
+  // Constants
+  private static final double STOWED_POSITION_DEGREES = 0.0;
+  private static final double DEPLOYED_POSITION_DEGREES = 93.0;
+
+  // IO fields
+  private final IntakePivotIO io;
+  private final IntakePivotIOInputsAutoLogged inputs = new IntakePivotIOInputsAutoLogged();
+
+  public enum IntakePivotStates {
+    OFF,
+    STOWED,
+    DEPLOYED,
+  }
+
+  // State variables
+  private IntakePivotStates wantedState = IntakePivotStates.OFF;
+  private IntakePivotStates currentState = IntakePivotStates.OFF;
+  private IntakePivotStates previousState = IntakePivotStates.OFF;
+  private ControlState controlState = ControlState.SUPERSTRUCTURE;
+
+  // Constructor
 
   /** Creates a new IntakePivot. */
   public IntakePivot(IntakePivotIO io) {
     this.io = io;
-    // Initialize visualizer with arm length in meters (30 inches = 0.762 m)
-    this.visualizer = new IntakePivotVisualizer(0.762);
   }
+
+  // State machine methods
+
+  public IntakePivotStates getState() {
+    return currentState;
+  }
+
+  public void setWantedState(IntakePivotStates state) {
+    wantedState = state;
+  }
+
+  public void setControlState(ControlState controlState) {
+    this.controlState = controlState;
+  }
+
+  private void updateState() {
+    previousState = currentState;
+    switch (wantedState) {
+      case STOWED:
+        currentState = IntakePivotStates.STOWED;
+        break;
+      case DEPLOYED:
+        currentState = IntakePivotStates.DEPLOYED;
+        break;
+      default:
+        currentState = IntakePivotStates.OFF;
+        break;
+    }
+  }
+
+  private void applyState() {
+    switch (currentState) {
+      case DEPLOYED:
+        setPosition(DEPLOYED_POSITION_DEGREES);
+        break;
+      case STOWED:
+        setPosition(STOWED_POSITION_DEGREES);
+        break;
+      case OFF:
+      default:
+        stop();
+    }
+  }
+
+  // IO delegation methods
 
   public void setPosition(double value) {
     io.setPosition(value);
@@ -33,20 +95,30 @@ public class IntakePivot extends SubsystemBase {
     this.setDutyCycle(0.0);
   }
 
+  // Command factory methods
+
   public Command setDutyCycleCommand(DoubleSupplier dutySupplier) {
     return this.runEnd(() -> this.setDutyCycle(dutySupplier.getAsDouble()), () -> this.stop());
   }
 
-  public Command setPosition(DoubleSupplier positionSupplier) {
-    return this.runEnd(() -> this.setPosition(positionSupplier.getAsDouble()), () -> this.stop());
+  public Command setPositionCommand(DoubleSupplier positionSupplier) {
+    return this.runOnce(() -> this.setPosition(positionSupplier.getAsDouble()));
   }
+
+  // periodic
 
   @Override
   public void periodic() {
     io.updateInputs(inputs);
     Logger.processInputs("IntakePivot", inputs);
 
-    // Update visualization with current arm angle (convert rotations to radians)
-    visualizer.update(inputs.position * 2.0 * Math.PI);
+    if (controlState == ControlState.SUPERSTRUCTURE) {
+      updateState();
+      applyState();
+    }
+    Logger.recordOutput("Subsystems/IntakePivot/WantedState", wantedState);
+    Logger.recordOutput("Subsystems/IntakePivot/CurrentState", currentState);
+    Logger.recordOutput("Subsystems/IntakePivot/PreviousState", previousState);
+    Logger.recordOutput("Subsystems/IntakePivot/ControlState", controlState);
   }
 }

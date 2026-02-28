@@ -9,6 +9,9 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.util.Units;
 
 public class ShooterConstants {
-  public static Transform2d ROBOT_TO_SHOOTER =
+  public static Transform2d WOODBOT_TO_SHOOTER =
       new Transform2d(Units.inchesToMeters(-7.0), 0.0, new Rotation2d());
+
+  public static Transform2d PRACTICEBOT_TO_SHOOTER =
+      new Transform2d(Units.inchesToMeters(-7.437), 0.0, new Rotation2d());
 }
