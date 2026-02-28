@@ -78,7 +78,7 @@ public class SuperStructure extends SubsystemBase {
       IntakePivot intakePivot,
       HopperRoller hopperRoller,
       ShotCalculator hubShotCalculator,
-      ShotCalculator outpostPassCalculator,
+      ShotCalculator passCalculator,
       BooleanSupplier isAlignedToTarget,
       Supplier<Pose2d> robotPoseSupplier,
       Transform2d robotToShooter) {
@@ -92,8 +92,7 @@ public class SuperStructure extends SubsystemBase {
     this.shooterStateMachine =
         new ShooterStateMachine(flywheel, hood, flywheelKicker, isAlignedToTarget);
     this.targetSelectionStateMachine =
-        new TargetSelectionStateMachine(
-            hubShotCalculator, outpostPassCalculator, robotPoseSupplier);
+        new TargetSelectionStateMachine(hubShotCalculator, passCalculator, robotPoseSupplier);
 
     flywheel.setShootVelocitySupplier(
         () -> targetSelectionStateMachine.getActiveCalculator().calculateShot().flywheelSpeed());

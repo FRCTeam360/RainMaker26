@@ -24,7 +24,7 @@ public class TargetSelectionStateMachine {
 
   // Dependencies
   private final ShotCalculator hubShotCalculator;
-  private final ShotCalculator outpostPassCalculator;
+  private final ShotCalculator passCalculator;
   private final Supplier<Pose2d> robotPoseSupplier;
 
   // State variables
@@ -36,15 +36,15 @@ public class TargetSelectionStateMachine {
    * Creates a new TargetSelectionStateMachine.
    *
    * @param hubShotCalculator the shot calculator for hub shots
-   * @param outpostPassCalculator the shot calculator for outpost passes
+   * @param passCalculator the shot calculator for passes
    * @param robotPoseSupplier supplier for the robot's current pose
    */
   public TargetSelectionStateMachine(
       ShotCalculator hubShotCalculator,
-      ShotCalculator outpostPassCalculator,
+      ShotCalculator passCalculator,
       Supplier<Pose2d> robotPoseSupplier) {
     this.hubShotCalculator = hubShotCalculator;
-    this.outpostPassCalculator = outpostPassCalculator;
+    this.passCalculator = passCalculator;
     this.robotPoseSupplier = robotPoseSupplier;
   }
 
@@ -69,7 +69,7 @@ public class TargetSelectionStateMachine {
    */
   public ShotCalculator getActiveCalculator() {
     if (currentState == TargetInternalStates.AT_OUTPOST) {
-      return outpostPassCalculator;
+      return passCalculator;
     }
     return hubShotCalculator;
   }

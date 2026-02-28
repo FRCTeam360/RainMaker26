@@ -513,7 +513,7 @@ public class RobotContainer {
     hubShotCalculator.clearShootingParams();
     // hubShotCalculator.calculateShot();
     passCalculator.clearShootingParams();
-    // outpostPassCalculator.calculateShot();
+    // passCalculator.calculateShot();
   }
 
   /**
