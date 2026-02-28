@@ -26,7 +26,7 @@ public class ShooterStateMachine {
   public enum ShooterStates {
     PREPARING_TO_FIRE,
     FIRING,
-    PASSIVE_PREPARING,
+    WAITING,
     IDLE
   }
 
@@ -125,7 +125,7 @@ public class ShooterStateMachine {
         }
         break;
       case PASSIVE_SHOOTER:
-        currentState = ShooterStates.PASSIVE_PREPARING;
+        currentState = ShooterStates.WAITING;
         break;
       case IDLE:
       default:
@@ -150,9 +150,9 @@ public class ShooterStateMachine {
         hood.setWantedState(HoodWantedStates.AIMING);
         flywheelKicker.setWantedState(FlywheelKickerStates.KICKING);
         break;
-      case PASSIVE_PREPARING:
-        flywheel.setWantedState(FlywheelWantedStates.SHOOTING);
-        hood.setWantedState(HoodWantedStates.PASSIVE_PREP);
+      case WAITING:
+        flywheel.setWantedState(FlywheelWantedStates.COASTING);
+        hood.setWantedState(HoodWantedStates.DUCKED);
         flywheelKicker.setWantedState(FlywheelKickerStates.IDLE);
         break;
       case IDLE:

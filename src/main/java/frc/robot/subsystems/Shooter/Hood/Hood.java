@@ -28,7 +28,7 @@ public class Hood extends SubsystemBase {
   public enum HoodWantedStates {
     IDLE,
     AIMING,
-    PASSIVE_PREP
+    DUCKED
   }
 
   public enum HoodInternalStates {
@@ -90,7 +90,7 @@ public class Hood extends SubsystemBase {
       case AIMING:
         holdShootingPosition();
         break;
-      case PASSIVE_PREP:
+      case DUCKED:
         // TODO: keep as is until we are confident with our localization to not default to ducking
         // when in PASSIVE_PREP mode. We currently call this for logging purposes to validate the
         // logic works

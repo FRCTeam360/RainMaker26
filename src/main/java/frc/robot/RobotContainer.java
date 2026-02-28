@@ -328,7 +328,7 @@ public class RobotContainer {
                     driverCont,
                     () -> {
                       if (superStructure.getCurrentSuperState()
-                          == SuperInternalStates.SHOOT_PASSING) {
+                          == SuperInternalStates.PASSING) {
                         return passCalculator.calculateShot().targetHeading();
                       }
                       return hubShotCalculator.calculateShot().targetHeading();

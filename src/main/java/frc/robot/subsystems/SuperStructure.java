@@ -60,8 +60,8 @@ public class SuperStructure extends SubsystemBase {
     DEFAULT, // flywheel spun up, hood prepping with ducking
     IDLE, // everything is stopped
     INTAKING, // intake button pressed
-    SHOOT_AT_HUB,
-    SHOOT_PASSING
+    SHOOTING_AT_HUB,
+    PASSING
   }
 
   // State variables
@@ -119,20 +119,20 @@ public class SuperStructure extends SubsystemBase {
       case SHOOT_AT_HUB:
         targetSelectionStateMachine.setWantedState(TargetWantedStates.HUB);
         targetSelectionStateMachine.update();
-        currentSuperState = SuperInternalStates.SHOOT_AT_HUB;
+        currentSuperState = SuperInternalStates.SHOOTING_AT_HUB;
         break;
       case SHOOT_AT_OUTPOST:
         targetSelectionStateMachine.setWantedState(TargetWantedStates.OUTPOST);
         targetSelectionStateMachine.update();
-        currentSuperState = SuperInternalStates.SHOOT_PASSING;
+        currentSuperState = SuperInternalStates.PASSING;
         break;
       case AUTO_CYCLE_SHOOTING:
         targetSelectionStateMachine.setWantedState(TargetWantedStates.AUTO);
         targetSelectionStateMachine.update();
         if (targetSelectionStateMachine.getState() == TargetInternalStates.AT_HUB) {
-          currentSuperState = SuperInternalStates.SHOOT_AT_HUB;
+          currentSuperState = SuperInternalStates.SHOOTING_AT_HUB;
         } else {
-          currentSuperState = SuperInternalStates.SHOOT_PASSING;
+          currentSuperState = SuperInternalStates.PASSING;
         }
         break;
       case IDLE:
@@ -155,12 +155,12 @@ public class SuperStructure extends SubsystemBase {
       case IDLE:
         stopped();
         break;
-      case SHOOT_AT_HUB:
-      case SHOOT_PASSING:
+      case SHOOTING_AT_HUB:
+      case PASSING:
         shooting();
         break;
       case DEFAULT:
-        passivePrep();
+        passive_preparing();
         break;
     }
   }
@@ -180,7 +180,7 @@ public class SuperStructure extends SubsystemBase {
     }
   }
 
-  private void passivePrep() {
+  private void passive_preparing() {
     intake.setWantedState(Intake.IntakeStates.OFF);
     indexer.setWantedState(Indexer.IndexerStates.OFF);
     intakePivot.setWantedState(IntakePivotWantedStates.OFF);
