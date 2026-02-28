@@ -31,9 +31,7 @@ public class IntakePivot extends SubsystemBase {
   public enum IntakePivotInternalStates {
     OFF,
     MOVING_TO_SETPOINT,
-    AT_SETPOINT,
-    AGITATING_HIGH,
-    AGITATING_LOW
+    AT_SETPOINT
   }
 
   // State variables
@@ -41,6 +39,8 @@ public class IntakePivot extends SubsystemBase {
   private IntakePivotInternalStates currentState = IntakePivotInternalStates.OFF;
   private IntakePivotInternalStates previousState = IntakePivotInternalStates.OFF;
   private ControlState controlState = ControlState.SUPERSTRUCTURE;
+  // For agitation cycle
+  private boolean agitateTargetHigh = true;
 
   // Constructor
 
@@ -79,15 +79,16 @@ public class IntakePivot extends SubsystemBase {
                 ? IntakePivotInternalStates.AT_SETPOINT
                 : IntakePivotInternalStates.MOVING_TO_SETPOINT;
         break;
-      case AGITATE_HOPPER:
-        if (shouldHighToLow()) {
-          currentState = IntakePivotInternalStates.AGITATING_LOW;
-        } else if (shouldLowToHigh()) {
-          currentState = IntakePivotInternalStates.AGITATING_HIGH;
-        } else if (!shouldHighToLow() && !shouldLowToHigh()) {
-          currentState = IntakePivotInternalStates.AGITATING_HIGH;
+      case AGITATE_HOPPER: {
+        double target = agitateTargetHigh ? HIGH_AGITATED_POSITION : LOW_AGITATED_POSITION;
+        if (atSetpoint(target)) {
+          agitateTargetHigh = !agitateTargetHigh; // Flip for next cycle
+          currentState = IntakePivotInternalStates.AT_SETPOINT;
+        } else {
+          currentState = IntakePivotInternalStates.MOVING_TO_SETPOINT;
         }
         break;
+      }
       default:
         currentState = IntakePivotInternalStates.AT_SETPOINT;
         break;
@@ -100,12 +101,6 @@ public class IntakePivot extends SubsystemBase {
       case AT_SETPOINT:
         setPosition(getTargetPosition());
         break;
-      case AGITATING_HIGH:
-        setPosition(HIGH_AGITATED_POSITION);
-        break;
-      case AGITATING_LOW:
-        setPosition(LOW_AGITATED_POSITION);
-        break;
       case OFF:
       default:
         stop();
@@ -114,6 +109,8 @@ public class IntakePivot extends SubsystemBase {
 
   private double getTargetPosition() {
     switch (wantedState) {
+      case AGITATE_HOPPER:
+        return agitateTargetHigh ? HIGH_AGITATED_POSITION : LOW_AGITATED_POSITION;
       case DEPLOYED:
         return DEPLOYED_POSITION_DEGREES;
       case STOWED:
@@ -132,23 +129,7 @@ public class IntakePivot extends SubsystemBase {
     return Math.abs(inputs.position - setpoint) < TOLERANCE;
   }
 
-  public boolean shouldLowToHigh() {
-    boolean isAtLowPosition = false;
-    if (this.getState() == IntakePivotInternalStates.AGITATING_LOW
-        && atSetpoint(LOW_AGITATED_POSITION)) {
-      isAtLowPosition = true;
-    }
-    return isAtLowPosition;
-  }
-
-  public boolean shouldHighToLow() {
-    boolean isAtHighPosition = false;
-    if (this.getState() == IntakePivotInternalStates.AGITATING_HIGH
-        && atSetpoint(HIGH_AGITATED_POSITION)) {
-      isAtHighPosition = true;
-    }
-    return isAtHighPosition;
-  }
+  // No longer needed: shouldLowToHigh/shouldHighToLow
 
   public void setDutyCycle(double value) {
     io.setDutyCycle(value);
