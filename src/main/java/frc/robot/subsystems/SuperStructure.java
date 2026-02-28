@@ -11,6 +11,7 @@ import frc.robot.subsystems.HopperRoller.HopperRoller.HopperRollerStates;
 import frc.robot.subsystems.Indexer.Indexer;
 import frc.robot.subsystems.Indexer.Indexer.IndexerStates;
 import frc.robot.subsystems.Intake.Intake;
+import frc.robot.subsystems.Intake.Intake.IntakeStates;
 import frc.robot.subsystems.IntakePivot.IntakePivot;
 import frc.robot.subsystems.IntakePivot.IntakePivot.IntakePivotWantedStates;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel;
@@ -174,6 +175,7 @@ public class SuperStructure extends SubsystemBase {
       indexer.setWantedState(IndexerStates.SHOOTING);
       hopperRoller.setWantedState(HopperRollerStates.ROLLING);
       intakePivot.setWantedState(IntakePivotWantedStates.AGITATE_HOPPER);
+      intake.setWantedState(IntakeStates.ASSIST_SHOOTING);
     } else {
       indexer.setWantedState(IndexerStates.OFF);
       hopperRoller.setWantedState(HopperRollerStates.OFF);
@@ -183,7 +185,7 @@ public class SuperStructure extends SubsystemBase {
   private void passive_preparing() {
     intake.setWantedState(Intake.IntakeStates.OFF);
     indexer.setWantedState(Indexer.IndexerStates.OFF);
-    intakePivot.setWantedState(IntakePivotWantedStates.OFF);
+    intakePivot.setWantedState(IntakePivotWantedStates.DEPLOYED);
     hopperRoller.setWantedState(HopperRollerStates.OFF);
     shooterStateMachine.setWantedState(ShooterWantedStates.PASSIVE_SHOOTER);
   }

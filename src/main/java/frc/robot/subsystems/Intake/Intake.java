@@ -29,7 +29,7 @@ public class Intake extends SubsystemBase {
   public enum IntakeStates {
     OFF,
     INTAKING,
-    SHOOTING,
+    ASSIST_SHOOTING,
     // JAMMED
   }
 
@@ -75,8 +75,8 @@ public class Intake extends SubsystemBase {
         currentState = IntakeStates.INTAKING;
         break;
 
-      case SHOOTING:
-        currentState = IntakeStates.SHOOTING;
+      case ASSIST_SHOOTING:
+        currentState = IntakeStates.ASSIST_SHOOTING;
         break;
       case OFF:
       default:
@@ -92,7 +92,7 @@ public class Intake extends SubsystemBase {
       case INTAKING:
         intaking();
         break;
-      case SHOOTING:
+      case ASSIST_SHOOTING:
         shootAssist();
         break;
       case OFF:
@@ -109,7 +109,8 @@ public class Intake extends SubsystemBase {
   }
 
   private void intaking() {
-    setDutyCycle(dutyCycleSupplier.getAsDouble());
+    setVelocity(1500);
+    ;
   }
 
   // private void unjamIntake() {
