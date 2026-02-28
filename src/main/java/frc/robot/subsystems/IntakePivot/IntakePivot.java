@@ -33,7 +33,9 @@ public class IntakePivot extends SubsystemBase {
   public enum IntakePivotInternalStates {
     OFF,
     MOVING_TO_SETPOINT,
-    AT_SETPOINT
+    AT_SETPOINT,
+    SWITCHING_AGITATE_TARGET_HIGH,
+    SWITCHING_AGITATE_TARGET_LOW
   }
 
   // State variables
@@ -81,15 +83,30 @@ public class IntakePivot extends SubsystemBase {
                 ? IntakePivotInternalStates.AT_SETPOINT
                 : IntakePivotInternalStates.MOVING_TO_SETPOINT;
         break;
-      case AGITATE_HOPPER: {
-        double target = agitateTargetHigh ? HIGH_AGITATED_POSITION_DEGREES : LOW_AGITATED_POSITION_DEGREES;
-        boolean atTarget = atSetpoint(target);
-        if (previousState == IntakePivotInternalStates.MOVING_TO_SETPOINT && atTarget) {
-          agitateTargetHigh = !agitateTargetHigh;
+      case AGITATE_HOPPER:
+        {
+          double target =
+              agitateTargetHigh ? HIGH_AGITATED_POSITION_DEGREES : LOW_AGITATED_POSITION_DEGREES;
+          boolean atTarget = atSetpoint(target);
+          if (previousState == IntakePivotInternalStates.MOVING_TO_SETPOINT && atTarget) {
+            currentState =
+                agitateTargetHigh
+                    ? IntakePivotInternalStates.SWITCHING_AGITATE_TARGET_LOW
+                    : IntakePivotInternalStates.SWITCHING_AGITATE_TARGET_HIGH;
+          } else if (currentState == IntakePivotInternalStates.SWITCHING_AGITATE_TARGET_HIGH) {
+            agitateTargetHigh = true;
+            currentState = IntakePivotInternalStates.AT_SETPOINT;
+          } else if (currentState == IntakePivotInternalStates.SWITCHING_AGITATE_TARGET_LOW) {
+            agitateTargetHigh = false;
+            currentState = IntakePivotInternalStates.AT_SETPOINT;
+          } else {
+            currentState =
+                atTarget
+                    ? IntakePivotInternalStates.AT_SETPOINT
+                    : IntakePivotInternalStates.MOVING_TO_SETPOINT;
+          }
+          break;
         }
-        currentState = atTarget ? IntakePivotInternalStates.AT_SETPOINT : IntakePivotInternalStates.MOVING_TO_SETPOINT;
-        break;
-      }
       case STACK_FUEL:
       default:
         currentState = IntakePivotInternalStates.OFF;
@@ -101,6 +118,8 @@ public class IntakePivot extends SubsystemBase {
     switch (currentState) {
       case MOVING_TO_SETPOINT:
       case AT_SETPOINT:
+      case SWITCHING_AGITATE_TARGET_HIGH:
+      case SWITCHING_AGITATE_TARGET_LOW:
         setPosition(getTargetPosition());
         break;
       case OFF:
