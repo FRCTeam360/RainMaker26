@@ -194,6 +194,9 @@ public final class Constants {
 
     // === HOOD ===
     public static final int HOOD_MOTOR = 34;
+
+    // === CLIMBER ===
+    public static final int CLIMBER_MOTOR = 36;
   }
 
   public static class OperatorConstants {
@@ -217,6 +220,6 @@ public final class Constants {
     } else if (!Robot.isReal()) { // KEEP AT BOTTOM
       return Constants.RobotType.SIM;
     }
-    return Constants.RobotType.WOODBOT;
+    return Constants.RobotType.PRACTICEBOT;
   }
 }
