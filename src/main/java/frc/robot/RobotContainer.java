@@ -271,7 +271,8 @@ public class RobotContainer {
                             () -> hubShotCalculator.calculateShot().targetHeading())))
             .andThen(superStructure.setStateCommand(SuperWantedStates.DEFAULT)));
 
-    // configDefaultCommands();
+    configVision();
+    configDefaultDrivingCommand();
     configureBindings();
     // configureTestBindings();
     // configureFullShootingTestBindings();
@@ -298,14 +299,16 @@ public class RobotContainer {
     }
   }
 
-  private void configDefaultCommands() {
+  private void configVision() {
     Command consumeVisionMeasurements =
         vision.consumeVisionMeasurements(
             measurements -> {
               drivetrain.addVisionMeasurements(measurements);
             });
     vision.setDefaultCommand(consumeVisionMeasurements.ignoringDisable(true));
+  }
 
+  private void configDefaultDrivingCommand() {
     drivetrain.setDefaultCommand(drivetrain.fieldOrientedDriveCommand(driverCont));
   }
 
