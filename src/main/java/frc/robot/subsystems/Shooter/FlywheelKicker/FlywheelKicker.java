@@ -13,6 +13,8 @@ import org.littletonrobotics.junction.Logger;
 public class FlywheelKicker extends SubsystemBase {
   // Constants
   private static final double KICKER_VELOCITY_RPM = 4500.0;
+  private static final double REVERSE_DUTY_CYCLE = -0.85;
+
 
   // IO fields
   private final FlywheelKickerIO io;
@@ -21,7 +23,8 @@ public class FlywheelKicker extends SubsystemBase {
   // Enums
   public enum FlywheelKickerStates {
     IDLE,
-    KICKING
+    KICKING,
+    REVERSING
   }
 
   // State variables
@@ -58,6 +61,9 @@ public class FlywheelKicker extends SubsystemBase {
       case KICKING:
         currentState = FlywheelKickerStates.KICKING;
         break;
+      case REVERSING:
+        currentState = FlywheelKickerStates.REVERSING;
+        break;
       case IDLE:
       default:
         currentState = FlywheelKickerStates.IDLE;
@@ -69,6 +75,9 @@ public class FlywheelKicker extends SubsystemBase {
     switch (currentState) {
       case KICKING:
         setVelocity(KICKER_VELOCITY_RPM);
+        break;
+      case REVERSING:
+        setDutyCycle(REVERSE_DUTY_CYCLE); 
         break;
       case IDLE:
       default:

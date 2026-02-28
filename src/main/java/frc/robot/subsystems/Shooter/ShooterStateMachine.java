@@ -20,13 +20,15 @@ public class ShooterStateMachine {
   public enum ShooterWantedStates {
     IDLE,
     SHOOTING,
-    PASSIVE_SHOOTER
+    PASSIVE_SHOOTER,
+    REVERSING
   }
 
   public enum ShooterStates {
     PREPARING_TO_FIRE,
     FIRING,
     WAITING,
+    UNJAMMING,
     IDLE
   }
 
@@ -127,6 +129,9 @@ public class ShooterStateMachine {
       case PASSIVE_SHOOTER:
         currentState = ShooterStates.WAITING;
         break;
+      case REVERSING:
+        currentState = ShooterStates.UNJAMMING;
+        break;
       case IDLE:
       default:
         currentState = ShooterStates.IDLE;
@@ -154,6 +159,11 @@ public class ShooterStateMachine {
         flywheel.setWantedState(FlywheelWantedStates.IDLE);
         hood.setWantedState(HoodWantedStates.DUCKED);
         flywheelKicker.setWantedState(FlywheelKickerStates.IDLE);
+        break;
+      case UNJAMMING:
+        flywheel.setWantedState(FlywheelWantedStates.IDLE);
+        hood.setWantedState(HoodWantedStates.AIMING);
+        flywheelKicker.setWantedState(FlywheelKickerStates.REVERSING);
         break;
       case IDLE:
       default:

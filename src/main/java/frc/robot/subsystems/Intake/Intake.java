@@ -16,7 +16,7 @@ public class Intake extends SubsystemBase {
   private static final double JAMMED_SUPPLY_CURRENT_DRAW = 35.0;
   private static final double REVERSE_UNJAM_DUTY_CYCLE = -0.5;
   private static final double INTAKING_DUTY_CYCLE = 0.8;
-  private static final double SHOOT_ASSIST_DUTY_CYCLE = 0.2;
+  private static final double SHOOT_ASSIST_DUTY_CYCLE = 0.3;
 
   // IO fields
   private final IntakeIO io;
@@ -109,8 +109,7 @@ public class Intake extends SubsystemBase {
   }
 
   private void intaking() {
-    setVelocity(1500);
-    ;
+    setVelocity(1100);
   }
 
   // private void unjamIntake() {

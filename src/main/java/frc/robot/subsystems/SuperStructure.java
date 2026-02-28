@@ -54,7 +54,8 @@ public class SuperStructure extends SubsystemBase {
     // TODO: not yet implemented
     DEFENSE,
     X_OUT,
-    EJECTING
+    EJECTING,
+    UNJAMMING
   }
 
   public enum SuperInternalStates {
@@ -62,7 +63,8 @@ public class SuperStructure extends SubsystemBase {
     IDLE, // everything is stopped
     INTAKING, // intake button pressed
     SHOOTING_AT_HUB,
-    PASSING
+    PASSING,
+    UNJAMMING
   }
 
   // State variables
@@ -139,6 +141,9 @@ public class SuperStructure extends SubsystemBase {
       case IDLE:
         currentSuperState = SuperInternalStates.IDLE;
         break;
+      case UNJAMMING:
+        currentSuperState = SuperInternalStates.UNJAMMING;
+        break;
       case DEFAULT:
       default:
         targetSelectionStateMachine.setWantedState(TargetWantedStates.AUTO);
@@ -160,6 +165,9 @@ public class SuperStructure extends SubsystemBase {
       case PASSING:
         shooting();
         break;
+      case UNJAMMING:
+        unjamming();
+        break;
       case DEFAULT:
         passive_preparing();
         break;
@@ -172,7 +180,7 @@ public class SuperStructure extends SubsystemBase {
     shooterStateMachine.setWantedState(ShooterWantedStates.SHOOTING);
 
     if (shooterStateMachine.getState() == ShooterStates.FIRING) {
-      indexer.setWantedState(IndexerStates.SHOOTING);
+      indexer.setWantedState(IndexerStates.INDEXING);
       hopperRoller.setWantedState(HopperRollerStates.ROLLING);
       intakePivot.setWantedState(IntakePivotWantedStates.AGITATE_HOPPER);
       intake.setWantedState(IntakeStates.ASSIST_SHOOTING);
@@ -205,6 +213,11 @@ public class SuperStructure extends SubsystemBase {
     shooterStateMachine.setWantedState(ShooterWantedStates.IDLE);
   }
 
+  private  void unjamming() {
+  indexer.setWantedState(IndexerStates.REVERSING);
+  shooterStateMachine.setWantedState(ShooterWantedStates.REVERSING);
+  hopperRoller.setWantedState(HopperRollerStates.REVERSING);
+  }
   private boolean canShootToTarget() {
     switch (wantedSuperState) {
       case SHOOT_AT_HUB:
