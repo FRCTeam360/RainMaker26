@@ -9,14 +9,28 @@
           {
             "title": "Superstructure",
             "x": 896.0,
-            "y": 128.0,
+            "y": 0.0,
             "width": 256.0,
-            "height": 384.0,
+            "height": 512.0,
             "type": "List Layout",
             "properties": {
               "label_position": "TOP"
             },
             "children": [
+              {
+                "title": "ControlState",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/SmartDashboard/Superstructure/ControlState",
+                  "period": 0.06,
+                  "data_type": "string",
+                  "show_submit_button": false
+                }
+              },
               {
                 "title": "CurrentShooterState",
                 "x": 0.0,
@@ -74,6 +88,20 @@
                 }
               },
               {
+                "title": "WantedShooterState",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/SmartDashboard/Superstructure/WantedShooterState",
+                  "period": 0.06,
+                  "data_type": "string",
+                  "show_submit_button": false
+                }
+              },
+              {
                 "title": "WantedSuperState",
                 "x": 0.0,
                 "y": 0.0,
@@ -106,8 +134,8 @@
           },
           {
             "title": "Auto Chooser",
-            "x": 896.0,
-            "y": 0.0,
+            "x": 640.0,
+            "y": 384.0,
             "width": 256.0,
             "height": 128.0,
             "type": "ComboBox Chooser",
