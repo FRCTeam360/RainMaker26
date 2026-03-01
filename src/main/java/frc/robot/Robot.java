@@ -161,7 +161,9 @@ public class Robot extends LoggedRobot {
       Logger.recordOutput("HubPhase", Constants.HUB_PHASE);
     }
     Logger.recordOutput("AutoWinner", Constants.AUTO_WINNER);
-    SmartDashboard.putString("AutoWinner", Constants.AUTO_WINNER.name());
+    if (Objects.nonNull(Constants.AUTO_WINNER)) {
+      SmartDashboard.putString("AutoWinner", Constants.AUTO_WINNER.name());
+    }
 
     boolean hubActive =
         RobotUtils.hubActive(
