@@ -109,6 +109,7 @@ public class ShooterStateMachine {
         Logger.recordOutput("Superstructure/Shooting/FlywheelReady", flywheelReady);
         Logger.recordOutput("Superstructure/Shooting/HoodReady", hoodReady);
         Logger.recordOutput("Superstructure/Shooting/DrivetrainAligned", drivetrainAligned);
+        Logger.recordOutput("Superstructure/Shooting/HubShootable", targetReady);
 
         // Enter FIRING when flywheel reaches AT_SETPOINT (with hood + drivetrain ready).
         // Stay in FIRING through bang-bang oscillations — only revert to PREPARING_TO_FIRE
@@ -119,7 +120,6 @@ public class ShooterStateMachine {
                 && drivetrainAligned
                 && targetReady;
         Logger.recordOutput("Superstructure/Shooting/Aligned", drivetrainAligned);
-        Logger.recordOutput("Superstructure/Shooting/HubShootable", targetReady);
 
         if (shouldFire) {
           currentState = ShooterStates.FIRING;
