@@ -124,31 +124,6 @@ public class ShotCalculator {
     double shooterVelXMps = shooterFieldVelocity.getX();
     double shooterVelYMps = shooterFieldVelocity.getY();
 
-    // Log analytical shooter velocity for verification against numerical derivative
-    Logger.recordOutput("ShotCalculator/analyticalVelXMps", shooterVelXMps);
-    Logger.recordOutput("ShotCalculator/analyticalVelYMps", shooterVelYMps);
-    Logger.recordOutput(
-        "ShotCalculator/shooterPosition",
-        new Pose2d(shooterPosition.getTranslation(), Rotation2d.kZero));
-
-    // Compute numerical velocity from cycle-over-cycle shooter position delta.
-    // Compare these values against the analytical ones above to verify the
-    // rotational offset math (especially the shooterOffsetY terms).
-    double now = Timer.getFPGATimestamp();
-    if (prevShooterPosition != null) {
-      double dt = now - prevTimestampSeconds;
-      if (dt > 0.0) {
-        double numericalVelXMps = (shooterPosition.getX() - prevShooterPosition.getX()) / dt;
-        double numericalVelYMps = (shooterPosition.getY() - prevShooterPosition.getY()) / dt;
-        Logger.recordOutput("ShotCalculator/numericalVelXMps", numericalVelXMps);
-        Logger.recordOutput("ShotCalculator/numericalVelYMps", numericalVelYMps);
-        Logger.recordOutput("ShotCalculator/velErrorXMps", shooterVelXMps - numericalVelXMps);
-        Logger.recordOutput("ShotCalculator/velErrorYMps", shooterVelYMps - numericalVelYMps);
-      }
-    }
-    prevShooterPosition = shooterPosition.getTranslation();
-    prevTimestampSeconds = now;
-
     // Calculate the initial distance from the shooter to the target
     double shooterToTargetDistanceMeters = target.getDistance(shooterPosition.getTranslation());
 
