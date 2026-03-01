@@ -5,8 +5,6 @@ import edu.wpi.first.math.geometry.Rectangle2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.robot.utils.FieldConstants.LinesHorizontal;
 import frc.robot.utils.FieldConstants.LinesVertical;
 import frc.robot.utils.FieldConstants.RightTrench;
@@ -90,11 +88,14 @@ public class PositionUtils {
 
   public static boolean isInPassingZone(Pose2d robotPose, Transform2d robotToShooter) {
     double robotX = robotPose.getX();
-    Alliance alliance = DriverStation.getAlliance().get();
-    double oppDSWall = FieldConstants.fieldLength;
+    double hubCenter;
+    double oppHubCenter;
+    double oppDSWall = 0.0;
 
     if (AllianceFlipUtil.shouldFlip()) {
-      oppDSWall = AllianceFlipUtil.applyX(FieldConstants.fieldLength);
+      hubCenter = AllianceFlipUtil.applyX(LinesVertical.hubCenter);
+      oppHubCenter = AllianceFlipUtil.applyX(LinesVertical.oppHubCenter);
+      oppDSWall = FieldConstants.fieldLength;
     }
 
     final Rectangle2d neutralNoFlyZone =
