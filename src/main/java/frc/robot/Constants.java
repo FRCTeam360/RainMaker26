@@ -5,8 +5,6 @@
 package frc.robot;
 
 import com.ctre.phoenix6.CANBus;
-import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.hal.HALUtil;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 
@@ -19,8 +17,6 @@ import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
-  public static final AprilTagFieldLayout FIELD_LAYOUT =
-      AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
 
   public static enum RobotType {
     SIM,

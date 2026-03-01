@@ -23,7 +23,7 @@ public class HopperRollerIOPB implements HopperRollerIO {
   private final SparkFlexConfig sparkFlexConfig = new SparkFlexConfig();
 
   public HopperRollerIOPB() {
-    sparkFlexConfig.idleMode(IdleMode.kCoast);
+    sparkFlexConfig.idleMode(IdleMode.kBrake);
     sparkFlexConfig.inverted(true);
 
     sparkFlexConfig.encoder.positionConversionFactor(1.0 / GEAR_RATIO);

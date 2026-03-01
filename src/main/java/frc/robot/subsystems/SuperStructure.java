@@ -202,6 +202,7 @@ public class SuperStructure extends SubsystemBase {
     intake.setWantedState(Intake.IntakeStates.INTAKING);
     intakePivot.setWantedState(IntakePivotWantedStates.DEPLOYED);
     shooterStateMachine.setWantedState(ShooterWantedStates.IDLE);
+    hopperRoller.setWantedState(HopperRollerStates.REVERSING);
     // indexer.setWantedState(Indexer.IndexerStates.INTAKING);
   }
 
@@ -224,7 +225,7 @@ public class SuperStructure extends SubsystemBase {
   private boolean canShootToTarget() {
     switch (wantedSuperState) {
       case SHOOT_AT_HUB:
-        if (!DriverStation.isDSAttached()) {
+        if (!DriverStation.isFMSAttached()) {
           return true;
         }
         return RobotUtils.hubActive(

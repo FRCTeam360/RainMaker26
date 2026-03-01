@@ -8,7 +8,7 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import frc.robot.Constants;
+import frc.robot.utils.FieldConstants;
 import frc.robot.utils.LimelightHelpers;
 import frc.robot.utils.LimelightHelpers.PoseEstimate;
 import frc.robot.utils.LimelightHelpers.RawFiducial;
@@ -108,7 +108,7 @@ public abstract class VisionIOLimelightBase implements VisionIO {
     for (int i = 0; i < poseEstimate.rawFiducials.length; i++) {
       RawFiducial rawFiducial = poseEstimate.rawFiducials[i];
       // if the pose is outside of the field, then skip to the next point
-      Optional<Pose3d> tagPose = Constants.FIELD_LAYOUT.getTagPose(rawFiducial.id);
+      Optional<Pose3d> tagPose = FieldConstants.FIELD_LAYOUT.getTagPose(rawFiducial.id);
       if (targetCount >= MAX_TAGS || tagPose.isEmpty()) continue;
 
       inputs.targetIds[targetCount] = rawFiducial.id;
