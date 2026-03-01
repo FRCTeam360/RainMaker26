@@ -1,10 +1,41 @@
-%% HopperRoller State Machine
-%% Reflects actual code in HopperRoller.java
+---
+title: HopperRoller State Machine
+---
 stateDiagram-v2
     [*] --> OFF
 
     OFF --> ROLLING : SuperStructure sets ROLLING
     ROLLING --> OFF : SuperStructure sets OFF
 
-    note right of OFF : Duty cycle = 0.0
-    note right of ROLLING : Duty cycle = 1.0
+    OFF --> PREVENT_JAM : SuperStructure sets PREVENT_JAM
+    PREVENT_JAM --> OFF : SuperStructure sets OFF
+
+    OFF --> UNJAMMING : SuperStructure sets UNJAMMING
+    UNJAMMING --> OFF : SuperStructure sets OFF
+
+    ROLLING --> PREVENT_JAM : SuperStructure sets PREVENT_JAM
+    PREVENT_JAM --> ROLLING : SuperStructure sets ROLLING
+    ROLLING --> UNJAMMING : SuperStructure sets UNJAMMING
+    UNJAMMING --> ROLLING : SuperStructure sets ROLLING
+    PREVENT_JAM --> UNJAMMING : SuperStructure sets UNJAMMING
+    UNJAMMING --> PREVENT_JAM : SuperStructure sets PREVENT_JAM
+
+    note right of OFF
+        Duty cycle = 0.0
+        Motor stopped
+    end note
+
+    note right of ROLLING
+        Duty cycle = 0.75
+        Normal feeding operation
+    end note
+
+    note right of PREVENT_JAM
+        Duty cycle = -0.1
+        Gentle reverse to prevent jams
+    end note
+
+    note right of UNJAMMING
+        Duty cycle = -0.8
+        Strong reverse to clear jams
+    end note

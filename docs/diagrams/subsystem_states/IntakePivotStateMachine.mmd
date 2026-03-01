@@ -1,32 +1,59 @@
-%% IntakePivot State Machine
-%% Reflects actual code in IntakePivot.java (2026-02-27)
+---
+title: IntakePivot State Machine
+---
 stateDiagram-v2
-    [*] --> OFF
+    state "Wanted: OFF" as WOFF
+    state "Wanted: STOWED" as WSTOWED
+    state "Wanted: DEPLOYED" as WDEPLOYED
+    state "Wanted: AGITATE_HOPPER" as WAGITATE
+    state "Wanted: STACK_FUEL" as WSTACK
 
-    OFF --> STOWED : SuperStructure sets STOWED
-    STOWED --> OFF : SuperStructure sets OFF
+    [*] --> WOFF
+    WOFF --> WSTOWED : SuperStructure sets<br>STOWED
+    WSTOWED --> WDEPLOYED : SuperStructure sets<br>DEPLOYED
+    WDEPLOYED --> WSTOWED : SuperStructure sets<br>STOWED
+    WSTOWED --> WAGITATE : SuperStructure sets<br>AGITATE_HOPPER
+    WAGITATE --> WSTOWED : SuperStructure sets<br>STOWED
+    WDEPLOYED --> WAGITATE : SuperStructure sets<br>AGITATE_HOPPER
+    WAGITATE --> WDEPLOYED : SuperStructure sets<br>DEPLOYED
+    WOFF --> WSTACK : SuperStructure sets<br>STACK_FUEL
+    WSTACK --> WOFF : SuperStructure sets<br>OFF
+    WSTOWED --> WOFF : SuperStructure sets<br>OFF
+    WOFF --> WDEPLOYED : SuperStructure sets<br>DEPLOYED
+    WDEPLOYED --> WOFF : SuperStructure sets<br>OFF
 
-    OFF --> DEPLOYED : SuperStructure sets DEPLOYED
-    DEPLOYED --> OFF : SuperStructure sets OFF
+    state WSTOWED {
+        [*] --> MOVING_TO_SETPOINT_STOWED
 
-    STOWED --> DEPLOYED : SuperStructure sets DEPLOYED
-    DEPLOYED --> STOWED : SuperStructure sets STOWED
-
-    OFF --> AGITATE_HOPPER : SuperStructure sets AGITATE_HOPPER
-    STOWED --> AGITATE_HOPPER : SuperStructure sets AGITATE_HOPPER
-    DEPLOYED --> AGITATE_HOPPER : SuperStructure sets AGITATE_HOPPER
-    AGITATE_HOPPER --> OFF : SuperStructure sets OFF
-
-    state AGITATE_HOPPER {
-        [*] --> MOVING_TO_SETPOINT
-        MOVING_TO_SETPOINT --> SWITCHING_AGITATE_TARGET_HIGH : atSetpoint, target LOW
-        MOVING_TO_SETPOINT --> SWITCHING_AGITATE_TARGET_LOW : atSetpoint, target HIGH
-        SWITCHING_AGITATE_TARGET_HIGH --> AT_SETPOINT : switch to HIGH
-        SWITCHING_AGITATE_TARGET_LOW --> AT_SETPOINT : switch to LOW
-        AT_SETPOINT --> MOVING_TO_SETPOINT : new target set
+        MOVING_TO_SETPOINT_STOWED --> AT_SETPOINT_STOWED : Position within<br>2° of 0° (stowed)
     }
 
-    note right of OFF : Position set to 0.0
-    note right of STOWED : Position set to 0.0°
-    note right of DEPLOYED : Position set to 93.0°
-    note right of AGITATE_HOPPER : Alternates between 60.0° and 30.0°
+    state WDEPLOYED {
+        [*] --> MOVING_TO_SETPOINT_DEPLOYED
+
+        MOVING_TO_SETPOINT_DEPLOYED --> AT_SETPOINT_DEPLOYED : Position within<br>2° of 93° (deployed)
+    }
+
+    state WAGITATE {
+        [*] --> MOVING_TO_SETPOINT_AGITATE
+
+        MOVING_TO_SETPOINT_AGITATE --> AT_SETPOINT_AGITATE : Position within<br>2° of target (60° or 80°)
+        AT_SETPOINT_AGITATE --> SWITCHING_AGITATE_TARGET_LOW : At high position (60°),<br>switch target to low
+        AT_SETPOINT_AGITATE --> SWITCHING_AGITATE_TARGET_HIGH : At low position (80°),<br>switch target to high
+        SWITCHING_AGITATE_TARGET_LOW --> AT_SETPOINT_AGITATE : Target set to 80°,<br>continue agitation
+        SWITCHING_AGITATE_TARGET_HIGH --> AT_SETPOINT_AGITATE : Target set to 60°,<br>continue agitation
+    }
+
+    note right of WOFF : Motor duty cycle = 0.0
+    note right of WSTOWED : Motor moves to 0° (stowed position)
+    note right of MOVING_TO_SETPOINT_STOWED : Position control to 0°
+    note right of AT_SETPOINT_STOWED : Holding at 0° within tolerance
+    note right of WDEPLOYED : Motor moves to 93° (deployed position)
+    note right of MOVING_TO_SETPOINT_DEPLOYED : Position control to 93°
+    note right of AT_SETPOINT_DEPLOYED : Holding at 93° within tolerance
+    note right of WAGITATE : Motor oscillates between 60° and 80°<br>to agitate hopper contents
+    note right of MOVING_TO_SETPOINT_AGITATE : Position control to current target<br>(60° or 80°)
+    note right of AT_SETPOINT_AGITATE : Holding at target position<br>before switching
+    note right of SWITCHING_AGITATE_TARGET_HIGH : Switching to high position (60°)
+    note right of SWITCHING_AGITATE_TARGET_LOW : Switching to low position (80°)
+    note right of WSTACK : Motor at stack fuel position (20°)<br>(Currently returns to OFF)

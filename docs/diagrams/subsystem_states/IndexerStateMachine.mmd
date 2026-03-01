@@ -1,14 +1,42 @@
-%% Indexer State Machine
-%% Reflects actual code in Indexer.java
+---
+title: Indexer State Machine
+---
 stateDiagram-v2
     [*] --> OFF
 
-    OFF --> INTAKING : SuperStructure sets INTAKING
-    INTAKING --> OFF : SuperStructure sets OFF
+    OFF --> ASSIST_INTAKING : SuperStructure sets ASSIST_INTAKING
+    ASSIST_INTAKING --> OFF : SuperStructure sets OFF
 
-    OFF --> SHOOTING : SuperStructure sets SHOOTING
-    SHOOTING --> OFF : SuperStructure sets OFF
+    OFF --> INDEXING : SuperStructure sets INDEXING
+    INDEXING --> OFF : SuperStructure sets OFF
 
-    note right of OFF : Duty cycle = 0.0
-    note right of INTAKING : Duty cycle = 0.4
-    note right of SHOOTING : Duty cycle = 0.4<br>(same output as INTAKING)
+    OFF --> REVERSING : SuperStructure sets REVERSING
+    REVERSING --> OFF : SuperStructure sets OFF
+
+    ASSIST_INTAKING --> INDEXING : SuperStructure sets INDEXING
+    INDEXING --> ASSIST_INTAKING : SuperStructure sets ASSIST_INTAKING
+    ASSIST_INTAKING --> REVERSING : SuperStructure sets REVERSING
+    INDEXING --> REVERSING : SuperStructure sets REVERSING
+    REVERSING --> INDEXING : SuperStructure sets INDEXING
+    REVERSING --> ASSIST_INTAKING : SuperStructure sets ASSIST_INTAKING
+
+    note right of OFF
+        Duty cycle = 0.0
+        Motor stopped
+    end note
+
+    note right of ASSIST_INTAKING
+        Duty cycle = -0.15
+        Reverse assist during intake
+        Prevents jamming
+    end note
+
+    note right of INDEXING
+        Duty cycle = 0.75
+        Forward feeding balls
+    end note
+
+    note right of REVERSING
+        Duty cycle = -0.35
+        Clearing jams
+    end note

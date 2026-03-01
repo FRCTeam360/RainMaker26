@@ -1,19 +1,29 @@
-%% Intake State Machine
-%% Reflects actual code in Intake.java
+---
+title: Intake State Machine
+---
 stateDiagram-v2
     [*] --> OFF
 
     OFF --> INTAKING : SuperStructure sets INTAKING
     INTAKING --> OFF : SuperStructure sets OFF
 
-    OFF --> SHOOTING : SuperStructure sets SHOOTING
-    SHOOTING --> OFF : SuperStructure sets OFF
+    OFF --> ASSIST_SHOOTING : SuperStructure sets ASSIST_SHOOTING
+    ASSIST_SHOOTING --> OFF : SuperStructure sets OFF
 
-    note right of OFF : Duty cycle = 0.0
-    note right of INTAKING : Duty cycle = 0.75
-    note right of SHOOTING : Duty cycle = 0.75<br>(same output as INTAKING)
+    INTAKING --> ASSIST_SHOOTING : SuperStructure sets ASSIST_SHOOTING
+    ASSIST_SHOOTING --> INTAKING : SuperStructure sets INTAKING
 
-    %% Planned but commented out
-    state "Planned (commented out)" as PLANNED {
-        JAMMED : Supply current >= 35A<br>Reverse at -0.5 duty cycle
-    }
+    note right of OFF
+        Duty cycle = 0.0
+        Motor stopped
+    end note
+
+    note right of INTAKING
+        Duty cycle = 0.8
+        Full intake power
+    end note
+
+    note right of ASSIST_SHOOTING
+        Duty cycle = 0.3
+        Gentle feeding during shots
+    end note
