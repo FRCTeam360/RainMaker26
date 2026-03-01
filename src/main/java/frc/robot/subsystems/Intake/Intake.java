@@ -113,7 +113,7 @@ public class Intake extends SubsystemBase {
     if (Constants.getRobotType() != Constants.RobotType.WOODBOT) {
       setVelocity(1100);
     } else {
-      setDutyCycle(0.5);
+      setDutyCycle(0.7);
     }
   }
 
