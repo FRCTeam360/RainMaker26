@@ -93,6 +93,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   private Rotation2d m_lastTargetHeading = new Rotation2d();
   private double m_lastTimestamp = 0.0;
   private boolean m_headingFeedforwardEnabled = false; // Tunable flag to enable/disable
+  private static final double MAX_HEADING_RATE_FEEDFORWARD_RAD_PER_SEC =
+      10.0; // Clamp feedforward to prevent spikes
 
   public final Command fieldOrientedDriveCommand(
       CommandXboxController driveCont) { // field oriented drive command!
@@ -378,6 +380,12 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     // Calculate heading rate (rad/s)
     double headingDelta = currentTargetHeading.minus(m_lastTargetHeading).getRadians();
     double headingRate = headingDelta / dt;
+
+    // Clamp to prevent extreme values from noise or discontinuities
+    headingRate =
+        Math.max(
+            -MAX_HEADING_RATE_FEEDFORWARD_RAD_PER_SEC,
+            Math.min(MAX_HEADING_RATE_FEEDFORWARD_RAD_PER_SEC, headingRate));
 
     // Update tracking variables
     m_lastTargetHeading = currentTargetHeading;
