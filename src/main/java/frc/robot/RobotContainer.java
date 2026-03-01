@@ -115,6 +115,12 @@ public class RobotContainer {
 
   private static final double FLYWHEEL_KICKER_WARMUP_VELOCITY_RPM = 4000.0;
 
+  /** Threshold above which a loop cycle is considered an overrun (22ms for a 20ms loop). */
+  private static final double LOOP_OVERRUN_THRESHOLD_SECONDS = 0.022;
+
+  private double lastCycleTimestamp = Logger.getTimestamp() / 1.0e6;
+  private int overrunCount;
+
   /** Frames to skip between processed frames while disabled. Only affects Limelight 4. */
   private static final int DISABLED_THROTTLE_SKIP_FRAMES = 200;
 
@@ -547,6 +553,18 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.CommandScheduler#run()}.
    */
   public void preSchedulerUpdate() {
+    double now = Logger.getTimestamp() / 1.0e6;
+    double loopTimeSeconds = now - lastCycleTimestamp;
+    lastCycleTimestamp = now;
+
+    if (loopTimeSeconds > LOOP_OVERRUN_THRESHOLD_SECONDS) {
+      overrunCount++;
+    }
+
+    Logger.recordOutput("LoopTiming/LoopTimeSeconds", loopTimeSeconds);
+    Logger.recordOutput("LoopTiming/Overrun", loopTimeSeconds > LOOP_OVERRUN_THRESHOLD_SECONDS);
+    Logger.recordOutput("LoopTiming/OverrunCount", overrunCount);
+
     hubShotCalculator.clearShootingParams();
     // hubShotCalculator.calculateShot();
     passCalculator.clearShootingParams();
