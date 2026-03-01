@@ -70,7 +70,7 @@ public final class Constants {
     public static final InterpolatingDoubleTreeMap timeOfFlightMap =
         new InterpolatingDoubleTreeMap();
 
-    public static final double MIN_SHOT_DISTANCE_METERS = 0.0;
+    public static final double MIN_SHOT_DISTANCE_METERS = 1.0;
     public static final double MAX_SHOT_DISTANCE_METERS = 5.0;
 
     static {
@@ -89,7 +89,9 @@ public final class Constants {
       shotFlywheelSpeedMap.put(2.0, 2500.0); // THIS IS GOOD
       shotFlywheelSpeedMap.put(0.0, 2250.0);
 
-      timeOfFlightMap.put(0.0, 0.0);
+      timeOfFlightMap.put(1.939, 0.82);
+      timeOfFlightMap.put(3.011, 1.26);
+      timeOfFlightMap.put(4.704, 1.37);
 
       // === PASSING VALUES === (TODO: change placeholder values)
       passFlywheelSpeedMap.put(6.0, 4000.0);
@@ -193,6 +195,74 @@ public final class Constants {
 
     // === CLIMBER ===
     public static final int CLIMBER_MOTOR = 36;
+
+    // === SHOT CALCULATOR ===
+    public static final InterpolatingDoubleTreeMap shotHoodAngleMap =
+        new InterpolatingDoubleTreeMap();
+    public static final InterpolatingDoubleTreeMap shotFlywheelSpeedMap =
+        new InterpolatingDoubleTreeMap();
+    public static final InterpolatingDoubleTreeMap passHoodAngleMap =
+        new InterpolatingDoubleTreeMap();
+    public static final InterpolatingDoubleTreeMap passFlywheelSpeedMap =
+        new InterpolatingDoubleTreeMap();
+    public static final InterpolatingDoubleTreeMap shotTimeOfFlightMap =
+        new InterpolatingDoubleTreeMap();
+    public static final InterpolatingDoubleTreeMap passTimeOfFlightMap =
+        new InterpolatingDoubleTreeMap();
+
+    public static final double MIN_SHOT_DISTANCE_METERS = 0.0;
+    public static final double MAX_SHOT_DISTANCE_METERS = 6.0;
+    public static final double MIN_PASS_DISTANCE_METERS = 0.0;
+    public static final double MAX_PASS_DISTANCE_METERS = 10.0;
+
+    static {
+      // === HUB SHOOTING VALUES (based on PracticeBot) ===
+      shotHoodAngleMap.put(6.0, 18.0);
+      shotHoodAngleMap.put(5.0, 18.0);
+      shotHoodAngleMap.put(4.0, 15.0);
+      shotHoodAngleMap.put(3.0, 6.0);
+      shotHoodAngleMap.put(2.5, 4.0);
+      shotHoodAngleMap.put(2.0, 2.0);
+      shotHoodAngleMap.put(1.0, 0.0);
+      shotHoodAngleMap.put(0.0, 0.0);
+
+      shotFlywheelSpeedMap.put(6.0, 2500.0);
+      shotFlywheelSpeedMap.put(5.0, 2500.0);
+      shotFlywheelSpeedMap.put(4.0, 2250.0);
+      shotFlywheelSpeedMap.put(3.0, 2250.0);
+      shotFlywheelSpeedMap.put(2.5, 2150.0);
+      shotFlywheelSpeedMap.put(2.0, 2000.0);
+      shotFlywheelSpeedMap.put(1.0, 1800.0);
+      shotFlywheelSpeedMap.put(0.0, 2000.0);
+
+      shotTimeOfFlightMap.put(0.0, 0.1);
+      shotTimeOfFlightMap.put(1.0, 0.15);
+      shotTimeOfFlightMap.put(2.0, 0.2);
+      shotTimeOfFlightMap.put(3.0, 0.3);
+      shotTimeOfFlightMap.put(4.0, 0.4);
+      shotTimeOfFlightMap.put(5.0, 0.5);
+      shotTimeOfFlightMap.put(6.0, 0.6);
+
+      // === PASSING VALUES (based on PracticeBot, tuned for longer distances) ===
+      passHoodAngleMap.put(10.0, 30.0);
+      passHoodAngleMap.put(8.0, 26.0);
+      passHoodAngleMap.put(6.0, 22.0);
+      passHoodAngleMap.put(4.0, 16.0);
+      passHoodAngleMap.put(2.0, 10.0);
+
+      passFlywheelSpeedMap.put(10.0, 4500.0);
+      passFlywheelSpeedMap.put(8.0, 4000.0);
+      passFlywheelSpeedMap.put(6.0, 3500.0);
+      passFlywheelSpeedMap.put(4.0, 3000.0);
+      passFlywheelSpeedMap.put(2.0, 2500.0);
+
+      passTimeOfFlightMap.put(0.0, 0.15);
+      passTimeOfFlightMap.put(2.0, 0.3);
+      passTimeOfFlightMap.put(4.0, 0.5);
+      passTimeOfFlightMap.put(6.0, 0.7);
+      passTimeOfFlightMap.put(8.0, 0.9);
+      passTimeOfFlightMap.put(10.0, 1.1);
+    }
   }
 
   public static class OperatorConstants {
