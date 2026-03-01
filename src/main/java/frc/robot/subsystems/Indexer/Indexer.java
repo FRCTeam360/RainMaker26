@@ -13,6 +13,7 @@ import org.littletonrobotics.junction.Logger;
 public class Indexer extends SubsystemBase {
   // Constants
   private static final double INDEXER_DUTY_CYCLE = 0.75;
+  private static final double INTAKING_ASSIST_DUTY_CYCLE = -0.15;
   private static final double REVERSING_DUTY_CYCLE = -0.35;
 
   // IO fields
@@ -77,7 +78,7 @@ public class Indexer extends SubsystemBase {
   private void applyState() {
     switch (currentState) {
       case ASSIST_INTAKING:
-        setDutyCycle(INDEXER_DUTY_CYCLE);
+        setDutyCycle(INTAKING_ASSIST_DUTY_CYCLE);
         break;
       case INDEXING:
         setDutyCycle(INDEXER_DUTY_CYCLE);

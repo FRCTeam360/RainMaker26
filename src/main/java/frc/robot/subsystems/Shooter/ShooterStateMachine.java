@@ -1,5 +1,6 @@
 package frc.robot.subsystems.Shooter;
 
+import frc.robot.Constants;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel.FlywheelInternalStates;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel.FlywheelWantedStates;
@@ -148,7 +149,11 @@ public class ShooterStateMachine {
       case PREPARING_TO_FIRE:
         flywheel.setWantedState(FlywheelWantedStates.SHOOTING);
         hood.setWantedState(HoodWantedStates.AIMING);
-        flywheelKicker.setWantedState(FlywheelKickerStates.IDLE);
+        if (Constants.getRobotType() != Constants.RobotType.WOODBOT) {
+          flywheelKicker.setWantedState(FlywheelKickerStates.KICKING);
+        } else {
+          flywheelKicker.setWantedState(FlywheelKickerStates.IDLE);
+        }
         break;
       case FIRING:
         flywheel.setWantedState(FlywheelWantedStates.SHOOTING);
@@ -163,6 +168,7 @@ public class ShooterStateMachine {
       case UNJAMMING:
         flywheel.setWantedState(FlywheelWantedStates.IDLE);
         hood.setWantedState(HoodWantedStates.IDLE);
+
         flywheelKicker.setWantedState(FlywheelKickerStates.REVERSING);
         break;
       case IDLE:
