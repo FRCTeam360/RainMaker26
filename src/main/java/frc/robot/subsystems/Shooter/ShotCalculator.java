@@ -155,6 +155,13 @@ public class ShotCalculator {
         lookaheadDistanceMeters >= minDistanceMeters
             && lookaheadDistanceMeters <= maxDistanceMeters;
 
+    // The virtual target is the real target offset by the velocity compensation — it represents
+    // where the robot is effectively aiming from its current position while moving.
+    Translation2d velocityOffset =
+        new Translation2d(shooterVelXMps * timeOfFlightSecs, shooterVelYMps * timeOfFlightSecs);
+    Translation2d virtualTarget = target.minus(velocityOffset);
+    Logger.recordOutput(
+        "ShotCalculator/virtualTarget", new Pose2d(virtualTarget, Rotation2d.kZero));
     Logger.recordOutput("ShotCalculator/targetPosition", new Pose2d(target, Rotation2d.kZero));
     Logger.recordOutput("ShotCalculator/hubPosition", FieldConstants.Hub.topCenterPoint);
     Logger.recordOutput("ShotCalculator/distanceToTarget", lookaheadDistanceMeters);
