@@ -27,8 +27,9 @@ import org.junit.jupiter.api.Test;
  *   <li>In 2D the cross product reduces to: ω × r = (−ω · r_y, ω · r_x)
  * </ul>
  *
- * <p>Reference: Meriam &amp; Kraige, <i>Engineering Mechanics: Dynamics</i>, Ch. 5 — Plane
- * Kinematics of Rigid Bodies, §5.3 Relative Velocity.
+ * <p>Reference: <a
+ * href="https://eng.libretexts.org/Bookshelves/Mechanical_Engineering/Introductory_Dynamics:_2D_Kinematics_and_Kinetics_of_Point_Masses_and_Rigid_Bodies_(Steeneken)/03:_Rigid_Body_Dynamics/09:_Kinematics_of_Rigid_Bodies/9.03:_Velocities_in_a_rigid_body">
+ * Velocities in a Rigid Body — Engineering LibreTexts</a>
  */
 public class TestShotCalculatorHelpers {
 
