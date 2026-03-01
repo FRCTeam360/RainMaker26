@@ -372,6 +372,11 @@ public class RobotContainer {
 
     configureIndependentModeBindings(isIndependentMode);
 
+    driverCont.a().onTrue(superStructure.setStateCommand(SuperWantedStates.UNJAMMING));
+    driverCont.a().onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
+
+    driverCont.y().onTrue(superStructure.setStateCommand(SuperWantedStates.STOWED));
+
     // Drivetrain commands
     // driverCont.leftTrigger().whileTrue(drivetrain.faceHubWhileDriving(driverCont));
     drivetrain.registerTelemetry(logger::telemeterize);
@@ -391,9 +396,13 @@ public class RobotContainer {
     driverCont.pov(270).and(isIndependentMode).whileTrue(hood.setPositionCommand(23.0));
     driverCont.start().and(isIndependentMode).onTrue(hood.zero());
 
+    // climber
+    driverCont.x().and(isIndependentMode).whileTrue(climber.setLeftDutyCycleCommand(0.2));
+    driverCont.y().and(isIndependentMode).whileTrue(climber.setLeftDutyCycleCommand(-0.2));
+
     // flywheel bindings
-    driverCont.x().and(isIndependentMode).whileTrue(flywheel.setVelocityCommand(3000.0));
-    driverCont.y().and(isIndependentMode).whileTrue(flywheel.setVelocityCommand(4000.0));
+    // driverCont.x().and(isIndependentMode).whileTrue(flywheel.setVelocityCommand(3000.0));
+    // driverCont.y().and(isIndependentMode).whileTrue(flywheel.setVelocityCommand(4000.0));
 
     // configureIntakeTestBindings(isIndependentMode);
     // configureFullShootingTestBindings(isIndependentMode);

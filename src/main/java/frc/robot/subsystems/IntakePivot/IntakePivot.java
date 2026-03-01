@@ -135,6 +135,7 @@ public class IntakePivot extends SubsystemBase {
       case DEPLOYED:
         return DEPLOYED_POSITION_DEGREES;
       case STOWED:
+        return STOWED_POSITION_DEGREES;
       default:
         return STOWED_POSITION_DEGREES;
     }
