@@ -1,9 +1,12 @@
 package frc.robot.utils;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rectangle2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.robot.utils.FieldConstants.LinesHorizontal;
 import frc.robot.utils.FieldConstants.LinesVertical;
 import frc.robot.utils.FieldConstants.RightTrench;
@@ -83,6 +86,32 @@ public class PositionUtils {
     }
     Logger.recordOutput("PositionUtils/IsInAllianceZone", result);
     return result;
+  }
+
+  public static boolean isInPassingZone (Pose2d robotPose, Transform2d robotToShooter) {
+    double robotX = robotPose.getX();
+    Alliance alliance = DriverStation.getAlliance().get();
+
+    if (AllianceFlipUtil.shouldFlip()) {
+      
+      } else {
+      
+      }
+    final Rectangle2d neutralNoFlyZone = new Rectangle2d(
+      new Translation2d(0, 0), // Bottom-left corner
+      new Translation2d(0, 0)  // Top-right corner
+    );
+    final Rectangle2d opponentNoFlyZone = new Rectangle2d(
+      new Translation2d(0, 0), // Bottom-left corner
+      new Translation2d(0, 0)  // Top-right corner
+    );
+
+    boolean inAllianceZone = PositionUtils.isInAllianceZone(robotPose);
+    boolean inDuckZone = PositionUtils.isInDuckZone(robotPose, robotToShooter);
+
+    if(!inAllianceZone && !inDuckZone){
+
+    }
   }
 
   /**

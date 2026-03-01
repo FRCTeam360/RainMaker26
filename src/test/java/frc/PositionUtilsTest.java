@@ -55,25 +55,25 @@ class PositionUtilsTest {
 
   @Test
   void robotInRightTrenchBlueSide() {
-    double midY = (LinesHorizontal.rightTrenchOpenEnd + LinesHorizontal.rightTrenchOpenStart) / 2.0;
+    double midY = (LinesHorizontal.rightTrenchRailSide + LinesHorizontal.rightTrenchHubSide) / 2.0;
     assertTrue(PositionUtils.isInDuckZone(poseAt(BLUE_TRENCH_X, midY), IDENTITY_TRANSFORM));
   }
 
   @Test
   void robotInLeftTrenchBlueSide() {
-    double midY = (LinesHorizontal.leftTrenchOpenEnd + LinesHorizontal.leftTrenchOpenStart) / 2.0;
+    double midY = (LinesHorizontal.leftTrenchHubSide + LinesHorizontal.leftTrenchRailSide) / 2.0;
     assertTrue(PositionUtils.isInDuckZone(poseAt(BLUE_TRENCH_X, midY), IDENTITY_TRANSFORM));
   }
 
   @Test
   void robotInRightTrenchRedSide() {
-    double midY = (LinesHorizontal.rightTrenchOpenEnd + LinesHorizontal.rightTrenchOpenStart) / 2.0;
+    double midY = (LinesHorizontal.rightTrenchRailSide + LinesHorizontal.rightTrenchHubSide) / 2.0;
     assertTrue(PositionUtils.isInDuckZone(poseAt(RED_TRENCH_X, midY), IDENTITY_TRANSFORM));
   }
 
   @Test
   void robotInLeftTrenchRedSide() {
-    double midY = (LinesHorizontal.leftTrenchOpenEnd + LinesHorizontal.leftTrenchOpenStart) / 2.0;
+    double midY = (LinesHorizontal.leftTrenchHubSide + LinesHorizontal.leftTrenchRailSide) / 2.0;
     assertTrue(PositionUtils.isInDuckZone(poseAt(RED_TRENCH_X, midY), IDENTITY_TRANSFORM));
   }
 
@@ -86,7 +86,7 @@ class PositionUtilsTest {
 
   @Test
   void robotOnBumpBetweenTrenchAndHub() {
-    double bumpMidY = (LinesHorizontal.rightTrenchOpenStart + LinesHorizontal.rightBumpEnd) / 2.0;
+    double bumpMidY = (LinesHorizontal.rightTrenchHubSide + LinesHorizontal.rightBumpRailSide) / 2.0;
     assertFalse(PositionUtils.isInDuckZone(poseAt(BLUE_TRENCH_X, bumpMidY), IDENTITY_TRANSFORM));
   }
 
@@ -96,28 +96,28 @@ class PositionUtilsTest {
   void robotAtRightTrenchBoundaryStart() {
     assertTrue(
         PositionUtils.isInDuckZone(
-            poseAt(BLUE_TRENCH_X, LinesHorizontal.rightTrenchOpenStart), IDENTITY_TRANSFORM));
+            poseAt(BLUE_TRENCH_X, LinesHorizontal.rightTrenchHubSide), IDENTITY_TRANSFORM));
   }
 
   @Test
   void robotAtRightTrenchBoundaryEnd() {
     assertTrue(
         PositionUtils.isInDuckZone(
-            poseAt(BLUE_TRENCH_X, LinesHorizontal.rightTrenchOpenEnd), IDENTITY_TRANSFORM));
+            poseAt(BLUE_TRENCH_X, LinesHorizontal.rightTrenchRailSide), IDENTITY_TRANSFORM));
   }
 
   @Test
   void robotAtLeftTrenchBoundaryStart() {
     assertTrue(
         PositionUtils.isInDuckZone(
-            poseAt(BLUE_TRENCH_X, LinesHorizontal.leftTrenchOpenStart), IDENTITY_TRANSFORM));
+            poseAt(BLUE_TRENCH_X, LinesHorizontal.leftTrenchRailSide), IDENTITY_TRANSFORM));
   }
 
   @Test
   void robotAtLeftTrenchBoundaryEnd() {
     assertTrue(
         PositionUtils.isInDuckZone(
-            poseAt(BLUE_TRENCH_X, LinesHorizontal.leftTrenchOpenEnd), IDENTITY_TRANSFORM));
+            poseAt(BLUE_TRENCH_X, LinesHorizontal.leftTrenchHubSide), IDENTITY_TRANSFORM));
   }
 
   // --- X-range tests ---
@@ -125,7 +125,7 @@ class PositionUtilsTest {
   @Test
   void correctYButNeutralZoneX() {
     // Right trench Y-band but X is in the middle of the field (no trench overhead)
-    double midY = (LinesHorizontal.rightTrenchOpenEnd + LinesHorizontal.rightTrenchOpenStart) / 2.0;
+    double midY = (LinesHorizontal.rightTrenchRailSide + LinesHorizontal.rightTrenchHubSide) / 2.0;
     assertFalse(
         PositionUtils.isInDuckZone(poseAt(NEUTRAL_X, midY), IDENTITY_TRANSFORM),
         "Should not duck when X is in neutral zone even if Y is in trench band");
@@ -134,7 +134,7 @@ class PositionUtilsTest {
   @Test
   void correctYButBeyondBlueTrenchX() {
     // Right trench Y-band but X is past the blue trench toward the driver station
-    double midY = (LinesHorizontal.rightTrenchOpenEnd + LinesHorizontal.rightTrenchOpenStart) / 2.0;
+    double midY = (LinesHorizontal.rightTrenchRailSide + LinesHorizontal.rightTrenchHubSide) / 2.0;
     double xBehindTrench = LinesVertical.hubCenter - RightTrench.width;
     assertFalse(
         PositionUtils.isInDuckZone(poseAt(xBehindTrench, midY), IDENTITY_TRANSFORM),
@@ -143,7 +143,7 @@ class PositionUtilsTest {
 
   @Test
   void atBlueTrenchXBoundary() {
-    double midY = (LinesHorizontal.rightTrenchOpenEnd + LinesHorizontal.rightTrenchOpenStart) / 2.0;
+    double midY = (LinesHorizontal.rightTrenchRailSide + LinesHorizontal.rightTrenchHubSide) / 2.0;
     double trenchEdgeX = LinesVertical.hubCenter + RightTrench.width / 2.0;
     assertTrue(
         PositionUtils.isInDuckZone(poseAt(trenchEdgeX, midY), IDENTITY_TRANSFORM),
@@ -152,7 +152,7 @@ class PositionUtilsTest {
 
   @Test
   void justOutsideBlueTrenchXBoundary() {
-    double midY = (LinesHorizontal.rightTrenchOpenEnd + LinesHorizontal.rightTrenchOpenStart) / 2.0;
+    double midY = (LinesHorizontal.rightTrenchRailSide + LinesHorizontal.rightTrenchHubSide) / 2.0;
     double justOutsideX = LinesVertical.hubCenter + RightTrench.width / 2.0 + 0.01;
     assertFalse(
         PositionUtils.isInDuckZone(poseAt(justOutsideX, midY), IDENTITY_TRANSFORM),
@@ -163,7 +163,7 @@ class PositionUtilsTest {
 
   @Test
   void shooterOffsetPushesIntoTrench() {
-    double justAbove = LinesHorizontal.rightTrenchOpenStart + 0.3;
+    double justAbove = LinesHorizontal.rightTrenchHubSide + 0.3;
     assertFalse(
         PositionUtils.isInDuckZone(poseAt(BLUE_TRENCH_X, justAbove), IDENTITY_TRANSFORM),
         "Robot without offset should be outside trench");
@@ -176,7 +176,7 @@ class PositionUtilsTest {
 
   @Test
   void shooterOffsetPushesOutOfTrench() {
-    double justInside = LinesHorizontal.rightTrenchOpenStart - 0.05;
+    double justInside = LinesHorizontal.rightTrenchHubSide - 0.05;
     assertTrue(
         PositionUtils.isInDuckZone(poseAt(BLUE_TRENCH_X, justInside), IDENTITY_TRANSFORM),
         "Robot without offset should be inside trench");
@@ -197,7 +197,7 @@ class PositionUtilsTest {
 
   @Test
   void zeroRotationWithXOffset() {
-    double midY = (LinesHorizontal.rightTrenchOpenEnd + LinesHorizontal.rightTrenchOpenStart) / 2.0;
+    double midY = (LinesHorizontal.rightTrenchRailSide + LinesHorizontal.rightTrenchHubSide) / 2.0;
     Pose2d pose = new Pose2d(BLUE_TRENCH_X, midY, new Rotation2d());
 
     assertTrue(PositionUtils.isInDuckZone(pose, SHOOTER_OFFSET));

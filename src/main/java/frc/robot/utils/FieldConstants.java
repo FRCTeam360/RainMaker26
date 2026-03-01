@@ -61,16 +61,16 @@ public class FieldConstants {
     public static final double center = fieldWidth / 2.0;
 
     // Right of hub
-    public static final double rightBumpStart = Hub.nearRightCorner.getY();
-    public static final double rightBumpEnd = rightBumpStart - RightBump.width;
-    public static final double rightTrenchOpenStart = rightBumpEnd - Units.inchesToMeters(12.0);
-    public static final double rightTrenchOpenEnd = 0;
+    public static final double rightBumpHubSide = Hub.nearRightCorner.getY();
+    public static final double rightBumpRailSide = rightBumpHubSide - RightBump.width;
+    public static final double rightTrenchHubSide = rightBumpRailSide - Units.inchesToMeters(12.0);
+    public static final double rightTrenchRailSide = 0;
 
     // Left of hub
-    public static final double leftBumpEnd = Hub.nearLeftCorner.getY();
-    public static final double leftBumpStart = leftBumpEnd + LeftBump.width;
-    public static final double leftTrenchOpenEnd = leftBumpStart + Units.inchesToMeters(12.0);
-    public static final double leftTrenchOpenStart = fieldWidth;
+    public static final double leftBumpHubSide = Hub.nearLeftCorner.getY();
+    public static final double leftBumpRailSide = leftBumpHubSide + LeftBump.width;
+    public static final double leftTrenchHubSide = leftBumpRailSide + Units.inchesToMeters(12.0);
+    public static final double leftTrenchRailSide = fieldWidth;
   }
 
   // Use something like this to create zones and use zone.contains(robot position) to check if the
