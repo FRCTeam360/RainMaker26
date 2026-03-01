@@ -86,7 +86,8 @@ class PositionUtilsTest {
 
   @Test
   void robotOnBumpBetweenTrenchAndHub() {
-    double bumpMidY = (LinesHorizontal.rightTrenchHubSide + LinesHorizontal.rightBumpRailSide) / 2.0;
+    double bumpMidY =
+        (LinesHorizontal.rightTrenchHubSide + LinesHorizontal.rightBumpRailSide) / 2.0;
     assertFalse(PositionUtils.isInDuckZone(poseAt(BLUE_TRENCH_X, bumpMidY), IDENTITY_TRANSFORM));
   }
 

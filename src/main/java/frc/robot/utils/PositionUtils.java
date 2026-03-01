@@ -50,11 +50,11 @@ public class PositionUtils {
     double shooterY = shooterPosition.getY();
 
     boolean inTrenchYRight =
-        shooterY >= LinesHorizontal.rightTrenchOpenEnd
-            && shooterY <= LinesHorizontal.rightTrenchOpenStart;
+        shooterY >= LinesHorizontal.rightTrenchRailSide
+            && shooterY <= LinesHorizontal.rightTrenchHubSide;
     boolean inTrenchYLeft =
-        shooterY >= LinesHorizontal.leftTrenchOpenEnd
-            && shooterY <= LinesHorizontal.leftTrenchOpenStart;
+        shooterY >= LinesHorizontal.leftTrenchHubSide
+            && shooterY <= LinesHorizontal.leftTrenchRailSide;
     boolean inTrenchYBand = inTrenchYRight || inTrenchYLeft;
 
     boolean inBlueTrenchX = shooterX >= BLUE_TRENCH_MIN_X && shooterX <= BLUE_TRENCH_MAX_X;
@@ -88,29 +88,38 @@ public class PositionUtils {
     return result;
   }
 
-  public static boolean isInPassingZone (Pose2d robotPose, Transform2d robotToShooter) {
+  public static boolean isInPassingZone(Pose2d robotPose, Transform2d robotToShooter) {
     double robotX = robotPose.getX();
     Alliance alliance = DriverStation.getAlliance().get();
+    double oppDSWall = FieldConstants.fieldLength;
 
     if (AllianceFlipUtil.shouldFlip()) {
-      
-      } else {
-      
-      }
-    final Rectangle2d neutralNoFlyZone = new Rectangle2d(
-      new Translation2d(0, 0), // Bottom-left corner
-      new Translation2d(0, 0)  // Top-right corner
-    );
-    final Rectangle2d opponentNoFlyZone = new Rectangle2d(
-      new Translation2d(0, 0), // Bottom-left corner
-      new Translation2d(0, 0)  // Top-right corner
-    );
+      oppDSWall = AllianceFlipUtil.applyX(FieldConstants.fieldLength);
+    }
+
+    final Rectangle2d neutralNoFlyZone =
+        new Rectangle2d(
+            new Translation2d(LinesVertical.hubCenter, LinesHorizontal.rightBumpHubSide),
+            new Translation2d(LinesVertical.center, LinesHorizontal.leftBumpHubSide));
+    final Rectangle2d opponentNoFlyZone =
+        new Rectangle2d(
+            new Translation2d(
+                FieldConstants.LinesVertical.oppHubCenter,
+                FieldConstants.LinesHorizontal.rightBumpHubSide),
+            new Translation2d(oppDSWall, LinesHorizontal.leftBumpHubSide));
 
     boolean inAllianceZone = PositionUtils.isInAllianceZone(robotPose);
     boolean inDuckZone = PositionUtils.isInDuckZone(robotPose, robotToShooter);
 
-    if(!inAllianceZone && !inDuckZone){
-
+    if (!inAllianceZone && !inDuckZone) {
+      if (opponentNoFlyZone.contains(robotPose.getTranslation())
+          || neutralNoFlyZone.contains(robotPose.getTranslation())) {
+        return false;
+      } else {
+        return true;
+      }
+    } else {
+      return false;
     }
   }
 
