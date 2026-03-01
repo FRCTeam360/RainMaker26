@@ -70,7 +70,7 @@ public final class Constants {
     public static final InterpolatingDoubleTreeMap timeOfFlightMap =
         new InterpolatingDoubleTreeMap();
 
-    public static final double MIN_SHOT_DISTANCE_METERS = 0.0;
+    public static final double MIN_SHOT_DISTANCE_METERS = 1.0;
     public static final double MAX_SHOT_DISTANCE_METERS = 5.0;
 
     static {
@@ -89,7 +89,9 @@ public final class Constants {
       shotFlywheelSpeedMap.put(2.0, 2500.0); // THIS IS GOOD
       shotFlywheelSpeedMap.put(0.0, 2250.0);
 
-      timeOfFlightMap.put(0.0, 0.0);
+      timeOfFlightMap.put(1.939, 0.82);
+      timeOfFlightMap.put(3.011, 1.26);
+      timeOfFlightMap.put(4.704, 1.37);
 
       // === PASSING VALUES === (TODO: change placeholder values)
       passFlywheelSpeedMap.put(6.0, 4000.0);
