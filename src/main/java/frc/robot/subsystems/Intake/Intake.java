@@ -75,7 +75,6 @@ public class Intake extends SubsystemBase {
         // }
         currentState = IntakeStates.INTAKING;
         break;
-
       case ASSIST_SHOOTING:
         currentState = IntakeStates.ASSIST_SHOOTING;
         break;

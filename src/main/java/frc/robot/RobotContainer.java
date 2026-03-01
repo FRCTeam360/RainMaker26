@@ -46,7 +46,7 @@ import frc.robot.subsystems.IntakePivot.IntakePivotIONoop;
 import frc.robot.subsystems.IntakePivot.IntakePivotIOPB;
 import frc.robot.subsystems.IntakePivot.IntakePivotIOSim;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel;
-import frc.robot.subsystems.Shooter.Flywheel.FlywheelIOPB;
+import frc.robot.subsystems.Shooter.Flywheel.FlywheelIOPBBangBang;
 import frc.robot.subsystems.Shooter.Flywheel.FlywheelIOSim;
 import frc.robot.subsystems.Shooter.Flywheel.FlywheelIOWBBangBang;
 import frc.robot.subsystems.Shooter.FlywheelKicker.FlywheelKicker;
@@ -196,7 +196,7 @@ public class RobotContainer {
         drivetrain = PracticeBotDrivetrain.createDrivetrain();
         climber = new Climber(new ClimberIOPB());
         logger = new Telemetry(PracticeBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
-        flywheel = new Flywheel(new FlywheelIOPB());
+        flywheel = new Flywheel(new FlywheelIOPBBangBang());
         hood = new Hood(new HoodIOPB());
         indexer = new Indexer(new IndexerIOPB());
         vision = // TODO ADD OTHER LIMELIGHTS
@@ -376,16 +376,12 @@ public class RobotContainer {
     intakeTrigger.onTrue(superStructure.setStateCommand(SuperWantedStates.INTAKING));
     intakeTrigger.onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
 
-    driverCont
-        .a()
-        .and(isSuperstructureMode)
-        .onTrue(superStructure.setStateCommand(SuperWantedStates.UNJAMMING));
-    driverCont
-        .a()
-        .and(isSuperstructureMode)
-        .onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
-
     configureIndependentModeBindings(isIndependentMode);
+
+    driverCont.a().onTrue(superStructure.setStateCommand(SuperWantedStates.UNJAMMING));
+    driverCont.a().onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
+
+    driverCont.y().onTrue(superStructure.setStateCommand(SuperWantedStates.STOWED));
 
     // Drivetrain commands
     // driverCont.leftTrigger().whileTrue(drivetrain.faceHubWhileDriving(driverCont));
@@ -397,26 +393,22 @@ public class RobotContainer {
   private void configureIndependentModeBindings(BooleanSupplier isIndependentMode) {
     driverCont.leftBumper().and(isIndependentMode).whileTrue(intake.setDutyCycleCommand(0.2));
 
-    driverCont.a().and(isIndependentMode).whileTrue(indexer.setDutyCycleCommand(0.5));
-    driverCont.b().and(isIndependentMode).whileTrue(flywheelKicker.setDutyCycleCommand(0.5));
-    driverCont
-        .rightBumper()
-        .and(isIndependentMode)
-        .whileTrue(hopperRoller.setDutyCycleCommand(0.5));
+    // driverCont.a().and(isIndependentMode).whileTrue(indexer.setDutyCycleCommand(0.5));
 
     // hood bindings
-    driverCont.pov(0).and(isIndependentMode).whileTrue(intakePivot.setPositionCommand(() -> 0.0));
-    driverCont
-        .pov(180)
-        .and(isIndependentMode)
-        .whileTrue(intakePivot.setPositionCommand(() -> 93.0));
-    driverCont.pov(90).and(isIndependentMode).whileTrue(flywheel.setVelocityCommand(() -> 2000.0));
-
+    driverCont.pov(0).and(isIndependentMode).onTrue(hood.moveToZeroAndZero());
+    driverCont.pov(90).and(isIndependentMode).whileTrue(hood.setPositionCommand(4.0));
+    driverCont.pov(180).and(isIndependentMode).whileTrue(hood.setPositionCommand(16.0));
+    driverCont.pov(270).and(isIndependentMode).whileTrue(hood.setPositionCommand(23.0));
     driverCont.start().and(isIndependentMode).onTrue(hood.zero());
 
+    // climber
+    driverCont.x().and(isIndependentMode).whileTrue(climber.setLeftDutyCycleCommand(0.2));
+    driverCont.y().and(isIndependentMode).whileTrue(climber.setLeftDutyCycleCommand(-0.2));
+
     // flywheel bindings
-    driverCont.x().and(isIndependentMode).whileTrue(hood.setPositionCommand(0.0));
-    driverCont.y().and(isIndependentMode).whileTrue(hood.setPositionCommand(20.0));
+    // driverCont.x().and(isIndependentMode).whileTrue(flywheel.setVelocityCommand(3000.0));
+    // driverCont.y().and(isIndependentMode).whileTrue(flywheel.setVelocityCommand(4000.0));
 
     // configureIntakeTestBindings(isIndependentMode);
     // configureFullShootingTestBindings(isIndependentMode);
