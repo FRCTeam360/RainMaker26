@@ -225,7 +225,7 @@ public class SuperStructure extends SubsystemBase {
   private boolean canShootToTarget() {
     switch (wantedSuperState) {
       case SHOOT_AT_HUB:
-        if (!DriverStation.isDSAttached()) {
+        if (!DriverStation.isFMSAttached()) {
           return true;
         }
         return RobotUtils.hubActive(
