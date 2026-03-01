@@ -5,8 +5,6 @@
 package frc.robot;
 
 import com.ctre.phoenix6.CANBus;
-import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.hal.HALUtil;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -21,24 +19,11 @@ import frc.robot.utils.RobotUtils.ActiveHub;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
-  public static final AprilTagFieldLayout FIELD_LAYOUT =
-      AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
 
   public static Alliance AUTO_WINNER;
   public static ActiveHub HUB_PHASE;
   public static boolean HUB_ACTIVE;
 
-  public static final int IMU_MODE_EXTERNAL_ONLY = 0;
-
-  public static final int IMU_MODE_EXTERNAL_SEED = 1;
-
-  public static final int IMU_MODE_INTERNAL_ONLY = 2;
-
-  public static final int IMU_MODE_INTERNAL_MT1_ASSIST = 3;
-
-  public static final int IMU_MODE_INTERNAL_EXTERNAL_ASSIST = 4;
-
-  public static final double IMU_ASSIST_ALPHA = 0.001;
 
   public static enum RobotType {
     SIM,
