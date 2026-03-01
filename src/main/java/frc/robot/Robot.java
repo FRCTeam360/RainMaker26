@@ -62,7 +62,8 @@ public class Robot extends LoggedRobot {
     }
     switch (Constants.getRobotType()) {
       case SIM:
-        // Running a physics simulator, log to NT
+        // Running a physics simulator, log to NT and disk
+        Logger.addDataReceiver(new WPILOGWriter("logs"));
         Logger.addDataReceiver(new NT4Publisher());
         break;
       case REPLAY:

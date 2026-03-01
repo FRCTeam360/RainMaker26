@@ -9,6 +9,7 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.Timer;
 import frc.robot.utils.FieldConstants;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
@@ -81,6 +82,10 @@ public class ShotCalculator {
 
   private ShootingParams cachedShootingParams = null;
 
+  // Previous shooter position and timestamp for numerical velocity calculation
+  private Translation2d prevShooterPosition = null;
+  private double prevTimestampSeconds = 0.0;
+
   /**
    * Calculates and caches the shooting parameters for the current robot position. Compensates for
    * robot velocity by projecting a lookahead position using the time-of-flight map, so the robot
@@ -117,16 +122,38 @@ public class ShotCalculator {
     double shooterVelXMps =
         robotFieldVelocity.getX()
             + omegaRadPerSec
-                // TODO verify shooterOffsetY math
-                // may have an error in the math here, need to verify with our own calculations.
-                // Since our shooter isn't offset in the Y direction, it doesn't matter.
-                * (shooterOffsetY * Math.cos(robotAngleRad)
+                * (shooterOffsetY * (-1.0) * Math.cos(robotAngleRad)
                     - shooterOffsetX * Math.sin(robotAngleRad));
     double shooterVelYMps =
         robotFieldVelocity.getY()
             + omegaRadPerSec
                 * (shooterOffsetX * Math.cos(robotAngleRad)
                     - shooterOffsetY * Math.sin(robotAngleRad));
+
+    // Log analytical shooter velocity for verification against numerical derivative
+    Logger.recordOutput("ShotCalculator/analyticalVelXMps", shooterVelXMps);
+    Logger.recordOutput("ShotCalculator/analyticalVelYMps", shooterVelYMps);
+    Logger.recordOutput(
+        "ShotCalculator/shooterPosition",
+        new Pose2d(shooterPosition.getTranslation(), Rotation2d.kZero));
+
+    // Compute numerical velocity from cycle-over-cycle shooter position delta.
+    // Compare these values against the analytical ones above to verify the
+    // rotational offset math (especially the shooterOffsetY terms).
+    double now = Timer.getFPGATimestamp();
+    if (prevShooterPosition != null) {
+      double dt = now - prevTimestampSeconds;
+      if (dt > 0.0) {
+        double numericalVelXMps = (shooterPosition.getX() - prevShooterPosition.getX()) / dt;
+        double numericalVelYMps = (shooterPosition.getY() - prevShooterPosition.getY()) / dt;
+        Logger.recordOutput("ShotCalculator/numericalVelXMps", numericalVelXMps);
+        Logger.recordOutput("ShotCalculator/numericalVelYMps", numericalVelYMps);
+        Logger.recordOutput("ShotCalculator/velErrorXMps", shooterVelXMps - numericalVelXMps);
+        Logger.recordOutput("ShotCalculator/velErrorYMps", shooterVelYMps - numericalVelYMps);
+      }
+    }
+    prevShooterPosition = shooterPosition.getTranslation();
+    prevTimestampSeconds = now;
 
     // Calculate the initial distance from the shooter to the target
     double shooterToTargetDistanceMeters = target.getDistance(shooterPosition.getTranslation());

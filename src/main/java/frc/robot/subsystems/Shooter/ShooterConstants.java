@@ -17,6 +17,8 @@ public class ShooterConstants {
   public static Transform2d PRACTICEBOT_TO_SHOOTER =
       new Transform2d(Units.inchesToMeters(-7.437), 0.0, new Rotation2d());
 
+  // Test Y offset to verify shooterOffsetY velocity math in sim.
+  // Real robot has no Y offset — set back to 0.0 after verification.
   public static Transform2d SIM_TO_SHOOTER =
-      new Transform2d(Units.inchesToMeters(-7.437), 0.0, new Rotation2d());
+      new Transform2d(Units.inchesToMeters(0.0), Units.inchesToMeters(6.0), new Rotation2d());
 }

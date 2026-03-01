@@ -384,6 +384,17 @@ public class RobotContainer {
 
     configureIndependentModeBindings(isIndependentMode);
 
+    // Operator axis 1 (left stick Y): activate hub shooting with drivetrain face-angle
+    Trigger operatorShootTrigger =
+        operatorCont.axisMagnitudeGreaterThan(1, 0.5).and(isSuperstructureMode);
+    operatorShootTrigger.whileTrue(
+        superStructure
+            .setStateCommand(SuperWantedStates.SHOOT_AT_HUB)
+            .alongWith(
+                drivetrain.faceAngleWhileDrivingCommand(
+                    driverCont, () -> hubShotCalculator.calculateShot().targetHeading())));
+    operatorShootTrigger.onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
+
     driverCont.a().onTrue(superStructure.setStateCommand(SuperWantedStates.UNJAMMING));
     driverCont.a().onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
 
