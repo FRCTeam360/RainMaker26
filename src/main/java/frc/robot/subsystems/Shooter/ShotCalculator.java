@@ -40,7 +40,11 @@ public class ShotCalculator {
    * @param isValid whether the target is within the effective shooting range
    */
   public record ShootingParams(
-      Rotation2d targetHeading, double hoodAngle, double flywheelSpeed, boolean isValid) {}
+      Rotation2d targetHeading,
+      double hoodAngle,
+      double flywheelSpeed,
+      double timeOfFlight,
+      boolean isValid) {}
 
   public record RobotShootingInfo(
       InterpolatingDoubleTreeMap shotHoodAngleMap,
@@ -146,10 +150,12 @@ public class ShotCalculator {
 
     double hoodAngle = shotHoodAngleMap.get(effectiveDistanceMeters);
     double flywheelSpeed = shotFlywheelSpeedMap.get(effectiveDistanceMeters);
+    double timeOfFlight = timeOfFlightMap.get(effectiveDistanceMeters);
     boolean isValid =
         lookaheadDistanceMeters >= minDistanceMeters
             && lookaheadDistanceMeters <= maxDistanceMeters;
 
+    Logger.recordOutput("ShotCalculator/targetPosition", new Pose2d(target, Rotation2d.kZero));
     Logger.recordOutput("ShotCalculator/hubPosition", FieldConstants.Hub.topCenterPoint);
     Logger.recordOutput("ShotCalculator/distanceToTarget", lookaheadDistanceMeters);
     Logger.recordOutput("ShotCalculator/targetFlywheelSpeed", flywheelSpeed);
@@ -160,7 +166,8 @@ public class ShotCalculator {
     Logger.recordOutput("ShotCalculator/timeOfFlightSecs", timeOfFlightSecs);
     Logger.recordOutput("ShotCalculator/isValid", isValid);
 
-    cachedShootingParams = new ShootingParams(targetHeading, hoodAngle, flywheelSpeed, isValid);
+    cachedShootingParams =
+        new ShootingParams(targetHeading, hoodAngle, flywheelSpeed, timeOfFlight, isValid);
     return cachedShootingParams;
   }
 

@@ -311,7 +311,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
           config,
           // Assume the path needs to be flipped for Red vs Blue, this is normally the
           // case
-          () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
+          () -> false,
           this // Subsystem for requirements
           );
     } catch (Exception ex) {
