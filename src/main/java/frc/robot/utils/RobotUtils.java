@@ -60,8 +60,7 @@ public class RobotUtils {
    * @param timeOfFlight the time of flight of the shot in seconds
    * @return which hub(s) are currently active
    */
-  public static ActiveHub getShootingPhase(
-      double gameTime, Boolean isTele, double timeOfFlight) {
+  public static ActiveHub getShootingPhase(double gameTime, Boolean isTele, double timeOfFlight) {
     // gameTime is the getMatchTime() from DriverStation, isTele is the isTeleop() from
     // DriverStation
     ActiveHub activeHub = ActiveHub.BOTH;

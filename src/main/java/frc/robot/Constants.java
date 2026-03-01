@@ -24,7 +24,6 @@ public final class Constants {
   public static ActiveHub HUB_PHASE;
   public static boolean HUB_ACTIVE;
 
-
   public static enum RobotType {
     SIM,
     WOODBOT,
