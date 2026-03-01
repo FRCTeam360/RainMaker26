@@ -248,7 +248,7 @@ public class SuperStructure extends SubsystemBase {
                     DriverStation.getMatchTime(),
                     DriverStation.isTeleop(),
                     hubShotCalculator.calculateShot().timeOfFlight()));
-        Logger.recordOutput("Auto Winner", hubActive);
+        Logger.recordOutput("Superstructure/Shooting/HubActive", hubActive);
         return hubActive;
       default:
         return true;
