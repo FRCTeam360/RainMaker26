@@ -241,11 +241,13 @@ public class SuperStructure extends SubsystemBase {
         if (!DriverStation.isFMSAttached()) {
           return true;
         }
+        double timeOfFlight = hubShotCalculator.calculateShot().timeOfFlight();
+
         return RobotUtils.hubActive(
             DriverStation.getAlliance(),
             RobotUtils.getAutoWinner(DriverStation.getGameSpecificMessage()),
             RobotUtils.getShootingPhase(
-                DriverStation.getMatchTime(), DriverStation.isTeleop(), hubShotCalculator));
+                DriverStation.getMatchTime(), DriverStation.isTeleop(), timeOfFlight));
       default:
         return true;
     }
@@ -297,7 +299,9 @@ public class SuperStructure extends SubsystemBase {
     SmartDashboard.putString(
         "Shooting Phase",
         RobotUtils.getShootingPhase(
-                DriverStation.getMatchTime(), DriverStation.isTeleop(), hubShotCalculator)
+                DriverStation.getMatchTime(),
+                DriverStation.isTeleop(),
+                hubShotCalculator.calculateShot().timeOfFlight())
             .toString());
 
     Logger.recordOutput("Superstructure/WantedSuperState", wantedSuperState);
