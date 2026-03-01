@@ -87,11 +87,11 @@ public final class Constants {
       shotHoodAngleMap.put(0.0, 6.0);
 
       // === SHOOTING VALUES ===
-      shotFlywheelSpeedMap.put(5.0, 3750.0);
-      shotFlywheelSpeedMap.put(4.0, 3750.0);
-      shotFlywheelSpeedMap.put(3.0, 3375.0);
-      shotFlywheelSpeedMap.put(2.0, 3000.0); // THIS IS GOOD
-      shotFlywheelSpeedMap.put(0.0, 2750.0);
+      shotFlywheelSpeedMap.put(5.0, 3250.0);
+      shotFlywheelSpeedMap.put(4.0, 3250.0);
+      shotFlywheelSpeedMap.put(3.0, 3000.0);
+      shotFlywheelSpeedMap.put(2.0, 2500.0); // THIS IS GOOD
+      shotFlywheelSpeedMap.put(0.0, 2250.0);
 
       timeOfFlightMap.put(0.0, 0.0);
 
@@ -194,6 +194,9 @@ public final class Constants {
 
     // === HOOD ===
     public static final int HOOD_MOTOR = 34;
+
+    // === CLIMBER ===
+    public static final int CLIMBER_MOTOR = 36;
   }
 
   public static class OperatorConstants {
@@ -217,6 +220,6 @@ public final class Constants {
     } else if (!Robot.isReal()) { // KEEP AT BOTTOM
       return Constants.RobotType.SIM;
     }
-    return Constants.RobotType.WOODBOT;
+    return Constants.RobotType.PRACTICEBOT;
   }
 }

@@ -31,7 +31,8 @@ public class ShotCalculator {
    * @param hoodAngle the hood angle setpoint in degrees
    * @param flywheelSpeed the flywheel speed setpoint in RPM
    */
-  public record ShootingParams(Rotation2d targetHeading, double hoodAngle, double flywheelSpeed) {}
+  public record ShootingParams(
+      Rotation2d targetHeading, double hoodAngle, double flywheelSpeed, double timeOfFlight) {}
 
   public record RobotShootingInfo(
       InterpolatingDoubleTreeMap shotHoodAngleMap,
@@ -90,6 +91,7 @@ public class ShotCalculator {
         target.minus(shooterPosition.getTranslation()).getAngle().rotateBy(Rotation2d.k180deg);
     double hoodAngle = shotHoodAngleMap.get(distanceToTarget);
     double flywheelSpeed = shotFlywheelSpeedMap.get(distanceToTarget);
+    double timeOfFlight = timeOfFlightMap.get(distanceToTarget);
 
     Logger.recordOutput("ShotCalculator/targetPosition", new Pose2d(target, Rotation2d.kZero));
     Logger.recordOutput("ShotCalculator/distanceToTarget", distanceToTarget);
@@ -97,7 +99,8 @@ public class ShotCalculator {
     Logger.recordOutput("ShotCalculator/targetHoodAngle", hoodAngle);
     Logger.recordOutput("ShotCalculator/targetHeading", targetHeading);
 
-    cachedShootingParams = new ShootingParams(targetHeading, hoodAngle, flywheelSpeed);
+    cachedShootingParams =
+        new ShootingParams(targetHeading, hoodAngle, flywheelSpeed, timeOfFlight);
 
     return cachedShootingParams;
   }
