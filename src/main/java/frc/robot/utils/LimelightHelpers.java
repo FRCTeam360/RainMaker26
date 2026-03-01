@@ -35,6 +35,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class LimelightHelpers {
 
   private static final Map<String, DoubleArrayEntry> doubleArrayEntries = new ConcurrentHashMap<>();
+  private static final double[] EMPTY_ARRAY_DOUBLE = new double[0];
+  private static final String[] EMPTY_ARRAY_STRING = new String[0];
 
   /** Represents a Color/Retroreflective Target Result extracted from JSON Output */
   public static class LimelightTarget_Retro {
@@ -379,7 +381,7 @@ public class LimelightHelpers {
     public double accelY;
 
     public IMUResults() {
-      data = new double[0];
+      data = EMPTY_ARRAY_DOUBLE;
       quaternion = new double[4];
     }
 
@@ -740,11 +742,11 @@ public class LimelightHelpers {
       PoseEstimate that = (PoseEstimate) obj;
       // We don't compare the timestampSeconds as it isn't relevant for equality and makes
       // unit testing harder
-      return Double.compare(that.latency, latency) == 0
+      return that.latency == latency
           && tagCount == that.tagCount
-          && Double.compare(that.tagSpan, tagSpan) == 0
-          && Double.compare(that.avgTagDist, avgTagDist) == 0
-          && Double.compare(that.avgTagArea, avgTagArea) == 0
+          && that.tagSpan == tagSpan
+          && that.avgTagDist == avgTagDist
+          && that.avgTagArea == avgTagArea
           && pose.equals(that.pose)
           && Arrays.equals(rawFiducials, that.rawFiducials);
     }
@@ -802,7 +804,6 @@ public class LimelightHelpers {
    */
   public static Pose3d toPose3D(double[] inData) {
     if (inData.length < 6) {
-      // System.err.println("Bad LL 3D Pose Data!");
       return new Pose3d();
     }
     return new Pose3d(
@@ -862,18 +863,14 @@ public class LimelightHelpers {
     result[0] = pose.getTranslation().getX();
     result[1] = pose.getTranslation().getY();
     result[2] = 0;
-    result[3] = Units.radiansToDegrees(0);
-    result[4] = Units.radiansToDegrees(0);
+    result[3] = 0;
+    result[4] = 0;
     result[5] = Units.radiansToDegrees(pose.getRotation().getRadians());
     return result;
   }
 
-  private static double extractArrayEntry(double[] inData, int position) {
-    if (inData.length < position + 1) {
-      return 0;
-    }
-    return inData[position];
-  }
+  private static final int VALS_PER_FIDUCIAL = 7;
+  private static final PoseEstimate EMPTY_POSE = new PoseEstimate();
 
   private static PoseEstimate getBotPoseEstimate(
       String limelightName, String entryName, boolean isMegaTag2) {
@@ -890,17 +887,21 @@ public class LimelightHelpers {
     }
 
     var pose = toPose2D(poseArray);
-    double latency = extractArrayEntry(poseArray, 6);
-    int tagCount = (int) extractArrayEntry(poseArray, 7);
-    double tagSpan = extractArrayEntry(poseArray, 8);
-    double tagDist = extractArrayEntry(poseArray, 9);
-    double tagArea = extractArrayEntry(poseArray, 10);
+    if (poseArray.length < 11) {
+      // TODO confirm if this is the right thing to do
+      return EMPTY_POSE;
+    }
+
+    double latency = poseArray[6];
+    int tagCount = (int) poseArray[7];
+    double tagSpan = poseArray[8];
+    double tagDist = poseArray[9];
+    double tagArea = poseArray[10];
 
     // Convert server timestamp from microseconds to seconds and adjust for latency
     double adjustedTimestamp = (timestamp / 1000000.0) - (latency / 1000.0);
 
-    int valsPerFiducial = 7;
-    int expectedTotalVals = 11 + valsPerFiducial * tagCount;
+    int expectedTotalVals = 11 + VALS_PER_FIDUCIAL * tagCount;
     RawFiducial[] rawFiducials;
 
     if (poseArray.length != expectedTotalVals) {
@@ -908,15 +909,15 @@ public class LimelightHelpers {
       rawFiducials = new RawFiducial[0];
     } else {
       rawFiducials = new RawFiducial[tagCount];
+      int ficualIndex = 11;
       for (int i = 0; i < tagCount; i++) {
-        int baseIndex = 11 + (i * valsPerFiducial);
-        int id = (int) poseArray[baseIndex];
-        double txnc = poseArray[baseIndex + 1];
-        double tync = poseArray[baseIndex + 2];
-        double ta = poseArray[baseIndex + 3];
-        double distToCamera = poseArray[baseIndex + 4];
-        double distToRobot = poseArray[baseIndex + 5];
-        double ambiguity = poseArray[baseIndex + 6];
+        int id = (int) poseArray[ficualIndex++];
+        double txnc = poseArray[ficualIndex++];
+        double tync = poseArray[ficualIndex++];
+        double ta = poseArray[ficualIndex++];
+        double distToCamera = poseArray[ficualIndex++];
+        double distToRobot = poseArray[ficualIndex++];
+        double ambiguity = poseArray[ficualIndex++];
         rawFiducials[i] = new RawFiducial(id, txnc, tync, ta, distToCamera, distToRobot, ambiguity);
       }
     }
@@ -941,30 +942,31 @@ public class LimelightHelpers {
    */
   public static RawFiducial[] getRawFiducials(String limelightName) {
     var entry = LimelightHelpers.getLimelightNTTableEntry(limelightName, "rawfiducials");
-    var rawFiducialArray = entry.getDoubleArray(new double[0]);
-    int valsPerEntry = 7;
-    if (rawFiducialArray.length % valsPerEntry != 0) {
+    var rawFiducialArray = entry.getDoubleArray(EMPTY_ARRAY_DOUBLE);
+    if (rawFiducialArray.length % VALS_PER_FIDUCIAL != 0) {
       return new RawFiducial[0];
     }
 
-    int numFiducials = rawFiducialArray.length / valsPerEntry;
+    int numFiducials = rawFiducialArray.length / VALS_PER_FIDUCIAL;
     RawFiducial[] rawFiducials = new RawFiducial[numFiducials];
 
+    int fiducialIndex = 0;
     for (int i = 0; i < numFiducials; i++) {
-      int baseIndex = i * valsPerEntry;
-      int id = (int) extractArrayEntry(rawFiducialArray, baseIndex);
-      double txnc = extractArrayEntry(rawFiducialArray, baseIndex + 1);
-      double tync = extractArrayEntry(rawFiducialArray, baseIndex + 2);
-      double ta = extractArrayEntry(rawFiducialArray, baseIndex + 3);
-      double distToCamera = extractArrayEntry(rawFiducialArray, baseIndex + 4);
-      double distToRobot = extractArrayEntry(rawFiducialArray, baseIndex + 5);
-      double ambiguity = extractArrayEntry(rawFiducialArray, baseIndex + 6);
+      int id = (int) rawFiducialArray[fiducialIndex++];
+      double txnc = rawFiducialArray[fiducialIndex++];
+      double tync = rawFiducialArray[fiducialIndex++];
+      double ta = rawFiducialArray[fiducialIndex++];
+      double distToCamera = rawFiducialArray[fiducialIndex++];
+      double distToRobot = rawFiducialArray[fiducialIndex++];
+      double ambiguity = rawFiducialArray[fiducialIndex++];
 
       rawFiducials[i] = new RawFiducial(id, txnc, tync, ta, distToCamera, distToRobot, ambiguity);
     }
 
     return rawFiducials;
   }
+
+  private static final int VALS_PER_RAW_DETECTION = 12;
 
   /**
    * Gets the latest raw neural detector results from NetworkTables
@@ -974,29 +976,28 @@ public class LimelightHelpers {
    */
   public static RawDetection[] getRawDetections(String limelightName) {
     var entry = LimelightHelpers.getLimelightNTTableEntry(limelightName, "rawdetections");
-    var rawDetectionArray = entry.getDoubleArray(new double[0]);
-    int valsPerEntry = 12;
-    if (rawDetectionArray.length % valsPerEntry != 0) {
+    var rawDetectionArray = entry.getDoubleArray(EMPTY_ARRAY_DOUBLE);
+    if (rawDetectionArray.length % VALS_PER_RAW_DETECTION != 0) {
       return new RawDetection[0];
     }
 
-    int numDetections = rawDetectionArray.length / valsPerEntry;
+    int numDetections = rawDetectionArray.length / VALS_PER_RAW_DETECTION;
     RawDetection[] rawDetections = new RawDetection[numDetections];
 
+    int rawIndex = 0;
     for (int i = 0; i < numDetections; i++) {
-      int baseIndex = i * valsPerEntry; // Starting index for this detection's data
-      int classId = (int) extractArrayEntry(rawDetectionArray, baseIndex);
-      double txnc = extractArrayEntry(rawDetectionArray, baseIndex + 1);
-      double tync = extractArrayEntry(rawDetectionArray, baseIndex + 2);
-      double ta = extractArrayEntry(rawDetectionArray, baseIndex + 3);
-      double corner0_X = extractArrayEntry(rawDetectionArray, baseIndex + 4);
-      double corner0_Y = extractArrayEntry(rawDetectionArray, baseIndex + 5);
-      double corner1_X = extractArrayEntry(rawDetectionArray, baseIndex + 6);
-      double corner1_Y = extractArrayEntry(rawDetectionArray, baseIndex + 7);
-      double corner2_X = extractArrayEntry(rawDetectionArray, baseIndex + 8);
-      double corner2_Y = extractArrayEntry(rawDetectionArray, baseIndex + 9);
-      double corner3_X = extractArrayEntry(rawDetectionArray, baseIndex + 10);
-      double corner3_Y = extractArrayEntry(rawDetectionArray, baseIndex + 11);
+      int classId = (int) rawDetectionArray[rawIndex++];
+      double txnc = rawDetectionArray[rawIndex++];
+      double tync = rawDetectionArray[rawIndex++];
+      double ta = rawDetectionArray[rawIndex++];
+      double corner0_X = rawDetectionArray[rawIndex++];
+      double corner0_Y = rawDetectionArray[rawIndex++];
+      double corner1_X = rawDetectionArray[rawIndex++];
+      double corner1_Y = rawDetectionArray[rawIndex++];
+      double corner2_X = rawDetectionArray[rawIndex++];
+      double corner2_Y = rawDetectionArray[rawIndex++];
+      double corner3_X = rawDetectionArray[rawIndex++];
+      double corner3_Y = rawDetectionArray[rawIndex++];
 
       rawDetections[i] =
           new RawDetection(
@@ -1007,6 +1008,8 @@ public class LimelightHelpers {
     return rawDetections;
   }
 
+  private static final int VALS_PER_RAW_TARGET = 3;
+
   /**
    * Gets the raw target contours from NetworkTables. Returns ungrouped contours in normalized
    * screen space (-1 to 1).
@@ -1016,20 +1019,19 @@ public class LimelightHelpers {
    */
   public static RawTarget[] getRawTargets(String limelightName) {
     var entry = LimelightHelpers.getLimelightNTTableEntry(limelightName, "rawtargets");
-    var rawTargetArray = entry.getDoubleArray(new double[0]);
-    int valsPerEntry = 3;
-    if (rawTargetArray.length % valsPerEntry != 0) {
+    var rawTargetArray = entry.getDoubleArray(EMPTY_ARRAY_DOUBLE);
+    if (rawTargetArray.length % VALS_PER_RAW_TARGET != 0) {
       return new RawTarget[0];
     }
 
-    int numTargets = rawTargetArray.length / valsPerEntry;
+    int numTargets = rawTargetArray.length / VALS_PER_RAW_TARGET;
     RawTarget[] rawTargets = new RawTarget[numTargets];
 
+    int rawIndex = 0;
     for (int i = 0; i < numTargets; i++) {
-      int baseIndex = i * valsPerEntry;
-      double txnc = extractArrayEntry(rawTargetArray, baseIndex);
-      double tync = extractArrayEntry(rawTargetArray, baseIndex + 1);
-      double ta = extractArrayEntry(rawTargetArray, baseIndex + 2);
+      double txnc = rawTargetArray[rawIndex++];
+      double tync = rawTargetArray[rawIndex++];
+      double ta = rawTargetArray[rawIndex++];
 
       rawTargets[i] = new RawTarget(txnc, tync, ta);
     }
@@ -1113,7 +1115,7 @@ public class LimelightHelpers {
         key,
         k -> {
           NetworkTable table = getLimelightNTTable(tableName);
-          return table.getDoubleArrayTopic(entryName).getEntry(new double[0]);
+          return table.getDoubleArrayTopic(entryName).getEntry(EMPTY_ARRAY_DOUBLE);
         });
   }
 
@@ -1130,7 +1132,7 @@ public class LimelightHelpers {
   }
 
   public static double[] getLimelightNTDoubleArray(String tableName, String entryName) {
-    return getLimelightNTTableEntry(tableName, entryName).getDoubleArray(new double[0]);
+    return getLimelightNTTableEntry(tableName, entryName).getDoubleArray(EMPTY_ARRAY_DOUBLE);
   }
 
   public static String getLimelightNTString(String tableName, String entryName) {
@@ -1138,7 +1140,7 @@ public class LimelightHelpers {
   }
 
   public static String[] getLimelightNTStringArray(String tableName, String entryName) {
-    return getLimelightNTTableEntry(tableName, entryName).getStringArray(new String[0]);
+    return getLimelightNTTableEntry(tableName, entryName).getStringArray(EMPTY_ARRAY_STRING);
   }
 
   /////
@@ -1590,7 +1592,6 @@ public class LimelightHelpers {
    * @return
    */
   public static Pose2d getBotPose2d(String limelightName) {
-
     double[] result = getBotPose(limelightName);
     return toPose2D(result);
   }
