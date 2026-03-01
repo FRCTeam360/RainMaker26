@@ -1,0 +1,131 @@
+<?xml version="1.0"?>
+<!DOCTYPE module PUBLIC
+    "-//Checkstyle//DTD Checkstyle Configuration 1.3//EN"
+    "https://checkstyle.org/dtds/configuration_1_3.dtd">
+
+<!--
+  Checkstyle configuration for RainMaker26.
+  Enforces naming conventions, magic numbers, method length, Javadoc, and other
+  style conventions described in CLAUDE.md.
+
+  All findings are errors — violations fail the build.
+  Run: ./gradlew checkstyleMain
+  Report: build/reports/checkstyle/checkstyleMain.html
+-->
+<module name="Checker">
+    <property name="severity" value="error"/>
+    <property name="fileExtensions" value="java"/>
+
+    <!-- Suppress specific files/rules via suppressions.xml -->
+    <module name="SuppressionFilter">
+        <property name="file" value="${config_loc}/suppressions.xml"/>
+    </module>
+
+    <!-- Disallow System.out.println — use Logger.recordOutput() instead -->
+    <module name="RegexpMultiline">
+        <property name="id" value="NoSystemOutPrintln"/>
+        <property name="format" value="System\.out\.println"/>
+        <property name="message" value="Use Logger.recordOutput() instead of System.out.println"/>
+        <property name="severity" value="error"/>
+    </module>
+
+    <module name="TreeWalker">
+
+        <!-- ===== NAMING CONVENTIONS ===== -->
+
+        <!-- PascalCase for types (classes, interfaces, enums, annotations) -->
+        <module name="TypeName">
+            <property name="format" value="^[A-Z][a-zA-Z0-9]*$"/>
+        </module>
+
+        <!-- camelCase for methods -->
+        <module name="MethodName">
+            <property name="format" value="^[a-z][a-zA-Z0-9]*$"/>
+        </module>
+
+        <!-- camelCase for instance/static non-final fields -->
+        <module name="MemberName">
+            <property name="format" value="^[a-z][a-zA-Z0-9]*$"/>
+        </module>
+
+        <!-- camelCase for method parameters -->
+        <module name="ParameterName">
+            <property name="format" value="^[a-z][a-zA-Z0-9]*$"/>
+        </module>
+
+        <!-- camelCase for local variables -->
+        <module name="LocalVariableName">
+            <property name="format" value="^[a-z][a-zA-Z0-9]*$"/>
+        </module>
+
+        <!-- ALL_CAPS or k-prefix for static final fields (constants).
+             Accepts both the project convention (ALL_CAPS) and the WPILib/FRC
+             k-prefix convention (kVariableName) since both are in active use. -->
+        <module name="ConstantName">
+            <property name="format" value="^(k[A-Z][a-zA-Z0-9]*|[A-Z][A-Z0-9]*(_[A-Z0-9]+)*)$"/>
+        </module>
+
+        <!-- ===== MAGIC NUMBERS ===== -->
+
+        <!--
+          Flag unnamed numeric literals. Common values and field initializers are
+          exempt; Constants.java, ShooterConstants.java, FieldConstants.java are
+          fully suppressed in suppressions.xml.
+        -->
+        <module name="MagicNumber">
+            <property name="ignoreNumbers" value="-1, 0, 0.0, 1, 1.0, 2"/>
+            <property name="ignoreHashCodeMethod" value="true"/>
+            <property name="ignoreAnnotation" value="true"/>
+            <property name="ignoreFieldDeclaration" value="true"/>
+        </module>
+
+        <!-- ===== METHOD LENGTH ===== -->
+
+        <!-- Max 60 lines per method, blank lines not counted (matches CLAUDE.md) -->
+        <module name="MethodLength">
+            <property name="max" value="60"/>
+            <property name="countEmpty" value="false"/>
+        </module>
+
+        <!-- ===== JAVADOC ===== -->
+
+        <!--
+          Public methods must have Javadoc. Framework callbacks are exempted to
+          avoid noise on periodic(), initialize(), execute(), end(), isFinished().
+        -->
+        <module name="MissingJavadocMethod">
+            <property name="scope" value="public"/>
+            <property name="ignoreMethodNamesRegex"
+                value="^(periodic|simulationPeriodic|robotPeriodic|autonomousPeriodic|teleopPeriodic|disabledPeriodic|testPeriodic|initialize|execute|end|isFinished|robotInit|autonomousInit|teleopInit|disabledInit|testInit|autonomousExit|teleopExit|disabledExit|testExit|main|getInstance)$"/>
+            <property name="tokens" value="METHOD_DEF, ANNOTATION_FIELD_DEF"/>
+        </module>
+
+        <!-- Javadoc content quality — must have @param and @return where applicable -->
+        <module name="JavadocMethod">
+            <property name="accessModifiers" value="public"/>
+            <property name="validateThrows" value="false"/>
+            <property name="tokens" value="METHOD_DEF, ANNOTATION_FIELD_DEF"/>
+        </module>
+
+        <!-- ===== EMPTY CATCHES ===== -->
+
+        <!--
+          Empty catch blocks must use a variable named "ignored" or "expected"
+          to signal intentional suppression.
+        -->
+        <module name="EmptyCatchBlock">
+            <property name="exceptionVariableName" value="ignored|expected"/>
+        </module>
+
+        <!-- ===== EMPTY BLOCKS & BRACES ===== -->
+
+        <!-- Empty block bodies (if, while, for, etc.) should at minimum have a comment -->
+        <module name="EmptyBlock">
+            <property name="option" value="text"/>
+        </module>
+
+        <!-- Require braces for all control flow statements -->
+        <module name="NeedBraces"/>
+
+    </module>
+</module>

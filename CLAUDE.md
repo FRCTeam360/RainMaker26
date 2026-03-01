@@ -89,6 +89,11 @@ Run SpotBugs to find potential bugs: ./gradlew spotbugsMain
 View the report: open build/reports/spotbugs/spotbugs.html
 **Note:** SpotBugs is diagnostic only. Findings are informational and should not block PRs from merging.
 
+Checkstyle runs automatically as part of: ./gradlew build
+Run it standalone: ./gradlew checkstyleMain
+View the report: open build/reports/checkstyle/checkstyleMain.html
+**Note:** Checkstyle violations fail the build.
+
 ## Code Patterns
 
 - Use Command-based programming controlling the drivetrain and superstructure for competition code: superstructure owns non-drivetrain subsystems which own hardware, commands define actions
