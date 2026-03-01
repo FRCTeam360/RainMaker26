@@ -64,6 +64,7 @@ public class HopperRoller extends SubsystemBase {
         break;
       case UNJAMMING:
         currentState = HopperRollerStates.UNJAMMING;
+        break;
       case OFF:
       default:
         currentState = HopperRollerStates.OFF;
