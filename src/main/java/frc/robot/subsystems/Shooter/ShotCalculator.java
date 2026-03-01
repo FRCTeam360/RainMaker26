@@ -9,7 +9,6 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.wpilibj.Timer;
 import frc.robot.utils.FieldConstants;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
@@ -81,10 +80,6 @@ public class ShotCalculator {
   }
 
   private ShootingParams cachedShootingParams = null;
-
-  // Previous shooter position and timestamp for numerical velocity calculation
-  private Translation2d prevShooterPosition = null;
-  private double prevTimestampSeconds = 0.0;
 
   /**
    * Calculates and caches the shooting parameters for the current robot position. Compensates for
