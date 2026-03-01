@@ -117,6 +117,9 @@ public class ShotCalculator {
     double shooterVelXMps =
         robotFieldVelocity.getX()
             + omegaRadPerSec
+                // TODO verify shooterOffsetY math
+                // may have an error in the math here, need to verify with our own calculations.
+                // Since our shooter isn't offset in the Y direction, it doesn't matter.
                 * (shooterOffsetY * Math.cos(robotAngleRad)
                     - shooterOffsetX * Math.sin(robotAngleRad));
     double shooterVelYMps =
