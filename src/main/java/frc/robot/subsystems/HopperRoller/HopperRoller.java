@@ -81,6 +81,7 @@ public class HopperRoller extends SubsystemBase {
         break;
       case UNJAMMING:
         setDutyCycle(UNJAMMING_DUTY_CYCLE);
+        break;
       case OFF:
       default:
         stop();
