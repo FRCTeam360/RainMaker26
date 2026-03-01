@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems.IntakePivot;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.ControlState;
@@ -186,5 +187,7 @@ public class IntakePivot extends SubsystemBase {
     Logger.recordOutput("Subsystems/IntakePivot/CurrentState", currentState);
     Logger.recordOutput("Subsystems/IntakePivot/PreviousState", previousState);
     Logger.recordOutput("Subsystems/IntakePivot/ControlState", controlState);
+    SmartDashboard.putString(
+        "Subsystems/IntakePivot/CurrentIntakePivotState", currentState.toString());
   }
 }

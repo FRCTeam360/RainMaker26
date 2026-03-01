@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems.Shooter.Hood;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -210,5 +211,6 @@ public class Hood extends SubsystemBase {
     Logger.recordOutput("Subsystems/Hood/CurrentState", currentState);
     Logger.recordOutput("Subsystems/Hood/PreviousState", previousState);
     Logger.recordOutput("Subsystems/Hood/ControlState", controlState);
+    SmartDashboard.putString("Subsystems/Hood/CurrentHoodState", currentState.toString());
   }
 }

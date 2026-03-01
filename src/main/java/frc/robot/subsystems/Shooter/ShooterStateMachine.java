@@ -107,7 +107,8 @@ public class ShooterStateMachine {
         boolean targetReady = canShootToTarget.getAsBoolean();
 
         Logger.recordOutput("Superstructure/Shooting/FlywheelState", flywheelState);
-        SmartDashboard.putString("Superstructure/Shooting/FlywheelState", flywheelState.toString());
+        // SmartDashboard.putString("Superstructure/Shooting/FlywheelState",
+        // flywheelState.toString());
         Logger.recordOutput("Superstructure/Shooting/FlywheelReady", flywheelReady);
         SmartDashboard.putBoolean("Superstructure/Shooting/FlywheelReady", flywheelReady);
         Logger.recordOutput("Superstructure/Shooting/HoodReady", hoodReady);
