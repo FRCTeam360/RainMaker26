@@ -8,6 +8,7 @@ import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.subsystems.ControlState;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
@@ -205,6 +206,12 @@ public class Flywheel extends SubsystemBase {
         setHoldVelocityControl(shootVelocitySupplier.getAsDouble());
         break;
       case COAST:
+        if (Constants.getRobotType() != Constants.RobotType.WOODBOT) {
+          setCoastVelocityControl(shootVelocitySupplier.getAsDouble());
+        } else {
+          setDutyCycle(0.0);
+        }
+        break;
       case OFF:
       default:
         setDutyCycle(0.0);
