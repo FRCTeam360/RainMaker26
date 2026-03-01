@@ -2,89 +2,188 @@
 title: SuperStructure State Machine
 ---
 stateDiagram-v2
-    [*] --> StateDefault
+    direction TB
+    [*] --> DEFAULT_WANTED
 
-    %% State definitions with descriptions
-    StateDefault: DEFAULT
-    StateIdle: IDLE
-    StateIntaking: INTAKING
-    StateShootAtHub: SHOOT_AT_HUB
-    StateShootAtOutpost: SHOOT_AT_OUTPOST
-    StateAutoCycleShooting: AUTO_CYCLE_SHOOTING
-    StateUnjamming: UNJAMMING
-    StateStowed: STOWED
+    %% DEFAULT Wanted State Container
+    state "WantedState: DEFAULT" as DEFAULT_WANTED {
+        [*] --> StateDefault
+        StateDefault: DEFAULT (internal)
+        
+        note right of StateDefault
+            TargetSelection → AUTO
+            ShooterStateMachine → PASSIVE_SHOOTER
+              ↳ Internal: WAITING
+            Intake → OFF
+            Indexer → OFF
+            IntakePivot → DEPLOYED
+            HopperRoller → OFF
+            Flywheel → IDLE (via ShooterStateMachine)
+            Hood → DUCKED (via ShooterStateMachine)
+            FlywheelKicker → IDLE (via ShooterStateMachine)
+            
+            Passive shooter state with hood ducking
+        end note
+    }
 
-    %% Default state flow
-    StateDefault --> StateIntaking : Driver holds<br>intake button
-    StateDefault --> StateShootAtHub : Driver holds<br>force hub button
-    StateDefault --> StateShootAtOutpost : Driver holds<br>force outpost button
-    StateDefault --> StateAutoCycleShooting : Driver holds<br>auto cycle button
-    StateDefault --> StateUnjamming : Driver presses<br>A button
-    StateDefault --> StateStowed : Driver presses<br>Y button
+    %% IDLE Wanted State Container
+    state "WantedState: IDLE" as IDLE_WANTED {
+        [*] --> StateIdle
+        StateIdle: IDLE (internal)
+        
+        note right of StateIdle
+            All subsystems stopped
+            Intake → OFF
+            Indexer → OFF
+            IntakePivot → OFF
+            HopperRoller → OFF
+            ShooterStateMachine → IDLE
+              ↳ Flywheel → IDLE
+              ↳ Hood → IDLE
+              ↳ FlywheelKicker → IDLE
+            
+            Used in disabled/test modes only
+        end note
+    }
 
-    %% Intaking flow
-    StateIntaking --> StateDefault : Driver releases<br>intake button
+    %% INTAKING Wanted State Container
+    state "WantedState: INTAKING" as INTAKING_WANTED {
+        [*] --> StateIntaking
+        StateIntaking: INTAKING (internal)
+        
+        note right of StateIntaking
+            Intake → INTAKING
+            IntakePivot → DEPLOYED
+            HopperRoller → PREVENT_JAM
+            Indexer → ASSIST_INTAKING
+            ShooterStateMachine → IDLE
+              ↳ Flywheel → IDLE
+              ↳ Hood → IDLE
+              ↳ FlywheelKicker → IDLE
+            
+            Full intake mode
+        end note
+    }
 
-    %% Hub shooting flow
-    StateShootAtHub --> StateDefault : Driver releases<br>force hub button
+    %% SHOOT_AT_HUB Wanted State Container
+    state "WantedState: SHOOT_AT_HUB" as SHOOT_HUB_WANTED {
+        [*] --> StateShootingAtHub
+        StateShootingAtHub: SHOOTING_AT_HUB (internal)
+        
+        note right of StateShootingAtHub
+            TargetSelection → HUB
+            ShooterStateMachine → SHOOTING
+              ↳ Internal: PREPARING_TO_FIRE ↔ FIRING
+            Intake → OFF (until FIRING)
+            Indexer → OFF (until FIRING)
+            IntakePivot → OFF (until FIRING)
+            HopperRoller → OFF (until FIRING)
+            
+            When ShooterStateMachine.state == FIRING:
+              Intake → ASSIST_SHOOTING
+              Indexer → INDEXING
+              IntakePivot → AGITATE_HOPPER
+              HopperRoller → ROLLING
+            
+            Shot calculator: hubShotCalculator
+        end note
+    }
 
-    %% Outpost pass flow
-    StateShootAtOutpost --> StateDefault : Driver releases<br>force outpost button
+    %% SHOOT_AT_OUTPOST Wanted State Container
+    state "WantedState: SHOOT_AT_OUTPOST" as SHOOT_OUTPOST_WANTED {
+        [*] --> StatePassing
+        StatePassing: PASSING (internal)
+        
+        note right of StatePassing
+            TargetSelection → OUTPOST
+            ShooterStateMachine → SHOOTING
+              ↳ Internal: PREPARING_TO_FIRE ↔ FIRING
+            Intake → OFF (until FIRING)
+            Indexer → OFF (until FIRING)
+            IntakePivot → OFF (until FIRING)
+            HopperRoller → OFF (until FIRING)
+            
+            When ShooterStateMachine.state == FIRING:
+              Intake → ASSIST_SHOOTING
+              Indexer → INDEXING
+              IntakePivot → AGITATE_HOPPER
+              HopperRoller → ROLLING
+            
+            Shot calculator: passCalculator
+        end note
+    }
 
-    %% Auto cycle flow
-    StateAutoCycleShooting --> StateDefault : Driver releases<br>auto cycle button
+    %% AUTO_CYCLE_SHOOTING Wanted State Container
+    state "WantedState: AUTO_CYCLE_SHOOTING" as AUTO_CYCLE_WANTED {
+        [*] --> AutoChoice
+        
+        state AutoChoice <<choice>>
+        AutoChoice --> StateAutoHub : TargetSelection<br>resolves to AT_HUB
+        AutoChoice --> StateAutoOutpost : TargetSelection<br>resolves to AT_OUTPOST
+        
+        StateAutoHub: SHOOTING_AT_HUB (internal)
+        StateAutoOutpost: PASSING (internal)
+        
+        note right of StateAutoHub
+            TargetSelection → AUTO → AT_HUB
+            Same behavior as SHOOT_AT_HUB
+            Auto-selected based on alliance zone
+        end note
+        
+        note right of StateAutoOutpost
+            TargetSelection → AUTO → AT_OUTPOST
+            Same behavior as SHOOT_AT_OUTPOST
+            Auto-selected based on alliance zone
+        end note
+    }
 
-    %% Unjamming flow
-    StateUnjamming --> StateDefault : Driver releases<br>A button
+    %% UNJAMMING Wanted State Container
+    state "WantedState: UNJAMMING" as UNJAMMING_WANTED {
+        [*] --> StateUnjamming
+        StateUnjamming: UNJAMMING (internal)
+        
+        note right of StateUnjamming
+            Indexer → REVERSING
+            HopperRoller → UNJAMMING
+            IntakePivot → DEPLOYED
+            Intake → OFF
+            ShooterStateMachine → REVERSING
+              ↳ Flywheel → IDLE
+              ↳ Hood → IDLE
+              ↳ FlywheelKicker → REVERSING
+            
+            Clears jams by reversing
+        end note
+    }
 
-    %% IDLE state (used in disabled/test modes)
-    StateIdle --> StateDefault : Robot enters<br>autonomous or teleop
+    %% STOWED Wanted State Container
+    state "WantedState: STOWED" as STOWED_WANTED {
+        [*] --> StateStowing
+        StateStowing: STOWING (internal)
+        
+        note right of StateStowing
+            IntakePivot → STOWED
+            
+            All other subsystems maintain
+            previous state (no explicit control)
+        end note
+    }
 
-    note right of StateDefault
-        Flywheel spun up
-        Hood prepping with ducking
-        Intake pivot deployed
-        Passive shooter state
-    end note
-    note right of StateIdle
-        All subsystems stopped
-        Used in disabled/test modes
-    end note
-    note right of StateIntaking
-        Intake + indexer running
-        Intake pivot deployed
-        Hopper roller prevents jams
-        Shooter idle
-    end note
-    note right of StateShootAtHub
-        Target selection: HUB
-        See ShooterStateMachine
-        Flywheel RPM & Hood angle
-        from hubShotCalculator
-        Fires when ready
-    end note
-    note right of StateShootAtOutpost
-        Target selection: OUTPOST
-        See ShooterStateMachine
-        Flywheel RPM & Hood angle
-        from passCalculator
-        Fires when ready
-    end note
-    note right of StateAutoCycleShooting
-        Auto-selects HUB or OUTPOST
-        based on alliance zone
-        Transitions to either
-        SHOOTING_AT_HUB or PASSING
-    end note
-    note right of StateUnjamming
-        Indexer + shooter reversing
-        Hopper roller unjamming
-        Intake pivot deployed
-        Intake off
-    end note
-    note right of StateStowed
-        Intake pivot stowed
-    end note
+    %% Transitions between wanted states
+    DEFAULT_WANTED --> INTAKING_WANTED : Driver holds intake button
+    DEFAULT_WANTED --> SHOOT_HUB_WANTED : Driver holds force hub button
+    DEFAULT_WANTED --> SHOOT_OUTPOST_WANTED : Driver holds force outpost button
+    DEFAULT_WANTED --> AUTO_CYCLE_WANTED : Driver holds auto cycle button
+    DEFAULT_WANTED --> UNJAMMING_WANTED : Driver presses A button
+    DEFAULT_WANTED --> STOWED_WANTED : Driver presses Y button
+
+    INTAKING_WANTED --> DEFAULT_WANTED : Driver releases intake button
+    SHOOT_HUB_WANTED --> DEFAULT_WANTED : Driver releases force hub button
+    SHOOT_OUTPOST_WANTED --> DEFAULT_WANTED : Driver releases force outpost button
+    AUTO_CYCLE_WANTED --> DEFAULT_WANTED : Driver releases auto cycle button
+    UNJAMMING_WANTED --> DEFAULT_WANTED : Driver releases A button
+
+    IDLE_WANTED --> DEFAULT_WANTED : Robot enters autonomous/teleop
 
     %% Defined but not yet implemented
     state "Not Yet Implemented" as NYI {
