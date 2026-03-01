@@ -64,11 +64,8 @@ Where on the field the auto primarily operates:
 
 #### 3. STARTING_POSITION (Required)
 Starting configuration/location:
-- `MIDDLE` - Center starting position
 - `BUMP` - Near bump obstacle
 - `TRENCH` - Near trench obstacle
-- `DEPOT` - Near depot
-- `OUTPOST` - Near outpost
 
 #### 4. ACTION (Required)
 Main strategy:
@@ -87,8 +84,8 @@ Main strategy:
 ```
 BLUE_OUTPOST_TRENCH_MIDDLE_SPRINT
 RED_DEPOT_BUMP_BULLETPROOF
-BLUE_OUTPOST_TRENCH_AGGRESSIVE
-RED_DEPOT_TRENCH_SAFE
+BLUE_OUTPOST_BUMP_AGGRESSIVE
+RED_DEPOT_TRENCH_MIDDLE_SPRINT
 ```
 
 
@@ -112,10 +109,10 @@ Include **only when path geometry is alliance-specific** (different trajectories
 
 #### 2. ORIGIN (Required)
 Where the path starts from:
-- `START_LEFT`, `START_CENTER`, `START_RIGHT` - Starting positions from driver station perspective
 - `HUB` - Starting from hub area
 - `DEPOT` - Starting from depot area
 - `CENTERLINE` - Starting from centerline/neutral zone
+- `CENTERLINE_TOP`, `CENTERLINE_BOTTOM` - Specific centerline positions
 - `BUMP`, `TRENCH` - Starting near/at obstacles
 - `OUTPOST` - Starting from outpost area
 - `TOP`, `BOTTOM`, `LEFT`, `RIGHT` - Directional qualifiers
@@ -128,6 +125,7 @@ What happens **during** the path. Omit if it's just a simple movement:
 - `GO_THROUGH` - Going through an area
 - `GO_AROUND` - Avoiding an obstacle
 - `POSITIONING` - Setting up for next action
+- `SHOOTING` - Shooting while moving (e.g., scoring in hub while driving)
 
 #### 4. DESTINATION (Required)
 Where the path ends:
@@ -144,11 +142,11 @@ Where the path ends:
 #### Alliance-Agnostic Paths
 Most paths should work for both alliances (omit alliance prefix):
 ```
-START_CENTER_HUB               # Start center position to hub
+DEPOT_CENTER_HUB               # Start center position to hub
 CENTERLINE_HUB                 # Centerline to hub
 DEPOT_CENTERLINE               # Depot to centerline
 HUB_CENTERLINE                 # Hub to centerline
-CENTERLINE_INTAKING_CENTERLINE_BOTTOM  # Collect fuel while moving within centerline
+CENTERLINE_TOP_INTAKING_CENTERLINE_BOTTOM  # Collect fuel moving from top to bottom centerline
 CENTERLINE_GO_OVER_TOP_BUMP    # Centerline, going over top bump
 CENTERLINE_GO_THROUGH_BOTTOM_DEPOT    # Centerline through to bottom depot
 HUB_GO_THROUGH_TRENCH          # Hub going through trench area
@@ -162,34 +160,6 @@ RED_DEPOT_CENTERLINE_BOTTOM    # Red-specific depot to bottom centerline
 BLUE_DEPOT_CENTERLINE_TOP      # Blue-specific depot to top centerline
 RED_START_LEFT_HUB             # Red starting left to hub
 BLUE_START_RIGHT_CENTERLINE    # Blue starting right to centerline
-```
-
-#### Test Paths
-For development and testing:
-```
-TEST_FIGURE_8
-TEST_STRAIGHT_LINE
-TEST_ROTATION
-TEST_SLALOM
-```
-
-### Examples
-
-```
-RED_MIDDLE_SPRINT_S1_TO_HUB
-RED_MIDDLE_SPRINT_S2_TO_FUEL
-RED_MIDDLE_SPRINT_S3_RETURN
-RED_MIDDLE_SPRINT_S4_TO_FUEL
-RED_MIDDLE_SPRINT_S5_TO_HUB
-
-BLUE_BULLETPROOF_PRELOAD_TO_HUB
-BLUE_BULLETPROOF_FUEL1_COLLECT
-BLUE_BULLETPROOF_SCORE1_RETURN
-BLUE_BULLETPROOF_SCORE2_TO_HUB
-
-BLUE_LEFT_TRENCH_COLLECT_S1_THROUGH_TRENCH
-BLUE_LEFT_TRENCH_COLLECT_S2_TO_FUEL
-BLUE_LEFT_TRENCH_COLLECT_S3_TO_DEPOT
 ```
 
 ### Current Paths Renamed
@@ -218,12 +188,12 @@ BLUE_LEFT_TRENCH_COLLECT_S3_TO_DEPOT
 ```
 pathplanner/autos/
 ├── competition/
-│   ├── BLUE_MIDDLE_MIDDLE_SPRINT.auto
-│   ├── RED_MIDDLE_MIDDLE_SPRINT.auto
-│   └── BLUE_DEPOT_LEFT_BULLETPROOF.auto
+│   ├── BLUE_DEPOT_CENTERLINE_MIDDLE_SPRINT.auto
+│   ├── RED_DEPOT_CENTERLINE_MIDDLE_SPRINT.auto
+│   └── BLUE_OUTPOST_BUMP_BULLETPROOF.auto
 ├── testing/
 │   ├── TEST_SUPERSTRUCTURE.auto
-│   └── BLUE_MIDDLE_TEST.auto
+│   └── TEST_DEPOT_TRENCH.auto
 └── archive/
     └── old_deprecated_autos.auto
 ```
@@ -240,7 +210,7 @@ pathplanner/paths/
 ├── centerline_collection/
 │   ├── HUB_INTAKING_CENTERLINE.path
 │   ├── HUB_INTAKING_CENTERLINE_BOTTOM.path
-│   ├── CENTERLINE_INTAKING_CENTERLINE_BOTTOM.path
+│   ├── CENTERLINE_TOP_INTAKING_CENTERLINE_BOTTOM.path
 │   └── DEPOT_INTAKING_CENTERLINE.path
 ├── obstacles/
 │   ├── CENTERLINE_GO_OVER_TOP_BUMP.path
@@ -293,7 +263,7 @@ pathplanner/paths/
 [ALLIANCE]_[SIDE]_[STARTING_POSITION]_[ACTION]
 
 Examples:
-BLUE_MIDDLE_MIDDLE_SPRINT
+BLUE_DEPOT_CENTERLINE_MIDDLE_SPRINT
 RED_DEPOT_BUMP_BULLETPROOF
 BLUE_OUTPOST_TRENCH_AGGRESSIVE
 ```
@@ -306,7 +276,7 @@ Examples:
 START_CENTER_HUB
 CENTERLINE_HUB
 RED_DEPOT_CENTERLINE_BOTTOM
-CENTERLINE_INTAKING_CENTERLINE_BOTTOM
+CENTERLINE_TOP_INTAKING_CENTERLINE_BOTTOM
 CENTERLINE_GO_OVER_TOP_BUMP
 HUB_GO_THROUGH_TRENCH
 ```
