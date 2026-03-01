@@ -40,6 +40,7 @@ public class FlywheelKicker extends SubsystemBase {
   private static final double SUSTAINED_RPM_DROP_DEBOUNCE_SECONDS = 0.2;
 
   private long kickCount = 0;
+  private static final double REVERSE_DUTY_CYCLE = -0.85;
 
   // IO fields
   private final FlywheelKickerIO io;
@@ -48,8 +49,34 @@ public class FlywheelKicker extends SubsystemBase {
   // Enums
   public enum FlywheelKickerStates {
     IDLE,
-    KICKING
+    KICKING,
+    REVERSING
   }
+
+  public enum FlywheelKickerInternalStates {
+    OFF,
+    SPINNING_UP,
+    AT_SETPOINT,
+    RECOVERING,
+    UNDER_KICKING
+  }
+
+  /**
+   * Debouncer for shot detection. Prevents rapid spinup/hold switching when velocity briefly dips
+   * below tolerance due to noise. A sustained drop past this debounce window indicates a note has
+   * passed through the kicker. Uses {@link DebounceType#kFalling} so the "out of tolerance" signal
+   * must persist before being accepted.
+   */
+  private final Debouncer ballFiredDebouncer =
+      new Debouncer(BALL_FIRED_DEBOUNCE_SECONDS, DebounceType.kFalling);
+
+  /**
+   * Debouncer for underspeed detection. Detects when RPM has been below tolerance for too long,
+   * indicating too many notes have passed through in rapid succession and the kicker can't recover
+   * between shots. Uses {@link DebounceType#kFalling} so single-shot dips don't trigger it.
+   */
+  private final Debouncer underspeedDebouncer =
+      new Debouncer(SUSTAINED_RPM_DROP_DEBOUNCE_SECONDS, DebounceType.kFalling);
 
   public enum FlywheelKickerInternalStates {
     OFF,
@@ -158,6 +185,9 @@ public class FlywheelKicker extends SubsystemBase {
           }
           break;
         }
+      case REVERSING:
+        currentState = FlywheelKickerStates.REVERSING;
+        break;
       case IDLE:
       default:
         currentState = FlywheelKickerInternalStates.OFF;
@@ -184,6 +214,9 @@ public class FlywheelKicker extends SubsystemBase {
         break;
       case AT_SETPOINT:
         setHoldVelocityControl(KICKER_VELOCITY_RPM);
+        break;
+      case REVERSING:
+        setDutyCycle(REVERSE_DUTY_CYCLE);
         break;
       case OFF:
       default:
