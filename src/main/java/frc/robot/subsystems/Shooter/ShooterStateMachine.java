@@ -23,7 +23,7 @@ public class ShooterStateMachine {
     IDLE,
     SHOOTING,
     PASSIVE_SHOOTER,
-    REVERSING,
+    REVERSING
   }
 
   public enum ShooterStates {
