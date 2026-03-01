@@ -70,6 +70,9 @@ public final class Constants {
     public static final InterpolatingDoubleTreeMap timeOfFlightMap =
         new InterpolatingDoubleTreeMap();
 
+    public static final double MIN_SHOT_DISTANCE_METERS = 0.0;
+    public static final double MAX_SHOT_DISTANCE_METERS = 5.0;
+
     static {
       // === SHOOTING VALUES ===
       shotHoodAngleMap.put(5.0, 20.0);
@@ -80,11 +83,11 @@ public final class Constants {
       shotHoodAngleMap.put(0.0, 6.0);
 
       // === SHOOTING VALUES ===
-      shotFlywheelSpeedMap.put(5.0, 3750.0);
-      shotFlywheelSpeedMap.put(4.0, 3750.0);
-      shotFlywheelSpeedMap.put(3.0, 3375.0);
-      shotFlywheelSpeedMap.put(2.0, 3000.0); // THIS IS GOOD
-      shotFlywheelSpeedMap.put(0.0, 2750.0);
+      shotFlywheelSpeedMap.put(5.0, 3250.0);
+      shotFlywheelSpeedMap.put(4.0, 3250.0);
+      shotFlywheelSpeedMap.put(3.0, 3000.0);
+      shotFlywheelSpeedMap.put(2.0, 2500.0); // THIS IS GOOD
+      shotFlywheelSpeedMap.put(0.0, 2250.0);
 
       timeOfFlightMap.put(0.0, 0.0);
 
@@ -97,6 +100,21 @@ public final class Constants {
   }
 
   public static class PracticeBotConstants {
+    // === SHOT CALCULATOR ===
+    public static final InterpolatingDoubleTreeMap shotHoodAngleMap =
+        new InterpolatingDoubleTreeMap();
+    public static final InterpolatingDoubleTreeMap shotFlywheelSpeedMap =
+        new InterpolatingDoubleTreeMap();
+    public static final InterpolatingDoubleTreeMap passHoodAngleMap =
+        new InterpolatingDoubleTreeMap();
+    public static final InterpolatingDoubleTreeMap passFlywheelSpeedMap =
+        new InterpolatingDoubleTreeMap();
+    public static final InterpolatingDoubleTreeMap timeOfFlightMap =
+        new InterpolatingDoubleTreeMap();
+
+    public static final double MIN_SHOT_DISTANCE_METERS = 0.0;
+    public static final double MAX_SHOT_DISTANCE_METERS = 6.0;
+
     // === INTAKE ===
     public static final int INTAKE_PIVOT_ID = 14;
     public static final int INTAKE_ID = 15;
@@ -122,10 +140,33 @@ public final class Constants {
     public static final int HOOD_ID = 24;
 
     // === LIMELIGHT ===
-    public static final String LIMELIGHT = "limelight";
+    public static final String LIMELIGHT = "limelight-right";
 
     // === CANBUS ===
     public static final CANBus CANBUS = new CANBus("Default Name");
+
+    static {
+      shotHoodAngleMap.put(6.0, 18.0);
+      shotHoodAngleMap.put(5.0, 18.0); // TESTED
+      shotHoodAngleMap.put(4.0, 15.0);
+      shotHoodAngleMap.put(3.0, 6.0); // TESTED
+      shotHoodAngleMap.put(2.5, 4.0); // TESTED
+      shotHoodAngleMap.put(2.0, 2.0);
+      shotHoodAngleMap.put(1.0, 0.0);
+      shotHoodAngleMap.put(0.0, 0.0);
+
+      // === SHOOTING VALUES ===
+      shotFlywheelSpeedMap.put(6.0, 2500.0);
+      shotFlywheelSpeedMap.put(5.0, 2500.0); // TESTED
+      shotFlywheelSpeedMap.put(4.0, 2250.0);
+      shotFlywheelSpeedMap.put(3.0, 2250.0); // TESTED
+      shotFlywheelSpeedMap.put(2.5, 2150.0); // TESTED
+      shotFlywheelSpeedMap.put(2.0, 2000.0);
+      shotFlywheelSpeedMap.put(1.0, 1800.0);
+      shotFlywheelSpeedMap.put(0.0, 2000.0);
+
+      timeOfFlightMap.put(0.0, 0.0);
+    }
   }
 
   public static class SimulationConstants {
@@ -149,6 +190,9 @@ public final class Constants {
 
     // === HOOD ===
     public static final int HOOD_MOTOR = 34;
+
+    // === CLIMBER ===
+    public static final int CLIMBER_MOTOR = 36;
   }
 
   public static class OperatorConstants {
@@ -172,6 +216,6 @@ public final class Constants {
     } else if (!Robot.isReal()) { // KEEP AT BOTTOM
       return Constants.RobotType.SIM;
     }
-    return Constants.RobotType.WOODBOT;
+    return Constants.RobotType.PRACTICEBOT;
   }
 }

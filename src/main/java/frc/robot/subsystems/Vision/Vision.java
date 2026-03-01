@@ -114,8 +114,10 @@ public class Vision extends SubsystemBase {
     // Clear previous measurements to prevent unbounded growth
     acceptedMeasurements.clear();
 
-    for (String key : ios.keySet()) {
-      VisionIO io = ios.get(key);
+    for (Map.Entry<String, VisionIO> entry : ios.entrySet()) {
+      VisionIO io = entry.getValue();
+      String key = entry.getKey();
+
       VisionIOInputsAutoLogged input = visionInputs.get(key);
 
       io.updateInputs(input);
@@ -128,11 +130,12 @@ public class Vision extends SubsystemBase {
           input.tagPoses[i] = input.tagPoses[0];
         }
       }
-      Logger.processInputs("Limelight: " + key, input.clone());
+      Logger.processInputs("Limelight: " + key, input);
     }
 
-    for (String key : visionInputs.keySet()) {
-      VisionIOInputsAutoLogged input = visionInputs.get(key);
+    for (Map.Entry<String, VisionIOInputsAutoLogged> entry : visionInputs.entrySet()) {
+      String key = entry.getKey();
+      VisionIOInputsAutoLogged input = entry.getValue();
 
       // Count total detections (pose updates attempted)
       if (input.poseUpdated) {

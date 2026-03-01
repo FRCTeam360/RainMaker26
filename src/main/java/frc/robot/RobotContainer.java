@@ -23,6 +23,10 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.generated.PracticeBotDrivetrain;
 import frc.robot.generated.WoodBotDrivetrain;
+import frc.robot.subsystems.Climber.Climber;
+import frc.robot.subsystems.Climber.ClimberIONoop;
+import frc.robot.subsystems.Climber.ClimberIOPB;
+import frc.robot.subsystems.Climber.ClimberIOSim;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.ControlState;
 import frc.robot.subsystems.HopperRoller.HopperRoller;
@@ -44,7 +48,7 @@ import frc.robot.subsystems.IntakePivot.IntakePivotIOSim;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel;
 import frc.robot.subsystems.Shooter.Flywheel.FlywheelIOPB;
 import frc.robot.subsystems.Shooter.Flywheel.FlywheelIOSim;
-import frc.robot.subsystems.Shooter.Flywheel.FlywheelIOWB;
+import frc.robot.subsystems.Shooter.Flywheel.FlywheelIOWBBangBang;
 import frc.robot.subsystems.Shooter.FlywheelKicker.FlywheelKicker;
 import frc.robot.subsystems.Shooter.FlywheelKicker.FlywheelKickerIOPB;
 import frc.robot.subsystems.Shooter.FlywheelKicker.FlywheelKickerIOSim;
@@ -57,13 +61,17 @@ import frc.robot.subsystems.Shooter.ShooterConstants;
 import frc.robot.subsystems.Shooter.ShotCalculator;
 import frc.robot.subsystems.Shooter.ShotCalculator.RobotShootingInfo;
 import frc.robot.subsystems.SuperStructure;
-import frc.robot.subsystems.SuperStructure.SuperStates;
+import frc.robot.subsystems.SuperStructure.SuperInternalStates;
+import frc.robot.subsystems.SuperStructure.SuperWantedStates;
 import frc.robot.subsystems.Vision.Vision;
+import frc.robot.subsystems.Vision.VisionIO;
 import frc.robot.subsystems.Vision.VisionIOLimelight3G;
 import frc.robot.subsystems.Vision.VisionIOLimelight4;
+import frc.robot.subsystems.Vision.VisionIOLimelightBase;
 import frc.robot.subsystems.Vision.VisionIOPhotonSim;
 import frc.robot.utils.AllianceFlipUtil;
 import frc.robot.utils.FieldConstants;
+import frc.robot.utils.PositionUtils;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.BooleanSupplier;
@@ -87,11 +95,13 @@ public class RobotContainer {
   private IntakePivot intakePivot;
   private HopperRoller hopperRoller;
   private FlywheelKicker flywheelKicker;
+  private Climber climber;
+  private BooleanSupplier canShootInHub;
 
   private SuperStructure superStructure;
 
   private ShotCalculator hubShotCalculator;
-  private ShotCalculator outpostPassCalculator;
+  private ShotCalculator passCalculator;
 
   // TODO: refactor to allow for more than 1 drivetrain type
 
@@ -118,6 +128,7 @@ public class RobotContainer {
     switch (Constants.getRobotType()) {
       case SIM:
         drivetrain = WoodBotDrivetrain.createDrivetrain();
+        climber = new Climber(new ClimberIOSim());
         logger = new Telemetry(WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
         intakePivot = new IntakePivot(new IntakePivotIOSim());
         vision =
@@ -135,14 +146,15 @@ public class RobotContainer {
                 Constants.WoodBotConstants.shotHoodAngleMap,
                 Constants.WoodBotConstants.shotFlywheelSpeedMap,
                 Constants.WoodBotConstants.timeOfFlightMap,
-                ShooterConstants.ROBOT_TO_SHOOTER,
-                0.0,
-                5.0);
+                ShooterConstants.WOODBOT_TO_SHOOTER,
+                Constants.WoodBotConstants.MIN_SHOT_DISTANCE_METERS,
+                Constants.WoodBotConstants.MAX_SHOT_DISTANCE_METERS);
         break;
       case WOODBOT:
         drivetrain = WoodBotDrivetrain.createDrivetrain();
+        climber = new Climber(new ClimberIONoop());
         logger = new Telemetry(WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
-        flywheel = new Flywheel(new FlywheelIOWB());
+        flywheel = new Flywheel(new FlywheelIOWBBangBang());
         hood = new Hood(new HoodIOWB());
         indexer = new Indexer(new IndexerIOWB());
         vision =
@@ -172,13 +184,14 @@ public class RobotContainer {
                 Constants.WoodBotConstants.shotHoodAngleMap,
                 Constants.WoodBotConstants.shotFlywheelSpeedMap,
                 Constants.WoodBotConstants.timeOfFlightMap,
-                ShooterConstants.ROBOT_TO_SHOOTER,
-                0.0,
-                5.0);
+                ShooterConstants.WOODBOT_TO_SHOOTER,
+                Constants.WoodBotConstants.MIN_SHOT_DISTANCE_METERS,
+                Constants.WoodBotConstants.MAX_SHOT_DISTANCE_METERS);
         break;
       case PRACTICEBOT:
       default:
         drivetrain = PracticeBotDrivetrain.createDrivetrain();
+        climber = new Climber(new ClimberIOPB());
         logger = new Telemetry(PracticeBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
         flywheel = new Flywheel(new FlywheelIOPB());
         hood = new Hood(new HoodIOPB());
@@ -188,7 +201,7 @@ public class RobotContainer {
                 Map.ofEntries(
                     Map.entry(
                         Constants.PracticeBotConstants.LIMELIGHT,
-                        new VisionIOLimelight3G(
+                        new VisionIOLimelight4(
                             Constants.PracticeBotConstants.LIMELIGHT,
                             () -> drivetrain.getAngle(),
                             () -> drivetrain.getAngularRate(),
@@ -200,12 +213,12 @@ public class RobotContainer {
 
         robotShootingInfo =
             new RobotShootingInfo(
-                Constants.WoodBotConstants.shotHoodAngleMap,
-                Constants.WoodBotConstants.shotFlywheelSpeedMap,
-                Constants.WoodBotConstants.timeOfFlightMap,
-                ShooterConstants.ROBOT_TO_SHOOTER,
-                0.0,
-                5.0);
+                Constants.PracticeBotConstants.shotHoodAngleMap,
+                Constants.PracticeBotConstants.shotFlywheelSpeedMap,
+                Constants.PracticeBotConstants.timeOfFlightMap,
+                ShooterConstants.PRACTICEBOT_TO_SHOOTER,
+                Constants.PracticeBotConstants.MIN_SHOT_DISTANCE_METERS,
+                Constants.PracticeBotConstants.MAX_SHOT_DISTANCE_METERS);
         // TODO ADD CLIMBERS
         break;
     }
@@ -214,10 +227,14 @@ public class RobotContainer {
             drivetrain::getPosition,
             () -> AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint.toTranslation2d()),
             robotShootingInfo);
-    outpostPassCalculator =
+    passCalculator =
         new ShotCalculator(
             drivetrain::getPosition,
-            () -> AllianceFlipUtil.apply(FieldConstants.Outpost.centerPoint),
+            () ->
+                PositionUtils.getCloserPassTarget(
+                    drivetrain.getPosition(),
+                    AllianceFlipUtil.apply(FieldConstants.RightBump.nearRightCorner),
+                    AllianceFlipUtil.apply(FieldConstants.LeftBump.nearLeftCorner)),
             robotShootingInfo);
     // Configure the trigger bindings
     // TODO: Re-enable superStructure construction and PathPlanner commands
@@ -232,27 +249,34 @@ public class RobotContainer {
             intakePivot,
             hopperRoller,
             hubShotCalculator,
-            outpostPassCalculator,
-            drivetrain::isAlignedToTarget);
+            passCalculator,
+            drivetrain::isAlignedToTarget,
+            drivetrain::getPosition,
+            robotShootingInfo.robotToShooter());
+    intake.setDutyCycleSupplier(driverCont::getLeftTriggerAxis);
 
     registerPathplannerCommand(
-        "basic intake", superStructure.setStateCommand(SuperStates.INTAKING));
+        "basic intake", superStructure.setStateCommand(SuperWantedStates.INTAKING));
     // TODO: add end condition based on state from SuperStructure (based on sensor inputs)
     registerPathplannerCommand(
         "shoot at hub",
         Commands.waitSeconds(10)
             .deadlineFor(
                 superStructure
-                    .setStateCommand(SuperStates.SHOOT_AT_HUB)
+                    .setStateCommand(SuperWantedStates.SHOOT_AT_HUB)
                     .alongWith(
                         drivetrain.faceAngleWhileDrivingCommand(
                             () -> 0,
                             () -> 0,
                             () -> hubShotCalculator.calculateShot().targetHeading())))
-            .andThen(superStructure.setStateCommand(SuperStates.IDLE)));
+            .andThen(superStructure.setStateCommand(SuperWantedStates.DEFAULT)));
 
+    configVision();
+    configDefaultDrivingCommand();
     configureBindings();
     // configureTestBindings();
+    // configureFullShootingTestBindings();
+    // configureFullShootingTestBindings();
 
     PathPlannerLogging.setLogActivePathCallback(
         (poses -> Logger.recordOutput("Swerve/ActivePath", poses.toArray(new Pose2d[0]))));
@@ -276,6 +300,19 @@ public class RobotContainer {
     }
   }
 
+  private void configVision() {
+    Command consumeVisionMeasurements =
+        vision.consumeVisionMeasurements(
+            measurements -> {
+              drivetrain.addVisionMeasurements(measurements);
+            });
+    vision.setDefaultCommand(consumeVisionMeasurements.ignoringDisable(true));
+  }
+
+  private void configDefaultDrivingCommand() {
+    drivetrain.setDefaultCommand(drivetrain.fieldOrientedDriveCommand(driverCont));
+  }
+
   /**
    * Use this method to define your trigger->command mappings. Triggers can be created via the
    * {@link Trigger#Trigger(java.util.function.BooleanSupplier)} constructor with an arbitrary
@@ -286,47 +323,61 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    Command consumeVisionMeasurements =
-        vision.consumeVisionMeasurements(
-            measurements -> {
-              drivetrain.addVisionMeasurements(measurements);
-            });
-    vision.setDefaultCommand(consumeVisionMeasurements.ignoringDisable(true));
-
-    drivetrain.setDefaultCommand(drivetrain.fieldOrientedDriveCommand(driverCont));
-
     BooleanSupplier isSuperstructureMode =
         () -> superStructure.getControlState() == ControlState.SUPERSTRUCTURE;
     BooleanSupplier isIndependentMode =
         () -> superStructure.getControlState() == ControlState.INDEPENDENT;
 
-    // Linked pair: whileTrue sets SHOOTING + aims, onFalse resets to IDLE.
-    // The InstantCommand (setStateCommand) finishes immediately; the alongWith group
-    // stays alive via faceAngleWhileDrivingCommand until whileTrue interrupts it.
-    Trigger shootAtHubTrigger = driverCont.rightTrigger().and(isSuperstructureMode);
-    shootAtHubTrigger.whileTrue(
+    // Auto-cycle: right trigger auto-selects hub or outpost based on alliance zone position.
+    // The heading supplier dynamically picks the correct calculator based on resolved state.
+    Trigger autoCycleTrigger = driverCont.rightTrigger().and(isSuperstructureMode);
+    autoCycleTrigger.whileTrue(
         superStructure
-            .setStateCommand(SuperStates.SHOOT_AT_HUB)
+            .setStateCommand(SuperWantedStates.AUTO_CYCLE_SHOOTING)
+            .alongWith(
+                drivetrain.faceAngleWhileDrivingCommand(
+                    driverCont,
+                    () -> {
+                      if (superStructure.getCurrentSuperState() == SuperInternalStates.PASSING) {
+                        return passCalculator.calculateShot().targetHeading();
+                      }
+                      return hubShotCalculator.calculateShot().targetHeading();
+                    })));
+    autoCycleTrigger.onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
+
+    // Manual override: force shoot at hub regardless of position
+    Trigger forceHubTrigger = driverCont.rightBumper().and(isSuperstructureMode);
+    forceHubTrigger.whileTrue(
+        superStructure
+            .setStateCommand(SuperWantedStates.SHOOT_AT_HUB)
             .alongWith(
                 drivetrain.faceAngleWhileDrivingCommand(
                     driverCont, () -> hubShotCalculator.calculateShot().targetHeading())));
-    // Must stay paired with the whileTrue above to reset state on trigger release
-    shootAtHubTrigger.onFalse(superStructure.setStateCommand(SuperStates.IDLE));
+    forceHubTrigger.onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
 
-    Trigger shootAtOutpostTrigger = driverCont.leftTrigger().and(isSuperstructureMode);
-    shootAtOutpostTrigger.whileTrue(
+    // Manual override: force pass to outpost regardless of position
+    Trigger forceOutpostTrigger = driverCont.leftBumper().and(isSuperstructureMode);
+    forceOutpostTrigger.whileTrue(
         superStructure
-            .setStateCommand(SuperStates.SHOOT_AT_OUTPOST)
+            .setStateCommand(SuperWantedStates.SHOOT_AT_OUTPOST)
             .alongWith(
                 drivetrain.faceAngleWhileDrivingCommand(
-                    driverCont, () -> outpostPassCalculator.calculateShot().targetHeading())));
-    // Must stay paired with the whileTrue above to reset state on trigger release
-    shootAtOutpostTrigger.onFalse(superStructure.setStateCommand(SuperStates.IDLE));
+                    driverCont, () -> passCalculator.calculateShot().targetHeading())));
+    forceOutpostTrigger.onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
 
     // TODO: Re-enable superStructure bindings
-    Trigger intakeTrigger = driverCont.leftBumper().and(isSuperstructureMode);
-    intakeTrigger.onTrue(superStructure.setStateCommand(SuperStates.INTAKING));
-    intakeTrigger.onFalse(superStructure.setStateCommand(SuperStates.IDLE));
+    Trigger intakeTrigger = driverCont.leftTrigger().and(isSuperstructureMode);
+    intakeTrigger.onTrue(superStructure.setStateCommand(SuperWantedStates.INTAKING));
+    intakeTrigger.onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
+
+    driverCont
+        .a()
+        .and(isSuperstructureMode)
+        .onTrue(superStructure.setStateCommand(SuperWantedStates.UNJAMMING));
+    driverCont
+        .a()
+        .and(isSuperstructureMode)
+        .onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
 
     configureIndependentModeBindings(isIndependentMode);
 
@@ -341,22 +392,30 @@ public class RobotContainer {
     driverCont.leftBumper().and(isIndependentMode).whileTrue(intake.setDutyCycleCommand(0.2));
 
     driverCont.a().and(isIndependentMode).whileTrue(indexer.setDutyCycleCommand(0.5));
+    driverCont.b().and(isIndependentMode).whileTrue(flywheelKicker.setDutyCycleCommand(0.5));
+    driverCont
+        .rightBumper()
+        .and(isIndependentMode)
+        .whileTrue(hopperRoller.setDutyCycleCommand(0.5));
 
     // hood bindings
-    driverCont.pov(0).and(isIndependentMode).onTrue(hood.moveToZeroAndZero());
-    driverCont.pov(90).and(isIndependentMode).whileTrue(hood.setPositionCommand(4.0));
-    driverCont.pov(180).and(isIndependentMode).whileTrue(hood.setPositionCommand(16.0));
-    driverCont.pov(270).and(isIndependentMode).whileTrue(hood.setPositionCommand(23.0));
+    driverCont.pov(0).and(isIndependentMode).whileTrue(intakePivot.setPositionCommand(() -> 0.0));
+    driverCont
+        .pov(180)
+        .and(isIndependentMode)
+        .whileTrue(intakePivot.setPositionCommand(() -> 93.0));
+    driverCont.pov(90).and(isIndependentMode).whileTrue(flywheel.setVelocityCommand(() -> 2000.0));
+
     driverCont.start().and(isIndependentMode).onTrue(hood.zero());
 
     // flywheel bindings
-    driverCont.x().and(isIndependentMode).whileTrue(flywheel.setVelocityCommand(2500));
-    driverCont.b().and(isIndependentMode).whileTrue(flywheel.setVelocityCommand(3000));
-    driverCont.y().and(isIndependentMode).whileTrue(flywheel.setVelocityCommand(3500));
+    driverCont.x().and(isIndependentMode).whileTrue(hood.setPositionCommand(0.0));
+    driverCont.y().and(isIndependentMode).whileTrue(hood.setPositionCommand(20.0));
 
     // configureIntakeTestBindings(isIndependentMode);
     // configureFullShootingTestBindings(isIndependentMode);
     // configureHoodTestBindings(isIndependentMode);
+    // configureClimberTestBindings(isIndependentMode);
   }
 
   void configureHoodTestBindings(BooleanSupplier isIndependentMode) {
@@ -366,30 +425,65 @@ public class RobotContainer {
   }
 
   /** Configures full intake to shooting test bindings for independent mode. */
-  private void configureFullShootingTestBindings(BooleanSupplier isIndependentMode) {
-    driverCont.rightTrigger().and(isIndependentMode).whileTrue(flywheel.setDutyCycleCommand(1.0));
+  private void configureFullShootingTestBindings() {
+    BooleanSupplier isSuperstructureMode =
+        () -> superStructure.getControlState() == ControlState.SUPERSTRUCTURE;
+    BooleanSupplier isIndependentMode =
+        () -> superStructure.getControlState() == ControlState.INDEPENDENT;
+
+    driverCont.rightTrigger().and(isIndependentMode).whileTrue(flywheel.setVelocityCommand(4000));
     driverCont
         .a()
         .and(isIndependentMode)
         .whileTrue(
             indexer
-                .setDutyCycleCommand(0.75)
+                .setDutyCycleCommand(() -> 0.75)
                 .alongWith(
                     hopperRoller.setDutyCycleCommand(0.75),
-                    flywheelKicker.setDutyCycleCommand(0.75)));
+                    flywheelKicker.setVelocityCommand(4000.0)));
     driverCont
         .b()
         .and(isIndependentMode)
         .whileTrue(
             indexer
-                .setDutyCycleCommand(-0.2)
+                .setDutyCycleCommand(() -> -0.3)
                 .alongWith(
-                    hopperRoller.setDutyCycleCommand(-0.2),
-                    flywheelKicker.setDutyCycleCommand(-0.2),
+                    hopperRoller.setDutyCycleCommand(-0.3),
+                    flywheelKicker.setDutyCycleCommand(-0.3),
                     intake.setDutyCycleCommand(-0.2)));
-    driverCont.x().and(isIndependentMode).onTrue(intakePivot.setPositionCommand(() -> 90.0));
-    driverCont.y().and(isIndependentMode).onTrue(intakePivot.setPositionCommand(() -> 0.0));
-    driverCont.leftTrigger().and(isIndependentMode).whileTrue(intake.setDutyCycleCommand(0.2));
+    driverCont.x().and(isIndependentMode).whileTrue(intakePivot.setPositionCommand(() -> 93.0));
+    driverCont.y().and(isIndependentMode).whileTrue(intakePivot.setPositionCommand(() -> 0.0));
+    driverCont.leftTrigger().and(isIndependentMode).whileTrue(intake.setVelocityCommand(1000.0));
+    driverCont.pov(0).and(isIndependentMode).whileTrue(hood.setPositionCommand(0.0));
+    driverCont.pov(90).and(isIndependentMode).whileTrue(hood.setPositionCommand(15.0));
+    driverCont.pov(180).and(isIndependentMode).whileTrue(hood.setPositionCommand(30.0));
+    driverCont.pov(270).and(isIndependentMode).whileTrue(hood.setPositionCommand(40.0));
+
+    driverCont.back().onTrue(drivetrain.zeroCommand());
+
+    // intake stuff
+    // driverCont
+    //     .axisMagnitudeGreaterThan(5, 0.1)
+    //     .and(isIndependentMode)
+    //     .whileTrue(intakePivot.setDutyCycleCommand(() -> -driverCont.getRightY() * 0.2));
+
+    // driverCont
+    //     .rightBumper()
+    //     .and(isIndependentMode)
+    //     .whileTrue(intakePivot.setPositionCommand(() -> 0.0));
+    // driverCont
+    //     .leftBumper()
+    //     .and(isIndependentMode)
+    //     .whileTrue(intakePivot.setPositionCommand(() -> 90.0));
+    // Intake rollers: A = in, B = out
+    // driverCont.a().and(isIndependentMode).whileTrue(intake.setDutyCycleCommand(0.2));
+    // driverCont.b().and(isIndependentMode).whileTrue(intake.setDutyCycleCommand(-0.2));
+  }
+
+  /** Configures climber test bindings for independent mode. */
+  private void configureClimberTestBindings(BooleanSupplier isIndependentMode) {
+    driverCont.x().and(isIndependentMode).whileTrue(climber.setLeftDutyCycleCommand(0.1));
+    driverCont.y().and(isIndependentMode).whileTrue(climber.setRightDutyCycleCommand(0.1));
   }
 
   /** Configures intake and intake pivot test bindings for independent mode. */
@@ -416,8 +510,9 @@ public class RobotContainer {
   /** Stops all subsystems safely when the robot is disabled. */
   public void onDisable() {
     superStructure.setControlState(ControlState.SUPERSTRUCTURE);
-    superStructure.setWantedSuperState(SuperStates.IDLE);
+    superStructure.setWantedSuperState(SuperWantedStates.IDLE);
     drivetrain.setControl(new SwerveRequest.Idle());
+    climber.stop();
     flywheel.stop();
     hood.stop();
     intake.stop();
@@ -432,18 +527,19 @@ public class RobotContainer {
   public void onEnable() {
     // Ensures superstructure control mode is active when enabled
     superStructure.setControlState(ControlState.SUPERSTRUCTURE);
+    superStructure.setWantedSuperState(SuperWantedStates.DEFAULT);
     onEnableVision();
   }
 
   /** Sets up vision to run at full performance and temperature */
   private void onEnableVision() {
-    vision.enableIMUAssist();
     vision.setThrottle(ENABLED_THROTTLE_SKIP_FRAMES);
   }
 
   /** Decouples the superstructure from subsystems for test mode. */
   public void onTestEnable() {
     superStructure.setControlState(ControlState.INDEPENDENT);
+    superStructure.setWantedSuperState(SuperWantedStates.IDLE);
     onEnableVision();
   }
 
@@ -455,8 +551,8 @@ public class RobotContainer {
   public void preSchedulerUpdate() {
     hubShotCalculator.clearShootingParams();
     // hubShotCalculator.calculateShot();
-    outpostPassCalculator.clearShootingParams();
-    // outpostPassCalculator.calculateShot();
+    passCalculator.clearShootingParams();
+    // passCalculator.calculateShot();
   }
 
   /**

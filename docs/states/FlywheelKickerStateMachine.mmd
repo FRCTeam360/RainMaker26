@@ -1,10 +1,11 @@
 %% FlywheelKicker State Machine
 %% Reflects actual code in FlywheelKicker.java
+%% Single-layer state: WantedState set by ShooterStateMachine
 stateDiagram-v2
-    [*] --> OFF
+    [*] --> IDLE
 
-    OFF --> SHOOTING : SuperStructure shooter<br>sub-state = FIRING
-    SHOOTING --> OFF : SuperStructure shooter<br>sub-state = PREPARING<br>or SuperState leaves shooting
+    IDLE --> KICKING : ShooterStateMachine<br>state = FIRING
+    KICKING --> IDLE : ShooterStateMachine<br>state = PREPARING_TO_FIRE<br>or IDLE
 
-    note right of OFF : Duty cycle = 0.0
-    note right of SHOOTING : Velocity = 4500 RPM
+    note right of IDLE : Duty cycle = 0.0
+    note right of KICKING : Velocity = 4500 RPM
