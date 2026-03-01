@@ -1,0 +1,39 @@
+%% Flywheel State Machine
+%% Reflects actual code in Flywheel.java
+%% Two-layer state: WantedState drives InternalState
+%% Bang-bang control with debounced shot detection and underspeed detection
+stateDiagram-v2
+    state "Wanted: IDLE" as WIDLE
+    state "Wanted: SHOOTING" as WSHOOTING
+    state "Wanted: COASTING" as WCOASTING
+
+    [*] --> WIDLE
+    WIDLE --> WSHOOTING : SuperStructure sets<br>SHOOTING
+    WSHOOTING --> WIDLE : SuperStructure sets<br>IDLE
+    WIDLE --> WCOASTING : SuperStructure sets<br>COASTING
+    WCOASTING --> WIDLE : SuperStructure sets<br>IDLE
+    WSHOOTING --> WCOASTING : SuperStructure sets<br>COASTING
+    WCOASTING --> WSHOOTING : SuperStructure sets<br>SHOOTING
+
+    state WSHOOTING {
+        [*] --> SPINNING_UP
+
+        SPINNING_UP --> AT_SETPOINT : Debounced velocity<br>within 100 RPM of target
+        AT_SETPOINT --> RECOVERING : Ball fired detected<br>(debounced velocity dip,<br>40ms falling-edge)
+        RECOVERING --> AT_SETPOINT : Debounced velocity<br>within 100 RPM of target
+        RECOVERING --> UNDER_SHOOTING : Sustained RPM drop<br>(200ms falling-edge debounce)
+        UNDER_SHOOTING --> AT_SETPOINT : Debounced velocity<br>within 100 RPM of target
+    }
+
+    state WCOASTING {
+        [*] --> COAST
+    }
+
+    note right of WIDLE : Motor duty cycle = 0.0
+    note right of WSHOOTING : Motor runs at ShotCalculator RPM<br>(hub or outpost depending on SuperState)
+    note right of SPINNING_UP : Duty-cycle bang-bang (Slot 0)<br>Max acceleration, unconstrained torque
+    note right of AT_SETPOINT : Torque-current bang-bang (Slot 0)<br>Bounded hold at 30A peak<br>ShooterStateMachine checks this to FIRE
+    note right of RECOVERING : Duty-cycle bang-bang (Slot 0)<br>Re-spinning after ball passed through<br>ShooterStateMachine stays in FIRING
+    note right of UNDER_SHOOTING : Duty-cycle bang-bang (Slot 0)<br>Too many rapid shots, can't recover<br>ShooterStateMachine reverts to PREPARING
+    note right of WCOASTING : Motor coasts at ShotCalculator RPM<br>Gentle deceleration or low-power hold
+    note right of COAST : Coast velocity control (Slot X)<br>Low-power, gentle holding or deceleration

@@ -6,38 +6,67 @@ package frc.robot.subsystems.Indexer;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.ControlState;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
 public class Indexer extends SubsystemBase {
+  // Constants
+  private static final double INDEXER_DUTY_CYCLE = 0.75;
+  private static final double REVERSING_DUTY_CYCLE = -0.35;
+
+  // IO fields
   private final IndexerIO io;
   private final IndexerIOInputsAutoLogged inputs = new IndexerIOInputsAutoLogged();
-  private static final double INDEXER_DUTY_CYCLE = 0.4;
 
+  // Enums
   public enum IndexerStates {
     OFF,
-    INTAKING,
-    SHOOTING
+    ASSIST_INTAKING,
+    INDEXING,
+    REVERSING
   }
+
+  // State variables
+  private IndexerStates wantedState = IndexerStates.OFF;
+  private IndexerStates currentState = IndexerStates.OFF;
+  private IndexerStates previousState = IndexerStates.OFF;
+  private ControlState controlState = ControlState.SUPERSTRUCTURE;
+
+  // Constructor
+
+  /** Creates a new Indexer. */
+  public Indexer(IndexerIO io) {
+    this.io = io;
+  }
+
+  // State machine methods
 
   public IndexerStates getState() {
     return currentState;
   }
 
-  private IndexerStates wantedState = IndexerStates.OFF;
-  private IndexerStates currentState = IndexerStates.OFF;
-  private IndexerStates previousState = IndexerStates.OFF;
+  public void setWantedState(IndexerStates state) {
+    wantedState = state;
+  }
+
+  public void setControlState(ControlState controlState) {
+    this.controlState = controlState;
+  }
 
   private void updateState() {
     previousState = currentState;
 
     switch (wantedState) {
-      case INTAKING:
-        currentState = IndexerStates.INTAKING;
+      case ASSIST_INTAKING:
+        currentState = IndexerStates.ASSIST_INTAKING;
         break;
 
-      case SHOOTING:
-        currentState = IndexerStates.SHOOTING;
+      case INDEXING:
+        currentState = IndexerStates.INDEXING;
+        break;
+      case REVERSING:
+        currentState = IndexerStates.REVERSING;
         break;
       case OFF:
         currentState = IndexerStates.OFF;
@@ -47,11 +76,14 @@ public class Indexer extends SubsystemBase {
 
   private void applyState() {
     switch (currentState) {
-      case INTAKING:
+      case ASSIST_INTAKING:
         setDutyCycle(INDEXER_DUTY_CYCLE);
         break;
-      case SHOOTING:
+      case INDEXING:
         setDutyCycle(INDEXER_DUTY_CYCLE);
+        break;
+      case REVERSING:
+        setDutyCycle(REVERSING_DUTY_CYCLE);
         break;
       case OFF:
       default:
@@ -60,25 +92,10 @@ public class Indexer extends SubsystemBase {
     }
   }
 
-  /** Creates a new Indexer. */
-  public Indexer(IndexerIO io) {
-    this.io = io;
-  }
-
-  public void setWantedState(IndexerStates state) {
-    wantedState = state;
-  }
+  // IO delegation methods
 
   public void setDutyCycle(double dutyCycle) {
     io.setDutyCycle(dutyCycle);
-  }
-
-  public Command setDutyCycleCommand(double value) {
-    return this.setDutyCycleCommand(() -> value);
-  }
-
-  public Command setDutyCycleCommand(DoubleSupplier valueSup) {
-    return this.runEnd(() -> io.setDutyCycle(valueSup.getAsDouble()), () -> io.setDutyCycle(0.0));
   }
 
   public void setVelocity(double velocity) {
@@ -89,15 +106,30 @@ public class Indexer extends SubsystemBase {
     io.setDutyCycle(0.0);
   }
 
+  // Command factory methods
+
+  public Command setDutyCycleCommand(double value) {
+    return this.setDutyCycleCommand(() -> value);
+  }
+
+  public Command setDutyCycleCommand(DoubleSupplier valueSup) {
+    return this.runEnd(() -> io.setDutyCycle(valueSup.getAsDouble()), () -> io.setDutyCycle(0.0));
+  }
+
+  // periodic
+
   @Override
   public void periodic() {
     io.updateInputs(inputs);
     Logger.processInputs("Indexer", inputs);
 
-    updateState();
-    applyState();
-    Logger.recordOutput("Subsystems/Indexer/WantedState", wantedState.toString());
-    Logger.recordOutput("Subsystems/Indexer/CurrentState", currentState.toString());
-    Logger.recordOutput("Subsystems/Indexer/PreviousState", previousState.toString());
+    if (controlState == ControlState.SUPERSTRUCTURE) {
+      updateState();
+      applyState();
+    }
+    Logger.recordOutput("Subsystems/Indexer/WantedState", wantedState);
+    Logger.recordOutput("Subsystems/Indexer/CurrentState", currentState);
+    Logger.recordOutput("Subsystems/Indexer/PreviousState", previousState);
+    Logger.recordOutput("Subsystems/Indexer/ControlState", controlState);
   }
 }

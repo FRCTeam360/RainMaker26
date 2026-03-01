@@ -105,15 +105,13 @@ public class VisionIOPhotonSim implements VisionIO {
     // Process all unread camera results
     var results = camera.getAllUnreadResults();
 
-    // Check if we have new results OR get the latest result even if it's old
-    var latestResult =
-        results.isEmpty() ? camera.getLatestResult() : results.get(results.size() - 1);
-
-    // If we have no result at all (not even a cached one)
-    if (latestResult == null) {
+    // If no new results this cycle, nothing to process
+    if (results.isEmpty()) {
       updateInputsWhenNoTargets(inputs);
       return;
     }
+
+    var latestResult = results.get(results.size() - 1);
 
     List<PhotonTrackedTarget> targets = latestResult.getTargets();
 
@@ -191,16 +189,6 @@ public class VisionIOPhotonSim implements VisionIO {
   public void setPipeline(int pipeline) {
     // Store the pipeline value (pipelines are not simulated)
     currentPipeline = pipeline;
-  }
-
-  @Override
-  public void takeSnapshot() {
-    // Snapshots are not simulated - no-op
-  }
-
-  @Override
-  public void resetSnapshot() {
-    // Snapshots are not simulated - no-op
   }
 
   // ----- Simulation-specific methods -----

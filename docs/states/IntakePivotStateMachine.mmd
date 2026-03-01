@@ -1,0 +1,32 @@
+%% IntakePivot State Machine
+%% Reflects actual code in IntakePivot.java (2026-02-27)
+stateDiagram-v2
+    [*] --> OFF
+
+    OFF --> STOWED : SuperStructure sets STOWED
+    STOWED --> OFF : SuperStructure sets OFF
+
+    OFF --> DEPLOYED : SuperStructure sets DEPLOYED
+    DEPLOYED --> OFF : SuperStructure sets OFF
+
+    STOWED --> DEPLOYED : SuperStructure sets DEPLOYED
+    DEPLOYED --> STOWED : SuperStructure sets STOWED
+
+    OFF --> AGITATE_HOPPER : SuperStructure sets AGITATE_HOPPER
+    STOWED --> AGITATE_HOPPER : SuperStructure sets AGITATE_HOPPER
+    DEPLOYED --> AGITATE_HOPPER : SuperStructure sets AGITATE_HOPPER
+    AGITATE_HOPPER --> OFF : SuperStructure sets OFF
+
+    state AGITATE_HOPPER {
+        [*] --> MOVING_TO_SETPOINT
+        MOVING_TO_SETPOINT --> SWITCHING_AGITATE_TARGET_HIGH : atSetpoint, target LOW
+        MOVING_TO_SETPOINT --> SWITCHING_AGITATE_TARGET_LOW : atSetpoint, target HIGH
+        SWITCHING_AGITATE_TARGET_HIGH --> AT_SETPOINT : switch to HIGH
+        SWITCHING_AGITATE_TARGET_LOW --> AT_SETPOINT : switch to LOW
+        AT_SETPOINT --> MOVING_TO_SETPOINT : new target set
+    }
+
+    note right of OFF : Position set to 0.0
+    note right of STOWED : Position set to 0.0°
+    note right of DEPLOYED : Position set to 93.0°
+    note right of AGITATE_HOPPER : Alternates between 60.0° and 30.0°
