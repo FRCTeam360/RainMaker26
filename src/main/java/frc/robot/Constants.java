@@ -237,7 +237,13 @@ public final class Constants {
       shotFlywheelSpeedMap.put(1.0, 1800.0);
       shotFlywheelSpeedMap.put(0.0, 2000.0);
 
-      shotTimeOfFlightMap.put(0.0, 0.0);
+      shotTimeOfFlightMap.put(0.0, 0.1);
+      shotTimeOfFlightMap.put(1.0, 0.15);
+      shotTimeOfFlightMap.put(2.0, 0.2);
+      shotTimeOfFlightMap.put(3.0, 0.3);
+      shotTimeOfFlightMap.put(4.0, 0.4);
+      shotTimeOfFlightMap.put(5.0, 0.5);
+      shotTimeOfFlightMap.put(6.0, 0.6);
 
       // === PASSING VALUES (based on PracticeBot, tuned for longer distances) ===
       passHoodAngleMap.put(10.0, 30.0);
@@ -252,7 +258,12 @@ public final class Constants {
       passFlywheelSpeedMap.put(4.0, 3000.0);
       passFlywheelSpeedMap.put(2.0, 2500.0);
 
-      passTimeOfFlightMap.put(0.0, 0.0);
+      passTimeOfFlightMap.put(0.0, 0.15);
+      passTimeOfFlightMap.put(2.0, 0.3);
+      passTimeOfFlightMap.put(4.0, 0.5);
+      passTimeOfFlightMap.put(6.0, 0.7);
+      passTimeOfFlightMap.put(8.0, 0.9);
+      passTimeOfFlightMap.put(10.0, 1.1);
     }
   }
 
