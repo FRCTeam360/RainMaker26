@@ -1,9 +1,9 @@
 package frc.robot.utils;
 
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants;
+import frc.robot.subsystems.Shooter.ShotCalculator;
 import java.io.File;
 import java.util.Optional;
 
@@ -60,11 +60,13 @@ public class RobotUtils {
    * @param isTele if the game is in teleop or auto. Can be accessed by DriverStation.isTeleop()
    * @return which hub(s) are currently active
    */
-  public static ActiveHub getShootingPhase(double gameTime, Boolean isTele, double timeToScan) {
+  public static ActiveHub getShootingPhase(
+      double gameTime, Boolean isTele, ShotCalculator hubShotCalculator) {
     // gameTime is the getMatchTime() from DriverStation, isTele is the isTeleop() from
     // DriverStation
+    double timeOfFlight = hubShotCalculator.calculateShot().timeOfFlight();
     ActiveHub activeHub = ActiveHub.BOTH;
-    gameTime -= timeToScan;
+    gameTime -= timeOfFlight;
     // Sets phases based on the current time in the game
     if (!isTele) {
       activeHub = ActiveHub.BOTH; // AUTO

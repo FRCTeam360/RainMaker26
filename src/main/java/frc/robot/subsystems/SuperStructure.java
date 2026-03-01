@@ -233,9 +233,7 @@ public class SuperStructure extends SubsystemBase {
             DriverStation.getAlliance(),
             RobotUtils.getAutoWinner(DriverStation.getGameSpecificMessage()),
             RobotUtils.getShootingPhase(
-                DriverStation.getMatchTime(),
-                DriverStation.isTeleop(),
-                hubShotCalculator.calculateShot().timeOfFlight()));
+                DriverStation.getMatchTime(), DriverStation.isTeleop(), hubShotCalculator));
       default:
         return true;
     }
@@ -284,6 +282,12 @@ public class SuperStructure extends SubsystemBase {
     applyStates();
     shooterStateMachine.apply();
 
+    SmartDashboard.putString(
+        "Shooting Phase",
+        RobotUtils.getShootingPhase(
+                DriverStation.getMatchTime(), DriverStation.isTeleop(), hubShotCalculator)
+            .toString());
+
     Logger.recordOutput("Superstructure/WantedSuperState", wantedSuperState);
     SmartDashboard.putString("Superstructure/WantedSuperState", wantedSuperState.toString());
 
@@ -294,11 +298,10 @@ public class SuperStructure extends SubsystemBase {
     SmartDashboard.putString("Superstructure/PreviousSuperState", previousSuperState.toString());
 
     Logger.recordOutput("Superstructure/ControlState", controlState);
+    SmartDashboard.putString("Superstructure/ControlState", controlState.toString());
+
     shooterStateMachine.log();
-    SmartDashboard.putString(
-        "Superstructure/PreviousShooterState", previousShooterState.toString());
 
     targetSelectionStateMachine.log();
-    SmartDashboard.putString("Superstructure/CurrentShooterState", currentShooterState.toString());
   }
 }

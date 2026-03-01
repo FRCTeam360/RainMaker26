@@ -1,6 +1,7 @@
 package frc.robot.subsystems.Shooter;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.utils.PositionUtils;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
@@ -106,7 +107,12 @@ public class TargetSelectionStateMachine {
   /** Logs the wanted, current, and previous target selection states. */
   public void log() {
     Logger.recordOutput("Superstructure/TargetSelection/WantedState", wantedState);
+    SmartDashboard.putString("Superstructure/TargetSelection/WantedState", wantedState.toString());
     Logger.recordOutput("Superstructure/TargetSelection/CurrentState", currentState);
+    SmartDashboard.putString(
+        "Superstructure/TargetSelection/CurrentState", currentState.toString());
     Logger.recordOutput("Superstructure/TargetSelection/PreviousState", previousState);
+    SmartDashboard.putString(
+        "Superstructure/TargetSelection/PreviousState", previousState.toString());
   }
 }

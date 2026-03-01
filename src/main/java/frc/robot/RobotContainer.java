@@ -549,11 +549,6 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.CommandScheduler#run()}.
    */
   public void preSchedulerUpdate() {
-
-    if (Objects.nonNull(shotCalculator)) {
-      shotCalculator.clearShootingParams();
-      shotCalculator.calculateShot();
-    }
     hubShotCalculator.clearShootingParams();
     // hubShotCalculator.calculateShot();
     passCalculator.clearShootingParams();

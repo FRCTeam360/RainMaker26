@@ -1,5 +1,6 @@
 package frc.robot.subsystems.Shooter;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel.FlywheelInternalStates;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel.FlywheelWantedStates;
@@ -105,9 +106,13 @@ public class ShooterStateMachine {
         boolean targetReady = canShootToTarget.getAsBoolean();
 
         Logger.recordOutput("Superstructure/Shooting/FlywheelState", flywheelState);
+        SmartDashboard.putString("Superstructure/Shooting/FlywheelState", flywheelState.toString());
         Logger.recordOutput("Superstructure/Shooting/FlywheelReady", flywheelReady);
+        SmartDashboard.putBoolean("Superstructure/Shooting/FlywheelReady", flywheelReady);
         Logger.recordOutput("Superstructure/Shooting/HoodReady", hoodReady);
+        SmartDashboard.putBoolean("Superstructure/Shooting/HoodReady", hoodReady);
         Logger.recordOutput("Superstructure/Shooting/DrivetrainAligned", drivetrainAligned);
+        SmartDashboard.putBoolean("Superstructure/Shooting/DrivetrainAligned", drivetrainAligned);
 
         // Enter FIRING when flywheel reaches AT_SETPOINT (with hood + drivetrain ready).
         // Stay in FIRING through bang-bang oscillations — only revert to PREPARING_TO_FIRE
@@ -177,7 +182,10 @@ public class ShooterStateMachine {
   /** Logs the wanted, current, and previous shooter states. */
   public void log() {
     Logger.recordOutput("Superstructure/WantedShooterState", wantedState);
+    SmartDashboard.putString("Superstructure/WantedShooterState", wantedState.toString());
     Logger.recordOutput("Superstructure/CurrentShooterState", currentState);
+    SmartDashboard.putString("Superstructure/CurrentShooterState", currentState.toString());
     Logger.recordOutput("Superstructure/PreviousShooterState", previousState);
+    SmartDashboard.putString("Superstructure/PreviousShooterState", previousState.toString());
   }
 }
