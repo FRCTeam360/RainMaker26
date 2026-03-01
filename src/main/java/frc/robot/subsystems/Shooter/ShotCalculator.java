@@ -115,20 +115,14 @@ public class ShotCalculator {
         new Translation2d(robotSpeeds.vxMetersPerSecond, robotSpeeds.vyMetersPerSecond)
             .rotateBy(robotHeading);
 
-    double robotAngleRad = robotHeading.getRadians();
-    double shooterOffsetX = robotToShooter.getX();
-    double shooterOffsetY = robotToShooter.getY();
-    double omegaRadPerSec = robotSpeeds.omegaRadiansPerSecond;
-    double shooterVelXMps =
-        robotFieldVelocity.getX()
-            + omegaRadPerSec
-                * (shooterOffsetY * (-1.0) * Math.cos(robotAngleRad)
-                    - shooterOffsetX * Math.sin(robotAngleRad));
-    double shooterVelYMps =
-        robotFieldVelocity.getY()
-            + omegaRadPerSec
-                * (shooterOffsetX * Math.cos(robotAngleRad)
-                    - shooterOffsetY * Math.sin(robotAngleRad));
+    Translation2d shooterFieldVelocity =
+        ShotCalculatorHelpers.shooterFieldVelocity(
+            robotFieldVelocity,
+            robotSpeeds.omegaRadiansPerSecond,
+            robotHeading.getRadians(),
+            robotToShooter);
+    double shooterVelXMps = shooterFieldVelocity.getX();
+    double shooterVelYMps = shooterFieldVelocity.getY();
 
     // Log analytical shooter velocity for verification against numerical derivative
     Logger.recordOutput("ShotCalculator/analyticalVelXMps", shooterVelXMps);
