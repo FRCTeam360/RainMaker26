@@ -56,7 +56,7 @@ public class SuperStructure extends SubsystemBase {
     X_OUT,
     EJECTING,
     UNJAMMING,
-    STOWED
+    STOWED,
   }
 
   public enum SuperInternalStates {
@@ -201,7 +201,7 @@ public class SuperStructure extends SubsystemBase {
   private void passive_preparing() {
     intake.setWantedState(Intake.IntakeStates.OFF);
     indexer.setWantedState(Indexer.IndexerStates.OFF);
-    intakePivot.setWantedState(IntakePivotWantedStates.DEPLOYED);
+    intakePivot.setWantedState(IntakePivotWantedStates.STOWED);
     hopperRoller.setWantedState(HopperRollerStates.OFF);
     shooterStateMachine.setWantedState(ShooterWantedStates.PASSIVE_SHOOTER);
   }

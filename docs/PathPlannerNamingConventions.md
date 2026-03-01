@@ -1,7 +1,7 @@
 # PathPlanner Naming Conventions
 
-**Version:** 1.0  
-**Game:** REBUILT (2026)  
+**Version:** 1.0
+**Game:** REBUILT (2026)
 **Team:** FRC 360
 
 This document defines standardized naming conventions for PathPlanner autonomous routines and paths based on the 2026 REBUILT game field layout and strategic objectives.
@@ -34,7 +34,7 @@ Based on the 2026 REBUILT game manual and `FieldConstants.java`, the field conta
 
 ### Starting Positions (from driver station perspective)
 - **Left** - Starting position on the left side
-- **Middle** - Starting position in the center  
+- **Middle** - Starting position in the center
 - **Right** - Starting position on the right side
 - **Bump** - Starting position near a bump obstacle
 - **Trench** - Starting position near a trench obstacle
@@ -311,4 +311,3 @@ _V2, _V3, _V4    - Revisions
 - **`BULLETPROOF`** - Conservative, high-reliability autonomous focused on guaranteed points with minimal risk.
 - **`PRELOAD`** - Minimal auto that scores only the fuel pre-loaded into the robot at match start.
 - **No defensive autos** - All autonomous routines are offensive (scoring-focused).
-

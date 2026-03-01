@@ -282,6 +282,8 @@ public class RobotContainer {
                             () -> 0,
                             () -> hubShotCalculator.calculateShot().targetHeading())))
             .andThen(superStructure.setStateCommand(SuperWantedStates.DEFAULT)));
+    registerPathplannerCommand(
+        "stow intake", superStructure.setStateCommand(SuperWantedStates.STOWED));
 
     configVision();
     configDefaultDrivingCommand();
