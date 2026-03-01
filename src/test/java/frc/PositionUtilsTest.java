@@ -39,10 +39,10 @@ class PositionUtilsTest {
   private static final Transform2d SHOOTER_OFFSET = new Transform2d(-0.2, 0.0, new Rotation2d());
 
   /** X coordinate at the center of the blue-side trench. */
-  private static final double BLUE_TRENCH_X = LinesVertical.hubCenter;
+  private static final double BLUE_TRENCH_X = LinesVertical.blueHubCenter;
 
   /** X coordinate at the center of the red-side trench. */
-  private static final double RED_TRENCH_X = LinesVertical.oppHubCenter;
+  private static final double RED_TRENCH_X = LinesVertical.redHubCenter;
 
   /** X coordinate in the middle of the field, between both trench X-ranges. */
   private static final double NEUTRAL_X = LinesVertical.center;
@@ -136,7 +136,7 @@ class PositionUtilsTest {
   void correctYButBeyondBlueTrenchX() {
     // Right trench Y-band but X is past the blue trench toward the driver station
     double midY = (LinesHorizontal.rightTrenchRailSide + LinesHorizontal.rightTrenchHubSide) / 2.0;
-    double xBehindTrench = LinesVertical.hubCenter - RightTrench.width;
+    double xBehindTrench = LinesVertical.blueHubCenter - RightTrench.width;
     assertFalse(
         PositionUtils.isInDuckZone(poseAt(xBehindTrench, midY), IDENTITY_TRANSFORM),
         "Should not duck when X is behind the trench structure");
@@ -145,7 +145,7 @@ class PositionUtilsTest {
   @Test
   void atBlueTrenchXBoundary() {
     double midY = (LinesHorizontal.rightTrenchRailSide + LinesHorizontal.rightTrenchHubSide) / 2.0;
-    double trenchEdgeX = LinesVertical.hubCenter + RightTrench.width / 2.0;
+    double trenchEdgeX = LinesVertical.blueHubCenter + RightTrench.width / 2.0;
     assertTrue(
         PositionUtils.isInDuckZone(poseAt(trenchEdgeX, midY), IDENTITY_TRANSFORM),
         "Should duck at the exact X boundary of the trench");
@@ -154,7 +154,7 @@ class PositionUtilsTest {
   @Test
   void justOutsideBlueTrenchXBoundary() {
     double midY = (LinesHorizontal.rightTrenchRailSide + LinesHorizontal.rightTrenchHubSide) / 2.0;
-    double justOutsideX = LinesVertical.hubCenter + RightTrench.width / 2.0 + 0.01;
+    double justOutsideX = LinesVertical.blueHubCenter + RightTrench.width / 2.0 + 0.01;
     assertFalse(
         PositionUtils.isInDuckZone(poseAt(justOutsideX, midY), IDENTITY_TRANSFORM),
         "Should not duck just outside the trench X boundary");
@@ -212,7 +212,7 @@ class PositionUtilsTest {
     DriverStationSim.notifyNewData();
 
     // Well inside blue alliance zone (near blue driver station)
-    double insideX = LinesVertical.allianceZone - 1.0;
+    double insideX = LinesVertical.blueAllianceZone - 1.0;
     assertTrue(
         PositionUtils.isInAllianceZone(poseAt(insideX, 4.0)),
         "Robot inside blue alliance zone should return true");
@@ -224,7 +224,7 @@ class PositionUtilsTest {
     DriverStationSim.notifyNewData();
 
     // Outside blue alliance zone (toward red side)
-    double outsideX = LinesVertical.allianceZone + 1.0;
+    double outsideX = LinesVertical.blueAllianceZone + 1.0;
     assertFalse(
         PositionUtils.isInAllianceZone(poseAt(outsideX, 4.0)),
         "Robot outside blue alliance zone should return false");
@@ -237,7 +237,7 @@ class PositionUtilsTest {
 
     // Exactly at the boundary (inclusive)
     assertTrue(
-        PositionUtils.isInAllianceZone(poseAt(LinesVertical.allianceZone, 4.0)),
+        PositionUtils.isInAllianceZone(poseAt(LinesVertical.blueAllianceZone, 4.0)),
         "Robot at blue alliance zone boundary should return true");
   }
 
@@ -247,7 +247,7 @@ class PositionUtilsTest {
     DriverStationSim.notifyNewData();
 
     // Well inside red alliance zone (near red driver station, high X in blue-origin coords)
-    double redBoundary = AllianceFlipUtil.applyX(LinesVertical.allianceZone);
+    double redBoundary = AllianceFlipUtil.applyX(LinesVertical.blueAllianceZone);
     double insideX = redBoundary + 1.0;
     assertTrue(
         PositionUtils.isInAllianceZone(poseAt(insideX, 4.0)),
@@ -260,7 +260,7 @@ class PositionUtilsTest {
     DriverStationSim.notifyNewData();
 
     // Outside red alliance zone (toward blue side, low X in blue-origin coords)
-    double redBoundary = AllianceFlipUtil.applyX(LinesVertical.allianceZone);
+    double redBoundary = AllianceFlipUtil.applyX(LinesVertical.blueAllianceZone);
     double outsideX = redBoundary - 1.0;
     assertFalse(
         PositionUtils.isInAllianceZone(poseAt(outsideX, 4.0)),

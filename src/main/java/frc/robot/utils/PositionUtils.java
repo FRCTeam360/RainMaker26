@@ -18,17 +18,17 @@ public class PositionUtils {
   /** Half-width of the trench structure along the X-axis. Both trenches share the same width. */
   private static final double TRENCH_HALF_WIDTH_METERS = RightTrench.width / 2.0;
 
-  // X-bounds for blue-side trenches (centered on hubCenter)
+  // X-bounds for blue-side trenches (centered on blueHubCenter)
   private static final double BLUE_TRENCH_MIN_X =
-      LinesVertical.hubCenter - TRENCH_HALF_WIDTH_METERS;
+      LinesVertical.blueHubCenter - TRENCH_HALF_WIDTH_METERS;
   private static final double BLUE_TRENCH_MAX_X =
-      LinesVertical.hubCenter + TRENCH_HALF_WIDTH_METERS;
+      LinesVertical.blueHubCenter + TRENCH_HALF_WIDTH_METERS;
 
-  // X-bounds for red-side trenches (centered on oppHubCenter)
+  // X-bounds for red-side trenches (centered on redHubCenter)
   private static final double RED_TRENCH_MIN_X =
-      LinesVertical.oppHubCenter - TRENCH_HALF_WIDTH_METERS;
+      LinesVertical.redHubCenter - TRENCH_HALF_WIDTH_METERS;
   private static final double RED_TRENCH_MAX_X =
-      LinesVertical.oppHubCenter + TRENCH_HALF_WIDTH_METERS;
+      LinesVertical.redHubCenter + TRENCH_HALF_WIDTH_METERS;
 
   private PositionUtils() {}
 
@@ -69,7 +69,7 @@ public class PositionUtils {
   /**
    * Returns whether the robot is inside its own alliance zone.
    *
-   * <p>The alliance zone boundary is defined by {@link LinesVertical#allianceZone}. For blue
+   * <p>The alliance zone boundary is defined by {@link LinesVertical#blueAllianceZone}. For blue
    * alliance, the zone is X &lt;= that boundary. For red alliance, the boundary is flipped and the
    * zone is X &gt;= the flipped boundary. Poses are always in blue-origin coordinates.
    *
@@ -80,9 +80,9 @@ public class PositionUtils {
     double robotX = robotPose.getX();
     boolean result;
     if (AllianceFlipUtil.shouldFlip()) {
-      result = robotX >= AllianceFlipUtil.applyX(LinesVertical.allianceZone);
+      result = robotX >= AllianceFlipUtil.applyX(LinesVertical.blueAllianceZone);
     } else {
-      result = robotX <= LinesVertical.allianceZone;
+      result = robotX <= LinesVertical.blueAllianceZone;
     }
     Logger.recordOutput("PositionUtils/IsInAllianceZone", result);
     return result;
@@ -99,12 +99,12 @@ public class PositionUtils {
 
     final Rectangle2d neutralNoFlyZone =
         new Rectangle2d(
-            new Translation2d(LinesVertical.hubCenter, LinesHorizontal.rightBumpHubSide),
+            new Translation2d(LinesVertical.blueHubCenter, LinesHorizontal.rightBumpHubSide),
             new Translation2d(LinesVertical.center, LinesHorizontal.leftBumpHubSide));
     final Rectangle2d opponentNoFlyZone =
         new Rectangle2d(
             new Translation2d(
-                FieldConstants.LinesVertical.oppHubCenter,
+                FieldConstants.LinesVertical.redHubCenter,
                 FieldConstants.LinesHorizontal.rightBumpHubSide),
             new Translation2d(oppDSWall, LinesHorizontal.leftBumpHubSide));
 
