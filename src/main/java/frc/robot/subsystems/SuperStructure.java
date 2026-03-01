@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -120,8 +121,11 @@ public class SuperStructure extends SubsystemBase {
     boolean aligned = isAlignedToTarget.getAsBoolean();
 
     Logger.recordOutput("Superstructure/Shooting/FlywheelReady", flywheelReady);
+    SmartDashboard.putBoolean("Superstructure/Shooting/FlywheelReady", flywheelReady);
     Logger.recordOutput("Superstructure/Shooting/HoodReady", hoodReady);
+    SmartDashboard.putBoolean("Superstructure/Shooting/HoodReady", hoodReady);
     Logger.recordOutput("Superstructure/Shooting/Aligned", aligned);
+    SmartDashboard.putBoolean("Superstructure/Shooting/Aligned", aligned);
 
     if (flywheelReady && hoodReady && aligned) {
       currentShooterState = ShooterStates.FIRING;
@@ -173,9 +177,19 @@ public class SuperStructure extends SubsystemBase {
     applyStates();
 
     Logger.recordOutput("Superstructure/WantedSuperState", wantedSuperState.toString());
+    SmartDashboard.putString("Superstructure/WantedSuperState", wantedSuperState.toString());
+
     Logger.recordOutput("Superstructure/CurrentSuperState", currentSuperState.toString());
+    SmartDashboard.putString("Superstructure/CurrentSuperState", currentSuperState.toString());
+
     Logger.recordOutput("Superstructure/PreviousSuperState", previousSuperState.toString());
+    SmartDashboard.putString("Superstructure/PreviousSuperState", previousSuperState.toString());
+
     Logger.recordOutput("Superstructure/PreviousShooterState", previousShooterState.toString());
+    SmartDashboard.putString(
+        "Superstructure/PreviousShooterState", previousShooterState.toString());
+
     Logger.recordOutput("Superstructure/CurrentShooterState", currentShooterState.toString());
+    SmartDashboard.putString("Superstructure/CurrentShooterState", currentShooterState.toString());
   }
 }
