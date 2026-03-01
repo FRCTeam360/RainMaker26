@@ -30,7 +30,7 @@ import org.littletonrobotics.junction.Logger;
  */
 public class FlywheelKicker extends SubsystemBase {
   // Constants
-  private static final double KICKER_VELOCITY_RPM = 3000.0;
+  private static final double KICKER_VELOCITY_RPM = 4500.0;
   private static final double TOLERANCE_RPM = 100.0;
 
   /** Debounce time for shot detection — filters noise from brief velocity dips. */
@@ -58,32 +58,8 @@ public class FlywheelKicker extends SubsystemBase {
     SPINNING_UP,
     AT_SETPOINT,
     RECOVERING,
-    UNDER_KICKING
-  }
-
-  /**
-   * Debouncer for shot detection. Prevents rapid spinup/hold switching when velocity briefly dips
-   * below tolerance due to noise. A sustained drop past this debounce window indicates a note has
-   * passed through the kicker. Uses {@link DebounceType#kFalling} so the "out of tolerance" signal
-   * must persist before being accepted.
-   */
-  private final Debouncer ballFiredDebouncer =
-      new Debouncer(BALL_FIRED_DEBOUNCE_SECONDS, DebounceType.kFalling);
-
-  /**
-   * Debouncer for underspeed detection. Detects when RPM has been below tolerance for too long,
-   * indicating too many notes have passed through in rapid succession and the kicker can't recover
-   * between shots. Uses {@link DebounceType#kFalling} so single-shot dips don't trigger it.
-   */
-  private final Debouncer underspeedDebouncer =
-      new Debouncer(SUSTAINED_RPM_DROP_DEBOUNCE_SECONDS, DebounceType.kFalling);
-
-  public enum FlywheelKickerInternalStates {
-    OFF,
-    SPINNING_UP,
-    AT_SETPOINT,
-    RECOVERING,
-    UNDER_KICKING
+    UNDER_KICKING,
+    REVERSING
   }
 
   /**
@@ -186,7 +162,7 @@ public class FlywheelKicker extends SubsystemBase {
           break;
         }
       case REVERSING:
-        currentState = FlywheelKickerStates.REVERSING;
+        currentState = FlywheelKickerInternalStates.REVERSING;
         break;
       case IDLE:
       default:

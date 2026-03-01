@@ -203,7 +203,7 @@ public class SuperStructure extends SubsystemBase {
     intakePivot.setWantedState(IntakePivotWantedStates.DEPLOYED);
     shooterStateMachine.setWantedState(ShooterWantedStates.IDLE);
     hopperRoller.setWantedState(HopperRollerStates.REVERSING);
-    // indexer.setWantedState(Indexer.IndexerStates.INTAKING);
+    indexer.setWantedState(Indexer.IndexerStates.ASSIST_INTAKING);
   }
 
   private void stopped() {

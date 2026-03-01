@@ -19,21 +19,21 @@ import frc.robot.Constants;
 public class FlywheelKickerIOPB implements FlywheelKickerIO {
   private static final double GEAR_RATIO = 1.0;
   private static final int CURRENT_LIMIT_AMPS = 40;
-  
+
   // Spinup config - bang-bang maximum acceleration (extremely high kP drives full output)
   private static final double SPINUP_KP = 999999.0;
   private static final double SPINUP_KI = 0.0;
   private static final double SPINUP_KD = 0.0;
-  
+
   // Hold config - smooth setpoint maintenance with tuned PID
-  private static final double HOLD_KP = 0.0002;
+  private static final double HOLD_KP = 0.0004;
   private static final double HOLD_KI = 0.0;
   private static final double HOLD_KD = 0.0;
-  
+
   // Feedforward (shared across all slots)
   private static final double KV = 0.0019;
   private static final double KS = 0.04;
-  
+
   private static final double MIN_SIGNAL_STRENGTH = 2000; // unknown unit
   private static final double PROXIMITY_THRESHOLD_METERS = 0.1;
   private static final double MAX_NEGATIVE_OUTPUT = 0.0;
@@ -62,20 +62,26 @@ public class FlywheelKickerIOPB implements FlywheelKickerIO {
     sparkFlexConfig.smartCurrentLimit(CURRENT_LIMIT_AMPS);
     sparkFlexConfig.encoder.positionConversionFactor(1.0 / GEAR_RATIO);
     sparkFlexConfig.encoder.velocityConversionFactor(1.0 / GEAR_RATIO);
-    
+
     // Configure Slot 0: Spinup - aggressive acceleration
-    sparkFlexConfig.closedLoop.p(SPINUP_KP, ClosedLoopSlot.kSlot0)
-                      .i(SPINUP_KI, ClosedLoopSlot.kSlot0)
-                      .d(SPINUP_KD, ClosedLoopSlot.kSlot0);
+    sparkFlexConfig
+        .closedLoop
+        .p(SPINUP_KP, ClosedLoopSlot.kSlot0)
+        .i(SPINUP_KI, ClosedLoopSlot.kSlot0)
+        .d(SPINUP_KD, ClosedLoopSlot.kSlot0);
     sparkFlexConfig.closedLoop.feedForward.kV(KV).kS(KS);
-    sparkFlexConfig.closedLoop.outputRange(MAX_NEGATIVE_OUTPUT, MAX_POSITIVE_OUTPUT, ClosedLoopSlot.kSlot0);
-    
+    sparkFlexConfig.closedLoop.outputRange(
+        MAX_NEGATIVE_OUTPUT, MAX_POSITIVE_OUTPUT, ClosedLoopSlot.kSlot0);
+
     // Configure Slot 1: Hold - smooth setpoint maintenance
-    sparkFlexConfig.closedLoop.p(HOLD_KP, ClosedLoopSlot.kSlot1)
-                      .i(HOLD_KI, ClosedLoopSlot.kSlot1)
-                      .d(HOLD_KD, ClosedLoopSlot.kSlot1);
+    sparkFlexConfig
+        .closedLoop
+        .p(HOLD_KP, ClosedLoopSlot.kSlot1)
+        .i(HOLD_KI, ClosedLoopSlot.kSlot1)
+        .d(HOLD_KD, ClosedLoopSlot.kSlot1);
     // Feedforward is shared across all slots, already set above
-    sparkFlexConfig.closedLoop.outputRange(MAX_NEGATIVE_OUTPUT, MAX_POSITIVE_OUTPUT, ClosedLoopSlot.kSlot1);
+    sparkFlexConfig.closedLoop.outputRange(
+        MAX_NEGATIVE_OUTPUT, MAX_POSITIVE_OUTPUT, ClosedLoopSlot.kSlot1);
 
     // Apply configuration once at startup
     flywheelKickerMotor.configure(

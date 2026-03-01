@@ -163,6 +163,7 @@ public class ShooterStateMachine {
       case UNJAMMING:
         flywheel.setWantedState(FlywheelWantedStates.IDLE);
         hood.setWantedState(HoodWantedStates.IDLE);
+
         flywheelKicker.setWantedState(FlywheelKickerStates.REVERSING);
         break;
       case IDLE:
