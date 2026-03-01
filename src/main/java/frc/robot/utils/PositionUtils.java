@@ -87,7 +87,6 @@ public class PositionUtils {
   }
 
   public static boolean isInPassingZone(Pose2d robotPose, Transform2d robotToShooter) {
-    double robotX = robotPose.getX();
     double hubCenter;
     double oppHubCenter;
     double oppDSWall = 0.0;
