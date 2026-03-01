@@ -49,12 +49,6 @@
           }
         },
         {
-          "type": "path",
-          "data": {
-            "pathName": "Red middle 4"
-          }
-        },
-        {
           "type": "named",
           "data": {
             "name": "shoot at hub"
