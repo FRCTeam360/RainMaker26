@@ -2,31 +2,93 @@
 title: SuperStructure State Machine
 ---
 stateDiagram-v2
-    [*] --> IDLE
+    [*] --> StateDefault
 
-    %% Intake flow
-    IDLE --> INTAKING : Driver holds<br>intake button
-    INTAKING --> IDLE : Driver releases<br>intake button
+    %% State definitions with descriptions
+    StateDefault: DEFAULT
+    StateIdle: IDLE
+    StateIntaking: INTAKING
+    StateShootAtHub: SHOOT_AT_HUB
+    StateShootAtOutpost: SHOOT_AT_OUTPOST
+    StateAutoCycleShooting: AUTO_CYCLE_SHOOTING
+    StateUnjamming: UNJAMMING
+    StateStowed: STOWED
+
+    %% Default state flow
+    StateDefault --> StateIntaking : Driver holds<br>intake button
+    StateDefault --> StateShootAtHub : Driver holds<br>force hub button
+    StateDefault --> StateShootAtOutpost : Driver holds<br>force outpost button
+    StateDefault --> StateAutoCycleShooting : Driver holds<br>auto cycle button
+    StateDefault --> StateUnjamming : Driver presses<br>A button
+    StateDefault --> StateStowed : Driver presses<br>Y button
+
+    %% Intaking flow
+    StateIntaking --> StateDefault : Driver releases<br>intake button
 
     %% Hub shooting flow
-    IDLE --> SHOOT_AT_HUB : Driver holds<br>right trigger
-    SHOOT_AT_HUB --> IDLE : Driver releases<br>right trigger
+    StateShootAtHub --> StateDefault : Driver releases<br>force hub button
 
     %% Outpost pass flow
-    IDLE --> SHOOT_AT_OUTPOST : Driver holds<br>left trigger
-    SHOOT_AT_OUTPOST --> IDLE : Driver releases<br>left trigger
+    StateShootAtOutpost --> StateDefault : Driver releases<br>force outpost button
 
-    note right of IDLE : All subsystems stopped<br>Hood position = 0.0
-    note right of INTAKING : Intake runs at 75% duty cycle
-    note right of SHOOT_AT_HUB : See ShootingStateMachine<br>for internal states.<br>Flywheel RPM & Hood angle<br>from hubShotCalculator
-    note right of SHOOT_AT_OUTPOST : Same shooter sub-state machine.<br>Flywheel RPM & Hood angle<br>from outpostPassCalculator
+    %% Auto cycle flow
+    StateAutoCycleShooting --> StateDefault : Driver releases<br>auto cycle button
+
+    %% Unjamming flow
+    StateUnjamming --> StateDefault : Driver releases<br>A button
+
+    %% IDLE state (used in disabled/test modes)
+    StateIdle --> StateDefault : Robot enters<br>autonomous or teleop
+
+    note right of StateDefault
+        Flywheel spun up
+        Hood prepping with ducking
+        Intake pivot deployed
+        Passive shooter state
+    end note
+    note right of StateIdle
+        All subsystems stopped
+        Used in disabled/test modes
+    end note
+    note right of StateIntaking
+        Intake + indexer running
+        Intake pivot deployed
+        Hopper roller prevents jams
+        Shooter idle
+    end note
+    note right of StateShootAtHub
+        Target selection: HUB
+        See ShooterStateMachine
+        Flywheel RPM & Hood angle
+        from hubShotCalculator
+        Fires when ready
+    end note
+    note right of StateShootAtOutpost
+        Target selection: OUTPOST
+        See ShooterStateMachine
+        Flywheel RPM & Hood angle
+        from passCalculator
+        Fires when ready
+    end note
+    note right of StateAutoCycleShooting
+        Auto-selects HUB or OUTPOST
+        based on alliance zone
+        Transitions to either
+        SHOOTING_AT_HUB or PASSING
+    end note
+    note right of StateUnjamming
+        Indexer + shooter reversing
+        Hopper roller unjamming
+        Intake pivot deployed
+        Intake off
+    end note
+    note right of StateStowed
+        Intake pivot stowed
+    end note
 
     %% Defined but not yet implemented
     state "Not Yet Implemented" as NYI {
         DEFENSE
         X_OUT
-        AUTO_ALIGN
-        X_OUT_SHOOTING
-        FIRING
         EJECTING
     }
