@@ -122,6 +122,7 @@ public class RobotContainer {
   private static final int ENABLED_THROTTLE_SKIP_FRAMES = 0;
 
   private RobotShootingInfo robotShootingInfo;
+  private RobotShootingInfo passShootingInfo;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -143,12 +144,20 @@ public class RobotContainer {
 
         robotShootingInfo =
             new RobotShootingInfo(
-                Constants.WoodBotConstants.shotHoodAngleMap,
-                Constants.WoodBotConstants.shotFlywheelSpeedMap,
-                Constants.WoodBotConstants.timeOfFlightMap,
-                ShooterConstants.WOODBOT_TO_SHOOTER,
-                Constants.WoodBotConstants.MIN_SHOT_DISTANCE_METERS,
-                Constants.WoodBotConstants.MAX_SHOT_DISTANCE_METERS);
+                Constants.SimulationConstants.shotHoodAngleMap,
+                Constants.SimulationConstants.shotFlywheelSpeedMap,
+                Constants.SimulationConstants.shotTimeOfFlightMap,
+                ShooterConstants.SIM_TO_SHOOTER,
+                Constants.SimulationConstants.MIN_SHOT_DISTANCE_METERS,
+                Constants.SimulationConstants.MAX_SHOT_DISTANCE_METERS);
+        passShootingInfo =
+            new RobotShootingInfo(
+                Constants.SimulationConstants.passHoodAngleMap,
+                Constants.SimulationConstants.passFlywheelSpeedMap,
+                Constants.SimulationConstants.passTimeOfFlightMap,
+                ShooterConstants.SIM_TO_SHOOTER,
+                Constants.SimulationConstants.MIN_PASS_DISTANCE_METERS,
+                Constants.SimulationConstants.MAX_PASS_DISTANCE_METERS);
         break;
       case WOODBOT:
         drivetrain = WoodBotDrivetrain.createDrivetrain();
@@ -187,6 +196,7 @@ public class RobotContainer {
                 ShooterConstants.WOODBOT_TO_SHOOTER,
                 Constants.WoodBotConstants.MIN_SHOT_DISTANCE_METERS,
                 Constants.WoodBotConstants.MAX_SHOT_DISTANCE_METERS);
+        passShootingInfo = robotShootingInfo;
         break;
       case PRACTICEBOT:
       default:
@@ -219,6 +229,7 @@ public class RobotContainer {
                 ShooterConstants.PRACTICEBOT_TO_SHOOTER,
                 Constants.PracticeBotConstants.MIN_SHOT_DISTANCE_METERS,
                 Constants.PracticeBotConstants.MAX_SHOT_DISTANCE_METERS);
+        passShootingInfo = robotShootingInfo;
         // TODO ADD CLIMBERS
         break;
     }
@@ -237,7 +248,7 @@ public class RobotContainer {
                     AllianceFlipUtil.apply(FieldConstants.RightBump.nearRightCorner),
                     AllianceFlipUtil.apply(FieldConstants.LeftBump.nearLeftCorner)),
             drivetrain::getVelocity,
-            robotShootingInfo);
+            passShootingInfo);
     // Configure the trigger bindings
     // TODO: Re-enable superStructure construction and PathPlanner commands
 
