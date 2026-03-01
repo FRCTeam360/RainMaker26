@@ -13,6 +13,8 @@ import org.littletonrobotics.junction.Logger;
 public class Indexer extends SubsystemBase {
   // Constants
   private static final double INDEXER_DUTY_CYCLE = 0.75;
+  private static final double INTAKING_ASSIST_DUTY_CYCLE = -0.15;
+  private static final double REVERSING_DUTY_CYCLE = -0.35;
 
   // IO fields
   private final IndexerIO io;
@@ -21,8 +23,9 @@ public class Indexer extends SubsystemBase {
   // Enums
   public enum IndexerStates {
     OFF,
-    INTAKING,
-    SHOOTING
+    ASSIST_INTAKING,
+    INDEXING,
+    REVERSING
   }
 
   // State variables
@@ -56,12 +59,15 @@ public class Indexer extends SubsystemBase {
     previousState = currentState;
 
     switch (wantedState) {
-      case INTAKING:
-        currentState = IndexerStates.INTAKING;
+      case ASSIST_INTAKING:
+        currentState = IndexerStates.ASSIST_INTAKING;
         break;
 
-      case SHOOTING:
-        currentState = IndexerStates.SHOOTING;
+      case INDEXING:
+        currentState = IndexerStates.INDEXING;
+        break;
+      case REVERSING:
+        currentState = IndexerStates.REVERSING;
         break;
       case OFF:
         currentState = IndexerStates.OFF;
@@ -71,11 +77,14 @@ public class Indexer extends SubsystemBase {
 
   private void applyState() {
     switch (currentState) {
-      case INTAKING:
+      case ASSIST_INTAKING:
+        setDutyCycle(INTAKING_ASSIST_DUTY_CYCLE);
+        break;
+      case INDEXING:
         setDutyCycle(INDEXER_DUTY_CYCLE);
         break;
-      case SHOOTING:
-        setDutyCycle(INDEXER_DUTY_CYCLE);
+      case REVERSING:
+        setDutyCycle(REVERSING_DUTY_CYCLE);
         break;
       case OFF:
       default:

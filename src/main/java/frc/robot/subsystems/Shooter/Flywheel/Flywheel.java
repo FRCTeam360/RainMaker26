@@ -8,6 +8,7 @@ import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.subsystems.ControlState;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
@@ -29,13 +30,13 @@ import org.littletonrobotics.junction.Logger;
  */
 public class Flywheel extends SubsystemBase {
   /** Velocity tolerance for bang-bang setpoint detection. */
-  private static final double TOLERANCE_RPM = 100.0;
+  private static final double TOLERANCE_RPM = 150.0;
 
   /** Debounce time for shot detection — filters noise from brief velocity dips. */
   private static final double BALL_FIRED_DEBOUNCE_SECONDS = 0.04;
 
   /** Debounce time for underspeed detection — sustained RPM drop signals too many rapid shots. */
-  private static final double SUSTAINED_RPM_DROP_DEBOUNCE_SECOND = 0.2;
+  private static final double SUSTAINED_RPM_DROP_DEBOUNCE_SECOND = 0.4;
 
   private long launchCount = 0;
 
@@ -205,7 +206,11 @@ public class Flywheel extends SubsystemBase {
         setHoldVelocityControl(shootVelocitySupplier.getAsDouble());
         break;
       case COAST:
-        setCoastVelocityControl(shootVelocitySupplier.getAsDouble());
+        if (Constants.getRobotType() != Constants.RobotType.WOODBOT) {
+          setCoastVelocityControl(shootVelocitySupplier.getAsDouble());
+        } else {
+          setDutyCycle(0.0);
+        }
         break;
       case OFF:
       default:

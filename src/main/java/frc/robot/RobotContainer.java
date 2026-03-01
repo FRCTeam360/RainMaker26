@@ -115,6 +115,12 @@ public class RobotContainer {
 
   private static final double FLYWHEEL_KICKER_WARMUP_VELOCITY_RPM = 4000.0;
 
+  /** Threshold above which a loop cycle is considered an overrun (22ms for a 20ms loop). */
+  private static final double LOOP_OVERRUN_THRESHOLD_SECONDS = 0.022;
+
+  private double lastCycleTimestamp = Logger.getTimestamp() / 1.0e6;
+  private int overrunCount;
+
   /** Frames to skip between processed frames while disabled. Only affects Limelight 4. */
   private static final int DISABLED_THROTTLE_SKIP_FRAMES = 200;
 
@@ -122,6 +128,7 @@ public class RobotContainer {
   private static final int ENABLED_THROTTLE_SKIP_FRAMES = 0;
 
   private RobotShootingInfo robotShootingInfo;
+  private RobotShootingInfo passShootingInfo;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -143,12 +150,20 @@ public class RobotContainer {
 
         robotShootingInfo =
             new RobotShootingInfo(
-                Constants.WoodBotConstants.shotHoodAngleMap,
-                Constants.WoodBotConstants.shotFlywheelSpeedMap,
-                Constants.WoodBotConstants.timeOfFlightMap,
-                ShooterConstants.WOODBOT_TO_SHOOTER,
-                Constants.WoodBotConstants.MIN_SHOT_DISTANCE_METERS,
-                Constants.WoodBotConstants.MAX_SHOT_DISTANCE_METERS);
+                Constants.SimulationConstants.shotHoodAngleMap,
+                Constants.SimulationConstants.shotFlywheelSpeedMap,
+                Constants.SimulationConstants.shotTimeOfFlightMap,
+                ShooterConstants.SIM_TO_SHOOTER,
+                Constants.SimulationConstants.MIN_SHOT_DISTANCE_METERS,
+                Constants.SimulationConstants.MAX_SHOT_DISTANCE_METERS);
+        passShootingInfo =
+            new RobotShootingInfo(
+                Constants.SimulationConstants.passHoodAngleMap,
+                Constants.SimulationConstants.passFlywheelSpeedMap,
+                Constants.SimulationConstants.passTimeOfFlightMap,
+                ShooterConstants.SIM_TO_SHOOTER,
+                Constants.SimulationConstants.MIN_PASS_DISTANCE_METERS,
+                Constants.SimulationConstants.MAX_PASS_DISTANCE_METERS);
         break;
       case WOODBOT:
         drivetrain = WoodBotDrivetrain.createDrivetrain();
@@ -166,14 +181,7 @@ public class RobotContainer {
                             Constants.WoodBotConstants.LIMELIGHT_3,
                             () -> drivetrain.getAngle(),
                             () -> drivetrain.getAngularRate(),
-                            true)),
-                    Map.entry(
-                        Constants.WoodBotConstants.LIMELIGHT_4,
-                        new VisionIOLimelight4(
-                            Constants.WoodBotConstants.LIMELIGHT_4,
-                            () -> drivetrain.getAngle(),
-                            () -> drivetrain.getAngularRate(),
-                            false))));
+                            true))));
         intake = new Intake(new IntakeIOWB());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOWB());
         intakePivot = new IntakePivot(new IntakePivotIONoop());
@@ -187,6 +195,7 @@ public class RobotContainer {
                 ShooterConstants.WOODBOT_TO_SHOOTER,
                 Constants.WoodBotConstants.MIN_SHOT_DISTANCE_METERS,
                 Constants.WoodBotConstants.MAX_SHOT_DISTANCE_METERS);
+        passShootingInfo = robotShootingInfo;
         break;
       case PRACTICEBOT:
       default:
@@ -219,6 +228,7 @@ public class RobotContainer {
                 ShooterConstants.PRACTICEBOT_TO_SHOOTER,
                 Constants.PracticeBotConstants.MIN_SHOT_DISTANCE_METERS,
                 Constants.PracticeBotConstants.MAX_SHOT_DISTANCE_METERS);
+        passShootingInfo = robotShootingInfo;
         // TODO ADD CLIMBERS
         break;
     }
@@ -226,6 +236,7 @@ public class RobotContainer {
         new ShotCalculator(
             drivetrain::getPosition,
             () -> AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint.toTranslation2d()),
+            drivetrain::getVelocity,
             robotShootingInfo);
     passCalculator =
         new ShotCalculator(
@@ -235,7 +246,8 @@ public class RobotContainer {
                     drivetrain.getPosition(),
                     AllianceFlipUtil.apply(FieldConstants.RightBump.nearRightCorner),
                     AllianceFlipUtil.apply(FieldConstants.LeftBump.nearLeftCorner)),
-            robotShootingInfo);
+            drivetrain::getVelocity,
+            passShootingInfo);
     // Configure the trigger bindings
     // TODO: Re-enable superStructure construction and PathPlanner commands
 
@@ -372,6 +384,11 @@ public class RobotContainer {
 
     configureIndependentModeBindings(isIndependentMode);
 
+    driverCont.a().onTrue(superStructure.setStateCommand(SuperWantedStates.UNJAMMING));
+    driverCont.a().onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
+
+    driverCont.y().onTrue(superStructure.setStateCommand(SuperWantedStates.STOWED));
+
     // Drivetrain commands
     // driverCont.leftTrigger().whileTrue(drivetrain.faceHubWhileDriving(driverCont));
     drivetrain.registerTelemetry(logger::telemeterize);
@@ -391,9 +408,13 @@ public class RobotContainer {
     driverCont.pov(270).and(isIndependentMode).whileTrue(hood.setPositionCommand(23.0));
     driverCont.start().and(isIndependentMode).onTrue(hood.zero());
 
+    // climber
+    driverCont.x().and(isIndependentMode).whileTrue(climber.setLeftDutyCycleCommand(0.2));
+    driverCont.y().and(isIndependentMode).whileTrue(climber.setLeftDutyCycleCommand(-0.2));
+
     // flywheel bindings
-    driverCont.x().and(isIndependentMode).whileTrue(flywheel.setVelocityCommand(3000.0));
-    driverCont.y().and(isIndependentMode).whileTrue(flywheel.setVelocityCommand(4000.0));
+    // driverCont.x().and(isIndependentMode).whileTrue(flywheel.setVelocityCommand(3000.0));
+    // driverCont.y().and(isIndependentMode).whileTrue(flywheel.setVelocityCommand(4000.0));
 
     // configureIntakeTestBindings(isIndependentMode);
     // configureFullShootingTestBindings(isIndependentMode);
@@ -532,6 +553,18 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.CommandScheduler#run()}.
    */
   public void preSchedulerUpdate() {
+    double now = Logger.getTimestamp() / 1.0e6;
+    double loopTimeSeconds = now - lastCycleTimestamp;
+    lastCycleTimestamp = now;
+
+    if (loopTimeSeconds > LOOP_OVERRUN_THRESHOLD_SECONDS) {
+      overrunCount++;
+    }
+
+    Logger.recordOutput("LoopTiming/LoopTimeSeconds", loopTimeSeconds);
+    Logger.recordOutput("LoopTiming/Overrun", loopTimeSeconds > LOOP_OVERRUN_THRESHOLD_SECONDS);
+    Logger.recordOutput("LoopTiming/OverrunCount", overrunCount);
+
     hubShotCalculator.clearShootingParams();
     // hubShotCalculator.calculateShot();
     passCalculator.clearShootingParams();

@@ -44,6 +44,15 @@ public class FlywheelKickerIOSim implements FlywheelKickerIO {
   private final LoggedNetworkBoolean tuningEnabled =
       new LoggedNetworkBoolean("/Tuning/FlywheelKicker/Enabled", false);
 
+  // Disturbance injection for testing state machine
+  private final LoggedNetworkBoolean injectDisturbance =
+      new LoggedNetworkBoolean("/Tuning/FlywheelKicker/InjectDisturbance", false);
+  private final LoggedNetworkNumber disturbanceDurationSeconds =
+      new LoggedNetworkNumber("/Tuning/FlywheelKicker/DisturbanceDurationSeconds", 0.5);
+
+  private double disturbanceStartTime = 0.0;
+  private boolean disturbanceActive = false;
+
   // Motor and control
   private final TalonFX motorControllerSim = new TalonFX(SimulationConstants.FLYWHEEL_KICKER_MOTOR);
   private final VelocityVoltage velocityRequest = new VelocityVoltage(0).withSlot(0);
@@ -114,11 +123,28 @@ public class FlywheelKickerIOSim implements FlywheelKickerIO {
       motorControllerSim.setControl(velocityRequest.withVelocity(targetRPS));
     }
 
-    // Step 1: Get the commanded voltage from motor and apply to simulation
+    // Step 1: Get the commanded voltage from motor
     double motorVoltage = motorControllerSim.getSimState().getMotorVoltage();
-    flywheelKickerSim.setInputVoltage(motorVoltage);
+
+    // Check if disturbance should be injected
+    if (injectDisturbance.get() && !disturbanceActive) {
+      disturbanceStartTime = edu.wpi.first.wpilibj.Timer.getFPGATimestamp();
+      disturbanceActive = true;
+    }
+
+    // Check if disturbance duration has elapsed
+    if (disturbanceActive
+        && edu.wpi.first.wpilibj.Timer.getFPGATimestamp() - disturbanceStartTime
+            > disturbanceDurationSeconds.get()) {
+      disturbanceActive = false;
+      injectDisturbance.set(false); // Reset the toggle
+    }
+
+    // Apply disturbance: zero out the motor voltage during disturbance period
+    double appliedVoltage = disturbanceActive ? 0.0 : motorVoltage;
 
     // Step 2: Update the simulation by one timestep
+    flywheelKickerSim.setInputVoltage(appliedVoltage);
     flywheelKickerSim.update(SimulationConstants.SIM_TICK_RATE_S);
 
     // Step 3: Update angular position by integrating velocity
@@ -156,5 +182,15 @@ public class FlywheelKickerIOSim implements FlywheelKickerIO {
   public void setVelocity(double rpm) {
     // TODO: Implement velocity control for simulation (e.g., use velocityRequest to command the
     // motor sim)
+  }
+
+  public void setSpinupVelocityControl(double rpm) {
+    // Sim doesn't differentiate - use same velocity control
+    setVelocity(rpm);
+  }
+
+  public void setHoldVelocityControl(double rpm) {
+    // Sim doesn't differentiate - use same velocity control
+    setVelocity(rpm);
   }
 }

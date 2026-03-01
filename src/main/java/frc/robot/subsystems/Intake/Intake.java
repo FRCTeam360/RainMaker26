@@ -6,6 +6,7 @@ package frc.robot.subsystems.Intake;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.subsystems.ControlState;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
@@ -16,7 +17,7 @@ public class Intake extends SubsystemBase {
   private static final double JAMMED_SUPPLY_CURRENT_DRAW = 35.0;
   private static final double REVERSE_UNJAM_DUTY_CYCLE = -0.5;
   private static final double INTAKING_DUTY_CYCLE = 0.8;
-  private static final double SHOOT_ASSIST_DUTY_CYCLE = 0.2;
+  private static final double SHOOT_ASSIST_DUTY_CYCLE = 0.3;
 
   // IO fields
   private final IntakeIO io;
@@ -29,7 +30,7 @@ public class Intake extends SubsystemBase {
   public enum IntakeStates {
     OFF,
     INTAKING,
-    SHOOTING,
+    ASSIST_SHOOTING,
     // JAMMED
   }
 
@@ -74,9 +75,8 @@ public class Intake extends SubsystemBase {
         // }
         currentState = IntakeStates.INTAKING;
         break;
-
-      case SHOOTING:
-        currentState = IntakeStates.SHOOTING;
+      case ASSIST_SHOOTING:
+        currentState = IntakeStates.ASSIST_SHOOTING;
         break;
       case OFF:
       default:
@@ -92,7 +92,7 @@ public class Intake extends SubsystemBase {
       case INTAKING:
         intaking();
         break;
-      case SHOOTING:
+      case ASSIST_SHOOTING:
         shootAssist();
         break;
       case OFF:
@@ -109,7 +109,11 @@ public class Intake extends SubsystemBase {
   }
 
   private void intaking() {
-    setDutyCycle(dutyCycleSupplier.getAsDouble());
+    if (Constants.getRobotType() != Constants.RobotType.WOODBOT) {
+      setVelocity(1100);
+    } else {
+      setDutyCycle(0.7);
+    }
   }
 
   // private void unjamIntake() {

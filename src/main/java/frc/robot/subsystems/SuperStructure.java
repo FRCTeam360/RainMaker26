@@ -11,6 +11,7 @@ import frc.robot.subsystems.HopperRoller.HopperRoller.HopperRollerStates;
 import frc.robot.subsystems.Indexer.Indexer;
 import frc.robot.subsystems.Indexer.Indexer.IndexerStates;
 import frc.robot.subsystems.Intake.Intake;
+import frc.robot.subsystems.Intake.Intake.IntakeStates;
 import frc.robot.subsystems.IntakePivot.IntakePivot;
 import frc.robot.subsystems.IntakePivot.IntakePivot.IntakePivotWantedStates;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel;
@@ -53,7 +54,9 @@ public class SuperStructure extends SubsystemBase {
     // TODO: not yet implemented
     DEFENSE,
     X_OUT,
-    EJECTING
+    EJECTING,
+    UNJAMMING,
+    STOWED
   }
 
   public enum SuperInternalStates {
@@ -61,7 +64,9 @@ public class SuperStructure extends SubsystemBase {
     IDLE, // everything is stopped
     INTAKING, // intake button pressed
     SHOOTING_AT_HUB,
-    PASSING
+    PASSING,
+    UNJAMMING,
+    STOWING
   }
 
   // State variables
@@ -138,6 +143,12 @@ public class SuperStructure extends SubsystemBase {
       case IDLE:
         currentSuperState = SuperInternalStates.IDLE;
         break;
+      case UNJAMMING:
+        currentSuperState = SuperInternalStates.UNJAMMING;
+        break;
+      case STOWED:
+        currentSuperState = SuperInternalStates.STOWING;
+        break;
       case DEFAULT:
       default:
         targetSelectionStateMachine.setWantedState(TargetWantedStates.AUTO);
@@ -159,6 +170,12 @@ public class SuperStructure extends SubsystemBase {
       case PASSING:
         shooting();
         break;
+      case UNJAMMING:
+        unjamming();
+        break;
+      case STOWING:
+        stowing();
+        break;
       case DEFAULT:
         passive_preparing();
         break;
@@ -171,9 +188,10 @@ public class SuperStructure extends SubsystemBase {
     shooterStateMachine.setWantedState(ShooterWantedStates.SHOOTING);
 
     if (shooterStateMachine.getState() == ShooterStates.FIRING) {
-      indexer.setWantedState(IndexerStates.SHOOTING);
+      indexer.setWantedState(IndexerStates.INDEXING);
       hopperRoller.setWantedState(HopperRollerStates.ROLLING);
       intakePivot.setWantedState(IntakePivotWantedStates.AGITATE_HOPPER);
+      intake.setWantedState(IntakeStates.ASSIST_SHOOTING);
     } else {
       indexer.setWantedState(IndexerStates.OFF);
       hopperRoller.setWantedState(HopperRollerStates.OFF);
@@ -183,7 +201,7 @@ public class SuperStructure extends SubsystemBase {
   private void passive_preparing() {
     intake.setWantedState(Intake.IntakeStates.OFF);
     indexer.setWantedState(Indexer.IndexerStates.OFF);
-    intakePivot.setWantedState(IntakePivotWantedStates.OFF);
+    intakePivot.setWantedState(IntakePivotWantedStates.DEPLOYED);
     hopperRoller.setWantedState(HopperRollerStates.OFF);
     shooterStateMachine.setWantedState(ShooterWantedStates.PASSIVE_SHOOTER);
   }
@@ -192,7 +210,8 @@ public class SuperStructure extends SubsystemBase {
     intake.setWantedState(Intake.IntakeStates.INTAKING);
     intakePivot.setWantedState(IntakePivotWantedStates.DEPLOYED);
     shooterStateMachine.setWantedState(ShooterWantedStates.IDLE);
-    // indexer.setWantedState(Indexer.IndexerStates.INTAKING);
+    hopperRoller.setWantedState(HopperRollerStates.PREVENT_JAM);
+    indexer.setWantedState(Indexer.IndexerStates.ASSIST_INTAKING);
   }
 
   private void stopped() {
@@ -203,10 +222,22 @@ public class SuperStructure extends SubsystemBase {
     shooterStateMachine.setWantedState(ShooterWantedStates.IDLE);
   }
 
+  private void unjamming() {
+    indexer.setWantedState(IndexerStates.REVERSING);
+    shooterStateMachine.setWantedState(ShooterWantedStates.REVERSING);
+    hopperRoller.setWantedState(HopperRollerStates.UNJAMMING);
+    intake.setWantedState(IntakeStates.OFF);
+    intakePivot.setWantedState(IntakePivotWantedStates.DEPLOYED);
+  }
+
+  private void stowing() {
+    intakePivot.setWantedState(IntakePivotWantedStates.STOWED);
+  }
+
   private boolean canShootToTarget() {
     switch (wantedSuperState) {
       case SHOOT_AT_HUB:
-        if (!DriverStation.isDSAttached()) {
+        if (!DriverStation.isFMSAttached()) {
           return true;
         }
         return RobotUtils.hubActive(

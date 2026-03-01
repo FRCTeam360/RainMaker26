@@ -1,5 +1,6 @@
 package frc.robot.subsystems.Shooter;
 
+import frc.robot.Constants;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel.FlywheelInternalStates;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel.FlywheelWantedStates;
@@ -20,13 +21,15 @@ public class ShooterStateMachine {
   public enum ShooterWantedStates {
     IDLE,
     SHOOTING,
-    PASSIVE_SHOOTER
+    PASSIVE_SHOOTER,
+    REVERSING
   }
 
   public enum ShooterStates {
     PREPARING_TO_FIRE,
     FIRING,
     WAITING,
+    UNJAMMING,
     IDLE
   }
 
@@ -127,6 +130,9 @@ public class ShooterStateMachine {
       case PASSIVE_SHOOTER:
         currentState = ShooterStates.WAITING;
         break;
+      case REVERSING:
+        currentState = ShooterStates.UNJAMMING;
+        break;
       case IDLE:
       default:
         currentState = ShooterStates.IDLE;
@@ -143,7 +149,11 @@ public class ShooterStateMachine {
       case PREPARING_TO_FIRE:
         flywheel.setWantedState(FlywheelWantedStates.SHOOTING);
         hood.setWantedState(HoodWantedStates.AIMING);
-        flywheelKicker.setWantedState(FlywheelKickerStates.IDLE);
+        if (Constants.getRobotType() != Constants.RobotType.WOODBOT) {
+          flywheelKicker.setWantedState(FlywheelKickerStates.KICKING);
+        } else {
+          flywheelKicker.setWantedState(FlywheelKickerStates.IDLE);
+        }
         break;
       case FIRING:
         flywheel.setWantedState(FlywheelWantedStates.SHOOTING);
@@ -151,9 +161,15 @@ public class ShooterStateMachine {
         flywheelKicker.setWantedState(FlywheelKickerStates.KICKING);
         break;
       case WAITING:
-        flywheel.setWantedState(FlywheelWantedStates.COASTING);
+        flywheel.setWantedState(FlywheelWantedStates.IDLE);
         hood.setWantedState(HoodWantedStates.DUCKED);
         flywheelKicker.setWantedState(FlywheelKickerStates.IDLE);
+        break;
+      case UNJAMMING:
+        flywheel.setWantedState(FlywheelWantedStates.IDLE);
+        hood.setWantedState(HoodWantedStates.IDLE);
+
+        flywheelKicker.setWantedState(FlywheelKickerStates.REVERSING);
         break;
       case IDLE:
       default:

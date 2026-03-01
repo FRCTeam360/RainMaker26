@@ -52,11 +52,11 @@ public class FlywheelIOPBBangBang implements FlywheelIO {
 
   private static final double STATOR_CURRENT_LIMIT_AMPS = 200.0;
   private static final double MAX_NEGATIVE_TORQUE_CURRENT = 0.0;
-  private static final double MAX_POSITIVE_TORQUE_CURRENT = 30.0;
+  private static final double MAX_POSITIVE_TORQUE_CURRENT = 40.0;
 
   private static final double MAX_NEGATIVE_DUTY_CYCLE = 0.0;
   private static final double MAX_POSITIVE_DUTY_CYCLE = 1.0;
-  private static final double SUPPLY_CURRENT_LIMIT_AMPS = 60.0;
+  private static final double SUPPLY_CURRENT_LIMIT_AMPS = 70.0;
   private static final double GEAR_RATIO = 1.0;
 
   private final TalonFX[] motors = {
