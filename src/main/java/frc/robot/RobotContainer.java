@@ -201,7 +201,6 @@ public class RobotContainer {
       default:
         drivetrain = PracticeBotDrivetrain.createDrivetrain();
         climber = new Climber(new ClimberIOPB());
-        logger = new Telemetry(PracticeBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
         flywheel = new Flywheel(new FlywheelIOPBBangBang());
         hood = new Hood(new HoodIOPB());
         indexer = new Indexer(new IndexerIOPB());
@@ -393,7 +392,6 @@ public class RobotContainer {
 
     // Drivetrain commands
     // driverCont.leftTrigger().whileTrue(drivetrain.faceHubWhileDriving(driverCont));
-    drivetrain.registerTelemetry(logger::telemeterize);
     driverCont.back().onTrue(drivetrain.zeroCommand());
   }
 
