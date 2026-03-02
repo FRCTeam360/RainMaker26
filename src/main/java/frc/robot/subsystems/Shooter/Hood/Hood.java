@@ -25,8 +25,7 @@ public class Hood extends SubsystemBase {
   private final HoodIOInputsAutoLogged inputs = new HoodIOInputsAutoLogged();
 
   // Alert
-  private final Alert hoodUpAlert =
-      new Alert("Hood is UP", AlertType.kWarning);
+  private final Alert hoodUpAlert = new Alert("Hood is UP", AlertType.kWarning);
 
   // Other fields
   private DoubleSupplier hoodAngleSupplier = () -> 0.0;
