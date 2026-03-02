@@ -326,6 +326,21 @@ public final class Constants {
 
   private static RobotType cachedRobotType;
 
+  /**
+   * Returns the robot type, caching the result after the first call.
+   *
+   * <p>{@link HALUtil#getSerialNumber()} is a JNI (Java Native Interface) call — it crosses the
+   * boundary from Java into native C++ code to read the RoboRIO's serial number. JNI calls have
+   * overhead from the Java-to-native transition, making them expensive to run every 20ms cycle.
+   * Caching avoids this repeated cost since the serial number never changes at runtime.
+   *
+   * @see <a href="https://docs.oracle.com/en/java/javase/17/docs/specs/jni/intro.html">JNI
+   *     Specification</a>
+   * @see <a
+   *     href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/hal/HALUtil.html#getSerialNumber()">
+   *     HALUtil.getSerialNumber() Javadoc</a>
+   * @return the detected {@link RobotType}
+   */
   public static RobotType getRobotType() {
     if (cachedRobotType != null) {
       return cachedRobotType;
