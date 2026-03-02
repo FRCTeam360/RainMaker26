@@ -96,7 +96,7 @@ public class Robot extends LoggedRobot {
     // and running subsystem periodic() methods.  This must be called from the robot's periodic
     // block in order for anything in the Command-based framework to work.
     double t0 = Logger.getTimestamp() / 1.0e6;
-    m_timeAndJoystickReplay.update();
+    // m_timeAndJoystickReplay.update();
     double t1 = Logger.getTimestamp() / 1.0e6;
     m_robotContainer.preSchedulerUpdate();
     double t2 = Logger.getTimestamp() / 1.0e6;
