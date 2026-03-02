@@ -114,6 +114,7 @@ public class ShooterStateMachine {
         Logger.recordOutput("Superstructure/Shooting/HoodReady", hoodReady);
         SmartDashboard.putBoolean("Superstructure/Shooting/HoodReady", hoodReady);
         Logger.recordOutput("Superstructure/Shooting/DrivetrainAligned", drivetrainAligned);
+        Logger.recordOutput("Superstructure/Shooting/TargetReady", targetReady);
         SmartDashboard.putBoolean("Superstructure/Shooting/DrivetrainAligned", drivetrainAligned);
 
         // Enter FIRING when flywheel reaches AT_SETPOINT (with hood + drivetrain ready).
@@ -124,8 +125,6 @@ public class ShooterStateMachine {
                 && hoodReady
                 && drivetrainAligned
                 && targetReady;
-        Logger.recordOutput("Superstructure/Shooting/Aligned", drivetrainAligned);
-        Logger.recordOutput("Superstructure/Shooting/HubShootable", targetReady);
 
         if (shouldFire) {
           currentState = ShooterStates.FIRING;

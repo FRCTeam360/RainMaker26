@@ -236,18 +236,24 @@ public class SuperStructure extends SubsystemBase {
   }
 
   private boolean canShootToTarget() {
-    switch (wantedSuperState) {
-      case SHOOT_AT_HUB:
+    switch (currentSuperState) {
+      case SHOOTING_AT_HUB:
         if (!DriverStation.isFMSAttached()) {
           return true;
         }
-        double timeOfFlight = hubShotCalculator.calculateShot().timeOfFlight();
-
-        return RobotUtils.hubActive(
-            DriverStation.getAlliance(),
-            RobotUtils.getAutoWinner(DriverStation.getGameSpecificMessage()),
-            RobotUtils.getShootingPhase(
-                DriverStation.getMatchTime(), DriverStation.isTeleop(), timeOfFlight));
+        if (wantedSuperState == SuperWantedStates.SHOOT_AT_HUB) {
+          return true;
+        }
+        boolean hubActive =
+            RobotUtils.hubActive(
+                DriverStation.getAlliance(),
+                RobotUtils.getAutoWinner(DriverStation.getGameSpecificMessage()),
+                RobotUtils.getShootingPhase(
+                    DriverStation.getMatchTime(),
+                    DriverStation.isTeleop(),
+                    hubShotCalculator.calculateShot().timeOfFlight()));
+        Logger.recordOutput("Superstructure/Shooting/HubActive", hubActive);
+        return hubActive;
       default:
         return true;
     }

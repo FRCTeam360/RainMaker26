@@ -106,7 +106,7 @@ public class RobotUtils {
       Optional<Alliance> alliance, Alliance autoWinner, ActiveHub gamePhase) {
     // alliance is our alliance, autoWinner is the result of getAutoWinner, gamePhase is the result
     // of getShootingPhase
-    Boolean hubActive = true;
+    boolean hubActive = true;
     if (alliance.isPresent()) {
       if (gamePhase == null || autoWinner == null) {
         return true;
