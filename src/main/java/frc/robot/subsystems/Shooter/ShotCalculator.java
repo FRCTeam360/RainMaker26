@@ -31,6 +31,9 @@ public class ShotCalculator {
   private double minDistanceMeters = 0.0;
   private double maxDistanceMeters = Double.MAX_VALUE;
 
+  // Iterative convergence terminates when successive TOF estimates agree within this threshold.
+  private static final double TOF_CONVERGENCE_THRESHOLD_SECS = 0.001;
+
   /**
    * Holds the calculated shooting parameters for a given robot position.
    *
@@ -134,13 +137,21 @@ public class ShotCalculator {
     // Use time of flight to project where the shooter will be when the ball arrives.
     // The robot imparts its velocity onto the ball, so we offset the aiming point
     // by (velocity * timeOfFlight) to lead the target.
+    // Iteratively refine: the lookahead distance differs from the initial distance, so the correct
+    // TOF is the one consistent with the lookahead it produces (fixed-point convergence).
     double timeOfFlightSecs = timeOfFlightMap.get(shooterToTargetDistanceMeters);
-    Translation2d lookaheadPosition =
-        shooterPosition
-            .getTranslation()
-            .plus(
-                new Translation2d(
-                    shooterVelXMps * timeOfFlightSecs, shooterVelYMps * timeOfFlightSecs));
+    Translation2d lookaheadPosition = shooterPosition.getTranslation();
+    for (int i = 0; i < 5; i++) {
+      lookaheadPosition =
+          shooterPosition
+              .getTranslation()
+              .plus(
+                  new Translation2d(
+                      shooterVelXMps * timeOfFlightSecs, shooterVelYMps * timeOfFlightSecs));
+      double newTof = timeOfFlightMap.get(target.getDistance(lookaheadPosition));
+      if (Math.abs(newTof - timeOfFlightSecs) < TOF_CONVERGENCE_THRESHOLD_SECS) break;
+      timeOfFlightSecs = newTof;
+    }
     double lookaheadDistanceMeters = target.getDistance(lookaheadPosition);
 
     double effectiveDistanceMeters =

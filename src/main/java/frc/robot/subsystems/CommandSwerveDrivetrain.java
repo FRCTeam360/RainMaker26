@@ -82,6 +82,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   private static final double HEADING_KD = 0.005;
   private static final double HEADING_I_ZONE = 0.0;
   private static final double HEADING_TOLERANCE_RAD = Math.toRadians(3.0);
+  // Extra heading tolerance granted per m/s of translational speed.
+  // Compensates for the PID steady-state tracking lag when the heading setpoint moves
+  // (setpoint rate ≈ v/d rad/s; lag ≈ rate/KP). Tunable — start at ~5°/m/s.
+  private static final double HEADING_SPEED_TOLERANCE_RAD_PER_MPS = Math.toRadians(5.0);
 
   // Field-centric facing angle request for hub tracking
   private final SwerveRequest.FieldCentricFacingAngle m_faceHubRequest =
@@ -343,17 +347,28 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   }
 
   /**
-   * Returns whether the heading controller is aligned to its target angle within the configured
+   * Returns whether the heading controller is aligned to its target angle within a speed-scaled
    * tolerance. Uses the {@link com.ctre.phoenix6.swerve.utility.PhoenixPIDController#atSetpoint()}
    * method on the facing-angle request's heading controller.
+   *
+   * <p>The tolerance grows with translational speed to account for the PID steady-state tracking
+   * lag: when the robot moves, the heading setpoint changes at roughly {@code v/d} rad/s, producing
+   * a lag of {@code (v/d)/KP} rad. Adding {@link #HEADING_SPEED_TOLERANCE_RAD_PER_MPS} per m/s
+   * compensates for this so the robot can fire during shoot-on-the-move.
    *
    * <p>Note: This only returns meaningful results while a {@link
    * SwerveRequest.FieldCentricFacingAngle} request is actively being applied (e.g., during
    * faceAngleWhileDriving). Before the first PID calculation, this returns false.
    *
-   * @return true if the heading error is within {@link #HEADING_TOLERANCE_RAD}
+   * @return true if the heading error is within the speed-scaled tolerance
    */
   public boolean isAlignedToTarget() {
+    ChassisSpeeds speeds = getVelocity();
+    double speedMps = Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond);
+    double dynamicToleranceRad =
+        HEADING_TOLERANCE_RAD + speedMps * HEADING_SPEED_TOLERANCE_RAD_PER_MPS;
+    m_faceHubRequest.HeadingController.setTolerance(dynamicToleranceRad);
+    Logger.recordOutput(SUBSYSTEM_NAME + "DynamicHeadingToleranceDeg", Math.toDegrees(dynamicToleranceRad));
     return m_faceHubRequest.HeadingController.atSetpoint();
   }
 
