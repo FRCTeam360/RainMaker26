@@ -135,16 +135,10 @@ public class Robot extends LoggedRobot {
     }
     double t3 = Logger.getTimestamp() / 1.0e6;
 
-    System.out.println(
-        "autonomousInit timing: onEnable="
-            + (t1 - t0)
-            + "s, getAutoCommand="
-            + (t2 - t1)
-            + "s, schedule="
-            + (t3 - t2)
-            + "s, total="
-            + (t3 - t0)
-            + "s");
+    Logger.recordOutput("AutoInitTiming/OnEnableSeconds", t1 - t0);
+    Logger.recordOutput("AutoInitTiming/GetAutoCommandSeconds", t2 - t1);
+    Logger.recordOutput("AutoInitTiming/ScheduleSeconds", t3 - t2);
+    Logger.recordOutput("AutoInitTiming/TotalSeconds", t3 - t0);
   }
 
   /** This function is called periodically during autonomous. */
