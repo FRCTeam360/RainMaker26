@@ -300,10 +300,11 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   private void configureAutoBuilder() {
     try {
       RobotConfig config;
-      if (Constants.getRobotType() == Constants.RobotType.PRACTICEBOT) {
-        config = RobotConfig.fromGUISettings();
-      } else {
+      // TODO rework this so it's unified with the top level robot builder class
+      if (Constants.getRobotType() == Constants.RobotType.WOODBOT) {
         config = Constants.WoodBotConstants.createPathPlannerConfig();
+      } else {
+        config = RobotConfig.fromGUISettings();
       }
 
       AutoBuilder.configure(
