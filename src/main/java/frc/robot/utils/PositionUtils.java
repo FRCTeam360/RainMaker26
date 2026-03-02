@@ -90,8 +90,8 @@ public class PositionUtils {
   }
 
   public static boolean isInPassingZone(Pose2d robotPose, Transform2d robotToShooter) {
-    double hubCenter;
-    double oppHubCenter;
+    double hubCenter = LinesVertical.hubCenter;
+    double oppHubCenter = LinesVertical.oppHubCenter;
     double oppDSWall = 0.0;
 
     if (AllianceFlipUtil.shouldFlip()) {
@@ -102,13 +102,11 @@ public class PositionUtils {
 
     final Rectangle2d neutralNoFlyZone =
         new Rectangle2d(
-            new Translation2d(LinesVertical.hubCenter, LinesHorizontal.rightBumpHubSide),
+            new Translation2d(hubCenter, LinesHorizontal.rightBumpHubSide),
             new Translation2d(LinesVertical.center, LinesHorizontal.leftBumpHubSide));
     final Rectangle2d opponentNoFlyZone =
         new Rectangle2d(
-            new Translation2d(
-                FieldConstants.LinesVertical.oppHubCenter,
-                FieldConstants.LinesHorizontal.rightBumpHubSide),
+            new Translation2d(oppHubCenter, FieldConstants.LinesHorizontal.rightBumpHubSide),
             new Translation2d(oppDSWall, LinesHorizontal.leftBumpHubSide));
 
     boolean inAllianceZone = PositionUtils.isInAllianceZone(robotPose);
