@@ -95,10 +95,20 @@ public class Robot extends LoggedRobot {
     // commands, running already-scheduled commands, removing finished or interrupted commands,
     // and running subsystem periodic() methods.  This must be called from the robot's periodic
     // block in order for anything in the Command-based framework to work.
+    double t0 = Logger.getTimestamp() / 1.0e6;
     m_timeAndJoystickReplay.update();
+    double t1 = Logger.getTimestamp() / 1.0e6;
     m_robotContainer.preSchedulerUpdate();
+    double t2 = Logger.getTimestamp() / 1.0e6;
     CommandScheduler.getInstance().run();
+    double t3 = Logger.getTimestamp() / 1.0e6;
     m_robotContainer.postSchedulerUpdate();
+    double t4 = Logger.getTimestamp() / 1.0e6;
+
+    Logger.recordOutput("LoopTiming/HootReplaySeconds", t1 - t0);
+    Logger.recordOutput("LoopTiming/PreSchedulerSeconds", t2 - t1);
+    Logger.recordOutput("LoopTiming/SchedulerSeconds", t3 - t2);
+    Logger.recordOutput("LoopTiming/PostSchedulerSeconds", t4 - t3);
   }
 
   /** This function is called once each time the robot enters Disabled mode. */
