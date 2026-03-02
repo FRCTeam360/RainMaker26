@@ -27,6 +27,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.Constants;
 import frc.robot.generated.WoodBotDrivetrain.TunerSwerveDrivetrain;
 import frc.robot.subsystems.Vision.VisionMeasurement;
 import java.util.List;
@@ -287,9 +288,24 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
    *     theta]ᵀ, with units in meters and radians
    * @param modules Constants for each specific module
    */
+  // PathPlanner AutoBuilder PID gains
+  private static final double PP_TRANSLATION_KP = 11.0;
+
+  private static final double PP_TRANSLATION_KI = 0.0;
+  private static final double PP_TRANSLATION_KD = 0.0;
+  private static final double PP_ROTATION_KP = 8.0;
+  private static final double PP_ROTATION_KI = 0.0;
+  private static final double PP_ROTATION_KD = 0.0;
+
   private void configureAutoBuilder() {
     try {
-      var config = RobotConfig.fromGUISettings();
+      RobotConfig config;
+      // TODO rework this so it's unified with the top level robot builder class
+      if (Constants.getRobotType() == Constants.RobotType.WOODBOT) {
+        config = Constants.WoodBotConstants.createPathPlannerConfig();
+      } else {
+        config = RobotConfig.fromGUISettings();
+      }
 
       AutoBuilder.configure(
           () -> getStateCopy().Pose, // Supplier of current robot pose
@@ -304,10 +320,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                       .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons())
                       .withDriveRequestType(m_driveRequestType)),
           new PPHolonomicDriveController(
-              // PID constants for translation
-              new PIDConstants(11, 0, 0),
-              // PID constants for rotation
-              new PIDConstants(8, 0, 0)),
+              new PIDConstants(PP_TRANSLATION_KP, PP_TRANSLATION_KI, PP_TRANSLATION_KD),
+              new PIDConstants(PP_ROTATION_KP, PP_ROTATION_KI, PP_ROTATION_KD)),
           config,
           // Assume the path needs to be flipped for Red vs Blue, this is normally the
           // case
