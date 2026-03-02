@@ -324,16 +324,24 @@ public final class Constants {
 
   public static double loopPeriodSecs; // add value
 
+  private static RobotType cachedRobotType;
+
   public static RobotType getRobotType() {
+    if (cachedRobotType != null) {
+      return cachedRobotType;
+    }
+
     String serialAddress = HALUtil.getSerialNumber();
 
     if (serialAddress.equals(SerialAddressConstants.WOOD_SERIAL_ADDRESS)) {
-      return Constants.RobotType.WOODBOT;
+      cachedRobotType = Constants.RobotType.WOODBOT;
     } else if (serialAddress.equals(SerialAddressConstants.PRACTICE_SERIAL_ADDRESS)) {
-      return Constants.RobotType.PRACTICEBOT;
+      cachedRobotType = Constants.RobotType.PRACTICEBOT;
     } else if (!Robot.isReal()) { // KEEP AT BOTTOM
-      return Constants.RobotType.SIM;
+      cachedRobotType = Constants.RobotType.SIM;
+    } else {
+      cachedRobotType = Constants.RobotType.PRACTICEBOT;
     }
-    return Constants.RobotType.PRACTICEBOT;
+    return cachedRobotType;
   }
 }
