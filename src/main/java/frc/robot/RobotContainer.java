@@ -4,8 +4,6 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.MetersPerSecond;
-
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
@@ -106,8 +104,6 @@ public class RobotContainer {
 
   // TODO: refactor to allow for more than 1 drivetrain type
 
-  private Telemetry logger;
-
   // Replace with CommandPS4Controller or CommandJoystick if needed
 
   private final CommandXboxController driverCont = new CommandXboxController(0);
@@ -140,7 +136,6 @@ public class RobotContainer {
       case SIM:
         drivetrain = WoodBotDrivetrain.createDrivetrain();
         climber = new Climber(new ClimberIOSim());
-        logger = new Telemetry(WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
         intakePivot = new IntakePivot(new IntakePivotIOSim());
         vision =
             new Vision(
@@ -172,7 +167,6 @@ public class RobotContainer {
       case WOODBOT:
         drivetrain = WoodBotDrivetrain.createDrivetrain();
         climber = new Climber(new ClimberIONoop());
-        logger = new Telemetry(WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
         flywheel = new Flywheel(new FlywheelIOWBBangBang());
         hood = new Hood(new HoodIOWB());
         indexer = new Indexer(new IndexerIOWB());
