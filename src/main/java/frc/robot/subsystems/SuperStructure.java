@@ -42,6 +42,8 @@ public class SuperStructure extends SubsystemBase {
   private final ShooterStateMachine shooterStateMachine;
   private final TargetSelectionStateMachine targetSelectionStateMachine;
   private final ShotCalculator hubShotCalculator;
+  private final Supplier<Pose2d> robotPoseSupplier;
+  private final Transform2d robotToShooter;
 
   // Enums
   public enum SuperWantedStates {
@@ -98,6 +100,8 @@ public class SuperStructure extends SubsystemBase {
     this.intakePivot = intakePivot;
     this.hopperRoller = hopperRoller;
     this.hubShotCalculator = hubShotCalculator;
+    this.robotPoseSupplier = robotPoseSupplier;
+    this.robotToShooter = robotToShooter;
     this.shooterStateMachine =
         new ShooterStateMachine(
             flywheel, hood, flywheelKicker, isAlignedToTarget, this::canShootToTarget);
@@ -253,6 +257,10 @@ public class SuperStructure extends SubsystemBase {
                     hubShotCalculator.calculateShot().timeOfFlight()));
         Logger.recordOutput("Superstructure/Shooting/HubActive", hubActive);
         return hubActive;
+      case PASSING:
+        boolean isInPassingZone =
+            PositionUtils.isInPassingZone(robotPoseSupplier.get(), robotToShooter);
+        return isInPassingZone;
       default:
         return true;
     }
