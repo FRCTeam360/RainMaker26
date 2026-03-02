@@ -119,7 +119,6 @@ public class ShooterStateMachine {
                 && hoodReady
                 && drivetrainAligned
                 && targetReady;
-        Logger.recordOutput("Superstructure/Shooting/Aligned", drivetrainAligned);
 
         if (shouldFire) {
           currentState = ShooterStates.FIRING;
