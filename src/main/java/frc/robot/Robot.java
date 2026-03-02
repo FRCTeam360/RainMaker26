@@ -123,13 +123,28 @@ public class Robot extends LoggedRobot {
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
   public void autonomousInit() {
+    double t0 = Logger.getTimestamp() / 1.0e6;
     m_robotContainer.onEnable();
+    double t1 = Logger.getTimestamp() / 1.0e6;
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
+    double t2 = Logger.getTimestamp() / 1.0e6;
 
     // schedule the autonomous command (example)
     if (m_autonomousCommand != null) {
       CommandScheduler.getInstance().schedule(m_autonomousCommand);
     }
+    double t3 = Logger.getTimestamp() / 1.0e6;
+
+    System.out.println(
+        "autonomousInit timing: onEnable="
+            + (t1 - t0)
+            + "s, getAutoCommand="
+            + (t2 - t1)
+            + "s, schedule="
+            + (t3 - t2)
+            + "s, total="
+            + (t3 - t0)
+            + "s");
   }
 
   /** This function is called periodically during autonomous. */
