@@ -4,7 +4,6 @@
 
 package frc.robot;
 
-import com.ctre.phoenix6.HootAutoReplay;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -26,10 +25,6 @@ public class Robot extends LoggedRobot {
   private Command m_autonomousCommand;
 
   private final RobotContainer m_robotContainer;
-
-  /* log and replay timestamp and joystick data */
-  private final HootAutoReplay m_timeAndJoystickReplay =
-      new HootAutoReplay().withTimestampReplay().withJoystickReplay();
 
   /**
    * This function is run when the robot is first started up and should be used for any
