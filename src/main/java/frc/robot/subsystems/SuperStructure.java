@@ -201,7 +201,7 @@ public class SuperStructure extends SubsystemBase {
   private void passive_preparing() {
     intake.setWantedState(Intake.IntakeStates.OFF);
     indexer.setWantedState(Indexer.IndexerStates.OFF);
-    intakePivot.setWantedState(IntakePivotWantedStates.STOWED);
+    intakePivot.setWantedState(IntakePivotWantedStates.DEPLOYED);
     hopperRoller.setWantedState(HopperRollerStates.OFF);
     shooterStateMachine.setWantedState(ShooterWantedStates.PASSIVE_SHOOTER);
   }
