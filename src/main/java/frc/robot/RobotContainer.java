@@ -43,7 +43,6 @@ import frc.robot.subsystems.Intake.IntakeRoller.IntakeRoller;
 import frc.robot.subsystems.Intake.IntakeRoller.IntakeRollerIOPB;
 import frc.robot.subsystems.Intake.IntakeRoller.IntakeRollerIOSim;
 import frc.robot.subsystems.Intake.IntakeRoller.IntakeRollerIOWB;
-import frc.robot.subsystems.Intake.IntakeStateMachine.IntakeInternalStates;
 import frc.robot.subsystems.Intake.IntakeStateMachine.IntakeWantedStates;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel;
 import frc.robot.subsystems.Shooter.Flywheel.FlywheelIOPBBangBang;
@@ -388,15 +387,7 @@ public class RobotContainer {
         .y()
         .and(isSuperstructureMode)
         .and(() -> !agitateTrigger.getAsBoolean())
-        .onTrue(
-            Commands.runOnce(
-                () -> {
-                  if (superStructure.getIntakeState() == IntakeInternalStates.STOWED) {
-                    superStructure.setIntakeState(IntakeWantedStates.INTAKING);
-                  } else {
-                    superStructure.setIntakeState(IntakeWantedStates.STOWED);
-                  }
-                }));
+        .onTrue(superStructure.toggleIntakeStateCommand());
 
     configureIndependentModeBindings(isIndependentMode);
 

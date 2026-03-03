@@ -271,6 +271,21 @@ public class SuperStructure extends SubsystemBase {
     return new InstantCommand(() -> setIntakeState(state));
   }
 
+  /**
+   * Returns a command that toggles the intake between STOWED and INTAKING. If the intake is
+   * currently STOWED, it switches to INTAKING; otherwise it switches to STOWED.
+   */
+  public Command toggleIntakeStateCommand() {
+    return new InstantCommand(
+        () -> {
+          if (intakeStateMachine.getState() == IntakeStateMachine.IntakeInternalStates.STOWED) {
+            intakeStateMachine.setWantedState(IntakeWantedStates.INTAKING);
+          } else {
+            intakeStateMachine.setWantedState(IntakeWantedStates.STOWED);
+          }
+        });
+  }
+
   // periodic
 
   @Override
