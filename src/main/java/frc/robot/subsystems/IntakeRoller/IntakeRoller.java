@@ -18,6 +18,7 @@ public class IntakeRoller extends SubsystemBase {
   private static final double REVERSE_UNJAM_DUTY_CYCLE = -0.5;
   private static final double INTAKING_DUTY_CYCLE = 0.8;
   private static final double SHOOT_ASSIST_DUTY_CYCLE = 0.3;
+  private static final double REVERSE_DUTY_CYCLE = -0.3;
 
   // IO fields
   private final IntakeRollerIO io;
@@ -31,6 +32,7 @@ public class IntakeRoller extends SubsystemBase {
     OFF,
     INTAKING,
     ASSIST_SHOOTING,
+    REVERSING
     // JAMMED
   }
 
@@ -78,6 +80,9 @@ public class IntakeRoller extends SubsystemBase {
       case ASSIST_SHOOTING:
         currentState = IntakeRollerStates.ASSIST_SHOOTING;
         break;
+      case REVERSING:
+        currentState = IntakeRollerStates.REVERSING;
+        break;
       case OFF:
       default:
         currentState = IntakeRollerStates.OFF;
@@ -94,6 +99,9 @@ public class IntakeRoller extends SubsystemBase {
         break;
       case ASSIST_SHOOTING:
         shootAssist();
+        break;
+      case REVERSING:
+        reversing();
         break;
       case OFF:
       default:
@@ -114,6 +122,10 @@ public class IntakeRoller extends SubsystemBase {
     } else {
       setDutyCycle(0.7);
     }
+  }
+
+  private void reversing() {
+    setDutyCycle(REVERSE_DUTY_CYCLE);
   }
 
   // private void unjamIntake() {

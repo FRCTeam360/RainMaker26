@@ -48,7 +48,6 @@ public class SuperStructure extends SubsystemBase {
   public enum SuperWantedStates {
     DEFAULT,
     IDLE,
-    INTAKING,
     SHOOT_AT_HUB,
     SHOOT_AT_OUTPOST,
     AUTO_CYCLE_SHOOTING, // auto-selects hub or outpost based on alliance zone
@@ -56,18 +55,15 @@ public class SuperStructure extends SubsystemBase {
     DEFENSE,
     X_OUT,
     EJECTING,
-    UNJAMMING,
-    STOWED
+    UNJAMMING
   }
 
   public enum SuperInternalStates {
     DEFAULT, // flywheel spun up, hood prepping with ducking
     IDLE, // everything is stopped
-    INTAKING, // intake button pressed
     SHOOTING_AT_HUB,
     PASSING,
-    UNJAMMING,
-    STOWING
+    UNJAMMING
   }
 
   // State variables
@@ -120,9 +116,6 @@ public class SuperStructure extends SubsystemBase {
     previousSuperState = currentSuperState;
 
     switch (wantedSuperState) {
-      case INTAKING:
-        currentSuperState = SuperInternalStates.INTAKING;
-        break;
       case SHOOT_AT_HUB:
         targetSelectionStateMachine.setWantedState(TargetWantedStates.HUB);
         targetSelectionStateMachine.update();
@@ -148,9 +141,6 @@ public class SuperStructure extends SubsystemBase {
       case UNJAMMING:
         currentSuperState = SuperInternalStates.UNJAMMING;
         break;
-      case STOWED:
-        currentSuperState = SuperInternalStates.STOWING;
-        break;
       case DEFAULT:
       default:
         targetSelectionStateMachine.setWantedState(TargetWantedStates.AUTO);
@@ -162,9 +152,6 @@ public class SuperStructure extends SubsystemBase {
 
   private void applyStates() {
     switch (currentSuperState) {
-      case INTAKING:
-        intaking();
-        break;
       case IDLE:
         stopped();
         break;
@@ -174,9 +161,6 @@ public class SuperStructure extends SubsystemBase {
         break;
       case UNJAMMING:
         unjamming();
-        break;
-      case STOWING:
-        stowing();
         break;
       case DEFAULT:
         passive_preparing();
@@ -205,12 +189,6 @@ public class SuperStructure extends SubsystemBase {
     shooterStateMachine.setWantedState(ShooterWantedStates.PASSIVE_SHOOTER);
   }
 
-  private void intaking() {
-    shooterStateMachine.setWantedState(ShooterWantedStates.IDLE);
-    hopperRoller.setWantedState(HopperRollerStates.PREVENT_JAM);
-    indexer.setWantedState(Indexer.IndexerStates.ASSIST_INTAKING);
-  }
-
   private void stopped() {
     intakeStateMachine.setWantedState(IntakeWantedStates.IDLE);
     indexer.setWantedState(Indexer.IndexerStates.OFF);
@@ -222,10 +200,6 @@ public class SuperStructure extends SubsystemBase {
     indexer.setWantedState(IndexerStates.REVERSING);
     shooterStateMachine.setWantedState(ShooterWantedStates.REVERSING);
     hopperRoller.setWantedState(HopperRollerStates.UNJAMMING);
-  }
-
-  private void stowing() {
-    // Intake is independently controlled — stowing is a no-op for SuperStructure
   }
 
   private boolean canShootToTarget() {
@@ -291,6 +265,10 @@ public class SuperStructure extends SubsystemBase {
    */
   public void setIntakeState(IntakeStateMachine.IntakeWantedStates state) {
     intakeStateMachine.setWantedState(state);
+  }
+
+  public Command setIntakeStateCommand(IntakeStateMachine.IntakeWantedStates state) {
+    return new InstantCommand(() -> setIntakeState(state), this);
   }
 
   // periodic

@@ -43,6 +43,7 @@ import frc.robot.subsystems.IntakeRoller.IntakeRoller;
 import frc.robot.subsystems.IntakeRoller.IntakeRollerIOPB;
 import frc.robot.subsystems.IntakeRoller.IntakeRollerIOSim;
 import frc.robot.subsystems.IntakeRoller.IntakeRollerIOWB;
+import frc.robot.subsystems.IntakeRoller.IntakeStateMachine.IntakeWantedStates;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel;
 import frc.robot.subsystems.Shooter.Flywheel.FlywheelIOPBBangBang;
 import frc.robot.subsystems.Shooter.Flywheel.FlywheelIOSim;
@@ -265,7 +266,7 @@ public class RobotContainer {
     intakeRoller.setDutyCycleSupplier(driverCont::getLeftTriggerAxis);
 
     registerPathplannerCommand(
-        "basic intake", superStructure.setStateCommand(SuperWantedStates.INTAKING));
+        "basic intake", superStructure.setIntakeStateCommand(IntakeWantedStates.INTAKING));
     // TODO: add end condition based on state from SuperStructure (based on sensor inputs)
     registerPathplannerCommand(
         "shoot at hub",
@@ -280,7 +281,7 @@ public class RobotContainer {
                             () -> hubShotCalculator.calculateShot().targetHeading())))
             .andThen(superStructure.setStateCommand(SuperWantedStates.DEFAULT)));
     registerPathplannerCommand(
-        "stow intake", superStructure.setStateCommand(SuperWantedStates.STOWED));
+        "stow intake", superStructure.setIntakeStateCommand(IntakeWantedStates.STOWED));
 
     configVision();
     configDefaultDrivingCommand();
@@ -380,15 +381,15 @@ public class RobotContainer {
 
     // TODO: Re-enable superStructure bindings
     Trigger intakeTrigger = driverCont.leftTrigger().and(isSuperstructureMode);
-    intakeTrigger.onTrue(superStructure.setStateCommand(SuperWantedStates.INTAKING));
-    intakeTrigger.onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
+    intakeTrigger.onTrue(superStructure.setIntakeStateCommand(IntakeWantedStates.INTAKING));
+    intakeTrigger.onFalse(superStructure.setIntakeStateCommand(IntakeWantedStates.DEPLOYED_IDLE));
 
     configureIndependentModeBindings(isIndependentMode);
 
     driverCont.a().onTrue(superStructure.setStateCommand(SuperWantedStates.UNJAMMING));
     driverCont.a().onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
 
-    driverCont.y().onTrue(superStructure.setStateCommand(SuperWantedStates.STOWED));
+    driverCont.y().onTrue(superStructure.setIntakeStateCommand(IntakeWantedStates.STOWED));
 
     // Drivetrain commands
     // driverCont.leftTrigger().whileTrue(drivetrain.faceHubWhileDriving(driverCont));
