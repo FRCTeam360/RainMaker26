@@ -18,11 +18,11 @@ stateDiagram-v2
     state WSHOOTING {
         [*] --> SPINNING_UP
 
-        SPINNING_UP --> AT_SETPOINT : Debounced velocity<br>within 100 RPM of target
+        SPINNING_UP --> AT_SETPOINT : Debounced velocity<br>within 150 RPM of target
         AT_SETPOINT --> RECOVERING : Ball fired detected<br>(debounced velocity dip,<br>40ms falling-edge)
-        RECOVERING --> AT_SETPOINT : Debounced velocity<br>within 100 RPM of target
-        RECOVERING --> UNDER_SHOOTING : Sustained RPM drop<br>(200ms falling-edge debounce)
-        UNDER_SHOOTING --> AT_SETPOINT : Debounced velocity<br>within 100 RPM of target
+        RECOVERING --> AT_SETPOINT : Debounced velocity<br>within 150 RPM of target
+        RECOVERING --> UNDER_SHOOTING : Sustained RPM drop<br>(400ms falling-edge debounce)
+        UNDER_SHOOTING --> AT_SETPOINT : Debounced velocity<br>within 150 RPM of target
     }
 
     state WCOASTING {
