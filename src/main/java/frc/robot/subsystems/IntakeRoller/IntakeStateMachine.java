@@ -1,8 +1,8 @@
-package frc.robot.subsystems.Intake;
+package frc.robot.subsystems.IntakeRoller;
 
-import frc.robot.subsystems.Intake.Intake.IntakeStates;
 import frc.robot.subsystems.IntakePivot.IntakePivot;
 import frc.robot.subsystems.IntakePivot.IntakePivot.IntakePivotWantedStates;
+import frc.robot.subsystems.IntakeRoller.IntakeRoller.IntakeRollerStates;
 import org.littletonrobotics.junction.Logger;
 
 /**
@@ -31,7 +31,7 @@ public class IntakeStateMachine {
   }
 
   // Subsystem refs
-  private final Intake intake;
+  private final IntakeRoller intakeRoller;
   private final IntakePivot intakePivot;
 
   // State variables
@@ -42,11 +42,11 @@ public class IntakeStateMachine {
   /**
    * Creates a new IntakeStateMachine.
    *
-   * @param intake the intake roller subsystem
+   * @param intakeRoller the intake roller subsystem
    * @param intakePivot the intake pivot subsystem
    */
-  public IntakeStateMachine(Intake intake, IntakePivot intakePivot) {
-    this.intake = intake;
+  public IntakeStateMachine(IntakeRoller intakeRoller, IntakePivot intakePivot) {
+    this.intakeRoller = intakeRoller;
     this.intakePivot = intakePivot;
   }
 
@@ -102,24 +102,24 @@ public class IntakeStateMachine {
   public void apply() {
     switch (currentState) {
       case INTAKING:
-        intake.setWantedState(IntakeStates.INTAKING);
+        intakeRoller.setWantedState(IntakeRollerStates.INTAKING);
         intakePivot.setWantedState(IntakePivotWantedStates.DEPLOYED);
         break;
       case AGITATING:
-        intake.setWantedState(IntakeStates.ASSIST_SHOOTING);
+        intakeRoller.setWantedState(IntakeRollerStates.ASSIST_SHOOTING);
         intakePivot.setWantedState(IntakePivotWantedStates.AGITATE_HOPPER);
         break;
       case DEPLOYED_IDLE:
-        intake.setWantedState(IntakeStates.OFF);
+        intakeRoller.setWantedState(IntakeRollerStates.OFF);
         intakePivot.setWantedState(IntakePivotWantedStates.DEPLOYED);
         break;
       case STOWED:
-        intake.setWantedState(IntakeStates.OFF);
+        intakeRoller.setWantedState(IntakeRollerStates.OFF);
         intakePivot.setWantedState(IntakePivotWantedStates.STOWED);
         break;
       case IDLE:
       default:
-        intake.setWantedState(IntakeStates.OFF);
+        intakeRoller.setWantedState(IntakeRollerStates.OFF);
         intakePivot.setWantedState(IntakePivotWantedStates.OFF);
         break;
     }

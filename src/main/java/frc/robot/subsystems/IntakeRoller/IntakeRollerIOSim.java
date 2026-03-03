@@ -2,7 +2,7 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.subsystems.Intake;
+package frc.robot.subsystems.IntakeRoller;
 
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
@@ -23,7 +23,7 @@ import frc.robot.Constants.SimulationConstants;
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
-public class IntakeIOSim implements IntakeIO {
+public class IntakeRollerIOSim implements IntakeRollerIO {
   // Motor constants
   private double gearRatio = 1.0;
   private DCMotor gearbox = DCMotor.getNeo550(1);
@@ -31,17 +31,18 @@ public class IntakeIOSim implements IntakeIO {
 
   // AdvantageScope tuning (sim-only, under /Tuning table)
   private final LoggedNetworkNumber tunableSetpoint =
-      new LoggedNetworkNumber("/Tuning/Intake/SetpointRPM", 0.0);
+      new LoggedNetworkNumber("/Tuning/IntakeRoller/SetpointRPM", 0.0);
   private final LoggedNetworkBoolean tuningEnabled =
-      new LoggedNetworkBoolean("/Tuning/Intake/Enabled", false);
+      new LoggedNetworkBoolean("/Tuning/IntakeRoller/Enabled", false);
 
   // Motor and control (using SparkFlex like the real hardware)
   private final SparkFlex motorControllerSim =
-      new SparkFlex(SimulationConstants.INTAKE_MOTOR, MotorType.kBrushless);
+      new SparkFlex(SimulationConstants.INTAKE_ROLLER_MOTOR, MotorType.kBrushless);
   private final SparkFlexConfig motorConfig = new SparkFlexConfig();
 
   // Sensor simulation
-  private final DigitalInput sensor = new DigitalInput(SimulationConstants.INTAKE_SENSOR_PORT);
+  private final DigitalInput sensor =
+      new DigitalInput(SimulationConstants.INTAKE_ROLLER_SENSOR_PORT);
   private final DIOSim sensorSim = new DIOSim(sensor);
 
   // Flywheel simulation
@@ -49,7 +50,7 @@ public class IntakeIOSim implements IntakeIO {
       LinearSystemId.createFlywheelSystem(gearbox, moi, gearRatio);
   private final FlywheelSim intakeSim = new FlywheelSim(plant, gearbox, gearRatio);
 
-  public IntakeIOSim() {
+  public IntakeRollerIOSim() {
     // Configure motor controller with PID and current limits
     configureMotor();
 
@@ -68,7 +69,7 @@ public class IntakeIOSim implements IntakeIO {
         motorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 
-  public void updateInputs(IntakeIOInputs inputs) {
+  public void updateInputs(IntakeRollerIOInputs inputs) {
     // --- AdvantageScope tuning (sim-only) ---
     if (tuningEnabled.get()) {
       // Command the tunable setpoint

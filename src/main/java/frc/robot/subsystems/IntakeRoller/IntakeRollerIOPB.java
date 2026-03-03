@@ -2,7 +2,7 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.subsystems.Intake;
+package frc.robot.subsystems.IntakeRoller;
 
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
@@ -13,27 +13,36 @@ import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
-import edu.wpi.first.wpilibj.DigitalInput;
-import frc.robot.Constants.WoodBotConstants;
+import frc.robot.Constants.PracticeBotConstants;
 
-public class IntakeIOWB implements IntakeIO {
-  private final SparkFlex motor = new SparkFlex(WoodBotConstants.INTAKE_ID, MotorType.kBrushless);
+public class IntakeRollerIOPB implements IntakeRollerIO {
+  private static final double GEAR_RATIO = 1.0;
+  private static final int CURRENT_LIMIT_AMPS = 55;
+  private static final double KP = 0.0002;
+  private static final double KI = 0.0;
+  private static final double KD = 0.0;
+  private static final double KV = 0.0019;
+  private static final double KS = 0.04;
+
+  private final SparkFlex motor =
+      new SparkFlex(PracticeBotConstants.INTAKE_ROLLER_ID, MotorType.kBrushless);
   private final RelativeEncoder encoder = motor.getEncoder();
   private final SparkFlexConfig config = new SparkFlexConfig();
-  private final DigitalInput sensor = new DigitalInput(WoodBotConstants.INTAKE_SENSOR_PORT);
-  private final SparkClosedLoopController closedLoopConfig;
+  private final SparkClosedLoopController closedLoopController;
 
-  public IntakeIOWB() {
-
-    config.idleMode(IdleMode.kBrake);
+  public IntakeRollerIOPB() {
+    config.idleMode(IdleMode.kCoast);
     config.inverted(true);
-    config.smartCurrentLimit(55);
+    config.smartCurrentLimit(CURRENT_LIMIT_AMPS);
 
-    config.closedLoop.p(0.0002).i(0.0).d(0.0);
-    config.closedLoop.feedForward.kV(0.0018).kS(0.004);
+    config.encoder.positionConversionFactor(1.0 / GEAR_RATIO);
+    config.encoder.velocityConversionFactor(1.0 / GEAR_RATIO);
+
+    config.closedLoop.p(KP).i(KI).d(KD);
+    config.closedLoop.feedForward.kV(KV).kS(KS);
 
     motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    closedLoopConfig = motor.getClosedLoopController();
+    closedLoopController = motor.getClosedLoopController();
   }
 
   public void setDutyCycle(double duty) {
@@ -44,20 +53,14 @@ public class IntakeIOWB implements IntakeIO {
     this.setDutyCycle(0.0);
   }
 
-  public void setEncoder(double value) {
-    encoder.setPosition(value);
-  }
-
   public void setVelocity(double velocity) {
-    closedLoopConfig.setSetpoint(velocity, ControlType.kVelocity);
+    closedLoopController.setSetpoint(velocity, ControlType.kVelocity);
   }
 
-  public void updateInputs(IntakeIOInputs inputs) {
+  public void updateInputs(IntakeRollerIOInputs inputs) {
     inputs.position = encoder.getPosition();
-    inputs.sensor = sensor.get();
+    inputs.statorCurrent = motor.getOutputCurrent();
     inputs.supplyCurrent = 0;
-    inputs.statorCurrent = motor.getOutputCurrent(); // TODO: check i
-    // this is right
     inputs.velocity = encoder.getVelocity();
     inputs.voltage = motor.getBusVoltage() * motor.getAppliedOutput();
   }

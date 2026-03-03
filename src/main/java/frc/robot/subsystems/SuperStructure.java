@@ -10,10 +10,10 @@ import frc.robot.subsystems.HopperRoller.HopperRoller;
 import frc.robot.subsystems.HopperRoller.HopperRoller.HopperRollerStates;
 import frc.robot.subsystems.Indexer.Indexer;
 import frc.robot.subsystems.Indexer.Indexer.IndexerStates;
-import frc.robot.subsystems.Intake.Intake;
-import frc.robot.subsystems.Intake.IntakeStateMachine;
-import frc.robot.subsystems.Intake.IntakeStateMachine.IntakeWantedStates;
 import frc.robot.subsystems.IntakePivot.IntakePivot;
+import frc.robot.subsystems.IntakeRoller.IntakeRoller;
+import frc.robot.subsystems.IntakeRoller.IntakeStateMachine;
+import frc.robot.subsystems.IntakeRoller.IntakeStateMachine.IntakeWantedStates;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel;
 import frc.robot.subsystems.Shooter.FlywheelKicker.FlywheelKicker;
 import frc.robot.subsystems.Shooter.Hood.Hood;
@@ -32,7 +32,7 @@ import org.littletonrobotics.junction.Logger;
 
 public class SuperStructure extends SubsystemBase {
   // Fields (subsystem refs, calculators, suppliers)
-  private final Intake intake;
+  private final IntakeRoller intakeRoller;
   private final Indexer indexer;
   private final FlywheelKicker flywheelKicker;
   private final Flywheel flywheel;
@@ -79,7 +79,7 @@ public class SuperStructure extends SubsystemBase {
   // Constructor
 
   public SuperStructure(
-      Intake intake,
+      IntakeRoller intakeRoller,
       Indexer indexer,
       FlywheelKicker flywheelKicker,
       Flywheel flywheel,
@@ -91,7 +91,7 @@ public class SuperStructure extends SubsystemBase {
       BooleanSupplier isAlignedToTarget,
       Supplier<Pose2d> robotPoseSupplier,
       Transform2d robotToShooter) {
-    this.intake = intake;
+    this.intakeRoller = intakeRoller;
     this.indexer = indexer;
     this.flywheelKicker = flywheelKicker;
     this.flywheel = flywheel;
@@ -102,7 +102,7 @@ public class SuperStructure extends SubsystemBase {
     this.shooterStateMachine =
         new ShooterStateMachine(
             flywheel, hood, flywheelKicker, isAlignedToTarget, this::canShootToTarget);
-    this.intakeStateMachine = new IntakeStateMachine(intake, intakePivot);
+    this.intakeStateMachine = new IntakeStateMachine(intakeRoller, intakePivot);
     this.targetSelectionStateMachine =
         new TargetSelectionStateMachine(hubShotCalculator, passCalculator, robotPoseSupplier);
 
@@ -260,7 +260,7 @@ public class SuperStructure extends SubsystemBase {
     flywheel.setControlState(controlState);
     indexer.setControlState(controlState);
     flywheelKicker.setControlState(controlState);
-    intake.setControlState(controlState);
+    intakeRoller.setControlState(controlState);
     intakePivot.setControlState(controlState);
     hopperRoller.setControlState(controlState);
     hood.setControlState(controlState);
