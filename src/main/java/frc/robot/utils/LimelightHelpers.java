@@ -32,7 +32,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * cameras in FRC. This library supports all Limelight features including AprilTag tracking, Neural
  * Networks, and standard color/retroreflective tracking.
  */
-public class LimelightHelpers {
+public final class LimelightHelpers {
 
   private static final Map<String, DoubleArrayEntry> doubleArrayEntries = new ConcurrentHashMap<>();
   private static final double[] EMPTY_ARRAY_DOUBLE = new double[0];
