@@ -223,11 +223,19 @@ public class SuperStructure extends SubsystemBase {
   }
 
   private void shooting_while_intaking() {
-    intake.setWantedState(Intake.IntakeStates.INTAKING);
-    intakePivot.setWantedState(IntakePivotWantedStates.DEPLOYED);
     shooterStateMachine.setWantedState(ShooterWantedStates.SHOOTING);
-    hopperRoller.setWantedState(HopperRollerStates.ROLLING);
-    indexer.setWantedState(Indexer.IndexerStates.INDEXING);
+
+    if (shooterStateMachine.getState() == ShooterStates.FIRING) {
+      indexer.setWantedState(IndexerStates.INDEXING);
+      hopperRoller.setWantedState(HopperRollerStates.ROLLING);
+      intakePivot.setWantedState(IntakePivotWantedStates.DEPLOYED);
+      intake.setWantedState(IntakeStates.INTAKING);
+    } else {
+      indexer.setWantedState(IndexerStates.OFF);
+      hopperRoller.setWantedState(HopperRollerStates.OFF);
+      intake.setWantedState(IntakeStates.INTAKING);
+      intakePivot.setWantedState(IntakePivotWantedStates.DEPLOYED);
+    }
   }
 
   private void stopped() {
