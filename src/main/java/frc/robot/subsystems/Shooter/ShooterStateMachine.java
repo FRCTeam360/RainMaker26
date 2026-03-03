@@ -1,6 +1,8 @@
 package frc.robot.subsystems.Shooter;
 
 import frc.robot.Constants;
+import frc.robot.subsystems.HopperRoller.HopperRoller;
+import frc.robot.subsystems.HopperRoller.HopperRoller.HopperRollerStates;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel.FlywheelInternalStates;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel.FlywheelWantedStates;
@@ -39,6 +41,7 @@ public class ShooterStateMachine {
   private final FlywheelKicker flywheelKicker;
   private final BooleanSupplier isAlignedToTarget;
   private final BooleanSupplier canShootToTarget;
+  private final HopperRoller hopperRoller;
 
   // State variables
   private ShooterWantedStates wantedState = ShooterWantedStates.IDLE;
@@ -57,11 +60,13 @@ public class ShooterStateMachine {
       Flywheel flywheel,
       Hood hood,
       FlywheelKicker flywheelKicker,
+      HopperRoller hopperRoller,
       BooleanSupplier isAlignedToTarget,
       BooleanSupplier canShootToTarget) {
     this.flywheel = flywheel;
     this.hood = hood;
     this.flywheelKicker = flywheelKicker;
+    this.hopperRoller = hopperRoller;
     this.isAlignedToTarget = isAlignedToTarget;
     this.canShootToTarget = canShootToTarget;
   }
