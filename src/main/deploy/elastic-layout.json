@@ -124,14 +124,14 @@
             }
           },
           {
-            "title": "HubActive",
+            "title": "Can Score in Hub",
             "x": 0.0,
             "y": 384.0,
             "width": 384.0,
             "height": 384.0,
             "type": "Boolean Box",
             "properties": {
-              "topic": "/AdvantageKit/RealOutputs/Superstructure/Shooting/HubActive",
+              "topic": "/SmartDashboard/Can Score in Hub",
               "period": 0.06,
               "data_type": "boolean",
               "true_color": 4283215696,
