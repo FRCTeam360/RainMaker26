@@ -9,26 +9,26 @@ import org.littletonrobotics.junction.Logger;
 /**
  * Manages the intake state machine, coordinating the intake rollers and intake pivot to centralize
  * intake logic. Called by the SuperStructure each cycle via update(), apply(), and log().
+ *
+ * <p>The intake state is controlled exclusively by driver inputs through the SuperStructure's
+ * setIntakeState() / setIntakeStateCommand() API. The SuperStructure's internal state helpers
+ * (shooting, idle, etc.) do not write to this state machine.
  */
 public class IntakeStateMachine {
   // Enums
 
-  /** Wanted states set by the SuperStructure to request intake behavior. */
+  /** Wanted states set by driver inputs to request intake behavior. */
   public enum IntakeWantedStates {
-    IDLE,
     INTAKING,
     STOWED,
-    AGITATING,
-    DEPLOYED_IDLE
+    AGITATING
   }
 
   /** Internal states representing the resolved intake behavior. */
   public enum IntakeInternalStates {
-    IDLE,
     INTAKING,
     STOWED,
-    AGITATING,
-    DEPLOYED_IDLE
+    AGITATING
   }
 
   // Subsystem refs
@@ -36,9 +36,9 @@ public class IntakeStateMachine {
   private final IntakePivot intakePivot;
 
   // State variables
-  private IntakeWantedStates wantedState = IntakeWantedStates.IDLE;
-  private IntakeInternalStates currentState = IntakeInternalStates.IDLE;
-  private IntakeInternalStates previousState = IntakeInternalStates.IDLE;
+  private IntakeWantedStates wantedState = IntakeWantedStates.INTAKING;
+  private IntakeInternalStates currentState = IntakeInternalStates.INTAKING;
+  private IntakeInternalStates previousState = IntakeInternalStates.INTAKING;
 
   /**
    * Creates a new IntakeStateMachine.
@@ -76,22 +76,11 @@ public class IntakeStateMachine {
       case INTAKING:
         currentState = IntakeInternalStates.INTAKING;
         break;
-      case AGITATING:
-        // Guard: INTAKING and STOWED take priority over agitation requests
-        if (currentState != IntakeInternalStates.INTAKING
-            && currentState != IntakeInternalStates.STOWED) {
-          currentState = IntakeInternalStates.AGITATING;
-        }
-        break;
-      case DEPLOYED_IDLE:
-        currentState = IntakeInternalStates.DEPLOYED_IDLE;
-        break;
       case STOWED:
         currentState = IntakeInternalStates.STOWED;
         break;
-      case IDLE:
-      default:
-        currentState = IntakeInternalStates.IDLE;
+      case AGITATING:
+        currentState = IntakeInternalStates.AGITATING;
         break;
     }
   }
@@ -110,18 +99,9 @@ public class IntakeStateMachine {
         intakeRoller.setWantedState(IntakeRollerStates.ASSIST_SHOOTING);
         intakePivot.setWantedState(IntakePivotWantedStates.AGITATE_HOPPER);
         break;
-      case DEPLOYED_IDLE:
-        intakeRoller.setWantedState(IntakeRollerStates.OFF);
-        intakePivot.setWantedState(IntakePivotWantedStates.DEPLOYED);
-        break;
       case STOWED:
         intakeRoller.setWantedState(IntakeRollerStates.OFF);
         intakePivot.setWantedState(IntakePivotWantedStates.STOWED);
-        break;
-      case IDLE:
-      default:
-        intakeRoller.setWantedState(IntakeRollerStates.OFF);
-        intakePivot.setWantedState(IntakePivotWantedStates.OFF);
         break;
     }
   }

@@ -43,6 +43,7 @@ import frc.robot.subsystems.Intake.IntakeRoller.IntakeRoller;
 import frc.robot.subsystems.Intake.IntakeRoller.IntakeRollerIOPB;
 import frc.robot.subsystems.Intake.IntakeRoller.IntakeRollerIOSim;
 import frc.robot.subsystems.Intake.IntakeRoller.IntakeRollerIOWB;
+import frc.robot.subsystems.Intake.IntakeStateMachine.IntakeInternalStates;
 import frc.robot.subsystems.Intake.IntakeStateMachine.IntakeWantedStates;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel;
 import frc.robot.subsystems.Shooter.Flywheel.FlywheelIOPBBangBang;
@@ -263,8 +264,6 @@ public class RobotContainer {
             drivetrain::isAlignedToTarget,
             drivetrain::getPosition,
             robotShootingInfo.robotToShooter());
-    intakeRoller.setDutyCycleSupplier(driverCont::getLeftTriggerAxis);
-
     registerPathplannerCommand(
         "basic intake", superStructure.setIntakeStateCommand(IntakeWantedStates.INTAKING));
     // TODO: add end condition based on state from SuperStructure (based on sensor inputs)
@@ -379,17 +378,30 @@ public class RobotContainer {
                     driverCont, () -> passCalculator.calculateShot().targetHeading())));
     forceOutpostTrigger.onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
 
-    // TODO: Re-enable superStructure bindings
-    Trigger intakeTrigger = driverCont.leftTrigger().and(isSuperstructureMode);
-    intakeTrigger.onTrue(superStructure.setIntakeStateCommand(IntakeWantedStates.INTAKING));
-    intakeTrigger.onFalse(superStructure.setIntakeStateCommand(IntakeWantedStates.DEPLOYED_IDLE));
+    // Left trigger held: agitate. Release: back to intaking.
+    Trigger agitateTrigger = driverCont.leftTrigger().and(isSuperstructureMode);
+    agitateTrigger.onTrue(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING));
+    agitateTrigger.onFalse(superStructure.setIntakeStateCommand(IntakeWantedStates.INTAKING));
+
+    // Y toggle: STOWED <-> INTAKING. Gated out while agitate trigger is held.
+    driverCont
+        .y()
+        .and(isSuperstructureMode)
+        .and(() -> !driverCont.leftTrigger().getAsBoolean())
+        .onTrue(
+            Commands.runOnce(
+                () -> {
+                  if (superStructure.getIntakeState() == IntakeInternalStates.STOWED) {
+                    superStructure.setIntakeState(IntakeWantedStates.INTAKING);
+                  } else {
+                    superStructure.setIntakeState(IntakeWantedStates.STOWED);
+                  }
+                }));
 
     configureIndependentModeBindings(isIndependentMode);
 
     driverCont.a().onTrue(superStructure.setStateCommand(SuperWantedStates.UNJAMMING));
     driverCont.a().onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
-
-    driverCont.y().onTrue(superStructure.setIntakeStateCommand(IntakeWantedStates.STOWED));
 
     // Drivetrain commands
     // driverCont.leftTrigger().whileTrue(drivetrain.faceHubWhileDriving(driverCont));
@@ -536,6 +548,7 @@ public class RobotContainer {
     // Ensures superstructure control mode is active when enabled
     superStructure.setControlState(ControlState.SUPERSTRUCTURE);
     superStructure.setWantedSuperState(SuperWantedStates.DEFAULT);
+    superStructure.setIntakeState(IntakeWantedStates.INTAKING);
     onEnableVision();
   }
 

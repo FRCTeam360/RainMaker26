@@ -13,7 +13,6 @@ import frc.robot.subsystems.Indexer.Indexer.IndexerStates;
 import frc.robot.subsystems.Intake.IntakePivot.IntakePivot;
 import frc.robot.subsystems.Intake.IntakeRoller.IntakeRoller;
 import frc.robot.subsystems.Intake.IntakeStateMachine;
-import frc.robot.subsystems.Intake.IntakeStateMachine.IntakeWantedStates;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel;
 import frc.robot.subsystems.Shooter.FlywheelKicker.FlywheelKicker;
 import frc.robot.subsystems.Shooter.Hood.Hood;
@@ -172,7 +171,6 @@ public class SuperStructure extends SubsystemBase {
     if (shooterStateMachine.getState() == ShooterStates.FIRING) {
       indexer.setWantedState(IndexerStates.INDEXING);
       hopperRoller.setWantedState(HopperRollerStates.ROLLING);
-      intakeStateMachine.setWantedState(IntakeWantedStates.AGITATING);
     } else {
       indexer.setWantedState(IndexerStates.OFF);
       hopperRoller.setWantedState(HopperRollerStates.PREVENT_JAM);
@@ -183,11 +181,9 @@ public class SuperStructure extends SubsystemBase {
     indexer.setWantedState(Indexer.IndexerStates.OFF);
     hopperRoller.setWantedState(HopperRollerStates.OFF);
     shooterStateMachine.setWantedState(ShooterWantedStates.PASSIVE_SHOOTER);
-    intakeStateMachine.setWantedState(IntakeWantedStates.INTAKING);
   }
 
   private void stopped() {
-    intakeStateMachine.setWantedState(IntakeWantedStates.IDLE);
     indexer.setWantedState(Indexer.IndexerStates.OFF);
     hopperRoller.setWantedState(HopperRollerStates.OFF);
     shooterStateMachine.setWantedState(ShooterWantedStates.IDLE);
@@ -262,6 +258,11 @@ public class SuperStructure extends SubsystemBase {
    */
   public void setIntakeState(IntakeStateMachine.IntakeWantedStates state) {
     intakeStateMachine.setWantedState(state);
+  }
+
+  /** Returns the current intake internal state. */
+  public IntakeStateMachine.IntakeInternalStates getIntakeState() {
+    return intakeStateMachine.getState();
   }
 
   public Command setIntakeStateCommand(IntakeStateMachine.IntakeWantedStates state) {
