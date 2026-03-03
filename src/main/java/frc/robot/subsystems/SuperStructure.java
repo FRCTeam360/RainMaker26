@@ -57,6 +57,7 @@ public class SuperStructure extends SubsystemBase {
     EJECTING,
     UNJAMMING,
     STOWED,
+    SHOOTING_WHILE_INTAKING
   }
 
   public enum SuperInternalStates {
@@ -66,7 +67,8 @@ public class SuperStructure extends SubsystemBase {
     SHOOTING_AT_HUB,
     PASSING,
     UNJAMMING,
-    STOWING
+    STOWING,
+    SHOOTING_WHILE_INTAKING
   }
 
   // State variables
@@ -140,6 +142,9 @@ public class SuperStructure extends SubsystemBase {
           currentSuperState = SuperInternalStates.PASSING;
         }
         break;
+      case SHOOTING_WHILE_INTAKING:
+        currentSuperState = SuperInternalStates.SHOOTING_WHILE_INTAKING;
+        break;
       case IDLE:
         currentSuperState = SuperInternalStates.IDLE;
         break;
@@ -170,6 +175,9 @@ public class SuperStructure extends SubsystemBase {
       case PASSING:
         shooting();
         break;
+      case SHOOTING_WHILE_INTAKING:
+        shooting_while_intaking();
+        break;
       case UNJAMMING:
         unjamming();
         break;
@@ -199,7 +207,7 @@ public class SuperStructure extends SubsystemBase {
   }
 
   private void passive_preparing() {
-    intake.setWantedState(Intake.IntakeStates.OFF);
+    intake.setWantedState(Intake.IntakeStates.INTAKING);
     indexer.setWantedState(Indexer.IndexerStates.OFF);
     intakePivot.setWantedState(IntakePivotWantedStates.DEPLOYED);
     hopperRoller.setWantedState(HopperRollerStates.OFF);
@@ -212,6 +220,14 @@ public class SuperStructure extends SubsystemBase {
     shooterStateMachine.setWantedState(ShooterWantedStates.IDLE);
     hopperRoller.setWantedState(HopperRollerStates.PREVENT_JAM);
     indexer.setWantedState(Indexer.IndexerStates.ASSIST_INTAKING);
+  }
+
+  private void shooting_while_intaking() {
+    intake.setWantedState(Intake.IntakeStates.INTAKING);
+    intakePivot.setWantedState(IntakePivotWantedStates.DEPLOYED);
+    shooterStateMachine.setWantedState(ShooterWantedStates.SHOOTING);
+    hopperRoller.setWantedState(HopperRollerStates.ROLLING);
+    indexer.setWantedState(Indexer.IndexerStates.INDEXING);
   }
 
   private void stopped() {

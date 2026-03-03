@@ -390,6 +390,10 @@ public class RobotContainer {
 
     driverCont.y().onTrue(superStructure.setStateCommand(SuperWantedStates.STOWED));
 
+    driverCont
+        .start()
+        .onTrue(superStructure.setStateCommand(SuperWantedStates.SHOOTING_WHILE_INTAKING));
+    driverCont.start().onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
     // Drivetrain commands
     // driverCont.leftTrigger().whileTrue(drivetrain.faceHubWhileDriving(driverCont));
     driverCont.back().onTrue(drivetrain.zeroCommand());
