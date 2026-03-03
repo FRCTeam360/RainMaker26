@@ -280,6 +280,8 @@ public class RobotContainer {
             .andThen(superStructure.setStateCommand(SuperWantedStates.DEFAULT)));
     registerPathplannerCommand(
         "stow intake", superStructure.setIntakeStateCommand(IntakeWantedStates.STOWED));
+    registerPathplannerCommand(
+        "spin up", superStructure.setStateCommand(SuperWantedStates.DEFAULT));
 
     configVision();
     configDefaultDrivingCommand();
