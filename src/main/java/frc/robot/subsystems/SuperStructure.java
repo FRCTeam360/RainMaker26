@@ -296,16 +296,6 @@ public class SuperStructure extends SubsystemBase {
 
   @Override
   public void periodic() {
-    // Runs the superstructure, shooter, and intake state machines
-    updateState();
-    targetSelectionStateMachine.update();
-    shooterStateMachine.update();
-    intakeStateMachine.update();
-
-    applyStates();
-    shooterStateMachine.apply();
-    intakeStateMachine.apply();
-
     // Calculate shot and extract time of flight once per cycle
     cachedTimeOfFlight = hubShotCalculator.calculateShot().timeOfFlight();
     RobotUtils.ActiveHub shootingPhase =
@@ -318,6 +308,16 @@ public class SuperStructure extends SubsystemBase {
             DriverStation.getAlliance(),
             RobotUtils.getAutoWinner(DriverStation.getGameSpecificMessage()),
             shootingPhase);
+
+    // Runs the superstructure, shooter, and intake state machines
+    updateState();
+    targetSelectionStateMachine.update();
+    shooterStateMachine.update();
+    intakeStateMachine.update();
+
+    applyStates();
+    shooterStateMachine.apply();
+    intakeStateMachine.apply();
 
     SmartDashboard.putString("Shooting Phase", shootingPhase.toString());
     SmartDashboard.putBoolean("Can Score in Hub", cachedHubActive);
