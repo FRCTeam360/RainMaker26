@@ -55,6 +55,9 @@ public class Robot extends LoggedRobot {
       Logger.addDataReceiver(new NT4Publisher());
       new PowerDistribution(1, ModuleType.kRev); // Enables power distribution logging
     }
+
+    Constants.initRobotType();
+
     switch (Constants.getRobotType()) {
       case SIM:
         // Running a physics simulator, log to NT

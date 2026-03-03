@@ -37,6 +37,25 @@ public final class Constants {
     REPLAY
   }
 
+  static RobotType robotType;
+
+  public static RobotType getRobotType() {
+    return robotType;
+  }
+
+  static RobotType initRobotType() {
+    String serialAddress = HALUtil.getSerialNumber();
+
+    if (serialAddress.equals(SerialAddressConstants.WOOD_SERIAL_ADDRESS)) {
+      return Constants.RobotType.WOODBOT;
+    } else if (serialAddress.equals(SerialAddressConstants.PRACTICE_SERIAL_ADDRESS)) {
+      return Constants.RobotType.PRACTICEBOT;
+    } else if (!Robot.isReal()) { // KEEP AT BOTTOM
+      return Constants.RobotType.SIM;
+    }
+    return Constants.RobotType.PRACTICEBOT;
+  }
+
   public static final class IOConstants {
     // === USB PATHS ===
     public static final String USB_ROOT_DIRECTORY = "/U";
@@ -323,17 +342,4 @@ public final class Constants {
   }
 
   public static double loopPeriodSecs; // add value
-
-  public static RobotType getRobotType() {
-    String serialAddress = HALUtil.getSerialNumber();
-
-    if (serialAddress.equals(SerialAddressConstants.WOOD_SERIAL_ADDRESS)) {
-      return Constants.RobotType.WOODBOT;
-    } else if (serialAddress.equals(SerialAddressConstants.PRACTICE_SERIAL_ADDRESS)) {
-      return Constants.RobotType.PRACTICEBOT;
-    } else if (!Robot.isReal()) { // KEEP AT BOTTOM
-      return Constants.RobotType.SIM;
-    }
-    return Constants.RobotType.PRACTICEBOT;
-  }
 }
