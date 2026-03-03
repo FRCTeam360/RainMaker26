@@ -13,6 +13,7 @@ import frc.robot.subsystems.Indexer.Indexer.IndexerStates;
 import frc.robot.subsystems.Intake.IntakePivot.IntakePivot;
 import frc.robot.subsystems.Intake.IntakeRoller.IntakeRoller;
 import frc.robot.subsystems.Intake.IntakeStateMachine;
+import frc.robot.subsystems.Intake.IntakeStateMachine.IntakeWantedStates;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel;
 import frc.robot.subsystems.Shooter.FlywheelKicker.FlywheelKicker;
 import frc.robot.subsystems.Shooter.Hood.Hood;
@@ -184,6 +185,7 @@ public class SuperStructure extends SubsystemBase {
   }
 
   private void stopped() {
+    intakeStateMachine.setWantedState(IntakeWantedStates.IDLE);
     indexer.setWantedState(Indexer.IndexerStates.OFF);
     hopperRoller.setWantedState(HopperRollerStates.OFF);
     shooterStateMachine.setWantedState(ShooterWantedStates.IDLE);

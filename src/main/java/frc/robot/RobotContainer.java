@@ -387,7 +387,7 @@ public class RobotContainer {
     driverCont
         .y()
         .and(isSuperstructureMode)
-        .and(() -> !driverCont.leftTrigger().getAsBoolean())
+        .and(() -> !agitateTrigger.getAsBoolean())
         .onTrue(
             Commands.runOnce(
                 () -> {
@@ -531,6 +531,7 @@ public class RobotContainer {
   public void onDisable() {
     superStructure.setControlState(ControlState.SUPERSTRUCTURE);
     superStructure.setWantedSuperState(SuperWantedStates.IDLE);
+    superStructure.setIntakeState(IntakeWantedStates.IDLE);
     drivetrain.setControl(new SwerveRequest.Idle());
     climber.stop();
     flywheel.stop();

@@ -19,6 +19,7 @@ public class IntakeStateMachine {
 
   /** Wanted states set by driver inputs to request intake behavior. */
   public enum IntakeWantedStates {
+    IDLE,
     INTAKING,
     STOWED,
     AGITATING
@@ -26,6 +27,7 @@ public class IntakeStateMachine {
 
   /** Internal states representing the resolved intake behavior. */
   public enum IntakeInternalStates {
+    IDLE,
     INTAKING,
     STOWED,
     AGITATING
@@ -36,9 +38,9 @@ public class IntakeStateMachine {
   private final IntakePivot intakePivot;
 
   // State variables
-  private IntakeWantedStates wantedState = IntakeWantedStates.INTAKING;
-  private IntakeInternalStates currentState = IntakeInternalStates.INTAKING;
-  private IntakeInternalStates previousState = IntakeInternalStates.INTAKING;
+  private IntakeWantedStates wantedState = IntakeWantedStates.IDLE;
+  private IntakeInternalStates currentState = IntakeInternalStates.IDLE;
+  private IntakeInternalStates previousState = IntakeInternalStates.IDLE;
 
   /**
    * Creates a new IntakeStateMachine.
@@ -82,6 +84,10 @@ public class IntakeStateMachine {
       case AGITATING:
         currentState = IntakeInternalStates.AGITATING;
         break;
+      case IDLE:
+      default:
+        currentState = IntakeInternalStates.IDLE;
+        break;
     }
   }
 
@@ -102,6 +108,11 @@ public class IntakeStateMachine {
       case STOWED:
         intakeRoller.setWantedState(IntakeRollerStates.OFF);
         intakePivot.setWantedState(IntakePivotWantedStates.STOWED);
+        break;
+      case IDLE:
+      default:
+        intakeRoller.setWantedState(IntakeRollerStates.OFF);
+        intakePivot.setWantedState(IntakePivotWantedStates.OFF);
         break;
     }
   }
