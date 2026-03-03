@@ -55,7 +55,8 @@ public class SuperStructure extends SubsystemBase {
     DEFENSE,
     X_OUT,
     EJECTING,
-    UNJAMMING
+    UNJAMMING,
+    STOWED,
   }
 
   public enum SuperInternalStates {
@@ -64,7 +65,8 @@ public class SuperStructure extends SubsystemBase {
     INTAKING, // intake button pressed
     SHOOTING_AT_HUB,
     PASSING,
-    UNJAMMING
+    UNJAMMING,
+    STOWING
   }
 
   // State variables
@@ -149,6 +151,9 @@ public class SuperStructure extends SubsystemBase {
       case UNJAMMING:
         currentSuperState = SuperInternalStates.UNJAMMING;
         break;
+      case STOWED:
+        currentSuperState = SuperInternalStates.STOWING;
+        break;
       case DEFAULT:
       default:
         targetSelectionStateMachine.setWantedState(TargetWantedStates.AUTO);
@@ -172,6 +177,9 @@ public class SuperStructure extends SubsystemBase {
         break;
       case UNJAMMING:
         unjamming();
+        break;
+      case STOWING:
+        stowing();
         break;
       case DEFAULT:
         passive_preparing();
@@ -207,8 +215,8 @@ public class SuperStructure extends SubsystemBase {
     intake.setWantedState(Intake.IntakeStates.INTAKING);
     intakePivot.setWantedState(IntakePivotWantedStates.DEPLOYED);
     shooterStateMachine.setWantedState(ShooterWantedStates.IDLE);
-    hopperRoller.setWantedState(HopperRollerStates.REVERSING);
-    // indexer.setWantedState(Indexer.IndexerStates.INTAKING);
+    hopperRoller.setWantedState(HopperRollerStates.PREVENT_JAM);
+    indexer.setWantedState(Indexer.IndexerStates.ASSIST_INTAKING);
   }
 
   private void stopped() {
@@ -222,24 +230,34 @@ public class SuperStructure extends SubsystemBase {
   private void unjamming() {
     indexer.setWantedState(IndexerStates.REVERSING);
     shooterStateMachine.setWantedState(ShooterWantedStates.REVERSING);
-    hopperRoller.setWantedState(HopperRollerStates.REVERSING);
+    hopperRoller.setWantedState(HopperRollerStates.UNJAMMING);
     intake.setWantedState(IntakeStates.OFF);
     intakePivot.setWantedState(IntakePivotWantedStates.DEPLOYED);
   }
 
+  private void stowing() {
+    intakePivot.setWantedState(IntakePivotWantedStates.STOWED);
+  }
+
   private boolean canShootToTarget() {
-    switch (wantedSuperState) {
-      case SHOOT_AT_HUB:
-        if (!DriverStation.isDSAttached()) {
+    switch (currentSuperState) {
+      case SHOOTING_AT_HUB:
+        if (!DriverStation.isFMSAttached()) {
           return true;
         }
-        return RobotUtils.hubActive(
-            DriverStation.getAlliance(),
-            RobotUtils.getAutoWinner(DriverStation.getGameSpecificMessage()),
-            RobotUtils.getShootingPhase(
-                DriverStation.getMatchTime(),
-                DriverStation.isTeleop(),
-                hubShotCalculator.calculateShot().timeOfFlight()));
+        if (wantedSuperState == SuperWantedStates.SHOOT_AT_HUB) {
+          return true;
+        }
+        boolean hubActive =
+            RobotUtils.hubActive(
+                DriverStation.getAlliance(),
+                RobotUtils.getAutoWinner(DriverStation.getGameSpecificMessage()),
+                RobotUtils.getShootingPhase(
+                    DriverStation.getMatchTime(),
+                    DriverStation.isTeleop(),
+                    hubShotCalculator.calculateShot().timeOfFlight()));
+        Logger.recordOutput("Superstructure/Shooting/HubActive", hubActive);
+        return hubActive;
       default:
         return true;
     }

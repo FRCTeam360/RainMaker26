@@ -9,6 +9,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.robot.subsystems.Shooter.ShotCalculator;
 import frc.robot.subsystems.Shooter.ShotCalculator.RobotShootingInfo;
 import frc.robot.subsystems.Shooter.ShotCalculator.ShootingParams;
@@ -36,6 +37,7 @@ public class TestShotCalculator {
             // public Pose2d(double x, double y, Rotation2d rotation)
             () -> new Pose2d(1.0, 0.0, new Rotation2d()),
             () -> new Translation2d(),
+            () -> new ChassisSpeeds(),
             RobotShootingInfo);
     ShootingParams cachedShootingParams = testShotCalculator.calculateShot();
 
@@ -68,7 +70,11 @@ public class TestShotCalculator {
     testPose = new Pose2d(1.0, 0.0, new Rotation2d());
     Supplier<Pose2d> testPoseSupplier = () -> testPose;
     ShotCalculator testShotCalculator =
-        new ShotCalculator(testPoseSupplier, () -> new Translation2d(), RobotShootingInfo);
+        new ShotCalculator(
+            testPoseSupplier,
+            () -> new Translation2d(),
+            () -> new ChassisSpeeds(),
+            RobotShootingInfo);
     ShootingParams cachedShootingParams = testShotCalculator.calculateShot();
 
     testPose =
@@ -99,7 +105,11 @@ public class TestShotCalculator {
     testPose = new Pose2d(1.0, 0.0, new Rotation2d());
     Supplier<Pose2d> testPoseSupplier = () -> testPose;
     ShotCalculator testShotCalculator =
-        new ShotCalculator(testPoseSupplier, () -> new Translation2d(), RobotShootingInfo);
+        new ShotCalculator(
+            testPoseSupplier,
+            () -> new Translation2d(),
+            () -> new ChassisSpeeds(),
+            RobotShootingInfo);
     ShootingParams cachedShootingParams = testShotCalculator.calculateShot();
 
     testShotCalculator.clearShootingParams();
