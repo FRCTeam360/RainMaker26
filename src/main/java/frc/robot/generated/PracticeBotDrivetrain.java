@@ -33,7 +33,7 @@ public class PracticeBotDrivetrain {
   // When using closed-loop control, the drive motor uses the control
   // output type specified by SwerveModuleConstants.DriveMotorClosedLoopOutput
   private static final Slot0Configs driveGains =
-      new Slot0Configs().withKP(6.0).withKI(0).withKD(0.15).withKS(2.0).withKV(0.0);
+      new Slot0Configs().withKP(8.0).withKI(0).withKD(0.15).withKS(4.5).withKV(0.0);
 
   // The closed-loop output type to use for the steer motors;
   // This affects the PID/FF gains for the steer motors
@@ -55,7 +55,7 @@ public class PracticeBotDrivetrain {
 
   // The stator current at which the wheels start to slip;
   // This needs to be tuned to your individual robot
-  private static final Current kSlipCurrent = Amps.of(110);
+  private static final Current kSlipCurrent = Amps.of(100);
 
   // Initial configs for the drive and steer motors and the azimuth encoder; these cannot be null.
   // Some configs will be overwritten; check the `with*InitialConfigs()` API documentation.
@@ -87,7 +87,7 @@ public class PracticeBotDrivetrain {
 
   private static final double kDriveGearRatio = 6.026785714285714;
   private static final double kSteerGearRatio = 26.09090909090909;
-  private static final Distance kWheelRadius = Inches.of(1.89);
+  private static final Distance kWheelRadius = Meters.of(0.048);
 
   private static final boolean kInvertLeftSide = false;
   private static final boolean kInvertRightSide = true;

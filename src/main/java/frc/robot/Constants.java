@@ -5,8 +5,14 @@
 package frc.robot;
 
 import com.ctre.phoenix6.CANBus;
+import com.pathplanner.lib.config.ModuleConfig;
+import com.pathplanner.lib.config.RobotConfig;
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.hal.HALUtil;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.robot.utils.RobotUtils.ActiveHub;
 
@@ -19,6 +25,12 @@ import frc.robot.utils.RobotUtils.ActiveHub;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
+  // This is to load the apriltag field layout on robot initialization.
+  // It prevents our robot code from having a 5 second initial lag on enablement after new code is
+  // deployed.
+  // This is load bearing code like that coconut jpg that keeps TF2 running -_-
+  public static final AprilTagFieldLayout FIELD_LAYOUT =
+      AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
 
   public static Alliance AUTO_WINNER;
   public static ActiveHub HUB_PHASE;
@@ -63,6 +75,42 @@ public final class Constants {
 
     // === CANBUS ===
     public static final CANBus CANBUS = new CANBus("Default Name");
+
+    // === PATHPLANNER CONFIG (as of Feb 20th tuning) ===
+    public static final double MASS_KG = 60.0;
+    public static final double MOI = 4.5;
+    public static final double WHEEL_RADIUS_METERS = 0.048;
+    public static final double MAX_DRIVE_SPEED_MPS = 4.69;
+    public static final double WHEEL_COF = 1.3;
+    public static final double DRIVE_GEARING = 6.03;
+    public static final double DRIVE_CURRENT_LIMIT_AMPS = 80.0;
+    public static final double MODULE_OFFSET_METERS = 0.301;
+
+    /**
+     * Creates a hardcoded RobotConfig for the WoodBot using known tuned constants.
+     *
+     * @return RobotConfig for the WoodBot
+     */
+    public static RobotConfig createPathPlannerConfig() {
+      ModuleConfig moduleConfig =
+          new ModuleConfig(
+              WHEEL_RADIUS_METERS,
+              MAX_DRIVE_SPEED_MPS,
+              WHEEL_COF,
+              DCMotor.getKrakenX60Foc(1),
+              DRIVE_GEARING,
+              DRIVE_CURRENT_LIMIT_AMPS,
+              1);
+
+      return new RobotConfig(
+          MASS_KG,
+          MOI,
+          moduleConfig,
+          new Translation2d(MODULE_OFFSET_METERS, MODULE_OFFSET_METERS),
+          new Translation2d(MODULE_OFFSET_METERS, -MODULE_OFFSET_METERS),
+          new Translation2d(-MODULE_OFFSET_METERS, MODULE_OFFSET_METERS),
+          new Translation2d(-MODULE_OFFSET_METERS, -MODULE_OFFSET_METERS));
+    }
 
     // === SHOT CALCULATOR ===
     public static final InterpolatingDoubleTreeMap shotHoodAngleMap =

@@ -4,8 +4,6 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.MetersPerSecond;
-
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
@@ -71,6 +69,7 @@ import frc.robot.subsystems.Vision.VisionIOLimelightBase;
 import frc.robot.subsystems.Vision.VisionIOPhotonSim;
 import frc.robot.utils.AllianceFlipUtil;
 import frc.robot.utils.FieldConstants;
+import frc.robot.utils.PathProvider;
 import frc.robot.utils.PositionUtils;
 import java.util.Map;
 import java.util.Objects;
@@ -105,8 +104,6 @@ public class RobotContainer {
 
   // TODO: refactor to allow for more than 1 drivetrain type
 
-  private Telemetry logger;
-
   // Replace with CommandPS4Controller or CommandJoystick if needed
 
   private final CommandXboxController driverCont = new CommandXboxController(0);
@@ -132,11 +129,13 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+    // Pre-load all PathPlanner path files into memory to avoid disk I/O during auto
+    PathProvider.initialize();
+
     switch (Constants.getRobotType()) {
       case SIM:
         drivetrain = WoodBotDrivetrain.createDrivetrain();
         climber = new Climber(new ClimberIOSim());
-        logger = new Telemetry(WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
         intakePivot = new IntakePivot(new IntakePivotIOSim());
         vision =
             new Vision(
@@ -168,7 +167,6 @@ public class RobotContainer {
       case WOODBOT:
         drivetrain = WoodBotDrivetrain.createDrivetrain();
         climber = new Climber(new ClimberIONoop());
-        logger = new Telemetry(WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
         flywheel = new Flywheel(new FlywheelIOWBBangBang());
         hood = new Hood(new HoodIOWB());
         indexer = new Indexer(new IndexerIOWB());
@@ -201,7 +199,6 @@ public class RobotContainer {
       default:
         drivetrain = PracticeBotDrivetrain.createDrivetrain();
         climber = new Climber(new ClimberIOPB());
-        logger = new Telemetry(PracticeBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
         flywheel = new Flywheel(new FlywheelIOPBBangBang());
         hood = new Hood(new HoodIOPB());
         indexer = new Indexer(new IndexerIOPB());
@@ -282,6 +279,8 @@ public class RobotContainer {
                             () -> 0,
                             () -> hubShotCalculator.calculateShot().targetHeading())))
             .andThen(superStructure.setStateCommand(SuperWantedStates.DEFAULT)));
+    registerPathplannerCommand(
+        "stow intake", superStructure.setStateCommand(SuperWantedStates.STOWED));
 
     configVision();
     configDefaultDrivingCommand();
@@ -300,6 +299,8 @@ public class RobotContainer {
     SmartDashboard.putData("Auto Chooser", autoChooser);
 
     CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
+    // Uncomment this if pathplanner starts to suck on loading
+    // CommandScheduler.getInstance().schedule(PathfindingCommand.warmupCommand());
   }
 
   public void registerPathplannerCommand(String name, Command command) {
@@ -391,7 +392,6 @@ public class RobotContainer {
 
     // Drivetrain commands
     // driverCont.leftTrigger().whileTrue(drivetrain.faceHubWhileDriving(driverCont));
-    drivetrain.registerTelemetry(logger::telemeterize);
     driverCont.back().onTrue(drivetrain.zeroCommand());
   }
 

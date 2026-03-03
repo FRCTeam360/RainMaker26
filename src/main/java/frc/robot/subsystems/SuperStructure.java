@@ -57,7 +57,7 @@ public class SuperStructure extends SubsystemBase {
     X_OUT,
     EJECTING,
     UNJAMMING,
-    STOWED
+    STOWED,
   }
 
   public enum SuperInternalStates {
