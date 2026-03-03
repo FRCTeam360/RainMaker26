@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.hal.DriverStationJNI;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -163,6 +164,45 @@ public class Robot extends LoggedRobot {
   /** This function is called periodically during test mode. */
   @Override
   public void testPeriodic() {}
+
+  private static void reportErrorImpl(
+      boolean isError, int code, String error, StackTraceElement[] stackTrace) {
+    reportErrorImpl(isError, code, error, true, stackTrace, 0);
+  }
+
+  private static void reportErrorImpl(
+      boolean isError,
+      int code,
+      String error,
+      boolean printTrace,
+      StackTraceElement[] stackTrace,
+      int stackTraceFirst) {
+    String locString;
+    if (stackTrace.length >= stackTraceFirst + 1) {
+      locString = stackTrace[stackTraceFirst].toString();
+    } else {
+      locString = "";
+    }
+    StringBuilder traceString = new StringBuilder();
+    if (printTrace) {
+      boolean haveLoc = false;
+      for (int i = stackTraceFirst; i < stackTrace.length; i++) {
+        String loc = stackTrace[i].toString();
+        traceString.append("\tat ").append(loc).append('\n');
+        // get first user function
+        if (!haveLoc && !loc.startsWith("edu.wpi.first")) {
+          locString = loc;
+          haveLoc = true;
+        }
+      }
+    }
+    DriverStationJNI.sendError(
+        isError, code, false, error, locString, traceString.toString(), true);
+  }
+
+  public static void reportError(String error, StackTraceElement[] stackTrace) {
+    reportErrorImpl(true, 1, error, stackTrace);
+  }
 
   /** This function is called once when the robot is first started up. */
   @Override
