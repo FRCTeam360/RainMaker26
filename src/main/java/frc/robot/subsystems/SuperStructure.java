@@ -11,9 +11,9 @@ import frc.robot.subsystems.HopperRoller.HopperRoller.HopperRollerStates;
 import frc.robot.subsystems.Indexer.Indexer;
 import frc.robot.subsystems.Indexer.Indexer.IndexerStates;
 import frc.robot.subsystems.Intake.Intake;
-import frc.robot.subsystems.Intake.Intake.IntakeStates;
+import frc.robot.subsystems.Intake.IntakeStateMachine;
+import frc.robot.subsystems.Intake.IntakeStateMachine.IntakeWantedStates;
 import frc.robot.subsystems.IntakePivot.IntakePivot;
-import frc.robot.subsystems.IntakePivot.IntakePivot.IntakePivotWantedStates;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel;
 import frc.robot.subsystems.Shooter.FlywheelKicker.FlywheelKicker;
 import frc.robot.subsystems.Shooter.Hood.Hood;
@@ -40,6 +40,7 @@ public class SuperStructure extends SubsystemBase {
   private final IntakePivot intakePivot;
   private final HopperRoller hopperRoller;
   private final ShooterStateMachine shooterStateMachine;
+  private final IntakeStateMachine intakeStateMachine;
   private final TargetSelectionStateMachine targetSelectionStateMachine;
   private final ShotCalculator hubShotCalculator;
 
@@ -56,7 +57,7 @@ public class SuperStructure extends SubsystemBase {
     X_OUT,
     EJECTING,
     UNJAMMING,
-    STOWED,
+    STOWED
   }
 
   public enum SuperInternalStates {
@@ -101,6 +102,7 @@ public class SuperStructure extends SubsystemBase {
     this.shooterStateMachine =
         new ShooterStateMachine(
             flywheel, hood, flywheelKicker, isAlignedToTarget, this::canShootToTarget);
+    this.intakeStateMachine = new IntakeStateMachine(intake, intakePivot);
     this.targetSelectionStateMachine =
         new TargetSelectionStateMachine(hubShotCalculator, passCalculator, robotPoseSupplier);
 
@@ -190,8 +192,7 @@ public class SuperStructure extends SubsystemBase {
     if (shooterStateMachine.getState() == ShooterStates.FIRING) {
       indexer.setWantedState(IndexerStates.INDEXING);
       hopperRoller.setWantedState(HopperRollerStates.ROLLING);
-      intakePivot.setWantedState(IntakePivotWantedStates.AGITATE_HOPPER);
-      intake.setWantedState(IntakeStates.ASSIST_SHOOTING);
+      intakeStateMachine.setWantedState(IntakeWantedStates.AGITATING);
     } else {
       indexer.setWantedState(IndexerStates.OFF);
       hopperRoller.setWantedState(HopperRollerStates.OFF);
@@ -199,25 +200,20 @@ public class SuperStructure extends SubsystemBase {
   }
 
   private void passive_preparing() {
-    intake.setWantedState(Intake.IntakeStates.OFF);
     indexer.setWantedState(Indexer.IndexerStates.OFF);
-    intakePivot.setWantedState(IntakePivotWantedStates.DEPLOYED);
     hopperRoller.setWantedState(HopperRollerStates.OFF);
     shooterStateMachine.setWantedState(ShooterWantedStates.PASSIVE_SHOOTER);
   }
 
   private void intaking() {
-    intake.setWantedState(Intake.IntakeStates.INTAKING);
-    intakePivot.setWantedState(IntakePivotWantedStates.DEPLOYED);
     shooterStateMachine.setWantedState(ShooterWantedStates.IDLE);
     hopperRoller.setWantedState(HopperRollerStates.PREVENT_JAM);
     indexer.setWantedState(Indexer.IndexerStates.ASSIST_INTAKING);
   }
 
   private void stopped() {
-    intake.setWantedState(Intake.IntakeStates.OFF);
+    intakeStateMachine.setWantedState(IntakeWantedStates.IDLE);
     indexer.setWantedState(Indexer.IndexerStates.OFF);
-    intakePivot.setWantedState(IntakePivotWantedStates.OFF);
     hopperRoller.setWantedState(HopperRollerStates.OFF);
     shooterStateMachine.setWantedState(ShooterWantedStates.IDLE);
   }
@@ -226,12 +222,10 @@ public class SuperStructure extends SubsystemBase {
     indexer.setWantedState(IndexerStates.REVERSING);
     shooterStateMachine.setWantedState(ShooterWantedStates.REVERSING);
     hopperRoller.setWantedState(HopperRollerStates.UNJAMMING);
-    intake.setWantedState(IntakeStates.OFF);
-    intakePivot.setWantedState(IntakePivotWantedStates.DEPLOYED);
   }
 
   private void stowing() {
-    intakePivot.setWantedState(IntakePivotWantedStates.STOWED);
+    // Intake is independently controlled — stowing is a no-op for SuperStructure
   }
 
   private boolean canShootToTarget() {
@@ -290,22 +284,34 @@ public class SuperStructure extends SubsystemBase {
     return currentSuperState;
   }
 
+  /**
+   * Sets the intake state machine's wanted state directly.
+   *
+   * @param state the desired intake state
+   */
+  public void setIntakeState(IntakeStateMachine.IntakeWantedStates state) {
+    intakeStateMachine.setWantedState(state);
+  }
+
   // periodic
 
   @Override
   public void periodic() {
-    // Runs both the superstructure and shooter state machines
+    // Runs the superstructure, shooter, and intake state machines
     updateState();
     shooterStateMachine.update();
+    intakeStateMachine.update();
 
     applyStates();
     shooterStateMachine.apply();
+    intakeStateMachine.apply();
 
     Logger.recordOutput("Superstructure/WantedSuperState", wantedSuperState);
     Logger.recordOutput("Superstructure/CurrentSuperState", currentSuperState);
     Logger.recordOutput("Superstructure/PreviousSuperState", previousSuperState);
     Logger.recordOutput("Superstructure/ControlState", controlState);
     shooterStateMachine.log();
+    intakeStateMachine.log();
     targetSelectionStateMachine.log();
   }
 }
