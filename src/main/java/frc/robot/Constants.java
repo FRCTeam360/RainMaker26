@@ -47,13 +47,15 @@ public final class Constants {
     String serialAddress = HALUtil.getSerialNumber();
 
     if (serialAddress.equals(SerialAddressConstants.WOOD_SERIAL_ADDRESS)) {
-      return Constants.RobotType.WOODBOT;
+      robotType = Constants.RobotType.WOODBOT;
     } else if (serialAddress.equals(SerialAddressConstants.PRACTICE_SERIAL_ADDRESS)) {
-      return Constants.RobotType.PRACTICEBOT;
+      robotType = Constants.RobotType.PRACTICEBOT;
     } else if (!Robot.isReal()) { // KEEP AT BOTTOM
-      return Constants.RobotType.SIM;
+      robotType = Constants.RobotType.SIM;
+    } else {
+      robotType = Constants.RobotType.PRACTICEBOT;
     }
-    return Constants.RobotType.PRACTICEBOT;
+    return robotType;
   }
 
   public static final class IOConstants {
