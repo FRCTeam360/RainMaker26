@@ -169,7 +169,6 @@ public class ShooterStateMachine {
         flywheel.setWantedState(FlywheelWantedStates.IDLE);
         hood.setWantedState(HoodWantedStates.IDLE);
         flywheelKicker.setWantedState(FlywheelKickerStates.REVERSING);
-        hopperRoller.setWantedState(HopperRollerStates.REVERSING);
         break;
       case IDLE:
       default:
