@@ -106,13 +106,13 @@ public class IntakeStateMachine {
         intakePivot.setWantedState(IntakePivotWantedStates.AGITATE_HOPPER);
         break;
       case STOWED:
-        intakeRoller.setWantedState(IntakeRollerStates.OFF);
+        intakeRoller.setWantedState(IntakeRollerStates.IDLE);
         intakePivot.setWantedState(IntakePivotWantedStates.STOWED);
         break;
       case IDLE:
       default:
-        intakeRoller.setWantedState(IntakeRollerStates.OFF);
-        intakePivot.setWantedState(IntakePivotWantedStates.OFF);
+        intakeRoller.setWantedState(IntakeRollerStates.IDLE);
+        intakePivot.setWantedState(IntakePivotWantedStates.IDLE);
         break;
     }
   }

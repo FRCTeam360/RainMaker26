@@ -29,7 +29,7 @@ public class IntakeRoller extends SubsystemBase {
 
   // Enums
   public enum IntakeRollerStates {
-    OFF,
+    IDLE,
     INTAKING,
     ASSIST_SHOOTING,
     REVERSING
@@ -37,9 +37,9 @@ public class IntakeRoller extends SubsystemBase {
   }
 
   // State variables
-  private IntakeRollerStates wantedState = IntakeRollerStates.OFF;
-  private IntakeRollerStates currentState = IntakeRollerStates.OFF;
-  private IntakeRollerStates previousState = IntakeRollerStates.OFF;
+  private IntakeRollerStates wantedState = IntakeRollerStates.IDLE;
+  private IntakeRollerStates currentState = IntakeRollerStates.IDLE;
+  private IntakeRollerStates previousState = IntakeRollerStates.IDLE;
   private ControlState controlState = ControlState.SUPERSTRUCTURE;
 
   // Constructor
@@ -83,9 +83,9 @@ public class IntakeRoller extends SubsystemBase {
       case REVERSING:
         currentState = IntakeRollerStates.REVERSING;
         break;
-      case OFF:
+      case IDLE:
       default:
-        currentState = IntakeRollerStates.OFF;
+        currentState = IntakeRollerStates.IDLE;
         break;
         // case JAMMED:
         //   currentState = IntakeRollerStates.JAMMED;
@@ -103,7 +103,7 @@ public class IntakeRoller extends SubsystemBase {
       case REVERSING:
         reversing();
         break;
-      case OFF:
+      case IDLE:
       default:
         stop();
         break;
