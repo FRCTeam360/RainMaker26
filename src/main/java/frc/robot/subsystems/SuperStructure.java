@@ -175,7 +175,7 @@ public class SuperStructure extends SubsystemBase {
       intakeStateMachine.setWantedState(IntakeWantedStates.AGITATING);
     } else {
       indexer.setWantedState(IndexerStates.OFF);
-      hopperRoller.setWantedState(HopperRollerStates.OFF);
+      hopperRoller.setWantedState(HopperRollerStates.PREVENT_JAM);
     }
   }
 
