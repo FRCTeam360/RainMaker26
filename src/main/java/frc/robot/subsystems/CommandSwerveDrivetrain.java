@@ -57,6 +57,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   // Keep track of when vision measurements are added for logging context
   private boolean hasVisionMeasurements = false;
 
+  // Cached state copy for dashboard updates (updated in periodic)
+  private SwerveDriveState cachedState;
+
   /* Blue alliance sees forward as 0 degrees (toward red alliance wall) */
   private static final Rotation2d kBlueAlliancePerspectiveRotation = Rotation2d.kZero;
   /* Red alliance sees forward as 180 degrees (toward blue alliance wall) */
@@ -271,36 +274,45 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
           public void initSendable(SendableBuilder builder) {
             builder.setSmartDashboardType("SwerveDrive");
 
+            // Use cached state from periodic() to avoid multiple getStateCopy() calls
             // Front Left (Module 0)
             builder.addDoubleProperty(
-                "Front Left Angle", () -> getStateCopy().ModuleStates[0].angle.getRadians(), null);
+                "Front Left Angle",
+                () -> cachedState != null ? cachedState.ModuleStates[0].angle.getRadians() : 0.0,
+                null);
             builder.addDoubleProperty(
                 "Front Left Velocity",
-                () -> getStateCopy().ModuleStates[0].speedMetersPerSecond,
+                () -> cachedState != null ? cachedState.ModuleStates[0].speedMetersPerSecond : 0.0,
                 null);
 
             // Front Right (Module 1)
             builder.addDoubleProperty(
-                "Front Right Angle", () -> getStateCopy().ModuleStates[1].angle.getRadians(), null);
+                "Front Right Angle",
+                () -> cachedState != null ? cachedState.ModuleStates[1].angle.getRadians() : 0.0,
+                null);
             builder.addDoubleProperty(
                 "Front Right Velocity",
-                () -> getStateCopy().ModuleStates[1].speedMetersPerSecond,
+                () -> cachedState != null ? cachedState.ModuleStates[1].speedMetersPerSecond : 0.0,
                 null);
 
             // Back Left (Module 2)
             builder.addDoubleProperty(
-                "Back Left Angle", () -> getStateCopy().ModuleStates[2].angle.getRadians(), null);
+                "Back Left Angle",
+                () -> cachedState != null ? cachedState.ModuleStates[2].angle.getRadians() : 0.0,
+                null);
             builder.addDoubleProperty(
                 "Back Left Velocity",
-                () -> getStateCopy().ModuleStates[2].speedMetersPerSecond,
+                () -> cachedState != null ? cachedState.ModuleStates[2].speedMetersPerSecond : 0.0,
                 null);
 
             // Back Right (Module 3)
             builder.addDoubleProperty(
-                "Back Right Angle", () -> getStateCopy().ModuleStates[3].angle.getRadians(), null);
+                "Back Right Angle",
+                () -> cachedState != null ? cachedState.ModuleStates[3].angle.getRadians() : 0.0,
+                null);
             builder.addDoubleProperty(
                 "Back Right Velocity",
-                () -> getStateCopy().ModuleStates[3].speedMetersPerSecond,
+                () -> cachedState != null ? cachedState.ModuleStates[3].speedMetersPerSecond : 0.0,
                 null);
 
             // Robot angle
@@ -447,6 +459,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     // Current pose includes vision fusion when vision measurements are added
 
     SwerveDriveState state = this.getStateCopy();
+
+    // Update cached state for dashboard (used by Sendable)
+    cachedState = state;
 
     Logger.recordOutput(SUBSYSTEM_NAME + "CurrentPose", state.Pose);
     Logger.recordOutput(SUBSYSTEM_NAME + "Rotation2d", state.RawHeading);

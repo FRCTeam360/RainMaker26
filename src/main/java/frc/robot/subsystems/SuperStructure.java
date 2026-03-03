@@ -253,6 +253,7 @@ public class SuperStructure extends SubsystemBase {
                     DriverStation.isTeleop(),
                     hubShotCalculator.calculateShot().timeOfFlight()));
         Logger.recordOutput("Superstructure/Shooting/HubActive", hubActive);
+        SmartDashboard.putBoolean("Hub Active", hubActive);
         return hubActive;
       default:
         return true;

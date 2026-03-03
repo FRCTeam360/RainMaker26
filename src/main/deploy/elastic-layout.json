@@ -5,7 +5,33 @@
     {
       "name": "Teleoperated",
       "grid_layout": {
-        "layouts": [],
+        "layouts": [
+          {
+            "title": "List Layout",
+            "x": 1152.0,
+            "y": 384.0,
+            "width": 384.0,
+            "height": 128.0,
+            "type": "List Layout",
+            "properties": {
+              "label_position": "TOP"
+            },
+            "children": [
+              {
+                "title": "Alerts",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 256.0,
+                "height": 384.0,
+                "type": "Alerts",
+                "properties": {
+                  "topic": "/SmartDashboard/Alerts",
+                  "period": 0.06
+                }
+              }
+            ]
+          }
+        ],
         "containers": [
           {
             "title": "YOUR CAMERA NAME-processed",
@@ -39,23 +65,6 @@
               "robot_color": 4294198070,
               "trajectory_color": 4294967295,
               "show_robot_outside_widget": true
-            }
-          },
-          {
-            "title": "HubActive",
-            "x": 0.0,
-            "y": 384.0,
-            "width": 384.0,
-            "height": 384.0,
-            "type": "Boolean Box",
-            "properties": {
-              "topic": "/SmartDashboard/HubActive",
-              "period": 0.06,
-              "data_type": "boolean",
-              "true_color": 4283215696,
-              "false_color": 4294198070,
-              "true_icon": "None",
-              "false_icon": "None"
             }
           },
           {
@@ -104,14 +113,31 @@
           {
             "title": "Shooting Phase",
             "x": 1152.0,
-            "y": 384.0,
+            "y": 512.0,
             "width": 384.0,
-            "height": 384.0,
+            "height": 256.0,
             "type": "Large Text Display",
             "properties": {
               "topic": "/SmartDashboard/Shooting Phase",
               "period": 0.06,
               "data_type": "string"
+            }
+          },
+          {
+            "title": "HubActive",
+            "x": 0.0,
+            "y": 384.0,
+            "width": 384.0,
+            "height": 384.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/SmartDashboard/HubActive",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
             }
           }
         ]
