@@ -1,8 +1,9 @@
-package frc.robot.subsystems.IntakeRoller;
+package frc.robot.subsystems.Intake;
 
-import frc.robot.subsystems.IntakePivot.IntakePivot;
-import frc.robot.subsystems.IntakePivot.IntakePivot.IntakePivotWantedStates;
-import frc.robot.subsystems.IntakeRoller.IntakeRoller.IntakeRollerStates;
+import frc.robot.subsystems.Intake.IntakePivot.IntakePivot;
+import frc.robot.subsystems.Intake.IntakePivot.IntakePivot.IntakePivotWantedStates;
+import frc.robot.subsystems.Intake.IntakeRoller.IntakeRoller;
+import frc.robot.subsystems.Intake.IntakeRoller.IntakeRoller.IntakeRollerStates;
 import org.littletonrobotics.junction.Logger;
 
 /**
