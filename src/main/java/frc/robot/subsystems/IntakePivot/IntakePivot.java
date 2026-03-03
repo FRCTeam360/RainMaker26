@@ -13,7 +13,7 @@ import org.littletonrobotics.junction.Logger;
 public class IntakePivot extends SubsystemBase {
   // Constants
   private static final double STOWED_POSITION_DEGREES = 0.0;
-  private static final double DEPLOYED_POSITION_DEGREES = 93.0;
+  private static final double DEPLOYED_POSITION_DEGREES = 98.0;
   private static final double HIGH_AGITATED_POSITION_DEGREES = 60.0;
   private static final double LOW_AGITATED_POSITION_DEGREES = 80.0;
   private static final double STACK_FUEL_POSITION_DEGREES = 20.0;
