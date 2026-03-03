@@ -6,8 +6,6 @@ package frc.robot.subsystems.Vision;
 
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableInstance;
 import frc.robot.utils.FieldConstants;
 import frc.robot.utils.LimelightHelpers;
 import frc.robot.utils.LimelightHelpers.PoseEstimate;
@@ -20,10 +18,9 @@ import java.util.function.DoubleSupplier;
  * filtering, and MegaTag2 logic.
  */
 public abstract class VisionIOLimelightBase implements VisionIO {
-  private final NetworkTable table;
-  private final String name;
   protected final DoubleSupplier gyroAngleSupplier;
   protected final DoubleSupplier gyroAngleRateSupplier;
+  protected final LimelightHelpers helper;
 
   private final boolean acceptMeasurements;
 
@@ -40,28 +37,22 @@ public abstract class VisionIOLimelightBase implements VisionIO {
       DoubleSupplier gyroAngleSupplier,
       DoubleSupplier gyroAngleRateSupplier,
       boolean acceptMeasurements) {
-    table = NetworkTableInstance.getDefault().getTable(name);
-    this.name = name;
+    this.helper = new LimelightHelpers(name);
     this.gyroAngleSupplier = gyroAngleSupplier;
     this.gyroAngleRateSupplier = gyroAngleRateSupplier;
     this.acceptMeasurements = acceptMeasurements;
   }
 
-  /** Returns the NetworkTables name of this Limelight. */
-  protected String getName() {
-    return name;
-  }
-
   @Override
   public void setLEDMode(int mode) {
-    table.getEntry("ledMode").setNumber(mode);
+    helper.setLEDMode(mode);
   }
 
   @Override
   public void updateInputs(VisionIOInputs inputs) {
     // Set robot orientation for MegaTag2 (flushed by postSchedulerUpdate)
-    LimelightHelpers.SetRobotOrientation_NoFlush(
-        name, gyroAngleSupplier.getAsDouble(), gyroAngleRateSupplier.getAsDouble(), 0, 0, 0, 0);
+    helper.SetRobotOrientation_NoFlush(
+        gyroAngleSupplier.getAsDouble(), gyroAngleRateSupplier.getAsDouble(), 0, 0, 0, 0);
 
     // Assume that the pose hasn't been updated
     inputs.poseUpdated = false;
@@ -130,16 +121,8 @@ public abstract class VisionIOLimelightBase implements VisionIO {
     return (int) table.getEntry("tid").getInteger(-1);
   }
 
-  private double getTXRaw() {
-    return table.getEntry("tx").getDouble(0.0);
-  }
-
   private double getTYRaw() {
     return table.getEntry("ty").getDouble(0.0);
-  }
-
-  private double getTV() {
-    return table.getEntry("tv").getDouble(0.0);
   }
 
   private double getPipeline() {
