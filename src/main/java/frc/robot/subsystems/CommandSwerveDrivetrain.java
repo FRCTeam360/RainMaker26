@@ -18,10 +18,14 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.util.sendable.Sendable;
+import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Subsystem;
@@ -49,9 +53,13 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   private double m_lastSimTime;
   private static final String SUBSYSTEM_NAME = "Swerve/";
   private final SwerveRequest xOutReq = new SwerveRequest.SwerveDriveBrake();
+  private final Field2d field = new Field2d();
 
   // Keep track of when vision measurements are added for logging context
   private boolean hasVisionMeasurements = false;
+
+  // Cached state copy for dashboard updates (updated in periodic)
+  private SwerveDriveState cachedState;
 
   /* Blue alliance sees forward as 0 degrees (toward red alliance wall) */
   private static final Rotation2d kBlueAlliancePerspectiveRotation = Rotation2d.kZero;
@@ -259,6 +267,59 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
       startSimThread();
     }
     configureAutoBuilder();
+    SmartDashboard.putData("Field", field);
+    SmartDashboard.putData(
+        "Swerve Drive",
+        new Sendable() {
+          @Override
+          public void initSendable(SendableBuilder builder) {
+            builder.setSmartDashboardType("SwerveDrive");
+
+            // Use cached state from periodic() to avoid multiple getStateCopy() calls
+            // Front Left (Module 0)
+            builder.addDoubleProperty(
+                "Front Left Angle",
+                () -> cachedState != null ? cachedState.ModuleStates[0].angle.getRadians() : 0.0,
+                null);
+            builder.addDoubleProperty(
+                "Front Left Velocity",
+                () -> cachedState != null ? cachedState.ModuleStates[0].speedMetersPerSecond : 0.0,
+                null);
+
+            // Front Right (Module 1)
+            builder.addDoubleProperty(
+                "Front Right Angle",
+                () -> cachedState != null ? cachedState.ModuleStates[1].angle.getRadians() : 0.0,
+                null);
+            builder.addDoubleProperty(
+                "Front Right Velocity",
+                () -> cachedState != null ? cachedState.ModuleStates[1].speedMetersPerSecond : 0.0,
+                null);
+
+            // Back Left (Module 2)
+            builder.addDoubleProperty(
+                "Back Left Angle",
+                () -> cachedState != null ? cachedState.ModuleStates[2].angle.getRadians() : 0.0,
+                null);
+            builder.addDoubleProperty(
+                "Back Left Velocity",
+                () -> cachedState != null ? cachedState.ModuleStates[2].speedMetersPerSecond : 0.0,
+                null);
+
+            // Back Right (Module 3)
+            builder.addDoubleProperty(
+                "Back Right Angle",
+                () -> cachedState != null ? cachedState.ModuleStates[3].angle.getRadians() : 0.0,
+                null);
+            builder.addDoubleProperty(
+                "Back Right Velocity",
+                () -> cachedState != null ? cachedState.ModuleStates[3].speedMetersPerSecond : 0.0,
+                null);
+
+            // Robot angle
+            builder.addDoubleProperty("Robot Angle", () -> getRotation2d().getRadians(), null);
+          }
+        });
   }
 
   /**
@@ -407,9 +468,14 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
   @Override
   public void periodic() {
+    field.setRobotPose(new Pose2d(getPose2d().getX(), getPose2d().getY(), getRotation2d()));
+
     // Current pose includes vision fusion when vision measurements are added
 
     SwerveDriveState state = this.getStateCopy();
+
+    // Update cached state for dashboard (used by Sendable)
+    cachedState = state;
 
     Logger.recordOutput(SUBSYSTEM_NAME + "CurrentPose", state.Pose);
     Logger.recordOutput(SUBSYSTEM_NAME + "Rotation2d", state.RawHeading);

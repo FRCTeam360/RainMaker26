@@ -3,6 +3,7 @@ package frc.robot.subsystems;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -215,6 +216,7 @@ public class SuperStructure extends SubsystemBase {
                     DriverStation.isTeleop(),
                     hubShotCalculator.calculateShot().timeOfFlight()));
         Logger.recordOutput("Superstructure/Shooting/HubActive", hubActive);
+        SmartDashboard.putBoolean("Hub Active", hubActive);
         return hubActive;
       default:
         return true;
@@ -300,8 +302,17 @@ public class SuperStructure extends SubsystemBase {
     shooterStateMachine.apply();
     intakeStateMachine.apply();
 
+    SmartDashboard.putString(
+        "Shooting Phase",
+        RobotUtils.getShootingPhase(
+                DriverStation.getMatchTime(),
+                DriverStation.isTeleop(),
+                hubShotCalculator.calculateShot().timeOfFlight())
+            .toString());
+
     Logger.recordOutput("Superstructure/WantedSuperState", wantedSuperState);
     Logger.recordOutput("Superstructure/CurrentSuperState", currentSuperState);
+    SmartDashboard.putString("Superstructure/CurrentSuperState", currentSuperState.toString());
     Logger.recordOutput("Superstructure/PreviousSuperState", previousSuperState);
     Logger.recordOutput("Superstructure/ControlState", controlState);
     shooterStateMachine.log();
