@@ -269,7 +269,7 @@ public class RobotContainer {
     // TODO: add end condition based on state from SuperStructure (based on sensor inputs)
     registerPathplannerCommand(
         "shoot at hub",
-        Commands.waitSeconds(10)
+        Commands.waitSeconds(5)
             .deadlineFor(
                 superStructure
                     .setStateCommand(SuperWantedStates.SHOOT_AT_HUB)

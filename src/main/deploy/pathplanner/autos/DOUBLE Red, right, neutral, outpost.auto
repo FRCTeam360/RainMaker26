@@ -5,13 +5,19 @@
     "data": {
       "commands": [
         {
-          "type": "parallel",
+          "type": "deadline",
           "data": {
             "commands": [
               {
                 "type": "path",
                 "data": {
                   "pathName": "Red middle 1"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "stow intake"
                 }
               }
             ]
@@ -75,46 +81,91 @@
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "shoot at hub"
+          }
+        },
+        {
           "type": "deadline",
           "data": {
             "commands": [
               {
-                "type": "wait",
+                "type": "path",
                 "data": {
-                  "waitTime": 5.0
+                  "pathName": "Red middle 5.1"
                 }
               },
               {
                 "type": "named",
                 "data": {
-                  "name": "shoot at hub"
+                  "name": "basic intake"
                 }
               }
             ]
           }
         },
         {
-          "type": "path",
+          "type": "deadline",
           "data": {
-            "pathName": "Red middle 5.1"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "Red middle 6.1"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "basic intake"
+                }
+              }
+            ]
           }
         },
         {
-          "type": "path",
+          "type": "deadline",
           "data": {
-            "pathName": "Red middle 6.1"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "Red middle 7.1"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "basic intake"
+                }
+              }
+            ]
           }
         },
         {
-          "type": "path",
+          "type": "deadline",
           "data": {
-            "pathName": "Red middle 7.1"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "Red middle 4.3"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "basic intake"
+                }
+              }
+            ]
           }
         },
         {
-          "type": "path",
+          "type": "named",
           "data": {
-            "pathName": "Red middle 4.3"
+            "name": "shoot at hub"
           }
         }
       ]
