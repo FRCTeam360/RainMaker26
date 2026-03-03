@@ -1,7 +1,6 @@
 package frc.robot.subsystems.Shooter;
 
 import frc.robot.subsystems.HopperRoller.HopperRoller;
-import frc.robot.subsystems.HopperRoller.HopperRoller.HopperRollerStates;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel.FlywheelInternalStates;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel.FlywheelWantedStates;
