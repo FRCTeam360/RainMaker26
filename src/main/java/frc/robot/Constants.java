@@ -52,8 +52,8 @@ public final class Constants {
 
   public static class WoodBotConstants {
     // === INTAKE ===
-    public static final int INTAKE_SENSOR_PORT = 0;
-    public static final int INTAKE_ID = 15;
+    public static final int INTAKE_ROLLER_SENSOR_PORT = 0;
+    public static final int INTAKE_ROLLER_ID = 15;
     public static final int INTAKE_PIVOT_ID = 0;
 
     // === HOPPER ===
@@ -173,7 +173,7 @@ public final class Constants {
 
     // === INTAKE ===
     public static final int INTAKE_PIVOT_ID = 14;
-    public static final int INTAKE_ID = 15;
+    public static final int INTAKE_ROLLER_ID = 15;
 
     // === CLIMBER ===
     public static final int CLIMBER_RIGHT_ID = 16;
@@ -229,8 +229,8 @@ public final class Constants {
     public static final double SIM_TICK_RATE_S = 0.02;
 
     // === INTAKE ===
-    public static final int INTAKE_MOTOR = 30;
-    public static final int INTAKE_SENSOR_PORT = 10;
+    public static final int INTAKE_ROLLER_MOTOR = 30;
+    public static final int INTAKE_ROLLER_SENSOR_PORT = 10;
     public static final int INTAKE_PIVOT_MOTOR = 15;
 
     // === HOPPER ===
