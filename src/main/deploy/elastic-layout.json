@@ -131,7 +131,7 @@
             "height": 384.0,
             "type": "Boolean Box",
             "properties": {
-              "topic": "/SmartDashboard/HubActive",
+              "topic": "/AdvantageKit/RealOutputs/Superstructure/Shooting/HubActive",
               "period": 0.06,
               "data_type": "boolean",
               "true_color": 4283215696,
