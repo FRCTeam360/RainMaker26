@@ -242,7 +242,7 @@ public class SuperStructure extends SubsystemBase {
   }
 
   public Command setStateCommand(SuperWantedStates superState) {
-    return new InstantCommand(() -> setWantedSuperState(superState), this);
+    return new InstantCommand(() -> setWantedSuperState(superState));
   }
 
   public void setWantedSuperState(SuperWantedStates superState) {
@@ -264,7 +264,7 @@ public class SuperStructure extends SubsystemBase {
   }
 
   public Command setIntakeStateCommand(IntakeStateMachine.IntakeWantedStates state) {
-    return new InstantCommand(() -> setIntakeState(state), this);
+    return new InstantCommand(() -> setIntakeState(state));
   }
 
   // periodic
