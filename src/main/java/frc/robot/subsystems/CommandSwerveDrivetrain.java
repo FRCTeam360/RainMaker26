@@ -13,7 +13,6 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -102,12 +101,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   // Maximum translational speed while using field-centric facing angle (fraction of maxSpeed).
   // Limits how much shoot-on-the-move compensation is needed.
   private static final double FACING_ANGLE_MAX_SPEED_FRACTION = 0.5;
-
-  // PID controller for PathPlanner heading override (auto shoot-on-the-move)
-  private final PIDController autoHeadingPID =
-      new PIDController(HEADING_KP, HEADING_KI, HEADING_KD);
-  private boolean headingOverrideActive = false;
-  private Supplier<Rotation2d> headingOverrideSupplier = null;
 
   // Field-centric facing angle request for hub tracking
   private final SwerveRequest.FieldCentricFacingAngle m_faceHubRequest =
@@ -237,35 +230,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         headingSupplier);
   }
 
-  /**
-   * Enables the PathPlanner rotation feedback override so that during auto path following, the
-   * robot rotates toward the heading supplied by {@code headingSupplier} instead of following the
-   * path's rotation profile. Uses a PID controller to compute the rotation rate (rad/s).
-   *
-   * @param headingSupplier supplier for the desired heading (field-relative)
-   */
-  public void enablePathPlannerHeadingOverride(Supplier<Rotation2d> headingSupplier) {
-    this.headingOverrideSupplier = headingSupplier;
-    autoHeadingPID.reset();
-    headingOverrideActive = true;
-    PPHolonomicDriveController.overrideRotationFeedback(
-        () -> {
-          double currentHeadingRad = getRotation2d().getRadians();
-          double targetHeadingRad = headingOverrideSupplier.get().getRadians();
-          return autoHeadingPID.calculate(currentHeadingRad, targetHeadingRad);
-        });
-  }
-
-  /**
-   * Disables the PathPlanner rotation feedback override, returning rotation control to the path
-   * follower.
-   */
-  public void disablePathPlannerHeadingOverride() {
-    headingOverrideActive = false;
-    headingOverrideSupplier = null;
-    PPHolonomicDriveController.clearRotationFeedbackOverride();
-  }
-
   /*
    * SysId routine for characterizing translation. This is used to find PID gains
    * for the drive motors.
@@ -345,8 +309,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     m_faceHubRequest.HeadingController.setIZone(HEADING_I_ZONE);
     m_faceHubRequest.HeadingController.setTolerance(HEADING_TOLERANCE_RAD);
     m_faceHubRequest.ForwardPerspective = ForwardPerspectiveValue.BlueAlliance;
-    autoHeadingPID.enableContinuousInput(-Math.PI, Math.PI);
-    autoHeadingPID.setTolerance(HEADING_TOLERANCE_RAD);
     if (Utils.isSimulation()) {
       startSimThread();
     }
@@ -512,11 +474,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         HEADING_TOLERANCE_RAD + speedMps * HEADING_SPEED_TOLERANCE_RAD_PER_MPS;
     Logger.recordOutput(
         SUBSYSTEM_NAME + "DynamicHeadingToleranceDeg", Math.toDegrees(dynamicToleranceRad));
-
-    if (headingOverrideActive) {
-      autoHeadingPID.setTolerance(dynamicToleranceRad);
-      return autoHeadingPID.atSetpoint();
-    }
 
     m_faceHubRequest.HeadingController.setTolerance(dynamicToleranceRad);
     return m_faceHubRequest.HeadingController.atSetpoint();

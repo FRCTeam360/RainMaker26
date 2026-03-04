@@ -289,20 +289,6 @@ public class RobotContainer {
                             () -> 0,
                             () -> hubShotCalculator.calculateShot().targetHeading())))
             .andThen(superStructure.setStateCommand(SuperWantedStates.DEFAULT)));
-    // This command never self-terminates. It MUST be bounded by event marker zones in
-    // PathPlanner. Using it as a standalone step in a sequential auto will stall the sequence.
-    registerPathplannerCommand(
-        "shoot at hub on move",
-        Commands.startEnd(
-            () -> {
-              drivetrain.enablePathPlannerHeadingOverride(
-                  () -> hubShotCalculator.calculateShot().targetHeading());
-              superStructure.setWantedSuperState(SuperWantedStates.SHOOT_AT_HUB);
-            },
-            () -> {
-              drivetrain.disablePathPlannerHeadingOverride();
-              superStructure.setWantedSuperState(SuperWantedStates.DEFAULT);
-            }));
     registerPathplannerCommand(
         "stow intake", superStructure.setIntakeStateCommand(IntakeWantedStates.STOWED));
     registerPathplannerCommand(
