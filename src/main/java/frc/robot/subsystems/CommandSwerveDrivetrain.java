@@ -98,6 +98,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   // (setpoint rate ≈ v/d rad/s; lag ≈ rate/KP). Tunable — start at ~5°/m/s.
   private static final double HEADING_SPEED_TOLERANCE_RAD_PER_MPS = Math.toRadians(5.0);
 
+  // Maximum translational speed while using field-centric facing angle (fraction of maxSpeed).
+  // Limits how much shoot-on-the-move compensation is needed.
+  private static final double FACING_ANGLE_MAX_SPEED_FRACTION = 0.5;
+
   // Field-centric facing angle request for hub tracking
   private final SwerveRequest.FieldCentricFacingAngle m_faceHubRequest =
       new SwerveRequest.FieldCentricFacingAngle()
@@ -171,16 +175,28 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
       DoubleSupplier velocityXSupplier,
       DoubleSupplier velocityYSupplier,
       Supplier<Rotation2d> headingSupplier) {
+    double speedCapMps = maxSpeed.in(MetersPerSecond) * FACING_ANGLE_MAX_SPEED_FRACTION;
     return this.applyRequest(
             () -> {
+              double rawVelXMps = velocityXSupplier.getAsDouble();
+              double rawVelYMps = velocityYSupplier.getAsDouble();
+
+              // Clamp the velocity vector magnitude to the speed cap
+              double rawSpeedMps = Math.hypot(rawVelXMps, rawVelYMps);
+              if (rawSpeedMps > speedCapMps) {
+                double scale = speedCapMps / rawSpeedMps;
+                rawVelXMps *= scale;
+                rawVelYMps *= scale;
+              }
+
               double velXMps =
                   DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
-                      ? velocityXSupplier.getAsDouble()
-                      : -velocityXSupplier.getAsDouble();
+                      ? rawVelXMps
+                      : -rawVelXMps;
               double velYMps =
                   DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
-                      ? velocityYSupplier.getAsDouble()
-                      : -velocityYSupplier.getAsDouble();
+                      ? rawVelYMps
+                      : -rawVelYMps;
               double omegaRps = m_faceHubRequest.HeadingController.getLastAppliedOutput();
               commandedSpeeds.vxMetersPerSecond = velXMps;
               commandedSpeeds.vyMetersPerSecond = velYMps;
