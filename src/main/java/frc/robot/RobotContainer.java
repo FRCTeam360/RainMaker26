@@ -392,7 +392,7 @@ public class RobotContainer {
       agitateTrigger.onFalse(superStructure.setIntakeStateCommand(IntakeWantedStates.INTAKING));
 
       // Y toggle: STOWED <-
-      > INTAKING. Gated out while agitate trigger is held.
+      // > INTAKING. Gated out while agitate trigger is held.
       driverCont
           .y()
           .and(isSuperstructureMode)
