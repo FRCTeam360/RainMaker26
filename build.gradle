@@ -154,7 +154,9 @@ deploy {
                     jvmArgs.add("-XX:+UseG1GC")
                     jvmArgs.add("-XX:MaxGCPauseMillis=20")
                     jvmArgs.add("-XX:GCTimeRatio=5")
-                    // roboRIO 2 is dual-core — limit GC threads to avoid starving the main loop
+                    // roboRIO 2 is dual-core: pin thread counts explicitly so the JVM
+                    // doesn't over-allocate if it misreads the core count (e.g. in a cgroup).
+                    // ConcGCThreads=1 ensures concurrent marking leaves one core for robot code.
                     jvmArgs.add("-XX:ParallelGCThreads=2")
                     jvmArgs.add("-XX:ConcGCThreads=1")
 
