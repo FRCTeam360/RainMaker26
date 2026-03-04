@@ -118,7 +118,7 @@ public class IntakeRoller extends SubsystemBase {
 
   private void intaking() {
     if (Constants.getRobotType() != Constants.RobotType.WOODBOT) {
-      setVelocity(1100);
+      setVelocity(2000);
     } else {
       setDutyCycle(0.7);
     }

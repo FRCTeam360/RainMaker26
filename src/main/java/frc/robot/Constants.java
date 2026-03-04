@@ -43,6 +43,12 @@ public final class Constants {
     REPLAY
   }
 
+  /** Frames to skip between processed frames while disabled. Only affects Limelight 4. */
+  public static final int DISABLED_THROTTLE_SKIP_FRAMES = 200;
+
+  /** Frames to skip between processed frames while enabled. Only affects Limelight 4. */
+  public static final int ENABLED_THROTTLE_SKIP_FRAMES = 0;
+
   static RobotType robotType;
 
   public static RobotType getRobotType() {
@@ -217,7 +223,8 @@ public final class Constants {
     public static final int HOOD_ID = 24;
 
     // === LIMELIGHT ===
-    public static final String LIMELIGHT = "limelight-right";
+    public static final String LIMELIGHT_RIGHT = "limelight-right";
+    public static final String LIMELIGHT_LEFT = "limelight-left";
 
     // === CANBUS ===
     public static final CANBus CANBUS = new CANBus("Default Name");

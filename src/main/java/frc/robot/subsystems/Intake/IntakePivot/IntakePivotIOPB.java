@@ -41,7 +41,7 @@ public class IntakePivotIOPB implements IntakePivotIO {
   private static final double MOTION_MAGIC_CRUISE_VELOCITY_RPS = 1.0;
   private static final double MOTION_MAGIC_JERK_RPS3 = 1750.0;
 
-  private static final double FORWARD_SOFT_LIMIT_DEGREES = 94.0;
+  private static final double FORWARD_SOFT_LIMIT_DEGREES = 98.0;
   private static final double REVERSE_SOFT_LIMIT_DEGREES = 0.0;
 
   private static final double PEAK_FORWARD_VOLTAGE = 12.0;

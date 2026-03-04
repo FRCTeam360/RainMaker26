@@ -68,9 +68,9 @@ public class SuperStructure extends SubsystemBase {
   }
 
   // State variables
-  private SuperWantedStates wantedSuperState = SuperWantedStates.DEFAULT;
-  private SuperInternalStates currentSuperState = SuperInternalStates.DEFAULT;
-  private SuperInternalStates previousSuperState = SuperInternalStates.DEFAULT;
+  private SuperWantedStates wantedSuperState = SuperWantedStates.IDLE;
+  private SuperInternalStates currentSuperState = SuperInternalStates.IDLE;
+  private SuperInternalStates previousSuperState = SuperInternalStates.IDLE;
   private ControlState controlState = ControlState.SUPERSTRUCTURE;
   private boolean cachedHubActive = true;
   private double cachedTimeOfFlight = 0.0;

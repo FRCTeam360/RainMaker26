@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.ControlState;
 import java.util.function.BooleanSupplier;
@@ -196,10 +197,13 @@ public class Hood extends SubsystemBase {
     final double ZERO_DUTY_CYCLE = -0.05;
     final double ZERO_TIMEOUT_SECONDS = 3.0;
     final double ZERO_SETTLE_SECONDS = 2.0;
-    return Commands.runEnd(() -> io.setDutyCycle(ZERO_DUTY_CYCLE), () -> io.setDutyCycle(0.0))
-        .withTimeout(ZERO_TIMEOUT_SECONDS)
+    return new InstantCommand(() -> this.controlState = ControlState.INDEPENDENT)
+        .andThen(
+            Commands.runEnd(() -> io.setDutyCycle(ZERO_DUTY_CYCLE), () -> io.setDutyCycle(0.0))
+                .withTimeout(ZERO_TIMEOUT_SECONDS))
         .andThen(Commands.waitSeconds(ZERO_SETTLE_SECONDS))
-        .andThen(zero());
+        .andThen(zero())
+        .andThen(new InstantCommand(() -> this.controlState = ControlState.SUPERSTRUCTURE));
   }
 
   // periodic
