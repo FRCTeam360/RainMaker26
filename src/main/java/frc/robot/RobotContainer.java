@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Constants.RobotType;
 import frc.robot.generated.PracticeBotDrivetrain;
 import frc.robot.generated.WoodBotDrivetrain;
 import frc.robot.subsystems.Climber.Climber;
@@ -380,16 +381,24 @@ public class RobotContainer {
     forceOutpostTrigger.onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
 
     // Left trigger held: agitate. Release: back to intaking.
-    Trigger agitateTrigger = driverCont.leftTrigger().and(isSuperstructureMode);
-    agitateTrigger.onTrue(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING));
-    agitateTrigger.onFalse(superStructure.setIntakeStateCommand(IntakeWantedStates.INTAKING));
+    if (Constants.getRobotType() == RobotType.WOODBOT) {
+      Trigger intakeTrigger = driverCont.leftTrigger().and(isSuperstructureMode);
+      intakeTrigger.onTrue(superStructure.setIntakeStateCommand(IntakeWantedStates.INTAKING));
+      intakeTrigger.whileFalse(superStructure.setIntakeStateCommand(IntakeWantedStates.IDLE));
 
-    // Y toggle: STOWED <-> INTAKING. Gated out while agitate trigger is held.
-    driverCont
-        .y()
-        .and(isSuperstructureMode)
-        .and(() -> !agitateTrigger.getAsBoolean())
-        .onTrue(superStructure.toggleIntakeStateCommand());
+    } else {
+      Trigger agitateTrigger = driverCont.leftTrigger().and(isSuperstructureMode);
+      agitateTrigger.onTrue(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING));
+      agitateTrigger.onFalse(superStructure.setIntakeStateCommand(IntakeWantedStates.INTAKING));
+
+      // Y toggle: STOWED <-
+      > INTAKING. Gated out while agitate trigger is held.
+      driverCont
+          .y()
+          .and(isSuperstructureMode)
+          .and(() -> !agitateTrigger.getAsBoolean())
+          .onTrue(superStructure.toggleIntakeStateCommand());
+    }
 
     configureIndependentModeBindings(isIndependentMode);
 
@@ -542,7 +551,10 @@ public class RobotContainer {
     // Ensures superstructure control mode is active when enabled
     superStructure.setControlState(ControlState.SUPERSTRUCTURE);
     superStructure.setWantedSuperState(SuperWantedStates.DEFAULT);
-    superStructure.setIntakeState(IntakeWantedStates.INTAKING);
+    superStructure.setIntakeState(
+        Constants.getRobotType() == RobotType.WOODBOT
+            ? IntakeWantedStates.IDLE
+            : IntakeWantedStates.INTAKING);
     onEnableVision();
   }
 
