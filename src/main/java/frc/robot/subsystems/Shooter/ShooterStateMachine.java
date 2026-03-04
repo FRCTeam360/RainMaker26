@@ -166,7 +166,7 @@ public class ShooterStateMachine {
         flywheelKicker.setWantedState(FlywheelKickerStates.KICKING);
         break;
       case WAITING:
-        flywheel.setWantedState(FlywheelWantedStates.IDLE);
+        flywheel.setWantedState(FlywheelWantedStates.COASTING);
         hood.setWantedState(HoodWantedStates.DUCKED);
         flywheelKicker.setWantedState(FlywheelKickerStates.IDLE);
         break;
