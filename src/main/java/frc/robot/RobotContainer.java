@@ -306,6 +306,8 @@ public class RobotContainer {
     registerPathplannerCommand(
         "stow intake", superStructure.setIntakeStateCommand(IntakeWantedStates.STOWED));
     registerPathplannerCommand(
+        "agitate intake", superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING));
+    registerPathplannerCommand(
         "spin up", superStructure.setStateCommand(SuperWantedStates.DEFAULT));
 
     configVision();
