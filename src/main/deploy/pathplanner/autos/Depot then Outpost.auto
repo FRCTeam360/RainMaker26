@@ -1,0 +1,70 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "deadline",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "DepotThenOutpath1"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "basic intake"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "deadline",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "DepotThenOutpath2"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "basic intake"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "sequential",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "DepotThenOutpath3"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "shoot at hub"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}

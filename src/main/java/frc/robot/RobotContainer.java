@@ -118,12 +118,6 @@ public class RobotContainer {
   private double lastCycleTimestamp = Logger.getTimestamp() / 1.0e6;
   private int overrunCount;
 
-  /** Frames to skip between processed frames while disabled. Only affects Limelight 4. */
-  private static final int DISABLED_THROTTLE_SKIP_FRAMES = 200;
-
-  /** Frames to skip between processed frames while enabled. Only affects Limelight 4. */
-  private static final int ENABLED_THROTTLE_SKIP_FRAMES = 0;
-
   private RobotShootingInfo robotShootingInfo;
   private RobotShootingInfo passShootingInfo;
 
@@ -206,9 +200,16 @@ public class RobotContainer {
             new Vision(
                 Map.ofEntries(
                     Map.entry(
-                        Constants.PracticeBotConstants.LIMELIGHT,
+                        Constants.PracticeBotConstants.LIMELIGHT_RIGHT,
                         new VisionIOLimelight4(
-                            Constants.PracticeBotConstants.LIMELIGHT,
+                            Constants.PracticeBotConstants.LIMELIGHT_RIGHT,
+                            () -> drivetrain.getAngle(),
+                            () -> drivetrain.getAngularRate(),
+                            true)),
+                    Map.entry(
+                        Constants.PracticeBotConstants.LIMELIGHT_LEFT,
+                        new VisionIOLimelight4(
+                            Constants.PracticeBotConstants.LIMELIGHT_LEFT,
                             () -> drivetrain.getAngle(),
                             () -> drivetrain.getAngularRate(),
                             true))));
@@ -269,7 +270,7 @@ public class RobotContainer {
     // TODO: add end condition based on state from SuperStructure (based on sensor inputs)
     registerPathplannerCommand(
         "shoot at hub",
-        Commands.waitSeconds(10)
+        Commands.waitSeconds(5)
             .deadlineFor(
                 superStructure
                     .setStateCommand(SuperWantedStates.SHOOT_AT_HUB)
@@ -398,19 +399,28 @@ public class RobotContainer {
   /** Configures bindings that are active only in independent (test) mode. */
   private void configureIndependentModeBindings(BooleanSupplier isIndependentMode) {
     driverCont.leftBumper().and(isIndependentMode).whileTrue(intake.setDutyCycleCommand(0.2));
+    driverCont.rightBumper().and(isIndependentMode).whileTrue(intake.setDutyCycleCommand(-0.2));
+    driverCont.rightTrigger().and(isIndependentMode).whileTrue(indexer.setDutyCycleCommand(0.2));
+    driverCont.leftTrigger().and(isIndependentMode).whileTrue(indexer.setDutyCycleCommand(-0.2));
 
     // driverCont.a().and(isIndependentMode).whileTrue(indexer.setDutyCycleCommand(0.5));
 
     // hood bindings
-    driverCont.pov(0).and(isIndependentMode).onTrue(hood.moveToZeroAndZero());
-    driverCont.pov(90).and(isIndependentMode).whileTrue(hood.setPositionCommand(4.0));
-    driverCont.pov(180).and(isIndependentMode).whileTrue(hood.setPositionCommand(16.0));
-    driverCont.pov(270).and(isIndependentMode).whileTrue(hood.setPositionCommand(23.0));
-    driverCont.start().and(isIndependentMode).onTrue(hood.zero());
+    driverCont.pov(0).and(isIndependentMode).onTrue(hood.setPositionCommand(20.0));
+    driverCont.pov(180).and(isIndependentMode).onTrue(hood.zero());
+
+    driverCont.pov(90).and(isIndependentMode).whileTrue(flywheelKicker.setDutyCycleCommand(0.2));
+    driverCont.pov(270).and(isIndependentMode).whileTrue(flywheelKicker.setDutyCycleCommand(-0.2));
 
     // climber
-    driverCont.x().and(isIndependentMode).whileTrue(climber.setLeftDutyCycleCommand(0.2));
-    driverCont.y().and(isIndependentMode).whileTrue(climber.setLeftDutyCycleCommand(-0.2));
+    driverCont.a().and(isIndependentMode).onTrue(intakePivot.setPositionCommand(() -> 96.0));
+    driverCont.y().and(isIndependentMode).onTrue(intakePivot.setPositionCommand(() -> 0.0));
+
+    driverCont.x().and(isIndependentMode).whileTrue(hopperRoller.setDutyCycleCommand(0.2));
+    driverCont.b().and(isIndependentMode).whileTrue(hopperRoller.setDutyCycleCommand(-0.2));
+
+    driverCont.start().and(isIndependentMode).whileTrue(flywheel.setDutyCycleCommand(0.2));
+    driverCont.back().and(isIndependentMode).whileTrue(flywheel.setDutyCycleCommand(-0.2));
 
     // flywheel bindings
     // driverCont.x().and(isIndependentMode).whileTrue(flywheel.setVelocityCommand(3000.0));
@@ -524,7 +534,7 @@ public class RobotContainer {
     indexer.stop();
     flywheelKicker.stop();
     vision.enableIMUSeeding();
-    vision.setThrottle(DISABLED_THROTTLE_SKIP_FRAMES);
+    vision.setThrottle(Constants.DISABLED_THROTTLE_SKIP_FRAMES);
   }
 
   /** Called when the robot transitions from disabled to an enabled mode. */
@@ -537,7 +547,7 @@ public class RobotContainer {
 
   /** Sets up vision to run at full performance and temperature */
   private void onEnableVision() {
-    vision.setThrottle(ENABLED_THROTTLE_SKIP_FRAMES);
+    vision.setThrottle(Constants.ENABLED_THROTTLE_SKIP_FRAMES);
   }
 
   /** Decouples the superstructure from subsystems for test mode. */
