@@ -109,6 +109,13 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
           .withRotationalDeadband(0.0)
           .withDriveRequestType(m_driveRequestType); // No deadband for rotation when facing point
 
+  // Heading feedforward tracking (Phase 3 optimization from ShootOnTheMove.md)
+  private Rotation2d m_lastTargetHeading = new Rotation2d();
+  private double m_lastTimestamp = 0.0;
+  private boolean m_headingFeedforwardEnabled = false; // Tunable flag to enable/disable
+  private static final double MAX_HEADING_RATE_FEEDFORWARD_RAD_PER_SEC =
+      10.0; // Clamp feedforward to prevent spikes
+
   public final Command fieldOrientedDriveCommand(
       CommandXboxController driveCont) { // field oriented drive command!
     SwerveRequest.FieldCentric drive =
@@ -179,6 +186,27 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
       Supplier<Rotation2d> headingSupplier) {
     double speedCapMps = maxSpeed.in(MetersPerSecond) * FACING_ANGLE_MAX_SPEED_FRACTION;
     return this.applyRequest(
+            () -> {
+              Rotation2d targetHeading = headingSupplier.get();
+              double feedforward = calculateHeadingFeedforward(targetHeading);
+
+              return m_faceHubRequest
+                  .withVelocityX(
+                      DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
+                          ? velocityXSupplier.getAsDouble()
+                          : -velocityXSupplier.getAsDouble())
+                  .withVelocityY(
+                      DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
+                          ? velocityYSupplier.getAsDouble()
+                          : -velocityYSupplier.getAsDouble())
+                  .withTargetDirection(targetHeading)
+                  .withTargetRateFeedforward(feedforward);
+            })
+        .finallyDo(
+            () -> {
+              m_faceHubRequest.HeadingController.reset();
+              resetHeadingFeedforward();
+            });
             () -> {
               double rawVelXMps = velocityXSupplier.getAsDouble();
               double rawVelYMps = velocityYSupplier.getAsDouble();
@@ -476,6 +504,74 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     Logger.recordOutput(
         SUBSYSTEM_NAME + "DynamicHeadingToleranceDeg", Math.toDegrees(dynamicToleranceRad));
     return m_faceHubRequest.HeadingController.atSetpoint();
+  }
+
+  /**
+   * Calculates heading rate feedforward using a simple derivative. This is part of Phase 3
+   * optimization from ShootOnTheMove.md to make heading tracking more responsive.
+   *
+   * @param currentTargetHeading The current target heading to face
+   * @return The heading rate in radians per second to add as feedforward
+   */
+  private double calculateHeadingFeedforward(Rotation2d currentTargetHeading) {
+    if (!m_headingFeedforwardEnabled) {
+      return 0.0;
+    }
+
+    double currentTime = Utils.getCurrentTimeSeconds(); // FPGA timestamp
+
+    // Calculate time delta (handle first iteration)
+    double dt = (m_lastTimestamp == 0.0) ? 0.02 : (currentTime - m_lastTimestamp);
+    dt = Math.max(dt, 0.001); // Prevent division by zero or negative dt
+
+    // Calculate heading rate (rad/s)
+    double headingDelta = currentTargetHeading.minus(m_lastTargetHeading).getRadians();
+    double headingRate = headingDelta / dt;
+
+    // Clamp to prevent extreme values from noise or discontinuities
+    headingRate =
+        Math.max(
+            -MAX_HEADING_RATE_FEEDFORWARD_RAD_PER_SEC,
+            Math.min(MAX_HEADING_RATE_FEEDFORWARD_RAD_PER_SEC, headingRate));
+
+    // Update tracking variables
+    m_lastTargetHeading = currentTargetHeading;
+    m_lastTimestamp = currentTime;
+
+    // Log for tuning
+    Logger.recordOutput(SUBSYSTEM_NAME + "HeadingRate/FeedForward", headingRate);
+    Logger.recordOutput(SUBSYSTEM_NAME + "HeadingRate/Enabled", m_headingFeedforwardEnabled);
+
+    return headingRate;
+  }
+
+  /**
+   * Resets the heading feedforward tracking state. Should be called when the facing-angle command
+   * ends.
+   */
+  private void resetHeadingFeedforward() {
+    m_lastTargetHeading = new Rotation2d();
+    m_lastTimestamp = 0.0;
+  }
+
+  /**
+   * Enables or disables heading feedforward for testing. When disabled, only PID control is used.
+   * When enabled, heading rate feedforward is added to improve tracking responsiveness.
+   *
+   * @param enabled true to enable feedforward, false to use PID-only
+   */
+  public void setHeadingFeedforwardEnabled(boolean enabled) {
+    m_headingFeedforwardEnabled = enabled;
+    Logger.recordOutput(SUBSYSTEM_NAME + "HeadingFeedforwardEnabled", enabled);
+  }
+
+  /**
+   * Returns whether heading feedforward is currently enabled.
+   *
+   * @return true if feedforward is enabled
+   */
+  public boolean isHeadingFeedforwardEnabled() {
+    return m_headingFeedforwardEnabled;
   }
 
   public double getAngle() {
