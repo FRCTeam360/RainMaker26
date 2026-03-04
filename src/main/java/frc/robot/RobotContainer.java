@@ -404,8 +404,11 @@ public class RobotContainer {
 
   /** Configures bindings that are active only in independent (test) mode. */
   private void configureIndependentModeBindings(BooleanSupplier isIndependentMode) {
-    driverCont.leftBumper().and(isIndependentMode).whileTrue(intake.setDutyCycleCommand(0.2));
-    driverCont.rightBumper().and(isIndependentMode).whileTrue(intake.setDutyCycleCommand(-0.2));
+    driverCont.leftBumper().and(isIndependentMode).whileTrue(intakeRoller.setDutyCycleCommand(0.2));
+    driverCont
+        .rightBumper()
+        .and(isIndependentMode)
+        .whileTrue(intakeRoller.setDutyCycleCommand(-0.2));
     driverCont.rightTrigger().and(isIndependentMode).whileTrue(indexer.setDutyCycleCommand(0.2));
     driverCont.leftTrigger().and(isIndependentMode).whileTrue(indexer.setDutyCycleCommand(-0.2));
 
