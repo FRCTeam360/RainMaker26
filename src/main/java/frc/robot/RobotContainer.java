@@ -286,7 +286,9 @@ public class RobotContainer {
                         drivetrain.faceAngleWhileDrivingCommand(
                             () -> 0,
                             () -> 0,
-                            () -> hubShotCalculator.calculateShot().targetHeading())))
+                            () -> hubShotCalculator.calculateShot().targetHeading(),
+                            () -> hubShotCalculator.calculateShot().headingVelocityRadPerSec())))
+            .finallyDo(() -> hubShotCalculator.resetHeadingState())
             .andThen(superStructure.setStateCommand(SuperWantedStates.DEFAULT)));
     registerPathplannerCommand(
         "stow intake", superStructure.setIntakeStateCommand(IntakeWantedStates.STOWED));
@@ -366,8 +368,22 @@ public class RobotContainer {
                         return passCalculator.calculateShot().targetHeading();
                       }
                       return hubShotCalculator.calculateShot().targetHeading();
+                    },
+                    () -> {
+                      if (superStructure.getCurrentSuperState() == SuperInternalStates.PASSING) {
+                        return passCalculator.calculateShot().headingVelocityRadPerSec();
+                      }
+                      return hubShotCalculator.calculateShot().headingVelocityRadPerSec();
                     })));
-    autoCycleTrigger.onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
+    autoCycleTrigger.onFalse(
+        superStructure
+            .setStateCommand(SuperWantedStates.DEFAULT)
+            .alongWith(
+                Commands.runOnce(
+                    () -> {
+                      hubShotCalculator.resetHeadingState();
+                      passCalculator.resetHeadingState();
+                    })));
 
     // Manual override: force shoot at hub regardless of position
     Trigger forceHubTrigger = driverCont.rightBumper().and(isSuperstructureMode);
@@ -376,8 +392,13 @@ public class RobotContainer {
             .setStateCommand(SuperWantedStates.SHOOT_AT_HUB)
             .alongWith(
                 drivetrain.faceAngleWhileDrivingCommand(
-                    driverCont, () -> hubShotCalculator.calculateShot().targetHeading())));
-    forceHubTrigger.onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
+                    driverCont,
+                    () -> hubShotCalculator.calculateShot().targetHeading(),
+                    () -> hubShotCalculator.calculateShot().headingVelocityRadPerSec())));
+    forceHubTrigger.onFalse(
+        superStructure
+            .setStateCommand(SuperWantedStates.DEFAULT)
+            .alongWith(Commands.runOnce(() -> hubShotCalculator.resetHeadingState())));
 
     // Manual override: force pass to outpost regardless of position
     Trigger forceOutpostTrigger = driverCont.leftBumper().and(isSuperstructureMode);
@@ -386,8 +407,13 @@ public class RobotContainer {
             .setStateCommand(SuperWantedStates.SHOOT_AT_OUTPOST)
             .alongWith(
                 drivetrain.faceAngleWhileDrivingCommand(
-                    driverCont, () -> passCalculator.calculateShot().targetHeading())));
-    forceOutpostTrigger.onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
+                    driverCont,
+                    () -> passCalculator.calculateShot().targetHeading(),
+                    () -> passCalculator.calculateShot().headingVelocityRadPerSec())));
+    forceOutpostTrigger.onFalse(
+        superStructure
+            .setStateCommand(SuperWantedStates.DEFAULT)
+            .alongWith(Commands.runOnce(() -> passCalculator.resetHeadingState())));
 
     // Left trigger held: agitate. Release: back to intaking.
     if (Constants.getRobotType() == RobotType.WOODBOT) {

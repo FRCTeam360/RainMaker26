@@ -93,10 +93,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   private static final double HEADING_KD = 0.005;
   private static final double HEADING_I_ZONE = 0.0;
   private static final double HEADING_TOLERANCE_RAD = Math.toRadians(3.0);
-  // Extra heading tolerance granted per m/s of translational speed.
-  // Compensates for the PID steady-state tracking lag when the heading setpoint moves
-  // (setpoint rate ≈ v/d rad/s; lag ≈ rate/KP). Tunable — start at ~5°/m/s.
-  private static final double HEADING_SPEED_TOLERANCE_RAD_PER_MPS = Math.toRadians(5.0);
 
   // Maximum translational speed while using field-centric facing angle (fraction of maxSpeed).
   // Limits how much shoot-on-the-move compensation is needed.
@@ -108,13 +104,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
           .withDeadband(maxSpeed.in(MetersPerSecond) * 0.01)
           .withRotationalDeadband(0.0)
           .withDriveRequestType(m_driveRequestType); // No deadband for rotation when facing point
-
-  // Heading feedforward tracking (Phase 3 optimization from ShootOnTheMove.md)
-  private Rotation2d m_lastTargetHeading = new Rotation2d();
-  private double m_lastTimestamp = 0.0;
-  private boolean m_headingFeedforwardEnabled = false; // Tunable flag to enable/disable
-  private static final double MAX_HEADING_RATE_FEEDFORWARD_RAD_PER_SEC =
-      10.0; // Clamp feedforward to prevent spikes
 
   public final Command fieldOrientedDriveCommand(
       CommandXboxController driveCont) { // field oriented drive command!
@@ -178,35 +167,18 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
    *
    * @param velocityXSupplier Supplier for X velocity (field-relative, forward positive) in m/s
    * @param velocityYSupplier Supplier for Y velocity (field-relative, left positive) in m/s
+   * @param headingSupplier Supplier for the target heading
+   * @param headingVelocitySupplier Supplier for the heading rate feedforward in rad/s (from
+   *     ShotCalculator)
    * @return Command that drives while facing the hub
    */
   public Command faceAngleWhileDrivingCommand(
       DoubleSupplier velocityXSupplier,
       DoubleSupplier velocityYSupplier,
-      Supplier<Rotation2d> headingSupplier) {
+      Supplier<Rotation2d> headingSupplier,
+      DoubleSupplier headingVelocitySupplier) {
     double speedCapMps = maxSpeed.in(MetersPerSecond) * FACING_ANGLE_MAX_SPEED_FRACTION;
     return this.applyRequest(
-            () -> {
-              Rotation2d targetHeading = headingSupplier.get();
-              double feedforward = calculateHeadingFeedforward(targetHeading);
-
-              return m_faceHubRequest
-                  .withVelocityX(
-                      DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
-                          ? velocityXSupplier.getAsDouble()
-                          : -velocityXSupplier.getAsDouble())
-                  .withVelocityY(
-                      DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
-                          ? velocityYSupplier.getAsDouble()
-                          : -velocityYSupplier.getAsDouble())
-                  .withTargetDirection(targetHeading)
-                  .withTargetRateFeedforward(feedforward);
-            })
-        .finallyDo(
-            () -> {
-              m_faceHubRequest.HeadingController.reset();
-              resetHeadingFeedforward();
-            });
             () -> {
               double rawVelXMps = velocityXSupplier.getAsDouble();
               double rawVelYMps = velocityYSupplier.getAsDouble();
@@ -219,6 +191,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                 rawVelYMps *= scale;
               }
 
+              Rotation2d targetHeading = headingSupplier.get();
+              double feedforward = headingVelocitySupplier.getAsDouble();
               double omegaRps = m_faceHubRequest.HeadingController.getLastAppliedOutput();
 
               // Store as robot-relative to match getVelocity() convention.
@@ -238,9 +212,13 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
               return m_faceHubRequest
                   .withVelocityX(rawVelXMps)
                   .withVelocityY(rawVelYMps)
-                  .withTargetDirection(headingSupplier.get());
+                  .withTargetDirection(targetHeading)
+                  .withTargetRateFeedforward(feedforward);
             })
-        .finallyDo(() -> m_faceHubRequest.HeadingController.reset());
+        .finallyDo(
+            () -> {
+              m_faceHubRequest.HeadingController.reset();
+            });
   }
 
   /**
@@ -248,14 +226,20 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
    * face the hub center, using controller input with cubic response curve.
    *
    * @param driveCont The Xbox controller for driver input
+   * @param headingSupplier Supplier for the target heading
+   * @param headingVelocitySupplier Supplier for the heading rate feedforward in rad/s (from
+   *     ShotCalculator)
    * @return Command that drives while facing the hub
    */
   public Command faceAngleWhileDrivingCommand(
-      CommandXboxController driveCont, Supplier<Rotation2d> headingSupplier) {
+      CommandXboxController driveCont,
+      Supplier<Rotation2d> headingSupplier,
+      DoubleSupplier headingVelocitySupplier) {
     return faceAngleWhileDrivingCommand(
         () -> Math.pow(driveCont.getLeftY(), 3) * maxSpeed.in(MetersPerSecond) * -1.0,
         () -> Math.pow(driveCont.getLeftX(), 3) * maxSpeed.in(MetersPerSecond) * -1.0,
-        headingSupplier);
+        headingSupplier,
+        headingVelocitySupplier);
   }
 
   /*
@@ -480,98 +464,21 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   }
 
   /**
-   * Returns whether the heading controller is aligned to its target angle within a speed-scaled
+   * Returns whether the heading controller is aligned to its target angle within the configured
    * tolerance. Uses the {@link com.ctre.phoenix6.swerve.utility.PhoenixPIDController#atSetpoint()}
    * method on the facing-angle request's heading controller.
-   *
-   * <p>The tolerance grows with translational speed to account for the PID steady-state tracking
-   * lag: when the robot moves, the heading setpoint changes at roughly {@code v/d} rad/s, producing
-   * a lag of {@code (v/d)/KP} rad. Adding {@link #HEADING_SPEED_TOLERANCE_RAD_PER_MPS} per m/s
-   * compensates for this so the robot can fire during shoot-on-the-move.
    *
    * <p>Note: This only returns meaningful results while a {@link
    * SwerveRequest.FieldCentricFacingAngle} request is actively being applied (e.g., during
    * faceAngleWhileDriving). Before the first PID calculation, this returns false.
    *
-   * @return true if the heading error is within the speed-scaled tolerance
+   * @return true if the heading error is within tolerance
    */
   public boolean isAlignedToTarget() {
-    ChassisSpeeds speeds = getVelocity();
-    double speedMps = Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond);
-    double dynamicToleranceRad =
-        HEADING_TOLERANCE_RAD + speedMps * HEADING_SPEED_TOLERANCE_RAD_PER_MPS;
-    m_faceHubRequest.HeadingController.setTolerance(dynamicToleranceRad);
+    m_faceHubRequest.HeadingController.setTolerance(HEADING_TOLERANCE_RAD);
     Logger.recordOutput(
-        SUBSYSTEM_NAME + "DynamicHeadingToleranceDeg", Math.toDegrees(dynamicToleranceRad));
+        SUBSYSTEM_NAME + "HeadingToleranceDeg", Math.toDegrees(HEADING_TOLERANCE_RAD));
     return m_faceHubRequest.HeadingController.atSetpoint();
-  }
-
-  /**
-   * Calculates heading rate feedforward using a simple derivative. This is part of Phase 3
-   * optimization from ShootOnTheMove.md to make heading tracking more responsive.
-   *
-   * @param currentTargetHeading The current target heading to face
-   * @return The heading rate in radians per second to add as feedforward
-   */
-  private double calculateHeadingFeedforward(Rotation2d currentTargetHeading) {
-    if (!m_headingFeedforwardEnabled) {
-      return 0.0;
-    }
-
-    double currentTime = Utils.getCurrentTimeSeconds(); // FPGA timestamp
-
-    // Calculate time delta (handle first iteration)
-    double dt = (m_lastTimestamp == 0.0) ? 0.02 : (currentTime - m_lastTimestamp);
-    dt = Math.max(dt, 0.001); // Prevent division by zero or negative dt
-
-    // Calculate heading rate (rad/s)
-    double headingDelta = currentTargetHeading.minus(m_lastTargetHeading).getRadians();
-    double headingRate = headingDelta / dt;
-
-    // Clamp to prevent extreme values from noise or discontinuities
-    headingRate =
-        Math.max(
-            -MAX_HEADING_RATE_FEEDFORWARD_RAD_PER_SEC,
-            Math.min(MAX_HEADING_RATE_FEEDFORWARD_RAD_PER_SEC, headingRate));
-
-    // Update tracking variables
-    m_lastTargetHeading = currentTargetHeading;
-    m_lastTimestamp = currentTime;
-
-    // Log for tuning
-    Logger.recordOutput(SUBSYSTEM_NAME + "HeadingRate/FeedForward", headingRate);
-    Logger.recordOutput(SUBSYSTEM_NAME + "HeadingRate/Enabled", m_headingFeedforwardEnabled);
-
-    return headingRate;
-  }
-
-  /**
-   * Resets the heading feedforward tracking state. Should be called when the facing-angle command
-   * ends.
-   */
-  private void resetHeadingFeedforward() {
-    m_lastTargetHeading = new Rotation2d();
-    m_lastTimestamp = 0.0;
-  }
-
-  /**
-   * Enables or disables heading feedforward for testing. When disabled, only PID control is used.
-   * When enabled, heading rate feedforward is added to improve tracking responsiveness.
-   *
-   * @param enabled true to enable feedforward, false to use PID-only
-   */
-  public void setHeadingFeedforwardEnabled(boolean enabled) {
-    m_headingFeedforwardEnabled = enabled;
-    Logger.recordOutput(SUBSYSTEM_NAME + "HeadingFeedforwardEnabled", enabled);
-  }
-
-  /**
-   * Returns whether heading feedforward is currently enabled.
-   *
-   * @return true if feedforward is enabled
-   */
-  public boolean isHeadingFeedforwardEnabled() {
-    return m_headingFeedforwardEnabled;
   }
 
   public double getAngle() {

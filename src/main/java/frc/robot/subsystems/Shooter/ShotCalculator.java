@@ -3,6 +3,7 @@
 
 package frc.robot.subsystems.Shooter;
 
+import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -42,21 +43,34 @@ public class ShotCalculator {
   private final String logTimeOfFlightSecs;
   private final String logIsValid;
   private final String logRobotSpeeds;
+  private final String logHeadingVelocityRadPerSec;
 
   private double minDistanceMeters = 0.0;
   private double maxDistanceMeters = Double.MAX_VALUE;
+
+  // Heading velocity feedforward state — computed inside calculateShot() so the feedforward
+  // is produced in the same place as the heading target (no 1-frame lag, no external derivative).
+  // Uses a moving-average filter to smooth the raw frame-to-frame heading delta (matches 6328).
+  private static final int HEADING_RATE_FILTER_TAPS = 5; // ~0.1s window at 50 Hz
+  private static final double LOOP_PERIOD_SECS = 0.02;
+  private final LinearFilter headingRateFilter =
+      LinearFilter.movingAverage(HEADING_RATE_FILTER_TAPS);
+  private Rotation2d lastTargetHeading = null;
 
   /**
    * Holds the calculated shooting parameters for a given robot position.
    *
    * @param targetHeading the robot heading that aims the shooter at the target, accounting for the
    *     shooter's facing angle relative to the robot
+   * @param headingVelocityRadPerSec the rate of change of the target heading in rad/s, filtered for
+   *     use as heading controller feedforward
    * @param hoodAngle the hood angle setpoint in degrees
    * @param flywheelSpeed the flywheel speed setpoint in RPM
    * @param isValid whether the target is within the effective shooting range
    */
   public record ShootingParams(
       Rotation2d targetHeading,
+      double headingVelocityRadPerSec,
       double hoodAngle,
       double flywheelSpeed,
       double timeOfFlight,
@@ -110,6 +124,7 @@ public class ShotCalculator {
     this.logTimeOfFlightSecs = basePath + "/timeOfFlightSecs";
     this.logIsValid = basePath + "/isValid";
     this.logRobotSpeeds = basePath + "/robotSpeeds";
+    this.logHeadingVelocityRadPerSec = basePath + "/headingVelocityRadPerSec";
   }
 
   private ShootingParams cachedShootingParams = null;
@@ -187,8 +202,9 @@ public class ShotCalculator {
         Math.max(minDistanceMeters, Math.min(maxDistanceMeters, lookaheadDistanceMeters));
 
     // Calculate the robot heading needed to aim the shooter at the target.
-    // First find the field-frame angle from the velocity-compensated robot center to the target,
-    // then subtract the shooter's facing angle relative to the robot so the drivetrain
+    // The drivetrain rotates around the robot center, so we compute the angle from the
+    // velocity-compensated robot center (not the shooter position) to the target.
+    // Then subtract the shooter's facing angle relative to the robot so the drivetrain
     // orients the shooter toward the target.
     Translation2d robotCenterLookahead =
         robotPosition
@@ -199,6 +215,18 @@ public class ShotCalculator {
                     robotFieldVelocity.getY() * timeOfFlightSecs));
     Rotation2d angleToTarget = target.minus(robotCenterLookahead).getAngle();
     Rotation2d targetHeading = angleToTarget.minus(robotToShooter.getRotation());
+
+    // Compute heading velocity feedforward (rad/s) using a filtered frame-to-frame derivative.
+    // This is produced in the same place as the heading target — no 1-frame lag, no external
+    // numerical differentiation. Matches 6328's approach of returning driveVelocity from the
+    // calculator. On the first frame (lastTargetHeading == null) we output 0 to avoid a spike.
+    double headingVelocityRadPerSec = 0.0;
+    if (lastTargetHeading != null) {
+      headingVelocityRadPerSec =
+          headingRateFilter.calculate(
+              targetHeading.minus(lastTargetHeading).getRadians() / LOOP_PERIOD_SECS);
+    }
+    lastTargetHeading = targetHeading;
 
     double hoodAngle = shotHoodAngleMap.get(effectiveDistanceMeters);
     double flywheelSpeed = shotFlywheelSpeedMap.get(effectiveDistanceMeters);
@@ -224,9 +252,16 @@ public class ShotCalculator {
     Logger.recordOutput(logTimeOfFlightSecs, timeOfFlightSecs);
     Logger.recordOutput(logIsValid, isValid);
     Logger.recordOutput(logRobotSpeeds, robotSpeeds);
+    Logger.recordOutput(logHeadingVelocityRadPerSec, headingVelocityRadPerSec);
 
     cachedShootingParams =
-        new ShootingParams(targetHeading, hoodAngle, flywheelSpeed, timeOfFlight, isValid);
+        new ShootingParams(
+            targetHeading,
+            headingVelocityRadPerSec,
+            hoodAngle,
+            flywheelSpeed,
+            timeOfFlight,
+            isValid);
     return cachedShootingParams;
   }
 
@@ -236,5 +271,17 @@ public class ShotCalculator {
    */
   public void clearShootingParams() {
     cachedShootingParams = null;
+    // Do NOT reset lastTargetHeading or headingRateFilter here — the heading velocity
+    // feedforward needs continuity across cache clears to produce a smooth derivative.
+    // Only reset them when the command that uses this calculator ends (not every frame).
+  }
+
+  /**
+   * Resets the heading velocity feedforward state. Call this when the aiming command ends so the
+   * filter doesn't carry stale data into the next activation.
+   */
+  public void resetHeadingState() {
+    lastTargetHeading = null;
+    headingRateFilter.reset();
   }
 }
