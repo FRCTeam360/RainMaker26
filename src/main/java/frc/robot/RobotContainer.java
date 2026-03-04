@@ -402,7 +402,7 @@ public class RobotContainer {
 
     configureIndependentModeBindings(isIndependentMode);
 
-    driverCont.a().onTrue(superStructure.setStateCommand(SuperWantedStates.UNJAMMING));
+    driverCont.a().onTrue(superStructure.setStateCommand(SuperWantedStates.FORCE_SHOOTING));
     driverCont.a().onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
 
     // Drivetrain commands
