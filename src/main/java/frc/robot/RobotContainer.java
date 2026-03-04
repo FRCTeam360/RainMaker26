@@ -69,6 +69,7 @@ import frc.robot.subsystems.Vision.VisionIOLimelight4;
 import frc.robot.subsystems.Vision.VisionIOLimelightBase;
 import frc.robot.subsystems.Vision.VisionIOPhotonSim;
 import frc.robot.utils.AllianceFlipUtil;
+import frc.robot.utils.CommandLogger;
 import frc.robot.utils.FieldConstants;
 import frc.robot.utils.PathProvider;
 import frc.robot.utils.PositionUtils;
@@ -288,6 +289,8 @@ public class RobotContainer {
                             () -> 0,
                             () -> hubShotCalculator.calculateShot().targetHeading())))
             .andThen(superStructure.setStateCommand(SuperWantedStates.DEFAULT)));
+    // This command never self-terminates. It MUST be bounded by event marker zones in
+    // PathPlanner. Using it as a standalone step in a sequential auto will stall the sequence.
     registerPathplannerCommand(
         "shoot at hub on move",
         Commands.startEnd(
@@ -328,7 +331,7 @@ public class RobotContainer {
 
   public void registerPathplannerCommand(String name, Command command) {
     if (Objects.nonNull(command)) {
-      NamedCommands.registerCommand(name, command);
+      NamedCommands.registerCommand(name, CommandLogger.logCommand(command, name));
     } else {
       System.err.println(name + " is null");
       NamedCommands.registerCommand(
