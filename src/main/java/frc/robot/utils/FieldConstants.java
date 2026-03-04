@@ -48,6 +48,12 @@ public class FieldConstants {
     public static final double oppHubCenter =
         FIELD_LAYOUT.getTagPose(4).get().getX() + Hub.width / 2.0;
     public static final double oppAllianceZone = FIELD_LAYOUT.getTagPose(10).get().getX();
+
+    // RED AND BLUE SPECIFIC
+    public static final double blueHubCenter =
+        FIELD_LAYOUT.getTagPose(26).get().getX() + Hub.width / 2.0;
+    public static final double redHubCenter =
+        FIELD_LAYOUT.getTagPose(4).get().getX() + Hub.width / 2.0;
   }
 
   /**
@@ -72,14 +78,6 @@ public class FieldConstants {
     public static final double leftTrenchHubSide = leftBumpRailSide + Units.inchesToMeters(12.0);
     public static final double leftTrenchRailSide = fieldWidth;
   }
-
-  // Use something like this to create zones and use zone.contains(robot position) to check if the
-  // robot is inside the zone?
-
-  //   private final Rectangle2d allianceZone = new Rectangle2d(
-  //             new Translation2d(x, y), // Bottom-left corner
-  //             new Translation2d(x, y)  // Top-right corner
-  //   );
 
   /** Hub related constants */
   public static class Hub {

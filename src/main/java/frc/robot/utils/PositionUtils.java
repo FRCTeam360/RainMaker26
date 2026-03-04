@@ -6,6 +6,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.robot.utils.FieldConstants.LinesHorizontal;
 import frc.robot.utils.FieldConstants.LinesVertical;
 import frc.robot.utils.FieldConstants.RightTrench;
@@ -28,6 +30,28 @@ public class PositionUtils {
       LinesVertical.oppHubCenter - TRENCH_HALF_WIDTH_METERS;
   private static final double RED_TRENCH_MAX_X =
       LinesVertical.oppHubCenter + TRENCH_HALF_WIDTH_METERS;
+
+  // If we are on the blue alliance, we use these no fly zones
+  static final Rectangle2d neutralNoFlyZoneWhenOnBlueAlliance =
+      new Rectangle2d(
+          new Translation2d(LinesVertical.blueHubCenter, LinesHorizontal.rightBumpHubSide),
+          new Translation2d(LinesVertical.center, LinesHorizontal.leftBumpHubSide));
+  static final Rectangle2d oppNoFlyZoneWhenOnBlueAlliance =
+      new Rectangle2d(
+          new Translation2d(
+              LinesVertical.redHubCenter, FieldConstants.LinesHorizontal.rightBumpHubSide),
+          new Translation2d(FieldConstants.fieldLength, LinesHorizontal.leftBumpHubSide));
+
+  // If we are on the red alliance, we use these no fly zones
+  static final Rectangle2d neutralNoFlyZoneWhenOnRedAlliance =
+      new Rectangle2d(
+          new Translation2d(LinesVertical.redHubCenter, LinesHorizontal.rightBumpHubSide),
+          new Translation2d(LinesVertical.center, LinesHorizontal.leftBumpHubSide));
+  static final Rectangle2d oppNoFlyZoneWhenOnRedAlliance =
+      new Rectangle2d(
+          new Translation2d(
+              LinesVertical.blueHubCenter, FieldConstants.LinesHorizontal.rightBumpHubSide),
+          new Translation2d(0.0, LinesHorizontal.leftBumpHubSide));
 
   private PositionUtils() {}
 
@@ -90,30 +114,21 @@ public class PositionUtils {
   }
 
   public static boolean isInPassingZone(Pose2d robotPose, Transform2d robotToShooter) {
-    double hubCenter = LinesVertical.hubCenter;
-    double oppHubCenter = LinesVertical.oppHubCenter;
-    double oppDSWall = 0.0;
+    Alliance alliance = DriverStation.getAlliance().get();
+    Rectangle2d neutralNoFlyZone = neutralNoFlyZoneWhenOnBlueAlliance;
+    Rectangle2d oppNoFlyZone = oppNoFlyZoneWhenOnBlueAlliance;
 
-    if (AllianceFlipUtil.shouldFlip()) {
-      hubCenter = AllianceFlipUtil.applyX(LinesVertical.hubCenter);
-      oppHubCenter = AllianceFlipUtil.applyX(LinesVertical.oppHubCenter);
-      oppDSWall = FieldConstants.fieldLength;
+    if (DriverStation.getAlliance().isPresent()) {
+      if (alliance == Alliance.Red) {
+        neutralNoFlyZone = neutralNoFlyZoneWhenOnRedAlliance;
+        oppNoFlyZone = oppNoFlyZoneWhenOnRedAlliance;
+      }
+    } else {
+      return true;
     }
-
-    final Rectangle2d neutralNoFlyZone =
-        new Rectangle2d(
-            new Translation2d(hubCenter, LinesHorizontal.rightBumpHubSide),
-            new Translation2d(LinesVertical.center, LinesHorizontal.leftBumpHubSide));
-    final Rectangle2d opponentNoFlyZone =
-        new Rectangle2d(
-            new Translation2d(oppHubCenter, FieldConstants.LinesHorizontal.rightBumpHubSide),
-            new Translation2d(oppDSWall, LinesHorizontal.leftBumpHubSide));
-
-    boolean inAllianceZone = PositionUtils.isInAllianceZone(robotPose);
     boolean inDuckZone = PositionUtils.isInDuckZone(robotPose, robotToShooter);
-
-    if (!inAllianceZone && !inDuckZone) {
-      if (opponentNoFlyZone.contains(robotPose.getTranslation())
+    if (!inDuckZone) {
+      if (oppNoFlyZone.contains(robotPose.getTranslation())
           || neutralNoFlyZone.contains(robotPose.getTranslation())) {
         return false;
       } else {
