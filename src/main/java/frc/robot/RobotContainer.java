@@ -418,7 +418,7 @@ public class RobotContainer {
 
     // hood bindings
     driverCont.pov(0).and(isIndependentMode).onTrue(hood.setPositionCommand(20.0));
-    driverCont.pov(180).and(isIndependentMode).onTrue(hood.zero());
+    driverCont.pov(180).and(isIndependentMode).onTrue(hood.moveToZeroAndZero());
 
     driverCont.pov(90).and(isIndependentMode).whileTrue(flywheelKicker.setDutyCycleCommand(0.2));
     driverCont.pov(270).and(isIndependentMode).whileTrue(flywheelKicker.setDutyCycleCommand(-0.2));
