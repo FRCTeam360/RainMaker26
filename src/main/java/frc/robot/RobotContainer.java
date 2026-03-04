@@ -188,7 +188,7 @@ public class RobotContainer {
                 ShooterConstants.WOODBOT_TO_SHOOTER,
                 Constants.WoodBotConstants.MIN_SHOT_DISTANCE_METERS,
                 Constants.WoodBotConstants.MAX_SHOT_DISTANCE_METERS);
-        passShootingInfo =
+        robotPassingInfo =
             new RobotShootingInfo(
                 Constants.WoodBotConstants.shotHoodAngleMap,
                 Constants.WoodBotConstants.shotFlywheelSpeedMap,
