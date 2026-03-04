@@ -148,17 +148,12 @@ deploy {
                 // First part is artifact name, 2nd is artifact type
                 // getTargetTypeClass is a shortcut to get the class type using a string
 
-                // Tuning the JVM to be more performant
-                // Credit to 6328 for getting our team thinking about this
+                // Tuning the JVM to be more performant based on 6328's config
                 frcJava(getArtifactTypeClass('FRCJavaArtifact')) {
-                    jvmArgs.add("-XX:+UseG1GC")
-                    jvmArgs.add("-XX:MaxGCPauseMillis=20")
+                    jvmArgs.add("-XX:+UnlockExperimentalVMOptions")
                     jvmArgs.add("-XX:GCTimeRatio=5")
-                    // roboRIO 2 is dual-core: pin thread counts explicitly so the JVM
-                    // doesn't over-allocate if it misreads the core count (e.g. in a cgroup).
-                    // ConcGCThreads=1 ensures concurrent marking leaves one core for robot code.
-                    jvmArgs.add("-XX:ParallelGCThreads=2")
-                    jvmArgs.add("-XX:ConcGCThreads=1")
+                    jvmArgs.add("-XX:+UseSerialGC")
+                    jvmArgs.add("-XX:MaxGCPauseMillis=50")
 
                     final MAX_JAVA_HEAP_SIZE_MB = 100;
                     jvmArgs.add("-Xmx" + MAX_JAVA_HEAP_SIZE_MB + "M")
