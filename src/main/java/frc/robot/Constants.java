@@ -249,6 +249,24 @@ public final class Constants {
       shotFlywheelSpeedMap.put(1.0, 1800.0);
       shotFlywheelSpeedMap.put(0.0, 2000.0);
 
+      passHoodAngleMap.put(15.0, 20.0);
+      // passHoodAngleMap.put(5.0, 20.0); // TESTED
+      // passHoodAngleMap.put(4.0, 20.0);
+      // passHoodAngleMap.put(3.0, 20.0); // TESTED
+      // passHoodAngleMap.put(2.5, 20.0); // TESTED
+      // passHoodAngleMap.put(2.0, 20.0);
+      passHoodAngleMap.put(1.0, 20.0);
+      passHoodAngleMap.put(0.0, 20.0);
+
+      passFlywheelSpeedMap.put(15.0, 3500.0);
+      passFlywheelSpeedMap.put(5.0, 3000.0); // TESTED
+      passFlywheelSpeedMap.put(4.0, 2750.0);
+      passFlywheelSpeedMap.put(3.0, 2600.0); // TESTED
+      passFlywheelSpeedMap.put(2.5, 2500.0); // TESTED
+      passFlywheelSpeedMap.put(2.0, 2200.0);
+      passFlywheelSpeedMap.put(1.0, 2000.0);
+      passFlywheelSpeedMap.put(0.0, 2000.0);
+
       timeOfFlightMap.put(0.0, 0.0);
     }
   }

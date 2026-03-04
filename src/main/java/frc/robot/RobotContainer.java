@@ -120,7 +120,7 @@ public class RobotContainer {
   private int overrunCount;
 
   private RobotShootingInfo robotShootingInfo;
-  private RobotShootingInfo passShootingInfo;
+  private RobotShootingInfo robotPassingInfo;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -150,7 +150,7 @@ public class RobotContainer {
                 ShooterConstants.SIM_TO_SHOOTER,
                 Constants.SimulationConstants.MIN_SHOT_DISTANCE_METERS,
                 Constants.SimulationConstants.MAX_SHOT_DISTANCE_METERS);
-        passShootingInfo =
+        robotPassingInfo =
             new RobotShootingInfo(
                 Constants.SimulationConstants.passHoodAngleMap,
                 Constants.SimulationConstants.passFlywheelSpeedMap,
@@ -188,7 +188,7 @@ public class RobotContainer {
                 ShooterConstants.WOODBOT_TO_SHOOTER,
                 Constants.WoodBotConstants.MIN_SHOT_DISTANCE_METERS,
                 Constants.WoodBotConstants.MAX_SHOT_DISTANCE_METERS);
-        passShootingInfo = robotShootingInfo;
+        robotPassingInfo = robotShootingInfo;
         break;
       case PRACTICEBOT:
       default:
@@ -227,8 +227,14 @@ public class RobotContainer {
                 ShooterConstants.PRACTICEBOT_TO_SHOOTER,
                 Constants.PracticeBotConstants.MIN_SHOT_DISTANCE_METERS,
                 Constants.PracticeBotConstants.MAX_SHOT_DISTANCE_METERS);
-        passShootingInfo = robotShootingInfo;
-        // TODO ADD CLIMBERS
+        robotPassingInfo =
+            new RobotShootingInfo(
+                Constants.PracticeBotConstants.passHoodAngleMap,
+                Constants.PracticeBotConstants.passFlywheelSpeedMap,
+                Constants.PracticeBotConstants.timeOfFlightMap,
+                ShooterConstants.PRACTICEBOT_TO_SHOOTER,
+                Constants.PracticeBotConstants.MIN_SHOT_DISTANCE_METERS,
+                Constants.PracticeBotConstants.MAX_SHOT_DISTANCE_METERS);
         break;
     }
     hubShotCalculator =
@@ -246,7 +252,7 @@ public class RobotContainer {
                     AllianceFlipUtil.apply(FieldConstants.RightBump.nearRightCorner),
                     AllianceFlipUtil.apply(FieldConstants.LeftBump.nearLeftCorner)),
             drivetrain::getVelocity,
-            passShootingInfo);
+            robotPassingInfo);
     // Configure the trigger bindings
     // TODO: Re-enable superStructure construction and PathPlanner commands
 
@@ -412,7 +418,10 @@ public class RobotContainer {
 
   /** Configures bindings that are active only in independent (test) mode. */
   private void configureIndependentModeBindings(BooleanSupplier isIndependentMode) {
-    driverCont.leftBumper().and(isIndependentMode).whileTrue(intakeRoller.setDutyCycleCommand(0.2));
+    driverCont
+        .leftBumper()
+        .and(isIndependentMode)
+        .whileTrue(intakeRoller.setVelocityCommand(4000.0));
     driverCont
         .rightBumper()
         .and(isIndependentMode)
@@ -424,7 +433,7 @@ public class RobotContainer {
 
     // hood bindings
     driverCont.pov(0).and(isIndependentMode).onTrue(hood.setPositionCommand(20.0));
-    driverCont.pov(180).and(isIndependentMode).onTrue(hood.zero());
+    driverCont.pov(180).and(isIndependentMode).onTrue(hood.moveToZeroAndZero());
 
     driverCont.pov(90).and(isIndependentMode).whileTrue(flywheelKicker.setDutyCycleCommand(0.2));
     driverCont.pov(270).and(isIndependentMode).whileTrue(flywheelKicker.setDutyCycleCommand(-0.2));
