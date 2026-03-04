@@ -32,22 +32,22 @@ public class PositionUtils {
       LinesVertical.oppHubCenter + TRENCH_HALF_WIDTH_METERS;
 
   // If we are on the blue alliance, we use these no fly zones
-  static final Rectangle2d neutralNoFlyZoneWhenOnBlueAlliance =
+  private static final Rectangle2d neutralNoFlyZoneWhenOnBlueAlliance =
       new Rectangle2d(
           new Translation2d(LinesVertical.blueHubCenter, LinesHorizontal.rightBumpHubSide),
           new Translation2d(LinesVertical.center, LinesHorizontal.leftBumpHubSide));
-  static final Rectangle2d oppNoFlyZoneWhenOnBlueAlliance =
+  private static final Rectangle2d oppNoFlyZoneWhenOnBlueAlliance =
       new Rectangle2d(
           new Translation2d(
               LinesVertical.redHubCenter, FieldConstants.LinesHorizontal.rightBumpHubSide),
           new Translation2d(FieldConstants.fieldLength, LinesHorizontal.leftBumpHubSide));
 
   // If we are on the red alliance, we use these no fly zones
-  static final Rectangle2d neutralNoFlyZoneWhenOnRedAlliance =
+  private static final Rectangle2d neutralNoFlyZoneWhenOnRedAlliance =
       new Rectangle2d(
           new Translation2d(LinesVertical.redHubCenter, LinesHorizontal.rightBumpHubSide),
           new Translation2d(LinesVertical.center, LinesHorizontal.leftBumpHubSide));
-  static final Rectangle2d oppNoFlyZoneWhenOnRedAlliance =
+  private static final Rectangle2d oppNoFlyZoneWhenOnRedAlliance =
       new Rectangle2d(
           new Translation2d(
               LinesVertical.blueHubCenter, FieldConstants.LinesHorizontal.rightBumpHubSide),
@@ -114,11 +114,11 @@ public class PositionUtils {
   }
 
   public static boolean isInPassingZone(Pose2d robotPose, Transform2d robotToShooter) {
-    Alliance alliance = DriverStation.getAlliance().get();
     Rectangle2d neutralNoFlyZone = neutralNoFlyZoneWhenOnBlueAlliance;
     Rectangle2d oppNoFlyZone = oppNoFlyZoneWhenOnBlueAlliance;
 
     if (DriverStation.getAlliance().isPresent()) {
+      Alliance alliance = DriverStation.getAlliance().get();
       if (alliance == Alliance.Red) {
         neutralNoFlyZone = neutralNoFlyZoneWhenOnRedAlliance;
         oppNoFlyZone = oppNoFlyZoneWhenOnRedAlliance;
