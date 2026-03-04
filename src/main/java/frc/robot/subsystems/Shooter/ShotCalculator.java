@@ -34,7 +34,8 @@ public class ShotCalculator {
   /**
    * Holds the calculated shooting parameters for a given robot position.
    *
-   * @param targetHeading the angle the drivebase should face toward the hub
+   * @param targetHeading the robot heading that aims the shooter at the target, accounting for the
+   *     shooter's facing angle relative to the robot
    * @param hoodAngle the hood angle setpoint in degrees
    * @param flywheelSpeed the flywheel speed setpoint in RPM
    * @param isValid whether the target is within the effective shooting range
@@ -153,10 +154,19 @@ public class ShotCalculator {
     double effectiveDistanceMeters =
         Math.max(minDistanceMeters, Math.min(maxDistanceMeters, lookaheadDistanceMeters));
 
-    // Calculate heading from lookahead position to target, then rotate 180°
-    // because the shooter is at the back of the robot
-    Rotation2d targetHeading =
-        target.minus(lookaheadPosition).getAngle().rotateBy(Rotation2d.k180deg);
+    // Calculate the robot heading needed to aim the shooter at the target.
+    // First find the field-frame angle from the velocity-compensated robot center to the target,
+    // then subtract the shooter's facing angle relative to the robot so the drivetrain
+    // orients the shooter toward the target.
+    Translation2d robotCenterLookahead =
+        robotPosition
+            .getTranslation()
+            .plus(
+                new Translation2d(
+                    robotFieldVelocity.getX() * timeOfFlightSecs,
+                    robotFieldVelocity.getY() * timeOfFlightSecs));
+    Rotation2d angleToTarget = target.minus(robotCenterLookahead).getAngle();
+    Rotation2d targetHeading = angleToTarget.minus(robotToShooter.getRotation());
 
     double hoodAngle = shotHoodAngleMap.get(effectiveDistanceMeters);
     double flywheelSpeed = shotFlywheelSpeedMap.get(effectiveDistanceMeters);
@@ -180,6 +190,8 @@ public class ShotCalculator {
     Logger.recordOutput("ShotCalculator/targetHeading", targetHeading);
     Logger.recordOutput(
         "ShotCalculator/lookaheadPose", new Pose2d(lookaheadPosition, targetHeading));
+    Logger.recordOutput(
+        "ShotCalculator/robotCenterLookahead", new Pose2d(robotCenterLookahead, targetHeading));
     Logger.recordOutput("ShotCalculator/timeOfFlightSecs", timeOfFlightSecs);
     Logger.recordOutput("ShotCalculator/isValid", isValid);
 

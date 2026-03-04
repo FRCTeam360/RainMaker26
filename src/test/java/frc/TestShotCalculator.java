@@ -45,7 +45,7 @@ public class TestShotCalculator {
 
     assertEquals(0.0, cachedShootingParams.flywheelSpeed());
 
-    assertTrue(cachedShootingParams.targetHeading().equals(new Rotation2d()));
+    assertTrue(cachedShootingParams.targetHeading().equals(Rotation2d.k180deg));
   }
 
   private Pose2d testPose;
@@ -125,11 +125,13 @@ public class TestShotCalculator {
         new Translation2d(3, 0).getDistance(new Translation2d(0.0 * tof, 2.0 * tof));
     double verifiedTof = tofMap.get(lookaheadDist);
 
-    assertEquals(tof, verifiedTof, 0.002, "Converged TOF must be self-consistent with lookahead distance");
+    assertEquals(
+        tof, verifiedTof, 0.002, "Converged TOF must be self-consistent with lookahead distance");
 
     // Also confirm convergence changed the result vs single-pass (initial TOF at 3 m is 0.4 s).
     double singlePassTof = tofMap.get(3.0);
-    assertNotEquals(singlePassTof, tof, 0.005, "Convergence should improve on the single-pass estimate");
+    assertNotEquals(
+        singlePassTof, tof, 0.005, "Convergence should improve on the single-pass estimate");
   }
 
   @Test

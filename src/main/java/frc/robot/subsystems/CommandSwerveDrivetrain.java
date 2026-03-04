@@ -429,7 +429,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     double dynamicToleranceRad =
         HEADING_TOLERANCE_RAD + speedMps * HEADING_SPEED_TOLERANCE_RAD_PER_MPS;
     m_faceHubRequest.HeadingController.setTolerance(dynamicToleranceRad);
-    Logger.recordOutput(SUBSYSTEM_NAME + "DynamicHeadingToleranceDeg", Math.toDegrees(dynamicToleranceRad));
+    Logger.recordOutput(
+        SUBSYSTEM_NAME + "DynamicHeadingToleranceDeg", Math.toDegrees(dynamicToleranceRad));
     return m_faceHubRequest.HeadingController.atSetpoint();
   }
 
