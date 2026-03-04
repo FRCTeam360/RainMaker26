@@ -181,7 +181,6 @@ public class Robot extends LoggedRobot {
         RobotUtils.hubActive(
             DriverStation.getAlliance(), Constants.AUTO_WINNER, Constants.HUB_PHASE);
     Constants.HUB_ACTIVE = hubActive;
-    Logger.recordOutput("HubActive", hubActive);
   }
 
   @Override
