@@ -289,6 +289,18 @@ public class RobotContainer {
                             () -> hubShotCalculator.calculateShot().targetHeading())))
             .andThen(superStructure.setStateCommand(SuperWantedStates.DEFAULT)));
     registerPathplannerCommand(
+        "shoot at hub on move",
+        Commands.startEnd(
+            () -> {
+              drivetrain.enablePathPlannerHeadingOverride(
+                  () -> hubShotCalculator.calculateShot().targetHeading());
+              superStructure.setWantedSuperState(SuperWantedStates.SHOOT_AT_HUB);
+            },
+            () -> {
+              drivetrain.disablePathPlannerHeadingOverride();
+              superStructure.setWantedSuperState(SuperWantedStates.DEFAULT);
+            }));
+    registerPathplannerCommand(
         "stow intake", superStructure.setIntakeStateCommand(IntakeWantedStates.STOWED));
     registerPathplannerCommand(
         "spin up", superStructure.setStateCommand(SuperWantedStates.DEFAULT));
