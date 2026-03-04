@@ -13,6 +13,8 @@ import edu.wpi.first.hal.HALUtil;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import frc.robot.utils.RobotUtils.ActiveHub;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -30,11 +32,42 @@ public final class Constants {
   public static final AprilTagFieldLayout FIELD_LAYOUT =
       AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
 
+  public static Alliance AUTO_WINNER;
+  public static ActiveHub HUB_PHASE;
+  public static boolean HUB_ACTIVE;
+
   public static enum RobotType {
     SIM,
     WOODBOT,
     PRACTICEBOT,
     REPLAY
+  }
+
+  /** Frames to skip between processed frames while disabled. Only affects Limelight 4. */
+  public static final int DISABLED_THROTTLE_SKIP_FRAMES = 200;
+
+  /** Frames to skip between processed frames while enabled. Only affects Limelight 4. */
+  public static final int ENABLED_THROTTLE_SKIP_FRAMES = 0;
+
+  static RobotType robotType;
+
+  public static RobotType getRobotType() {
+    return robotType;
+  }
+
+  static RobotType initRobotType() {
+    String serialAddress = HALUtil.getSerialNumber();
+
+    if (serialAddress.equals(SerialAddressConstants.WOOD_SERIAL_ADDRESS)) {
+      robotType = Constants.RobotType.WOODBOT;
+    } else if (serialAddress.equals(SerialAddressConstants.PRACTICE_SERIAL_ADDRESS)) {
+      robotType = Constants.RobotType.PRACTICEBOT;
+    } else if (!Robot.isReal()) { // KEEP AT BOTTOM
+      robotType = Constants.RobotType.SIM;
+    } else {
+      robotType = Constants.RobotType.PRACTICEBOT;
+    }
+    return robotType;
   }
 
   public static final class IOConstants {
@@ -46,8 +79,8 @@ public final class Constants {
 
   public static class WoodBotConstants {
     // === INTAKE ===
-    public static final int INTAKE_SENSOR_PORT = 0;
-    public static final int INTAKE_ID = 15;
+    public static final int INTAKE_ROLLER_SENSOR_PORT = 0;
+    public static final int INTAKE_ROLLER_ID = 15;
     public static final int INTAKE_PIVOT_ID = 0;
 
     // === HOPPER ===
@@ -167,7 +200,7 @@ public final class Constants {
 
     // === INTAKE ===
     public static final int INTAKE_PIVOT_ID = 14;
-    public static final int INTAKE_ID = 15;
+    public static final int INTAKE_ROLLER_ID = 15;
 
     // === CLIMBER ===
     public static final int CLIMBER_RIGHT_ID = 16;
@@ -190,7 +223,8 @@ public final class Constants {
     public static final int HOOD_ID = 24;
 
     // === LIMELIGHT ===
-    public static final String LIMELIGHT = "limelight-right";
+    public static final String LIMELIGHT_RIGHT = "limelight-right";
+    public static final String LIMELIGHT_LEFT = "limelight-left";
 
     // === CANBUS ===
     public static final CANBus CANBUS = new CANBus("Default Name");
@@ -223,8 +257,8 @@ public final class Constants {
     public static final double SIM_TICK_RATE_S = 0.02;
 
     // === INTAKE ===
-    public static final int INTAKE_MOTOR = 30;
-    public static final int INTAKE_SENSOR_PORT = 10;
+    public static final int INTAKE_ROLLER_MOTOR = 30;
+    public static final int INTAKE_ROLLER_SENSOR_PORT = 10;
     public static final int INTAKE_PIVOT_MOTOR = 15;
 
     // === HOPPER ===
@@ -323,17 +357,4 @@ public final class Constants {
   }
 
   public static double loopPeriodSecs; // add value
-
-  public static RobotType getRobotType() {
-    String serialAddress = HALUtil.getSerialNumber();
-
-    if (serialAddress.equals(SerialAddressConstants.WOOD_SERIAL_ADDRESS)) {
-      return Constants.RobotType.WOODBOT;
-    } else if (serialAddress.equals(SerialAddressConstants.PRACTICE_SERIAL_ADDRESS)) {
-      return Constants.RobotType.PRACTICEBOT;
-    } else if (!Robot.isReal()) { // KEEP AT BOTTOM
-      return Constants.RobotType.SIM;
-    }
-    return Constants.RobotType.PRACTICEBOT;
-  }
 }

@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems.Vision;
 
+import frc.robot.Constants;
 import frc.robot.utils.LimelightHelpers;
 import java.util.function.DoubleSupplier;
 
@@ -42,6 +43,7 @@ public class VisionIOLimelight4 extends VisionIOLimelightBase {
     super(name, gyroAngleSupplier, gyroAngleRateSupplier, acceptMeasurements);
     LimelightHelpers.SetIMUAssistAlpha(name, IMU_ASSIST_ALPHA);
     LimelightHelpers.SetIMUMode(name, IMU_MODE_EXTERNAL_SEED);
+    setThrottle(Constants.DISABLED_THROTTLE_SKIP_FRAMES);
   }
 
   @Override

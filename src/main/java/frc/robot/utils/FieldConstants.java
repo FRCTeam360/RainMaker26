@@ -48,6 +48,12 @@ public class FieldConstants {
     public static final double oppHubCenter =
         FIELD_LAYOUT.getTagPose(4).get().getX() + Hub.width / 2.0;
     public static final double oppAllianceZone = FIELD_LAYOUT.getTagPose(10).get().getX();
+
+    // RED AND BLUE SPECIFIC
+    public static final double blueHubCenter =
+        FIELD_LAYOUT.getTagPose(26).get().getX() + Hub.width / 2.0;
+    public static final double redHubCenter =
+        FIELD_LAYOUT.getTagPose(4).get().getX() + Hub.width / 2.0;
   }
 
   /**
@@ -61,16 +67,16 @@ public class FieldConstants {
     public static final double center = fieldWidth / 2.0;
 
     // Right of hub
-    public static final double rightBumpStart = Hub.nearRightCorner.getY();
-    public static final double rightBumpEnd = rightBumpStart - RightBump.width;
-    public static final double rightTrenchOpenStart = rightBumpEnd - Units.inchesToMeters(12.0);
-    public static final double rightTrenchOpenEnd = 0;
+    public static final double rightBumpHubSide = Hub.nearRightCorner.getY();
+    public static final double rightBumpRailSide = rightBumpHubSide - RightBump.width;
+    public static final double rightTrenchHubSide = rightBumpRailSide - Units.inchesToMeters(12.0);
+    public static final double rightTrenchRailSide = 0;
 
     // Left of hub
-    public static final double leftBumpEnd = Hub.nearLeftCorner.getY();
-    public static final double leftBumpStart = leftBumpEnd + LeftBump.width;
-    public static final double leftTrenchOpenEnd = leftBumpStart + Units.inchesToMeters(12.0);
-    public static final double leftTrenchOpenStart = fieldWidth;
+    public static final double leftBumpHubSide = Hub.nearLeftCorner.getY();
+    public static final double leftBumpRailSide = leftBumpHubSide + LeftBump.width;
+    public static final double leftTrenchHubSide = leftBumpRailSide + Units.inchesToMeters(12.0);
+    public static final double leftTrenchRailSide = fieldWidth;
   }
 
   /** Hub related constants */
