@@ -44,6 +44,8 @@ public class SuperStructure extends SubsystemBase {
   private final IntakeStateMachine intakeStateMachine;
   private final TargetSelectionStateMachine targetSelectionStateMachine;
   private final ShotCalculator hubShotCalculator;
+  private final Supplier<Pose2d> robotPoseSupplier;
+  private final Transform2d robotToShooter;
 
   // Enums
   public enum SuperWantedStates {
@@ -98,6 +100,8 @@ public class SuperStructure extends SubsystemBase {
     this.intakePivot = intakePivot;
     this.hopperRoller = hopperRoller;
     this.hubShotCalculator = hubShotCalculator;
+    this.robotPoseSupplier = robotPoseSupplier;
+    this.robotToShooter = robotToShooter;
     this.shooterStateMachine =
         new ShooterStateMachine(
             flywheel, hood, flywheelKicker, isAlignedToTarget, this::canShootToTarget);
@@ -201,20 +205,27 @@ public class SuperStructure extends SubsystemBase {
   }
 
   private boolean canShootToTarget() {
-    switch (currentSuperState) {
-      case SHOOTING_AT_HUB:
-        if (!DriverStation.isFMSAttached()) {
+    if (wantedSuperState == SuperWantedStates.AUTO_CYCLE_SHOOTING) {
+      switch (currentSuperState) {
+        case SHOOTING_AT_HUB:
+          if (!DriverStation.isFMSAttached()) {
+            return true;
+          }
+          // Allow shooting if explicitly commanded to shoot at hub (manual override)
+          if (wantedSuperState == SuperWantedStates.SHOOT_AT_HUB) {
+            return true;
+          }
+          // For AUTO_CYCLE_SHOOTING, check if hub is actually active based on game phase
+          return canScoreAtHub();
+        case PASSING:
+          boolean isInPassingZone =
+              PositionUtils.isInPassingZone(robotPoseSupplier.get(), robotToShooter);
+          return isInPassingZone;
+        default:
           return true;
-        }
-        // Allow shooting if explicitly commanded to shoot at hub (manual override)
-        if (wantedSuperState == SuperWantedStates.SHOOT_AT_HUB) {
-          return true;
-        }
-        // For AUTO_CYCLE_SHOOTING, check if hub is actually active based on game phase
-        return canScoreAtHub();
-      default:
-        return true;
+      }
     }
+    return true;
   }
 
   // Public API
