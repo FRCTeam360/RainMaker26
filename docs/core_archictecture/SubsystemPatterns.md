@@ -367,7 +367,7 @@ Private methods implementing state transitions:
 ```java
 private void updateState() {
   previousState = currentState;
-  
+
   switch (wantedState) {
     case <STATE_1>:
       // Logic to determine internal state

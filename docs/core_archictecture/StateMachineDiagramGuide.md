@@ -141,7 +141,7 @@ stateDiagram-v2
     ASSIST_INTAKING --> OFF : SuperStructure sets OFF
     OFF --> INDEXING : SuperStructure sets INDEXING
     INDEXING --> OFF : SuperStructure sets OFF
-    
+
     note right of OFF
         Duty cycle = 0.0
         Motor stopped
@@ -184,7 +184,7 @@ stateDiagram-v2
     state "WantedState: <WANTED_1>" as WANTED_1_CONTAINER {
         [*] --> <Internal_State_A>
         <Internal_State_A>: <INTERNAL_STATE_NAME>
-        
+
         note right of <Internal_State_A>
             <Hardware behavior>
             <Control mode/slot>
@@ -196,15 +196,15 @@ stateDiagram-v2
         [*] --> <Internal_State_B>
         <Internal_State_B> --> <Internal_State_C> : <Sensor condition>
         <Internal_State_C> --> <Internal_State_B> : <Sensor condition>
-        
+
         <Internal_State_B>: <INTERNAL_STATE_NAME_B>
         <Internal_State_C>: <INTERNAL_STATE_NAME_C>
-        
+
         note right of <Internal_State_B>
             <Hardware behavior for state B>
             <Control details>
         end note
-        
+
         note right of <Internal_State_C>
             <Hardware behavior for state C>
             <Control details>
@@ -245,13 +245,13 @@ stateDiagram-v2
             Duty-cycle bang-bang (Slot 0)
             Max acceleration, unconstrained torque
         end note
-        
+
         note right of AT_SETPOINT
             Torque-current bang-bang (Slot 0)
             Bounded hold at 30A peak
             ShooterStateMachine checks this to FIRE
         end note
-        
+
         note right of RECOVERING
             Duty-cycle bang-bang (Slot 0)
             Re-spinning after ball passed through
@@ -296,7 +296,7 @@ stateDiagram-v2
     state "WantedState: <WANTED_STATE_1>" as WANTED_1 {
         [*] --> <InternalState1>
         <InternalState1>: <INTERNAL_STATE_NAME>
-        
+
         note right of <InternalState1>
             Subsystem1 → <State>
             Subsystem2 → <State>
@@ -308,16 +308,16 @@ stateDiagram-v2
     state "WantedState: <WANTED_STATE_2>" as WANTED_2 {
         [*] --> <InternalStateA>
         <InternalStateA> --> <InternalStateB> : <Condition>
-        
+
         <InternalStateA>: <INTERNAL_STATE_A>
         <InternalStateB>: <INTERNAL_STATE_B>
-        
+
         note right of <InternalStateA>
             Subsystem1 → <State>
             Subsystem2 → <State>
             <Coordination logic>
         end note
-        
+
         note right of <InternalStateB>
             Subsystem1 → <State>
             Subsystem2 → <State>
@@ -342,7 +342,7 @@ stateDiagram-v2
 state "WantedState: SHOOT_AT_HUB" as SHOOTING_HUB {
     [*] --> SHOOTING_AT_HUB
     SHOOTING_AT_HUB: SHOOTING_AT_HUB (internal state)
-    
+
     note right of SHOOTING_AT_HUB
         TargetSelection → HUB
         ShooterStateMachine → SHOOTING
@@ -351,7 +351,7 @@ state "WantedState: SHOOT_AT_HUB" as SHOOTING_HUB {
         Indexer → OFF (until FIRING)
         IntakePivot → OFF
         HopperRoller → OFF (until FIRING)
-        
+
         When ShooterStateMachine reaches FIRING:
           Indexer → INDEXING
           HopperRoller → ROLLING
@@ -396,7 +396,7 @@ state "WantedState: SHOOTING" as SHOOTING_WANTED {
         Hood → AIMING (moving to angle)
         FlywheelKicker → KICKING
     end note
-    
+
     note right of StateFiring
         Ready and firing
         Flywheel → SHOOTING (at setpoint)
@@ -564,15 +564,15 @@ stateDiagram-v2
         [*] --> StateMoving
         StateMoving --> StateAtTarget : Sensor reaches target<br>(debounced 100ms)
         StateAtTarget --> StateMoving : Target changed<br>OR position error > tolerance
-        
+
         StateMoving: MOVING_TO_SETPOINT
         StateAtTarget: AT_SETPOINT
-        
+
         note right of StateMoving
             <Control mode>
             <Hardware behavior>
         end note
-        
+
         note right of StateAtTarget
             <Control mode>
             <Hardware behavior>
@@ -597,12 +597,12 @@ stateDiagram-v2
     state "WantedState: <WANTED_1>" as WANTED_1 {
         [*] --> StateInternal1
         StateInternal1: <INTERNAL_STATE_1>
-        
+
         note right of StateInternal1
             Subsystem1 → <State>
             Subsystem2 → <State>
             SubsystemN → <State>
-            
+
             <Coordination notes>
         end note
     }
@@ -611,15 +611,15 @@ stateDiagram-v2
         [*] --> StateInternalA
         StateInternalA --> StateInternalB : <Condition>
         StateInternalB --> StateInternalA : <Condition>
-        
+
         StateInternalA: <INTERNAL_STATE_A>
         StateInternalB: <INTERNAL_STATE_B>
-        
+
         note right of StateInternalA
             Subsystem1 → <State>
             Subsystem2 → <State>
         end note
-        
+
         note right of StateInternalB
             Subsystem1 → <State>
             Subsystem2 → <State>
@@ -682,13 +682,13 @@ note right of State<Name>
     Flywheel → <STATE> (via ShooterStateMachine)
     Hood → <STATE> (via ShooterStateMachine)
     FlywheelKicker → <STATE> (via ShooterStateMachine)
-    
+
     Conditional changes:
       When <condition>:
         Subsystem → <NEW_STATE>
       When <condition>:
         Subsystem → <NEW_STATE>
-    
+
     Special behaviors:
       - <Note about coordination>
       - <Note about timing>

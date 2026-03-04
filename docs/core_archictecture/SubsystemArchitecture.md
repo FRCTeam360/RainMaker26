@@ -452,7 +452,7 @@ private void shooting() {
   intakePivot.setWantedState(IntakePivotWantedStates.STOWED);
   indexer.setWantedState(IndexerStates.INDEXING);
   hopperRoller.setWantedState(HopperRollerStates.ROLLING);
-  
+
   // Shooter state machine handles multi-phase spinup/fire/recover cycle
   shooterStateMachine.setWantedState(ShooterWantedStates.SHOOTING);
 }
@@ -885,7 +885,7 @@ Store previous state to detect transitions:
 ```java
 private void updateState() {
   previousState = currentState;
-  
+
   // Detect edge (transition from one state to another)
   boolean ballFired = (previousState == AT_SETPOINT) && !atSetpoint();
   if (ballFired) {
