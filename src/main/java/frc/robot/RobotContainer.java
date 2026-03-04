@@ -233,12 +233,14 @@ public class RobotContainer {
     }
     hubShotCalculator =
         new ShotCalculator(
+            "HubShotCalc",
             drivetrain::getPosition,
             () -> AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint.toTranslation2d()),
             drivetrain::getVelocity,
             robotShootingInfo);
     passCalculator =
         new ShotCalculator(
+            "PassCalc",
             drivetrain::getPosition,
             () ->
                 PositionUtils.getCloserPassTarget(

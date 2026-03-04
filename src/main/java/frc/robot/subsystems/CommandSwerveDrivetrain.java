@@ -61,6 +61,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   // Cached state copy for dashboard updates (updated in periodic)
   private SwerveDriveState cachedState;
 
+  // Commanded speeds for shoot-on-the-move compensation (tracks what we tell the robot to do)
+  private ChassisSpeeds commandedSpeeds = new ChassisSpeeds();
+
   /* Blue alliance sees forward as 0 degrees (toward red alliance wall) */
   private static final Rotation2d kBlueAlliancePerspectiveRotation = Rotation2d.kZero;
   /* Red alliance sees forward as 180 degrees (toward blue alliance wall) */
@@ -110,20 +113,27 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             .withRotationalDeadband(maxAngularVelocity.in(RadiansPerSecond) * 0.01)
             .withDriveRequestType(m_driveRequestType);
     return this.applyRequest(
-        () ->
-            drive
-                .withVelocityX(
-                    Math.pow(driveCont.getLeftY(), 3)
-                        * maxSpeed.in(MetersPerSecond)
-                        * -1.0) // Drive forward with negative Y (forward)
-                .withVelocityY(
-                    Math.pow(driveCont.getLeftX(), 3)
-                        * maxSpeed.in(MetersPerSecond)
-                        * -1.0) // Drive left with negative X (left)
-                .withRotationalRate(
-                    Math.pow(driveCont.getRightX(), 2)
-                        * (maxAngularVelocity.in(RadiansPerSecond) / 2.0)
-                        * -Math.signum(driveCont.getRightX())) // Drive
+        () -> {
+          double velXMps = Math.pow(driveCont.getLeftY(), 3) * maxSpeed.in(MetersPerSecond) * -1.0;
+          double velYMps = Math.pow(driveCont.getLeftX(), 3) * maxSpeed.in(MetersPerSecond) * -1.0;
+          double omegaRps =
+              Math.pow(driveCont.getRightX(), 2)
+                  * (maxAngularVelocity.in(RadiansPerSecond) / 2.0)
+                  * -Math.signum(driveCont.getRightX());
+          commandedSpeeds.vxMetersPerSecond =
+              DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
+                  ? velXMps
+                  : -velXMps;
+          commandedSpeeds.vyMetersPerSecond =
+              DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
+                  ? velYMps
+                  : -velYMps;
+          commandedSpeeds.omegaRadiansPerSecond = omegaRps;
+          return drive
+              .withVelocityX(velXMps) // Drive forward with negative Y (forward)
+              .withVelocityY(velYMps) // Drive left with negative X (left)
+              .withRotationalRate(omegaRps); // Drive
+        }
         // counterclockwise
         // with negative X
         // (left)
@@ -138,11 +148,14 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
   // Xout Command
   public void xOut() {
+    commandedSpeeds.vxMetersPerSecond = 0.0;
+    commandedSpeeds.vyMetersPerSecond = 0.0;
+    commandedSpeeds.omegaRadiansPerSecond = 0.0;
     this.setControl(xOutReq);
   }
 
   public Command xOutCmd() {
-    return this.applyRequest(() -> xOutReq);
+    return this.run(() -> xOut());
   }
 
   /**
@@ -159,17 +172,25 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
       DoubleSupplier velocityYSupplier,
       Supplier<Rotation2d> headingSupplier) {
     return this.applyRequest(
-            () ->
-                m_faceHubRequest
-                    .withVelocityX(
-                        DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
-                            ? velocityXSupplier.getAsDouble()
-                            : -velocityXSupplier.getAsDouble())
-                    .withVelocityY(
-                        DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
-                            ? velocityYSupplier.getAsDouble()
-                            : -velocityYSupplier.getAsDouble())
-                    .withTargetDirection(headingSupplier.get()))
+            () -> {
+              double velXMps =
+                  DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
+                      ? velocityXSupplier.getAsDouble()
+                      : -velocityXSupplier.getAsDouble();
+              double velYMps =
+                  DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
+                      ? velocityYSupplier.getAsDouble()
+                      : -velocityYSupplier.getAsDouble();
+              double omegaRps = m_faceHubRequest.HeadingController.getLastAppliedOutput();
+              commandedSpeeds.vxMetersPerSecond = velXMps;
+              commandedSpeeds.vyMetersPerSecond = velYMps;
+              commandedSpeeds.omegaRadiansPerSecond = omegaRps;
+
+              return m_faceHubRequest
+                  .withVelocityX(velXMps)
+                  .withVelocityY(velYMps)
+                  .withTargetDirection(headingSupplier.get());
+            })
         .finallyDo(() -> m_faceHubRequest.HeadingController.reset());
   }
 
@@ -377,13 +398,15 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
           this::resetPose, // Consumer for seeding pose against auto
           () -> getStateCopy().Speeds, // Supplier of current robot speeds
           // Consumer of ChassisSpeeds and feedforwards to drive the robot
-          (speeds, feedforwards) ->
-              setControl(
-                  m_pathApplyRobotSpeeds
-                      .withSpeeds(ChassisSpeeds.discretize(speeds, 0.020))
-                      .withWheelForceFeedforwardsX(feedforwards.robotRelativeForcesXNewtons())
-                      .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons())
-                      .withDriveRequestType(m_driveRequestType)),
+          (speeds, feedforwards) -> {
+            setCommandedSpeeds(speeds);
+            setControl(
+                m_pathApplyRobotSpeeds
+                    .withSpeeds(ChassisSpeeds.discretize(speeds, 0.020))
+                    .withWheelForceFeedforwardsX(feedforwards.robotRelativeForcesXNewtons())
+                    .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons())
+                    .withDriveRequestType(m_driveRequestType));
+          },
           new PPHolonomicDriveController(
               new PIDConstants(PP_TRANSLATION_KP, PP_TRANSLATION_KI, PP_TRANSLATION_KD),
               new PIDConstants(PP_ROTATION_KP, PP_ROTATION_KI, PP_ROTATION_KD)),
@@ -575,6 +598,25 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
    */
   public ChassisSpeeds getVelocity() {
     return this.getStateCopy().Speeds;
+  }
+
+  /**
+   * Returns the commanded chassis speeds of the robot (what the drivetrain is being told to do).
+   * This is less noisy than measured velocities for shoot-on-the-move compensation.
+   *
+   * @return the commanded {@link ChassisSpeeds} of the robot
+   */
+  public ChassisSpeeds getCommandedVelocity() {
+    return commandedSpeeds;
+  }
+
+  /**
+   * Sets the commanded chassis speeds. Called internally when applying drive requests.
+   *
+   * @param speeds the commanded chassis speeds
+   */
+  private void setCommandedSpeeds(ChassisSpeeds speeds) {
+    this.commandedSpeeds = speeds;
   }
 
   /**

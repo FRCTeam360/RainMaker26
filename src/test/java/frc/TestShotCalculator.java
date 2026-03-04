@@ -34,6 +34,7 @@ public class TestShotCalculator {
 
     ShotCalculator testShotCalculator =
         new ShotCalculator(
+            "test",
             // public Pose2d(double x, double y, Rotation2d rotation)
             () -> new Pose2d(1.0, 0.0, new Rotation2d()),
             () -> new Translation2d(),
@@ -71,6 +72,7 @@ public class TestShotCalculator {
     Supplier<Pose2d> testPoseSupplier = () -> testPose;
     ShotCalculator testShotCalculator =
         new ShotCalculator(
+            "test",
             testPoseSupplier,
             () -> new Translation2d(),
             () -> new ChassisSpeeds(),
@@ -111,6 +113,7 @@ public class TestShotCalculator {
     // Converged result should satisfy: tofMap(lookaheadDist) ≈ timeOfFlight (self-consistent).
     ShotCalculator calculator =
         new ShotCalculator(
+            "test",
             () -> new Pose2d(0, 0, new Rotation2d()),
             () -> new Translation2d(3, 0),
             () -> new ChassisSpeeds(0, 2.0, 0),
@@ -155,6 +158,7 @@ public class TestShotCalculator {
     Supplier<Pose2d> testPoseSupplier = () -> testPose;
     ShotCalculator testShotCalculator =
         new ShotCalculator(
+            "test",
             testPoseSupplier,
             () -> new Translation2d(),
             () -> new ChassisSpeeds(),
