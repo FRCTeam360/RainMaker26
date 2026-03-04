@@ -243,7 +243,7 @@ public class RobotContainer {
             "HubShotCalc",
             drivetrain::getPosition,
             () -> AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint.toTranslation2d()),
-            drivetrain::getVelocity,
+            drivetrain::getCommandedVelocity,
             robotShootingInfo);
     passCalculator =
         new ShotCalculator(
@@ -254,7 +254,7 @@ public class RobotContainer {
                     drivetrain.getPosition(),
                     AllianceFlipUtil.apply(FieldConstants.RightBump.nearRightCorner),
                     AllianceFlipUtil.apply(FieldConstants.LeftBump.nearLeftCorner)),
-            drivetrain::getVelocity,
+            drivetrain::getCommandedVelocity,
             passShootingInfo);
     // Configure the trigger bindings
     // TODO: Re-enable superStructure construction and PathPlanner commands
