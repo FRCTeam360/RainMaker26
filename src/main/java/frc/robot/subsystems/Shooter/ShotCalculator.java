@@ -110,23 +110,14 @@ public class ShotCalculator {
         new Translation2d(robotSpeeds.vxMetersPerSecond, robotSpeeds.vyMetersPerSecond)
             .rotateBy(robotHeading);
 
-    double robotAngleRad = robotHeading.getRadians();
-    double shooterOffsetX = robotToShooter.getX();
-    double shooterOffsetY = robotToShooter.getY();
-    double omegaRadPerSec = robotSpeeds.omegaRadiansPerSecond;
-    double shooterVelXMps =
-        robotFieldVelocity.getX()
-            + omegaRadPerSec
-                // TODO verify shooterOffsetY math
-                // may have an error in the math here, need to verify with our own calculations.
-                // Since our shooter isn't offset in the Y direction, it doesn't matter.
-                * (shooterOffsetY * Math.cos(robotAngleRad)
-                    - shooterOffsetX * Math.sin(robotAngleRad));
-    double shooterVelYMps =
-        robotFieldVelocity.getY()
-            + omegaRadPerSec
-                * (shooterOffsetX * Math.cos(robotAngleRad)
-                    - shooterOffsetY * Math.sin(robotAngleRad));
+    Translation2d shooterFieldVelocity =
+        ShotCalculatorHelpers.shooterFieldVelocity(
+            robotFieldVelocity,
+            robotSpeeds.omegaRadiansPerSecond,
+            robotHeading.getRadians(),
+            robotToShooter);
+    double shooterVelXMps = shooterFieldVelocity.getX();
+    double shooterVelYMps = shooterFieldVelocity.getY();
 
     // Calculate the initial distance from the shooter to the target
     double shooterToTargetDistanceMeters = target.getDistance(shooterPosition.getTranslation());
