@@ -2,7 +2,7 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.subsystems.Intake;
+package frc.robot.subsystems.Intake.IntakeRoller;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -11,49 +11,51 @@ import frc.robot.subsystems.ControlState;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
-public class Intake extends SubsystemBase {
+public class IntakeRoller extends SubsystemBase {
   // Constants
   private static final double INTAKE_VELOCITY_RPM = 4500.0;
   private static final double JAMMED_SUPPLY_CURRENT_DRAW = 35.0;
   private static final double REVERSE_UNJAM_DUTY_CYCLE = -0.5;
   private static final double INTAKING_DUTY_CYCLE = 0.8;
   private static final double SHOOT_ASSIST_DUTY_CYCLE = 0.3;
+  private static final double REVERSE_DUTY_CYCLE = -0.3;
 
   // IO fields
-  private final IntakeIO io;
-  private final IntakeIOInputsAutoLogged inputs = new IntakeIOInputsAutoLogged();
+  private final IntakeRollerIO io;
+  private final IntakeRollerIOInputsAutoLogged inputs = new IntakeRollerIOInputsAutoLogged();
 
   // Other fields
   private DoubleSupplier dutyCycleSupplier = () -> INTAKING_DUTY_CYCLE;
 
   // Enums
-  public enum IntakeStates {
-    OFF,
+  public enum IntakeRollerStates {
+    IDLE,
     INTAKING,
     ASSIST_SHOOTING,
+    REVERSING
     // JAMMED
   }
 
   // State variables
-  private IntakeStates wantedState = IntakeStates.OFF;
-  private IntakeStates currentState = IntakeStates.OFF;
-  private IntakeStates previousState = IntakeStates.OFF;
+  private IntakeRollerStates wantedState = IntakeRollerStates.IDLE;
+  private IntakeRollerStates currentState = IntakeRollerStates.IDLE;
+  private IntakeRollerStates previousState = IntakeRollerStates.IDLE;
   private ControlState controlState = ControlState.SUPERSTRUCTURE;
 
   // Constructor
 
-  /** Creates a new Intake. */
-  public Intake(IntakeIO io) {
+  /** Creates a new IntakeRoller. */
+  public IntakeRoller(IntakeRollerIO io) {
     this.io = io;
   }
 
   // State machine methods
 
-  public IntakeStates getState() {
+  public IntakeRollerStates getState() {
     return currentState;
   }
 
-  public void setWantedState(IntakeStates state) {
+  public void setWantedState(IntakeRollerStates state) {
     wantedState = state;
   }
 
@@ -70,20 +72,23 @@ public class Intake extends SubsystemBase {
     switch (wantedState) {
       case INTAKING:
         // if (isJammed()) {
-        //   currentState = IntakeStates.JAMMED;
+        //   currentState = IntakeRollerStates.JAMMED;
         // } else {
         // }
-        currentState = IntakeStates.INTAKING;
+        currentState = IntakeRollerStates.INTAKING;
         break;
       case ASSIST_SHOOTING:
-        currentState = IntakeStates.ASSIST_SHOOTING;
+        currentState = IntakeRollerStates.ASSIST_SHOOTING;
         break;
-      case OFF:
+      case REVERSING:
+        currentState = IntakeRollerStates.REVERSING;
+        break;
+      case IDLE:
       default:
-        currentState = IntakeStates.OFF;
+        currentState = IntakeRollerStates.IDLE;
         break;
         // case JAMMED:
-        //   currentState = IntakeStates.JAMMED;
+        //   currentState = IntakeRollerStates.JAMMED;
     }
   }
 
@@ -95,7 +100,10 @@ public class Intake extends SubsystemBase {
       case ASSIST_SHOOTING:
         shootAssist();
         break;
-      case OFF:
+      case REVERSING:
+        reversing();
+        break;
+      case IDLE:
       default:
         stop();
         break;
@@ -114,6 +122,10 @@ public class Intake extends SubsystemBase {
     } else {
       setDutyCycle(0.7);
     }
+  }
+
+  private void reversing() {
+    setDutyCycle(REVERSE_DUTY_CYCLE);
   }
 
   // private void unjamIntake() {
@@ -159,16 +171,16 @@ public class Intake extends SubsystemBase {
   @Override
   public void periodic() {
     io.updateInputs(inputs);
-    Logger.processInputs("Intake", inputs);
+    Logger.processInputs("IntakeRoller", inputs);
 
     if (controlState == ControlState.SUPERSTRUCTURE) {
       updateState();
       applyState();
     }
-    Logger.recordOutput("Subsystems/Intake/WantedState", wantedState);
-    Logger.recordOutput("Subsystems/Intake/CurrentState", currentState);
-    Logger.recordOutput("Subsystems/Intake/PreviousState", previousState);
-    Logger.recordOutput("Subsystems/Intake/ControlState", controlState);
-    // Logger.recordOutput("Subsystems/Intake/PreviousState", isJammed());
+    Logger.recordOutput("Subsystems/IntakeRoller/WantedState", wantedState);
+    Logger.recordOutput("Subsystems/IntakeRoller/CurrentState", currentState);
+    Logger.recordOutput("Subsystems/IntakeRoller/PreviousState", previousState);
+    Logger.recordOutput("Subsystems/IntakeRoller/ControlState", controlState);
+    // Logger.recordOutput("Subsystems/IntakeRoller/PreviousState", isJammed());
   }
 }

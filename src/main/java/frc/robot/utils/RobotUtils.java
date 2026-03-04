@@ -1,6 +1,7 @@
 package frc.robot.utils;
 
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants;
 import java.io.File;
 import java.util.Optional;
@@ -44,6 +45,7 @@ public class RobotUtils {
         case 'R':
           return Alliance.Red;
         default:
+          return null;
       }
     }
     // called when no data was received from driver station
@@ -55,13 +57,14 @@ public class RobotUtils {
    *
    * @param gameTime the gameTime from DriverStation
    * @param isTele if the game is in teleop or auto. Can be accessed by DriverStation.isTeleop()
+   * @param timeOfFlight the time of flight of the shot in seconds
    * @return which hub(s) are currently active
    */
-  public static ActiveHub getShootingPhase(double gameTime, Boolean isTele, double timeToScan) {
+  public static ActiveHub getShootingPhase(double gameTime, Boolean isTele, double timeOfFlight) {
     // gameTime is the getMatchTime() from DriverStation, isTele is the isTeleop() from
     // DriverStation
     ActiveHub activeHub = ActiveHub.BOTH;
-    gameTime -= timeToScan;
+    gameTime -= timeOfFlight;
     // Sets phases based on the current time in the game
     if (!isTele) {
       activeHub = ActiveHub.BOTH; // AUTO
@@ -86,6 +89,7 @@ public class RobotUtils {
         return ActiveHub.BOTH; // TRANSITION
       }
     }
+    SmartDashboard.putString("ActiveHub", activeHub.name());
     return activeHub;
   }
 
@@ -102,7 +106,7 @@ public class RobotUtils {
       Optional<Alliance> alliance, Alliance autoWinner, ActiveHub gamePhase) {
     // alliance is our alliance, autoWinner is the result of getAutoWinner, gamePhase is the result
     // of getShootingPhase
-    Boolean hubActive = true;
+    boolean hubActive = true;
     if (alliance.isPresent()) {
       if (gamePhase == null || autoWinner == null) {
         return true;
