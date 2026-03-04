@@ -124,15 +124,17 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
               Math.pow(driveCont.getRightX(), 2)
                   * (maxAngularVelocity.in(RadiansPerSecond) / 2.0)
                   * -Math.signum(driveCont.getRightX());
-          commandedSpeeds.vxMetersPerSecond =
-              DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
-                  ? velXMps
-                  : -velXMps;
-          commandedSpeeds.vyMetersPerSecond =
-              DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
-                  ? velYMps
-                  : -velYMps;
-          commandedSpeeds.omegaRadiansPerSecond = omegaRps;
+          // Store as robot-relative to match getVelocity() convention.
+          // Operator-perspective velocities are converted to field-relative via
+          // alliance flip, then to robot-relative via fromFieldRelativeSpeeds.
+          boolean isBlueAlliance =
+              DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue;
+          commandedSpeeds =
+              ChassisSpeeds.fromFieldRelativeSpeeds(
+                  isBlueAlliance ? velXMps : -velXMps,
+                  isBlueAlliance ? velYMps : -velYMps,
+                  omegaRps,
+                  getPosition().getRotation());
           return drive
               .withVelocityX(velXMps) // Drive forward with negative Y (forward)
               .withVelocityY(velYMps) // Drive left with negative X (left)
@@ -189,22 +191,25 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                 rawVelYMps *= scale;
               }
 
-              double velXMps =
-                  DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
-                      ? rawVelXMps
-                      : -rawVelXMps;
-              double velYMps =
-                  DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
-                      ? rawVelYMps
-                      : -rawVelYMps;
               double omegaRps = m_faceHubRequest.HeadingController.getLastAppliedOutput();
-              commandedSpeeds.vxMetersPerSecond = velXMps;
-              commandedSpeeds.vyMetersPerSecond = velYMps;
-              commandedSpeeds.omegaRadiansPerSecond = omegaRps;
 
+              // Store as robot-relative to match getVelocity() convention.
+              // Convert operator-perspective to field-relative (alliance flip),
+              // then field-relative to robot-relative.
+              boolean isBlueAlliance =
+                  DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue;
+              commandedSpeeds =
+                  ChassisSpeeds.fromFieldRelativeSpeeds(
+                      isBlueAlliance ? rawVelXMps : -rawVelXMps,
+                      isBlueAlliance ? rawVelYMps : -rawVelYMps,
+                      omegaRps,
+                      getPosition().getRotation());
+
+              // Pass operator-perspective values — CTRE applies operator perspective
+              // internally via setOperatorPerspectiveForward
               return m_faceHubRequest
-                  .withVelocityX(velXMps)
-                  .withVelocityY(velYMps)
+                  .withVelocityX(rawVelXMps)
+                  .withVelocityY(rawVelYMps)
                   .withTargetDirection(headingSupplier.get());
             })
         .finallyDo(() -> m_faceHubRequest.HeadingController.reset());
