@@ -4,6 +4,9 @@
 
 package frc.robot.subsystems.Shooter.Hood;
 
+import edu.wpi.first.wpilibj.Alert;
+import edu.wpi.first.wpilibj.Alert.AlertType;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -16,10 +19,14 @@ import org.littletonrobotics.junction.Logger;
 public class Hood extends SubsystemBase {
   // Constants
   private static final double TOLERANCE = 0.5;
+  private static final double HOOD_UP_THRESHOLD = 2.0; // degrees - threshold for "hood is up"
 
   // IO fields
   private final HoodIO io;
   private final HoodIOInputsAutoLogged inputs = new HoodIOInputsAutoLogged();
+
+  // Alert
+  private final Alert hoodUpAlert = new Alert("Hood is UP", AlertType.kWarning);
 
   // Other fields
   private DoubleSupplier hoodAngleSupplier = () -> 0.0;
@@ -210,9 +217,19 @@ public class Hood extends SubsystemBase {
       updateState();
       applyState();
     }
+
+    // Update hood up alert - triggers when hood is not ducked and position is above threshold
+    boolean isHoodUp =
+        (wantedState != HoodWantedStates.DUCKED
+            && currentState != HoodInternalStates.ZEROING
+            && getPosition() > HOOD_UP_THRESHOLD);
+    hoodUpAlert.set(isHoodUp);
+
     Logger.recordOutput("Subsystems/Hood/WantedState", wantedState);
     Logger.recordOutput("Subsystems/Hood/CurrentState", currentState);
     Logger.recordOutput("Subsystems/Hood/PreviousState", previousState);
     Logger.recordOutput("Subsystems/Hood/ControlState", controlState);
+    Logger.recordOutput("Subsystems/Hood/IsHoodUp", isHoodUp);
+    SmartDashboard.putString("Subsystems/Hood/CurrentHoodState", currentState.toString());
   }
 }
