@@ -23,7 +23,6 @@ import frc.robot.generated.PracticeBotDrivetrain;
 import frc.robot.generated.WoodBotDrivetrain;
 import frc.robot.subsystems.Climber.Climber;
 import frc.robot.subsystems.Climber.ClimberIONoop;
-import frc.robot.subsystems.Climber.ClimberIOPB;
 import frc.robot.subsystems.Climber.ClimberIOSim;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.ControlState;
@@ -193,7 +192,7 @@ public class RobotContainer {
       case PRACTICEBOT:
       default:
         drivetrain = PracticeBotDrivetrain.createDrivetrain();
-        climber = new Climber(new ClimberIOPB());
+        climber = new Climber(new ClimberIONoop());
         flywheel = new Flywheel(new FlywheelIOPBBangBang());
         hood = new Hood(new HoodIOPB());
         indexer = new Indexer(new IndexerIOPB());
