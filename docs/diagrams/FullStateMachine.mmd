@@ -1,0 +1,93 @@
+---
+title: Full State Machine (All Layers)
+---
+stateDiagram-v2
+    [*] --> IDLE
+
+    state IDLE {
+        [*] --> idle_subsystems
+        state "All Subsystems" as idle_subsystems {
+            idle_intake: Intake → OFF
+            idle_pivot: IntakePivot → OFF
+            idle_indexer: Indexer → OFF
+            idle_hopper: HopperRoller → OFF
+            idle_kicker: FlywheelKicker → OFF
+            idle_flywheel: Flywheel → OFF
+            idle_hood: Hood → OFF (position 0.0)
+        }
+    }
+
+    state INTAKING {
+        [*] --> intaking_subsystems
+        state "Active Subsystems" as intaking_subsystems {
+            int_intake: Intake → INTAKING (75%)
+            int_pivot: IntakePivot → not driven
+            int_hopper: HopperRoller → not driven
+        }
+    }
+
+    state SHOOT_AT_HUB {
+        [*] --> hub_PREPARING
+
+        state "PREPARING_TO_FIRE" as hub_PREPARING {
+            hub_prep_fw: Flywheel → SHOOTING (SPINNING_UP)
+            hub_prep_hood: Hood → AIMING (MOVING)
+            hub_prep_kicker: FlywheelKicker → IDLE
+        }
+
+        state "FIRING" as hub_FIRING {
+            hub_fire_fw: Flywheel → SHOOTING (AT_SETPOINT / RECOVERING)
+            hub_fire_hood: Hood → AIMING (AT_SETPOINT)
+            hub_fire_kicker: FlywheelKicker → KICKING
+        }
+
+        state "COASTING" as hub_COASTING {
+            hub_coast_fw: Flywheel → COASTING (COAST)
+            hub_coast_hood: Hood → AIMING (AT_SETPOINT)
+            hub_coast_kicker: FlywheelKicker → IDLE
+        }
+
+    hub_PREPARING --> hub_FIRING : Flywheel AT_SETPOINT<br>AND Hood AT_SETPOINT<br>AND aligned
+    hub_FIRING --> hub_PREPARING : Flywheel UNDER_SHOOTING<br>OR hood lost OR alignment lost
+    hub_FIRING --> hub_COASTING : SuperStructure sets COASTING
+    hub_COASTING --> hub_FIRING : SuperStructure sets SHOOTING
+    hub_COASTING --> hub_PREPARING : Flywheel OFF or IDLE
+    }
+
+    state SHOOT_AT_OUTPOST {
+        [*] --> out_PREPARING
+
+
+        state "PREPARING_TO_FIRE" as out_PREPARING {
+            out_prep_fw: Flywheel → SHOOTING (SPINNING_UP)
+            out_prep_hood: Hood → AIMING (MOVING)
+            out_prep_kicker: FlywheelKicker → IDLE
+        }
+
+        state "FIRING" as out_FIRING {
+            out_fire_fw: Flywheel → SHOOTING (AT_SETPOINT / RECOVERING)
+            out_fire_hood: Hood → AIMING (AT_SETPOINT)
+            out_fire_kicker: FlywheelKicker → KICKING
+        }
+
+        state "COASTING" as out_COASTING {
+            out_coast_fw: Flywheel → COASTING (COAST)
+            out_coast_hood: Hood → AIMING (AT_SETPOINT)
+            out_coast_kicker: FlywheelKicker → IDLE
+        }
+
+    out_PREPARING --> out_FIRING : Flywheel AT_SETPOINT<br>AND Hood AT_SETPOINT<br>AND aligned
+    out_FIRING --> out_PREPARING : Flywheel UNDER_SHOOTING<br>OR hood lost OR alignment lost
+    out_FIRING --> out_COASTING : SuperStructure sets COASTING
+    out_COASTING --> out_FIRING : SuperStructure sets SHOOTING
+    out_COASTING --> out_PREPARING : Flywheel OFF or IDLE
+    }
+
+    IDLE --> INTAKING : Intake button held
+    INTAKING --> IDLE : Intake button released
+
+    IDLE --> SHOOT_AT_HUB : Right trigger held
+    SHOOT_AT_HUB --> IDLE : Right trigger released
+
+    IDLE --> SHOOT_AT_OUTPOST : Left trigger held
+    SHOOT_AT_OUTPOST --> IDLE : Left trigger released

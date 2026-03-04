@@ -4,8 +4,6 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.MetersPerSecond;
-
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
@@ -37,14 +35,15 @@ import frc.robot.subsystems.Indexer.Indexer;
 import frc.robot.subsystems.Indexer.IndexerIOPB;
 import frc.robot.subsystems.Indexer.IndexerIOSim;
 import frc.robot.subsystems.Indexer.IndexerIOWB;
-import frc.robot.subsystems.Intake.Intake;
-import frc.robot.subsystems.Intake.IntakeIOPB;
-import frc.robot.subsystems.Intake.IntakeIOSim;
-import frc.robot.subsystems.Intake.IntakeIOWB;
-import frc.robot.subsystems.IntakePivot.IntakePivot;
-import frc.robot.subsystems.IntakePivot.IntakePivotIONoop;
-import frc.robot.subsystems.IntakePivot.IntakePivotIOPB;
-import frc.robot.subsystems.IntakePivot.IntakePivotIOSim;
+import frc.robot.subsystems.Intake.IntakePivot.IntakePivot;
+import frc.robot.subsystems.Intake.IntakePivot.IntakePivotIONoop;
+import frc.robot.subsystems.Intake.IntakePivot.IntakePivotIOPB;
+import frc.robot.subsystems.Intake.IntakePivot.IntakePivotIOSim;
+import frc.robot.subsystems.Intake.IntakeRoller.IntakeRoller;
+import frc.robot.subsystems.Intake.IntakeRoller.IntakeRollerIOPB;
+import frc.robot.subsystems.Intake.IntakeRoller.IntakeRollerIOSim;
+import frc.robot.subsystems.Intake.IntakeRoller.IntakeRollerIOWB;
+import frc.robot.subsystems.Intake.IntakeStateMachine.IntakeWantedStates;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel;
 import frc.robot.subsystems.Shooter.Flywheel.FlywheelIOPBBangBang;
 import frc.robot.subsystems.Shooter.Flywheel.FlywheelIOSim;
@@ -71,6 +70,7 @@ import frc.robot.subsystems.Vision.VisionIOLimelightBase;
 import frc.robot.subsystems.Vision.VisionIOPhotonSim;
 import frc.robot.utils.AllianceFlipUtil;
 import frc.robot.utils.FieldConstants;
+import frc.robot.utils.PathProvider;
 import frc.robot.utils.PositionUtils;
 import java.util.Map;
 import java.util.Objects;
@@ -91,7 +91,7 @@ public class RobotContainer {
   private Hood hood;
   private Indexer indexer;
   private Vision vision;
-  private Intake intake;
+  private IntakeRoller intakeRoller;
   private IntakePivot intakePivot;
   private HopperRoller hopperRoller;
   private FlywheelKicker flywheelKicker;
@@ -104,8 +104,6 @@ public class RobotContainer {
   private ShotCalculator passCalculator;
 
   // TODO: refactor to allow for more than 1 drivetrain type
-
-  private Telemetry logger;
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
 
@@ -132,11 +130,13 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+    // Pre-load all PathPlanner path files into memory to avoid disk I/O during auto
+    PathProvider.initialize();
+
     switch (Constants.getRobotType()) {
       case SIM:
         drivetrain = WoodBotDrivetrain.createDrivetrain();
         climber = new Climber(new ClimberIOSim());
-        logger = new Telemetry(WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
         intakePivot = new IntakePivot(new IntakePivotIOSim());
         vision =
             new Vision(
@@ -144,7 +144,7 @@ public class RobotContainer {
         flywheel = new Flywheel(new FlywheelIOSim());
         hood = new Hood(new HoodIOSim());
         indexer = new Indexer(new IndexerIOSim());
-        intake = new Intake(new IntakeIOSim());
+        intakeRoller = new IntakeRoller(new IntakeRollerIOSim());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOSim());
         hopperRoller = new HopperRoller(new HopperRollerIOSim());
 
@@ -168,7 +168,6 @@ public class RobotContainer {
       case WOODBOT:
         drivetrain = WoodBotDrivetrain.createDrivetrain();
         climber = new Climber(new ClimberIONoop());
-        logger = new Telemetry(WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
         flywheel = new Flywheel(new FlywheelIOWBBangBang());
         hood = new Hood(new HoodIOWB());
         indexer = new Indexer(new IndexerIOWB());
@@ -182,7 +181,7 @@ public class RobotContainer {
                             () -> drivetrain.getAngle(),
                             () -> drivetrain.getAngularRate(),
                             true))));
-        intake = new Intake(new IntakeIOWB());
+        intakeRoller = new IntakeRoller(new IntakeRollerIOWB());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOWB());
         intakePivot = new IntakePivot(new IntakePivotIONoop());
         hopperRoller = new HopperRoller(new HopperRollerIONoop());
@@ -201,7 +200,6 @@ public class RobotContainer {
       default:
         drivetrain = PracticeBotDrivetrain.createDrivetrain();
         climber = new Climber(new ClimberIOPB());
-        logger = new Telemetry(PracticeBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
         flywheel = new Flywheel(new FlywheelIOPBBangBang());
         hood = new Hood(new HoodIOPB());
         indexer = new Indexer(new IndexerIOPB());
@@ -215,7 +213,7 @@ public class RobotContainer {
                             () -> drivetrain.getAngle(),
                             () -> drivetrain.getAngularRate(),
                             true))));
-        intake = new Intake(new IntakeIOPB());
+        intakeRoller = new IntakeRoller(new IntakeRollerIOPB());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOPB());
         intakePivot = new IntakePivot(new IntakePivotIOPB());
         hopperRoller = new HopperRoller(new HopperRollerIOPB());
@@ -253,7 +251,7 @@ public class RobotContainer {
 
     superStructure =
         new SuperStructure(
-            intake,
+            intakeRoller,
             indexer,
             flywheelKicker,
             flywheel,
@@ -265,10 +263,8 @@ public class RobotContainer {
             drivetrain::isAlignedToTarget,
             drivetrain::getPosition,
             robotShootingInfo.robotToShooter());
-    intake.setDutyCycleSupplier(driverCont::getLeftTriggerAxis);
-
     registerPathplannerCommand(
-        "basic intake", superStructure.setStateCommand(SuperWantedStates.INTAKING));
+        "basic intake", superStructure.setIntakeStateCommand(IntakeWantedStates.INTAKING));
     // TODO: add end condition based on state from SuperStructure (based on sensor inputs)
     registerPathplannerCommand(
         "shoot at hub",
@@ -282,6 +278,10 @@ public class RobotContainer {
                             () -> 0,
                             () -> hubShotCalculator.calculateShot().targetHeading())))
             .andThen(superStructure.setStateCommand(SuperWantedStates.DEFAULT)));
+    registerPathplannerCommand(
+        "stow intake", superStructure.setIntakeStateCommand(IntakeWantedStates.STOWED));
+    registerPathplannerCommand(
+        "spin up", superStructure.setStateCommand(SuperWantedStates.DEFAULT));
 
     configVision();
     configDefaultDrivingCommand();
@@ -300,6 +300,8 @@ public class RobotContainer {
     SmartDashboard.putData("Auto Chooser", autoChooser);
 
     CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
+    // Uncomment this if pathplanner starts to suck on loading
+    // CommandScheduler.getInstance().schedule(PathfindingCommand.warmupCommand());
   }
 
   public void registerPathplannerCommand(String name, Command command) {
@@ -377,27 +379,31 @@ public class RobotContainer {
                     driverCont, () -> passCalculator.calculateShot().targetHeading())));
     forceOutpostTrigger.onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
 
-    // TODO: Re-enable superStructure bindings
-    Trigger intakeTrigger = driverCont.leftTrigger().and(isSuperstructureMode);
-    intakeTrigger.onTrue(superStructure.setStateCommand(SuperWantedStates.INTAKING));
-    intakeTrigger.onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
+    // Left trigger held: agitate. Release: back to intaking.
+    Trigger agitateTrigger = driverCont.leftTrigger().and(isSuperstructureMode);
+    agitateTrigger.onTrue(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING));
+    agitateTrigger.onFalse(superStructure.setIntakeStateCommand(IntakeWantedStates.INTAKING));
+
+    // Y toggle: STOWED <-> INTAKING. Gated out while agitate trigger is held.
+    driverCont
+        .y()
+        .and(isSuperstructureMode)
+        .and(() -> !agitateTrigger.getAsBoolean())
+        .onTrue(superStructure.toggleIntakeStateCommand());
 
     configureIndependentModeBindings(isIndependentMode);
 
     driverCont.a().onTrue(superStructure.setStateCommand(SuperWantedStates.UNJAMMING));
     driverCont.a().onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
 
-    driverCont.y().onTrue(superStructure.setStateCommand(SuperWantedStates.STOWED));
-
     // Drivetrain commands
     // driverCont.leftTrigger().whileTrue(drivetrain.faceHubWhileDriving(driverCont));
-    drivetrain.registerTelemetry(logger::telemeterize);
     driverCont.back().onTrue(drivetrain.zeroCommand());
   }
 
   /** Configures bindings that are active only in independent (test) mode. */
   private void configureIndependentModeBindings(BooleanSupplier isIndependentMode) {
-    driverCont.leftBumper().and(isIndependentMode).whileTrue(intake.setDutyCycleCommand(0.2));
+    driverCont.leftBumper().and(isIndependentMode).whileTrue(intakeRoller.setDutyCycleCommand(0.2));
 
     // driverCont.a().and(isIndependentMode).whileTrue(indexer.setDutyCycleCommand(0.5));
 
@@ -454,10 +460,13 @@ public class RobotContainer {
                 .alongWith(
                     hopperRoller.setDutyCycleCommand(-0.3),
                     flywheelKicker.setDutyCycleCommand(-0.3),
-                    intake.setDutyCycleCommand(-0.2)));
+                    intakeRoller.setDutyCycleCommand(-0.2)));
     driverCont.x().and(isIndependentMode).whileTrue(intakePivot.setPositionCommand(() -> 93.0));
     driverCont.y().and(isIndependentMode).whileTrue(intakePivot.setPositionCommand(() -> 0.0));
-    driverCont.leftTrigger().and(isIndependentMode).whileTrue(intake.setVelocityCommand(1000.0));
+    driverCont
+        .leftTrigger()
+        .and(isIndependentMode)
+        .whileTrue(intakeRoller.setVelocityCommand(1000.0));
     driverCont.pov(0).and(isIndependentMode).whileTrue(hood.setPositionCommand(0.0));
     driverCont.pov(90).and(isIndependentMode).whileTrue(hood.setPositionCommand(15.0));
     driverCont.pov(180).and(isIndependentMode).whileTrue(hood.setPositionCommand(30.0));
@@ -480,8 +489,8 @@ public class RobotContainer {
     //     .and(isIndependentMode)
     //     .whileTrue(intakePivot.setPositionCommand(() -> 90.0));
     // Intake rollers: A = in, B = out
-    // driverCont.a().and(isIndependentMode).whileTrue(intake.setDutyCycleCommand(0.2));
-    // driverCont.b().and(isIndependentMode).whileTrue(intake.setDutyCycleCommand(-0.2));
+    // driverCont.a().and(isIndependentMode).whileTrue(intakeRoller.setDutyCycleCommand(0.2));
+    // driverCont.b().and(isIndependentMode).whileTrue(intakeRoller.setDutyCycleCommand(-0.2));
   }
 
   /** Configures climber test bindings for independent mode. */
@@ -507,19 +516,20 @@ public class RobotContainer {
         .and(isIndependentMode)
         .whileTrue(intakePivot.setPositionCommand(() -> 90.0));
     // Intake rollers: A = in, B = out
-    driverCont.a().and(isIndependentMode).whileTrue(intake.setDutyCycleCommand(0.2));
-    driverCont.b().and(isIndependentMode).whileTrue(intake.setDutyCycleCommand(-0.2));
+    driverCont.a().and(isIndependentMode).whileTrue(intakeRoller.setDutyCycleCommand(0.2));
+    driverCont.b().and(isIndependentMode).whileTrue(intakeRoller.setDutyCycleCommand(-0.2));
   }
 
   /** Stops all subsystems safely when the robot is disabled. */
   public void onDisable() {
     superStructure.setControlState(ControlState.SUPERSTRUCTURE);
     superStructure.setWantedSuperState(SuperWantedStates.IDLE);
+    superStructure.setIntakeState(IntakeWantedStates.IDLE);
     drivetrain.setControl(new SwerveRequest.Idle());
     climber.stop();
     flywheel.stop();
     hood.stop();
-    intake.stop();
+    intakeRoller.stop();
     intakePivot.stop();
     indexer.stop();
     flywheelKicker.stop();
@@ -532,6 +542,7 @@ public class RobotContainer {
     // Ensures superstructure control mode is active when enabled
     superStructure.setControlState(ControlState.SUPERSTRUCTURE);
     superStructure.setWantedSuperState(SuperWantedStates.DEFAULT);
+    superStructure.setIntakeState(IntakeWantedStates.INTAKING);
     onEnableVision();
   }
 

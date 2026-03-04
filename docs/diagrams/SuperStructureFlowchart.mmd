@@ -1,0 +1,57 @@
+---
+title: SuperStructure State Machine - Flowchart View
+---
+flowchart TB
+    Start([Robot Enabled]) --> DefaultWanted
+    
+    %% Default State
+    DefaultWanted["DEFAULT_WANTED<br/>---<br/>Ready to act<br/>Passive shooter running<br/>Intake deployed"]
+    
+    %% Operational States
+    Intaking["INTAKING_WANTED<br/>---<br/>Collecting algae<br/>Intake + indexer active"]
+    ShootHub["SHOOT_AT_HUB<br/>---<br/>Scoring at hub<br/>Uses hub calculator"]
+    ShootOutpost["SHOOT_AT_OUTPOST<br/>---<br/>Passing to outpost<br/>Uses pass calculator"]
+    AutoCycle["AUTO_CYCLE<br/>---<br/>Auto target selection<br/>Hub or Outpost based on zone"]
+    Unjam["UNJAMMING<br/>---<br/>Clearing jam<br/>All reversing"]
+    Stowed["STOWED<br/>---<br/>Intake stowed<br/>For climbing/defense"]
+    
+    %% Idle State
+    IdleState["IDLE_WANTED<br/>---<br/>All subsystems stopped<br/>Disabled/test only"]
+    
+    %% Transitions from DEFAULT (the busy hub)
+    DefaultWanted -->|"Intake button"| Intaking
+    DefaultWanted -->|"Force hub button"| ShootHub
+    DefaultWanted -->|"Force outpost button"| ShootOutpost
+    DefaultWanted -->|"Auto cycle button"| AutoCycle
+    DefaultWanted -->|"A button"| Unjam
+    DefaultWanted -->|"Y button"| Stowed
+    
+    %% Return transitions (all go back to DEFAULT)
+    Intaking -.->|"Button released"| DefaultWanted
+    ShootHub -.-> DefaultWanted
+    ShootOutpost -.-> DefaultWanted
+    AutoCycle -.-> DefaultWanted
+    Unjam -.-> DefaultWanted
+    Stowed -.-> DefaultWanted
+    
+    %% Mode change
+    IdleState ==>|"Mode → Auto/Teleop"| DefaultWanted
+    
+    %% Subsystem detail callouts
+    DefaultWanted -.- DefaultDetails["Subsystems:<br/>• TargetSelection → AUTO<br/>• ShooterStateMachine → PASSIVE_SHOOTER<br/>• Intake → OFF<br/>• Indexer → OFF<br/>• IntakePivot → DEPLOYED<br/>• HopperRoller → OFF"]
+    
+    Intaking -.- IntakingDetails["Subsystems:<br/>• Intake → INTAKING<br/>• IntakePivot → DEPLOYED<br/>• HopperRoller → PREVENT_JAM<br/>• Indexer → ASSIST_INTAKING<br/>• ShooterStateMachine → IDLE"]
+    
+    ShootHub -.- ShootDetails["Shooting Sequence:<br/>1. PREPARING_TO_FIRE<br/>   - Spin up flywheel/hood<br/>   - Wait for at setpoint<br/>2. FIRING<br/>   - Intake → ASSIST_SHOOTING<br/>   - Indexer → INDEXING<br/>   - IntakePivot → AGITATE_HOPPER<br/>   - HopperRoller → ROLLING"]
+    
+    style DefaultWanted fill:#bbdefb,stroke:#0d47a1,stroke-width:3px,color:#000
+    style Intaking fill:#ce93d8,stroke:#4a148c,stroke-width:2px,color:#000
+    style ShootHub fill:#ffcc80,stroke:#e65100,stroke-width:2px,color:#000
+    style ShootOutpost fill:#ffcc80,stroke:#e65100,stroke-width:2px,color:#000
+    style AutoCycle fill:#a5d6a7,stroke:#1b5e20,stroke-width:2px,color:#000
+    style Unjam fill:#ef9a9a,stroke:#b71c1c,stroke-width:2px,color:#000
+    style Stowed fill:#f48fb1,stroke:#880e4f,stroke-width:2px,color:#000
+    style IdleState fill:#e0e0e0,stroke:#212121,stroke-width:2px,color:#000
+    
+    classDef detailBox fill:#fff9c4,stroke:#f57f17,stroke-width:1px,stroke-dasharray:3,color:#000
+    class DefaultDetails,IntakingDetails,ShootDetails detailBox
