@@ -32,7 +32,7 @@ public class HoodIOPB implements HoodIO {
   private static final double KV = 0.0;
   private static final double FORWARD_SOFT_LIMIT_DEGREES = 47.0;
   private static final double STATOR_CURRENT_LIMIT_AMPS = 60.0;
-  private static final double SUPPLY_CURRENT_LIMIT_AMPS = 30.0;
+  private static final double SUPPLY_CURRENT_LIMIT_AMPS = 25.0;
   private static final double MOTION_MAGIC_ACCELERATION_RPS2 = 4.0;
   private static final double MOTION_MAGIC_CRUISE_VELOCITY_RPS = 2.0;
   private static final double MOTION_MAGIC_JERK_RPS3 = 1200.0;

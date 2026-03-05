@@ -15,6 +15,7 @@ import frc.robot.Constants;
 
 public class HopperRollerIOPB implements HopperRollerIO {
   private static final double GEAR_RATIO = 1.0;
+  private static final int CURRENT_LIMIT_AMPS = 40;
 
   private final SparkFlex hopperRollerMotor =
       new SparkFlex(Constants.PracticeBotConstants.HOPPER_ROLLER_ID, MotorType.kBrushless);
@@ -25,6 +26,7 @@ public class HopperRollerIOPB implements HopperRollerIO {
   public HopperRollerIOPB() {
     sparkFlexConfig.idleMode(IdleMode.kBrake);
     sparkFlexConfig.inverted(true);
+    sparkFlexConfig.smartCurrentLimit(CURRENT_LIMIT_AMPS);
 
     sparkFlexConfig.encoder.positionConversionFactor(1.0 / GEAR_RATIO);
     sparkFlexConfig.encoder.velocityConversionFactor(1.0 / GEAR_RATIO);
