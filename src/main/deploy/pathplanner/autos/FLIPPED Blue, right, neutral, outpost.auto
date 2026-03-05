@@ -5,31 +5,13 @@
     "data": {
       "commands": [
         {
-          "type": "named",
-          "data": {
-            "name": "default"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "[R] Depot 1"
-          }
-        },
-        {
-          "type": "deadline",
+          "type": "parallel",
           "data": {
             "commands": [
               {
-                "type": "wait",
+                "type": "path",
                 "data": {
-                  "waitTime": 3.0
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "shoot without timer"
+                  "pathName": "FLIPPED Blue middle 1"
                 }
               }
             ]
@@ -42,7 +24,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "[R] Depot 2"
+                  "pathName": "FLIPPED Blue middle 2.1"
                 }
               },
               {
@@ -55,9 +37,41 @@
           }
         },
         {
-          "type": "path",
+          "type": "deadline",
           "data": {
-            "pathName": "[R] Depot 3"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "FLIPPED Blue middle 3.3"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "basic intake"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "deadline",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "FLIPPED Blue middle 4.3"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "basic intake"
+                }
+              }
+            ]
           }
         },
         {
@@ -71,22 +85,9 @@
                 }
               },
               {
-                "type": "parallel",
+                "type": "named",
                 "data": {
-                  "commands": [
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "shoot without timer"
-                      }
-                    },
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "agitate intake"
-                      }
-                    }
-                  ]
+                  "name": "shoot at hub"
                 }
               }
             ]

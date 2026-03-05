@@ -299,7 +299,7 @@ public class RobotContainer {
     // TODO: add end condition based on state from SuperStructure (based on sensor inputs)
     registerPathplannerCommand(
         "shoot at hub",
-        Commands.waitSeconds(3)
+        Commands.waitSeconds(4)
             .deadlineFor(
                 superStructure
                     .setStateCommand(SuperWantedStates.SHOOT_AT_HUB)
@@ -317,6 +317,14 @@ public class RobotContainer {
         "deploy intake", superStructure.setIntakeStateCommand(IntakeWantedStates.DEPLOYED));
     registerPathplannerCommand(
         "agitate intake", superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING));
+    registerPathplannerCommand(
+        "shoot without timer",
+        superStructure
+            .setStateCommand(SuperWantedStates.SHOOT_AT_HUB)
+            .alongWith(
+                drivetrain.faceAngleWhileDrivingCommand(
+                    () -> 0, () -> 0, () -> hubShotCalculator.calculateShot().targetHeading()))
+            .finallyDo(() -> superStructure.setWantedSuperState(SuperWantedStates.DEFAULT)));
 
     configVision();
     configDefaultDrivingCommand();

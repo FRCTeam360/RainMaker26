@@ -17,7 +17,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "OtherSideAlternateShoot1"
+                  "pathName": "Blue left middle 1"
                 }
               },
               {
@@ -49,7 +49,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "OthersideAlternateShoot2"
+                  "pathName": "Blue left middle 2"
                 }
               },
               {
@@ -68,7 +68,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "OthersideAlternateShoot3"
+                  "pathName": "Blue left middle 3"
                 }
               },
               {
@@ -106,7 +106,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "OthersideAlternateShoot4"
+                  "pathName": "Blue left middle 4"
                 }
               },
               {
@@ -125,7 +125,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "OthersideAlternateShoot5"
+                  "pathName": "Blue left middle 5"
                 }
               },
               {
@@ -140,7 +140,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "OthersideAlternateShoot3"
+            "pathName": "Blue left middle 3"
           }
         },
         {

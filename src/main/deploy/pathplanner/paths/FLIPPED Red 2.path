@@ -3,43 +3,38 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 16.04606666666667,
-        "y": 3.1287666666666665
+        "x": 15.99,
+        "y": 1.092
       },
       "prevControl": null,
       "nextControl": {
-        "x": 14.27044774978731,
-        "y": 2.9760035616052396
+        "x": 16.019811,
+        "y": 1.727189
       },
       "isLocked": false,
-      "linkedName": "red depot 2 end"
+      "linkedName": null
     },
     {
       "anchor": {
-        "x": 13.824333333333334,
-        "y": 3.1287666666666665
+        "x": 15.99,
+        "y": 3.259
       },
       "prevControl": {
-        "x": 14.663819148806255,
-        "y": 3.1467766444521343
+        "x": 15.9795,
+        "y": 2.845811
       },
       "nextControl": null,
       "isLocked": false,
       "linkedName": null
     }
   ],
-  "rotationTargets": [
-    {
-      "waypointRelativePos": 0.1892116182572606,
-      "rotationDegrees": 90.0
-    }
-  ],
+  "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 2.0,
-    "maxAcceleration": 6.0,
+    "maxVelocity": 0.5,
+    "maxAcceleration": 5.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
@@ -47,7 +42,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -45.784824602991954
+    "rotation": 90.0
   },
   "reversed": false,
   "folder": null,
