@@ -4,7 +4,6 @@
 
 package frc.robot.subsystems.Intake.IntakePivot;
 
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -20,8 +19,6 @@ public class IntakePivot extends SubsystemBase {
   private static final double LOW_AGITATED_POSITION_DEGREES = 80.0;
   private static final double STACK_FUEL_POSITION_DEGREES = 20.0;
   private static final double TOLERANCE_DEGREES = 2.0;
-  private static final double LOW_AGITATE_DWELL_SECONDS = 2.0;
-  private static final double HIGH_AGITATE_DWELL_SECONDS = 0.0;
   // IO fields
   private final IntakePivotIO io;
   private final IntakePivotIOInputsAutoLogged inputs = new IntakePivotIOInputsAutoLogged();
@@ -49,8 +46,6 @@ public class IntakePivot extends SubsystemBase {
   private ControlState controlState = ControlState.SUPERSTRUCTURE;
   // For agitation cycle
   private boolean agitateTargetHigh = true;
-  private final Timer lowDwellTimer = new Timer();
-  private final Timer highDwellTimer = new Timer();
 
   // Constructor
 
@@ -95,31 +90,16 @@ public class IntakePivot extends SubsystemBase {
               agitateTargetHigh ? HIGH_AGITATED_POSITION_DEGREES : LOW_AGITATED_POSITION_DEGREES;
           boolean atTarget = atSetpoint(target);
           if (previousState == IntakePivotInternalStates.MOVING_TO_SETPOINT && atTarget) {
-            if (agitateTargetHigh) {
-              // Just arrived at high — start high dwell timer
-              currentState = IntakePivotInternalStates.SWITCHING_AGITATE_TARGET_LOW;
-            } else {
-              // Just arrived at low — start low dwell timer
-              currentState = IntakePivotInternalStates.SWITCHING_AGITATE_TARGET_HIGH;
-            }
+            currentState =
+                agitateTargetHigh
+                    ? IntakePivotInternalStates.SWITCHING_AGITATE_TARGET_LOW
+                    : IntakePivotInternalStates.SWITCHING_AGITATE_TARGET_HIGH;
           } else if (currentState == IntakePivotInternalStates.SWITCHING_AGITATE_TARGET_HIGH) {
             agitateTargetHigh = true;
-            highDwellTimer.restart();
             currentState = IntakePivotInternalStates.AT_SETPOINT;
           } else if (currentState == IntakePivotInternalStates.SWITCHING_AGITATE_TARGET_LOW) {
             agitateTargetHigh = false;
-            lowDwellTimer.restart();
             currentState = IntakePivotInternalStates.AT_SETPOINT;
-          } else if (agitateTargetHigh
-              && currentState == IntakePivotInternalStates.AT_SETPOINT
-              && highDwellTimer.hasElapsed(HIGH_AGITATE_DWELL_SECONDS)) {
-            // Dwell at high position complete — switch down to low
-            currentState = IntakePivotInternalStates.SWITCHING_AGITATE_TARGET_LOW;
-          } else if (!agitateTargetHigh
-              && currentState == IntakePivotInternalStates.AT_SETPOINT
-              && lowDwellTimer.hasElapsed(LOW_AGITATE_DWELL_SECONDS)) {
-            // Dwell at low position complete — switch back to high
-            currentState = IntakePivotInternalStates.SWITCHING_AGITATE_TARGET_HIGH;
           } else {
             currentState =
                 atTarget

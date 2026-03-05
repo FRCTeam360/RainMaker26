@@ -32,7 +32,7 @@ public class Flywheel extends SubsystemBase {
   /** Velocity tolerance for bang-bang setpoint detection. */
   private static final double TOLERANCE_RPM = 150.0;
 
-  private static final double COAST_CONSTANT_VELOCITY = 1250;
+  private static final double COAST_CONSTANT_VELOCITY = 0.0;
 
   /** Debounce time for shot detection — filters noise from brief velocity dips. */
   private static final double BALL_FIRED_DEBOUNCE_SECONDS = 0.04;
