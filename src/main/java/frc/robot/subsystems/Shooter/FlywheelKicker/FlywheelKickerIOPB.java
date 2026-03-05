@@ -26,12 +26,12 @@ public class FlywheelKickerIOPB implements FlywheelKickerIO {
   private static final double SPINUP_KD = 0.0;
 
   // Hold config - smooth setpoint maintenance with tuned PID
-  private static final double HOLD_KP = 0.0015;
+  private static final double HOLD_KP = 0.0006;
   private static final double HOLD_KI = 0.0;
   private static final double HOLD_KD = 0.0;
 
   // Feedforward (shared across all slots)
-  private static final double KV = 0.0010;
+  private static final double KV = 0.002;
   private static final double KS = 0.04;
 
   private static final double MIN_SIGNAL_STRENGTH = 2000; // unknown unit
@@ -83,8 +83,7 @@ public class FlywheelKickerIOPB implements FlywheelKickerIO {
         .feedForward
         .kV(KV, ClosedLoopSlot.kSlot1)
         .kS(KS, ClosedLoopSlot.kSlot1);
-    sparkFlexConfig.closedLoop.outputRange(
-        MAX_NEGATIVE_OUTPUT, MAX_POSITIVE_OUTPUT, ClosedLoopSlot.kSlot1);
+    sparkFlexConfig.closedLoop.outputRange(-1.0, 1.0, ClosedLoopSlot.kSlot1);
 
     // Apply configuration once at startup
     flywheelKickerMotor.configure(
