@@ -58,7 +58,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   // Keep track of when vision measurements are added for logging context
   private boolean hasVisionMeasurements = false;
 
-  // Cached state copy for dashboard updates (updated in periodic)
+  // Lazily-cached state copy. Invalidated once per cycle via clearCachedState() in
+  // preSchedulerUpdate(), then populated on first access via getCachedState().
+  // This ensures at most one getStateCopy() allocation per scheduler cycle.
   private SwerveDriveState cachedState;
 
   // Commanded speeds for shoot-on-the-move compensation (tracks what we tell the robot to do)
@@ -363,7 +365,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                 null);
 
             // Robot angle
-            builder.addDoubleProperty("Robot Angle", () -> getRotation2d().getRadians(), null);
+            builder.addDoubleProperty(
+                "Robot Angle", () -> getCachedState().Pose.getRotation().getRadians(), null);
           }
         });
   }
@@ -415,9 +418,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
       }
 
       AutoBuilder.configure(
-          () -> getStateCopy().Pose, // Supplier of current robot pose
+          this::getPosition, // Supplier of current robot pose (uses cached state)
           this::resetPose, // Consumer for seeding pose against auto
-          () -> getStateCopy().Speeds, // Supplier of current robot speeds
+          this::getVelocity, // Supplier of current robot speeds (uses cached state)
           // Consumer of ChassisSpeeds and feedforwards to drive the robot
           (speeds, feedforwards) -> {
             setCommandedSpeeds(speeds);
@@ -443,12 +446,35 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     }
   }
 
+  /**
+   * Returns the lazily-cached swerve state for this scheduler cycle. On the first call after {@link
+   * #clearCachedState()}, this calls {@link #getStateCopy()} once and caches the result. All
+   * subsequent calls in the same cycle return the cached instance with zero allocation.
+   *
+   * @return the cached {@link SwerveDriveState}
+   */
+  public SwerveDriveState getCachedState() {
+    if (cachedState == null) {
+      cachedState = this.getStateCopy();
+    }
+    return cachedState;
+  }
+
+  /**
+   * Invalidates the cached swerve state so the next {@link #getCachedState()} call fetches a fresh
+   * copy. Called once per scheduler cycle from {@link
+   * frc.robot.RobotContainer#preSchedulerUpdate()}.
+   */
+  public void clearCachedState() {
+    cachedState = null;
+  }
+
   public Pose2d getPose2d() {
-    return this.getStateCopy().Pose;
+    return getCachedState().Pose;
   }
 
   public Rotation2d getRotation2d() {
-    return getPose2d().getRotation();
+    return getCachedState().Pose.getRotation();
   }
 
   /**
@@ -480,11 +506,11 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   }
 
   public double getAngle() {
-    return this.getRotation2d().getDegrees();
+    return getRotation2d().getDegrees();
   }
 
   public double getAngularRate() {
-    return Math.toDegrees(this.getStateCopy().Speeds.omegaRadiansPerSecond);
+    return Math.toDegrees(getVelocity().omegaRadiansPerSecond);
   }
 
   public void zero() {
@@ -529,14 +555,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
   @Override
   public void periodic() {
-    field.setRobotPose(new Pose2d(getPose2d().getX(), getPose2d().getY(), getRotation2d()));
+    SwerveDriveState state = getCachedState();
 
-    // Current pose includes vision fusion when vision measurements are added
-
-    SwerveDriveState state = this.getStateCopy();
-
-    // Update cached state for dashboard (used by Sendable)
-    cachedState = state;
+    field.setRobotPose(state.Pose);
 
     Logger.recordOutput(SUBSYSTEM_NAME + "CurrentPose", state.Pose);
     Logger.recordOutput(SUBSYSTEM_NAME + "Rotation2d", state.RawHeading);
@@ -610,7 +631,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
    * @return the current {@link Pose2d} of the robot
    */
   public Pose2d getPosition() {
-    return this.getStateCopy().Pose;
+    return getCachedState().Pose;
   }
 
   /**
@@ -619,7 +640,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
    * @return the current {@link ChassisSpeeds} of the robot
    */
   public ChassisSpeeds getVelocity() {
-    return this.getStateCopy().Speeds;
+    return getCachedState().Speeds;
   }
 
   /**
