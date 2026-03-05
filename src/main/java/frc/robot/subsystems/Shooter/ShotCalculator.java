@@ -27,7 +27,7 @@ public class ShotCalculator {
   private final InterpolatingDoubleTreeMap shotFlywheelSpeedMap;
   private final InterpolatingDoubleTreeMap timeOfFlightMap;
   private final Transform2d robotToShooter;
-  private final String name;
+  private final double maxRobotSpeedMps;
 
   private final String logCached;
   private final String logVirtualTarget;
@@ -68,7 +68,8 @@ public class ShotCalculator {
       InterpolatingDoubleTreeMap timeOfFlightMap,
       Transform2d robotToShooter,
       double minDistanceMeters, // should be 0.0 for hub
-      double maxDistanceMeters /* should be 5.0 for hub */) {}
+      double maxDistanceMeters, /* should be 5.0 for hub */
+      double maxRobotSpeedMps) {}
 
   /**
    * Creates a new ShotCalculator.
@@ -85,7 +86,6 @@ public class ShotCalculator {
       Supplier<Translation2d> targetSupplier,
       Supplier<ChassisSpeeds> velocitySupplier,
       RobotShootingInfo robotShootingInfo) {
-    this.name = name;
     this.robotPoseSupplier = robotPoseSupplier;
     this.targetSupplier = targetSupplier;
     this.velocitySupplier = velocitySupplier;
@@ -95,6 +95,7 @@ public class ShotCalculator {
     this.robotToShooter = robotShootingInfo.robotToShooter;
     this.minDistanceMeters = robotShootingInfo.minDistanceMeters;
     this.maxDistanceMeters = robotShootingInfo.maxDistanceMeters;
+    this.maxRobotSpeedMps = robotShootingInfo.maxRobotSpeedMps;
 
     String basePath = "ShotCalculator/" + name;
     this.logCached = basePath + "/cached";

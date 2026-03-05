@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.MetersPerSecond;
+
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
@@ -150,7 +152,8 @@ public class RobotContainer {
                 Constants.SimulationConstants.shotTimeOfFlightMap,
                 ShooterConstants.SIM_TO_SHOOTER,
                 Constants.SimulationConstants.MIN_SHOT_DISTANCE_METERS,
-                Constants.SimulationConstants.MAX_SHOT_DISTANCE_METERS);
+                Constants.SimulationConstants.MAX_SHOT_DISTANCE_METERS,
+                WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
         robotPassingInfo =
             new RobotShootingInfo(
                 Constants.SimulationConstants.passHoodAngleMap,
@@ -158,7 +161,8 @@ public class RobotContainer {
                 Constants.SimulationConstants.passTimeOfFlightMap,
                 ShooterConstants.SIM_TO_SHOOTER,
                 Constants.SimulationConstants.MIN_PASS_DISTANCE_METERS,
-                Constants.SimulationConstants.MAX_PASS_DISTANCE_METERS);
+                Constants.SimulationConstants.MAX_PASS_DISTANCE_METERS,
+                WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
         break;
       case WOODBOT:
         drivetrain = WoodBotDrivetrain.createDrivetrain();
@@ -188,7 +192,8 @@ public class RobotContainer {
                 Constants.WoodBotConstants.timeOfFlightMap,
                 ShooterConstants.WOODBOT_TO_SHOOTER,
                 Constants.WoodBotConstants.MIN_SHOT_DISTANCE_METERS,
-                Constants.WoodBotConstants.MAX_SHOT_DISTANCE_METERS);
+                Constants.WoodBotConstants.MAX_SHOT_DISTANCE_METERS,
+                WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
         robotPassingInfo =
             new RobotShootingInfo(
                 Constants.WoodBotConstants.shotHoodAngleMap,
@@ -196,7 +201,8 @@ public class RobotContainer {
                 Constants.WoodBotConstants.timeOfFlightMap,
                 ShooterConstants.WOODBOT_TO_SHOOTER,
                 Constants.WoodBotConstants.MIN_SHOT_DISTANCE_METERS,
-                Constants.WoodBotConstants.MAX_SHOT_DISTANCE_METERS);
+                Constants.WoodBotConstants.MAX_SHOT_DISTANCE_METERS,
+                WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
         break;
       case PRACTICEBOT:
       default:
@@ -234,7 +240,8 @@ public class RobotContainer {
                 Constants.PracticeBotConstants.timeOfFlightMap,
                 ShooterConstants.PRACTICEBOT_TO_SHOOTER,
                 Constants.PracticeBotConstants.MIN_SHOT_DISTANCE_METERS,
-                Constants.PracticeBotConstants.MAX_SHOT_DISTANCE_METERS);
+                Constants.PracticeBotConstants.MAX_SHOT_DISTANCE_METERS,
+                PracticeBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
         robotPassingInfo =
             new RobotShootingInfo(
                 Constants.PracticeBotConstants.passHoodAngleMap,
@@ -242,7 +249,8 @@ public class RobotContainer {
                 Constants.PracticeBotConstants.timeOfFlightMap,
                 ShooterConstants.PRACTICEBOT_TO_SHOOTER,
                 Constants.PracticeBotConstants.MIN_SHOT_DISTANCE_METERS,
-                Constants.PracticeBotConstants.MAX_SHOT_DISTANCE_METERS);
+                Constants.PracticeBotConstants.MAX_SHOT_DISTANCE_METERS,
+                PracticeBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
         break;
     }
     hubShotCalculator =
