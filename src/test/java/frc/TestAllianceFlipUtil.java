@@ -11,11 +11,13 @@ import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.utils.AllianceFlipUtil;
 import frc.robot.utils.FieldConstants;
 import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 
 public class TestAllianceFlipUtil {
-  {
+  @BeforeEach
+  void beforeEach() {
     try (MockedStatic<DriverStation> ds = mockStatic(DriverStation.class)) {
       ds.when(DriverStation::getAlliance).thenReturn(Optional.of(DriverStation.Alliance.Red));
       // now test Red behavior
@@ -57,26 +59,26 @@ public class TestAllianceFlipUtil {
 
   @Test
   public void redTestXAndY() {
-    // Fixing Later
+    // not working, somebody else fix please
   }
 
   @Test
   public void redTestTranslation2D() {
-    // Fixing later
+    // Not working, somebody else fix please
   }
 
   @Test
   public void redTestRotation2D() {
-    // Fixing later
+    // Not working, somebody else fix please
   }
 
   @Test
   public void redTestPose2D() {
-    // Adding later
+    // Wasn't working, somebody else make please
   }
 
   @Test
   public void redTestTranslation3D() {
-    // Adding later
+    // Not working, somebody else please fix, as I have to work on smtn else
   }
 }
