@@ -151,7 +151,7 @@ deploy {
                 // Tuning the JVM to be more performant
                 // Credit to 6328 for getting our team thinking about this
                 frcJava(getArtifactTypeClass('FRCJavaArtifact')) {
-                    jvmArgs.add("-XX:+UseG1GC")
+                    gcType = edu.wpi.first.gradlerio.deploy.roborio.GarbageCollectorType.G1_Base
                     jvmArgs.add("-XX:MaxGCPauseMillis=20")
                     jvmArgs.add("-XX:GCTimeRatio=5")
                     // roboRIO 2 is dual-core: pin thread counts explicitly so the JVM
