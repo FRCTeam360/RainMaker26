@@ -29,6 +29,7 @@ public class TestRobotInSim {
                 "Unhandled exception: " + throwable.toString(), throwable.getStackTrace());
             System.exit(-1);
         }
+                return null;
     }
 
 
