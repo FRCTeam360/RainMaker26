@@ -17,7 +17,9 @@ import frc.robot.Constants.PracticeBotConstants;
 
 public class IntakeRollerIOPB implements IntakeRollerIO {
   private static final double GEAR_RATIO = 1.0;
-  private static final int CURRENT_LIMIT_AMPS = 45;
+  private static final int STALL_CURRENT_LIMIT_AMPS = 50;
+  private static final int FREE_CURRENT_LIMIT_AMPS = 60;
+
   private static final double KP = 0.0002;
   private static final double KI = 0.0;
   private static final double KD = 0.0;
@@ -33,7 +35,7 @@ public class IntakeRollerIOPB implements IntakeRollerIO {
   public IntakeRollerIOPB() {
     config.idleMode(IdleMode.kCoast);
     config.inverted(true);
-    config.smartCurrentLimit(CURRENT_LIMIT_AMPS);
+    config.smartCurrentLimit(STALL_CURRENT_LIMIT_AMPS, FREE_CURRENT_LIMIT_AMPS);
 
     config.encoder.positionConversionFactor(1.0 / GEAR_RATIO);
     config.encoder.velocityConversionFactor(1.0 / GEAR_RATIO);
