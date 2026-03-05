@@ -210,8 +210,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
               // Pass operator-perspective values — CTRE applies operator perspective
               // internally via setOperatorPerspectiveForward
               return m_faceHubRequest
-                  .withVelocityX(rawVelXMps)
-                  .withVelocityY(rawVelYMps)
+                  .withVelocityX(isBlueAlliance ? rawVelXMps : -rawVelXMps)
+                  .withVelocityY(isBlueAlliance ? rawVelYMps : -rawVelYMps)
                   .withTargetDirection(headingSupplier.get());
             })
         .finallyDo(() -> m_faceHubRequest.HeadingController.reset());

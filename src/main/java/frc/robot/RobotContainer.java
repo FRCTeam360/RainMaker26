@@ -72,7 +72,6 @@ import frc.robot.subsystems.Vision.VisionIOLimelightBase;
 import frc.robot.subsystems.Vision.VisionIOPhotonSim;
 import frc.robot.utils.AllianceFlipUtil;
 import frc.robot.utils.CommandLogger;
-import frc.robot.utils.CommandLogger;
 import frc.robot.utils.FieldConstants;
 import frc.robot.utils.PathProvider;
 import frc.robot.utils.PositionUtils;
@@ -342,7 +341,6 @@ public class RobotContainer {
 
   public void registerPathplannerCommand(String name, Command command) {
     if (Objects.nonNull(command)) {
-      NamedCommands.registerCommand(name, CommandLogger.logCommand(command, name));
       NamedCommands.registerCommand(name, CommandLogger.logCommand(command, name));
     } else {
       System.err.println(name + " is null");
