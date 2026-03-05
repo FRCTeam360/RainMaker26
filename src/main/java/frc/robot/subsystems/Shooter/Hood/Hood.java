@@ -20,6 +20,7 @@ public class Hood extends SubsystemBase {
   // Constants
   private static final double TOLERANCE = 0.5;
   private static final double HOOD_UP_THRESHOLD = 2.0; // degrees - threshold for "hood is up"
+  private final double FORCE_SHOOTING_SETPOINT = 20.0;
 
   // IO fields
   private final HoodIO io;
@@ -111,6 +112,7 @@ public class Hood extends SubsystemBase {
         break;
       case FORCE_SHOOTING:
         currentState = HoodInternalStates.FORCE_SHOOTING;
+        break;
       case IDLE:
       default:
         currentState = HoodInternalStates.OFF;
@@ -128,7 +130,7 @@ public class Hood extends SubsystemBase {
         moveHoodToZero();
         break;
       case FORCE_SHOOTING:
-        setPosition(20.0);
+        setPosition(FORCE_SHOOTING_SETPOINT);
         break;
       case OFF:
       default:
