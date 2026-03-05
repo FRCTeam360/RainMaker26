@@ -66,7 +66,7 @@ public class SuperStructure extends SubsystemBase {
     DEFAULT, // flywheel spun up, hood prepping with ducking
     IDLE, // everything is stopped
     SHOOTING_AT_HUB,
-    FORCE_SHOOTING,
+    SHOOTING,
     PASSING,
     UNJAMMING
   }
@@ -130,7 +130,7 @@ public class SuperStructure extends SubsystemBase {
         currentSuperState = SuperInternalStates.SHOOTING_AT_HUB;
         break;
       case FORCE_SHOOTING:
-        currentSuperState = SuperInternalStates.FORCE_SHOOTING;
+        currentSuperState = SuperInternalStates.SHOOTING;
         break;
       case SHOOT_AT_OUTPOST:
         targetSelectionStateMachine.setWantedState(TargetWantedStates.OUTPOST);
@@ -163,7 +163,7 @@ public class SuperStructure extends SubsystemBase {
       case IDLE:
         stopped();
         break;
-      case FORCE_SHOOTING:
+      case SHOOTING:
       case SHOOTING_AT_HUB:
       case PASSING:
         shooting();
@@ -182,10 +182,8 @@ public class SuperStructure extends SubsystemBase {
   private void shooting() {
     shooterStateMachine.setWantedState(ShooterWantedStates.SHOOTING);
 
-    if (shooterStateMachine.getState() == ShooterStates.FIRING) {
-      indexer.setWantedState(IndexerStates.INDEXING);
-      hopperRoller.setWantedState(HopperRollerStates.ROLLING);
-    } else if (shooterStateMachine.getState() == ShooterStates.FORCE_SHOOTING) {
+    if (shooterStateMachine.getState() == ShooterStates.FIRING
+        || shooterStateMachine.getState() == ShooterStates.FORCE_SHOOTING) {
       indexer.setWantedState(IndexerStates.INDEXING);
       hopperRoller.setWantedState(HopperRollerStates.ROLLING);
     } else {

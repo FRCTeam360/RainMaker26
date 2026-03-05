@@ -134,7 +134,7 @@ public class ShooterStateMachine {
           currentState = ShooterStates.FIRING;
         } else {
           currentState =
-              flywheelReady || (previousState == ShooterStates.FIRING && !flywheelUnderShooting)
+              (previousState == ShooterStates.FIRING && !flywheelUnderShooting)
                   ? ShooterStates.FORCE_SHOOTING
                   : ShooterStates.PREPARING_TO_FIRE;
         }
@@ -173,7 +173,9 @@ public class ShooterStateMachine {
         flywheelKicker.setWantedState(FlywheelKickerStates.KICKING);
         break;
       case FORCE_SHOOTING:
-        // shoot stuff
+        flywheel.setWantedState(FlywheelWantedStates.FORCE_SHOOTING);
+        hood.setWantedState(HoodWantedStates.FORCE_SHOOTING);
+        flywheelKicker.setWantedState(FlywheelKickerStates.KICKING);
         break;
       case WAITING:
         flywheel.setWantedState(FlywheelWantedStates.IDLE);

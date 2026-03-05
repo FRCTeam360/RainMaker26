@@ -36,14 +36,16 @@ public class Hood extends SubsystemBase {
   public enum HoodWantedStates {
     IDLE,
     AIMING,
-    DUCKED
+    DUCKED,
+    FORCE_SHOOTING
   }
 
   public enum HoodInternalStates {
     OFF,
     MOVING,
     AT_SETPOINT,
-    ZEROING
+    ZEROING,
+    FORCE_SHOOTING
   }
 
   // State variables
@@ -99,12 +101,16 @@ public class Hood extends SubsystemBase {
         holdShootingPosition();
         break;
       case DUCKED:
-        // TODO: keep as is until we are confident with our localization to not default to ducking
-        // when in PASSIVE_PREP mode. We currently call this for logging purposes to validate the
+        // TODO: keep as is until we are confident with our localization to not default
+        // to ducking
+        // when in PASSIVE_PREP mode. We currently call this for logging purposes to
+        // validate the
         // logic works
         shouldDuck.getAsBoolean();
         currentState = HoodInternalStates.ZEROING;
         break;
+      case FORCE_SHOOTING:
+        currentState = HoodInternalStates.FORCE_SHOOTING;
       case IDLE:
       default:
         currentState = HoodInternalStates.OFF;
@@ -120,6 +126,9 @@ public class Hood extends SubsystemBase {
         break;
       case ZEROING:
         moveHoodToZero();
+        break;
+      case FORCE_SHOOTING:
+        setPosition(20.0);
         break;
       case OFF:
       default:
@@ -218,7 +227,8 @@ public class Hood extends SubsystemBase {
       applyState();
     }
 
-    // Update hood up alert - triggers when hood is not ducked and position is above threshold
+    // Update hood up alert - triggers when hood is not ducked and position is above
+    // threshold
     boolean isHoodUp =
         (wantedState != HoodWantedStates.DUCKED
             && currentState != HoodInternalStates.ZEROING
