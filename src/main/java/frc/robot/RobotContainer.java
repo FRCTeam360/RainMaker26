@@ -377,14 +377,14 @@ public class RobotContainer {
     forceHubTrigger.onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
 
     // Manual override: force pass to outpost regardless of position
-    Trigger forceOutpostTrigger = driverCont.leftBumper().and(isSuperstructureMode);
-    forceOutpostTrigger.whileTrue(
-        superStructure
-            .setStateCommand(SuperWantedStates.SHOOT_AT_OUTPOST)
-            .alongWith(
-                drivetrain.faceAngleWhileDrivingCommand(
-                    driverCont, () -> passCalculator.calculateShot().targetHeading())));
-    forceOutpostTrigger.onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
+    // Trigger forceOutpostTrigger = driverCont.leftBumper().and(isSuperstructureMode);
+    // forceOutpostTrigger.whileTrue(
+    //     superStructure
+    //         .setStateCommand(SuperWantedStates.SHOOT_AT_OUTPOST)
+    //         .alongWith(
+    //             drivetrain.faceAngleWhileDrivingCommand(
+    //                 driverCont, () -> passCalculator.calculateShot().targetHeading())));
+    // forceOutpostTrigger.onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
 
     // Left trigger held: agitate. Release: back to intaking.
     if (Constants.getRobotType() == RobotType.WOODBOT) {
@@ -393,9 +393,13 @@ public class RobotContainer {
       intakeTrigger.whileFalse(superStructure.setIntakeStateCommand(IntakeWantedStates.IDLE));
 
     } else {
+      Trigger intakeTrigger = driverCont.leftBumper().and(isSuperstructureMode);
+      intakeTrigger.onTrue(superStructure.setIntakeStateCommand(IntakeWantedStates.INTAKING));
+      intakeTrigger.whileFalse(superStructure.setIntakeStateCommand(IntakeWantedStates.IDLE));
+      
       Trigger agitateTrigger = driverCont.leftTrigger().and(isSuperstructureMode);
       agitateTrigger.onTrue(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING));
-      agitateTrigger.onFalse(superStructure.setIntakeStateCommand(IntakeWantedStates.INTAKING));
+      agitateTrigger.onFalse(superStructure.setIntakeStateCommand(IntakeWantedStates.IDLE));
 
       // Y toggle: STOWED <-
       // > INTAKING. Gated out while agitate trigger is held.
