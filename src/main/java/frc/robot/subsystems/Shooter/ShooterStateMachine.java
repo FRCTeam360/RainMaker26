@@ -18,12 +18,14 @@ import org.littletonrobotics.junction.Logger;
  * determine when the shooter is ready to fire.
  */
 public class ShooterStateMachine {
+  private boolean isForced = false;
   // Enums
   public enum ShooterWantedStates {
     IDLE,
     SHOOTING,
     PASSIVE_SHOOTER,
-    REVERSING
+    REVERSING,
+    FORCED_SHOT
   }
 
   public enum ShooterStates {
@@ -98,13 +100,16 @@ public class ShooterStateMachine {
     previousState = currentState;
 
     switch (wantedState) {
+      case FORCED_SHOT:
+        isForced = true;
       case SHOOTING:
         FlywheelInternalStates flywheelState = flywheel.getState();
         boolean flywheelReady = flywheelState == FlywheelInternalStates.AT_SETPOINT;
         boolean flywheelUnderShooting = flywheelState == FlywheelInternalStates.UNDER_SHOOTING;
         boolean hoodReady = hood.getState() == HoodInternalStates.AT_SETPOINT;
-        boolean drivetrainAligned = isAlignedToTarget.getAsBoolean();
-        boolean targetReady = canShootToTarget.getAsBoolean();
+        boolean drivetrainAligned = isForced ? true :isAlignedToTarget.getAsBoolean();
+        boolean targetReady = isForced ? true :canShootToTarget.getAsBoolean();
+        isForced = false;
 
         Logger.recordOutput("Superstructure/Shooting/FlywheelState", flywheelState);
         // SmartDashboard.putString("Superstructure/Shooting/FlywheelState",
