@@ -51,7 +51,8 @@ public class Flywheel extends SubsystemBase {
   public enum FlywheelWantedStates {
     IDLE,
     SHOOTING,
-    COASTING
+    COASTING,
+    FORCE_SHOOTING
   }
 
   /**
@@ -73,7 +74,8 @@ public class Flywheel extends SubsystemBase {
     AT_SETPOINT,
     RECOVERING,
     UNDER_SHOOTING,
-    COAST
+    COAST,
+    AT_FORCE_SHOOTING_SETPOINT
   }
 
   /**
@@ -180,6 +182,28 @@ public class Flywheel extends SubsystemBase {
       case COASTING:
         currentState = FlywheelInternalStates.COAST;
         break;
+      case FORCE_SHOOTING:
+        double targetRPM = 20.0;
+        boolean atSetpoint = atSetpoint(targetRPM);
+        boolean underspeed = isUnderspeed(targetRPM);
+        boolean wasAtSetpoint = previousState == FlywheelInternalStates.AT_FORCE_SHOOTING_SETPOINT;
+        boolean wasRecovering = previousState == FlywheelInternalStates.RECOVERING;
+        boolean ballFired = wasAtSetpoint && !atSetpoint;
+
+        if (underspeed && wasRecovering) {
+          currentState = FlywheelInternalStates.UNDER_SHOOTING;
+        } else if (ballFired) {
+          launchCount++;
+          currentState = FlywheelInternalStates.RECOVERING;
+        } else if (atSetpoint) {
+          currentState = FlywheelInternalStates.AT_FORCE_SHOOTING_SETPOINT;
+        } else if (wasRecovering) {
+          currentState = FlywheelInternalStates.RECOVERING;
+        } else {
+          currentState = FlywheelInternalStates.SPINNING_UP;
+        }
+        break;
+
       case IDLE:
       default:
         currentState = FlywheelInternalStates.OFF;
@@ -206,6 +230,9 @@ public class Flywheel extends SubsystemBase {
         break;
       case AT_SETPOINT:
         setHoldVelocityControl(shootVelocitySupplier.getAsDouble());
+        break;
+      case AT_FORCE_SHOOTING_SETPOINT:
+        setHoldVelocityControl(20.0);
         break;
       case COAST:
         if (Constants.getRobotType() != Constants.RobotType.WOODBOT) {

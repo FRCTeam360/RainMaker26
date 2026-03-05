@@ -29,6 +29,7 @@ public class ShooterStateMachine {
   public enum ShooterStates {
     PREPARING_TO_FIRE,
     FIRING,
+    FORCE_SHOOTING,
     WAITING,
     UNJAMMING,
     IDLE
@@ -117,9 +118,12 @@ public class ShooterStateMachine {
         Logger.recordOutput("Superstructure/Shooting/TargetReady", targetReady);
         SmartDashboard.putBoolean("Superstructure/Shooting/DrivetrainAligned", drivetrainAligned);
 
-        // Enter FIRING when flywheel reaches AT_SETPOINT (with hood + drivetrain ready).
-        // Stay in FIRING through bang-bang oscillations — only revert to PREPARING_TO_FIRE
-        // when UNDER_SHOOTING signals a sustained RPM drop from too many shots passing through.
+        // Enter FIRING when flywheel reaches AT_SETPOINT (with hood + drivetrain
+        // ready).
+        // Stay in FIRING through bang-bang oscillations — only revert to
+        // PREPARING_TO_FIRE
+        // when UNDER_SHOOTING signals a sustained RPM drop from too many shots passing
+        // through.
         boolean shouldFire =
             (flywheelReady || (previousState == ShooterStates.FIRING && !flywheelUnderShooting))
                 && hoodReady
@@ -129,7 +133,10 @@ public class ShooterStateMachine {
         if (shouldFire) {
           currentState = ShooterStates.FIRING;
         } else {
-          currentState = ShooterStates.PREPARING_TO_FIRE;
+          currentState =
+              (previousState == ShooterStates.FIRING && !flywheelUnderShooting)
+                  ? ShooterStates.FORCE_SHOOTING
+                  : ShooterStates.PREPARING_TO_FIRE;
         }
         break;
       case PASSIVE_SHOOTER:
@@ -163,6 +170,11 @@ public class ShooterStateMachine {
       case FIRING:
         flywheel.setWantedState(FlywheelWantedStates.SHOOTING);
         hood.setWantedState(HoodWantedStates.AIMING);
+        flywheelKicker.setWantedState(FlywheelKickerStates.KICKING);
+        break;
+      case FORCE_SHOOTING:
+        flywheel.setWantedState(FlywheelWantedStates.FORCE_SHOOTING);
+        hood.setWantedState(HoodWantedStates.FORCE_SHOOTING);
         flywheelKicker.setWantedState(FlywheelKickerStates.KICKING);
         break;
       case WAITING:
