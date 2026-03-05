@@ -69,7 +69,7 @@ public class FlywheelKickerIOPB implements FlywheelKickerIO {
         .p(SPINUP_KP, ClosedLoopSlot.kSlot0)
         .i(SPINUP_KI, ClosedLoopSlot.kSlot0)
         .d(SPINUP_KD, ClosedLoopSlot.kSlot0);
-    sparkFlexConfig.closedLoop.feedForward.kV(KV).kS(KS);
+    sparkFlexConfig.closedLoop.feedForward.kV(KV, ClosedLoopSlot.kSlot0).kS(KS, ClosedLoopSlot.kSlot0);
     sparkFlexConfig.closedLoop.outputRange(
         MAX_NEGATIVE_OUTPUT, MAX_POSITIVE_OUTPUT, ClosedLoopSlot.kSlot0);
 
@@ -79,7 +79,7 @@ public class FlywheelKickerIOPB implements FlywheelKickerIO {
         .p(HOLD_KP, ClosedLoopSlot.kSlot1)
         .i(HOLD_KI, ClosedLoopSlot.kSlot1)
         .d(HOLD_KD, ClosedLoopSlot.kSlot1);
-    // Feedforward is shared across all slots, already set above
+    sparkFlexConfig.closedLoop.feedForward.kV(KV, ClosedLoopSlot.kSlot1).kS(KS, ClosedLoopSlot.kSlot1);
     sparkFlexConfig.closedLoop.outputRange(
         MAX_NEGATIVE_OUTPUT, MAX_POSITIVE_OUTPUT, ClosedLoopSlot.kSlot1);
 
