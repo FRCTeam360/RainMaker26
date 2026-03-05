@@ -1,0 +1,38 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "blueFuelscatter1TEST"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "shoot at hub"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "shoot at hub"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}
