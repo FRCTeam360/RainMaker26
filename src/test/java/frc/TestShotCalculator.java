@@ -31,7 +31,8 @@ public class TestShotCalculator {
             new Transform2d(),
             0.0,
             5.0,
-            4.69);
+            4.69,
+            0);
 
     ShotCalculator testShotCalculator =
         new ShotCalculator(
@@ -69,7 +70,8 @@ public class TestShotCalculator {
             new Transform2d(),
             0.0,
             5.0,
-            4.69);
+            4.69,
+            0);
     testPose = new Pose2d(1.0, 0.0, new Rotation2d());
     Supplier<Pose2d> testPoseSupplier = () -> testPose;
     ShotCalculator testShotCalculator =
@@ -108,7 +110,7 @@ public class TestShotCalculator {
     flywheelMap.put(1.0, 0.0);
 
     RobotShootingInfo info =
-        new RobotShootingInfo(hoodMap, flywheelMap, tofMap, new Transform2d(), 0.0, 10.0, 4.69);
+        new RobotShootingInfo(hoodMap, flywheelMap, tofMap, new Transform2d(), 0.0, 10.0, 4.69, 0);
 
     // Robot at origin, target at (3, 0), moving at 2 m/s in +Y.
     // Single-pass would use TOF at 3 m = 0.4 s → lookahead distance ≈ 3.105 m → TOF ≈ 0.411 s.
@@ -156,7 +158,8 @@ public class TestShotCalculator {
             new Transform2d(),
             0.0,
             5.0,
-            4.69);
+            4.69,
+            0);
     testPose = new Pose2d(1.0, 0.0, new Rotation2d());
     Supplier<Pose2d> testPoseSupplier = () -> testPose;
     ShotCalculator testShotCalculator =

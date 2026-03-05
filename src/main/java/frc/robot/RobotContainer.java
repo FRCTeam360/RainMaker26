@@ -153,7 +153,8 @@ public class RobotContainer {
                 ShooterConstants.SIM_TO_SHOOTER,
                 Constants.SimulationConstants.MIN_SHOT_DISTANCE_METERS,
                 Constants.SimulationConstants.MAX_SHOT_DISTANCE_METERS,
-                WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
+                WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond),
+                0);
         robotPassingInfo =
             new RobotShootingInfo(
                 Constants.SimulationConstants.passHoodAngleMap,
@@ -162,7 +163,8 @@ public class RobotContainer {
                 ShooterConstants.SIM_TO_SHOOTER,
                 Constants.SimulationConstants.MIN_PASS_DISTANCE_METERS,
                 Constants.SimulationConstants.MAX_PASS_DISTANCE_METERS,
-                WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
+                WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond),
+                0);
         break;
       case WOODBOT:
         drivetrain = WoodBotDrivetrain.createDrivetrain();
@@ -193,7 +195,8 @@ public class RobotContainer {
                 ShooterConstants.WOODBOT_TO_SHOOTER,
                 Constants.WoodBotConstants.MIN_SHOT_DISTANCE_METERS,
                 Constants.WoodBotConstants.MAX_SHOT_DISTANCE_METERS,
-                WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
+                WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond),
+                250);
         robotPassingInfo =
             new RobotShootingInfo(
                 Constants.WoodBotConstants.shotHoodAngleMap,
@@ -202,7 +205,8 @@ public class RobotContainer {
                 ShooterConstants.WOODBOT_TO_SHOOTER,
                 Constants.WoodBotConstants.MIN_SHOT_DISTANCE_METERS,
                 Constants.WoodBotConstants.MAX_SHOT_DISTANCE_METERS,
-                WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
+                WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond),
+                0);
         break;
       case PRACTICEBOT:
       default:
@@ -241,7 +245,8 @@ public class RobotContainer {
                 ShooterConstants.PRACTICEBOT_TO_SHOOTER,
                 Constants.PracticeBotConstants.MIN_SHOT_DISTANCE_METERS,
                 Constants.PracticeBotConstants.MAX_SHOT_DISTANCE_METERS,
-                PracticeBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
+                PracticeBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond),
+                0);
         robotPassingInfo =
             new RobotShootingInfo(
                 Constants.PracticeBotConstants.passHoodAngleMap,
@@ -250,7 +255,8 @@ public class RobotContainer {
                 ShooterConstants.PRACTICEBOT_TO_SHOOTER,
                 Constants.PracticeBotConstants.MIN_SHOT_DISTANCE_METERS,
                 Constants.PracticeBotConstants.MAX_SHOT_DISTANCE_METERS,
-                PracticeBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond));
+                PracticeBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond),
+                0);
         break;
     }
     hubShotCalculator =
