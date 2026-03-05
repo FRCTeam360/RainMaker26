@@ -70,11 +70,19 @@ FLIPPED_PREFIX = "FLIPPED "
 
 # --- Name flipping ---
 
+def swap_alliance_in_name(name):
+    """Swap Red alliance tags to Blue in a name."""
+    name = name.replace("[R]", "[B]")
+    name = name.replace("Red", "Blue")
+    name = name.replace("red", "blue")
+    return name
+
+
 def make_flipped_name(name):
-    """Add 'FLIPPED ' prefix to a name. Idempotent — won't double-prefix."""
+    """Add 'FLIPPED ' prefix and swap Red->Blue. Idempotent."""
     if name.startswith(FLIPPED_PREFIX):
         return name
-    return FLIPPED_PREFIX + name
+    return FLIPPED_PREFIX + swap_alliance_in_name(name)
 
 
 def is_red_name(name):
