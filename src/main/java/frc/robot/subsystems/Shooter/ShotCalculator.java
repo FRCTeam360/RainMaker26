@@ -27,14 +27,31 @@ public class ShotCalculator {
   private final InterpolatingDoubleTreeMap shotFlywheelSpeedMap;
   private final InterpolatingDoubleTreeMap timeOfFlightMap;
   private final Transform2d robotToShooter;
+  private final double maxRobotSpeedMps;
+
+  private final String logCached;
+  private final String logVirtualTarget;
+  private final String logTargetPosition;
+  private final String logHubPosition;
+  private final String logDistanceToTarget;
+  private final String logTargetFlywheelSpeed;
+  private final String logTargetHoodAngle;
+  private final String logTargetHeading;
+  private final String logLookaheadPose;
+  private final String logRobotCenterLookahead;
+  private final String logTimeOfFlightSecs;
+  private final String logIsValid;
+  private final String logRobotSpeeds;
 
   private double minDistanceMeters = 0.0;
   private double maxDistanceMeters = Double.MAX_VALUE;
+  private double vPercentageToFlywheelOutput;
 
   /**
    * Holds the calculated shooting parameters for a given robot position.
    *
-   * @param targetHeading the angle the drivebase should face toward the hub
+   * @param targetHeading the robot heading that aims the shooter at the target, accounting for the
+   *     shooter's facing angle relative to the robot
    * @param hoodAngle the hood angle setpoint in degrees
    * @param flywheelSpeed the flywheel speed setpoint in RPM
    * @param isValid whether the target is within the effective shooting range
@@ -52,7 +69,9 @@ public class ShotCalculator {
       InterpolatingDoubleTreeMap timeOfFlightMap,
       Transform2d robotToShooter,
       double minDistanceMeters, // should be 0.0 for hub
-      double maxDistanceMeters /* should be 5.0 for hub */) {}
+      double maxDistanceMeters, /* should be 5.0 for hub */
+      double maxRobotSpeedMps,
+      double vPercentageToFlywheelOutput) {}
 
   /**
    * Creates a new ShotCalculator.
@@ -64,6 +83,7 @@ public class ShotCalculator {
    * @param robotShootingInfo the shooting configuration (maps, offsets, range limits)
    */
   public ShotCalculator(
+      String name,
       Supplier<Pose2d> robotPoseSupplier,
       Supplier<Translation2d> targetSupplier,
       Supplier<ChassisSpeeds> velocitySupplier,
@@ -77,6 +97,23 @@ public class ShotCalculator {
     this.robotToShooter = robotShootingInfo.robotToShooter;
     this.minDistanceMeters = robotShootingInfo.minDistanceMeters;
     this.maxDistanceMeters = robotShootingInfo.maxDistanceMeters;
+    this.maxRobotSpeedMps = robotShootingInfo.maxRobotSpeedMps;
+    this.vPercentageToFlywheelOutput = robotShootingInfo.vPercentageToFlywheelOutput;
+
+    String basePath = "ShotCalculator/" + name;
+    this.logCached = basePath + "/cached";
+    this.logVirtualTarget = basePath + "/virtualTarget";
+    this.logTargetPosition = basePath + "/targetPosition";
+    this.logHubPosition = basePath + "/hubPosition";
+    this.logDistanceToTarget = basePath + "/distanceToTarget";
+    this.logTargetFlywheelSpeed = basePath + "/targetFlywheelSpeed";
+    this.logTargetHoodAngle = basePath + "/targetHoodAngle";
+    this.logTargetHeading = basePath + "/targetHeading";
+    this.logLookaheadPose = basePath + "/lookaheadPose";
+    this.logRobotCenterLookahead = basePath + "/robotCenterLookahead";
+    this.logTimeOfFlightSecs = basePath + "/timeOfFlightSecs";
+    this.logIsValid = basePath + "/isValid";
+    this.logRobotSpeeds = basePath + "/robotSpeeds";
   }
 
   private ShootingParams cachedShootingParams = null;
@@ -92,10 +129,10 @@ public class ShotCalculator {
    */
   public ShootingParams calculateShot() {
     if (cachedShootingParams != null) {
-      Logger.recordOutput("ShotCalculator/cached", true);
+      Logger.recordOutput(logCached, true);
       return cachedShootingParams;
     }
-    Logger.recordOutput("ShotCalculator/cached", false);
+    Logger.recordOutput(logCached, false);
 
     Pose2d robotPosition = robotPoseSupplier.get();
     Pose2d shooterPosition = robotPosition.plus(robotToShooter);
@@ -105,6 +142,10 @@ public class ShotCalculator {
     // Start with the robot's translational velocity rotated into the field frame,
     // then add the rotational contribution at the shooter offset from the robot center.
     ChassisSpeeds robotSpeeds = velocitySupplier.get();
+    double currentSpeed =
+        Math.sqrt(
+            Math.pow(robotSpeeds.vxMetersPerSecond, 2)
+                + Math.pow(robotSpeeds.vyMetersPerSecond, 2));
     Rotation2d robotHeading = robotPosition.getRotation();
     Translation2d robotFieldVelocity =
         new Translation2d(robotSpeeds.vxMetersPerSecond, robotSpeeds.vyMetersPerSecond)
@@ -134,25 +175,43 @@ public class ShotCalculator {
     // Use time of flight to project where the shooter will be when the ball arrives.
     // The robot imparts its velocity onto the ball, so we offset the aiming point
     // by (velocity * timeOfFlight) to lead the target.
+    // Iteratively refine: the lookahead distance differs from the initial distance, so the correct
+    // TOF is the one consistent with the lookahead it produces (fixed-point convergence).
     double timeOfFlightSecs = timeOfFlightMap.get(shooterToTargetDistanceMeters);
-    Translation2d lookaheadPosition =
-        shooterPosition
-            .getTranslation()
-            .plus(
-                new Translation2d(
-                    shooterVelXMps * timeOfFlightSecs, shooterVelYMps * timeOfFlightSecs));
+    Translation2d lookaheadPosition = shooterPosition.getTranslation();
+    for (int i = 0; i < 10; i++) {
+      lookaheadPosition =
+          shooterPosition
+              .getTranslation()
+              .plus(
+                  new Translation2d(
+                      shooterVelXMps * timeOfFlightSecs, shooterVelYMps * timeOfFlightSecs));
+      double newTof = timeOfFlightMap.get(target.getDistance(lookaheadPosition));
+      timeOfFlightSecs = newTof;
+    }
     double lookaheadDistanceMeters = target.getDistance(lookaheadPosition);
 
     double effectiveDistanceMeters =
         Math.max(minDistanceMeters, Math.min(maxDistanceMeters, lookaheadDistanceMeters));
 
-    // Calculate heading from lookahead position to target, then rotate 180°
-    // because the shooter is at the back of the robot
-    Rotation2d targetHeading =
-        target.minus(lookaheadPosition).getAngle().rotateBy(Rotation2d.k180deg);
+    // Calculate the robot heading needed to aim the shooter at the target.
+    // First find the field-frame angle from the velocity-compensated robot center to the target,
+    // then subtract the shooter's facing angle relative to the robot so the drivetrain
+    // orients the shooter toward the target.
+    Translation2d robotCenterLookahead =
+        robotPosition
+            .getTranslation()
+            .plus(
+                new Translation2d(
+                    robotFieldVelocity.getX() * timeOfFlightSecs,
+                    robotFieldVelocity.getY() * timeOfFlightSecs));
+    Rotation2d angleToTarget = target.minus(robotCenterLookahead).getAngle();
+    Rotation2d targetHeading = angleToTarget.minus(robotToShooter.getRotation());
 
     double hoodAngle = shotHoodAngleMap.get(effectiveDistanceMeters);
-    double flywheelSpeed = shotFlywheelSpeedMap.get(effectiveDistanceMeters);
+    double flywheelSpeed =
+        shotFlywheelSpeedMap.get(effectiveDistanceMeters)
+            + ((currentSpeed / maxRobotSpeedMps) * vPercentageToFlywheelOutput);
     double timeOfFlight = timeOfFlightMap.get(effectiveDistanceMeters);
     boolean isValid =
         lookaheadDistanceMeters >= minDistanceMeters
@@ -163,18 +222,18 @@ public class ShotCalculator {
     Translation2d velocityOffset =
         new Translation2d(shooterVelXMps * timeOfFlightSecs, shooterVelYMps * timeOfFlightSecs);
     Translation2d virtualTarget = target.minus(velocityOffset);
-    Logger.recordOutput(
-        "ShotCalculator/virtualTarget", new Pose2d(virtualTarget, Rotation2d.kZero));
-    Logger.recordOutput("ShotCalculator/targetPosition", new Pose2d(target, Rotation2d.kZero));
-    Logger.recordOutput("ShotCalculator/hubPosition", FieldConstants.Hub.topCenterPoint);
-    Logger.recordOutput("ShotCalculator/distanceToTarget", lookaheadDistanceMeters);
-    Logger.recordOutput("ShotCalculator/targetFlywheelSpeed", flywheelSpeed);
-    Logger.recordOutput("ShotCalculator/targetHoodAngle", hoodAngle);
-    Logger.recordOutput("ShotCalculator/targetHeading", targetHeading);
-    Logger.recordOutput(
-        "ShotCalculator/lookaheadPose", new Pose2d(lookaheadPosition, targetHeading));
-    Logger.recordOutput("ShotCalculator/timeOfFlightSecs", timeOfFlightSecs);
-    Logger.recordOutput("ShotCalculator/isValid", isValid);
+    Logger.recordOutput(logVirtualTarget, new Pose2d(virtualTarget, Rotation2d.kZero));
+    Logger.recordOutput(logTargetPosition, new Pose2d(target, Rotation2d.kZero));
+    Logger.recordOutput(logHubPosition, FieldConstants.Hub.topCenterPoint);
+    Logger.recordOutput(logDistanceToTarget, lookaheadDistanceMeters);
+    Logger.recordOutput(logTargetFlywheelSpeed, flywheelSpeed);
+    Logger.recordOutput(logTargetHoodAngle, hoodAngle);
+    Logger.recordOutput(logTargetHeading, targetHeading);
+    Logger.recordOutput(logLookaheadPose, new Pose2d(lookaheadPosition, targetHeading));
+    Logger.recordOutput(logRobotCenterLookahead, new Pose2d(robotCenterLookahead, targetHeading));
+    Logger.recordOutput(logTimeOfFlightSecs, timeOfFlightSecs);
+    Logger.recordOutput(logIsValid, isValid);
+    Logger.recordOutput(logRobotSpeeds, robotSpeeds);
 
     cachedShootingParams =
         new ShootingParams(targetHeading, hoodAngle, flywheelSpeed, timeOfFlight, isValid);

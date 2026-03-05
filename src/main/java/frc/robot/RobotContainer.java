@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.MetersPerSecond;
+
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
@@ -69,6 +71,7 @@ import frc.robot.subsystems.Vision.VisionIOLimelight4;
 import frc.robot.subsystems.Vision.VisionIOLimelightBase;
 import frc.robot.subsystems.Vision.VisionIOPhotonSim;
 import frc.robot.utils.AllianceFlipUtil;
+import frc.robot.utils.CommandLogger;
 import frc.robot.utils.CommandLogger;
 import frc.robot.utils.FieldConstants;
 import frc.robot.utils.PathProvider;
@@ -150,7 +153,9 @@ public class RobotContainer {
                 Constants.SimulationConstants.shotTimeOfFlightMap,
                 ShooterConstants.SIM_TO_SHOOTER,
                 Constants.SimulationConstants.MIN_SHOT_DISTANCE_METERS,
-                Constants.SimulationConstants.MAX_SHOT_DISTANCE_METERS);
+                Constants.SimulationConstants.MAX_SHOT_DISTANCE_METERS,
+                WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond),
+                0);
         robotPassingInfo =
             new RobotShootingInfo(
                 Constants.SimulationConstants.passHoodAngleMap,
@@ -158,7 +163,9 @@ public class RobotContainer {
                 Constants.SimulationConstants.passTimeOfFlightMap,
                 ShooterConstants.SIM_TO_SHOOTER,
                 Constants.SimulationConstants.MIN_PASS_DISTANCE_METERS,
-                Constants.SimulationConstants.MAX_PASS_DISTANCE_METERS);
+                Constants.SimulationConstants.MAX_PASS_DISTANCE_METERS,
+                WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond),
+                0);
         break;
       case WOODBOT:
         drivetrain = WoodBotDrivetrain.createDrivetrain();
@@ -188,8 +195,19 @@ public class RobotContainer {
                 Constants.WoodBotConstants.timeOfFlightMap,
                 ShooterConstants.WOODBOT_TO_SHOOTER,
                 Constants.WoodBotConstants.MIN_SHOT_DISTANCE_METERS,
-                Constants.WoodBotConstants.MAX_SHOT_DISTANCE_METERS);
-        robotPassingInfo = robotShootingInfo;
+                Constants.WoodBotConstants.MAX_SHOT_DISTANCE_METERS,
+                WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond),
+                250);
+        robotPassingInfo =
+            new RobotShootingInfo(
+                Constants.WoodBotConstants.shotHoodAngleMap,
+                Constants.WoodBotConstants.shotFlywheelSpeedMap,
+                Constants.WoodBotConstants.timeOfFlightMap,
+                ShooterConstants.WOODBOT_TO_SHOOTER,
+                Constants.WoodBotConstants.MIN_SHOT_DISTANCE_METERS,
+                Constants.WoodBotConstants.MAX_SHOT_DISTANCE_METERS,
+                WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond),
+                0);
         break;
       case PRACTICEBOT:
       default:
@@ -227,7 +245,9 @@ public class RobotContainer {
                 Constants.PracticeBotConstants.timeOfFlightMap,
                 ShooterConstants.PRACTICEBOT_TO_SHOOTER,
                 Constants.PracticeBotConstants.MIN_SHOT_DISTANCE_METERS,
-                Constants.PracticeBotConstants.MAX_SHOT_DISTANCE_METERS);
+                Constants.PracticeBotConstants.MAX_SHOT_DISTANCE_METERS,
+                PracticeBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond),
+                0);
         robotPassingInfo =
             new RobotShootingInfo(
                 Constants.PracticeBotConstants.passHoodAngleMap,
@@ -235,24 +255,28 @@ public class RobotContainer {
                 Constants.PracticeBotConstants.timeOfFlightMap,
                 ShooterConstants.PRACTICEBOT_TO_SHOOTER,
                 Constants.PracticeBotConstants.MIN_SHOT_DISTANCE_METERS,
-                Constants.PracticeBotConstants.MAX_SHOT_DISTANCE_METERS);
+                Constants.PracticeBotConstants.MAX_SHOT_DISTANCE_METERS,
+                PracticeBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond),
+                0);
         break;
     }
     hubShotCalculator =
         new ShotCalculator(
+            "HubShotCalc",
             drivetrain::getPosition,
             () -> AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint.toTranslation2d()),
-            drivetrain::getVelocity,
+            drivetrain::getCommandedVelocity,
             robotShootingInfo);
     passCalculator =
         new ShotCalculator(
+            "PassCalc",
             drivetrain::getPosition,
             () ->
                 PositionUtils.getCloserPassTarget(
                     drivetrain.getPosition(),
                     AllianceFlipUtil.apply(FieldConstants.RightBump.nearRightCorner),
                     AllianceFlipUtil.apply(FieldConstants.LeftBump.nearLeftCorner)),
-            drivetrain::getVelocity,
+            drivetrain::getCommandedVelocity,
             robotPassingInfo);
     // Configure the trigger bindings
     // TODO: Re-enable superStructure construction and PathPlanner commands
@@ -318,6 +342,7 @@ public class RobotContainer {
 
   public void registerPathplannerCommand(String name, Command command) {
     if (Objects.nonNull(command)) {
+      NamedCommands.registerCommand(name, CommandLogger.logCommand(command, name));
       NamedCommands.registerCommand(name, CommandLogger.logCommand(command, name));
     } else {
       System.err.println(name + " is null");
