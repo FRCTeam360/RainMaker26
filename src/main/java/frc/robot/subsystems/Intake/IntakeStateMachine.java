@@ -88,6 +88,7 @@ public class IntakeStateMachine {
         break;
       case DEPLOYED:
         currentState = IntakeInternalStates.DEPLOYED;
+        break;
       case IDLE:
       default:
         currentState = IntakeInternalStates.IDLE;
