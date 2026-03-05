@@ -15,10 +15,9 @@ Output files are prefixed with "FLIPPED " so they're easy to identify as generat
 Review them in PathPlanner, then rename the ones you want to keep.
 
 Usage:
-  python scripts/flip_autos.py                        # flip all [R]/Red files
+  python scripts/flip_autos.py                        # flip all Red & Blue tagged files
   python scripts/flip_autos.py --auto "[R] Depot"     # flip one auto + its paths
   python scripts/flip_autos.py --path "[R] Depot 1"   # flip one path only
-  python scripts/flip_autos.py --reverse              # flip Blue -> Red instead
   python scripts/flip_autos.py --dry-run              # preview without writing
 
 No external dependencies required - uses only the Python standard library.
@@ -71,15 +70,19 @@ FLIPPED_PREFIX = "FLIPPED "
 # --- Name flipping ---
 
 def swap_alliance_in_name(name):
-    """Swap Red alliance tags to Blue in a name."""
-    name = name.replace("[R]", "[B]")
-    name = name.replace("Red", "Blue")
-    name = name.replace("red", "blue")
+    """Swap alliance tags in a name. Red->Blue and Blue->Red."""
+    # Use placeholders to avoid double-swapping
+    name = name.replace("[R]", "<<R>>").replace("[B]", "<<B>>")
+    name = name.replace("Red", "<<RED>>").replace("Blue", "<<BLUE>>")
+    name = name.replace("red", "<<red>>").replace("blue", "<<blue>>")
+    name = name.replace("<<R>>", "[B]").replace("<<B>>", "[R]")
+    name = name.replace("<<RED>>", "Blue").replace("<<BLUE>>", "Red")
+    name = name.replace("<<red>>", "blue").replace("<<blue>>", "red")
     return name
 
 
 def make_flipped_name(name):
-    """Add 'FLIPPED ' prefix and swap Red->Blue. Idempotent."""
+    """Add 'FLIPPED ' prefix and swap alliance tags. Idempotent."""
     if name.startswith(FLIPPED_PREFIX):
         return name
     return FLIPPED_PREFIX + swap_alliance_in_name(name)
@@ -264,13 +267,15 @@ def flip_single_auto(autos_dir, paths_dir, auto_name, field_length, field_width,
     return True
 
 
-def flip_all(deploy_dir, field_length, field_width, reverse, dry_run):
+def is_alliance_tagged(name):
+    """Check if a name has any alliance tag (Red or Blue)."""
+    return is_red_name(name) or is_blue_name(name)
+
+
+def flip_all(deploy_dir, field_length, field_width, dry_run):
     """Flip all alliance-tagged autos and paths, outputting FLIPPED copies."""
     paths_dir = deploy_dir / "paths"
     autos_dir = deploy_dir / "autos"
-
-    detect_fn = is_blue_name if reverse else is_red_name
-    src_label = "Blue" if reverse else "Red"
 
     # Flip paths
     flipped_paths = set()
@@ -279,8 +284,8 @@ def flip_all(deploy_dir, field_length, field_width, reverse, dry_run):
             name = path_file.stem
             if is_flipped_name(name):
                 continue
-            if detect_fn(name):
-                print(f"Flipping path: {name} ({src_label} -> FLIPPED)")
+            if is_alliance_tagged(name):
+                print(f"Flipping path: {name} -> {make_flipped_name(name)}")
                 flip_single_path(paths_dir, name, field_length, field_width, dry_run)
                 flipped_paths.add(name)
 
@@ -290,8 +295,8 @@ def flip_all(deploy_dir, field_length, field_width, reverse, dry_run):
             name = auto_file.stem
             if is_flipped_name(name):
                 continue
-            if detect_fn(name):
-                print(f"Flipping auto: {name} ({src_label} -> FLIPPED)")
+            if is_alliance_tagged(name):
+                print(f"Flipping auto: {name} -> {make_flipped_name(name)}")
                 auto_data = read_json(auto_file)
                 ref_paths = collect_path_names_from_command(auto_data.get("command", {}))
 
@@ -324,11 +329,6 @@ def main():
         help="Flip a single path by name (without .path extension).",
     )
     parser.add_argument(
-        "--reverse",
-        action="store_true",
-        help="Flip Blue -> Red instead of the default Red -> Blue.",
-    )
-    parser.add_argument(
         "--dry-run",
         action="store_true",
         help="Preview what would be written without actually writing files.",
@@ -354,10 +354,9 @@ def main():
             args.dry_run
         )
     else:
-        src_label = "Blue" if args.reverse else "Red"
-        print(f"Flipping all {src_label}-tagged autos and paths -> FLIPPED copies...")
+        print("Flipping all alliance-tagged autos and paths -> FLIPPED copies...")
         print()
-        flip_all(deploy_dir, field_length, field_width, args.reverse, args.dry_run)
+        flip_all(deploy_dir, field_length, field_width, args.dry_run)
 
     print()
     print("Done.")
