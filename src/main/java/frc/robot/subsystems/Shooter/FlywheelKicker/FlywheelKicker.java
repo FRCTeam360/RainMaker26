@@ -186,7 +186,7 @@ public class FlywheelKicker extends SubsystemBase {
       case SPINNING_UP:
       case RECOVERING:
       case UNDER_KICKING:
-        setHoldVelocityControl(KICKER_VELOCITY_RPM);
+        setSpinupVelocityControl(KICKER_VELOCITY_RPM);
         break;
       case AT_SETPOINT:
         setHoldVelocityControl(KICKER_VELOCITY_RPM);

@@ -16,6 +16,7 @@ public class CommandLogger {
    * @return The provided command with appended logging when the command starts and ends
    */
   public static Command logCommand(Command command, String commandName) {
+    Logger.recordOutput("Command Running: " + commandName, false);
     return command
         .beforeStarting(() -> logCommand(commandName, true))
         .finallyDo(() -> logCommand(commandName, false));

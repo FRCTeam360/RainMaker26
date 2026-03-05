@@ -69,6 +69,7 @@ import frc.robot.subsystems.Vision.VisionIOLimelight4;
 import frc.robot.subsystems.Vision.VisionIOLimelightBase;
 import frc.robot.subsystems.Vision.VisionIOPhotonSim;
 import frc.robot.utils.AllianceFlipUtil;
+import frc.robot.utils.CommandLogger;
 import frc.robot.utils.FieldConstants;
 import frc.robot.utils.PathProvider;
 import frc.robot.utils.PositionUtils;
@@ -275,7 +276,7 @@ public class RobotContainer {
     // TODO: add end condition based on state from SuperStructure (based on sensor inputs)
     registerPathplannerCommand(
         "shoot at hub",
-        Commands.waitSeconds(5)
+        Commands.waitSeconds(3)
             .deadlineFor(
                 superStructure
                     .setStateCommand(SuperWantedStates.SHOOT_AT_HUB)
@@ -288,7 +289,11 @@ public class RobotContainer {
     registerPathplannerCommand(
         "stow intake", superStructure.setIntakeStateCommand(IntakeWantedStates.STOWED));
     registerPathplannerCommand(
-        "spin up", superStructure.setStateCommand(SuperWantedStates.DEFAULT));
+        "default", superStructure.setStateCommand(SuperWantedStates.DEFAULT));
+    registerPathplannerCommand(
+        "deploy intake", superStructure.setIntakeStateCommand(IntakeWantedStates.DEPLOYED));
+    registerPathplannerCommand(
+        "agitate intake", superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING));
 
     configVision();
     configDefaultDrivingCommand();
@@ -313,7 +318,7 @@ public class RobotContainer {
 
   public void registerPathplannerCommand(String name, Command command) {
     if (Objects.nonNull(command)) {
-      NamedCommands.registerCommand(name, command);
+      NamedCommands.registerCommand(name, CommandLogger.logCommand(command, name));
     } else {
       System.err.println(name + " is null");
       NamedCommands.registerCommand(
@@ -391,7 +396,7 @@ public class RobotContainer {
     if (Constants.getRobotType() == RobotType.WOODBOT) {
       Trigger intakeTrigger = driverCont.leftTrigger().and(isSuperstructureMode);
       intakeTrigger.onTrue(superStructure.setIntakeStateCommand(IntakeWantedStates.INTAKING));
-      intakeTrigger.whileFalse(superStructure.setIntakeStateCommand(IntakeWantedStates.IDLE));
+      intakeTrigger.whileFalse(superStructure.setIntakeStateCommand(IntakeWantedStates.DEPLOYED));
 
     } else {
       Trigger intakeTrigger = driverCont.leftBumper().and(isSuperstructureMode);
@@ -400,7 +405,7 @@ public class RobotContainer {
 
       Trigger agitateTrigger = driverCont.leftTrigger().and(isSuperstructureMode);
       agitateTrigger.onTrue(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING));
-      agitateTrigger.onFalse(superStructure.setIntakeStateCommand(IntakeWantedStates.IDLE));
+      agitateTrigger.onFalse(superStructure.setIntakeStateCommand(IntakeWantedStates.DEPLOYED));
 
       // Y toggle: STOWED <-
       // > INTAKING. Gated out while agitate trigger is held.
