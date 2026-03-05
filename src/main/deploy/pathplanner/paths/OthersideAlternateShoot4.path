@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 2.074457070707071,
-        "y": 7.310277777777778
+        "x": 3.1054444444444447,
+        "y": 7.075266666666667
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.074457070707071,
-        "y": 7.310277777777778
+        "x": 4.401455555555556,
+        "y": 7.513766666666666
       },
       "isLocked": false,
       "linkedName": "Othersideend4"
@@ -28,7 +28,16 @@
       "linkedName": null
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.06887966804979709,
+      "rotationDegrees": 180.0
+    },
+    {
+      "waypointRelativePos": 0.5883817427385832,
+      "rotationDegrees": 180.0
+    }
+  ],
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [],
@@ -42,13 +51,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": -103.04998613468264
   },
   "reversed": false,
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": 130.91438322002523
   },
   "useDefaultConstraints": true
 }
