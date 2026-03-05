@@ -13,7 +13,7 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
+import frc.robot.utils.FieldConstants;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -56,6 +56,7 @@ public class Vision extends SubsystemBase {
     for (String key : visionIos.keySet()) {
       visionInputs.put(key, new VisionIOInputsAutoLogged());
     }
+    enableIMUSeeding();
   }
 
   public void turnOnLights(String name) {
@@ -113,8 +114,10 @@ public class Vision extends SubsystemBase {
     // Clear previous measurements to prevent unbounded growth
     acceptedMeasurements.clear();
 
-    for (String key : ios.keySet()) {
-      VisionIO io = ios.get(key);
+    for (Map.Entry<String, VisionIO> entry : ios.entrySet()) {
+      VisionIO io = entry.getValue();
+      String key = entry.getKey();
+
       VisionIOInputsAutoLogged input = visionInputs.get(key);
 
       io.updateInputs(input);
@@ -127,12 +130,12 @@ public class Vision extends SubsystemBase {
           input.tagPoses[i] = input.tagPoses[0];
         }
       }
-
-      Logger.processInputs("Limelight: " + key, input.clone());
+      Logger.processInputs("Vision: " + key, input);
     }
 
-    for (String key : visionInputs.keySet()) {
-      VisionIOInputsAutoLogged input = visionInputs.get(key);
+    for (Map.Entry<String, VisionIOInputsAutoLogged> entry : visionInputs.entrySet()) {
+      String key = entry.getKey();
+      VisionIOInputsAutoLogged input = entry.getValue();
 
       // Count total detections (pose updates attempted)
       if (input.poseUpdated) {
@@ -150,9 +153,9 @@ public class Vision extends SubsystemBase {
 
       // Skip measurements that are not with in the field boundary
       if (pose.getX() < 0.0
-          || pose.getX() > Constants.FIELD_LAYOUT.getFieldLength()
+          || pose.getX() > FieldConstants.fieldLength
           || pose.getY() < 0.0
-          || pose.getY() > Constants.FIELD_LAYOUT.getFieldWidth()) {
+          || pose.getY() > FieldConstants.fieldWidth) {
         rejectedMeasurements++;
         continue;
       }
@@ -176,6 +179,31 @@ public class Vision extends SubsystemBase {
     Logger.recordOutput(
         VISION_LOGGING_PREFIX + "Rejection Rate",
         totalDetections > 0 ? (double) rejectedMeasurements / totalDetections : 0.0);
+  }
+
+  /** Enables IMU seeding on all vision IO layers. Call during disabled. */
+  public void enableIMUSeeding() {
+    for (VisionIO io : ios.values()) {
+      io.enableIMUSeeding();
+    }
+  }
+
+  /** Enables IMU assist on all vision IO layers. Call when robot is enabled. */
+  public void enableIMUAssist() {
+    for (VisionIO io : ios.values()) {
+      io.enableIMUAssist();
+    }
+  }
+
+  /**
+   * Sets the processing throttle on all vision IO layers.
+   *
+   * @param throttle number of frames to skip between processed frames (0 = full speed)
+   */
+  public void setThrottle(int throttle) {
+    for (VisionIO io : ios.values()) {
+      io.setThrottle(throttle);
+    }
   }
 
   /**

@@ -34,7 +34,7 @@ public class FlywheelTuneCommand extends Command {
 
   @Override
   public void execute() {
-    flywheel.setVelocity(tunableRPM.get());
+    flywheel.setHoldVelocityControl(tunableRPM.get());
   }
 
   @Override
