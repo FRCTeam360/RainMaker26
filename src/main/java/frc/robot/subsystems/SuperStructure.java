@@ -175,7 +175,8 @@ public class SuperStructure extends SubsystemBase {
         unjamming();
         break;
       case FORCED_SHOT:
-
+        shooting();
+        shooterStateMachine.setWantedState(ShooterWantedStates.FORCED_SHOT);
         break;
       case DEFAULT:
         passive_preparing();
