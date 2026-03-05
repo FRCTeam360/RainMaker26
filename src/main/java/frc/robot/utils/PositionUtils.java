@@ -139,6 +139,16 @@ public class PositionUtils {
     }
   }
 
+  public static boolean canPass(Pose2d robotPose, Rotation2d robotRotation) {
+    Rotation2d shooterRotation = robotRotation.plus(Rotation2d.k180deg);
+    double rayLength = FieldConstants.fieldLength;
+    Translation2d end = robotPose.getTranslation().plus(new Translation2d(rayLength, shooterRotation));
+    Pose2d[] raycast = new Pose2d[] {robotPose, new Pose2d(end, shooterRotation)};
+    Logger.recordOutput("Raycast/Line", raycast);
+
+    return true;
+  }
+
   /**
    * Returns whichever of two candidate targets is closer to the robot.
    *
