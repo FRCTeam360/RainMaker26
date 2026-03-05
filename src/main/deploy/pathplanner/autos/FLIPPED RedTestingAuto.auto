@@ -5,13 +5,19 @@
     "data": {
       "commands": [
         {
+          "type": "path",
+          "data": {
+            "pathName": "FLIPPED RedTesting"
+          }
+        },
+        {
           "type": "deadline",
           "data": {
             "commands": [
               {
                 "type": "path",
                 "data": {
-                  "pathName": "INTAKING"
+                  "pathName": "FLIPPED RedTesting2"
                 }
               },
               {
@@ -24,9 +30,22 @@
           }
         },
         {
-          "type": "path",
+          "type": "deadline",
           "data": {
-            "pathName": "SHOOTING"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "FLIPPED RedTesting3"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "basic intake"
+                }
+              }
+            ]
           }
         },
         {

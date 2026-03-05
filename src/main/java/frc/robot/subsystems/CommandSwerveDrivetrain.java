@@ -86,7 +86,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
       new SwerveRequest.SysIdSwerveRotation();
   private final DriveRequestType m_driveRequestType = DriveRequestType.Velocity;
   // TODO refactor into a constants file
-  public static final LinearVelocity maxSpeed = MetersPerSecond.of(4.69);
+  public static final LinearVelocity maxSpeed = MetersPerSecond.of(4.85);
   public static final AngularVelocity maxAngularVelocity = RevolutionsPerSecond.of(4.0);
 
   // Heading controller PID gains (from example code)
@@ -210,8 +210,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
               // Pass operator-perspective values — CTRE applies operator perspective
               // internally via setOperatorPerspectiveForward
               return m_faceHubRequest
-                  .withVelocityX(rawVelXMps)
-                  .withVelocityY(rawVelYMps)
+                  .withVelocityX(isBlueAlliance ? rawVelXMps : -rawVelXMps)
+                  .withVelocityY(isBlueAlliance ? rawVelYMps : -rawVelYMps)
                   .withTargetDirection(headingSupplier.get());
             })
         .finallyDo(() -> m_faceHubRequest.HeadingController.reset());

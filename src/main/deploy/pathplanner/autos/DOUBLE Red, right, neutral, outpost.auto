@@ -15,9 +15,35 @@
                 }
               },
               {
-                "type": "named",
+                "type": "sequential",
                 "data": {
-                  "name": "stow intake"
+                  "commands": [
+                    {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 0.1
+                      }
+                    },
+                    {
+                      "type": "parallel",
+                      "data": {
+                        "commands": [
+                          {
+                            "type": "named",
+                            "data": {
+                              "name": "basic intake"
+                            }
+                          },
+                          {
+                            "type": "named",
+                            "data": {
+                              "name": "default"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
                 }
               }
             ]
@@ -66,24 +92,18 @@
           "data": {
             "commands": [
               {
-                "type": "path",
+                "type": "named",
                 "data": {
-                  "pathName": "Red middle 4.3"
+                  "name": "shoot at hub"
                 }
               },
               {
                 "type": "named",
                 "data": {
-                  "name": "basic intake"
+                  "name": "agitate intake"
                 }
               }
             ]
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "shoot at hub"
           }
         },
         {
@@ -148,24 +168,18 @@
           "data": {
             "commands": [
               {
-                "type": "path",
+                "type": "named",
                 "data": {
-                  "pathName": "Red middle 4.3"
+                  "name": "shoot at hub"
                 }
               },
               {
                 "type": "named",
                 "data": {
-                  "name": "basic intake"
+                  "name": "agitate intake"
                 }
               }
             ]
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "shoot at hub"
           }
         }
       ]

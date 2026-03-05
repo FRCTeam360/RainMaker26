@@ -267,7 +267,9 @@ public final class Constants {
       passFlywheelSpeedMap.put(1.0, 2000.0);
       passFlywheelSpeedMap.put(0.0, 2000.0);
 
-      timeOfFlightMap.put(0.0, 0.0);
+      timeOfFlightMap.put(1.939, 0.82);
+      timeOfFlightMap.put(3.011, 1.26);
+      timeOfFlightMap.put(4.704, 1.37);
     }
   }
 

@@ -299,7 +299,7 @@ public class RobotContainer {
     // TODO: add end condition based on state from SuperStructure (based on sensor inputs)
     registerPathplannerCommand(
         "shoot at hub",
-        Commands.waitSeconds(5)
+        Commands.waitSeconds(4)
             .deadlineFor(
                 superStructure
                     .setStateCommand(SuperWantedStates.SHOOT_AT_HUB)
@@ -312,9 +312,19 @@ public class RobotContainer {
     registerPathplannerCommand(
         "stow intake", superStructure.setIntakeStateCommand(IntakeWantedStates.STOWED));
     registerPathplannerCommand(
+        "default", superStructure.setStateCommand(SuperWantedStates.DEFAULT));
+    registerPathplannerCommand(
+        "deploy intake", superStructure.setIntakeStateCommand(IntakeWantedStates.DEPLOYED));
+    registerPathplannerCommand(
         "agitate intake", superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING));
     registerPathplannerCommand(
-        "spin up", superStructure.setStateCommand(SuperWantedStates.DEFAULT));
+        "shoot without timer",
+        superStructure
+            .setStateCommand(SuperWantedStates.SHOOT_AT_HUB)
+            .alongWith(
+                drivetrain.faceAngleWhileDrivingCommand(
+                    () -> 0, () -> 0, () -> hubShotCalculator.calculateShot().targetHeading()))
+            .finallyDo(() -> superStructure.setWantedSuperState(SuperWantedStates.DEFAULT)));
 
     configVision();
     configDefaultDrivingCommand();
@@ -403,25 +413,30 @@ public class RobotContainer {
     forceHubTrigger.onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
 
     // Manual override: force pass to outpost regardless of position
-    Trigger forceOutpostTrigger = driverCont.leftBumper().and(isSuperstructureMode);
-    forceOutpostTrigger.whileTrue(
-        superStructure
-            .setStateCommand(SuperWantedStates.SHOOT_AT_OUTPOST)
-            .alongWith(
-                drivetrain.faceAngleWhileDrivingCommand(
-                    driverCont, () -> passCalculator.calculateShot().targetHeading())));
-    forceOutpostTrigger.onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
+    driverCont
+        .b()
+        .whileTrue(
+            superStructure
+                .setStateCommand(SuperWantedStates.SHOOT_AT_OUTPOST)
+                .alongWith(
+                    drivetrain.faceAngleWhileDrivingCommand(
+                        driverCont, () -> passCalculator.calculateShot().targetHeading())));
+    driverCont.b().onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
 
     // Left trigger held: agitate. Release: back to intaking.
     if (Constants.getRobotType() == RobotType.WOODBOT) {
       Trigger intakeTrigger = driverCont.leftTrigger().and(isSuperstructureMode);
       intakeTrigger.onTrue(superStructure.setIntakeStateCommand(IntakeWantedStates.INTAKING));
-      intakeTrigger.whileFalse(superStructure.setIntakeStateCommand(IntakeWantedStates.IDLE));
+      intakeTrigger.whileFalse(superStructure.setIntakeStateCommand(IntakeWantedStates.DEPLOYED));
 
     } else {
+      Trigger intakeTrigger = driverCont.leftBumper().and(isSuperstructureMode);
+      intakeTrigger.onTrue(superStructure.setIntakeStateCommand(IntakeWantedStates.INTAKING));
+      intakeTrigger.whileFalse(superStructure.setIntakeStateCommand(IntakeWantedStates.IDLE));
+
       Trigger agitateTrigger = driverCont.leftTrigger().and(isSuperstructureMode);
       agitateTrigger.onTrue(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING));
-      agitateTrigger.onFalse(superStructure.setIntakeStateCommand(IntakeWantedStates.INTAKING));
+      agitateTrigger.onFalse(superStructure.setIntakeStateCommand(IntakeWantedStates.DEPLOYED));
 
       // Y toggle: STOWED <-
       // > INTAKING. Gated out while agitate trigger is held.
@@ -601,7 +616,7 @@ public class RobotContainer {
     superStructure.setIntakeState(
         Constants.getRobotType() == RobotType.WOODBOT
             ? IntakeWantedStates.IDLE
-            : IntakeWantedStates.INTAKING);
+            : IntakeWantedStates.IDLE);
     onEnableVision();
   }
 

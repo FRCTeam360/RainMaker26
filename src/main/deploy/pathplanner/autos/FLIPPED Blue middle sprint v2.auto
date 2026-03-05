@@ -7,7 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Red middle 1"
+            "pathName": "FLIPPED Blue middle 1"
           }
         },
         {
@@ -17,7 +17,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "Red middle 2"
+                  "pathName": "FLIPPED Blue middle 2"
                 }
               },
               {
@@ -36,13 +36,32 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "Red middle 3"
+                  "pathName": "FLIPPED Blue middle 3.2"
                 }
               },
               {
                 "type": "named",
                 "data": {
                   "name": "basic intake"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "deadline",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "FLIPPED Blue middle 4.2"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "spinup flywheel hub shot"
                 }
               }
             ]
