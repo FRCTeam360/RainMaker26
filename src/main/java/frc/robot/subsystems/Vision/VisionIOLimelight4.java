@@ -17,6 +17,8 @@ public class VisionIOLimelight4 extends VisionIOLimelightBase {
   /** Seeds the LL4 internal IMU from the external gyro (Pigeon). Use while disabled. */
   private static final int IMU_MODE_EXTERNAL_SEED = 1;
 
+  private int rewindCounter = 0;
+
   /** Fuses the LL4 internal IMU with external gyro corrections. Use while enabled. */
   private static final int IMU_MODE_INTERNAL_EXTERNAL_ASSIST = 4;
 
@@ -59,5 +61,12 @@ public class VisionIOLimelight4 extends VisionIOLimelightBase {
   @Override
   public void setThrottle(int throttle) {
     LimelightHelpers.SetThrottle(getName(), throttle);
+  }
+
+  @Override
+  public void captureRewind() {
+    rewindCounter++;
+    double[] captureData = {(double) rewindCounter, 10.0};
+    getTable().getEntry("capture_rewind").setDoubleArray(captureData);
   }
 }

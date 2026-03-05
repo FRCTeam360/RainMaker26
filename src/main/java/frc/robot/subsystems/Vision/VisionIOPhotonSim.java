@@ -203,6 +203,7 @@ public class VisionIOPhotonSim implements VisionIO {
     visionSim.resetRobotPose(pose);
   }
 
+  @Override
   public void captureRewind() {}
 
   /**
