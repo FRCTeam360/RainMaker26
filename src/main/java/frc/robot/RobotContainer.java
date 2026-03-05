@@ -377,14 +377,15 @@ public class RobotContainer {
     forceHubTrigger.onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
 
     // Manual override: force pass to outpost regardless of position
-    // Trigger forceOutpostTrigger = driverCont.leftBumper().and(isSuperstructureMode);
-    // forceOutpostTrigger.whileTrue(
-    //     superStructure
-    //         .setStateCommand(SuperWantedStates.SHOOT_AT_OUTPOST)
-    //         .alongWith(
-    //             drivetrain.faceAngleWhileDrivingCommand(
-    //                 driverCont, () -> passCalculator.calculateShot().targetHeading())));
-    // forceOutpostTrigger.onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
+    driverCont
+        .b()
+        .whileTrue(
+            superStructure
+                .setStateCommand(SuperWantedStates.SHOOT_AT_OUTPOST)
+                .alongWith(
+                    drivetrain.faceAngleWhileDrivingCommand(
+                        driverCont, () -> passCalculator.calculateShot().targetHeading())));
+    driverCont.b().onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
 
     // Left trigger held: agitate. Release: back to intaking.
     if (Constants.getRobotType() == RobotType.WOODBOT) {
@@ -396,7 +397,7 @@ public class RobotContainer {
       Trigger intakeTrigger = driverCont.leftBumper().and(isSuperstructureMode);
       intakeTrigger.onTrue(superStructure.setIntakeStateCommand(IntakeWantedStates.INTAKING));
       intakeTrigger.whileFalse(superStructure.setIntakeStateCommand(IntakeWantedStates.IDLE));
-      
+
       Trigger agitateTrigger = driverCont.leftTrigger().and(isSuperstructureMode);
       agitateTrigger.onTrue(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING));
       agitateTrigger.onFalse(superStructure.setIntakeStateCommand(IntakeWantedStates.IDLE));
@@ -579,7 +580,7 @@ public class RobotContainer {
     superStructure.setIntakeState(
         Constants.getRobotType() == RobotType.WOODBOT
             ? IntakeWantedStates.IDLE
-            : IntakeWantedStates.INTAKING);
+            : IntakeWantedStates.IDLE);
     onEnableVision();
   }
 
