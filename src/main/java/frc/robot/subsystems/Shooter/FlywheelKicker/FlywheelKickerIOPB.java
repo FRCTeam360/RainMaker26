@@ -19,7 +19,7 @@ import frc.robot.Constants;
 public class FlywheelKickerIOPB implements FlywheelKickerIO {
   private static final double GEAR_RATIO = 1.0;
   private static final int STALL_CURRENT_LIMIT_AMPS = 45;
-  private static final int FREE_CURRENT_LIMIT_AMPS = 45;
+  private static final int FREE_CURRENT_LIMIT_AMPS = 50;
 
   // Spinup config - bang-bang maximum acceleration (extremely high kP drives full output)
   private static final double SPINUP_KP = 999999.0;
@@ -32,7 +32,7 @@ public class FlywheelKickerIOPB implements FlywheelKickerIO {
   private static final double HOLD_KD = 0.0;
 
   // Feedforward (shared across all slots)
-  private static final double KV = 0.0070;
+  private static final double KV = 0.0012;
   private static final double KS = 0.04;
 
   private static final double MIN_SIGNAL_STRENGTH = 2000; // unknown unit
@@ -70,7 +70,11 @@ public class FlywheelKickerIOPB implements FlywheelKickerIO {
         .p(SPINUP_KP, ClosedLoopSlot.kSlot0)
         .i(SPINUP_KI, ClosedLoopSlot.kSlot0)
         .d(SPINUP_KD, ClosedLoopSlot.kSlot0);
-    sparkFlexConfig.closedLoop.feedForward.kV(KV).kS(KS);
+    sparkFlexConfig
+        .closedLoop
+        .feedForward
+        .kV(KV, ClosedLoopSlot.kSlot1)
+        .kS(KS, ClosedLoopSlot.kSlot1);
     sparkFlexConfig.closedLoop.outputRange(
         MAX_NEGATIVE_OUTPUT, MAX_POSITIVE_OUTPUT, ClosedLoopSlot.kSlot0);
 

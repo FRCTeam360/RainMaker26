@@ -30,7 +30,7 @@ import org.littletonrobotics.junction.Logger;
  */
 public class FlywheelKicker extends SubsystemBase {
   // Constants
-  private static final double KICKER_VELOCITY_RPM = 4500.0;
+  private static final double KICKER_VELOCITY_RPM = 3500.0;
   private static final double TOLERANCE_RPM = 100.0;
 
   /** Debounce time for shot detection — filters noise from brief velocity dips. */
