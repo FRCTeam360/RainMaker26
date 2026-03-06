@@ -8,6 +8,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.robot.utils.FieldConstants;
@@ -58,6 +59,11 @@ public class ShotCalculator {
       LinearFilter.movingAverage(HEADING_RATE_FILTER_TAPS);
   private Rotation2d lastTargetHeading = null;
   private double vPercentageToFlywheelOutput;
+
+  // Phase delay compensation (matches 6328): advance the estimated robot pose forward in time by
+  // this amount to compensate for sensor/loop latency before computing the shooting solution.
+  // 6328 uses 0.03 s (30 ms). Adjust if the robot's effective latency differs.
+  private static final double PHASE_DELAY_SECS = 0.03;
 
   /**
    * Holds the calculated shooting parameters for a given robot position.
@@ -152,39 +158,40 @@ public class ShotCalculator {
     Logger.recordOutput(logCached, false);
 
     Pose2d robotPosition = robotPoseSupplier.get();
+    ChassisSpeeds robotSpeeds = velocitySupplier.get();
+
+    // Convert robot-relative chassis speeds to field-relative once, up front.
+    // All subsequent velocity math uses field-relative coordinates.
+    ChassisSpeeds fieldSpeeds =
+        ChassisSpeeds.fromRobotRelativeSpeeds(robotSpeeds, robotPosition.getRotation());
+
+    // Advance the pose by the phase delay to compensate for sensor/loop latency.
+    // This matches 6328's approach: act on where the robot will be in ~30ms rather than
+    // where odometry says it is now. Uses Pose2d.exp(Twist2d) for a proper on-manifold advance.
+    // Uses field-relative vx/vy so the advance points in the correct field direction.
+    robotPosition =
+        robotPosition.exp(
+            new Twist2d(
+                fieldSpeeds.vxMetersPerSecond * PHASE_DELAY_SECS,
+                fieldSpeeds.vyMetersPerSecond * PHASE_DELAY_SECS,
+                fieldSpeeds.omegaRadiansPerSecond * PHASE_DELAY_SECS));
     Pose2d shooterPosition = robotPosition.plus(robotToShooter);
     Translation2d target = targetSupplier.get();
 
     // Compute field-relative shooter velocity for shoot-on-the-move compensation.
-    // Start with the robot's translational velocity rotated into the field frame,
-    // then add the rotational contribution at the shooter offset from the robot center.
-    ChassisSpeeds robotSpeeds = velocitySupplier.get();
+    // Shooter velocity = robot translation velocity + rotational contribution at the shooter offset.
+    // Rotational contribution uses the standard 2D cross product (ω × r) with the shooter offset
+    // rotated into the field frame: vx_extra = -ω·r_y_field, vy_extra = +ω·r_x_field.
     double currentSpeed =
-        Math.sqrt(
-            Math.pow(robotSpeeds.vxMetersPerSecond, 2)
-                + Math.pow(robotSpeeds.vyMetersPerSecond, 2));
-    Rotation2d robotHeading = robotPosition.getRotation();
-    Translation2d robotFieldVelocity =
-        new Translation2d(robotSpeeds.vxMetersPerSecond, robotSpeeds.vyMetersPerSecond)
-            .rotateBy(robotHeading);
-
-    double robotAngleRad = robotHeading.getRadians();
-    double shooterOffsetX = robotToShooter.getX();
-    double shooterOffsetY = robotToShooter.getY();
-    double omegaRadPerSec = robotSpeeds.omegaRadiansPerSecond;
+        Math.hypot(fieldSpeeds.vxMetersPerSecond, fieldSpeeds.vyMetersPerSecond);
+    double omegaRadPerSec = fieldSpeeds.omegaRadiansPerSecond;
+    Translation2d shooterOffsetField =
+        new Translation2d(robotToShooter.getX(), robotToShooter.getY())
+            .rotateBy(robotPosition.getRotation());
     double shooterVelXMps =
-        robotFieldVelocity.getX()
-            + omegaRadPerSec
-                // TODO verify shooterOffsetY math
-                // may have an error in the math here, need to verify with our own calculations.
-                // Since our shooter isn't offset in the Y direction, it doesn't matter.
-                * (shooterOffsetY * Math.cos(robotAngleRad)
-                    - shooterOffsetX * Math.sin(robotAngleRad));
+        fieldSpeeds.vxMetersPerSecond + (-omegaRadPerSec * shooterOffsetField.getY());
     double shooterVelYMps =
-        robotFieldVelocity.getY()
-            + omegaRadPerSec
-                * (shooterOffsetX * Math.cos(robotAngleRad)
-                    - shooterOffsetY * Math.sin(robotAngleRad));
+        fieldSpeeds.vyMetersPerSecond + (omegaRadPerSec * shooterOffsetField.getX());
 
     // Calculate the initial distance from the shooter to the target
     double shooterToTargetDistanceMeters = target.getDistance(shooterPosition.getTranslation());
@@ -221,8 +228,8 @@ public class ShotCalculator {
             .getTranslation()
             .plus(
                 new Translation2d(
-                    robotFieldVelocity.getX() * timeOfFlightSecs,
-                    robotFieldVelocity.getY() * timeOfFlightSecs));
+                    fieldSpeeds.vxMetersPerSecond * timeOfFlightSecs,
+                    fieldSpeeds.vyMetersPerSecond * timeOfFlightSecs));
     Rotation2d angleToTarget = target.minus(robotCenterLookahead).getAngle();
     Rotation2d targetHeading = angleToTarget.minus(robotToShooter.getRotation());
 
