@@ -273,8 +273,8 @@ public class RobotContainer {
             () ->
                 PositionUtils.getCloserPassTarget(
                     drivetrain.getPosition(),
-                    AllianceFlipUtil.apply(FieldConstants.RightBump.nearRightCorner),
-                    AllianceFlipUtil.apply(FieldConstants.LeftBump.nearLeftCorner)),
+                    AllianceFlipUtil.apply(FieldConstants.RightBump.passingPoint),
+                    AllianceFlipUtil.apply(FieldConstants.LeftBump.passingPoint)),
             drivetrain::getCommandedVelocity,
             robotPassingInfo);
     // Configure the trigger bindings
