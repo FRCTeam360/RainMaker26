@@ -655,7 +655,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
    * @return the current {@link ChassisSpeeds} of the robot
    */
   public ChassisSpeeds getVelocity() {
-    return this.getStateCopy().Speeds;
+    return getCachedState().Speeds;
+
   }
 
   /**
