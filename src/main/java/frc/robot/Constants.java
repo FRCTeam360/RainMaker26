@@ -240,11 +240,11 @@ public final class Constants {
       shotHoodAngleMap.put(0.0, 0.0);
 
       // === SHOOTING VALUES ===
-      shotFlywheelSpeedMap.put(6.0, 2500.0);
-      shotFlywheelSpeedMap.put(5.0, 2500.0); // TESTED
-      shotFlywheelSpeedMap.put(4.0, 2250.0);
-      shotFlywheelSpeedMap.put(3.0, 2250.0); // TESTED
-      shotFlywheelSpeedMap.put(2.5, 2150.0); // TESTED
+      shotFlywheelSpeedMap.put(6.0, 2550.0);
+      shotFlywheelSpeedMap.put(5.0, 2550.0); // TESTED
+      shotFlywheelSpeedMap.put(4.0, 2300.0);
+      shotFlywheelSpeedMap.put(3.0, 2300.0); // TESTED
+      shotFlywheelSpeedMap.put(2.5, 2200.0); // TESTED
       shotFlywheelSpeedMap.put(2.0, 2000.0);
       shotFlywheelSpeedMap.put(1.0, 1800.0);
       shotFlywheelSpeedMap.put(0.0, 2000.0);
