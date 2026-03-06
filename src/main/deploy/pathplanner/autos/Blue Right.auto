@@ -5,6 +5,12 @@
     "data": {
       "commands": [
         {
+          "type": "named",
+          "data": {
+            "name": "default"
+          }
+        },
+        {
           "type": "deadline",
           "data": {
             "commands": [
