@@ -145,7 +145,8 @@ public class FieldConstants {
     // Passing point
     // TODO: isolate this to own class in field constants
     public static final Translation2d passingPoint =
-        nearLeftCorner.plus(new Translation2d(-1.0, 0.0));
+        new Translation2d(
+            nearLeftCorner.getX(), (nearLeftCorner.getY() + nearRightCorner.getY()) / 2).plus(new Translation2d(0.3,0.0));
 
     // Relevant reference points on opposing side
     public static final Translation2d oppNearLeftCorner =
@@ -176,7 +177,8 @@ public class FieldConstants {
     // Passing point
     // TODO: isolate this to own class in field constants
     public static final Translation2d passingPoint =
-        nearRightCorner.plus(new Translation2d(-1.0, 0.0));
+        new Translation2d(
+            nearLeftCorner.getX(), (nearLeftCorner.getY() + nearRightCorner.getY()) / 2).plus(new Translation2d(0.3,0.0));
 
     // Relevant reference points on opposing side
     public static final Translation2d oppNearLeftCorner = Hub.oppNearRightCorner;

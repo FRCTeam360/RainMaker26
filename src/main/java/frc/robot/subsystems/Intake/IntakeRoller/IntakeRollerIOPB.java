@@ -18,7 +18,7 @@ import frc.robot.Constants.PracticeBotConstants;
 public class IntakeRollerIOPB implements IntakeRollerIO {
   private static final double GEAR_RATIO = 1.0;
   private static final int STALL_CURRENT_LIMIT_AMPS = 50;
-  private static final int FREE_CURRENT_LIMIT_AMPS = 50;
+  private static final int FREE_CURRENT_LIMIT_AMPS = 55;
 
   private static final double KP = 0.0002;
   private static final double KI = 0.0;
