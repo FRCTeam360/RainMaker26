@@ -142,6 +142,11 @@ public class FieldConstants {
         new Translation2d(LinesVertical.hubCenter + width / 2, Units.inchesToMeters(255));
     public static final Translation2d farRightCorner = Hub.farLeftCorner;
 
+    // Passing point
+    // TODO: isolate this to own class in field constants
+    public static final Translation2d passingPoint =
+        nearLeftCorner.plus(new Translation2d(-1.0, 0.0));
+
     // Relevant reference points on opposing side
     public static final Translation2d oppNearLeftCorner =
         new Translation2d(LinesVertical.oppHubCenter - width / 2, Units.inchesToMeters(255));
@@ -167,6 +172,11 @@ public class FieldConstants {
     public static final Translation2d farRightCorner =
         new Translation2d(
             LinesVertical.hubCenter + width / 2, fieldWidth - Units.inchesToMeters(255));
+
+    // Passing point
+    // TODO: isolate this to own class in field constants
+    public static final Translation2d passingPoint =
+        nearRightCorner.plus(new Translation2d(-1.0, 0.0));
 
     // Relevant reference points on opposing side
     public static final Translation2d oppNearLeftCorner = Hub.oppNearRightCorner;
