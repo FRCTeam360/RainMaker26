@@ -29,6 +29,7 @@ public class ShotCalculator {
   private final InterpolatingDoubleTreeMap timeOfFlightMap;
   private final Transform2d robotToShooter;
   private final String name;
+  private final double maxRobotSpeedMps;
 
   private final String logCached;
   private final String logVirtualTarget;
@@ -56,6 +57,7 @@ public class ShotCalculator {
   private final LinearFilter headingRateFilter =
       LinearFilter.movingAverage(HEADING_RATE_FILTER_TAPS);
   private Rotation2d lastTargetHeading = null;
+  private double vPercentageToFlywheelOutput;
 
   /**
    * Holds the calculated shooting parameters for a given robot position.
@@ -82,7 +84,9 @@ public class ShotCalculator {
       InterpolatingDoubleTreeMap timeOfFlightMap,
       Transform2d robotToShooter,
       double minDistanceMeters, // should be 0.0 for hub
-      double maxDistanceMeters /* should be 5.0 for hub */) {}
+      double maxDistanceMeters, /* should be 5.0 for hub */
+      double maxRobotSpeedMps,
+      double vPercentageToFlywheelOutput) {}
 
   /**
    * Creates a new ShotCalculator.
@@ -125,6 +129,8 @@ public class ShotCalculator {
     this.logIsValid = basePath + "/isValid";
     this.logRobotSpeeds = basePath + "/robotSpeeds";
     this.logHeadingVelocityRadPerSec = basePath + "/headingVelocityRadPerSec";
+    this.maxRobotSpeedMps = robotShootingInfo.maxRobotSpeedMps;
+    this.vPercentageToFlywheelOutput = robotShootingInfo.vPercentageToFlywheelOutput;
   }
 
   private ShootingParams cachedShootingParams = null;
@@ -153,6 +159,10 @@ public class ShotCalculator {
     // Start with the robot's translational velocity rotated into the field frame,
     // then add the rotational contribution at the shooter offset from the robot center.
     ChassisSpeeds robotSpeeds = velocitySupplier.get();
+    double currentSpeed =
+        Math.sqrt(
+            Math.pow(robotSpeeds.vxMetersPerSecond, 2)
+                + Math.pow(robotSpeeds.vyMetersPerSecond, 2));
     Rotation2d robotHeading = robotPosition.getRotation();
     Translation2d robotFieldVelocity =
         new Translation2d(robotSpeeds.vxMetersPerSecond, robotSpeeds.vyMetersPerSecond)
@@ -229,7 +239,9 @@ public class ShotCalculator {
     lastTargetHeading = targetHeading;
 
     double hoodAngle = shotHoodAngleMap.get(effectiveDistanceMeters);
-    double flywheelSpeed = shotFlywheelSpeedMap.get(effectiveDistanceMeters);
+    double flywheelSpeed =
+        shotFlywheelSpeedMap.get(effectiveDistanceMeters)
+            + ((currentSpeed / maxRobotSpeedMps) * vPercentageToFlywheelOutput);
     double timeOfFlight = timeOfFlightMap.get(effectiveDistanceMeters);
     boolean isValid =
         lookaheadDistanceMeters >= minDistanceMeters
