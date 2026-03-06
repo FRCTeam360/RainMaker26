@@ -15,8 +15,8 @@ import frc.robot.Constants;
 
 public class HopperRollerIOPB implements HopperRollerIO {
   private static final double GEAR_RATIO = 1.0;
-  private static final int STALL_CURRENT_LIMIT_AMPS = 40;
-  private static final int FREE_CURRENT_LIMIT_AMPS = 45;
+  private static final int STALL_CURRENT_LIMIT_AMPS = 60;
+  private static final int FREE_CURRENT_LIMIT_AMPS = 40;
 
   private final SparkFlex hopperRollerMotor =
       new SparkFlex(Constants.PracticeBotConstants.HOPPER_ROLLER_ID, MotorType.kBrushless);
