@@ -245,7 +245,7 @@ public final class Constants {
       shotFlywheelSpeedMap.put(4.0, 2250.0);
       shotFlywheelSpeedMap.put(3.0, 2250.0); // TESTED
       shotFlywheelSpeedMap.put(2.5, 2150.0); // TESTED
-      shotFlywheelSpeedMap.put(2.0, 2000.0);
+      shotFlywheelSpeedMap.put(2.0, 1950.0);
       shotFlywheelSpeedMap.put(1.0, 1800.0);
       shotFlywheelSpeedMap.put(0.0, 2000.0);
 
