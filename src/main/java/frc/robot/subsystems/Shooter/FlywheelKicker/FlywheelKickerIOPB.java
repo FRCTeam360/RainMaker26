@@ -63,8 +63,8 @@ public class FlywheelKickerIOPB implements FlywheelKickerIO {
     sparkFlexConfig.smartCurrentLimit(STALL_CURRENT_LIMIT_AMPS, FREE_CURRENT_LIMIT_AMPS);
     sparkFlexConfig.encoder.positionConversionFactor(1.0 / GEAR_RATIO);
     sparkFlexConfig.encoder.velocityConversionFactor(1.0 / GEAR_RATIO);
-    //sparkFlexConfig.encoder.uvwMeasurementPeriod(10);
-    //sparkFlexConfig.encoder.uvwAverageDepth(2);
+    // sparkFlexConfig.encoder.uvwMeasurementPeriod(10);
+    // sparkFlexConfig.encoder.uvwAverageDepth(2);
 
     // Configure Slot 0: Spinup - aggressive acceleration
     sparkFlexConfig
