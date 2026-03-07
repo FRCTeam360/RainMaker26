@@ -2,9 +2,9 @@
 title: Full State Machine (All Layers)
 ---
 stateDiagram-v2
-    [*] --> DEFAULT
+    [*] --> DefaultState
 
-    state DEFAULT {
+    state "DEFAULT" as DefaultState {
         [*] --> default_subsystems
         state "All Subsystems" as default_subsystems {
             def_intake: IntakeStateMachine -> DEPLOYED
@@ -31,7 +31,7 @@ stateDiagram-v2
         state "PREPARING_TO_FIRE" as hub_PREPARING {
             hub_prep_fw: Flywheel -> SHOOTING (SPINNING_UP)
             hub_prep_hood: Hood -> AIMING (MOVING)
-            hub_prep_kicker: FlywheelKicker -> KICKING (WoodBot: IDLE)
+            hub_prep_kicker: FlywheelKicker -> KICKING (WoodBot IDLE)
         }
 
         state "FIRING" as hub_FIRING {
@@ -53,7 +53,7 @@ stateDiagram-v2
         state "PREPARING_TO_FIRE" as out_PREPARING {
             out_prep_fw: Flywheel -> SHOOTING (SPINNING_UP)
             out_prep_hood: Hood -> AIMING (MOVING)
-            out_prep_kicker: FlywheelKicker -> KICKING (WoodBot: IDLE)
+            out_prep_kicker: FlywheelKicker -> KICKING (WoodBot IDLE)
         }
 
         state "FIRING" as out_FIRING {
@@ -101,25 +101,25 @@ stateDiagram-v2
         ejecting_note: Not yet implemented
     }
 
-    DEFAULT --> SHOOT_AT_HUB : Force hub button
-    SHOOT_AT_HUB --> DEFAULT : Button released
+    DefaultState --> SHOOT_AT_HUB : Force hub button
+    SHOOT_AT_HUB --> DefaultState : Button released
 
-    DEFAULT --> SHOOT_AT_OUTPOST : Force outpost button
-    SHOOT_AT_OUTPOST --> DEFAULT : Button released
+    DefaultState --> SHOOT_AT_OUTPOST : Force outpost button
+    SHOOT_AT_OUTPOST --> DefaultState : Button released
 
-    DEFAULT --> AUTO_CYCLE_SHOOTING : Auto cycle button
-    AUTO_CYCLE_SHOOTING --> DEFAULT : Button released
+    DefaultState --> AUTO_CYCLE_SHOOTING : Auto cycle button
+    AUTO_CYCLE_SHOOTING --> DefaultState : Button released
 
-    DEFAULT --> UNJAMMING : Unjam button
-    UNJAMMING --> DEFAULT : Button released
+    DefaultState --> UNJAMMING : Unjam button
+    UNJAMMING --> DefaultState : Button released
 
-    DEFAULT --> DEFENSE : Defense button
-    DEFENSE --> DEFAULT : Button released
+    DefaultState --> DEFENSE : Defense button
+    DEFENSE --> DefaultState : Button released
 
-    DEFAULT --> X_OUT : X-out button
-    X_OUT --> DEFAULT : Button released
+    DefaultState --> X_OUT : X-out button
+    X_OUT --> DefaultState : Button released
 
-    DEFAULT --> EJECTING : Eject button
-    EJECTING --> DEFAULT : Button released
+    DefaultState --> EJECTING : Eject button
+    EJECTING --> DefaultState : Button released
 
-    IDLE --> DEFAULT : Mode -> Auto/Teleop
+    IDLE --> DefaultState : Mode -> Auto/Teleop
