@@ -40,7 +40,7 @@ public class FlywheelKicker extends SubsystemBase {
   private static final double SUSTAINED_RPM_DROP_DEBOUNCE_SECONDS = 0.2;
 
   private long kickCount = 0;
-  private static final double REVERSE_DUTY_CYCLE = -0.85;
+  private static final double REVERSE_DUTY_CYCLE = -0.95;
 
   // IO fields
   private final FlywheelKickerIO io;
