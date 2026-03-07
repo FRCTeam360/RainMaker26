@@ -193,7 +193,7 @@ public final class Constants {
     public static final InterpolatingDoubleTreeMap passFlywheelSpeedMap =
         new InterpolatingDoubleTreeMap();
     public static final InterpolatingDoubleTreeMap timeOfFlightMap =
-        new InterpolatingDoubleTreeMap();
+        new InterpolatingDoubleTreeMap(); 
 
     public static final double MIN_SHOT_DISTANCE_METERS = 0.0;
     public static final double MAX_SHOT_DISTANCE_METERS = 6.0;
@@ -258,7 +258,9 @@ public final class Constants {
       passHoodAngleMap.put(1.0, 20.0);
       passHoodAngleMap.put(0.0, 20.0);
 
-      passFlywheelSpeedMap.put(15.0, 3500.0);
+      passFlywheelSpeedMap.put(15.0, 4500.0);
+      passFlywheelSpeedMap.put(9.0, 4000.0);
+      passFlywheelSpeedMap.put(7.0, 3500.0);
       passFlywheelSpeedMap.put(5.0, 3000.0); // TESTED
       passFlywheelSpeedMap.put(4.0, 2750.0);
       passFlywheelSpeedMap.put(3.0, 2600.0); // TESTED
