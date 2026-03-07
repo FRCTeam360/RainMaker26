@@ -2,27 +2,26 @@
 title: Full State Machine (All Layers)
 ---
 stateDiagram-v2
-    [*] --> IDLE
+    [*] --> DEFAULT
+
+    state DEFAULT {
+        [*] --> default_subsystems
+        state "All Subsystems" as default_subsystems {
+            def_intake: IntakeStateMachine -> DEPLOYED
+            def_shooter: ShooterStateMachine -> PASSIVE_SHOOTER
+            def_target: TargetSelection -> AUTO
+            def_hopper: HopperRoller -> OFF
+            def_indexer: Indexer -> OFF
+        }
+    }
 
     state IDLE {
         [*] --> idle_subsystems
         state "All Subsystems" as idle_subsystems {
-            idle_intake: Intake → OFF
-            idle_pivot: IntakePivot → OFF
-            idle_indexer: Indexer → OFF
-            idle_hopper: HopperRoller → OFF
-            idle_kicker: FlywheelKicker → OFF
-            idle_flywheel: Flywheel → OFF
-            idle_hood: Hood → OFF (position 0.0)
-        }
-    }
-
-    state INTAKING {
-        [*] --> intaking_subsystems
-        state "Active Subsystems" as intaking_subsystems {
-            int_intake: Intake → INTAKING (75%)
-            int_pivot: IntakePivot → not driven
-            int_hopper: HopperRoller → not driven
+            idle_intake: IntakeStateMachine -> IDLE
+            idle_shooter: ShooterStateMachine -> IDLE
+            idle_hopper: HopperRoller -> OFF
+            idle_indexer: Indexer -> OFF
         }
     }
 
@@ -30,64 +29,97 @@ stateDiagram-v2
         [*] --> hub_PREPARING
 
         state "PREPARING_TO_FIRE" as hub_PREPARING {
-            hub_prep_fw: Flywheel → SHOOTING (SPINNING_UP)
-            hub_prep_hood: Hood → AIMING (MOVING)
-            hub_prep_kicker: FlywheelKicker → IDLE
+            hub_prep_fw: Flywheel -> SHOOTING (SPINNING_UP)
+            hub_prep_hood: Hood -> AIMING (MOVING)
+            hub_prep_kicker: FlywheelKicker -> KICKING (WoodBot: IDLE)
         }
 
         state "FIRING" as hub_FIRING {
-            hub_fire_fw: Flywheel → SHOOTING (AT_SETPOINT / RECOVERING)
-            hub_fire_hood: Hood → AIMING (AT_SETPOINT)
-            hub_fire_kicker: FlywheelKicker → KICKING
+            hub_fire_fw: Flywheel -> SHOOTING (AT_SETPOINT / RECOVERING)
+            hub_fire_hood: Hood -> AIMING (AT_SETPOINT)
+            hub_fire_kicker: FlywheelKicker -> KICKING
+            hub_fire_intake: IntakeStateMachine -> AGITATING
+            hub_fire_indexer: Indexer -> INDEXING
+            hub_fire_hopper: HopperRoller -> ROLLING
         }
 
-        state "COASTING" as hub_COASTING {
-            hub_coast_fw: Flywheel → COASTING (COAST)
-            hub_coast_hood: Hood → AIMING (AT_SETPOINT)
-            hub_coast_kicker: FlywheelKicker → IDLE
-        }
-
-    hub_PREPARING --> hub_FIRING : Flywheel AT_SETPOINT<br>AND Hood AT_SETPOINT<br>AND aligned
-    hub_FIRING --> hub_PREPARING : Flywheel UNDER_SHOOTING<br>OR hood lost OR alignment lost
-    hub_FIRING --> hub_COASTING : SuperStructure sets COASTING
-    hub_COASTING --> hub_FIRING : SuperStructure sets SHOOTING
-    hub_COASTING --> hub_PREPARING : Flywheel OFF or IDLE
+        hub_PREPARING --> hub_FIRING : Flywheel AT_SETPOINT<br>AND Hood AT_SETPOINT<br>AND aligned
+        hub_FIRING --> hub_PREPARING : Flywheel UNDER_SHOOTING<br>OR hood lost OR alignment lost
     }
 
     state SHOOT_AT_OUTPOST {
         [*] --> out_PREPARING
 
-
         state "PREPARING_TO_FIRE" as out_PREPARING {
-            out_prep_fw: Flywheel → SHOOTING (SPINNING_UP)
-            out_prep_hood: Hood → AIMING (MOVING)
-            out_prep_kicker: FlywheelKicker → IDLE
+            out_prep_fw: Flywheel -> SHOOTING (SPINNING_UP)
+            out_prep_hood: Hood -> AIMING (MOVING)
+            out_prep_kicker: FlywheelKicker -> KICKING (WoodBot: IDLE)
         }
 
         state "FIRING" as out_FIRING {
-            out_fire_fw: Flywheel → SHOOTING (AT_SETPOINT / RECOVERING)
-            out_fire_hood: Hood → AIMING (AT_SETPOINT)
-            out_fire_kicker: FlywheelKicker → KICKING
+            out_fire_fw: Flywheel -> SHOOTING (AT_SETPOINT / RECOVERING)
+            out_fire_hood: Hood -> AIMING (AT_SETPOINT)
+            out_fire_kicker: FlywheelKicker -> KICKING
+            out_fire_intake: IntakeStateMachine -> AGITATING
+            out_fire_indexer: Indexer -> INDEXING
+            out_fire_hopper: HopperRoller -> ROLLING
         }
 
-        state "COASTING" as out_COASTING {
-            out_coast_fw: Flywheel → COASTING (COAST)
-            out_coast_hood: Hood → AIMING (AT_SETPOINT)
-            out_coast_kicker: FlywheelKicker → IDLE
-        }
-
-    out_PREPARING --> out_FIRING : Flywheel AT_SETPOINT<br>AND Hood AT_SETPOINT<br>AND aligned
-    out_FIRING --> out_PREPARING : Flywheel UNDER_SHOOTING<br>OR hood lost OR alignment lost
-    out_FIRING --> out_COASTING : SuperStructure sets COASTING
-    out_COASTING --> out_FIRING : SuperStructure sets SHOOTING
-    out_COASTING --> out_PREPARING : Flywheel OFF or IDLE
+        out_PREPARING --> out_FIRING : Flywheel AT_SETPOINT<br>AND Hood AT_SETPOINT<br>AND aligned
+        out_FIRING --> out_PREPARING : Flywheel UNDER_SHOOTING<br>OR hood lost OR alignment lost
     }
 
-    IDLE --> INTAKING : Intake button held
-    INTAKING --> IDLE : Intake button released
+    state AUTO_CYCLE_SHOOTING {
+        [*] --> auto_choice
+        state auto_choice <<choice>>
+        auto_choice --> auto_hub : In alliance zone
+        auto_choice --> auto_outpost : Outside alliance zone
 
-    IDLE --> SHOOT_AT_HUB : Right trigger held
-    SHOOT_AT_HUB --> IDLE : Right trigger released
+        auto_hub: Target -> HUB (hub shot calculator)
+        auto_outpost: Target -> OUTPOST (pass calculator)
+    }
 
-    IDLE --> SHOOT_AT_OUTPOST : Left trigger held
-    SHOOT_AT_OUTPOST --> IDLE : Left trigger released
+    state UNJAMMING {
+        [*] --> unjam_subsystems
+        state "All Subsystems" as unjam_subsystems {
+            unjam_shooter: ShooterStateMachine -> REVERSING
+            unjam_intake: IntakeStateMachine -> IDLE
+            unjam_indexer: Indexer -> REVERSING
+            unjam_hopper: HopperRoller -> UNJAMMING
+        }
+    }
+
+    state DEFENSE {
+        defense_note: Not yet implemented
+    }
+
+    state X_OUT {
+        xout_note: Not yet implemented
+    }
+
+    state EJECTING {
+        ejecting_note: Not yet implemented
+    }
+
+    DEFAULT --> SHOOT_AT_HUB : Force hub button
+    SHOOT_AT_HUB --> DEFAULT : Button released
+
+    DEFAULT --> SHOOT_AT_OUTPOST : Force outpost button
+    SHOOT_AT_OUTPOST --> DEFAULT : Button released
+
+    DEFAULT --> AUTO_CYCLE_SHOOTING : Auto cycle button
+    AUTO_CYCLE_SHOOTING --> DEFAULT : Button released
+
+    DEFAULT --> UNJAMMING : Unjam button
+    UNJAMMING --> DEFAULT : Button released
+
+    DEFAULT --> DEFENSE : Defense button
+    DEFENSE --> DEFAULT : Button released
+
+    DEFAULT --> X_OUT : X-out button
+    X_OUT --> DEFAULT : Button released
+
+    DEFAULT --> EJECTING : Eject button
+    EJECTING --> DEFAULT : Button released
+
+    IDLE --> DEFAULT : Mode -> Auto/Teleop

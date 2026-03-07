@@ -1,12 +1,13 @@
-# Convert all Mermaid diagrams to SVG
+# Convert all Mermaid diagrams to PNG recursively
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+$rootDir = Split-Path -Parent $scriptDir
 
-Get-ChildItem -Path $scriptDir -Filter "*.mmd" | ForEach-Object {
+Get-ChildItem -Path $rootDir -Filter "*.mmd" -Recurse | ForEach-Object {
     $inputFile = $_.FullName
-    $outputFile = [System.IO.Path]::ChangeExtension($inputFile, ".svg")
+    $outputFile = [System.IO.Path]::ChangeExtension($inputFile, ".png")
 
-    Write-Host "Converting $($_.Name) -> $([System.IO.Path]::GetFileName($outputFile))"
-    mmdc -i $inputFile -o $outputFile
+    Write-Host "Converting $($_.FullName) -> $([System.IO.Path]::GetFileName($outputFile))"
+    mmdc -i $inputFile -o $outputFile --scale 4
 }
 
 Write-Host "Done!"
