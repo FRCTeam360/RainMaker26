@@ -11,9 +11,9 @@ import org.littletonrobotics.junction.Logger;
 
 public class HopperRoller extends SubsystemBase {
   // Constants
-  private static final double ROLLER_DUTY_CYCLE = 0.75;
+  private static final double ROLLER_DUTY_CYCLE = 0.80;
   private static final double PREVENT_JAM_DUTY_CYCLE = -0.2;
-  private static final double UNJAMMING_DUTY_CYCLE = -0.8;
+  private static final double UNJAMMING_DUTY_CYCLE = -0.95;
 
   // IO fields
   private final HopperRollerIO io;

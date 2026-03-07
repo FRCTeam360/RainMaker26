@@ -18,8 +18,8 @@ import frc.robot.Constants;
 
 public class FlywheelKickerIOPB implements FlywheelKickerIO {
   private static final double GEAR_RATIO = 1.0;
-  private static final int STALL_CURRENT_LIMIT_AMPS = 50;
-  private static final int FREE_CURRENT_LIMIT_AMPS = 45;
+  private static final int STALL_CURRENT_LIMIT_AMPS = 60;
+  private static final int FREE_CURRENT_LIMIT_AMPS = 50;
 
   // Spinup config - bang-bang maximum acceleration (extremely high kP drives full output)
   private static final double SPINUP_KP = 999999.0;
@@ -63,6 +63,8 @@ public class FlywheelKickerIOPB implements FlywheelKickerIO {
     sparkFlexConfig.smartCurrentLimit(STALL_CURRENT_LIMIT_AMPS, FREE_CURRENT_LIMIT_AMPS);
     sparkFlexConfig.encoder.positionConversionFactor(1.0 / GEAR_RATIO);
     sparkFlexConfig.encoder.velocityConversionFactor(1.0 / GEAR_RATIO);
+    sparkFlexConfig.encoder.uvwMeasurementPeriod(10);
+    sparkFlexConfig.encoder.uvwAverageDepth(2);
 
     // Configure Slot 0: Spinup - aggressive acceleration
     sparkFlexConfig
