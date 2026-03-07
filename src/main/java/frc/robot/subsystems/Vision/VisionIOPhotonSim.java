@@ -203,6 +203,9 @@ public class VisionIOPhotonSim implements VisionIO {
     visionSim.resetRobotPose(pose);
   }
 
+  @Override
+  public void captureRewind() {}
+
   /**
    * Gets the Field2d for visualizing the simulation.
    *

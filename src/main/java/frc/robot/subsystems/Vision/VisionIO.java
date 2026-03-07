@@ -46,7 +46,7 @@ public interface VisionIO {
   default void setPipeline(int pipeline) {}
 
   default void takeSnapshot() {}
-
+  
   default void resetSnapshot() {}
 
   /** Enables IMU seeding from external orientation data. Only relevant for Limelight 4. */
@@ -61,4 +61,7 @@ public interface VisionIO {
    * @param throttle number of frames to skip between processed frames (0 = full speed)
    */
   default void setThrottle(int throttle) {}
+
+  /** Captures a rewind clip. Only relevant for Limelight 4. */
+  default void captureRewind() {}
 }

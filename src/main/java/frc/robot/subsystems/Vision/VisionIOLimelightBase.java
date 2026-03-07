@@ -24,6 +24,7 @@ public abstract class VisionIOLimelightBase implements VisionIO {
   private final String name;
   protected final DoubleSupplier gyroAngleSupplier;
   protected final DoubleSupplier gyroAngleRateSupplier;
+  private final boolean isLimelight4;
 
   private final boolean acceptMeasurements;
 
@@ -50,6 +51,11 @@ public abstract class VisionIOLimelightBase implements VisionIO {
   /** Returns the NetworkTables name of this Limelight. */
   protected String getName() {
     return name;
+  }
+
+  /** Returns the NetworkTable for this Limelight. */
+  protected NetworkTable getTable() {
+    return table;
   }
 
   @Override
@@ -159,5 +165,19 @@ public abstract class VisionIOLimelightBase implements VisionIO {
   @Override
   public void resetSnapshot() {
     table.getEntry("snapshot").setNumber(0.0);
+  }
+
+  // while enabled
+  public void enableIMUAssist() {
+    if (isLimelight4) {
+      LimelightHelpers.SetIMUMode(name, Constants.IMU_MODE_INTERNAL_EXTERNAL_ASSIST);
+    }
+  }
+
+  // call during disabled
+  public void seedIMU() {
+    if (isLimelight4) {
+      LimelightHelpers.SetIMUMode(name, Constants.IMU_MODE_EXTERNAL_SEED);
+    }
   }
 }
