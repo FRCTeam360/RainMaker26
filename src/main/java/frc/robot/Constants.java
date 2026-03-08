@@ -73,6 +73,9 @@ public final class Constants {
   public static final class IOConstants {
     // === USB PATHS ===
     public static final String USB_ROOT_DIRECTORY = "/U";
+
+    // === POWER DISTRIBUTION ===
+    public static final int PDH_CAN_ID = 1; // REV PDH default CAN ID
   }
 
   public static final CANBus RIO_CANBUS = new CANBus("rio");

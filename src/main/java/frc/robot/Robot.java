@@ -7,8 +7,8 @@ package frc.robot;
 import edu.wpi.first.net.WebServer;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
-import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
+import org.littletonrobotics.junction.LoggedPowerDistribution;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -58,7 +58,8 @@ public class Robot extends LoggedRobot {
       }
       // TODO: Re-enable for practice sessions when live dashboard telemetry is needed
       Logger.addDataReceiver(new NT4Publisher());
-      new PowerDistribution(1, ModuleType.kRev); // Enables power distribution logging
+      LoggedPowerDistribution.getInstance(
+          Constants.IOConstants.PDH_CAN_ID, ModuleType.kRev); // Enables power distribution logging
     }
 
     switch (Constants.initRobotType()) {
