@@ -87,9 +87,22 @@
           }
         },
         {
-          "type": "path",
+          "type": "deadline",
           "data": {
-            "pathName": "Blue left middle 3"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "Blue left middle 3"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "basic intake"
+                }
+              }
+            ]
           }
         },
         {
