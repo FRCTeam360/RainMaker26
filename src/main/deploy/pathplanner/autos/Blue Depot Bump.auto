@@ -42,7 +42,26 @@
               {
                 "type": "named",
                 "data": {
+                  "name": "basic intake"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "deadline",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
                   "name": "shoot at hub"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "agitate intake"
                 }
               }
             ]
