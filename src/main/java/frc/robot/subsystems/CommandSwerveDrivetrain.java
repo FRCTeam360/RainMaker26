@@ -98,7 +98,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   // Extra heading tolerance granted per m/s of translational speed.
   // Compensates for the PID steady-state tracking lag when the heading setpoint moves
   // (setpoint rate ≈ v/d rad/s; lag ≈ rate/KP). Tunable — start at ~5°/m/s.
-  private static final double HEADING_SPEED_TOLERANCE_RAD_PER_MPS = Math.toRadians(2.0);
+  private static final double HEADING_SPEED_TOLERANCE_RAD_PER_MPS = Math.toRadians(0.2);
 
   // Maximum translational speed while using field-centric facing angle (fraction of maxSpeed).
   // Limits how much shoot-on-the-move compensation is needed.
