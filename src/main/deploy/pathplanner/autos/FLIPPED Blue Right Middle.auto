@@ -187,12 +187,6 @@
               }
             ]
           }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "shoot at hub"
-          }
         }
       ]
     }
