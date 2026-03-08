@@ -31,10 +31,10 @@ import org.littletonrobotics.junction.Logger;
 public class FlywheelKicker extends SubsystemBase {
   // Constants
   private static final double KICKER_VELOCITY_RPM = 3500.0;
-  private static final double TOLERANCE_RPM = 100.0;
+  private static final double TOLERANCE_RPM = 150.0;
 
   /** Debounce time for shot detection — filters noise from brief velocity dips. */
-  private static final double BALL_FIRED_DEBOUNCE_SECONDS = 0.04;
+  private static final double BALL_FIRED_DEBOUNCE_SECONDS = 0.06;
 
   /** Debounce time for underspeed detection — sustained RPM drop signals too many rapid shots. */
   private static final double SUSTAINED_RPM_DROP_DEBOUNCE_SECONDS = 0.2;
@@ -186,7 +186,7 @@ public class FlywheelKicker extends SubsystemBase {
       case SPINNING_UP:
       case RECOVERING:
       case UNDER_KICKING:
-        setHoldVelocityControl(KICKER_VELOCITY_RPM);
+        setSpinupVelocityControl(KICKER_VELOCITY_RPM);
         break;
       case AT_SETPOINT:
         setHoldVelocityControl(KICKER_VELOCITY_RPM);
