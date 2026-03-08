@@ -39,8 +39,8 @@ public class IntakeRollerIOPB implements IntakeRollerIO {
 
     config.encoder.positionConversionFactor(1.0 / GEAR_RATIO);
     config.encoder.velocityConversionFactor(1.0 / GEAR_RATIO);
-    config.encoder.uvwMeasurementPeriod(8);
-    config.encoder.uvwAverageDepth(1);
+    config.encoder.uvwMeasurementPeriod(10);
+    config.encoder.uvwAverageDepth(2);
 
     config.closedLoop.p(KP).i(KI).d(KD);
     config.closedLoop.feedForward.kV(KV).kS(KS);
