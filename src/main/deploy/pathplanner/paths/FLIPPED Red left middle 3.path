@@ -3,41 +3,41 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 9.916811,
-        "y": 0.673167
+        "x": 9.965533333333335,
+        "y": 0.5562333333333322
       },
       "prevControl": null,
       "nextControl": {
-        "x": 10.248122,
-        "y": 0.673167
+        "x": 10.296844333333336,
+        "y": 0.5562333333333322
       },
       "isLocked": false,
       "linkedName": "Othersideend3"
     },
     {
       "anchor": {
-        "x": 11.388222,
-        "y": 0.653678
+        "x": 11.514900000000003,
+        "y": 0.5562333333333322
       },
       "prevControl": {
-        "x": 10.720592,
-        "y": 0.641081
+        "x": 10.847270000000002,
+        "y": 0.5436363333333324
       },
       "nextControl": {
-        "x": 11.904678,
-        "y": 0.663422
+        "x": 12.031356000000002,
+        "y": 0.5659773333333322
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 13.434556,
-        "y": 0.994733
+        "x": 13.912033333333333,
+        "y": 1.0142222222222221
       },
       "prevControl": {
-        "x": 13.171456,
-        "y": 0.595211
+        "x": 13.512511111111111,
+        "y": 0.6926555555555558
       },
       "nextControl": null,
       "isLocked": false,
@@ -58,7 +58,7 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 3.0,
+    "maxVelocity": 2.5,
     "maxAcceleration": 6.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
@@ -75,5 +75,5 @@
     "velocity": 0,
     "rotation": 0.0
   },
-  "useDefaultConstraints": true
+  "useDefaultConstraints": false
 }
