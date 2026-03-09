@@ -12,7 +12,7 @@
         "y": 1.334919
       },
       "isLocked": false,
-      "linkedName": "Othersideend1"
+      "linkedName": "FLIPPED Othersideend1"
     },
     {
       "anchor": {
@@ -41,7 +41,7 @@
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "Othersideend3"
+      "linkedName": "FLIPPED Othersideend3"
     }
   ],
   "rotationTargets": [],
