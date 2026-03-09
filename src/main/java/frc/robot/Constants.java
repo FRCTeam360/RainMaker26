@@ -73,6 +73,9 @@ public final class Constants {
   public static final class IOConstants {
     // === USB PATHS ===
     public static final String USB_ROOT_DIRECTORY = "/U";
+
+    // === POWER DISTRIBUTION ===
+    public static final int PDH_CAN_ID = 1; // REV PDH default CAN ID
   }
 
   public static final CANBus RIO_CANBUS = new CANBus("rio");
@@ -245,9 +248,9 @@ public final class Constants {
       shotFlywheelSpeedMap.put(4.0, 2250.0);
       shotFlywheelSpeedMap.put(3.0, 2250.0); // TESTED
       shotFlywheelSpeedMap.put(2.5, 2150.0); // TESTED
-      shotFlywheelSpeedMap.put(2.0, 1950.0);
-      shotFlywheelSpeedMap.put(1.0, 1800.0);
-      shotFlywheelSpeedMap.put(0.0, 1800.0);
+      shotFlywheelSpeedMap.put(2.0, 2000.0);
+      shotFlywheelSpeedMap.put(1.0, 2000.0);
+      shotFlywheelSpeedMap.put(0.0, 2000.0);
 
       passHoodAngleMap.put(15.0, 20.0);
       // passHoodAngleMap.put(5.0, 20.0); // TESTED

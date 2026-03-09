@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 14.184877777777777,
-        "y": 1.784033333333333
+        "x": 2.355122,
+        "y": 6.285967
       },
       "prevControl": null,
       "nextControl": {
-        "x": 13.658677777777777,
-        "y": 2.2322773333333323
+        "x": 1.828922,
+        "y": 6.734211
       },
       "isLocked": false,
       "linkedName": "red depot 1 end"
@@ -24,7 +24,7 @@
         "y": 7.746431
       },
       "nextControl": {
-        "x": 0.48418900000000004,
+        "x": 0.484189,
         "y": 7.0168
       },
       "isLocked": false,
@@ -32,12 +32,12 @@
     },
     {
       "anchor": {
-        "x": 16.04606666666667,
-        "y": 3.1287666666666665
+        "x": 0.493933,
+        "y": 4.941233
       },
       "prevControl": {
-        "x": 16.026577666666668,
-        "y": 3.586755666666666
+        "x": 0.474444,
+        "y": 5.399222
       },
       "nextControl": null,
       "isLocked": false,
@@ -63,13 +63,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 90.0
+    "rotation": -90.0
   },
   "reversed": false,
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -45.784824602991954
+    "rotation": 134.2152
   },
   "useDefaultConstraints": false
 }
