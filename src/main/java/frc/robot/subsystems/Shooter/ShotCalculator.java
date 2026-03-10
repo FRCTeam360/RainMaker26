@@ -168,13 +168,14 @@ public class ShotCalculator {
     // Advance the pose by the phase delay to compensate for sensor/loop latency.
     // This matches 6328's approach: act on where the robot will be in ~30ms rather than
     // where odometry says it is now. Uses Pose2d.exp(Twist2d) for a proper on-manifold advance.
-    // Uses field-relative vx/vy so the advance points in the correct field direction.
+    // Twist2d dx/dy are in the robot's local frame, so robot-relative speeds are used here —
+    // NOT field-relative. Field-relative speeds (fieldSpeeds) are used only for velocity math.
     robotPosition =
         robotPosition.exp(
             new Twist2d(
-                fieldSpeeds.vxMetersPerSecond * PHASE_DELAY_SECS,
-                fieldSpeeds.vyMetersPerSecond * PHASE_DELAY_SECS,
-                fieldSpeeds.omegaRadiansPerSecond * PHASE_DELAY_SECS));
+                robotSpeeds.vxMetersPerSecond * PHASE_DELAY_SECS,
+                robotSpeeds.vyMetersPerSecond * PHASE_DELAY_SECS,
+                robotSpeeds.omegaRadiansPerSecond * PHASE_DELAY_SECS));
     Pose2d shooterPosition = robotPosition.plus(robotToShooter);
     Translation2d target = targetSupplier.get();
 
