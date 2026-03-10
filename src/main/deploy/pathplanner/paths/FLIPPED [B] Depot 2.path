@@ -3,37 +3,58 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 0.480344,
-        "y": 7.225101
+        "x": 2.355122,
+        "y": 6.285967
       },
       "prevControl": null,
       "nextControl": {
-        "x": 0.434999,
-        "y": 6.103237
+        "x": 1.828922,
+        "y": 6.734211
+      },
+      "isLocked": false,
+      "linkedName": "red depot 1 end"
+    },
+    {
+      "anchor": {
+        "x": 0.484189,
+        "y": 7.484533
+      },
+      "prevControl": {
+        "x": 0.484189,
+        "y": 7.746431
+      },
+      "nextControl": {
+        "x": 0.484189,
+        "y": 7.0168
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 0.48,
-        "y": 5.92
+        "x": 0.493933,
+        "y": 4.941233
       },
       "prevControl": {
-        "x": 0.492066,
-        "y": 7.179125
+        "x": 0.474444,
+        "y": 5.399222
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "red depot 2 end"
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.5543568464730261,
+      "rotationDegrees": -90.0
+    }
+  ],
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 3.0,
+    "maxVelocity": 1.0,
     "maxAcceleration": 6.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
@@ -48,7 +69,7 @@
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -90.0
+    "rotation": 134.2152
   },
-  "useDefaultConstraints": true
+  "useDefaultConstraints": false
 }
