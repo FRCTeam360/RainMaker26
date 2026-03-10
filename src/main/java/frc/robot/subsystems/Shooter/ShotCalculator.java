@@ -44,7 +44,7 @@ public class ShotCalculator {
   private final String logRobotCenterLookahead;
   private final String logTimeOfFlightSecs;
   private final String logIsValid;
-  private final String logRobotSpeeds;
+  private final String logDrivetrainVelocityRobotRelative;
   private final String logHeadingVelocityRadPerSec;
 
   private double minDistanceMeters = 0.0;
@@ -53,7 +53,9 @@ public class ShotCalculator {
   // Heading velocity feedforward state — computed inside calculateShot() so the feedforward
   // is produced in the same place as the heading target (no 1-frame lag, no external derivative).
   // Uses a moving-average filter to smooth the raw frame-to-frame heading delta (matches 6328).
-  private static final int HEADING_RATE_FILTER_TAPS = 5; // ~0.1s window at 50 Hz
+  // Increase taps to smooth more aggressively; decrease for faster response. At 50 Hz, 5 taps ≈
+  // 0.1 s window.
+  private static final int HEADING_RATE_FILTER_TAPS = 5;
   private static final double LOOP_PERIOD_SECS = 0.02;
   private final LinearFilter headingRateFilter =
       LinearFilter.movingAverage(HEADING_RATE_FILTER_TAPS);
@@ -133,7 +135,7 @@ public class ShotCalculator {
     this.logRobotCenterLookahead = basePath + "/robotCenterLookahead";
     this.logTimeOfFlightSecs = basePath + "/timeOfFlightSecs";
     this.logIsValid = basePath + "/isValid";
-    this.logRobotSpeeds = basePath + "/robotSpeeds";
+    this.logDrivetrainVelocityRobotRelative = basePath + "/drivetrainVelocityRobotRelative";
     this.logHeadingVelocityRadPerSec = basePath + "/headingVelocityRadPerSec";
     this.maxRobotSpeedMps = robotShootingInfo.maxRobotSpeedMps;
     this.vPercentageToFlywheelOutput = robotShootingInfo.vPercentageToFlywheelOutput;
@@ -157,45 +159,48 @@ public class ShotCalculator {
     }
     Logger.recordOutput(logCached, false);
 
-    Pose2d robotPosition = robotPoseSupplier.get();
-    ChassisSpeeds robotSpeeds = velocitySupplier.get();
+    Pose2d drivetrainPose = robotPoseSupplier.get();
+    ChassisSpeeds drivetrainSpeedsRobotRelative = velocitySupplier.get();
 
     // Convert robot-relative chassis speeds to field-relative once, up front.
-    // All subsequent velocity math uses field-relative coordinates.
-    ChassisSpeeds fieldSpeeds =
-        ChassisSpeeds.fromRobotRelativeSpeeds(robotSpeeds, robotPosition.getRotation());
+    ChassisSpeeds drivetrainSpeedsFieldRelative =
+        ChassisSpeeds.fromRobotRelativeSpeeds(
+            drivetrainSpeedsRobotRelative, drivetrainPose.getRotation());
 
-    // Advance the pose by the phase delay to compensate for sensor/loop latency.
+    // Advance the drivetrain pose by the phase delay to compensate for sensor/loop latency.
     // This matches 6328's approach: act on where the robot will be in ~30ms rather than
     // where odometry says it is now. Uses Pose2d.exp(Twist2d) for a proper on-manifold advance.
-    // Twist2d dx/dy are in the robot's local frame, so robot-relative speeds are used here —
-    // NOT field-relative. Field-relative speeds (fieldSpeeds) are used only for velocity math.
-    robotPosition =
-        robotPosition.exp(
+    // Twist2d expects robot-local frame — use robot-relative speeds, not fieldRelative.
+    drivetrainPose =
+        drivetrainPose.exp(
             new Twist2d(
-                robotSpeeds.vxMetersPerSecond * PHASE_DELAY_SECS,
-                robotSpeeds.vyMetersPerSecond * PHASE_DELAY_SECS,
-                robotSpeeds.omegaRadiansPerSecond * PHASE_DELAY_SECS));
-    Pose2d shooterPosition = robotPosition.plus(robotToShooter);
+                drivetrainSpeedsRobotRelative.vxMetersPerSecond * PHASE_DELAY_SECS,
+                drivetrainSpeedsRobotRelative.vyMetersPerSecond * PHASE_DELAY_SECS,
+                drivetrainSpeedsRobotRelative.omegaRadiansPerSecond * PHASE_DELAY_SECS));
+    Pose2d shooterPose = drivetrainPose.plus(robotToShooter);
     Translation2d target = targetSupplier.get();
 
     // Compute field-relative shooter velocity for shoot-on-the-move compensation.
-    // Shooter velocity = robot translation velocity + rotational contribution at the shooter
-    // offset.
+    // Shooter velocity = drivetrain translational velocity + rotational contribution at the
+    // shooter offset (because the shooter is not at the robot center).
     // Rotational contribution uses the standard 2D cross product (ω × r) with the shooter offset
     // rotated into the field frame: vx_extra = -ω·r_y_field, vy_extra = +ω·r_x_field.
-    double currentSpeed = Math.hypot(fieldSpeeds.vxMetersPerSecond, fieldSpeeds.vyMetersPerSecond);
-    double omegaRadPerSec = fieldSpeeds.omegaRadiansPerSecond;
-    Translation2d shooterOffsetField =
+    double drivetrainTranslationSpeedMps =
+        Math.hypot(
+            drivetrainSpeedsFieldRelative.vxMetersPerSecond,
+            drivetrainSpeedsFieldRelative.vyMetersPerSecond);
+    double drivetrainOmegaRadPerSec = drivetrainSpeedsFieldRelative.omegaRadiansPerSecond;
+    Translation2d shooterOffsetFieldRelative =
         new Translation2d(robotToShooter.getX(), robotToShooter.getY())
-            .rotateBy(robotPosition.getRotation());
-    double shooterVelXMps =
-        fieldSpeeds.vxMetersPerSecond + (-omegaRadPerSec * shooterOffsetField.getY());
-    double shooterVelYMps =
-        fieldSpeeds.vyMetersPerSecond + (omegaRadPerSec * shooterOffsetField.getX());
+            .rotateBy(drivetrainPose.getRotation());
+    double shooterVelFieldXMps =
+        drivetrainSpeedsFieldRelative.vxMetersPerSecond
+            + (-drivetrainOmegaRadPerSec * shooterOffsetFieldRelative.getY());
+    double shooterVelFieldYMps =
+        drivetrainSpeedsFieldRelative.vyMetersPerSecond
+            + (drivetrainOmegaRadPerSec * shooterOffsetFieldRelative.getX());
 
-    // Calculate the initial distance from the shooter to the target
-    double shooterToTargetDistanceMeters = target.getDistance(shooterPosition.getTranslation());
+    double shooterToTargetDistanceMeters = target.getDistance(shooterPose.getTranslation());
 
     // Use time of flight to project where the shooter will be when the ball arrives.
     // The robot imparts its velocity onto the ball, so we offset the aiming point
@@ -203,41 +208,37 @@ public class ShotCalculator {
     // Iteratively refine: the lookahead distance differs from the initial distance, so the correct
     // TOF is the one consistent with the lookahead it produces (fixed-point convergence).
     double timeOfFlightSecs = timeOfFlightMap.get(shooterToTargetDistanceMeters);
-    Translation2d lookaheadPosition = shooterPosition.getTranslation();
+    Translation2d shooterLookaheadPosition = shooterPose.getTranslation();
     for (int i = 0; i < 10; i++) {
-      lookaheadPosition =
-          shooterPosition
+      shooterLookaheadPosition =
+          shooterPose
               .getTranslation()
               .plus(
                   new Translation2d(
-                      shooterVelXMps * timeOfFlightSecs, shooterVelYMps * timeOfFlightSecs));
-      double newTof = timeOfFlightMap.get(target.getDistance(lookaheadPosition));
+                      shooterVelFieldXMps * timeOfFlightSecs,
+                      shooterVelFieldYMps * timeOfFlightSecs));
+      double newTof = timeOfFlightMap.get(target.getDistance(shooterLookaheadPosition));
       timeOfFlightSecs = newTof;
     }
-    double lookaheadDistanceMeters = target.getDistance(lookaheadPosition);
+    double lookaheadDistanceMeters = target.getDistance(shooterLookaheadPosition);
 
     double effectiveDistanceMeters =
         Math.max(minDistanceMeters, Math.min(maxDistanceMeters, lookaheadDistanceMeters));
 
-    // Calculate the robot heading needed to aim the shooter at the target.
-    // The drivetrain rotates around the robot center, so we compute the angle from the
-    // velocity-compensated robot center (not the shooter position) to the target.
-    // Then subtract the shooter's facing angle relative to the robot so the drivetrain
-    // orients the shooter toward the target.
-    Translation2d robotCenterLookahead =
-        robotPosition
+    // Aim from the drivetrain center's lookahead, not the shooter tip's.
+    // Subtract the shooter's facing angle so the drivetrain orients the shooter toward the target.
+    Translation2d drivetrainLookaheadPosition =
+        drivetrainPose
             .getTranslation()
             .plus(
                 new Translation2d(
-                    fieldSpeeds.vxMetersPerSecond * timeOfFlightSecs,
-                    fieldSpeeds.vyMetersPerSecond * timeOfFlightSecs));
-    Rotation2d angleToTarget = target.minus(robotCenterLookahead).getAngle();
+                    drivetrainSpeedsFieldRelative.vxMetersPerSecond * timeOfFlightSecs,
+                    drivetrainSpeedsFieldRelative.vyMetersPerSecond * timeOfFlightSecs));
+    Rotation2d angleToTarget = target.minus(drivetrainLookaheadPosition).getAngle();
     Rotation2d targetHeading = angleToTarget.minus(robotToShooter.getRotation());
 
     // Compute heading velocity feedforward (rad/s) using a filtered frame-to-frame derivative.
-    // This is produced in the same place as the heading target — no 1-frame lag, no external
-    // numerical differentiation. Matches 6328's approach of returning driveVelocity from the
-    // calculator. On the first frame (lastTargetHeading == null) we output 0 to avoid a spike.
+    // On the first frame output 0 to avoid a spike from the uninitialized lastTargetHeading.
     double headingVelocityRadPerSec = 0.0;
     if (lastTargetHeading != null) {
       headingVelocityRadPerSec =
@@ -249,16 +250,15 @@ public class ShotCalculator {
     double hoodAngle = shotHoodAngleMap.get(effectiveDistanceMeters);
     double flywheelSpeed =
         shotFlywheelSpeedMap.get(effectiveDistanceMeters)
-            + ((currentSpeed / maxRobotSpeedMps) * vPercentageToFlywheelOutput);
+            + ((drivetrainTranslationSpeedMps / maxRobotSpeedMps) * vPercentageToFlywheelOutput);
     double timeOfFlight = timeOfFlightMap.get(effectiveDistanceMeters);
     boolean isValid =
         lookaheadDistanceMeters >= minDistanceMeters
             && lookaheadDistanceMeters <= maxDistanceMeters;
 
-    // The virtual target is the real target offset by the velocity compensation — it represents
-    // where the robot is effectively aiming from its current position while moving.
     Translation2d velocityOffset =
-        new Translation2d(shooterVelXMps * timeOfFlightSecs, shooterVelYMps * timeOfFlightSecs);
+        new Translation2d(
+            shooterVelFieldXMps * timeOfFlightSecs, shooterVelFieldYMps * timeOfFlightSecs);
     Translation2d virtualTarget = target.minus(velocityOffset);
     Logger.recordOutput(logVirtualTarget, new Pose2d(virtualTarget, Rotation2d.kZero));
     Logger.recordOutput(logTargetPosition, new Pose2d(target, Rotation2d.kZero));
@@ -267,11 +267,12 @@ public class ShotCalculator {
     Logger.recordOutput(logTargetFlywheelSpeed, flywheelSpeed);
     Logger.recordOutput(logTargetHoodAngle, hoodAngle);
     Logger.recordOutput(logTargetHeading, targetHeading);
-    Logger.recordOutput(logLookaheadPose, new Pose2d(lookaheadPosition, targetHeading));
-    Logger.recordOutput(logRobotCenterLookahead, new Pose2d(robotCenterLookahead, targetHeading));
+    Logger.recordOutput(logLookaheadPose, new Pose2d(shooterLookaheadPosition, targetHeading));
+    Logger.recordOutput(
+        logRobotCenterLookahead, new Pose2d(drivetrainLookaheadPosition, targetHeading));
     Logger.recordOutput(logTimeOfFlightSecs, timeOfFlightSecs);
     Logger.recordOutput(logIsValid, isValid);
-    Logger.recordOutput(logRobotSpeeds, robotSpeeds);
+    Logger.recordOutput(logDrivetrainVelocityRobotRelative, drivetrainSpeedsRobotRelative);
     Logger.recordOutput(logHeadingVelocityRadPerSec, headingVelocityRadPerSec);
 
     cachedShootingParams =
