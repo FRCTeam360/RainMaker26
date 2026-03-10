@@ -656,7 +656,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
    */
   public ChassisSpeeds getVelocity() {
     return getCachedState().Speeds;
-
   }
 
   /**

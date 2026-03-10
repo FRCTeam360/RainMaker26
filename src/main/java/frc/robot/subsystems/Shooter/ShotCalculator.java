@@ -180,11 +180,11 @@ public class ShotCalculator {
     Translation2d target = targetSupplier.get();
 
     // Compute field-relative shooter velocity for shoot-on-the-move compensation.
-    // Shooter velocity = robot translation velocity + rotational contribution at the shooter offset.
+    // Shooter velocity = robot translation velocity + rotational contribution at the shooter
+    // offset.
     // Rotational contribution uses the standard 2D cross product (ω × r) with the shooter offset
     // rotated into the field frame: vx_extra = -ω·r_y_field, vy_extra = +ω·r_x_field.
-    double currentSpeed =
-        Math.hypot(fieldSpeeds.vxMetersPerSecond, fieldSpeeds.vyMetersPerSecond);
+    double currentSpeed = Math.hypot(fieldSpeeds.vxMetersPerSecond, fieldSpeeds.vyMetersPerSecond);
     double omegaRadPerSec = fieldSpeeds.omegaRadiansPerSecond;
     Translation2d shooterOffsetField =
         new Translation2d(robotToShooter.getX(), robotToShooter.getY())
