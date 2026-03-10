@@ -13,6 +13,7 @@ import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -673,6 +674,7 @@ public class RobotContainer {
    */
   public void postSchedulerUpdate() {
     NetworkTableInstance.getDefault().flush();
+    SmartDashboard.putNumber("batteryVoltage", RobotController.getBatteryVoltage());
   }
 
   /**
