@@ -220,10 +220,10 @@ public class ShotCalculator {
       double newTof = timeOfFlightMap.get(target.getDistance(shooterLookaheadPosition));
       timeOfFlightSecs = newTof;
     }
-    double lookaheadDistanceMeters = target.getDistance(shooterLookaheadPosition);
+    double lookaheadShotDistanceMeters = target.getDistance(shooterLookaheadPosition);
 
-    double effectiveDistanceMeters =
-        Math.max(minDistanceMeters, Math.min(maxDistanceMeters, lookaheadDistanceMeters));
+    double clampedShotDistanceMeters =
+        Math.max(minDistanceMeters, Math.min(maxDistanceMeters, lookaheadShotDistanceMeters));
 
     // Aim from the drivetrain center's lookahead, not the shooter tip's.
     // Subtract the shooter's facing angle so the drivetrain orients the shooter toward the target.
@@ -247,14 +247,14 @@ public class ShotCalculator {
     }
     lastTargetHeading = targetHeading;
 
-    double hoodAngle = shotHoodAngleMap.get(effectiveDistanceMeters);
+    double hoodAngle = shotHoodAngleMap.get(clampedShotDistanceMeters);
     double flywheelSpeed =
-        shotFlywheelSpeedMap.get(effectiveDistanceMeters)
+        shotFlywheelSpeedMap.get(clampedShotDistanceMeters)
             + ((drivetrainTranslationSpeedMps / maxRobotSpeedMps) * vPercentageToFlywheelOutput);
-    double timeOfFlight = timeOfFlightMap.get(effectiveDistanceMeters);
+    double timeOfFlight = timeOfFlightMap.get(clampedShotDistanceMeters);
     boolean isValid =
-        lookaheadDistanceMeters >= minDistanceMeters
-            && lookaheadDistanceMeters <= maxDistanceMeters;
+        lookaheadShotDistanceMeters >= minDistanceMeters
+            && lookaheadShotDistanceMeters <= maxDistanceMeters;
 
     Translation2d velocityOffset =
         new Translation2d(
@@ -263,7 +263,7 @@ public class ShotCalculator {
     Logger.recordOutput(logVirtualTarget, new Pose2d(virtualTarget, Rotation2d.kZero));
     Logger.recordOutput(logTargetPosition, new Pose2d(target, Rotation2d.kZero));
     Logger.recordOutput(logHubPosition, FieldConstants.Hub.topCenterPoint);
-    Logger.recordOutput(logDistanceToTarget, lookaheadDistanceMeters);
+    Logger.recordOutput(logDistanceToTarget, lookaheadShotDistanceMeters);
     Logger.recordOutput(logTargetFlywheelSpeed, flywheelSpeed);
     Logger.recordOutput(logTargetHoodAngle, hoodAngle);
     Logger.recordOutput(logTargetHeading, targetHeading);
