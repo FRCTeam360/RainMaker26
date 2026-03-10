@@ -22,6 +22,24 @@ import org.littletonrobotics.junction.Logger;
  * lookahead.
  */
 public class ShotCalculator {
+
+  // ===== CONSTANTS =====
+
+  // Phase delay compensation (matches 6328): advance the estimated robot pose forward in time by
+  // this amount to compensate for sensor/loop latency before computing the shooting solution.
+  // 6328 uses 0.03 s (30 ms). Adjust if the robot's effective latency differs.
+  private static final double PHASE_DELAY_SECS = 0.03;
+
+  // Heading velocity feedforward state — computed inside calculateShot() so the feedforward
+  // is produced in the same place as the heading target (no 1-frame lag, no external derivative).
+  // Uses a moving-average filter to smooth the raw frame-to-frame heading delta (matches 6328).
+  // Increase taps to smooth more aggressively; decrease for faster response. At 50 Hz, 5 taps ≈
+  // 0.1 s window.
+  private static final int HEADING_RATE_FILTER_TAPS = 5;
+  private static final double LOOP_PERIOD_SECS = 0.02;
+
+  // ===== CONFIGURATION =====
+
   private final Supplier<Pose2d> robotPoseSupplier;
   private final Supplier<Translation2d> targetSupplier;
   private final Supplier<ChassisSpeeds> velocitySupplier;
@@ -31,6 +49,11 @@ public class ShotCalculator {
   private final Transform2d robotToShooter;
   private final String name;
   private final double maxRobotSpeedMps;
+  private final double vPercentageToFlywheelOutput;
+  private double minDistanceMeters = 0.0;
+  private double maxDistanceMeters = Double.MAX_VALUE;
+
+  // ===== LOG PATHS =====
 
   private final String logCached;
   private final String logVirtualTarget;
@@ -47,25 +70,14 @@ public class ShotCalculator {
   private final String logDrivetrainVelocityRobotRelative;
   private final String logHeadingVelocityRadPerSec;
 
-  private double minDistanceMeters = 0.0;
-  private double maxDistanceMeters = Double.MAX_VALUE;
+  // ===== STATE =====
 
-  // Heading velocity feedforward state — computed inside calculateShot() so the feedforward
-  // is produced in the same place as the heading target (no 1-frame lag, no external derivative).
-  // Uses a moving-average filter to smooth the raw frame-to-frame heading delta (matches 6328).
-  // Increase taps to smooth more aggressively; decrease for faster response. At 50 Hz, 5 taps ≈
-  // 0.1 s window.
-  private static final int HEADING_RATE_FILTER_TAPS = 5;
-  private static final double LOOP_PERIOD_SECS = 0.02;
+  private ShootingParams cachedShootingParams = null;
   private final LinearFilter headingRateFilter =
       LinearFilter.movingAverage(HEADING_RATE_FILTER_TAPS);
   private Rotation2d lastTargetHeading = null;
-  private double vPercentageToFlywheelOutput;
 
-  // Phase delay compensation (matches 6328): advance the estimated robot pose forward in time by
-  // this amount to compensate for sensor/loop latency before computing the shooting solution.
-  // 6328 uses 0.03 s (30 ms). Adjust if the robot's effective latency differs.
-  private static final double PHASE_DELAY_SECS = 0.03;
+  // ===== RECORDS =====
 
   /**
    * Holds the calculated shooting parameters for a given robot position.
@@ -121,6 +133,8 @@ public class ShotCalculator {
     this.robotToShooter = robotShootingInfo.robotToShooter;
     this.minDistanceMeters = robotShootingInfo.minDistanceMeters;
     this.maxDistanceMeters = robotShootingInfo.maxDistanceMeters;
+    this.maxRobotSpeedMps = robotShootingInfo.maxRobotSpeedMps;
+    this.vPercentageToFlywheelOutput = robotShootingInfo.vPercentageToFlywheelOutput;
 
     String basePath = "ShotCalculator/" + name;
     this.logCached = basePath + "/cached";
@@ -137,11 +151,9 @@ public class ShotCalculator {
     this.logIsValid = basePath + "/isValid";
     this.logDrivetrainVelocityRobotRelative = basePath + "/drivetrainVelocityRobotRelative";
     this.logHeadingVelocityRadPerSec = basePath + "/headingVelocityRadPerSec";
-    this.maxRobotSpeedMps = robotShootingInfo.maxRobotSpeedMps;
-    this.vPercentageToFlywheelOutput = robotShootingInfo.vPercentageToFlywheelOutput;
   }
 
-  private ShootingParams cachedShootingParams = null;
+  // ===== METHODS =====
 
   /**
    * Calculates and caches the shooting parameters for the current robot position. Compensates for
@@ -259,7 +271,9 @@ public class ShotCalculator {
     Translation2d velocityOffset =
         new Translation2d(
             shooterVelFieldXMps * timeOfFlightSecs, shooterVelFieldYMps * timeOfFlightSecs);
+
     Translation2d virtualTarget = target.minus(velocityOffset);
+    
     Logger.recordOutput(logVirtualTarget, new Pose2d(virtualTarget, Rotation2d.kZero));
     Logger.recordOutput(logTargetPosition, new Pose2d(target, Rotation2d.kZero));
     Logger.recordOutput(logHubPosition, FieldConstants.Hub.topCenterPoint);
