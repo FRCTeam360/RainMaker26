@@ -1,0 +1,26 @@
+---
+title: Control Flow
+---
+graph TD
+    subgraph "Robot Periodic Loop"
+        Pre["preSchedulerUpdate()<br/>Cache shot calculations"] --> Sched["CommandScheduler.run()"]
+        Sched --> Post["postSchedulerUpdate()<br/>Flush NetworkTables"]
+    end
+
+    subgraph "SuperStructure Periodic"
+        US["updateState()<br/>Wanted -> Internal"] --> TSM["TargetSelection.update()<br/>Hub vs Outpost"]
+        TSM --> SSM["Shooter.update()<br/>Check readiness"]
+        SSM --> ISM["Intake.update()<br/>Resolve intake state"]
+        ISM --> AS["applyStates()<br/>Set subsystem wanted states"]
+    end
+
+    Sched --> US
+
+    style Pre fill:#4a90d9,color:#fff
+    style Sched fill:#4a90d9,color:#fff
+    style Post fill:#4a90d9,color:#fff
+    style US fill:#e07b39,color:#fff
+    style TSM fill:#d94a4a,color:#fff
+    style SSM fill:#d94a4a,color:#fff
+    style ISM fill:#d94a4a,color:#fff
+    style AS fill:#e07b39,color:#fff

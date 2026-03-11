@@ -1,0 +1,16 @@
+---
+title: IO Layer Abstraction
+---
+graph LR
+    Sub["Subsystem"] --> IO["IO Interface"]
+    IO --> Sim["IOSim<br/>(Simulation)"]
+    IO --> PB["IOPB<br/>(PracticeBot)"]
+    IO --> WB["IOWB<br/>(WoodBot)"]
+    IO --> Noop["IONoop<br/>(No Hardware)"]
+
+    style Sub fill:#50b050,color:#fff
+    style IO fill:#e07b39,color:#fff
+    style Sim fill:#4a90d9,color:#fff
+    style PB fill:#4a90d9,color:#fff
+    style WB fill:#4a90d9,color:#fff
+    style Noop fill:#4a90d9,color:#fff

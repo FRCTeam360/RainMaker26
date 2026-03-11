@@ -399,8 +399,14 @@ public class RobotContainer {
                         return passCalculator.calculateShot().targetHeading();
                       }
                       return hubShotCalculator.calculateShot().targetHeading();
-                    })));
-    autoCycleTrigger.onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
+                    }))
+            .alongWith(
+                Commands.waitSeconds(1.0)
+                    .andThen(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING))));
+    autoCycleTrigger.onFalse(
+        superStructure
+            .setStateCommand(SuperWantedStates.DEFAULT)
+            .alongWith(superStructure.setIntakeStateCommand(IntakeWantedStates.DEPLOYED)));
 
     // Manual override: force shoot at hub regardless of position
     Trigger forceHubTrigger = driverCont.rightBumper().and(isSuperstructureMode);
