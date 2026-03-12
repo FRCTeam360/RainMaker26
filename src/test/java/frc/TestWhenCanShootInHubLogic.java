@@ -1,6 +1,6 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
+// // Copyright (c) FIRST and other WPILib contributors.
+// // Open Source Software; you can modify and/or share it under the terms of
+// // the WPILib BSD license file in the root directory of this project.
 package frc;
 
 import static frc.robot.utils.RobotUtils.ActiveHub.*;
@@ -16,31 +16,31 @@ import org.junit.jupiter.api.Test;
 public class TestWhenCanShootInHubLogic {
   @Test
   void hubPhaseShouldBeBOTH() {
-    ActiveHub activeHub = RobotUtils.getHubPhase(25.0, true);
+    ActiveHub activeHub = RobotUtils.getShootingPhase(25.0, true, 0.0);
     assertEquals(BOTH, activeHub);
   }
 
   @Test
   void hubPhaseShouldBeBOTH2() {
-    ActiveHub activeHub = RobotUtils.getHubPhase(360, true);
+    ActiveHub activeHub = RobotUtils.getShootingPhase(360, true, 0.0);
     assertEquals(BOTH, activeHub);
   }
 
   @Test
   void hubPhaseShouldBeBOTHAuto() {
-    ActiveHub activeHub = RobotUtils.getHubPhase(25.0, false);
+    ActiveHub activeHub = RobotUtils.getShootingPhase(25.0, false, 0.0);
     assertEquals(BOTH, activeHub);
   }
 
   @Test
   void hubPhaseShouldBeAUTOLOSER() {
-    ActiveHub activeHub = RobotUtils.getHubPhase(75.0, true);
+    ActiveHub activeHub = RobotUtils.getShootingPhase(75.0, true, 0.0);
     assertEquals(AUTOLOSER, activeHub);
   }
 
   @Test
   void hubPhaseShouldBeAUTOWINNER() {
-    ActiveHub activeHub = RobotUtils.getHubPhase(50.0, true);
+    ActiveHub activeHub = RobotUtils.getShootingPhase(50.0, true, 0.0);
     assertEquals(AUTOWINNER, activeHub);
   }
 
@@ -131,8 +131,8 @@ public class TestWhenCanShootInHubLogic {
   }
 
   @Test
-  void hubActiveShouldBeNull() {
+  void hubActiveShouldBeTrueByDefault() {
     Boolean hubActive = RobotUtils.hubActive(Optional.of(Alliance.Red), Alliance.Red, null);
-    assertEquals(null, hubActive);
+    assertEquals(true, hubActive);
   }
 }

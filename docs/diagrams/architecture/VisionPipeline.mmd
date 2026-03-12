@@ -1,0 +1,30 @@
+---
+title: Vision Pipeline
+---
+graph TD
+    subgraph "IO Layer (per camera)"
+        LL["Limelight"] -->|NetworkTables| MT2["MegaTag2 + Gyro Fusion"]
+        MT2 --> Filter{"Filter"}
+        Filter -->|"No target / gyro rate > 720°/s /<br/>rotation mismatch > 60°"| Reject["Reject"]
+        Filter -->|Pass| Inputs["VisionIOInputs<br/>(pose, timestamp, tags, distances)"]
+    end
+
+    subgraph "Vision Subsystem (periodic)"
+        Inputs --> Bounds{"Pose within<br/>field bounds?"}
+        Bounds -->|No| Reject2["Reject"]
+        Bounds -->|Yes| StdDev["Std dev by tag distance<br/>(0.1m→high conf, 8m→low conf)"]
+        StdDev --> Meas["VisionMeasurement"]
+    end
+
+    Meas -->|"consumeVisionMeasurements()"| Drive["Drivetrain Pose Estimator"]
+
+    style LL fill:#50b050,color:#fff
+    style MT2 fill:#4a90d9,color:#fff
+    style Filter fill:#e07b39,color:#fff
+    style Reject fill:#d94a4a,color:#fff
+    style Inputs fill:#4a90d9,color:#fff
+    style Bounds fill:#e07b39,color:#fff
+    style Reject2 fill:#d94a4a,color:#fff
+    style StdDev fill:#8e44ad,color:#fff
+    style Meas fill:#50b050,color:#fff
+    style Drive fill:#50b050,color:#fff

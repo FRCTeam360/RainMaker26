@@ -1,0 +1,49 @@
+---
+title: Hood State Machine
+---
+stateDiagram-v2
+    state "Wanted: IDLE" as WIDLE
+    state "Wanted: AIMING" as WAIMING
+    state "Wanted: DUCKED" as WDUCKED
+
+    [*] --> WIDLE
+    WIDLE --> WAIMING : SuperStructure sets AIMING
+    WIDLE --> WDUCKED : SuperStructure sets DUCKED
+    WAIMING --> WIDLE : SuperStructure sets IDLE
+    WAIMING --> WDUCKED : SuperStructure sets DUCKED
+    WDUCKED --> WIDLE : SuperStructure sets IDLE
+    WDUCKED --> WAIMING : SuperStructure sets AIMING
+
+    state WIDLE {
+        OFF
+    }
+
+    state WAIMING {
+        [*] --> MOVING
+        MOVING --> AT_SETPOINT : |position - target| < 0.5°
+        AT_SETPOINT --> MOVING : |position - target| >= 0.5°
+    }
+
+    state WDUCKED {
+        ZEROING
+    }
+
+    note right of WIDLE
+        Duty cycle = 0.0
+        Hood disabled
+    end note
+
+    note right of WAIMING
+        Position set to ShotCalculator angle
+        (hub or outpost depending on SuperState)
+    end note
+
+    note right of AT_SETPOINT
+        Ready — ShooterStateMachine checks
+        this to transition to FIRING
+    end note
+
+    note right of WDUCKED
+        Position set to 0.0°
+        Retract hood to avoid obstacles
+    end note

@@ -1,0 +1,56 @@
+---
+title: Intake State Machine (IntakeStateMachine)
+---
+stateDiagram-v2
+    state "Wanted: IDLE" as WIDLE
+    state "Wanted: INTAKING" as WINTAKING
+    state "Wanted: STOWED" as WSTOWED
+    state "Wanted: AGITATING" as WAGITATING
+    state "Wanted: DEPLOYED" as WDEPLOYED
+
+    [*] --> WIDLE
+
+    WIDLE --> WINTAKING : SuperStructure sets INTAKING
+    WIDLE --> WSTOWED : SuperStructure sets STOWED
+    WIDLE --> WAGITATING : SuperStructure sets AGITATING
+    WIDLE --> WDEPLOYED : SuperStructure sets DEPLOYED
+
+    WINTAKING --> WIDLE : SuperStructure sets IDLE
+    WINTAKING --> WSTOWED : SuperStructure sets STOWED
+    WINTAKING --> WAGITATING : SuperStructure sets AGITATING
+
+    WSTOWED --> WIDLE : SuperStructure sets IDLE
+    WSTOWED --> WINTAKING : SuperStructure sets INTAKING
+    WSTOWED --> WDEPLOYED : SuperStructure sets DEPLOYED
+
+    WAGITATING --> WIDLE : SuperStructure sets IDLE
+    WAGITATING --> WINTAKING : SuperStructure sets INTAKING
+
+    WDEPLOYED --> WIDLE : SuperStructure sets IDLE
+    WDEPLOYED --> WINTAKING : SuperStructure sets INTAKING
+    WDEPLOYED --> WSTOWED : SuperStructure sets STOWED
+
+    note right of WIDLE
+        IntakeRoller → IDLE
+        IntakePivot → IDLE
+    end note
+
+    note right of WINTAKING
+        IntakeRoller → INTAKING
+        IntakePivot → DEPLOYED
+    end note
+
+    note right of WSTOWED
+        IntakeRoller → IDLE
+        IntakePivot → STOWED
+    end note
+
+    note right of WAGITATING
+        IntakeRoller → ASSIST_SHOOTING
+        IntakePivot → AGITATE_HOPPER
+    end note
+
+    note right of WDEPLOYED
+        IntakeRoller → IDLE
+        IntakePivot → DEPLOYED
+    end note

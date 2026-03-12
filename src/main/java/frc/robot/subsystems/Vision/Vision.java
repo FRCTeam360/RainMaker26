@@ -13,7 +13,7 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
+import frc.robot.utils.FieldConstants;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -41,7 +41,7 @@ public class Vision extends SubsystemBase {
     MEASUREMENT_STD_DEV_DISTANCE_MAP.put(
         0.1,
         VecBuilder.fill(
-            0.25, 0.25, 999999.0)); // Close tags ( at 10 cm): very high confidence (50 cm std dev)
+            0.5, 0.5, 999999.0)); // Close tags ( at 10 cm): very high confidence (50 cm std dev)
     MEASUREMENT_STD_DEV_DISTANCE_MAP.put(
         8.0,
         VecBuilder.fill(
@@ -114,8 +114,10 @@ public class Vision extends SubsystemBase {
     // Clear previous measurements to prevent unbounded growth
     acceptedMeasurements.clear();
 
-    for (String key : ios.keySet()) {
-      VisionIO io = ios.get(key);
+    for (Map.Entry<String, VisionIO> entry : ios.entrySet()) {
+      VisionIO io = entry.getValue();
+      String key = entry.getKey();
+
       VisionIOInputsAutoLogged input = visionInputs.get(key);
 
       io.updateInputs(input);
@@ -128,11 +130,12 @@ public class Vision extends SubsystemBase {
           input.tagPoses[i] = input.tagPoses[0];
         }
       }
-      Logger.processInputs("Limelight: " + key, input.clone());
+      Logger.processInputs("Vision: " + key, input);
     }
 
-    for (String key : visionInputs.keySet()) {
-      VisionIOInputsAutoLogged input = visionInputs.get(key);
+    for (Map.Entry<String, VisionIOInputsAutoLogged> entry : visionInputs.entrySet()) {
+      String key = entry.getKey();
+      VisionIOInputsAutoLogged input = entry.getValue();
 
       // Count total detections (pose updates attempted)
       if (input.poseUpdated) {
@@ -150,9 +153,9 @@ public class Vision extends SubsystemBase {
 
       // Skip measurements that are not with in the field boundary
       if (pose.getX() < 0.0
-          || pose.getX() > Constants.FIELD_LAYOUT.getFieldLength()
+          || pose.getX() > FieldConstants.fieldLength
           || pose.getY() < 0.0
-          || pose.getY() > Constants.FIELD_LAYOUT.getFieldWidth()) {
+          || pose.getY() > FieldConstants.fieldWidth) {
         rejectedMeasurements++;
         continue;
       }

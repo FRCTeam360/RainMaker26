@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems.Shooter.Flywheel;
 
+import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
@@ -14,6 +16,10 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Voltage;
 import frc.robot.Constants.WoodBotConstants;
 
 public class FlywheelIOWB implements FlywheelIO {
@@ -24,6 +30,17 @@ public class FlywheelIOWB implements FlywheelIO {
   };
   private TalonFXConfiguration rightConfig = new TalonFXConfiguration();
   private TalonFXConfiguration leftConfig = new TalonFXConfiguration();
+
+  private final StatusSignal<Current> rightStatorCurrentSignal;
+  private final StatusSignal<Current> rightSupplyCurrentSignal;
+  private final StatusSignal<Angle> rightPositionSignal;
+  private final StatusSignal<AngularVelocity> rightVelocitySignal;
+  private final StatusSignal<Voltage> rightMotorVoltageSignal;
+  private final StatusSignal<Current> leftStatorCurrentSignal;
+  private final StatusSignal<Current> leftSupplyCurrentSignal;
+  private final StatusSignal<Angle> leftPositionSignal;
+  private final StatusSignal<AngularVelocity> leftVelocitySignal;
+  private final StatusSignal<Voltage> leftMotorVoltageSignal;
 
   public FlywheelIOWB() {
     double kP = 3.0;
@@ -78,6 +95,34 @@ public class FlywheelIOWB implements FlywheelIO {
               (oddFollower ? MotorAlignmentValue.Opposed : MotorAlignmentValue.Aligned)));
       oddFollower = !oddFollower;
     }
+
+    rightStatorCurrentSignal = motors[0].getStatorCurrent();
+    rightSupplyCurrentSignal = motors[0].getSupplyCurrent();
+    rightPositionSignal = motors[0].getPosition();
+    rightVelocitySignal = motors[0].getVelocity();
+    rightMotorVoltageSignal = motors[0].getMotorVoltage();
+
+    leftStatorCurrentSignal = motors[1].getStatorCurrent();
+    leftSupplyCurrentSignal = motors[1].getSupplyCurrent();
+    leftPositionSignal = motors[1].getPosition();
+    leftVelocitySignal = motors[1].getVelocity();
+    leftMotorVoltageSignal = motors[1].getMotorVoltage();
+
+    BaseStatusSignal.setUpdateFrequencyForAll(
+        50,
+        rightStatorCurrentSignal,
+        rightSupplyCurrentSignal,
+        rightPositionSignal,
+        rightVelocitySignal,
+        rightMotorVoltageSignal,
+        leftStatorCurrentSignal,
+        leftSupplyCurrentSignal,
+        leftPositionSignal,
+        leftVelocitySignal,
+        leftMotorVoltageSignal);
+    for (TalonFX motor : motors) {
+      motor.optimizeBusUtilization();
+    }
   }
 
   MotionMagicVelocityVoltage velocityVoltage = new MotionMagicVelocityVoltage(0);
@@ -85,7 +130,19 @@ public class FlywheelIOWB implements FlywheelIO {
   VelocityTorqueCurrentFOC velocityTorqueCurrent = new VelocityTorqueCurrentFOC(0.0);
 
   @Override
-  public void setVelocity(double rpm) {
+  public void setSpinupVelocityControl(double rpm) {
+    double rps = rpm / 60.0;
+    motors[0].setControl(velocityTorqueCurrent.withVelocity(rps));
+  }
+
+  @Override
+  public void setHoldVelocityControl(double rpm) {
+    double rps = rpm / 60.0;
+    motors[0].setControl(velocityTorqueCurrent.withVelocity(rps));
+  }
+
+  @Override
+  public void setCoastVelocityControl(double rpm) {
     double rps = rpm / 60.0;
     motors[0].setControl(velocityTorqueCurrent.withVelocity(rps));
   }
@@ -96,13 +153,30 @@ public class FlywheelIOWB implements FlywheelIO {
   }
 
   public void updateInputs(FlywheelIOInputs inputs) {
-    for (int i = 0; i < motors.length; i++) {
-      inputs.statorCurrents[i] = motors[i].getStatorCurrent().getValueAsDouble();
-      inputs.supplyCurrents[i] = motors[i].getSupplyCurrent().getValueAsDouble();
-      inputs.positions[i] = motors[i].getPosition().getValueAsDouble();
-      // velocities are now in RPM
-      inputs.velocities[i] = motors[i].getVelocity().getValueAsDouble() * 60.0;
-      inputs.voltages[i] = motors[i].getMotorVoltage().getValueAsDouble();
-    }
+    BaseStatusSignal.refreshAll(
+        rightStatorCurrentSignal,
+        rightSupplyCurrentSignal,
+        rightPositionSignal,
+        rightVelocitySignal,
+        rightMotorVoltageSignal,
+        leftStatorCurrentSignal,
+        leftSupplyCurrentSignal,
+        leftPositionSignal,
+        leftVelocitySignal,
+        leftMotorVoltageSignal);
+
+    inputs.statorCurrents[0] = rightStatorCurrentSignal.getValueAsDouble();
+    inputs.supplyCurrents[0] = rightSupplyCurrentSignal.getValueAsDouble();
+    inputs.positions[0] = rightPositionSignal.getValueAsDouble();
+    // velocities are now in RPM
+    inputs.velocities[0] = rightVelocitySignal.getValueAsDouble() * 60.0;
+    inputs.voltages[0] = rightMotorVoltageSignal.getValueAsDouble();
+
+    inputs.statorCurrents[1] = leftStatorCurrentSignal.getValueAsDouble();
+    inputs.supplyCurrents[1] = leftSupplyCurrentSignal.getValueAsDouble();
+    inputs.positions[1] = leftPositionSignal.getValueAsDouble();
+    // velocities are now in RPM
+    inputs.velocities[1] = leftVelocitySignal.getValueAsDouble() * 60.0;
+    inputs.voltages[1] = leftMotorVoltageSignal.getValueAsDouble();
   }
 }
