@@ -198,3 +198,6 @@ src/main/java/frc/robot/BuildConstants.java
 
 # SpotBugs reports
 build/reports/spotbugs/
+
+# Python
+__pycache__/

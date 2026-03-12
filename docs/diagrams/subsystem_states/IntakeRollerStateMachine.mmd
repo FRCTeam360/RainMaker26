@@ -1,0 +1,43 @@
+---
+title: IntakeRoller State Machine
+---
+stateDiagram-v2
+    [*] --> IDLE
+
+    IDLE --> INTAKING : IntakeStateMachine sets INTAKING
+    INTAKING --> IDLE : IntakeStateMachine sets IDLE
+
+    IDLE --> ASSIST_SHOOTING : IntakeStateMachine sets ASSIST_SHOOTING
+    ASSIST_SHOOTING --> IDLE : IntakeStateMachine sets IDLE
+
+    IDLE --> REVERSING : IntakeStateMachine sets REVERSING
+    REVERSING --> IDLE : IntakeStateMachine sets IDLE
+
+    INTAKING --> ASSIST_SHOOTING : IntakeStateMachine sets ASSIST_SHOOTING
+    ASSIST_SHOOTING --> INTAKING : IntakeStateMachine sets INTAKING
+
+    INTAKING --> REVERSING : IntakeStateMachine sets REVERSING
+    REVERSING --> INTAKING : IntakeStateMachine sets INTAKING
+
+    ASSIST_SHOOTING --> REVERSING : IntakeStateMachine sets REVERSING
+    REVERSING --> ASSIST_SHOOTING : IntakeStateMachine sets ASSIST_SHOOTING
+
+    note right of IDLE
+        Duty cycle = 0.0
+        Motor stopped
+    end note
+
+    note right of INTAKING
+        Duty cycle = 0.8
+        Full intake power
+    end note
+
+    note right of ASSIST_SHOOTING
+        Duty cycle = 0.3
+        Gentle feeding during shots
+    end note
+
+    note right of REVERSING
+        Duty cycle = negative
+        Reverse to clear jams
+    end note

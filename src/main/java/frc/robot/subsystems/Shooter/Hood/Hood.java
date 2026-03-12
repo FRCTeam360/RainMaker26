@@ -17,7 +17,7 @@ import org.littletonrobotics.junction.Logger;
 
 public class Hood extends SubsystemBase {
   // Constants
-  private static final double TOLERANCE = 0.5;
+  private static final double TOLERANCE = 1.0;
   private static final double HOOD_UP_THRESHOLD = 2.0; // degrees - threshold for "hood is up"
 
   // IO fields
