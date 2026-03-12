@@ -50,6 +50,7 @@ public class SuperStructure extends SubsystemBase {
   // Enums
   public enum SuperWantedStates {
     DEFAULT,
+    AUTO_CYCLE_FALSE,
     IDLE,
     SHOOT_AT_HUB,
     SHOOT_AT_OUTPOST,
@@ -58,7 +59,8 @@ public class SuperStructure extends SubsystemBase {
     DEFENSE,
     X_OUT,
     EJECTING,
-    UNJAMMING
+    UNJAMMING,
+    AGITATING_PASSING
   }
 
   public enum SuperInternalStates {
@@ -66,7 +68,8 @@ public class SuperStructure extends SubsystemBase {
     IDLE, // everything is stopped
     SHOOTING_AT_HUB,
     PASSING,
-    UNJAMMING
+    UNJAMMING,
+    AGITATING_PASSING
   }
 
   // State variables
@@ -145,6 +148,11 @@ public class SuperStructure extends SubsystemBase {
       case UNJAMMING:
         currentSuperState = SuperInternalStates.UNJAMMING;
         break;
+      case AGITATING_PASSING:
+        currentSuperState = SuperInternalStates.AGITATING_PASSING;
+        break;
+      case AUTO_CYCLE_FALSE:
+        setIntakeStateCommand(IntakeWantedStates.DEPLOYED);
       case DEFAULT:
       default:
         targetSelectionStateMachine.setWantedState(TargetWantedStates.AUTO);
@@ -158,6 +166,8 @@ public class SuperStructure extends SubsystemBase {
       case IDLE:
         stopped();
         break;
+      case AGITATING_PASSING:
+        setIntakeStateCommand(IntakeWantedStates.AGITATING);
       case SHOOTING_AT_HUB:
       case PASSING:
         shooting();
