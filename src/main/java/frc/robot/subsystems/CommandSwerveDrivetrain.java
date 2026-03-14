@@ -121,19 +121,17 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   private static final double SNAP_THRESHOLD = 0.3; // High tolerance to prevent accidental presses
 
   private Rotation2d getSnapAngle(double driverOmega) {
-    double currentDegrees = getRotation2d().getDegrees();
-    currentDegrees = ((currentDegrees % 360) + 360) % 360;
-
-    boolean stickIsDeflected = Math.abs(driverOmega) > SNAP_THRESHOLD;
     boolean positiveDeflection = driverOmega < -SNAP_THRESHOLD; // Right on stick = negative omega
     boolean negativeDeflection = driverOmega > SNAP_THRESHOLD; // Left on stick = positive omega
 
+    // Snap relative to currentTargetAngle so that rapid consecutive presses always advance
+    // by 90° steps, even if the robot hasn't finished rotating to the previous setpoint yet.
     if (positiveDeflection && positiveEdgeReady) {
       positiveEdgeReady = false;
-      currentTargetAngle = ((Math.floor(currentDegrees / 90.0) + 1) * 90.0) % 360;
+      currentTargetAngle = (((currentTargetAngle / 90.0) + 1) * 90.0) % 360;
     } else if (negativeDeflection && negativeEdgeReady) {
       negativeEdgeReady = false;
-      currentTargetAngle = ((Math.floor(currentDegrees / 90.0) - 1) * 90.0) % 360;
+      currentTargetAngle = (((currentTargetAngle / 90.0) - 1) * 90.0);
     }
 
     // Reset edge detection when stick returns to center
