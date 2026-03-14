@@ -96,6 +96,10 @@ public class HopperRoller extends SubsystemBase {
     io.setDutyCycle(dutyCycle);
   }
 
+  public void setVelocity(double rpm) {
+    io.setVelocity(rpm);
+  }
+
   public void stop() {
     io.setDutyCycle(0.0);
   }

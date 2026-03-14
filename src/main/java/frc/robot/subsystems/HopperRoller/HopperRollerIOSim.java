@@ -35,4 +35,8 @@ public class HopperRollerIOSim implements HopperRollerIO {
   public void setDutyCycle(double dutyCycle) {
     appliedDutyCycle = dutyCycle;
   }
+
+  public void setVelocity(double rpm) {
+    sim.setAngularVelocity(rpm);
+  }
 }
