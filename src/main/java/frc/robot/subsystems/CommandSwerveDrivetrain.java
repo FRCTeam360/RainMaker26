@@ -28,6 +28,7 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -112,6 +113,43 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   // Limits how much shoot-on-the-move compensation is needed.
   private static final double FACING_ANGLE_MAX_SPEED_FRACTION = 0.5;
 
+  // Heading lock state for driver-assist toggle
+  private boolean headingLockEnabled = false;
+  private double currentTargetAngle = 0.0;
+  private boolean positiveEdgeReady = true;
+  private boolean negativeEdgeReady = true;
+  private boolean headingControllerActive =
+      false; // Tracks if facing-angle request has been applied
+  private static final double SNAP_THRESHOLD = 0.3; // High tolerance to prevent accidental presses
+
+  private Rotation2d getSnapAngle(double driverOmega) {
+    // Omega calculation uses -Math.signum(getRightX()): right stick (positive X) = negative omega
+    boolean clockwiseSnap = driverOmega < -SNAP_THRESHOLD; // Right stick = clockwise
+    boolean counterClockwiseSnap = driverOmega > SNAP_THRESHOLD; // Left stick = counter-clockwise
+
+    // Snap relative to currentTargetAngle so that rapid consecutive presses always advance
+    // by 90° steps, even if the robot hasn't finished rotating to the previous setpoint yet.
+    if (clockwiseSnap && positiveEdgeReady) {
+      positiveEdgeReady = false;
+      currentTargetAngle = (((currentTargetAngle / 90.0) + 1) * 90.0) % 360;
+    } else if (counterClockwiseSnap && negativeEdgeReady) {
+      negativeEdgeReady = false;
+      currentTargetAngle = (((currentTargetAngle / 90.0) - 1) * 90.0);
+    }
+
+    // Reset edge detection when stick returns to center
+    if (!clockwiseSnap) {
+      positiveEdgeReady = true;
+    }
+    if (!counterClockwiseSnap) {
+      negativeEdgeReady = true;
+    }
+
+    if (currentTargetAngle < 0) currentTargetAngle += 360;
+
+    return Rotation2d.fromDegrees(currentTargetAngle);
+  }
+
   // Field-centric facing angle request for hub tracking
   private final SwerveRequest.FieldCentricFacingAngle m_faceHubRequest =
       new SwerveRequest.FieldCentricFacingAngle()
@@ -143,8 +181,19 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
               ChassisSpeeds.fromFieldRelativeSpeeds(
                   isBlueAlliance ? velXMps : -velXMps,
                   isBlueAlliance ? velYMps : -velYMps,
-                  omegaRps,
+                  headingLockEnabled && headingControllerActive
+                      ? m_faceHubRequest.HeadingController.getLastAppliedOutput()
+                      : omegaRps,
                   getPosition().getRotation());
+
+          if (headingLockEnabled) {
+            headingControllerActive = true; // Mark that we've applied the facing-angle request
+            return m_faceHubRequest
+                .withVelocityX(isBlueAlliance ? velXMps : -velXMps)
+                .withVelocityY(isBlueAlliance ? velYMps : -velYMps)
+                .withTargetDirection(getSnapAngle(omegaRps));
+          }
+
           return drive
               .withVelocityX(velXMps) // Drive forward with negative Y (forward)
               .withVelocityY(velYMps) // Drive left with negative X (left)
@@ -172,6 +221,25 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
   public Command xOutCmd() {
     return this.run(() -> xOut());
+  }
+
+  public Command toggleHeadingLockCommand() {
+    return new InstantCommand(
+        () -> {
+          headingLockEnabled = !headingLockEnabled;
+          headingControllerActive = false; // Reset so we know when fresh data is available
+          if (headingLockEnabled) {
+            // Initialize to nearest 90° angle when enabling
+            double currentDegrees = getRotation2d().getDegrees();
+            currentDegrees = ((currentDegrees % 360) + 360) % 360;
+            currentTargetAngle = Math.round(currentDegrees / 90.0) * 90.0;
+            if (currentTargetAngle >= 360) currentTargetAngle = 0;
+          }
+        });
+  }
+
+  public boolean isHeadingLockEnabled() {
+    return headingLockEnabled;
   }
 
   /**
