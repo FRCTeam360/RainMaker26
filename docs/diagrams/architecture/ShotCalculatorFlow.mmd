@@ -1,0 +1,73 @@
+---
+title: Shot Calculator Flow
+---
+graph TD
+    subgraph "Inputs"
+        Pose["Robot Pose"]
+        Target["Target Position<br/>(Hub or Outpost)"]
+        Vel["Robot Velocity"]
+    end
+
+    subgraph "Target Selection"
+        WS{"Wanted State"} -->|HUB / OUTPOST| Force["Manual Override"]
+        WS -->|AUTO| Zone{"In alliance zone?"}
+        Zone -->|Yes| Hub["Hub Calculator"]
+        Zone -->|No| Pass["Pass Calculator"]
+        Force --> Active["Active ShotCalculator"]
+        Hub --> Active
+        Pass --> Active
+    end
+
+    subgraph "Shoot-on-the-Move Compensation"
+        Pose --> ShooterPos["Shooter position<br/>(pose + offset)"]
+        Vel --> FieldVel["Field-relative velocity<br/>(translation + rotation at shooter)"]
+        ShooterPos --> TOF["Initial distance → TOF lookup"]
+        Target --> TOF
+        TOF --> Loop["Iterative refinement ×10<br/>(shooterPos + vel × TOF → new distance → new TOF)"]
+        FieldVel --> Loop
+        Loop --> Lookahead["Compensated distance + heading"]
+    end
+
+    subgraph "Interpolation Maps"
+        Lookahead --> HoodMap["Distance → Hood Angle"]
+        Lookahead --> FWMap["Distance → Flywheel RPM"]
+        Vel -->|"speed compensation"| FWMap
+        Lookahead --> HeadingCalc["Angle to target − shooter rotation"]
+        Lookahead --> ValidCheck{"In shooting range?"}
+    end
+
+    subgraph "ShootingParams Output"
+        HoodMap --> Params["ShootingParams<br/>(cached until cleared)"]
+        FWMap --> Params
+        HeadingCalc --> Params
+        ValidCheck --> Params
+    end
+
+    Params -->|heading| DT["Drivetrain"]
+    Params -->|hoodAngle| Hood["Hood"]
+    Params -->|flywheelSpeed| FW["Flywheel"]
+    Params -->|isValid| SSM["ShooterStateMachine"]
+
+    style Pose fill:#50b050,color:#fff
+    style Target fill:#50b050,color:#fff
+    style Vel fill:#50b050,color:#fff
+    style WS fill:#e07b39,color:#fff
+    style Force fill:#4a90d9,color:#fff
+    style Zone fill:#e07b39,color:#fff
+    style Hub fill:#8e44ad,color:#fff
+    style Pass fill:#8e44ad,color:#fff
+    style Active fill:#8e44ad,color:#fff
+    style ShooterPos fill:#4a90d9,color:#fff
+    style FieldVel fill:#4a90d9,color:#fff
+    style TOF fill:#8e44ad,color:#fff
+    style Loop fill:#8e44ad,color:#fff
+    style Lookahead fill:#4a90d9,color:#fff
+    style HoodMap fill:#8e44ad,color:#fff
+    style FWMap fill:#8e44ad,color:#fff
+    style HeadingCalc fill:#4a90d9,color:#fff
+    style ValidCheck fill:#e07b39,color:#fff
+    style Params fill:#d94a4a,color:#fff
+    style DT fill:#50b050,color:#fff
+    style Hood fill:#50b050,color:#fff
+    style FW fill:#50b050,color:#fff
+    style SSM fill:#d94a4a,color:#fff

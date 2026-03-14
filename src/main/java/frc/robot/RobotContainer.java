@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.MetersPerSecond;
+
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
@@ -69,6 +71,7 @@ import frc.robot.subsystems.Vision.VisionIOLimelight4;
 import frc.robot.subsystems.Vision.VisionIOLimelightBase;
 import frc.robot.subsystems.Vision.VisionIOPhotonSim;
 import frc.robot.utils.AllianceFlipUtil;
+import frc.robot.utils.CommandLogger;
 import frc.robot.utils.FieldConstants;
 import frc.robot.utils.PathProvider;
 import frc.robot.utils.PositionUtils;
@@ -149,7 +152,9 @@ public class RobotContainer {
                 Constants.SimulationConstants.shotTimeOfFlightMap,
                 ShooterConstants.SIM_TO_SHOOTER,
                 Constants.SimulationConstants.MIN_SHOT_DISTANCE_METERS,
-                Constants.SimulationConstants.MAX_SHOT_DISTANCE_METERS);
+                Constants.SimulationConstants.MAX_SHOT_DISTANCE_METERS,
+                WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond),
+                0);
         robotPassingInfo =
             new RobotShootingInfo(
                 Constants.SimulationConstants.passHoodAngleMap,
@@ -157,7 +162,9 @@ public class RobotContainer {
                 Constants.SimulationConstants.passTimeOfFlightMap,
                 ShooterConstants.SIM_TO_SHOOTER,
                 Constants.SimulationConstants.MIN_PASS_DISTANCE_METERS,
-                Constants.SimulationConstants.MAX_PASS_DISTANCE_METERS);
+                Constants.SimulationConstants.MAX_PASS_DISTANCE_METERS,
+                WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond),
+                0);
         break;
       case WOODBOT:
         drivetrain = WoodBotDrivetrain.createDrivetrain();
@@ -187,8 +194,19 @@ public class RobotContainer {
                 Constants.WoodBotConstants.timeOfFlightMap,
                 ShooterConstants.WOODBOT_TO_SHOOTER,
                 Constants.WoodBotConstants.MIN_SHOT_DISTANCE_METERS,
-                Constants.WoodBotConstants.MAX_SHOT_DISTANCE_METERS);
-        robotPassingInfo = robotShootingInfo;
+                Constants.WoodBotConstants.MAX_SHOT_DISTANCE_METERS,
+                WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond),
+                250);
+        robotPassingInfo =
+            new RobotShootingInfo(
+                Constants.WoodBotConstants.shotHoodAngleMap,
+                Constants.WoodBotConstants.shotFlywheelSpeedMap,
+                Constants.WoodBotConstants.timeOfFlightMap,
+                ShooterConstants.WOODBOT_TO_SHOOTER,
+                Constants.WoodBotConstants.MIN_SHOT_DISTANCE_METERS,
+                Constants.WoodBotConstants.MAX_SHOT_DISTANCE_METERS,
+                WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond),
+                0);
         break;
       case PRACTICEBOT:
       default:
@@ -226,7 +244,9 @@ public class RobotContainer {
                 Constants.PracticeBotConstants.timeOfFlightMap,
                 ShooterConstants.PRACTICEBOT_TO_SHOOTER,
                 Constants.PracticeBotConstants.MIN_SHOT_DISTANCE_METERS,
-                Constants.PracticeBotConstants.MAX_SHOT_DISTANCE_METERS);
+                Constants.PracticeBotConstants.MAX_SHOT_DISTANCE_METERS,
+                PracticeBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond),
+                0);
         robotPassingInfo =
             new RobotShootingInfo(
                 Constants.PracticeBotConstants.passHoodAngleMap,
@@ -234,24 +254,28 @@ public class RobotContainer {
                 Constants.PracticeBotConstants.timeOfFlightMap,
                 ShooterConstants.PRACTICEBOT_TO_SHOOTER,
                 Constants.PracticeBotConstants.MIN_SHOT_DISTANCE_METERS,
-                Constants.PracticeBotConstants.MAX_SHOT_DISTANCE_METERS);
+                Constants.PracticeBotConstants.MAX_SHOT_DISTANCE_METERS,
+                PracticeBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond),
+                0);
         break;
     }
     hubShotCalculator =
         new ShotCalculator(
+            "HubShotCalc",
             drivetrain::getPosition,
             () -> AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint.toTranslation2d()),
-            drivetrain::getVelocity,
+            drivetrain::getCommandedVelocity,
             robotShootingInfo);
     passCalculator =
         new ShotCalculator(
+            "PassCalc",
             drivetrain::getPosition,
             () ->
                 PositionUtils.getCloserPassTarget(
                     drivetrain.getPosition(),
-                    AllianceFlipUtil.apply(FieldConstants.RightBump.nearRightCorner),
-                    AllianceFlipUtil.apply(FieldConstants.LeftBump.nearLeftCorner)),
-            drivetrain::getVelocity,
+                    AllianceFlipUtil.apply(FieldConstants.RightBump.passingPoint),
+                    AllianceFlipUtil.apply(FieldConstants.LeftBump.passingPoint)),
+            drivetrain::getCommandedVelocity,
             robotPassingInfo);
     // Configure the trigger bindings
     // TODO: Re-enable superStructure construction and PathPlanner commands
@@ -275,7 +299,7 @@ public class RobotContainer {
     // TODO: add end condition based on state from SuperStructure (based on sensor inputs)
     registerPathplannerCommand(
         "shoot at hub",
-        Commands.waitSeconds(5)
+        Commands.waitSeconds(4)
             .deadlineFor(
                 superStructure
                     .setStateCommand(SuperWantedStates.SHOOT_AT_HUB)
@@ -288,7 +312,19 @@ public class RobotContainer {
     registerPathplannerCommand(
         "stow intake", superStructure.setIntakeStateCommand(IntakeWantedStates.STOWED));
     registerPathplannerCommand(
-        "spin up", superStructure.setStateCommand(SuperWantedStates.DEFAULT));
+        "default", superStructure.setStateCommand(SuperWantedStates.DEFAULT));
+    registerPathplannerCommand(
+        "deploy intake", superStructure.setIntakeStateCommand(IntakeWantedStates.DEPLOYED));
+    registerPathplannerCommand(
+        "agitate intake", superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING));
+    registerPathplannerCommand(
+        "shoot without timer",
+        superStructure
+            .setStateCommand(SuperWantedStates.SHOOT_AT_HUB)
+            .alongWith(
+                drivetrain.faceAngleWhileDrivingCommand(
+                    () -> 0, () -> 0, () -> hubShotCalculator.calculateShot().targetHeading()))
+            .finallyDo(() -> superStructure.setWantedSuperState(SuperWantedStates.DEFAULT)));
 
     configVision();
     configDefaultDrivingCommand();
@@ -313,7 +349,7 @@ public class RobotContainer {
 
   public void registerPathplannerCommand(String name, Command command) {
     if (Objects.nonNull(command)) {
-      NamedCommands.registerCommand(name, command);
+      NamedCommands.registerCommand(name, CommandLogger.logCommand(command, name));
     } else {
       System.err.println(name + " is null");
       NamedCommands.registerCommand(
@@ -363,8 +399,14 @@ public class RobotContainer {
                         return passCalculator.calculateShot().targetHeading();
                       }
                       return hubShotCalculator.calculateShot().targetHeading();
-                    })));
-    autoCycleTrigger.onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
+                    }))
+            .alongWith(
+                Commands.waitSeconds(1.0)
+                    .andThen(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING))));
+    autoCycleTrigger.onFalse(
+        superStructure
+            .setStateCommand(SuperWantedStates.DEFAULT)
+            .alongWith(superStructure.setIntakeStateCommand(IntakeWantedStates.DEPLOYED)));
 
     // Manual override: force shoot at hub regardless of position
     Trigger forceHubTrigger = driverCont.rightBumper().and(isSuperstructureMode);
@@ -377,25 +419,30 @@ public class RobotContainer {
     forceHubTrigger.onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
 
     // Manual override: force pass to outpost regardless of position
-    Trigger forceOutpostTrigger = driverCont.leftBumper().and(isSuperstructureMode);
-    forceOutpostTrigger.whileTrue(
-        superStructure
-            .setStateCommand(SuperWantedStates.SHOOT_AT_OUTPOST)
-            .alongWith(
-                drivetrain.faceAngleWhileDrivingCommand(
-                    driverCont, () -> passCalculator.calculateShot().targetHeading())));
-    forceOutpostTrigger.onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
+    driverCont
+        .b()
+        .whileTrue(
+            superStructure
+                .setStateCommand(SuperWantedStates.SHOOT_AT_OUTPOST)
+                .alongWith(
+                    drivetrain.faceAngleWhileDrivingCommand(
+                        driverCont, () -> passCalculator.calculateShot().targetHeading())));
+    driverCont.b().onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
 
     // Left trigger held: agitate. Release: back to intaking.
     if (Constants.getRobotType() == RobotType.WOODBOT) {
       Trigger intakeTrigger = driverCont.leftTrigger().and(isSuperstructureMode);
       intakeTrigger.onTrue(superStructure.setIntakeStateCommand(IntakeWantedStates.INTAKING));
-      intakeTrigger.whileFalse(superStructure.setIntakeStateCommand(IntakeWantedStates.IDLE));
+      intakeTrigger.whileFalse(superStructure.setIntakeStateCommand(IntakeWantedStates.DEPLOYED));
 
     } else {
+      Trigger intakeTrigger = driverCont.leftBumper().and(isSuperstructureMode);
+      intakeTrigger.onTrue(superStructure.setIntakeStateCommand(IntakeWantedStates.INTAKING));
+      intakeTrigger.whileFalse(superStructure.setIntakeStateCommand(IntakeWantedStates.IDLE));
+
       Trigger agitateTrigger = driverCont.leftTrigger().and(isSuperstructureMode);
       agitateTrigger.onTrue(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING));
-      agitateTrigger.onFalse(superStructure.setIntakeStateCommand(IntakeWantedStates.INTAKING));
+      agitateTrigger.onFalse(superStructure.setIntakeStateCommand(IntakeWantedStates.DEPLOYED));
 
       // Y toggle: STOWED <-
       // > INTAKING. Gated out while agitate trigger is held.
@@ -575,7 +622,7 @@ public class RobotContainer {
     superStructure.setIntakeState(
         Constants.getRobotType() == RobotType.WOODBOT
             ? IntakeWantedStates.IDLE
-            : IntakeWantedStates.INTAKING);
+            : IntakeWantedStates.IDLE);
     onEnableVision();
   }
 
@@ -609,6 +656,7 @@ public class RobotContainer {
     Logger.recordOutput("LoopTiming/Overrun", loopTimeSeconds > LOOP_OVERRUN_THRESHOLD_SECONDS);
     Logger.recordOutput("LoopTiming/OverrunCount", overrunCount);
 
+    drivetrain.clearCachedState();
     hubShotCalculator.clearShootingParams();
     // hubShotCalculator.calculateShot();
     passCalculator.clearShootingParams();

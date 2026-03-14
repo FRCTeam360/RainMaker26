@@ -187,7 +187,7 @@ public class SuperStructure extends SubsystemBase {
 
   private void passive_preparing() {
     indexer.setWantedState(Indexer.IndexerStates.OFF);
-    hopperRoller.setWantedState(HopperRollerStates.OFF);
+    hopperRoller.setWantedState(HopperRollerStates.PREVENT_JAM);
     shooterStateMachine.setWantedState(ShooterWantedStates.PASSIVE_SHOOTER);
   }
 
@@ -216,7 +216,7 @@ public class SuperStructure extends SubsystemBase {
             return true;
           }
           // For AUTO_CYCLE_SHOOTING, check if hub is actually active based on game phase
-          return canScoreAtHub();
+          return canScoreAtHub() && hubShotCalculator.calculateShot().isValid();
         case PASSING:
           boolean isInPassingZone =
               PositionUtils.isInPassingZone(robotPoseSupplier.get(), robotToShooter);
