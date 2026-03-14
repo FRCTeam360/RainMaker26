@@ -8,6 +8,7 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import frc.robot.Constants;
 import frc.robot.utils.FieldConstants;
 import frc.robot.utils.LimelightHelpers;
 import frc.robot.utils.LimelightHelpers.PoseEstimate;
@@ -50,6 +51,11 @@ public abstract class VisionIOLimelightBase implements VisionIO {
   /** Returns the NetworkTables name of this Limelight. */
   protected String getName() {
     return name;
+  }
+
+  /** Returns the NetworkTable for this Limelight. */
+  protected NetworkTable getTable() {
+    return table;
   }
 
   @Override
@@ -159,5 +165,15 @@ public abstract class VisionIOLimelightBase implements VisionIO {
   @Override
   public void resetSnapshot() {
     table.getEntry("snapshot").setNumber(0.0);
+  }
+
+  // while enabled
+  public void enableIMUAssist() {
+    LimelightHelpers.SetIMUMode(name, Constants.IMU_MODE_INTERNAL_EXTERNAL_ASSIST);
+  }
+
+  // call during disabled
+  public void enableIMUSeeding() {
+    LimelightHelpers.SetIMUMode(name, Constants.IMU_MODE_EXTERNAL_SEED);
   }
 }

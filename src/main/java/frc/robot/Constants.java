@@ -49,6 +49,12 @@ public final class Constants {
   /** Frames to skip between processed frames while enabled. Only affects Limelight 4. */
   public static final int ENABLED_THROTTLE_SKIP_FRAMES = 0;
 
+  /** Seeds the LL4 internal IMU from the external gyro (Pigeon). Use while disabled. */
+  public static final int IMU_MODE_EXTERNAL_SEED = 1;
+
+  /** Fuses the LL4 internal IMU with external gyro corrections. Use while enabled. */
+  public static final int IMU_MODE_INTERNAL_EXTERNAL_ASSIST = 4;
+
   static RobotType robotType;
 
   public static RobotType getRobotType() {

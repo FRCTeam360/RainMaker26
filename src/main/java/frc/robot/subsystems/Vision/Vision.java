@@ -109,6 +109,10 @@ public class Vision extends SubsystemBase {
             });
   }
 
+  public void captureRewind(String name) {
+    Optional.ofNullable(ios.get(name)).ifPresent(io -> io.captureRewind());
+  }
+
   @Override
   public void periodic() {
     // Clear previous measurements to prevent unbounded growth
