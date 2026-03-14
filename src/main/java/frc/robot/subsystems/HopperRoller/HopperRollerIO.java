@@ -19,5 +19,7 @@ public interface HopperRollerIO {
 
   public default void updateInputs(HopperRollerIOInputs inputs) {}
 
+  public void setVelocity(double rpm);
+
   public void setDutyCycle(double dutyCycle);
 }
