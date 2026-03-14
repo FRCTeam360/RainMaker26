@@ -8,6 +8,7 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import frc.robot.Constants;
 import frc.robot.utils.FieldConstants;
 import frc.robot.utils.LimelightHelpers;
 import frc.robot.utils.LimelightHelpers.PoseEstimate;
@@ -24,7 +25,6 @@ public abstract class VisionIOLimelightBase implements VisionIO {
   private final String name;
   protected final DoubleSupplier gyroAngleSupplier;
   protected final DoubleSupplier gyroAngleRateSupplier;
-  private final boolean isLimelight4;
 
   private final boolean acceptMeasurements;
 
@@ -169,15 +169,11 @@ public abstract class VisionIOLimelightBase implements VisionIO {
 
   // while enabled
   public void enableIMUAssist() {
-    if (isLimelight4) {
-      LimelightHelpers.SetIMUMode(name, Constants.IMU_MODE_INTERNAL_EXTERNAL_ASSIST);
-    }
+    LimelightHelpers.SetIMUMode(name, Constants.IMU_MODE_INTERNAL_EXTERNAL_ASSIST);
   }
 
   // call during disabled
-  public void seedIMU() {
-    if (isLimelight4) {
-      LimelightHelpers.SetIMUMode(name, Constants.IMU_MODE_EXTERNAL_SEED);
-    }
+  public void enableIMUSeeding() {
+    LimelightHelpers.SetIMUMode(name, Constants.IMU_MODE_EXTERNAL_SEED);
   }
 }
