@@ -115,13 +115,38 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
   // Heading lock state for driver-assist toggle
   private boolean headingLockEnabled = false;
+  private double currentTargetAngle = 0.0;
+  private boolean positiveEdgeReady = true;
+  private boolean negativeEdgeReady = true;
+  private static final double SNAP_THRESHOLD = 0.3; // High tolerance to prevent accidental presses
 
-  private Rotation2d getNearestAlignedAngle() {
+  private Rotation2d getSnapAngle(double driverOmega) {
     double currentDegrees = getRotation2d().getDegrees();
     currentDegrees = ((currentDegrees % 360) + 360) % 360;
-    double nearest = Math.round(currentDegrees / 90.0) * 90.0;
-    if (nearest >= 360) nearest = 0;
-    return Rotation2d.fromDegrees(nearest);
+
+    boolean stickIsDeflected = Math.abs(driverOmega) > SNAP_THRESHOLD;
+    boolean positiveDeflection = driverOmega < -SNAP_THRESHOLD; // Right on stick = negative omega
+    boolean negativeDeflection = driverOmega > SNAP_THRESHOLD; // Left on stick = positive omega
+
+    if (positiveDeflection && positiveEdgeReady) {
+      positiveEdgeReady = false;
+      currentTargetAngle = ((Math.floor(currentDegrees / 90.0) + 1) * 90.0) % 360;
+    } else if (negativeDeflection && negativeEdgeReady) {
+      negativeEdgeReady = false;
+      currentTargetAngle = ((Math.floor(currentDegrees / 90.0) - 1) * 90.0) % 360;
+    }
+
+    // Reset edge detection when stick returns to center
+    if (!positiveDeflection) {
+      positiveEdgeReady = true;
+    }
+    if (!negativeDeflection) {
+      negativeEdgeReady = true;
+    }
+
+    if (currentTargetAngle < 0) currentTargetAngle += 360;
+
+    return Rotation2d.fromDegrees(currentTargetAngle);
   }
 
   // Field-centric facing angle request for hub tracking
@@ -164,7 +189,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             return m_faceHubRequest
                 .withVelocityX(isBlueAlliance ? velXMps : -velXMps)
                 .withVelocityY(isBlueAlliance ? velYMps : -velYMps)
-                .withTargetDirection(getNearestAlignedAngle());
+                .withTargetDirection(getSnapAngle(omegaRps));
           }
 
           return drive
