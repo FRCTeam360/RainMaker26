@@ -58,7 +58,8 @@ public class SuperStructure extends SubsystemBase {
     DEFENSE,
     X_OUT,
     EJECTING,
-    UNJAMMING
+    UNJAMMING,
+    FORCED_SHOT
   }
 
   public enum SuperInternalStates {
@@ -66,7 +67,8 @@ public class SuperStructure extends SubsystemBase {
     IDLE, // everything is stopped
     SHOOTING_AT_HUB,
     PASSING,
-    UNJAMMING
+    UNJAMMING,
+    FORCED_SHOT
   }
 
   // State variables
@@ -108,11 +110,16 @@ public class SuperStructure extends SubsystemBase {
     this.intakeStateMachine = new IntakeStateMachine(intakeRoller, intakePivot);
     this.targetSelectionStateMachine =
         new TargetSelectionStateMachine(hubShotCalculator, passCalculator, robotPoseSupplier);
-
+    
     flywheel.setShootVelocitySupplier(
-        () -> targetSelectionStateMachine.getActiveCalculator().calculateShot().flywheelSpeed());
+      () -> {if(currentSuperState == SuperInternalStates.FORCED_SHOT){ return 2000; } return targetSelectionStateMachine.getActiveCalculator().calculateShot().flywheelSpeed();
+        //() -> targetSelectionStateMachine.getActiveCalculator().calculateShot().flywheelSpeed()
+       } );
     hood.setHoodAngleSupplier(
-        () -> targetSelectionStateMachine.getActiveCalculator().calculateShot().hoodAngle());
+        () -> {
+          if(currentSuperState == SuperInternalStates.FORCED_SHOT ){return 20.0;}
+          return targetSelectionStateMachine.getActiveCalculator().calculateShot().hoodAngle();
+        });
     hood.setShouldDuckSupplier(
         () -> PositionUtils.isInDuckZone(robotPoseSupplier.get(), robotToShooter));
   }
@@ -145,6 +152,8 @@ public class SuperStructure extends SubsystemBase {
       case UNJAMMING:
         currentSuperState = SuperInternalStates.UNJAMMING;
         break;
+      case FORCED_SHOT:
+        currentSuperState = SuperInternalStates.FORCED_SHOT;
       case DEFAULT:
       default:
         targetSelectionStateMachine.setWantedState(TargetWantedStates.AUTO);
@@ -164,6 +173,10 @@ public class SuperStructure extends SubsystemBase {
         break;
       case UNJAMMING:
         unjamming();
+        break;
+      case FORCED_SHOT:
+        shooting();
+        shooterStateMachine.setWantedState(ShooterWantedStates.FORCED_SHOT);
         break;
       case DEFAULT:
         passive_preparing();
