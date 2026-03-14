@@ -28,6 +28,7 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -112,6 +113,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   // Limits how much shoot-on-the-move compensation is needed.
   private static final double FACING_ANGLE_MAX_SPEED_FRACTION = 0.5;
 
+  // Heading lock state for driver-assist toggle
+  private boolean headingLockEnabled = false;
+  private static final Rotation2d HEADING_LOCK_ANGLE = Rotation2d.kZero;
+
   // Field-centric facing angle request for hub tracking
   private final SwerveRequest.FieldCentricFacingAngle m_faceHubRequest =
       new SwerveRequest.FieldCentricFacingAngle()
@@ -143,8 +148,18 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
               ChassisSpeeds.fromFieldRelativeSpeeds(
                   isBlueAlliance ? velXMps : -velXMps,
                   isBlueAlliance ? velYMps : -velYMps,
-                  omegaRps,
+                  headingLockEnabled
+                      ? m_faceHubRequest.HeadingController.getLastAppliedOutput()
+                      : omegaRps,
                   getPosition().getRotation());
+
+          if (headingLockEnabled) {
+            return m_faceHubRequest
+                .withVelocityX(isBlueAlliance ? velXMps : -velXMps)
+                .withVelocityY(isBlueAlliance ? velYMps : -velYMps)
+                .withTargetDirection(HEADING_LOCK_ANGLE);
+          }
+
           return drive
               .withVelocityX(velXMps) // Drive forward with negative Y (forward)
               .withVelocityY(velYMps) // Drive left with negative X (left)
@@ -172,6 +187,14 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
   public Command xOutCmd() {
     return this.run(() -> xOut());
+  }
+
+  public Command toggleHeadingLockCommand() {
+    return new InstantCommand(() -> headingLockEnabled = !headingLockEnabled);
+  }
+
+  public boolean isHeadingLockEnabled() {
+    return headingLockEnabled;
   }
 
   /**
