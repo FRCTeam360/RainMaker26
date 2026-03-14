@@ -115,7 +115,14 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
   // Heading lock state for driver-assist toggle
   private boolean headingLockEnabled = false;
-  private static final Rotation2d HEADING_LOCK_ANGLE = Rotation2d.kZero;
+
+  private Rotation2d getNearestAlignedAngle() {
+    double currentDegrees = getRotation2d().getDegrees();
+    currentDegrees = ((currentDegrees % 360) + 360) % 360;
+    double nearest = Math.round(currentDegrees / 90.0) * 90.0;
+    if (nearest >= 360) nearest = 0;
+    return Rotation2d.fromDegrees(nearest);
+  }
 
   // Field-centric facing angle request for hub tracking
   private final SwerveRequest.FieldCentricFacingAngle m_faceHubRequest =
@@ -157,7 +164,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             return m_faceHubRequest
                 .withVelocityX(isBlueAlliance ? velXMps : -velXMps)
                 .withVelocityY(isBlueAlliance ? velYMps : -velYMps)
-                .withTargetDirection(HEADING_LOCK_ANGLE);
+                .withTargetDirection(getNearestAlignedAngle());
           }
 
           return drive
