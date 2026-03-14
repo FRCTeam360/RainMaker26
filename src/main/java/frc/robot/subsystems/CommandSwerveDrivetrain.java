@@ -121,24 +121,25 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   private static final double SNAP_THRESHOLD = 0.3; // High tolerance to prevent accidental presses
 
   private Rotation2d getSnapAngle(double driverOmega) {
-    boolean positiveDeflection = driverOmega < -SNAP_THRESHOLD; // Right on stick = negative omega
-    boolean negativeDeflection = driverOmega > SNAP_THRESHOLD; // Left on stick = positive omega
+    // Omega calculation uses -Math.signum(getRightX()): right stick (positive X) = negative omega
+    boolean clockwiseSnap = driverOmega < -SNAP_THRESHOLD; // Right stick = clockwise
+    boolean counterClockwiseSnap = driverOmega > SNAP_THRESHOLD; // Left stick = counter-clockwise
 
     // Snap relative to currentTargetAngle so that rapid consecutive presses always advance
     // by 90° steps, even if the robot hasn't finished rotating to the previous setpoint yet.
-    if (positiveDeflection && positiveEdgeReady) {
+    if (clockwiseSnap && positiveEdgeReady) {
       positiveEdgeReady = false;
       currentTargetAngle = (((currentTargetAngle / 90.0) + 1) * 90.0) % 360;
-    } else if (negativeDeflection && negativeEdgeReady) {
+    } else if (counterClockwiseSnap && negativeEdgeReady) {
       negativeEdgeReady = false;
       currentTargetAngle = (((currentTargetAngle / 90.0) - 1) * 90.0);
     }
 
     // Reset edge detection when stick returns to center
-    if (!positiveDeflection) {
+    if (!clockwiseSnap) {
       positiveEdgeReady = true;
     }
-    if (!negativeDeflection) {
+    if (!counterClockwiseSnap) {
       negativeEdgeReady = true;
     }
 
@@ -220,7 +221,17 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   }
 
   public Command toggleHeadingLockCommand() {
-    return new InstantCommand(() -> headingLockEnabled = !headingLockEnabled);
+    return new InstantCommand(
+        () -> {
+          headingLockEnabled = !headingLockEnabled;
+          if (headingLockEnabled) {
+            // Initialize to nearest 90° angle when enabling
+            double currentDegrees = getRotation2d().getDegrees();
+            currentDegrees = ((currentDegrees % 360) + 360) % 360;
+            currentTargetAngle = Math.round(currentDegrees / 90.0) * 90.0;
+            if (currentTargetAngle >= 360) currentTargetAngle = 0;
+          }
+        });
   }
 
   public boolean isHeadingLockEnabled() {
