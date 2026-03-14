@@ -118,6 +118,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   private double currentTargetAngle = 0.0;
   private boolean positiveEdgeReady = true;
   private boolean negativeEdgeReady = true;
+  private boolean headingControllerActive =
+      false; // Tracks if facing-angle request has been applied
   private static final double SNAP_THRESHOLD = 0.3; // High tolerance to prevent accidental presses
 
   private Rotation2d getSnapAngle(double driverOmega) {
@@ -179,12 +181,13 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
               ChassisSpeeds.fromFieldRelativeSpeeds(
                   isBlueAlliance ? velXMps : -velXMps,
                   isBlueAlliance ? velYMps : -velYMps,
-                  headingLockEnabled
+                  headingLockEnabled && headingControllerActive
                       ? m_faceHubRequest.HeadingController.getLastAppliedOutput()
                       : omegaRps,
                   getPosition().getRotation());
 
           if (headingLockEnabled) {
+            headingControllerActive = true; // Mark that we've applied the facing-angle request
             return m_faceHubRequest
                 .withVelocityX(isBlueAlliance ? velXMps : -velXMps)
                 .withVelocityY(isBlueAlliance ? velYMps : -velYMps)
@@ -224,6 +227,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     return new InstantCommand(
         () -> {
           headingLockEnabled = !headingLockEnabled;
+          headingControllerActive = false; // Reset so we know when fresh data is available
           if (headingLockEnabled) {
             // Initialize to nearest 90° angle when enabling
             double currentDegrees = getRotation2d().getDegrees();
