@@ -32,32 +32,48 @@
     },
     {
       "anchor": {
-        "x": 6.379577777777778,
-        "y": 6.938844444444444
+        "x": 7.461211111111112,
+        "y": 6.890122222222221
       },
       "prevControl": {
-        "x": 5.802713541666666,
-        "y": 7.78661111111111
+        "x": 6.884346875,
+        "y": 7.737888888888887
       },
       "nextControl": {
-        "x": 6.956442013888889,
-        "y": 6.0910777777777785
+        "x": 8.038075347222223,
+        "y": 6.042355555555555
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 7.227344444444444,
-        "y": 4.921744444444443
+        "x": 7.685333333333334,
+        "y": 3.3626333333333323
       },
       "prevControl": {
-        "x": 8.196797446211876,
-        "y": 4.194654693118865
+        "x": 8.133577777777777,
+        "y": 3.2457000000000003
       },
       "nextControl": {
-        "x": 6.09698888888889,
-        "y": 5.76951111111111
+        "x": 7.32100696902558,
+        "y": 3.457674993587528
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 5.960566666666666,
+        "y": 3.664711111111111
+      },
+      "prevControl": {
+        "x": 5.770784835342977,
+        "y": 2.896400793978115
+      },
+      "nextControl": {
+        "x": 6.564722222222223,
+        "y": 6.110566666666666
       },
       "isLocked": false,
       "linkedName": null
@@ -90,17 +106,35 @@
       "rotationDegrees": -90.0
     },
     {
-      "waypointRelativePos": 3.3029045643153525,
-      "rotationDegrees": 119.99999999999999
+      "waypointRelativePos": 2.8091286307053345,
+      "rotationDegrees": -90.0
+    },
+    {
+      "waypointRelativePos": 3.887966804979213,
+      "rotationDegrees": 100.0
     }
   ],
-  "constraintZones": [],
+  "constraintZones": [
+    {
+      "name": "Constraints Zone",
+      "minWaypointRelativePos": 1.6823821339949796,
+      "maxWaypointRelativePos": 4.133995037220853,
+      "constraints": {
+        "maxVelocity": 2.5,
+        "maxAcceleration": 10.0,
+        "maxAngularVelocity": 200.0,
+        "maxAngularAcceleration": 100.0,
+        "nominalVoltage": 12.0,
+        "unlimited": false
+      }
+    }
+  ],
   "pointTowardsZones": [],
   "eventMarkers": [
     {
       "name": "intake",
       "waypointRelativePos": 0.027791563275458973,
-      "endWaypointRelativePos": 3.68833746898262,
+      "endWaypointRelativePos": 4.401985111662501,
       "command": {
         "type": "named",
         "data": {
