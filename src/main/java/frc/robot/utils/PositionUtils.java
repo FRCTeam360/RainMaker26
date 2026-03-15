@@ -8,6 +8,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import frc.robot.utils.FieldConstants.Hub;
 import frc.robot.utils.FieldConstants.LinesHorizontal;
 import frc.robot.utils.FieldConstants.LinesVertical;
 import frc.robot.utils.FieldConstants.RightTrench;
@@ -31,6 +32,12 @@ public class PositionUtils {
   private static final double RED_TRENCH_MAX_X =
       LinesVertical.oppHubCenter + TRENCH_HALF_WIDTH_METERS;
 
+  // Hubs
+  private static final Rectangle2d blueAllianceHub =
+      new Rectangle2d(Hub.nearLeftCorner, Hub.farRightCorner);
+  private static final Rectangle2d redAllianceHub =
+      new Rectangle2d(Hub.oppNearLeftCorner, Hub.oppFarRightCorner);
+          
   // If we are on the blue alliance, we use these no fly zones
   private static final Rectangle2d neutralNoFlyZoneWhenOnBlueAlliance =
       new Rectangle2d(
@@ -156,22 +163,22 @@ public class PositionUtils {
     }
     Translation2d end = start.plus(new Translation2d(maxDistance, shooterRotation));
     int length = (int) Math.round(start.getDistance(end));
-    Pose2d[] raycast = getRaycastLine(start, end, shooterRotation, length);
+    Pose2d[] points = new Pose2d[length + 1];
+    for (int i = 0; i <= length; i++) {
+      double spotOnLine = (double) i / length;
+      double x = start.getX() + (end.getX() - start.getX()) * spotOnLine;
+      double y = start.getY() + (end.getY() - start.getY()) * spotOnLine;
+      points[i] = new Pose2d(new Translation2d(x, y), shooterRotation);
+    }
+    for (Pose2d point : points) {
+      if(blueAllianceHub.contains(point.getTranslation())){
+        
+      }
+    }
+    Pose2d[] raycast = points;
     Logger.recordOutput("Raycast/Line", raycast);
 
     return true;
-  }
-
-  public static Pose2d[] getRaycastLine(
-      Translation2d start, Translation2d end, Rotation2d direction, int numberOfPoints) {
-    Pose2d[] points = new Pose2d[numberOfPoints + 1];
-    for (int i = 0; i <= numberOfPoints; i++) {
-      double spotOnLine = (double) i / numberOfPoints;
-      double x = start.getX() + (end.getX() - start.getX()) * spotOnLine;
-      double y = start.getY() + (end.getY() - start.getY()) * spotOnLine;
-      points[i] = new Pose2d(new Translation2d(x, y), direction);
-    }
-    return points;
   }
 
   /**

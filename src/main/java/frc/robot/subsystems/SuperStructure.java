@@ -309,6 +309,7 @@ public class SuperStructure extends SubsystemBase {
   @Override
   public void periodic() {
     Pose2d robotPose = robotPoseSupplier.get();
+    // this is just for testing purposes, delete after integrating into passing function
     PositionUtils.canPass(robotPose, robotPose.getRotation().plus(Rotation2d.k180deg));
     // Calculate shot and extract time of flight once per cycle
     cachedTimeOfFlight = hubShotCalculator.calculateShot().timeOfFlight();
