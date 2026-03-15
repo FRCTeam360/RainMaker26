@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -307,6 +308,8 @@ public class SuperStructure extends SubsystemBase {
 
   @Override
   public void periodic() {
+    Pose2d robotPose = robotPoseSupplier.get();
+    PositionUtils.canPass(robotPose, robotPose.getRotation().plus(Rotation2d.k180deg));
     // Calculate shot and extract time of flight once per cycle
     cachedTimeOfFlight = hubShotCalculator.calculateShot().timeOfFlight();
     RobotUtils.ActiveHub shootingPhase =

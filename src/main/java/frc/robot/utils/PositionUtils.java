@@ -139,14 +139,39 @@ public class PositionUtils {
     }
   }
 
-  public static boolean canPass(Pose2d robotPose, Rotation2d robotRotation) {
-    Rotation2d shooterRotation = robotRotation.plus(Rotation2d.k180deg);
-    double rayLength = FieldConstants.fieldLength;
-    Translation2d end = robotPose.getTranslation().plus(new Translation2d(rayLength, shooterRotation));
-    Pose2d[] raycast = new Pose2d[] {robotPose, new Pose2d(end, shooterRotation)};
+  public static boolean canPass(Pose2d robotPose, Rotation2d shooterRotation) {
+    Translation2d start = robotPose.getTranslation();
+    double dx = shooterRotation.getCos();
+    double dy = shooterRotation.getSin();
+    double maxDistance = Double.MAX_VALUE;
+    if (dx > 0) {
+      maxDistance = Math.min(maxDistance, (FieldConstants.fieldLength - start.getX()) / dx);
+    } else if (dx < 0) {
+      maxDistance = Math.min(maxDistance, -start.getX() / dx);
+    }
+    if (dy > 0) {
+      maxDistance = Math.min(maxDistance, (FieldConstants.fieldWidth - start.getY()) / dy);
+    } else if (dy < 0) {
+      maxDistance = Math.min(maxDistance, -start.getY() / dy);
+    }
+    Translation2d end = start.plus(new Translation2d(maxDistance, shooterRotation));
+    int length = (int) Math.round(start.getDistance(end));
+    Pose2d[] raycast = getRaycastLine(start, end, shooterRotation, length);
     Logger.recordOutput("Raycast/Line", raycast);
 
     return true;
+  }
+
+  public static Pose2d[] getRaycastLine(
+      Translation2d start, Translation2d end, Rotation2d direction, int numberOfPoints) {
+    Pose2d[] points = new Pose2d[numberOfPoints + 1];
+    for (int i = 0; i <= numberOfPoints; i++) {
+      double spotOnLine = (double) i / numberOfPoints;
+      double x = start.getX() + (end.getX() - start.getX()) * spotOnLine;
+      double y = start.getY() + (end.getY() - start.getY()) * spotOnLine;
+      points[i] = new Pose2d(new Translation2d(x, y), direction);
+    }
+    return points;
   }
 
   /**
