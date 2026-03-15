@@ -88,11 +88,27 @@
     {
       "waypointRelativePos": 2.0879668049792643,
       "rotationDegrees": -90.0
+    },
+    {
+      "waypointRelativePos": 3.3029045643153525,
+      "rotationDegrees": 119.99999999999999
     }
   ],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [],
+  "eventMarkers": [
+    {
+      "name": "intake",
+      "waypointRelativePos": 0.027791563275458973,
+      "endWaypointRelativePos": 3.68833746898262,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "basic intake"
+        }
+      }
+    }
+  ],
   "globalConstraints": {
     "maxVelocity": 4.0,
     "maxAcceleration": 10.0,

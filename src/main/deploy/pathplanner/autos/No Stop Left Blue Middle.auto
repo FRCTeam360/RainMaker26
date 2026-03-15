@@ -11,9 +11,21 @@
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "shoot at hub"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "No Stop Left Blue M 2"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "shoot at hub"
           }
         }
       ]
