@@ -80,10 +80,10 @@ public class FlywheelIOPBBangBang implements FlywheelIO {
   private final StatusSignal<Voltage> leftMotorVoltageSignal;
 
   /** Frequency for telemetry signals (current, position, supply current). */
-  private static final double TELEMETRY_UPDATE_FREQUENCY_HZ = 100.0;
+  private static final double TELEMETRY_UPDATE_FREQUENCY_HZ = 50.0;
 
   /** Frequency for control-critical signals (velocity, voltage, torque current, duty cycle). */
-  private static final double CONTROL_UPDATE_FREQUENCY_HZ = 500.0;
+  private static final double CONTROL_UPDATE_FREQUENCY_HZ = 250.0;
 
   /** Constructs the practice bot flywheel IO and configures both TalonFX motors. */
   public FlywheelIOPBBangBang() {

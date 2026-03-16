@@ -6,6 +6,7 @@ package frc.robot.subsystems.Intake;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.subsystems.ControlState;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
@@ -74,7 +75,6 @@ public class Intake extends SubsystemBase {
         // }
         currentState = IntakeStates.INTAKING;
         break;
-
       case ASSIST_SHOOTING:
         currentState = IntakeStates.ASSIST_SHOOTING;
         break;
@@ -109,7 +109,11 @@ public class Intake extends SubsystemBase {
   }
 
   private void intaking() {
-    setVelocity(1100);
+    if (Constants.getRobotType() != Constants.RobotType.WOODBOT) {
+      setVelocity(1100);
+    } else {
+      setDutyCycle(0.7);
+    }
   }
 
   // private void unjamIntake() {

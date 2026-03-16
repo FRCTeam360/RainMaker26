@@ -83,7 +83,7 @@ public class FlywheelIOWBBangBang implements FlywheelIO {
   private static final double TELEMETRY_UPDATE_FREQUENCY_HZ = 100.0;
 
   /** Frequency for control-critical signals (velocity, voltage, torque current, duty cycle). */
-  private static final double CONTROL_UPDATE_FREQUENCY_HZ = 500.0;
+  private static final double CONTROL_UPDATE_FREQUENCY_HZ = 250.0;
 
   /** Constructs the WoodBot flywheel IO and configures both TalonFX motors. */
   public FlywheelIOWBBangBang() {

@@ -12,7 +12,8 @@ import org.littletonrobotics.junction.Logger;
 public class HopperRoller extends SubsystemBase {
   // Constants
   private static final double ROLLER_DUTY_CYCLE = 0.75;
-  private static final double REVERSING_DUTY_CYCLE = -0.1;
+  private static final double PREVENT_JAM_DUTY_CYCLE = -0.1;
+  private static final double UNJAMMING_DUTY_CYCLE = -0.8;
 
   // IO fields
   private final HopperRollerIO io;
@@ -22,7 +23,8 @@ public class HopperRoller extends SubsystemBase {
   public enum HopperRollerStates {
     OFF,
     ROLLING,
-    REVERSING
+    UNJAMMING,
+    PREVENT_JAM
   }
 
   // State variables
@@ -57,8 +59,11 @@ public class HopperRoller extends SubsystemBase {
       case ROLLING:
         currentState = HopperRollerStates.ROLLING;
         break;
-      case REVERSING:
-        currentState = HopperRollerStates.REVERSING;
+      case PREVENT_JAM:
+        currentState = HopperRollerStates.PREVENT_JAM;
+        break;
+      case UNJAMMING:
+        currentState = HopperRollerStates.UNJAMMING;
         break;
       case OFF:
       default:
@@ -72,8 +77,11 @@ public class HopperRoller extends SubsystemBase {
       case ROLLING:
         setDutyCycle(ROLLER_DUTY_CYCLE);
         break;
-      case REVERSING:
-        setDutyCycle(REVERSING_DUTY_CYCLE);
+      case PREVENT_JAM:
+        setDutyCycle(PREVENT_JAM_DUTY_CYCLE);
+        break;
+      case UNJAMMING:
+        setDutyCycle(UNJAMMING_DUTY_CYCLE);
         break;
       case OFF:
       default:
