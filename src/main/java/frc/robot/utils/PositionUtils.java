@@ -169,11 +169,13 @@ public class PositionUtils {
     for (Pose2d point : points) {
       if (blueAllianceHub.contains(point.getTranslation())) {
         end = point.getTranslation();
+        length = (int) Math.round(start.getDistance(end));
         points = getRaycastLine(start, end, shooterRotation, length);
         canPass = false;
         break;
       } else if (redAllianceHub.contains(point.getTranslation())) {
         end = point.getTranslation();
+        length = (int) Math.round(start.getDistance(end));
         points = getRaycastLine(start, end, shooterRotation, length);
         canPass = false;
         break;
