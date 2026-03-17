@@ -125,8 +125,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
           .withDriveRequestType(m_driveRequestType);
 
   public void fieldOrientedDrive(CommandXboxController driveCont) {
-    double defenseModeRotationScaler = (isDefenseMode ? 3.0 : 1.0);
-    double defenseModeTranslationScaler = (isDefenseMode ? 0.96 : 1.0);
+    double defenseModeRotationScaler = (isDefenseMode ? 1.25: 1.0);
+    double defenseModeTranslationScaler = (isDefenseMode ? 0.75 : 1.0);
     FIELD_CENTRIC_DRIVE.ForwardPerspective = ForwardPerspectiveValue.OperatorPerspective;
     this.setControl(
         FIELD_CENTRIC_DRIVE
