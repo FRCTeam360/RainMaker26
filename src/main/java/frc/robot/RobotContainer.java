@@ -457,7 +457,7 @@ public class RobotContainer {
 
     driverCont.a().onTrue(superStructure.setStateCommand(SuperWantedStates.UNJAMMING));
     driverCont.a().onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
-    
+
     // defense mode
     driverCont
         .start()

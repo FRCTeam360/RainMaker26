@@ -163,7 +163,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
           .withDriveRequestType(m_driveRequestType);
 
   public void fieldOrientedDrive(CommandXboxController driveCont) {
-    double defenseModeRotationScaler = (isDefenseMode ? 1.25: 1.0);
+    double defenseModeRotationScaler = (isDefenseMode ? 1.25 : 1.0);
     double defenseModeTranslationScaler = (isDefenseMode ? 0.75 : 1.0);
     FIELD_CENTRIC_DRIVE.ForwardPerspective = ForwardPerspectiveValue.OperatorPerspective;
     this.setControl(
@@ -275,14 +275,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   public Command faceAngleWhileDrivingCommand(
       CommandXboxController driveCont, Supplier<Rotation2d> headingSupplier) {
     return faceAngleWhileDrivingCommand(
-        () ->
-            Math.pow(driveCont.getLeftY(), 3)
-                * maxSpeed.in(MetersPerSecond)
-                * -1.0,
-        () ->
-            Math.pow(driveCont.getLeftX(), 3)
-                * maxSpeed.in(MetersPerSecond)
-                * -1.0,
+        () -> Math.pow(driveCont.getLeftY(), 3) * maxSpeed.in(MetersPerSecond) * -1.0,
+        () -> Math.pow(driveCont.getLeftX(), 3) * maxSpeed.in(MetersPerSecond) * -1.0,
         headingSupplier);
   }
 

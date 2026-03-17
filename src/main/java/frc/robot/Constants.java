@@ -12,11 +12,11 @@ import com.pathplanner.lib.config.RobotConfig;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.hal.HALUtil;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.robot.utils.RobotUtils.ActiveHub;
 
@@ -113,7 +113,7 @@ public final class Constants {
     // === MAXIMUMS ===
     public static final LinearVelocity maxSpeed = MetersPerSecond.of(4.69);
     public static final AngularVelocity maxAngularVelocity = RevolutionsPerSecond.of(4.0);
-    
+
     // === PATHPLANNER CONFIG (as of Feb 20th tuning) ===
     public static final double MASS_KG = 60.0;
     public static final double MOI = 4.5;
@@ -242,7 +242,7 @@ public final class Constants {
 
     public static final LinearVelocity maxSpeed = MetersPerSecond.of(4.69);
     public static final AngularVelocity maxAngularVelocity = RevolutionsPerSecond.of(4.0);
-    
+
     static {
       shotHoodAngleMap.put(6.0, 18.0);
       shotHoodAngleMap.put(5.0, 18.0); // TESTED
@@ -314,7 +314,7 @@ public final class Constants {
     // === MAXIMUMS ===
     public static final LinearVelocity maxSpeed = MetersPerSecond.of(4.69);
     public static final AngularVelocity maxAngularVelocity = RevolutionsPerSecond.of(4.0);
-    
+
     // === CLIMBER ===
     public static final int CLIMBER_MOTOR = 36;
 
