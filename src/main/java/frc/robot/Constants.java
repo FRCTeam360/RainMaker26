@@ -240,6 +240,7 @@ public final class Constants {
     // === CANBUS ===
     public static final CANBus CANBUS = new CANBus("Default Name");
 
+    // === MAXIMUMS ===
     public static final LinearVelocity maxSpeed = MetersPerSecond.of(4.69);
     public static final AngularVelocity maxAngularVelocity = RevolutionsPerSecond.of(4.0);
 

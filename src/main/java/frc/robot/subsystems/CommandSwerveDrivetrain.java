@@ -32,6 +32,7 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
+import frc.robot.Constants.PracticeBotConstants;
 import frc.robot.generated.WoodBotDrivetrain.TunerSwerveDrivetrain;
 import frc.robot.subsystems.Vision.VisionMeasurement;
 import java.util.List;
@@ -48,8 +49,8 @@ import org.littletonrobotics.junction.Logger;
  * https://v6.docs.ctr-electronics.com/en/stable/docs/tuner/tuner-swerve/index.html
  */
 public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Subsystem {
-  public static final LinearVelocity maxSpeed = WoodBotConstants.maxSpeed;
-  public static final AngularVelocity maxAngularVelocity = WoodBotConstants.maxAngularVelocity;
+  public static final LinearVelocity maxSpeed = PracticeBotConstants.maxSpeed;
+  public static final AngularVelocity maxAngularVelocity = PracticeBotConstants.maxAngularVelocity;
   public boolean isDefenseMode = false;
   private static final double kSimLoopPeriod = 0.004; // 4 ms
   private Notifier m_simNotifier = null;
