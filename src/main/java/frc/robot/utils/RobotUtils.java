@@ -61,34 +61,43 @@ public class RobotUtils {
    * @return which hub(s) are currently active
    */
   public static ActiveHub getShootingPhase(double gameTime, Boolean isTele, double timeOfFlight) {
+    double shiftTimer = 0.0;
     // gameTime is the getMatchTime() from DriverStation, isTele is the isTeleop() from
     // DriverStation
     ActiveHub activeHub = ActiveHub.BOTH;
     gameTime -= timeOfFlight;
     // Sets phases based on the current time in the game
     if (!isTele) {
-      activeHub = ActiveHub.BOTH; // AUTO
+      activeHub = ActiveHub.BOTH;
+      shiftTimer = 20.0; // AUTO
     } else if (isTele) {
       if (gameTime <= 30) {
-        activeHub = ActiveHub.BOTH; // END GAME
+        activeHub = ActiveHub.BOTH;
+        shiftTimer = 30.0; // END GAME
       } else if (gameTime < 53) {
-        activeHub = ActiveHub.AUTOWINNER; // ALLIANCE SHIFT 4
+        activeHub = ActiveHub.AUTOWINNER;
+        shiftTimer = 25.0; // ALLIANCE SHIFT 4
       } else if (gameTime <= 55 && gameTime >= 53) {
         activeHub = ActiveHub.BOTH; // ALLIANCE SHIFT GRACE PERIOD
       } else if (gameTime < 78) {
-        activeHub = ActiveHub.AUTOLOSER; // ALLIANCE SHIFT 3
+        activeHub = ActiveHub.AUTOLOSER;
+        shiftTimer = 25.0; // ALLIANCE SHIFT 3
       } else if (gameTime <= 80 && gameTime >= 78) {
         activeHub = ActiveHub.BOTH; // ALLIANCE SHIFT GRACE PERIOD
       } else if (gameTime < 103) {
-        activeHub = ActiveHub.AUTOWINNER; // ALLIANCE SHIFT 2
+        activeHub = ActiveHub.AUTOWINNER;
+        shiftTimer = 25.0; // ALLIANCE SHIFT 2
       } else if (gameTime <= 105 && gameTime >= 103) {
         activeHub = ActiveHub.BOTH; // ALLIANCE SHIFT GRACE PERIOD
       } else if (gameTime <= 130) {
-        activeHub = ActiveHub.AUTOLOSER; // ALLIANCE SHIFT 1
+        activeHub = ActiveHub.AUTOLOSER;
+        shiftTimer = 25.0; // ALLIANCE SHIFT 1
       } else {
+        shiftTimer = 10.0;
         return ActiveHub.BOTH; // TRANSITION
       }
     }
+    SmartDashboard.putNumber("Shift Timer", shiftTimer);
     SmartDashboard.putString("ActiveHub", activeHub.name());
     return activeHub;
   }
