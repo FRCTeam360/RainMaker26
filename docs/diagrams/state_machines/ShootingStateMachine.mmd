@@ -1,0 +1,84 @@
+---
+title: Shooting State Machine
+---
+stateDiagram-v2
+    direction TB
+    [*] --> IDLE_WANTED
+
+    %% IDLE Wanted State Container
+    state "WantedState: IDLE" as IDLE_WANTED {
+        [*] --> StateIdle
+        StateIdle: IDLE
+        note right of StateIdle
+            All shooter subsystems stopped
+            Flywheel → IDLE
+            Hood → IDLE
+            FlywheelKicker → IDLE
+        end note
+    }
+
+    %% PASSIVE_SHOOTER Wanted State Container
+    state "WantedState: PASSIVE_SHOOTER" as PASSIVE_WANTED {
+        [*] --> StateWaiting
+        StateWaiting: WAITING
+        note right of StateWaiting
+            Passive shooter mode (DEFAULT)
+            Flywheel → IDLE (spun down)
+            Hood → DUCKED
+            FlywheelKicker → IDLE
+        end note
+    }
+
+    %% SHOOTING Wanted State Container
+    state "WantedState: SHOOTING" as SHOOTING_WANTED {
+        [*] --> StatePreparingToFire
+        StatePreparingToFire: PREPARING_TO_FIRE
+        StateFiring: FIRING
+
+        StatePreparingToFire --> StateFiring : Flywheel AT_SETPOINT<br>AND Hood AT_SETPOINT<br>AND drivetrain aligned<br>AND target shootable
+        StateFiring --> StatePreparingToFire : Flywheel UNDER_SHOOTING<br>OR hood loses position<br>OR alignment lost<br>OR target not shootable
+
+        note right of StatePreparingToFire
+            Spinning up and aiming
+            Flywheel → SHOOTING (ramping up)
+            Hood → AIMING (moving to angle)
+            FlywheelKicker → KICKING (WoodBot: IDLE)
+        end note
+        note right of StateFiring
+            Ready and firing
+            Flywheel → SHOOTING (at setpoint)
+            Hood → AIMING (at setpoint)
+            FlywheelKicker → KICKING
+            Stays in FIRING through brief RPM dips
+            (RECOVERING state in flywheel)
+        end note
+    }
+
+    %% REVERSING Wanted State Container
+    state "WantedState: REVERSING" as REVERSING_WANTED {
+        [*] --> StateUnjamming
+        StateUnjamming: UNJAMMING
+        note right of StateUnjamming
+            Reversing to clear jams
+            Flywheel → IDLE
+            Hood → IDLE
+            FlywheelKicker → REVERSING
+        end note
+    }
+
+    %% Transitions between wanted states
+    IDLE_WANTED --> SHOOTING_WANTED : setWantedState(SHOOTING)
+    IDLE_WANTED --> PASSIVE_WANTED : setWantedState(PASSIVE_SHOOTER)
+    IDLE_WANTED --> REVERSING_WANTED : setWantedState(REVERSING)
+
+    PASSIVE_WANTED --> IDLE_WANTED : setWantedState(IDLE)
+    PASSIVE_WANTED --> SHOOTING_WANTED : setWantedState(SHOOTING)
+    PASSIVE_WANTED --> REVERSING_WANTED : setWantedState(REVERSING)
+
+    SHOOTING_WANTED --> IDLE_WANTED : setWantedState(IDLE)
+    SHOOTING_WANTED --> PASSIVE_WANTED : setWantedState(PASSIVE_SHOOTER)
+    SHOOTING_WANTED --> REVERSING_WANTED : setWantedState(REVERSING)
+
+    REVERSING_WANTED --> IDLE_WANTED : setWantedState(IDLE)
+    REVERSING_WANTED --> SHOOTING_WANTED : setWantedState(SHOOTING)
+    REVERSING_WANTED --> PASSIVE_WANTED : setWantedState(PASSIVE_SHOOTER)

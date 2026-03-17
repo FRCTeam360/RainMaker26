@@ -1,0 +1,54 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 12.996055555555555,
+        "y": 1.969177777777777
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 13.541744444444443,
+        "y": 1.939944444444444
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 14.184877777777777,
+        "y": 1.784033333333333
+      },
+      "prevControl": {
+        "x": 13.902288888888888,
+        "y": 1.7645444444444442
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "red depot 1 end"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 6.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": -45.784824602991954
+  },
+  "reversed": false,
+  "folder": null,
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": -90.0
+  },
+  "useDefaultConstraints": true
+}

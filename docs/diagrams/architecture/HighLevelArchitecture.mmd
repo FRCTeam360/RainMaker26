@@ -1,0 +1,49 @@
+---
+title: High-Level Architecture
+---
+graph TD
+    Robot["Robot.java<br/>(Main Loop)"] --> RC["RobotContainer<br/>(Wiring & Bindings)"]
+
+    RC --> SS["SuperStructure<br/>(Master Coordinator)"]
+    RC --> Drive["CommandSwerveDrivetrain"]
+    RC --> Vis["Vision"]
+    RC --> Climb["Climber"]
+    RC --> SC["ShotCalculators<br/>(Hub & Pass)"]
+
+    SS --> ShooterSM["ShooterStateMachine"]
+    SS --> IntakeSM["IntakeStateMachine"]
+    SS --> TargetSM["TargetSelectionStateMachine"]
+
+    ShooterSM --> FW["Flywheel"]
+    ShooterSM --> Hood["Hood"]
+    ShooterSM --> Kicker["FlywheelKicker"]
+
+    IntakeSM --> IR["IntakeRoller"]
+    IntakeSM --> IP["IntakePivot"]
+
+    SS --> Idx["Indexer"]
+    SS --> HR["HopperRoller"]
+
+    TargetSM --> SC
+
+    Vis -->|"Pose Estimates"| Drive
+
+    SC -->|"Hood Angle &<br/>Flywheel Speed"| ShooterSM
+
+    style Robot fill:#4a90d9,color:#fff
+    style RC fill:#4a90d9,color:#fff
+    style SS fill:#e07b39,color:#fff
+    style ShooterSM fill:#d94a4a,color:#fff
+    style IntakeSM fill:#d94a4a,color:#fff
+    style TargetSM fill:#d94a4a,color:#fff
+    style Drive fill:#50b050,color:#fff
+    style Vis fill:#50b050,color:#fff
+    style Climb fill:#50b050,color:#fff
+    style FW fill:#50b050,color:#fff
+    style Hood fill:#50b050,color:#fff
+    style Kicker fill:#50b050,color:#fff
+    style IR fill:#50b050,color:#fff
+    style IP fill:#50b050,color:#fff
+    style Idx fill:#50b050,color:#fff
+    style HR fill:#50b050,color:#fff
+    style SC fill:#8e44ad,color:#fff

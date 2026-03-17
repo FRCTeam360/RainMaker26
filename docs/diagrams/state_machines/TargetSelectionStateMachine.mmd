@@ -1,0 +1,59 @@
+---
+title: Target Selection State Machine
+---
+stateDiagram-v2
+    direction TB
+    [*] --> AUTO_WANTED
+
+    %% HUB Wanted State Container
+    state "WantedState: HUB" as HUB_WANTED {
+        [*] --> StateAtHub
+        StateAtHub: AT_HUB
+        note right of StateAtHub
+            Force targeting hub (manual override)
+            Uses hubShotCalculator
+        end note
+    }
+
+    %% OUTPOST Wanted State Container
+    state "WantedState: OUTPOST" as OUTPOST_WANTED {
+        [*] --> StateAtOutpost
+        StateAtOutpost: AT_OUTPOST
+        note right of StateAtOutpost
+            Force targeting outpost (manual override)
+            Uses passCalculator
+        end note
+    }
+
+    %% AUTO Wanted State Container
+    state "WantedState: AUTO" as AUTO_WANTED {
+        [*] --> AutoStateChoice
+        
+        state AutoStateChoice <<choice>>
+        AutoStateChoice --> StateAutoHub : Robot in alliance zone
+        AutoStateChoice --> StateAutoOutpost : Robot outside alliance zone
+        
+        StateAutoHub: AT_HUB
+        StateAutoOutpost: AT_OUTPOST
+        
+        note right of StateAutoHub
+            Auto-selected hub target
+            Uses hubShotCalculator
+            Re-evaluated every cycle
+        end note
+        note right of StateAutoOutpost
+            Auto-selected outpost target
+            Uses passCalculator
+            Re-evaluated every cycle
+        end note
+    }
+
+    %% Transitions between wanted states
+    AUTO_WANTED --> HUB_WANTED : setWantedState(HUB)
+    AUTO_WANTED --> OUTPOST_WANTED : setWantedState(OUTPOST)
+
+    HUB_WANTED --> AUTO_WANTED : setWantedState(AUTO)
+    HUB_WANTED --> OUTPOST_WANTED : setWantedState(OUTPOST)
+
+    OUTPOST_WANTED --> AUTO_WANTED : setWantedState(AUTO)
+    OUTPOST_WANTED --> HUB_WANTED : setWantedState(HUB)
