@@ -122,6 +122,9 @@ def flip_path_data(path_data, field_length, field_width):
                 point["x"], point["y"] = flip_point(
                     point["x"], point["y"], field_length, field_width
                 )
+        linked = wp.get("linkedName")
+        if linked is not None:
+            wp["linkedName"] = make_flipped_name(linked)
 
     for rt in data.get("rotationTargets", []):
         if "rotationDegrees" in rt:
