@@ -57,11 +57,11 @@ public abstract class VisionIOLimelightBase implements VisionIO {
     // Assume that the pose hasn't been updated
     inputs.poseUpdated = false;
 
-    inputs.tv = getTV();
-    inputs.tx = getTXRaw();
-    inputs.ty = getTYRaw();
-    inputs.pipeline = (int) getPipeline();
-    inputs.tagID = getAprilTagID();
+    inputs.tv = helper.getTV();
+    inputs.tx = helper.getTX();
+    inputs.ty = helper.getTY();
+    inputs.pipeline = (int) helper.getPipeline();
+    inputs.tagID = helper.getAprilTagID();
 
     if (!acceptMeasurements) {
       return;
@@ -117,30 +117,15 @@ public abstract class VisionIOLimelightBase implements VisionIO {
     return Optional.ofNullable(mt2);
   }
 
-  private int getAprilTagID() {
-    return (int) table.getEntry("tid").getInteger(-1);
-  }
-
-  private double getTYRaw() {
-    return table.getEntry("ty").getDouble(0.0);
-  }
-
-  private double getPipeline() {
-    return table.getEntry("getpipe").getDouble(0.0);
-  }
-
-  @Override
-  public void setPipeline(int pipeline) {
-    table.getEntry("pipeline").setNumber(pipeline);
-  }
-
   @Override
   public void takeSnapshot() {
-    table.getEntry("snapshot").setNumber(1.0);
+    helper.getSnapshotEntry().setNumber(1.0);
+    // TODO Helper.triggerSnapshot increments the snapshot number everytime to take a new snapshot
+    // We should investigate doing that instead of resetting
   }
 
   @Override
   public void resetSnapshot() {
-    table.getEntry("snapshot").setNumber(0.0);
+    helper.getSnapshotEntry().setNumber(0.0);
   }
 }
