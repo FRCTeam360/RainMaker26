@@ -493,7 +493,7 @@ public class RobotContainer {
     driverCont.b().and(isIndependentMode).whileTrue(hopperRoller.setDutyCycleCommand(-0.2));
 
     driverCont.start().and(isIndependentMode).whileTrue(flywheel.setDutyCycleCommand(0.2));
-    driverCont.back().and(isIndependentMode).whileTrue(flywheel.setDutyCycleCommand(-0.2));
+    driverCont.back().and(isIndependentMode).whileTrue(hood.zero());
   }
 
   void configureHoodTestBindings(BooleanSupplier isIndependentMode) {
