@@ -9,7 +9,7 @@
       "prevControl": null,
       "nextControl": {
         "x": 12.138544,
-        "y": 0.556233
+        "y": 0.5562329999999999
       },
       "isLocked": false,
       "linkedName": "FLIPPED Othersideend4"
@@ -42,8 +42,8 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 3.0,
-    "maxAcceleration": 6.0,
+    "maxVelocity": 4.0,
+    "maxAcceleration": 10.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
