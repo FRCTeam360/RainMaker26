@@ -13,6 +13,8 @@ import edu.wpi.first.hal.HALUtil;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import frc.robot.utils.RobotUtils.ActiveHub;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -30,6 +32,10 @@ public final class Constants {
   public static final AprilTagFieldLayout FIELD_LAYOUT =
       AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
 
+  public static Alliance AUTO_WINNER;
+  public static ActiveHub HUB_PHASE;
+  public static boolean HUB_ACTIVE;
+
   public static enum RobotType {
     SIM,
     WOODBOT,
@@ -37,17 +43,47 @@ public final class Constants {
     REPLAY
   }
 
+  /** Frames to skip between processed frames while disabled. Only affects Limelight 4. */
+  public static final int DISABLED_THROTTLE_SKIP_FRAMES = 200;
+
+  /** Frames to skip between processed frames while enabled. Only affects Limelight 4. */
+  public static final int ENABLED_THROTTLE_SKIP_FRAMES = 0;
+
+  static RobotType robotType;
+
+  public static RobotType getRobotType() {
+    return robotType;
+  }
+
+  static RobotType initRobotType() {
+    String serialAddress = HALUtil.getSerialNumber();
+
+    if (serialAddress.equals(SerialAddressConstants.WOOD_SERIAL_ADDRESS)) {
+      robotType = Constants.RobotType.WOODBOT;
+    } else if (serialAddress.equals(SerialAddressConstants.PRACTICE_SERIAL_ADDRESS)) {
+      robotType = Constants.RobotType.PRACTICEBOT;
+    } else if (!Robot.isReal()) { // KEEP AT BOTTOM
+      robotType = Constants.RobotType.SIM;
+    } else {
+      robotType = Constants.RobotType.PRACTICEBOT;
+    }
+    return robotType;
+  }
+
   public static final class IOConstants {
     // === USB PATHS ===
     public static final String USB_ROOT_DIRECTORY = "/U";
+
+    // === POWER DISTRIBUTION ===
+    public static final int PDH_CAN_ID = 1; // REV PDH default CAN ID
   }
 
   public static final CANBus RIO_CANBUS = new CANBus("rio");
 
   public static class WoodBotConstants {
     // === INTAKE ===
-    public static final int INTAKE_SENSOR_PORT = 0;
-    public static final int INTAKE_ID = 15;
+    public static final int INTAKE_ROLLER_SENSOR_PORT = 0;
+    public static final int INTAKE_ROLLER_ID = 15;
     public static final int INTAKE_PIVOT_ID = 0;
 
     // === HOPPER ===
@@ -167,7 +203,7 @@ public final class Constants {
 
     // === INTAKE ===
     public static final int INTAKE_PIVOT_ID = 14;
-    public static final int INTAKE_ID = 15;
+    public static final int INTAKE_ROLLER_ID = 15;
 
     // === CLIMBER ===
     public static final int CLIMBER_RIGHT_ID = 16;
@@ -190,7 +226,8 @@ public final class Constants {
     public static final int HOOD_ID = 24;
 
     // === LIMELIGHT ===
-    public static final String LIMELIGHT = "limelight-right";
+    public static final String LIMELIGHT_RIGHT = "limelight-right";
+    public static final String LIMELIGHT_LEFT = "limelight-left";
 
     // === CANBUS ===
     public static final CANBus CANBUS = new CANBus("Default Name");
@@ -206,16 +243,38 @@ public final class Constants {
       shotHoodAngleMap.put(0.0, 0.0);
 
       // === SHOOTING VALUES ===
-      shotFlywheelSpeedMap.put(6.0, 2500.0);
-      shotFlywheelSpeedMap.put(5.0, 2500.0); // TESTED
+      shotFlywheelSpeedMap.put(6.0, 2600.0);
+      shotFlywheelSpeedMap.put(5.0, 2550.0); // TESTED
       shotFlywheelSpeedMap.put(4.0, 2250.0);
       shotFlywheelSpeedMap.put(3.0, 2250.0); // TESTED
       shotFlywheelSpeedMap.put(2.5, 2150.0); // TESTED
       shotFlywheelSpeedMap.put(2.0, 2000.0);
-      shotFlywheelSpeedMap.put(1.0, 1800.0);
+      shotFlywheelSpeedMap.put(1.0, 2000.0);
       shotFlywheelSpeedMap.put(0.0, 2000.0);
 
-      timeOfFlightMap.put(0.0, 0.0);
+      passHoodAngleMap.put(15.0, 20.0);
+      // passHoodAngleMap.put(5.0, 20.0); // TESTED
+      // passHoodAngleMap.put(4.0, 20.0);
+      // passHoodAngleMap.put(3.0, 20.0); // TESTED
+      // passHoodAngleMap.put(2.5, 20.0); // TESTED
+      // passHoodAngleMap.put(2.0, 20.0);
+      passHoodAngleMap.put(1.0, 20.0);
+      passHoodAngleMap.put(0.0, 20.0);
+
+      passFlywheelSpeedMap.put(15.0, 4500.0);
+      passFlywheelSpeedMap.put(9.0, 4000.0);
+      passFlywheelSpeedMap.put(7.0, 3500.0);
+      passFlywheelSpeedMap.put(5.0, 3000.0); // TESTED
+      passFlywheelSpeedMap.put(4.0, 2750.0);
+      passFlywheelSpeedMap.put(3.0, 2600.0); // TESTED
+      passFlywheelSpeedMap.put(2.5, 2500.0); // TESTED
+      passFlywheelSpeedMap.put(2.0, 2200.0);
+      passFlywheelSpeedMap.put(1.0, 2000.0);
+      passFlywheelSpeedMap.put(0.0, 2000.0);
+
+      timeOfFlightMap.put(1.939, 0.82);
+      timeOfFlightMap.put(3.011, 1.26);
+      timeOfFlightMap.put(4.704, 1.37);
     }
   }
 
@@ -223,8 +282,8 @@ public final class Constants {
     public static final double SIM_TICK_RATE_S = 0.02;
 
     // === INTAKE ===
-    public static final int INTAKE_MOTOR = 30;
-    public static final int INTAKE_SENSOR_PORT = 10;
+    public static final int INTAKE_ROLLER_MOTOR = 30;
+    public static final int INTAKE_ROLLER_SENSOR_PORT = 10;
     public static final int INTAKE_PIVOT_MOTOR = 15;
 
     // === HOPPER ===
@@ -323,17 +382,4 @@ public final class Constants {
   }
 
   public static double loopPeriodSecs; // add value
-
-  public static RobotType getRobotType() {
-    String serialAddress = HALUtil.getSerialNumber();
-
-    if (serialAddress.equals(SerialAddressConstants.WOOD_SERIAL_ADDRESS)) {
-      return Constants.RobotType.WOODBOT;
-    } else if (serialAddress.equals(SerialAddressConstants.PRACTICE_SERIAL_ADDRESS)) {
-      return Constants.RobotType.PRACTICEBOT;
-    } else if (!Robot.isReal()) { // KEEP AT BOTTOM
-      return Constants.RobotType.SIM;
-    }
-    return Constants.RobotType.PRACTICEBOT;
-  }
 }

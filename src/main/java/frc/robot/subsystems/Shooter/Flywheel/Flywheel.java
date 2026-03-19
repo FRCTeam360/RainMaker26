@@ -32,6 +32,8 @@ public class Flywheel extends SubsystemBase {
   /** Velocity tolerance for bang-bang setpoint detection. */
   private static final double TOLERANCE_RPM = 150.0;
 
+  private static final double COAST_CONSTANT_VELOCITY = 0.0;
+
   /** Debounce time for shot detection — filters noise from brief velocity dips. */
   private static final double BALL_FIRED_DEBOUNCE_SECONDS = 0.04;
 
@@ -207,7 +209,7 @@ public class Flywheel extends SubsystemBase {
         break;
       case COAST:
         if (Constants.getRobotType() != Constants.RobotType.WOODBOT) {
-          setCoastVelocityControl(shootVelocitySupplier.getAsDouble());
+          setCoastVelocityControl(COAST_CONSTANT_VELOCITY);
         } else {
           setDutyCycle(0.0);
         }

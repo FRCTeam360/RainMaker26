@@ -38,6 +38,8 @@ public class HoodIOSim implements HoodIO {
   private static final double FORWARD_SOFT_LIMIT_DEGREES = 47.0;
   private static final double REVERSE_SOFT_LIMIT_DEGREES = 0.0;
 
+  private final HoodVisualizer visualizer = new HoodVisualizer(ARM_LENGTH);
+
   // Motor and control
   private final TalonFX motorControllerSim = new TalonFX(SimulationConstants.HOOD_MOTOR);
   private final PositionVoltage positionRequest = new PositionVoltage(0).withSlot(0);
@@ -118,6 +120,9 @@ public class HoodIOSim implements HoodIO {
     inputs.voltage = motorControllerSim.getSimState().getMotorVoltage();
     inputs.statorCurrent = motorControllerSim.getStatorCurrent().getValueAsDouble();
     inputs.supplyCurrent = motorControllerSim.getSupplyCurrent().getValueAsDouble();
+
+    // Step 6: Update visualization (sim only)
+    visualizer.update(hoodSim.getAngleRads());
   }
 
   /** Set position in degrees (matches PB IO) */

@@ -83,7 +83,7 @@ public class FlywheelIOPBBangBang implements FlywheelIO {
   private static final double TELEMETRY_UPDATE_FREQUENCY_HZ = 50.0;
 
   /** Frequency for control-critical signals (velocity, voltage, torque current, duty cycle). */
-  private static final double CONTROL_UPDATE_FREQUENCY_HZ = 250.0;
+  private static final double CONTROL_UPDATE_FREQUENCY_HZ = 500.0;
 
   /** Constructs the practice bot flywheel IO and configures both TalonFX motors. */
   public FlywheelIOPBBangBang() {
@@ -104,13 +104,13 @@ public class FlywheelIOPBBangBang implements FlywheelIO {
 
     // Slot 2: Traditional PID velocity control
     // TODO: Tune PID gains if needed
-    rightConfig.Slot2.kP = 3.0;
+    rightConfig.Slot2.kP = 0.06;
     rightConfig.Slot2.kI = 0.0;
-    rightConfig.Slot2.kD = 0.1;
+    rightConfig.Slot2.kD = 0.0;
     rightConfig.Slot2.kA = 0.0;
     rightConfig.Slot2.kG = 0.0;
-    rightConfig.Slot2.kS = 3.0;
-    rightConfig.Slot2.kV = 0.008;
+    rightConfig.Slot2.kS = 0.33;
+    rightConfig.Slot2.kV = 0.125;
 
     rightConfig.CurrentLimits.StatorCurrentLimit = STATOR_CURRENT_LIMIT_AMPS;
     rightConfig.CurrentLimits.StatorCurrentLimitEnable = true;

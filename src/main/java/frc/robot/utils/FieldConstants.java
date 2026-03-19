@@ -48,6 +48,12 @@ public class FieldConstants {
     public static final double oppHubCenter =
         FIELD_LAYOUT.getTagPose(4).get().getX() + Hub.width / 2.0;
     public static final double oppAllianceZone = FIELD_LAYOUT.getTagPose(10).get().getX();
+
+    // RED AND BLUE SPECIFIC
+    public static final double blueHubCenter =
+        FIELD_LAYOUT.getTagPose(26).get().getX() + Hub.width / 2.0;
+    public static final double redHubCenter =
+        FIELD_LAYOUT.getTagPose(4).get().getX() + Hub.width / 2.0;
   }
 
   /**
@@ -61,16 +67,16 @@ public class FieldConstants {
     public static final double center = fieldWidth / 2.0;
 
     // Right of hub
-    public static final double rightBumpStart = Hub.nearRightCorner.getY();
-    public static final double rightBumpEnd = rightBumpStart - RightBump.width;
-    public static final double rightTrenchOpenStart = rightBumpEnd - Units.inchesToMeters(12.0);
-    public static final double rightTrenchOpenEnd = 0;
+    public static final double rightBumpHubSide = Hub.nearRightCorner.getY();
+    public static final double rightBumpRailSide = rightBumpHubSide - RightBump.width;
+    public static final double rightTrenchHubSide = rightBumpRailSide - Units.inchesToMeters(12.0);
+    public static final double rightTrenchRailSide = 0;
 
     // Left of hub
-    public static final double leftBumpEnd = Hub.nearLeftCorner.getY();
-    public static final double leftBumpStart = leftBumpEnd + LeftBump.width;
-    public static final double leftTrenchOpenEnd = leftBumpStart + Units.inchesToMeters(12.0);
-    public static final double leftTrenchOpenStart = fieldWidth;
+    public static final double leftBumpHubSide = Hub.nearLeftCorner.getY();
+    public static final double leftBumpRailSide = leftBumpHubSide + LeftBump.width;
+    public static final double leftTrenchHubSide = leftBumpRailSide + Units.inchesToMeters(12.0);
+    public static final double leftTrenchRailSide = fieldWidth;
   }
 
   /** Hub related constants */
@@ -136,6 +142,13 @@ public class FieldConstants {
         new Translation2d(LinesVertical.hubCenter + width / 2, Units.inchesToMeters(255));
     public static final Translation2d farRightCorner = Hub.farLeftCorner;
 
+    // Passing point
+    // TODO: isolate this to own class in field constants
+    public static final Translation2d passingPoint =
+        new Translation2d(
+                nearLeftCorner.getX(), (nearLeftCorner.getY() + nearRightCorner.getY()) / 2)
+            .plus(new Translation2d(0.3, 0.0));
+
     // Relevant reference points on opposing side
     public static final Translation2d oppNearLeftCorner =
         new Translation2d(LinesVertical.oppHubCenter - width / 2, Units.inchesToMeters(255));
@@ -161,6 +174,13 @@ public class FieldConstants {
     public static final Translation2d farRightCorner =
         new Translation2d(
             LinesVertical.hubCenter + width / 2, fieldWidth - Units.inchesToMeters(255));
+
+    // Passing point
+    // TODO: isolate this to own class in field constants
+    public static final Translation2d passingPoint =
+        new Translation2d(
+                nearLeftCorner.getX(), (nearLeftCorner.getY() + nearRightCorner.getY()) / 2)
+            .plus(new Translation2d(0.3, 0.0));
 
     // Relevant reference points on opposing side
     public static final Translation2d oppNearLeftCorner = Hub.oppNearRightCorner;

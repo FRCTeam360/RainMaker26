@@ -18,7 +18,8 @@ import frc.robot.Constants;
 
 public class FlywheelKickerIOPB implements FlywheelKickerIO {
   private static final double GEAR_RATIO = 1.0;
-  private static final int CURRENT_LIMIT_AMPS = 40;
+  private static final int STALL_CURRENT_LIMIT_AMPS = 60;
+  private static final int FREE_CURRENT_LIMIT_AMPS = 50;
 
   // Spinup config - bang-bang maximum acceleration (extremely high kP drives full output)
   private static final double SPINUP_KP = 999999.0;
@@ -26,12 +27,12 @@ public class FlywheelKickerIOPB implements FlywheelKickerIO {
   private static final double SPINUP_KD = 0.0;
 
   // Hold config - smooth setpoint maintenance with tuned PID
-  private static final double HOLD_KP = 0.0004;
+  private static final double HOLD_KP = 0.0010;
   private static final double HOLD_KI = 0.0;
   private static final double HOLD_KD = 0.0;
 
   // Feedforward (shared across all slots)
-  private static final double KV = 0.0019;
+  private static final double KV = 0.0012;
   private static final double KS = 0.04;
 
   private static final double MIN_SIGNAL_STRENGTH = 2000; // unknown unit
@@ -59,9 +60,11 @@ public class FlywheelKickerIOPB implements FlywheelKickerIO {
     // Configure base motor settings
     sparkFlexConfig.idleMode(IdleMode.kCoast);
     sparkFlexConfig.inverted(false);
-    sparkFlexConfig.smartCurrentLimit(CURRENT_LIMIT_AMPS);
+    sparkFlexConfig.smartCurrentLimit(STALL_CURRENT_LIMIT_AMPS, FREE_CURRENT_LIMIT_AMPS);
     sparkFlexConfig.encoder.positionConversionFactor(1.0 / GEAR_RATIO);
     sparkFlexConfig.encoder.velocityConversionFactor(1.0 / GEAR_RATIO);
+    sparkFlexConfig.encoder.uvwMeasurementPeriod(10);
+    sparkFlexConfig.encoder.uvwAverageDepth(2);
 
     // Configure Slot 0: Spinup - aggressive acceleration
     sparkFlexConfig
@@ -69,7 +72,11 @@ public class FlywheelKickerIOPB implements FlywheelKickerIO {
         .p(SPINUP_KP, ClosedLoopSlot.kSlot0)
         .i(SPINUP_KI, ClosedLoopSlot.kSlot0)
         .d(SPINUP_KD, ClosedLoopSlot.kSlot0);
-    sparkFlexConfig.closedLoop.feedForward.kV(KV).kS(KS);
+    sparkFlexConfig
+        .closedLoop
+        .feedForward
+        .kV(KV, ClosedLoopSlot.kSlot1)
+        .kS(KS, ClosedLoopSlot.kSlot1);
     sparkFlexConfig.closedLoop.outputRange(
         MAX_NEGATIVE_OUTPUT, MAX_POSITIVE_OUTPUT, ClosedLoopSlot.kSlot0);
 

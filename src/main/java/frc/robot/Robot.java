@@ -4,12 +4,17 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj.PowerDistribution;
+import edu.wpi.first.net.WebServer;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.utils.RobotUtils;
+import java.util.Objects;
 import org.littletonrobotics.junction.LogFileUtil;
+import org.littletonrobotics.junction.LoggedPowerDistribution;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
@@ -53,9 +58,11 @@ public class Robot extends LoggedRobot {
       }
       // TODO: Re-enable for practice sessions when live dashboard telemetry is needed
       Logger.addDataReceiver(new NT4Publisher());
-      new PowerDistribution(1, ModuleType.kRev); // Enables power distribution logging
+      LoggedPowerDistribution.getInstance(
+          Constants.IOConstants.PDH_CAN_ID, ModuleType.kRev); // Enables power distribution logging
     }
-    switch (Constants.getRobotType()) {
+
+    switch (Constants.initRobotType()) {
       case SIM:
         // Running a physics simulator, log to NT
         Logger.addDataReceiver(new NT4Publisher());
@@ -74,6 +81,7 @@ public class Robot extends LoggedRobot {
     // be added.
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
+    WebServer.start(5800, Filesystem.getDeployDirectory().getPath());
     m_robotContainer = new RobotContainer();
   }
 
@@ -90,6 +98,14 @@ public class Robot extends LoggedRobot {
     // commands, running already-scheduled commands, removing finished or interrupted commands,
     // and running subsystem periodic() methods.  This must be called from the robot's periodic
     // block in order for anything in the Command-based framework to work.
+    SmartDashboard.putNumber("Match Time", DriverStation.getMatchTime());
+    if (Objects.nonNull(Constants.HUB_PHASE)) {
+      SmartDashboard.putString("HubPhase", Constants.HUB_PHASE.name());
+    } else {
+      SmartDashboard.putString("HubPhase", "BOTH");
+    }
+    SmartDashboard.putBoolean("HubActive", Constants.HUB_ACTIVE);
+
     double t0 = Logger.getTimestamp() / 1.0e6;
     m_robotContainer.preSchedulerUpdate();
     double t1 = Logger.getTimestamp() / 1.0e6;
@@ -144,6 +160,8 @@ public class Robot extends LoggedRobot {
     // teleop starts running. If you want the autonomous to
     // continue until interrupted by another command, remove
     // this line or comment it out.
+
+    Constants.AUTO_WINNER = RobotUtils.getAutoWinner(DriverStation.getGameSpecificMessage());
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
@@ -151,7 +169,20 @@ public class Robot extends LoggedRobot {
 
   /** This function is called periodically during operator control. */
   @Override
-  public void teleopPeriodic() {}
+  public void teleopPeriodic() {
+    if (Objects.nonNull(Constants.HUB_PHASE)) {
+      Logger.recordOutput("HubPhase", Constants.HUB_PHASE);
+    }
+    Logger.recordOutput("AutoWinner", Constants.AUTO_WINNER);
+    if (Objects.nonNull(Constants.AUTO_WINNER)) {
+      SmartDashboard.putString("AutoWinner", Constants.AUTO_WINNER.name());
+    }
+
+    boolean hubActive =
+        RobotUtils.hubActive(
+            DriverStation.getAlliance(), Constants.AUTO_WINNER, Constants.HUB_PHASE);
+    Constants.HUB_ACTIVE = hubActive;
+  }
 
   @Override
   public void testInit() {

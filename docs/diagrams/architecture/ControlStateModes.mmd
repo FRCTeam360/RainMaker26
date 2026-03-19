@@ -1,0 +1,20 @@
+---
+title: Control State Modes
+---
+graph LR
+    subgraph "SUPERSTRUCTURE Mode (Default)"
+        SSCtrl["SuperStructure<br/>State Machines"] -->|"Sets wanted states"| Subs1["Subsystems"]
+    end
+
+    subgraph "INDEPENDENT Mode (Testing)"
+        Cmds["Direct Commands"] -->|"Bypass superstructure"| Subs2["Subsystems"]
+    end
+
+    Toggle["ControlState Switch"] --> SSCtrl
+    Toggle --> Cmds
+
+    style SSCtrl fill:#e07b39,color:#fff
+    style Subs1 fill:#50b050,color:#fff
+    style Cmds fill:#8e44ad,color:#fff
+    style Subs2 fill:#50b050,color:#fff
+    style Toggle fill:#4a90d9,color:#fff

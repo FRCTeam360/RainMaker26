@@ -41,7 +41,7 @@ public class Vision extends SubsystemBase {
     MEASUREMENT_STD_DEV_DISTANCE_MAP.put(
         0.1,
         VecBuilder.fill(
-            0.25, 0.25, 999999.0)); // Close tags ( at 10 cm): very high confidence (50 cm std dev)
+            0.5, 0.5, 999999.0)); // Close tags ( at 10 cm): very high confidence (50 cm std dev)
     MEASUREMENT_STD_DEV_DISTANCE_MAP.put(
         8.0,
         VecBuilder.fill(
@@ -130,7 +130,7 @@ public class Vision extends SubsystemBase {
           input.tagPoses[i] = input.tagPoses[0];
         }
       }
-      Logger.processInputs("Limelight: " + key, input);
+      Logger.processInputs("Vision: " + key, input);
     }
 
     for (Map.Entry<String, VisionIOInputsAutoLogged> entry : visionInputs.entrySet()) {
