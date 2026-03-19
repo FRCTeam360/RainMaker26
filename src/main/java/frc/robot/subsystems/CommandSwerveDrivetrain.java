@@ -34,6 +34,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
 import frc.robot.generated.WoodBotDrivetrain.TunerSwerveDrivetrain;
 import frc.robot.subsystems.Vision.VisionMeasurement;
+import frc.robot.utils.ControllerHelper;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.DoubleSupplier;
@@ -128,12 +129,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             .withDriveRequestType(m_driveRequestType);
     return this.applyRequest(
         () -> {
-          double velXMps = Math.pow(driveCont.getLeftY(), 3) * maxSpeed.in(MetersPerSecond) * -1.0;
-          double velYMps = Math.pow(driveCont.getLeftX(), 3) * maxSpeed.in(MetersPerSecond) * -1.0;
-          double omegaRps =
-              Math.pow(driveCont.getRightX(), 2)
-                  * (maxAngularVelocity.in(RadiansPerSecond) / 2.0)
-                  * -Math.signum(driveCont.getRightX());
+          double velXMps = ControllerHelper.modifyAxisCubic(driveCont.getLeftY(), 1);
+          double velYMps = ControllerHelper.modifyAxisCubic(driveCont.getLeftX(), 1);
+          double omegaRps = ControllerHelper.modifyAxisCubed(driveCont.getRightX(), 1);
           // Store as robot-relative to match getVelocity() convention.
           // Operator-perspective velocities are converted to field-relative via
           // alliance flip, then to robot-relative via fromFieldRelativeSpeeds.
@@ -155,12 +153,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         // (left)
         );
   }
-
-  private final SwerveRequest.FieldCentric FIELD_CENTRIC_DRIVE =
-      new SwerveRequest.FieldCentric()
-          .withDeadband(maxSpeed.in(MetersPerSecond) * 0.01)
-          .withRotationalDeadband(maxAngularVelocity.in(RadiansPerSecond) * 0.01)
-          .withDriveRequestType(m_driveRequestType);
 
   // Xout Command
   public void xOut() {
@@ -235,8 +227,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   public Command faceAngleWhileDrivingCommand(
       CommandXboxController driveCont, Supplier<Rotation2d> headingSupplier) {
     return faceAngleWhileDrivingCommand(
-        () -> Math.pow(driveCont.getLeftY(), 3) * maxSpeed.in(MetersPerSecond) * -1.0,
-        () -> Math.pow(driveCont.getLeftX(), 3) * maxSpeed.in(MetersPerSecond) * -1.0,
+        () -> ControllerHelper.modifyAxisCubic(driveCont.getLeftY(), 1),
+        () -> ControllerHelper.modifyAxisCubic(driveCont.getLeftX(), 1),
         headingSupplier);
   }
 
