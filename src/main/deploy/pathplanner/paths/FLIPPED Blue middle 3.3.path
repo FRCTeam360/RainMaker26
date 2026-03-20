@@ -8,24 +8,24 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 7.421767,
-        "y": 1.803411
+        "x": 5.876348,
+        "y": 3.394536
       },
       "isLocked": false,
-      "linkedName": "red middle 2 end"
+      "linkedName": "FLIPPED blue middle 2 end"
     },
     {
       "anchor": {
-        "x": 6.769116,
-        "y": 0.721889
+        "x": 6.445649,
+        "y": 0.470399
       },
       "prevControl": {
-        "x": 7.631622,
-        "y": 0.769149
+        "x": 7.308155,
+        "y": 0.51766
       },
       "nextControl": {
-        "x": 6.057771,
-        "y": 0.682911
+        "x": 5.734305,
+        "y": 0.431422
       },
       "isLocked": false,
       "linkedName": null
@@ -57,7 +57,7 @@
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "3.3 end"
+      "linkedName": "FLIPPED 3.3 end"
     }
   ],
   "rotationTargets": [
@@ -74,7 +74,7 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 3.5,
+    "maxVelocity": 2.5,
     "maxAcceleration": 6.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
