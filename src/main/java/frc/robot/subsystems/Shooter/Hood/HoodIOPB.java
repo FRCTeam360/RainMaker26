@@ -11,7 +11,6 @@ import com.ctre.phoenix6.configs.TalonFXSConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFXS;
 import com.ctre.phoenix6.signals.InvertedValue;
-import com.ctre.phoenix6.signals.MotorArrangementValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
@@ -62,15 +61,12 @@ public class HoodIOPB implements HoodIO {
     slot0Configs.kS = KS;
     slot0Configs.kV = KV;
 
-    config.Commutation.MotorArrangement = MotorArrangementValue.NEO550_JST;
-
     config.ExternalFeedback.SensorToMechanismRatio = GEAR_RATIO;
 
     config.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
     config.SoftwareLimitSwitch.ForwardSoftLimitThreshold =
         Units.degreesToRotations(FORWARD_SOFT_LIMIT_DEGREES);
     config.CurrentLimits.StatorCurrentLimit = STATOR_CURRENT_LIMIT_AMPS;
-    // NEO 550 has lower current capacity than Falcon 500
     config.CurrentLimits.StatorCurrentLimitEnable = true;
     config.CurrentLimits.SupplyCurrentLimit = SUPPLY_CURRENT_LIMIT_AMPS;
     config.CurrentLimits.SupplyCurrentLimitEnable = true;
@@ -96,6 +92,8 @@ public class HoodIOPB implements HoodIO {
         supplyCurrentSignal,
         motorVoltageSignal);
     hoodMotor.optimizeBusUtilization();
+
+    setZero();
   }
 
   /**
@@ -116,6 +114,7 @@ public class HoodIOPB implements HoodIO {
         supplyCurrentSignal,
         motorVoltageSignal);
     inputs.position = Units.rotationsToDegrees(positionSignal.getValueAsDouble());
+    inputs.positionRotations = positionSignal.getValueAsDouble();
     inputs.statorCurrent = statorCurrentSignal.getValueAsDouble();
     inputs.supplyCurrent = supplyCurrentSignal.getValueAsDouble();
     inputs.velocity = Units.rotationsToDegrees(velocitySignal.getValueAsDouble());
