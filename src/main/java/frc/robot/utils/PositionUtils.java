@@ -149,6 +149,9 @@ public class PositionUtils {
   public static boolean canPass(Pose2d robotPose, Rotation2d shooterRotation) {
     boolean canPass = true;
     Translation2d start = robotPose.getTranslation();
+    double rise;
+    double run;
+    double slope;
     double dx = shooterRotation.getCos();
     double dy = shooterRotation.getSin();
     double maxDistance = Double.MAX_VALUE;
@@ -164,38 +167,13 @@ public class PositionUtils {
     }
     Translation2d end = start.plus(new Translation2d(maxDistance, shooterRotation));
     int length = (int) Math.round(start.getDistance(end));
-    Pose2d[] points = getRaycastLine(start, end, shooterRotation, length);
-    Pose2d[] raycast;
-    for (Pose2d point : points) {
-      if (blueAllianceHub.contains(point.getTranslation())) {
-        end = point.getTranslation();
-        length = (int) Math.round(start.getDistance(end));
-        points = getRaycastLine(start, end, shooterRotation, length);
-        canPass = false;
-        break;
-      } else if (redAllianceHub.contains(point.getTranslation())) {
-        end = point.getTranslation();
-        length = (int) Math.round(start.getDistance(end));
-        points = getRaycastLine(start, end, shooterRotation, length);
-        canPass = false;
-        break;
-      }
-    }
-    raycast = points;
-    Logger.recordOutput("Raycast/Line", raycast);
+    rise = start.getY() - end.getY();
+    run = start.getX() - end.getX();
+    slope = rise/run;
+    
+    
+    // Logger.recordOutput("Raycast/Line", raycast);
     return canPass;
-  }
-
-  public static Pose2d[] getRaycastLine(
-      Translation2d start, Translation2d end, Rotation2d rotation, int numberOfPoints) {
-    Pose2d[] points = new Pose2d[numberOfPoints + 1];
-    for (int i = 0; i <= numberOfPoints; i++) {
-      double spotOnLine = (double) i / numberOfPoints;
-      double x = start.getX() + (end.getX() - start.getX()) * spotOnLine;
-      double y = start.getY() + (end.getY() - start.getY()) * spotOnLine;
-      points[i] = new Pose2d(new Translation2d(x, y), rotation);
-    }
-    return points;
   }
 
   /**
