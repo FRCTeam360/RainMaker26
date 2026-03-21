@@ -302,12 +302,19 @@ public class RobotContainer {
         Commands.waitSeconds(4)
             .deadlineFor(
                 superStructure
-                    .setStateCommand(SuperWantedStates.SHOOT_AT_HUB)
-                    .alongWith(
-                        drivetrain.faceAngleWhileDrivingCommand(
-                            () -> 0,
-                            () -> 0,
-                            () -> hubShotCalculator.calculateShot().targetHeading())))
+            .setStateCommand(SuperWantedStates.AUTO_CYCLE_SHOOTING)
+            .alongWith(
+                drivetrain.faceAngleWhileDrivingCommand(
+                    driverCont,
+                    () -> {
+                      if (superStructure.getCurrentSuperState() == SuperInternalStates.PASSING) {
+                        return passCalculator.calculateShot().targetHeading();
+                      }
+                      return hubShotCalculator.calculateShot().targetHeading();
+                    }))
+            .alongWith(
+                Commands.waitSeconds(1.25)
+                    .andThen(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING))))
             .andThen(superStructure.setStateCommand(SuperWantedStates.DEFAULT)));
     registerPathplannerCommand(
         "stow intake", superStructure.setIntakeStateCommand(IntakeWantedStates.STOWED));
