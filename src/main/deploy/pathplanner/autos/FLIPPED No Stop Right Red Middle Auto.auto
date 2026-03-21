@@ -43,9 +43,22 @@
           }
         },
         {
-          "type": "named",
+          "type": "deadline",
           "data": {
-            "name": "shoot at hub"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "shoot at hub"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "agitate intake"
+                }
+              }
+            ]
           }
         },
         {
@@ -68,9 +81,22 @@
           }
         },
         {
-          "type": "named",
+          "type": "deadline",
           "data": {
-            "name": "shoot at hub"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "shoot at hub"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "agitate intake"
+                }
+              }
+            ]
           }
         }
       ]
