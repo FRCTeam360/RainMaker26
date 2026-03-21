@@ -47,6 +47,10 @@ public class SuperStructure extends SubsystemBase {
   private final Supplier<Pose2d> robotPoseSupplier;
   private final Transform2d robotToShooter;
 
+  //shooting @ 3 meters
+  private final double HOOD_FORCED_ANGLE = 10.0;
+  private final double FLYWHEEL_FORCED_RPM = 2200.0;
+
   // Enums
   public enum SuperWantedStates {
     DEFAULT,
@@ -114,7 +118,7 @@ public class SuperStructure extends SubsystemBase {
     flywheel.setShootVelocitySupplier(
         () -> {
           if (currentSuperState == SuperInternalStates.FORCED_SHOT) {
-            return 2000;
+            return FLYWHEEL_FORCED_RPM;
           }
           return targetSelectionStateMachine.getActiveCalculator().calculateShot().flywheelSpeed();
           // () -> targetSelectionStateMachine.getActiveCalculator().calculateShot().flywheelSpeed()
@@ -122,7 +126,7 @@ public class SuperStructure extends SubsystemBase {
     hood.setHoodAngleSupplier(
         () -> {
           if (currentSuperState == SuperInternalStates.FORCED_SHOT) {
-            return 20.0;
+            return HOOD_FORCED_ANGLE;
           }
           return targetSelectionStateMachine.getActiveCalculator().calculateShot().hoodAngle();
         });
