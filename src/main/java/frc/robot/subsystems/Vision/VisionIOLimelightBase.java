@@ -85,10 +85,11 @@ public abstract class VisionIOLimelightBase implements VisionIO {
     // per, then don't update further
     if (newPoseEstimate.isEmpty()
         || inputs.tv == 0.0
-        || gyroAngleRateSupplier.getAsDouble() > 720.0) return;
+        || Math.abs(gyroAngleRateSupplier.getAsDouble()) > 720.0) return;
     // if the megatag1 pose estimate has less than 2 tags in it, don't update
     // further
     if (!newPoseEstimate.get().isMegaTag2) return;
+    if (newPoseEstimate.get().tagCount == 0) return;
     if (Math.abs(
             newPoseEstimate
                 .get()
@@ -96,7 +97,7 @@ public abstract class VisionIOLimelightBase implements VisionIO {
                 .getRotation()
                 .minus(Rotation2d.fromDegrees(gyroAngleSupplier.getAsDouble()))
                 .getDegrees())
-        > 60.0) return;
+        > 120.0) return;
 
     PoseEstimate poseEstimate = newPoseEstimate.get();
 

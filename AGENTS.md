@@ -209,6 +209,7 @@ Use this checklist as a reference for what good code looks like, but **only flag
 - [ ] Units documented in variable names or comments (meters, radians, etc.)
 - [ ] Resource ownership clear (one subsystem per hardware device)
 - [ ] All subsystems initialized in every robot config (SIM, WoodBot, PracticeBot) — use Noop IOs for missing hardware
+- [ ] No NI Driver Station artifacts in source files — the DS enable shortcut inserts `\[]` into the focused window, and pressing Enter to disable can insert stray newlines. Flag any `\[]` occurrences or unexpected blank lines in code/comments that may have been typed while the DS was focused.
 
 ## Do
 
