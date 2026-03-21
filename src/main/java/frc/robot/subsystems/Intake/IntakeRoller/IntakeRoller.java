@@ -147,6 +147,19 @@ public class IntakeRoller extends SubsystemBase {
     io.setVelocity(velocity);
   }
 
+  /**
+   * Updates the closed-loop PID and feedforward gains.
+   *
+   * @param kP Proportional gain
+   * @param kI Integral gain
+   * @param kD Derivative gain
+   * @param kV Velocity feedforward gain
+   * @param kS Static feedforward gain
+   */
+  public void setPID(double kP, double kI, double kD, double kV, double kS) {
+    io.setPID(kP, kI, kD, kV, kS);
+  }
+
   public void stop() {
     this.setDutyCycle(0.0);
   }

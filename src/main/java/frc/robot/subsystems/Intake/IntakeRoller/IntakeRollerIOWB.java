@@ -53,6 +53,14 @@ public class IntakeRollerIOWB implements IntakeRollerIO {
     closedLoopConfig.setSetpoint(velocity, ControlType.kVelocity);
   }
 
+  @Override
+  public void setPID(double kP, double kI, double kD, double kV, double kS) {
+    SparkFlexConfig pidConfig = new SparkFlexConfig();
+    pidConfig.closedLoop.p(kP).i(kI).d(kD);
+    pidConfig.closedLoop.feedForward.kV(kV).kS(kS);
+    motor.configure(pidConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+  }
+
   public void updateInputs(IntakeRollerIOInputs inputs) {
     inputs.position[0] = encoder.getPosition();
     inputs.sensor = sensor.get();

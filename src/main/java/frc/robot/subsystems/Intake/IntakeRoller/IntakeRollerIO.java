@@ -25,5 +25,16 @@ public interface IntakeRollerIO {
 
   public void stop();
 
+  /**
+   * Updates the closed-loop PID and feedforward gains.
+   *
+   * @param kP Proportional gain
+   * @param kI Integral gain
+   * @param kD Derivative gain
+   * @param kV Velocity feedforward gain
+   * @param kS Static feedforward gain
+   */
+  public default void setPID(double kP, double kI, double kD, double kV, double kS) {}
+
   public default void updateInputs(IntakeRollerIOInputs inputs) {}
 }

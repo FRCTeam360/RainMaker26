@@ -106,6 +106,15 @@ public class IntakeRollerIOSim implements IntakeRollerIO {
   }
 
   @Override
+  public void setPID(double kP, double kI, double kD, double kV, double kS) {
+    SparkFlexConfig pidConfig = new SparkFlexConfig();
+    pidConfig.closedLoop.p(kP).i(kI).d(kD);
+    pidConfig.closedLoop.feedForward.kV(kV).kS(kS);
+    motorControllerSim.configure(
+        pidConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+  }
+
+  @Override
   public void setDutyCycle(double value) {
     motorControllerSim.set(value);
   }
