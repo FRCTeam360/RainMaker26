@@ -170,6 +170,8 @@ public class PositionUtils {
     } else if (dx < 0) {
       maxDistance = Math.min(maxDistance, -start.getX() / dx);
     }
+    maxDistance = Math.min(maxDistance, (Hub.farRightCorner.getX() - start.getX()) / dx);
+    maxDistance = Math.min(maxDistance, (-Hub.oppNearLeftCorner.getX() - start.getX()) / dx);
     // if dy > 0 we're looking towards the wall next to the red outpost
     if (dy > 0) {
       maxDistance = Math.min(maxDistance, (FieldConstants.fieldWidth - start.getY()) / dy);
@@ -177,6 +179,8 @@ public class PositionUtils {
     } else if (dy < 0) {
       maxDistance = Math.min(maxDistance, -start.getY() / dy);
     }
+    maxDistance = Math.min(maxDistance, (Hub.farRightCorner.getY() - start.getY()) / dy);
+    maxDistance = Math.min(maxDistance, (Hub.nearRightCorner.getY() - start.getY()) / dy);
     Translation2d end = start.plus(new Translation2d(maxDistance, shooterRotation));
     int length = (int) Math.round(start.getDistance(end));
     rise = start.getY() - end.getY();
