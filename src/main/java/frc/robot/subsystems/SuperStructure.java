@@ -168,7 +168,7 @@ public class SuperStructure extends SubsystemBase {
         break;
       case AGITATING_PASSING:
         setIntakeState(IntakeWantedStates.AGITATING);
-        //shoots and agitates
+        // shoots and agitates
       case SHOOTING_AT_HUB:
       case PASSING:
         shooting();
