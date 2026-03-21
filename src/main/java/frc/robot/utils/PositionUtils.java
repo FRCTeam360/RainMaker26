@@ -164,38 +164,25 @@ public class PositionUtils {
     }
     Translation2d end = start.plus(new Translation2d(maxDistance, shooterRotation));
     int length = (int) Math.round(start.getDistance(end));
-    Pose2d[] points = getRaycastLine(start, end, shooterRotation, length);
-    Pose2d[] raycast;
-    for (Pose2d point : points) {
-      if (blueAllianceHub.contains(point.getTranslation())) {
-        end = point.getTranslation();
-        length = (int) Math.round(start.getDistance(end));
-        points = getRaycastLine(start, end, shooterRotation, length);
-        canPass = false;
-        break;
-      } else if (redAllianceHub.contains(point.getTranslation())) {
-        end = point.getTranslation();
-        length = (int) Math.round(start.getDistance(end));
-        points = getRaycastLine(start, end, shooterRotation, length);
-        canPass = false;
-        break;
-      }
-    }
-    raycast = points;
+    end = findIntersectionWithHub(start, end, shooterRotation, length);
+    Pose2d[] raycast = new Pose2d[] {robotPose, new Pose2d(end, shooterRotation)};
     Logger.recordOutput("Raycast/Line", raycast);
     return canPass;
   }
 
-  public static Pose2d[] getRaycastLine(
+  public static Translation2d findIntersectionWithHub(
       Translation2d start, Translation2d end, Rotation2d rotation, int numberOfPoints) {
-    Pose2d[] points = new Pose2d[numberOfPoints + 1];
     for (int i = 0; i <= numberOfPoints; i++) {
       double spotOnLine = (double) i / numberOfPoints;
       double x = start.getX() + (end.getX() - start.getX()) * spotOnLine;
       double y = start.getY() + (end.getY() - start.getY()) * spotOnLine;
-      points[i] = new Pose2d(new Translation2d(x, y), rotation);
+      Translation2d point = new Translation2d(x, y);
+      Logger.recordOutput("Raycast/Point", point);
+      if (blueAllianceHub.contains(point) || redAllianceHub.contains(point)) {
+        return point;
+      }
     }
-    return points;
+    return end;
   }
 
   /**
