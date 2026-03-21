@@ -8,24 +8,8 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 11.589072037158596,
-        "y": 7.4584977832410235
-      },
-      "isLocked": false,
-      "linkedName": null
-    },
-    {
-      "anchor": {
-        "x": 8.718244444444444,
-        "y": 6.968077777777778
-      },
-      "prevControl": {
-        "x": 9.077580620983616,
-        "y": 7.468787368605006
-      },
-      "nextControl": {
-        "x": 8.572482268385139,
-        "y": 6.764968477078731
+        "x": 11.454886844961791,
+        "y": 7.465206822491193
       },
       "isLocked": false,
       "linkedName": null
@@ -33,31 +17,47 @@
     {
       "anchor": {
         "x": 9.234700000000002,
-        "y": 4.970466666666666
+        "y": 7.318877777777777
       },
       "prevControl": {
-        "x": 8.533160873779867,
-        "y": 4.8342454771093575
+        "x": 9.440501554869792,
+        "y": 7.599516261691125
       },
       "nextControl": {
-        "x": 10.23837777777778,
-        "y": 5.165355555555555
+        "x": 8.805944444444444,
+        "y": 6.734211111111112
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 10.423522222222223,
-        "y": 5.5064111111111105
+        "x": 9.234700000000002,
+        "y": 5.233566666666666
       },
       "prevControl": {
-        "x": 10.147010603178252,
-        "y": 5.3736120750113905
+        "x": 8.766966666666667,
+        "y": 5.2920333333333325
       },
       "nextControl": {
-        "x": 10.743379617312096,
-        "y": 5.660027635089974
+        "x": 9.626231624420015,
+        "y": 5.184625213614164
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 10.3748,
+        "y": 5.7207888888888885
+      },
+      "prevControl": {
+        "x": 9.895578195169193,
+        "y": 5.586530955319705
+      },
+      "nextControl": {
+        "x": 10.619487377681693,
+        "y": 5.789340072008789
       },
       "isLocked": false,
       "linkedName": null
@@ -68,8 +68,8 @@
         "y": 5.7207888888888885
       },
       "prevControl": {
-        "x": 13.875753236744979,
-        "y": 5.622458056344662
+        "x": 13.773900665535438,
+        "y": 5.635387048681083
       },
       "nextControl": null,
       "isLocked": false,
@@ -82,16 +82,16 @@
       "rotationDegrees": -164.8482
     },
     {
-      "waypointRelativePos": 0.7170124481327801,
-      "rotationDegrees": -83.21660607977768
+      "waypointRelativePos": 0.7634854771784232,
+      "rotationDegrees": -74.21362591657142
     },
     {
       "waypointRelativePos": 1.4763485477178429,
-      "rotationDegrees": -74.4234113628769
+      "rotationDegrees": -78.4341161957761
     },
     {
       "waypointRelativePos": 2.323651452282158,
-      "rotationDegrees": 14.087438547764288
+      "rotationDegrees": 1.1759165096604294
     },
     {
       "waypointRelativePos": 3.4390041493775954,
@@ -101,13 +101,13 @@
   "constraintZones": [
     {
       "name": "Constraints Zone",
-      "minWaypointRelativePos": 0.7622828784119067,
+      "minWaypointRelativePos": 0.8019851116625277,
       "maxWaypointRelativePos": 4.0,
       "constraints": {
-        "maxVelocity": 2.5,
+        "maxVelocity": 2.0,
         "maxAcceleration": 6.0,
-        "maxAngularVelocity": 540.0,
-        "maxAngularAcceleration": 720.0,
+        "maxAngularVelocity": 360.0,
+        "maxAngularAcceleration": 540.0,
         "nominalVoltage": 12.0,
         "unlimited": false
       }
@@ -116,10 +116,10 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 4.0,
-    "maxAcceleration": 8.0,
-    "maxAngularVelocity": 540.0,
-    "maxAngularAcceleration": 720.0,
+    "maxVelocity": 3.0,
+    "maxAcceleration": 7.0,
+    "maxAngularVelocity": 360.0,
+    "maxAngularAcceleration": 540.0,
     "nominalVoltage": 12.0,
     "unlimited": false
   },
@@ -133,5 +133,5 @@
     "velocity": 0,
     "rotation": 180.0
   },
-  "useDefaultConstraints": true
+  "useDefaultConstraints": false
 }
