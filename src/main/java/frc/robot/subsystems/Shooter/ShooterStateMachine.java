@@ -28,6 +28,7 @@ public class ShooterStateMachine {
 
   public enum ShooterStates {
     PREPARING_TO_FIRE,
+    AIMED,
     FIRING,
     WAITING,
     UNJAMMING,
@@ -117,17 +118,18 @@ public class ShooterStateMachine {
         Logger.recordOutput("Superstructure/Shooting/TargetReady", targetReady);
         SmartDashboard.putBoolean("Superstructure/Shooting/DrivetrainAligned", drivetrainAligned);
 
-        // Enter FIRING when flywheel reaches AT_SETPOINT (with hood + drivetrain ready).
-        // Stay in FIRING through bang-bang oscillations — only revert to PREPARING_TO_FIRE
-        // when UNDER_SHOOTING signals a sustained RPM drop from too many shots passing through.
-        boolean shouldFire =
-            (flywheelReady || (previousState == ShooterStates.FIRING && !flywheelUnderShooting))
-                && hoodReady
-                && drivetrainAligned
-                && targetReady;
+        // AIMED requires flywheel and hood to be genuinely at setpoint.
+        // Bang-bang oscillations during firing are tolerated to stay in FIRING —
+        // only revert when UNDER_SHOOTING signals a sustained RPM drop.
+        boolean inBangBang =
+            previousState == ShooterStates.FIRING && !flywheelUnderShooting;
+        boolean subsystemsReady = flywheelReady && hoodReady && drivetrainAligned;
+        boolean shouldFire = (subsystemsReady || inBangBang) && targetReady;
 
         if (shouldFire) {
           currentState = ShooterStates.FIRING;
+        } else if (subsystemsReady) {
+          currentState = ShooterStates.AIMED;
         } else {
           currentState = ShooterStates.PREPARING_TO_FIRE;
         }
@@ -152,6 +154,7 @@ public class ShooterStateMachine {
   public void apply() {
     switch (currentState) {
       case PREPARING_TO_FIRE:
+      case AIMED:
         flywheel.setWantedState(FlywheelWantedStates.SHOOTING);
         hood.setWantedState(HoodWantedStates.AIMING);
         if (Constants.getRobotType() != Constants.RobotType.WOODBOT) {
@@ -173,7 +176,6 @@ public class ShooterStateMachine {
       case UNJAMMING:
         flywheel.setWantedState(FlywheelWantedStates.IDLE);
         hood.setWantedState(HoodWantedStates.IDLE);
-
         flywheelKicker.setWantedState(FlywheelKickerStates.REVERSING);
         break;
       case IDLE:
