@@ -152,7 +152,7 @@ public class SuperStructure extends SubsystemBase {
         currentSuperState = SuperInternalStates.AGITATING_PASSING;
         break;
       case AUTO_CYCLE_FALSE:
-        setIntakeStateCommand(IntakeWantedStates.DEPLOYED);
+        setIntakeState(IntakeWantedStates.DEPLOYED);
       case DEFAULT:
       default:
         targetSelectionStateMachine.setWantedState(TargetWantedStates.AUTO);
@@ -167,7 +167,8 @@ public class SuperStructure extends SubsystemBase {
         stopped();
         break;
       case AGITATING_PASSING:
-        setIntakeStateCommand(IntakeWantedStates.AGITATING);
+        setIntakeState(IntakeWantedStates.AGITATING);
+        //shoots and agitates
       case SHOOTING_AT_HUB:
       case PASSING:
         shooting();
