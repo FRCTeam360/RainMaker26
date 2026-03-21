@@ -127,8 +127,7 @@ public class ShooterStateMachine {
         // AIMED requires flywheel and hood to be genuinely at setpoint.
         // Bang-bang oscillations during firing are tolerated to stay in FIRING —
         // only revert when UNDER_SHOOTING signals a sustained RPM drop.
-        boolean inBangBang =
-            previousState == ShooterStates.FIRING && !flywheelUnderShooting;
+        boolean inBangBang = previousState == ShooterStates.FIRING && !flywheelUnderShooting;
         boolean subsystemsReady = flywheelReady && hoodReady && drivetrainAligned;
         boolean shouldFire = (subsystemsReady || inBangBang) && targetReady;
 
