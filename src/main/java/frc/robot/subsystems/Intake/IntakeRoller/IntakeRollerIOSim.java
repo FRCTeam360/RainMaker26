@@ -97,12 +97,12 @@ public class IntakeRollerIOSim implements IntakeRollerIO {
         BatterySim.calculateDefaultBatteryLoadedVoltage(intakeSim.getCurrentDrawAmps()));
 
     // Step 5: Read all inputs from the SIMULATED VALUES (source of truth)
-    inputs.velocity = intakeSim.getAngularVelocityRPM(); // SparkFlex encoder default is RPM
-    inputs.voltage = appliedVoltage;
-    inputs.statorCurrent = intakeSim.getCurrentDrawAmps();
+    inputs.velocity[0] = intakeSim.getAngularVelocityRPM(); // SparkFlex encoder default is RPM
+    inputs.voltage[0] = appliedVoltage;
+    inputs.statorCurrent[0] = intakeSim.getCurrentDrawAmps();
     inputs.supplyCurrent = intakeSim.getCurrentDrawAmps();
     inputs.sensor = sensorSim.getValue();
-    inputs.position = 0.0; // Not tracked for flywheel
+    inputs.position[0] = 0.0; // Not tracked for flywheel
   }
 
   @Override

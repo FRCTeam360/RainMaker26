@@ -10,11 +10,11 @@ public interface IntakeRollerIO {
   /** Creates a new IntakeRollerIO. */
   @AutoLog
   public static class IntakeRollerIOInputs {
-    public double statorCurrent = 0.0;
+    public double[] statorCurrent = new double[2];
     public double supplyCurrent = 0.0;
-    public double voltage = 0.0;
-    public double velocity = 0.0;
-    public double position = 0.0;
+    public double[] voltage = new double[2];
+    public double[] velocity = new double[2];
+    public double[] position = new double[2];
     public boolean sensor = false;
     // insert inputs
   }
