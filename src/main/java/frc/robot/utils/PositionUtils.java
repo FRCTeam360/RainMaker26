@@ -36,15 +36,8 @@ public class PositionUtils {
   // The segments are based on the view from the corresponding driver station
   private static final Rectangle2d blueAllianceHub =
       new Rectangle2d(Hub.nearLeftCorner, Hub.farRightCorner);
-  private static final Segment2d blueHubLength = new Segment2d(Hub.farRightCorner, Hub.farLeftCorner);
-  private static final Segment2d blueHubWidthLeft = new Segment2d(Hub.nearLeftCorner, Hub.farLeftCorner);
-  private static final Segment2d blueHubWidthRight = new Segment2d(Hub.nearRightCorner, Hub.farRightCorner);
-
   private static final Rectangle2d redAllianceHub =
       new Rectangle2d(Hub.oppNearLeftCorner, Hub.oppFarRightCorner);
-  private static final Segment2d redHubLength = new Segment2d(Hub.oppNearRightCorner, Hub.oppNearLeftCorner);
-  private static final Segment2d redHubWidthLeft = new Segment2d(Hub.oppFarLeftCorner, Hub.oppNearLeftCorner);
-  private static final Segment2d redHubWidthRight = new Segment2d(Hub.oppFarRightCorner, Hub.oppNearRightCorner);
 
   // If we are on the blue alliance, we use these no fly zones
   private static final Rectangle2d neutralNoFlyZoneWhenOnBlueAlliance =
@@ -163,6 +156,7 @@ public class PositionUtils {
     double dx = shooterRotation.getCos();
     double dy = shooterRotation.getSin();
     double maxDistance = Double.MAX_VALUE;
+
     // if dx > 0 then we're looking towards the blue alliance side
     if (dx > 0) {
       maxDistance = Math.min(maxDistance, (FieldConstants.fieldLength - start.getX()) / dx);
@@ -170,8 +164,6 @@ public class PositionUtils {
     } else if (dx < 0) {
       maxDistance = Math.min(maxDistance, -start.getX() / dx);
     }
-    maxDistance = Math.min(maxDistance, (Hub.farRightCorner.getX() - start.getX()) / dx);
-    maxDistance = Math.min(maxDistance, (-Hub.oppNearLeftCorner.getX() - start.getX()) / dx);
     // if dy > 0 we're looking towards the wall next to the red outpost
     if (dy > 0) {
       maxDistance = Math.min(maxDistance, (FieldConstants.fieldWidth - start.getY()) / dy);
@@ -179,15 +171,14 @@ public class PositionUtils {
     } else if (dy < 0) {
       maxDistance = Math.min(maxDistance, -start.getY() / dy);
     }
-    maxDistance = Math.min(maxDistance, (Hub.farRightCorner.getY() - start.getY()) / dy);
-    maxDistance = Math.min(maxDistance, (Hub.nearRightCorner.getY() - start.getY()) / dy);
+
     Translation2d end = start.plus(new Translation2d(maxDistance, shooterRotation));
     int length = (int) Math.round(start.getDistance(end));
     rise = start.getY() - end.getY();
     run = start.getX() - end.getX();
     slope = rise / run;
-
-    // Logger.recordOutput("Raycast/Line", raycast);
+    Pose2d[] raycast = new Pose2d[] {robotPose, new Pose2d(end, shooterRotation)};
+    Logger.recordOutput("Raycast/Line", raycast);
     return canPass;
   }
 
