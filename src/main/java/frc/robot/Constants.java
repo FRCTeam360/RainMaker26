@@ -283,12 +283,13 @@ public final class Constants {
       // passFlywheelSpeedMap.put(0.0, 2000.0);
 
       // AGGRESSIVE LOW ANGLE PASS MAP
-      passHoodAngleMap.put(15.0, 40.0);
+      passHoodAngleMap.put(12.0, 35.0);
+      passHoodAngleMap.put(9.0, 40.0);
       passHoodAngleMap.put(1.0, 40.0);
       passHoodAngleMap.put(0.0, 40.0);
 
-      passFlywheelSpeedMap.put(15.0, 4500.0);
-      passFlywheelSpeedMap.put(9.0, 3500.0);
+      passFlywheelSpeedMap.put(12.0, 4500.0);
+      passFlywheelSpeedMap.put(9.0, 3750.0);
       passFlywheelSpeedMap.put(7.0, 3000.0);
       passFlywheelSpeedMap.put(5.0, 2200.0); // TESTED
       passFlywheelSpeedMap.put(4.0, 2000.0);
