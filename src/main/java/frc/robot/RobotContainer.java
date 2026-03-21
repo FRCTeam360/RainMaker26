@@ -253,8 +253,8 @@ public class RobotContainer {
                 Constants.PracticeBotConstants.passFlywheelSpeedMap,
                 Constants.PracticeBotConstants.timeOfFlightMap,
                 ShooterConstants.PRACTICEBOT_TO_SHOOTER,
-                Constants.PracticeBotConstants.MIN_SHOT_DISTANCE_METERS,
-                Constants.PracticeBotConstants.MAX_SHOT_DISTANCE_METERS,
+                Constants.PracticeBotConstants.MIN_PASS_DISTANCE_METERS,
+                Constants.PracticeBotConstants.MAX_PASS_DISTANCE_METERS,
                 PracticeBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond),
                 0);
         break;
