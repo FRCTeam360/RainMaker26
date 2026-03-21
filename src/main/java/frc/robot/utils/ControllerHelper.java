@@ -29,7 +29,7 @@ public class ControllerHelper {
   public static double modifyAxisCubed(double value, double scale) {
     double clippedValue = MathUtil.applyDeadband(value, DEADBAND);
 
-    // Cube the clipped value (preserving and inverting the sign) and return it.
+    // Square the clipped value (preserving the sign) and return it.
     return scale * Math.copySign((clippedValue * clippedValue), value);
   }
 
