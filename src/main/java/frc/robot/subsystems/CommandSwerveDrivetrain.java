@@ -256,6 +256,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
       DoubleSupplier velocityYSupplier,
       Supplier<Rotation2d> headingSupplier) {
     double speedCapMps = maxSpeed.in(MetersPerSecond) * FACING_ANGLE_MAX_SPEED_FRACTION;
+    // Tracks whether the heading controller has produced at least one output for this
+    // command schedule. Reset in finallyDo so each new schedule starts clean.
+    boolean[] controllerHasRun = {false};
     return this.applyRequest(
             () -> {
               double rawVelXMps = velocityXSupplier.getAsDouble();
@@ -269,7 +272,14 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                 rawVelYMps *= scale;
               }
 
-              double omegaRps = m_faceHubRequest.HeadingController.getLastAppliedOutput();
+              // Gate on controllerHasRun to avoid consuming stale output on the first cycle
+              // after the controller was reset (getLastAppliedOutput() returns 0 until the
+              // facing-angle request has been applied at least once).
+              double omegaRps =
+                  controllerHasRun[0]
+                      ? m_faceHubRequest.HeadingController.getLastAppliedOutput()
+                      : 0.0;
+              controllerHasRun[0] = true;
 
               // Store as robot-relative to match getVelocity() convention.
               // Convert operator-perspective to field-relative (alliance flip),
@@ -290,7 +300,11 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                   .withVelocityY(isBlueAlliance ? rawVelYMps : -rawVelYMps)
                   .withTargetDirection(headingSupplier.get());
             })
-        .finallyDo(() -> m_faceHubRequest.HeadingController.reset());
+        .finallyDo(
+            () -> {
+              m_faceHubRequest.HeadingController.reset();
+              controllerHasRun[0] = false; // Reset so next schedule starts clean
+            });
   }
 
   /**
