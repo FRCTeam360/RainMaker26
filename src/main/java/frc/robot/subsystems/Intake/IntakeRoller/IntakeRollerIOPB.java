@@ -17,40 +17,52 @@ import frc.robot.Constants.PracticeBotConstants;
 
 public class IntakeRollerIOPB implements IntakeRollerIO {
   private static final double GEAR_RATIO = 1.0;
-  private static final int STALL_CURRENT_LIMIT_AMPS = 70;
-  private static final int FREE_CURRENT_LIMIT_AMPS = 60;
+  private static final int STALL_CURRENT_LIMIT_AMPS = 60;
+  private static final int FREE_CURRENT_LIMIT_AMPS = 50;
 
-  private static final double KP = 0.0002;
-  private static final double KI = 0.0000;
+  private static final double KP = 0.00011;
+  private static final double KI = 0.0;
   private static final double KD = 0.0;
   private static final double KV = 0.0019;
-  private static final double KS = 0.04;
+  private static final double KS = 0.01;
 
-  private final SparkFlex motor =
-      new SparkFlex(PracticeBotConstants.INTAKE_ROLLER_ID, MotorType.kBrushless);
-  private final RelativeEncoder encoder = motor.getEncoder();
-  private final SparkFlexConfig config = new SparkFlexConfig();
+  private final SparkFlex motorLeft =
+      new SparkFlex(
+          PracticeBotConstants.LEFT_INTAKE_ROLLER_ID, MotorType.kBrushless); // original motor
+  private final SparkFlex motorRight =
+      new SparkFlex(PracticeBotConstants.RIGHT_INTAKE_ROLLER_ID, MotorType.kBrushless);
+  private final RelativeEncoder leftEncoder = motorLeft.getEncoder();
+  private final RelativeEncoder rightEncoder = motorRight.getEncoder();
+  private final SparkFlexConfig leftConfig = new SparkFlexConfig();
+  private final SparkFlexConfig rightConfig = new SparkFlexConfig();
   private final SparkClosedLoopController closedLoopController;
 
   public IntakeRollerIOPB() {
-    config.idleMode(IdleMode.kCoast);
-    config.inverted(true);
-    config.smartCurrentLimit(STALL_CURRENT_LIMIT_AMPS, FREE_CURRENT_LIMIT_AMPS);
+    leftConfig.idleMode(IdleMode.kCoast);
+    rightConfig.idleMode(IdleMode.kCoast);
 
-    config.encoder.positionConversionFactor(1.0 / GEAR_RATIO);
-    config.encoder.velocityConversionFactor(1.0 / GEAR_RATIO);
-    config.encoder.uvwMeasurementPeriod(10);
-    config.encoder.uvwAverageDepth(2);
+    leftConfig.inverted(true);
 
-    config.closedLoop.p(KP).i(KI).d(KD);
-    config.closedLoop.feedForward.kV(KV).kS(KS);
+    leftConfig.smartCurrentLimit(STALL_CURRENT_LIMIT_AMPS, FREE_CURRENT_LIMIT_AMPS);
+    rightConfig.smartCurrentLimit(STALL_CURRENT_LIMIT_AMPS, FREE_CURRENT_LIMIT_AMPS);
 
-    motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    closedLoopController = motor.getClosedLoopController();
+    leftConfig.encoder.positionConversionFactor(1.0 / GEAR_RATIO);
+    leftConfig.encoder.velocityConversionFactor(1.0 / GEAR_RATIO);
+    leftConfig.encoder.uvwMeasurementPeriod(10);
+    leftConfig.encoder.uvwAverageDepth(2);
+
+    leftConfig.closedLoop.p(KP).i(KI).d(KD);
+    leftConfig.closedLoop.feedForward.kV(KV).kS(KS);
+
+    motorLeft.configure(leftConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    rightConfig.follow(motorLeft, true);
+    motorRight.configure(
+        rightConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    closedLoopController = motorLeft.getClosedLoopController();
   }
 
   public void setDutyCycle(double duty) {
-    motor.set(duty);
+    motorLeft.set(duty);
   }
 
   public void stop() {
@@ -61,11 +73,24 @@ public class IntakeRollerIOPB implements IntakeRollerIO {
     closedLoopController.setSetpoint(velocity, ControlType.kVelocity);
   }
 
+  @Override
+  public void setPID(double kP, double kI, double kD, double kV, double kS) {
+    SparkFlexConfig pidConfig = new SparkFlexConfig();
+    pidConfig.closedLoop.p(kP).i(kI).d(kD);
+    pidConfig.closedLoop.feedForward.kV(kV).kS(kS);
+    motorLeft.configure(
+        pidConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+  }
+
   public void updateInputs(IntakeRollerIOInputs inputs) {
-    inputs.position = encoder.getPosition();
-    inputs.statorCurrent = motor.getOutputCurrent();
+    inputs.position[0] = leftEncoder.getPosition();
+    inputs.statorCurrent[0] = motorLeft.getOutputCurrent();
+    inputs.velocity[0] = leftEncoder.getVelocity();
+    inputs.voltage[0] = motorLeft.getBusVoltage() * motorLeft.getAppliedOutput();
+    inputs.position[1] = rightEncoder.getPosition();
+    inputs.statorCurrent[1] = motorRight.getOutputCurrent();
+    inputs.velocity[1] = rightEncoder.getVelocity();
+    inputs.voltage[1] = motorRight.getBusVoltage() * motorRight.getAppliedOutput();
     inputs.supplyCurrent = 0;
-    inputs.velocity = encoder.getVelocity();
-    inputs.voltage = motor.getBusVoltage() * motor.getAppliedOutput();
   }
 }
