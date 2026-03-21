@@ -129,7 +129,11 @@ public class ShooterStateMachine {
         // only revert when UNDER_SHOOTING signals a sustained RPM drop.
         boolean inBangBang = previousState == ShooterStates.FIRING && !flywheelUnderShooting;
         boolean subsystemsReady = flywheelReady && hoodReady && drivetrainAligned;
-        boolean shouldFire = (subsystemsReady || inBangBang) && targetReady;
+        boolean shouldFire = (flywheelReady || inBangBang) && hoodReady && drivetrainAligned && targetReady;
+
+        Logger.recordOutput("Superstructure/Shooting/InBangBang", inBangBang);
+        Logger.recordOutput("Superstructure/Shooting/SubsystemsReady", subsystemsReady);
+        Logger.recordOutput("Superstructure/Shooting/ShouldFire", shouldFire);
 
         if (shouldFire) {
           currentState = ShooterStates.FIRING;
