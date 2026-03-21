@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 14.136155555555556,
-        "y": 5.721
+        "x": 13.512511111111111,
+        "y": 5.7207888888888885
       },
       "prevControl": null,
       "nextControl": {
-        "x": 16.396867,
-        "y": 6.568766777777778
+        "x": 15.773222555555556,
+        "y": 6.568555666666667
       },
       "isLocked": false,
       "linkedName": "FLIPPED altnostopend"
@@ -123,7 +123,7 @@
     },
     {
       "waypointRelativePos": 2.4697095435684657,
-      "rotationDegrees": -87.07491603577485
+      "rotationDegrees": -87.07491603577486
     },
     {
       "waypointRelativePos": 4.05,
