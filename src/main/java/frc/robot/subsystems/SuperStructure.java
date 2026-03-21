@@ -164,6 +164,15 @@ public class SuperStructure extends SubsystemBase {
         break;
       case FORCED_SHOT:
         currentSuperState = SuperInternalStates.FORCED_SHOT;
+        // hood.setHoodAngleSupplier(
+        // () -> {
+        //   return HOOD_FORCED_ANGLE;
+        //   });
+        //   flywheel.setShootVelocitySupplier(
+        // () -> {
+        //   return FLYWHEEL_FORCED_RPM;
+        // });
+        break;
       case DEFAULT:
       default:
         targetSelectionStateMachine.setWantedState(TargetWantedStates.AUTO);
