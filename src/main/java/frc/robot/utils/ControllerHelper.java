@@ -22,15 +22,15 @@ public class ControllerHelper {
   public static double modifyAxisCubic(double value, double scale) {
     double clippedValue = MathUtil.applyDeadband(value, DEADBAND);
 
-    // Cube the clipped value (preserving and inverting the sign) and return it.
-    return scale * Math.copySign((clippedValue * clippedValue * clippedValue), -value);
+    // Cube the clipped value (preserving the sign) and return it.
+    return scale * Math.copySign((clippedValue * clippedValue * clippedValue), value);
   }
 
   public static double modifyAxisCubed(double value, double scale) {
     double clippedValue = MathUtil.applyDeadband(value, DEADBAND);
 
-    // Square the clipped value (preserving and inverting the sign) and return it.
-    return scale * Math.copySign((clippedValue * clippedValue), -value);
+    // Square the clipped value (preserving the sign) and return it.
+    return scale * Math.copySign((clippedValue * clippedValue), value);
   }
 
   /**
