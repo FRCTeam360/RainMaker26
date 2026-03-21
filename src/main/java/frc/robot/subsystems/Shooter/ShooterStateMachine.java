@@ -31,6 +31,7 @@ public class ShooterStateMachine {
     AIMED,
     FIRING,
     WAITING,
+    STANDBY,
     UNJAMMING,
     IDLE
   }
@@ -41,6 +42,7 @@ public class ShooterStateMachine {
   private final FlywheelKicker flywheelKicker;
   private final BooleanSupplier isAlignedToTarget;
   private final BooleanSupplier canShootToTarget;
+  private BooleanSupplier isInAllianceZone = () -> false;
 
   // State variables
   private ShooterWantedStates wantedState = ShooterWantedStates.IDLE;
@@ -80,6 +82,10 @@ public class ShooterStateMachine {
    */
   public void setWantedState(ShooterWantedStates state) {
     wantedState = state;
+  }
+
+  public void setIsInAllianceZoneSupplier(BooleanSupplier supplier) {
+    this.isInAllianceZone = supplier;
   }
 
   /**
@@ -135,7 +141,8 @@ public class ShooterStateMachine {
         }
         break;
       case PASSIVE_SHOOTER:
-        currentState = ShooterStates.WAITING;
+        currentState =
+            isInAllianceZone.getAsBoolean() ? ShooterStates.STANDBY : ShooterStates.WAITING;
         break;
       case REVERSING:
         currentState = ShooterStates.UNJAMMING;
@@ -169,6 +176,11 @@ public class ShooterStateMachine {
         flywheelKicker.setWantedState(FlywheelKickerStates.KICKING);
         break;
       case WAITING:
+        flywheel.setWantedState(FlywheelWantedStates.IDLE);
+        hood.setWantedState(HoodWantedStates.DUCKED);
+        flywheelKicker.setWantedState(FlywheelKickerStates.IDLE);
+        break;
+      case STANDBY:
         flywheel.setWantedState(FlywheelWantedStates.COASTING);
         hood.setWantedState(HoodWantedStates.DUCKED);
         flywheelKicker.setWantedState(FlywheelKickerStates.IDLE);
