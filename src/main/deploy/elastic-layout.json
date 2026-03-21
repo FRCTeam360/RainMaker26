@@ -5,47 +5,8 @@
     {
       "name": "Teleoperated",
       "grid_layout": {
-        "layouts": [
-          {
-            "title": "List Layout",
-            "x": 1152.0,
-            "y": 384.0,
-            "width": 384.0,
-            "height": 128.0,
-            "type": "List Layout",
-            "properties": {
-              "label_position": "TOP"
-            },
-            "children": [
-              {
-                "title": "Alerts",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 256.0,
-                "height": 384.0,
-                "type": "Alerts",
-                "properties": {
-                  "topic": "/SmartDashboard/Alerts",
-                  "period": 0.06
-                }
-              }
-            ]
-          }
-        ],
+        "layouts": [],
         "containers": [
-          {
-            "title": "YOUR CAMERA NAME-processed",
-            "x": 0.0,
-            "y": 0.0,
-            "width": 384.0,
-            "height": 384.0,
-            "type": "Camera Stream",
-            "properties": {
-              "topic": "/CameraPublisher/YOUR CAMERA NAME-processed",
-              "period": 0.06,
-              "rotation_turns": 0
-            }
-          },
           {
             "title": "Field",
             "x": 384.0,
@@ -56,8 +17,8 @@
             "properties": {
               "topic": "/SmartDashboard/Field",
               "period": 0.06,
-              "field_game": "Rebuilt",
-              "robot_width": 0.85,
+              "field_game": "Reefscape",
+              "robot_width": 0.92,
               "robot_length": 0.85,
               "show_other_objects": true,
               "show_trajectories": true,
@@ -88,7 +49,7 @@
             "x": 768.0,
             "y": 384.0,
             "width": 384.0,
-            "height": 384.0,
+            "height": 256.0,
             "type": "Large Text Display",
             "properties": {
               "topic": "/SmartDashboard/Superstructure/CurrentSuperState",
@@ -101,7 +62,7 @@
             "x": 384.0,
             "y": 384.0,
             "width": 384.0,
-            "height": 384.0,
+            "height": 256.0,
             "type": "SwerveDrive",
             "properties": {
               "topic": "/SmartDashboard/Swerve Drive",
@@ -115,7 +76,7 @@
             "x": 1152.0,
             "y": 512.0,
             "width": 384.0,
-            "height": 256.0,
+            "height": 128.0,
             "type": "Large Text Display",
             "properties": {
               "topic": "/SmartDashboard/Shooting Phase",
@@ -124,14 +85,27 @@
             }
           },
           {
-            "title": "Can Score in Hub",
+            "title": "limelight-right",
+            "x": 0.0,
+            "y": 0.0,
+            "width": 384.0,
+            "height": 384.0,
+            "type": "Camera Stream",
+            "properties": {
+              "topic": "/CameraPublisher/limelight-right",
+              "period": 0.06,
+              "rotation_turns": 0
+            }
+          },
+          {
+            "title": "HubActive",
             "x": 0.0,
             "y": 384.0,
             "width": 384.0,
-            "height": 384.0,
+            "height": 256.0,
             "type": "Boolean Box",
             "properties": {
-              "topic": "/SmartDashboard/Can Score in Hub",
+              "topic": "/AdvantageKit/RealOutputs/Superstructure/HubActive",
               "period": 0.06,
               "data_type": "boolean",
               "true_color": 4283215696,
@@ -139,61 +113,18 @@
               "true_icon": "None",
               "false_icon": "None"
             }
-          }
-        ]
-      }
-    },
-    {
-      "name": "Autonomous",
-      "grid_layout": {
-        "layouts": [],
-        "containers": [
+          },
           {
             "title": "Auto Chooser",
-            "x": 0.0,
-            "y": 0.0,
-            "width": 512.0,
-            "height": 256.0,
+            "x": 1152.0,
+            "y": 384.0,
+            "width": 384.0,
+            "height": 128.0,
             "type": "ComboBox Chooser",
             "properties": {
               "topic": "/SmartDashboard/Auto Chooser",
               "period": 0.06,
               "sort_options": false
-            }
-          },
-          {
-            "title": "Field",
-            "x": 512.0,
-            "y": 0.0,
-            "width": 1024.0,
-            "height": 512.0,
-            "type": "Field",
-            "properties": {
-              "topic": "/SmartDashboard/Field",
-              "period": 0.06,
-              "field_game": "Rebuilt",
-              "robot_width": 0.85,
-              "robot_length": 0.85,
-              "show_other_objects": true,
-              "show_trajectories": true,
-              "field_rotation": 0.0,
-              "robot_color": 4294198070,
-              "trajectory_color": 4294967295,
-              "show_robot_outside_widget": true
-            }
-          },
-          {
-            "title": "Swerve Drive",
-            "x": 0.0,
-            "y": 256.0,
-            "width": 512.0,
-            "height": 512.0,
-            "type": "SwerveDrive",
-            "properties": {
-              "topic": "/SmartDashboard/Swerve Drive",
-              "period": 0.06,
-              "show_robot_rotation": true,
-              "rotation_unit": "Radians"
             }
           }
         ]
