@@ -33,6 +33,7 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
+import frc.robot.utils.AllianceFlipUtil;
 import frc.robot.generated.WoodBotDrivetrain.TunerSwerveDrivetrain;
 import frc.robot.subsystems.Vision.VisionMeasurement;
 import java.util.List;
@@ -116,10 +117,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   // Heading lock state for driver-assist toggle
   private boolean headingLockEnabled = false;
   private double currentTargetAngle = 0.0;
-  private boolean pushUpReady = true;
-  private boolean pushDownReady = true;
-  private boolean pushRightReady = true;
-  private boolean pushLeftReady = true;
   private boolean headingControllerActive =
       false; // Tracks if facing-angle request has been applied
   private static final double SNAP_THRESHOLD = 0.3; // High tolerance to prevent accidental presses
@@ -127,34 +124,24 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   // Called once per scheduler cycle from fieldOrientedDriveCommand to update the snap target.
   // Kept outside the applyRequest lambda so it runs exactly once per cycle regardless of
   // how many times the request supplier is invoked.
-  private void updateSnapAngle(double rightX, double rightY, boolean isBlue) {
+  private void updateSnapAngle(double rightX, double rightY) {
     boolean yDominant = Math.abs(rightY) >= Math.abs(rightX);
     boolean pushUp = yDominant && rightY < -SNAP_THRESHOLD;
     boolean pushDown = yDominant && rightY > SNAP_THRESHOLD;
     boolean pushRight = !yDominant && rightX > SNAP_THRESHOLD;
     boolean pushLeft = !yDominant && rightX < -SNAP_THRESHOLD;
 
-    // Map stick direction to a field-absolute heading based on alliance:
-    //   Blue  — up=0°, right=270°, down=180°, left=90°
-    //   Red   — up=180°, right=90°, down=0°, left=270°
-    if (pushUp && pushUpReady) {
-      pushUpReady = false;
-      currentTargetAngle = isBlue ? 0.0 : 180.0;
-    } else if (pushDown && pushDownReady) {
-      pushDownReady = false;
-      currentTargetAngle = isBlue ? 180.0 : 0.0;
-    } else if (pushRight && pushRightReady) {
-      pushRightReady = false;
-      currentTargetAngle = isBlue ? 270.0 : 90.0;
-    } else if (pushLeft && pushLeftReady) {
-      pushLeftReady = false;
-      currentTargetAngle = isBlue ? 90.0 : 270.0;
+    // Blue-perspective base angles flipped automatically for Red via AllianceFlipUtil:
+    //   up=0°, down=180°, right=270°, left=90°
+    if (pushUp) {
+      currentTargetAngle = AllianceFlipUtil.apply(Rotation2d.fromDegrees(0.0)).getDegrees();
+    } else if (pushDown) {
+      currentTargetAngle = AllianceFlipUtil.apply(Rotation2d.fromDegrees(180.0)).getDegrees();
+    } else if (pushRight) {
+      currentTargetAngle = AllianceFlipUtil.apply(Rotation2d.fromDegrees(270.0)).getDegrees();
+    } else if (pushLeft) {
+      currentTargetAngle = AllianceFlipUtil.apply(Rotation2d.fromDegrees(90.0)).getDegrees();
     }
-
-    if (!pushUp) pushUpReady = true;
-    if (!pushDown) pushDownReady = true;
-    if (!pushRight) pushRightReady = true;
-    if (!pushLeft) pushLeftReady = true;
   }
 
   // Field-centric facing angle request for hub tracking
@@ -194,7 +181,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                   getPosition().getRotation());
 
           if (headingLockEnabled) {
-            updateSnapAngle(driveCont.getRightX(), driveCont.getRightY(), isBlueAlliance);
+            updateSnapAngle(driveCont.getRightX(), driveCont.getRightY());
             headingControllerActive = true; // Mark that we've applied the facing-angle request
             return m_faceHubRequest
                 .withVelocityX(isBlueAlliance ? velXMps : -velXMps)
