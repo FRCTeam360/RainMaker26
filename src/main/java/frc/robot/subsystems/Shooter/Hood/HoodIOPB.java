@@ -26,7 +26,7 @@ public class HoodIOPB implements HoodIO {
   private static final double KI = 0.0;
   private static final double KD = 0.0;
   private static final double KA = 0.0;
-  private static final double KG = 0.15; // .15
+  private static final double KG = 0.01; // .15
   private static final double KS = 0.2;
   private static final double KV = 0.0;
   private static final double FORWARD_SOFT_LIMIT_DEGREES = 47.0;
