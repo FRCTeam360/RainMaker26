@@ -7,14 +7,11 @@ package frc.robot;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
 import com.ctre.phoenix6.swerve.SwerveRequest;
-import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -70,6 +67,7 @@ import frc.robot.subsystems.Vision.VisionIOLimelight3G;
 import frc.robot.subsystems.Vision.VisionIOLimelight4;
 import frc.robot.subsystems.Vision.VisionIOLimelightBase;
 import frc.robot.subsystems.Vision.VisionIOPhotonSim;
+import frc.robot.utils.AllianceAutoChooser;
 import frc.robot.utils.AllianceFlipUtil;
 import frc.robot.utils.CommandLogger;
 import frc.robot.utils.FieldConstants;
@@ -89,7 +87,7 @@ import org.littletonrobotics.junction.Logger;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private CommandSwerveDrivetrain drivetrain;
-  private SendableChooser<Command> autoChooser;
+  private AllianceAutoChooser autoChooser;
   private Flywheel flywheel;
   private Hood hood;
   private Indexer indexer;
@@ -339,8 +337,7 @@ public class RobotContainer {
     PathPlannerLogging.setLogTargetPoseCallback(
         pose -> Logger.recordOutput("Swerve/TargetPathPose", pose));
 
-    autoChooser = AutoBuilder.buildAutoChooser();
-    SmartDashboard.putData("Auto Chooser", autoChooser);
+    autoChooser = new AllianceAutoChooser();
 
     CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
     // Uncomment this if pathplanner starts to suck on loading
@@ -675,13 +672,18 @@ public class RobotContainer {
     NetworkTableInstance.getDefault().flush();
   }
 
+  /** Called every loop cycle while the robot is disabled. */
+  public void disabledPeriodic() {
+    autoChooser.update();
+    autoChooser.checkForAutoChange();
+  }
+
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
    *
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    // An example command will be run in autonomous
     return autoChooser.getSelected();
   }
 }
