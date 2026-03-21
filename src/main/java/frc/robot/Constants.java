@@ -236,11 +236,11 @@ public final class Constants {
 
     static {
       shotHoodAngleMap.put(6.0, 16.0);
-      shotHoodAngleMap.put(5.0, 16.0); // TESTED
-      shotHoodAngleMap.put(4.0, 15.0);
+      shotHoodAngleMap.put(5.0, 16.0);
 
-      shotHoodAngleMap.put(3.5, 15.0);
+      shotHoodAngleMap.put(4.0, 17.0);
 
+      shotHoodAngleMap.put(3.5, 16.0);
       shotHoodAngleMap.put(3.0, 10.0);
       shotHoodAngleMap.put(2.5, 6.0);
       shotHoodAngleMap.put(2.0, 3.0);
@@ -248,11 +248,11 @@ public final class Constants {
 
       // === SHOOTING VALUES ===
       shotFlywheelSpeedMap.put(6.0, 2600.0);
-      shotFlywheelSpeedMap.put(5.0, 2550.0); // TESTED
-      shotFlywheelSpeedMap.put(4.0, 2400.0);
+      shotFlywheelSpeedMap.put(5.0, 2550.0);
 
-      shotFlywheelSpeedMap.put(3.5, 2300.0);
+      shotFlywheelSpeedMap.put(4.0, 2500.0);
 
+      shotFlywheelSpeedMap.put(3.5, 2325.0);
       shotFlywheelSpeedMap.put(3.0, 2200.0);
       shotFlywheelSpeedMap.put(2.5, 2100.0);
       shotFlywheelSpeedMap.put(2.0, 2000.0);
