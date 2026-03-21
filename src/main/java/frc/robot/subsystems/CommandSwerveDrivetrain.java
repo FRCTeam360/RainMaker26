@@ -116,38 +116,45 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   // Heading lock state for driver-assist toggle
   private boolean headingLockEnabled = false;
   private double currentTargetAngle = 0.0;
-  private boolean positiveEdgeReady = true;
-  private boolean negativeEdgeReady = true;
+  private boolean pushUpReady = true;
+  private boolean pushDownReady = true;
+  private boolean pushRightReady = true;
+  private boolean pushLeftReady = true;
   private boolean headingControllerActive =
       false; // Tracks if facing-angle request has been applied
   private static final double SNAP_THRESHOLD = 0.3; // High tolerance to prevent accidental presses
 
-  private Rotation2d getSnapAngle(double driverOmega) {
-    // Omega calculation uses -Math.signum(getRightX()): right stick (positive X) = negative omega
-    boolean clockwiseSnap = driverOmega < -SNAP_THRESHOLD; // Right stick = clockwise
-    boolean counterClockwiseSnap = driverOmega > SNAP_THRESHOLD; // Left stick = counter-clockwise
+  // Called once per scheduler cycle from fieldOrientedDriveCommand to update the snap target.
+  // Kept outside the applyRequest lambda so it runs exactly once per cycle regardless of
+  // how many times the request supplier is invoked.
+  private void updateSnapAngle(double rightX, double rightY, boolean isBlue) {
+    boolean yDominant = Math.abs(rightY) >= Math.abs(rightX);
+    boolean pushUp = yDominant && rightY < -SNAP_THRESHOLD;
+    boolean pushDown = yDominant && rightY > SNAP_THRESHOLD;
+    boolean pushRight = !yDominant && rightX > SNAP_THRESHOLD;
+    boolean pushLeft = !yDominant && rightX < -SNAP_THRESHOLD;
 
-    // Snap relative to currentTargetAngle so that rapid consecutive presses always advance
-    // by 90° steps, even if the robot hasn't finished rotating to the previous setpoint yet.
-    if (clockwiseSnap && positiveEdgeReady) {
-      positiveEdgeReady = false;
-      currentTargetAngle = (((currentTargetAngle / 90.0) + 1) * 90.0) % 360;
-    } else if (counterClockwiseSnap && negativeEdgeReady) {
-      negativeEdgeReady = false;
-      currentTargetAngle = (((currentTargetAngle / 90.0) - 1) * 90.0);
+    // Map stick direction to a field-absolute heading based on alliance:
+    //   Blue  — up=0°, right=270°, down=180°, left=90°
+    //   Red   — up=180°, right=90°, down=0°, left=270°
+    if (pushUp && pushUpReady) {
+      pushUpReady = false;
+      currentTargetAngle = isBlue ? 0.0 : 180.0;
+    } else if (pushDown && pushDownReady) {
+      pushDownReady = false;
+      currentTargetAngle = isBlue ? 180.0 : 0.0;
+    } else if (pushRight && pushRightReady) {
+      pushRightReady = false;
+      currentTargetAngle = isBlue ? 270.0 : 90.0;
+    } else if (pushLeft && pushLeftReady) {
+      pushLeftReady = false;
+      currentTargetAngle = isBlue ? 90.0 : 270.0;
     }
 
-    // Reset edge detection when stick returns to center
-    if (!clockwiseSnap) {
-      positiveEdgeReady = true;
-    }
-    if (!counterClockwiseSnap) {
-      negativeEdgeReady = true;
-    }
-
-    if (currentTargetAngle < 0) currentTargetAngle += 360;
-
-    return Rotation2d.fromDegrees(currentTargetAngle);
+    if (!pushUp) pushUpReady = true;
+    if (!pushDown) pushDownReady = true;
+    if (!pushRight) pushRightReady = true;
+    if (!pushLeft) pushLeftReady = true;
   }
 
   // Field-centric facing angle request for hub tracking
@@ -187,11 +194,12 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                   getPosition().getRotation());
 
           if (headingLockEnabled) {
+            updateSnapAngle(driveCont.getRightX(), driveCont.getRightY(), isBlueAlliance);
             headingControllerActive = true; // Mark that we've applied the facing-angle request
             return m_faceHubRequest
                 .withVelocityX(isBlueAlliance ? velXMps : -velXMps)
                 .withVelocityY(isBlueAlliance ? velYMps : -velYMps)
-                .withTargetDirection(getSnapAngle(omegaRps));
+                .withTargetDirection(Rotation2d.fromDegrees(currentTargetAngle));
           }
 
           return drive
