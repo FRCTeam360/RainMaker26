@@ -412,7 +412,8 @@ public class RobotContainer {
     Trigger forceHubTrigger = driverCont.rightBumper().and(isSuperstructureMode);
     forceHubTrigger.whileTrue(
         superStructure
-            .setStateCommand(SuperWantedStates.SHOOT_AT_HUB)
+            // .setStateCommand(SuperWantedStates.SHOOT_AT_HUB)
+            .setStateCommand(SuperWantedStates.FORCED_SHOT)
             .alongWith(
                 drivetrain.faceAngleWhileDrivingCommand(
                     driverCont, () -> hubShotCalculator.calculateShot().targetHeading())));

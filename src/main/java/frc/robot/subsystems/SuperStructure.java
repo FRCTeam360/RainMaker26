@@ -110,14 +110,20 @@ public class SuperStructure extends SubsystemBase {
     this.intakeStateMachine = new IntakeStateMachine(intakeRoller, intakePivot);
     this.targetSelectionStateMachine =
         new TargetSelectionStateMachine(hubShotCalculator, passCalculator, robotPoseSupplier);
-    
+
     flywheel.setShootVelocitySupplier(
-      () -> {if(currentSuperState == SuperInternalStates.FORCED_SHOT){ return 2000; } return targetSelectionStateMachine.getActiveCalculator().calculateShot().flywheelSpeed();
-        //() -> targetSelectionStateMachine.getActiveCalculator().calculateShot().flywheelSpeed()
-       } );
+        () -> {
+          if (currentSuperState == SuperInternalStates.FORCED_SHOT) {
+            return 2000;
+          }
+          return targetSelectionStateMachine.getActiveCalculator().calculateShot().flywheelSpeed();
+          // () -> targetSelectionStateMachine.getActiveCalculator().calculateShot().flywheelSpeed()
+        });
     hood.setHoodAngleSupplier(
         () -> {
-          if(currentSuperState == SuperInternalStates.FORCED_SHOT ){return 20.0;}
+          if (currentSuperState == SuperInternalStates.FORCED_SHOT) {
+            return 20.0;
+          }
           return targetSelectionStateMachine.getActiveCalculator().calculateShot().hoodAngle();
         });
     hood.setShouldDuckSupplier(

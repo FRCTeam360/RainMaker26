@@ -19,6 +19,7 @@ import org.littletonrobotics.junction.Logger;
  */
 public class ShooterStateMachine {
   private boolean isForced = false;
+
   // Enums
   public enum ShooterWantedStates {
     IDLE,
@@ -107,8 +108,8 @@ public class ShooterStateMachine {
         boolean flywheelReady = flywheelState == FlywheelInternalStates.AT_SETPOINT;
         boolean flywheelUnderShooting = flywheelState == FlywheelInternalStates.UNDER_SHOOTING;
         boolean hoodReady = hood.getState() == HoodInternalStates.AT_SETPOINT;
-        boolean drivetrainAligned = isForced ? true :isAlignedToTarget.getAsBoolean();
-        boolean targetReady = isForced ? true :canShootToTarget.getAsBoolean();
+        boolean drivetrainAligned = isForced ? true : isAlignedToTarget.getAsBoolean();
+        boolean targetReady = isForced ? true : canShootToTarget.getAsBoolean();
         isForced = false;
 
         Logger.recordOutput("Superstructure/Shooting/FlywheelState", flywheelState);
