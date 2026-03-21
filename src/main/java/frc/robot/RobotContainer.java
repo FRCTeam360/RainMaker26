@@ -468,11 +468,11 @@ public class RobotContainer {
     driverCont
         .leftBumper()
         .and(isIndependentMode)
-        .whileTrue(intakeRoller.setVelocityCommand(4000.0));
+        .whileTrue(intakeRoller.setVelocityCommand(1000.0));
     driverCont
         .rightBumper()
         .and(isIndependentMode)
-        .whileTrue(intakeRoller.setDutyCycleCommand(-0.2));
+        .whileTrue(intakeRoller.setVelocityCommand(-1000.0));
     driverCont.rightTrigger().and(isIndependentMode).whileTrue(indexer.setDutyCycleCommand(0.2));
     driverCont.leftTrigger().and(isIndependentMode).whileTrue(indexer.setDutyCycleCommand(-0.2));
 

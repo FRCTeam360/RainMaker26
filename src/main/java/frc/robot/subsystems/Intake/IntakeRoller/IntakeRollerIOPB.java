@@ -17,8 +17,8 @@ import frc.robot.Constants.PracticeBotConstants;
 
 public class IntakeRollerIOPB implements IntakeRollerIO {
   private static final double GEAR_RATIO = 1.0;
-  private static final int STALL_CURRENT_LIMIT_AMPS = 60;
-  private static final int FREE_CURRENT_LIMIT_AMPS = 50;
+  private static final int STALL_CURRENT_LIMIT_AMPS = 40;
+  private static final int FREE_CURRENT_LIMIT_AMPS = 30;
 
   private static final double KP = 0.0001;
   private static final double KI = 0.0;
@@ -27,7 +27,8 @@ public class IntakeRollerIOPB implements IntakeRollerIO {
   private static final double KS = 0.02;
 
   private final SparkFlex motorLeft =
-      new SparkFlex(PracticeBotConstants.LEFT_INTAKE_ROLLER_ID, MotorType.kBrushless);//original motor
+      new SparkFlex(
+          PracticeBotConstants.LEFT_INTAKE_ROLLER_ID, MotorType.kBrushless); // original motor
   private final SparkFlex motorRight =
       new SparkFlex(PracticeBotConstants.RIGHT_INTAKE_ROLLER_ID, MotorType.kBrushless);
   private final RelativeEncoder leftEncoder = motorLeft.getEncoder();
@@ -54,8 +55,9 @@ public class IntakeRollerIOPB implements IntakeRollerIO {
     leftConfig.closedLoop.feedForward.kV(KV).kS(KS);
 
     motorLeft.configure(leftConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    rightConfig.follow(motorLeft,true);
-    motorRight.configure(rightConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    rightConfig.follow(motorLeft, true);
+    motorRight.configure(
+        rightConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     closedLoopController = motorLeft.getClosedLoopController();
   }
 
