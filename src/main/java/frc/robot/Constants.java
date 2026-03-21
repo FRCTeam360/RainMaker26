@@ -204,7 +204,7 @@ public final class Constants {
     // === INTAKE ===
     public static final int INTAKE_PIVOT_ID = 14;
     public static final int LEFT_INTAKE_ROLLER_ID = 15;
-    public static final int RIGHT_INTAKE_ROLLER_ID = 0;
+    public static final int RIGHT_INTAKE_ROLLER_ID = 25;
 
     // === CLIMBER ===
     public static final int CLIMBER_RIGHT_ID = 16;
