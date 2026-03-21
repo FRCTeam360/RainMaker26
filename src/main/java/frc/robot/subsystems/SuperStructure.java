@@ -110,7 +110,7 @@ public class SuperStructure extends SubsystemBase {
     this.robotToShooter = robotToShooter;
     this.shooterStateMachine =
         new ShooterStateMachine(
-            flywheel, hood, flywheelKicker,() -> currentSuperState == SuperInternalStates.FORCED_SHOT ? true : isAlignedToTarget.getAsBoolean(), this::canShootToTarget);
+            flywheel, hood, flywheelKicker, isAlignedToTarget, this::canShootToTarget);
     this.intakeStateMachine = new IntakeStateMachine(intakeRoller, intakePivot);
     this.targetSelectionStateMachine =
         new TargetSelectionStateMachine(hubShotCalculator, passCalculator, robotPoseSupplier);
@@ -121,7 +121,8 @@ public class SuperStructure extends SubsystemBase {
             return FLYWHEEL_FORCED_RPM;
           }
           return targetSelectionStateMachine.getActiveCalculator().calculateShot().flywheelSpeed();
-          // () -> targetSelectionStateMachine.getActiveCalculator().calculateShot().flywheelSpeed()
+          // () ->
+          // targetSelectionStateMachine.getActiveCalculator().calculateShot().flywheelSpeed()
         });
     hood.setHoodAngleSupplier(
         () -> {
@@ -166,11 +167,11 @@ public class SuperStructure extends SubsystemBase {
         currentSuperState = SuperInternalStates.FORCED_SHOT;
         // hood.setHoodAngleSupplier(
         // () -> {
-        //   return HOOD_FORCED_ANGLE;
-        //   });
-        //   flywheel.setShootVelocitySupplier(
+        // return HOOD_FORCED_ANGLE;
+        // });
+        // flywheel.setShootVelocitySupplier(
         // () -> {
-        //   return FLYWHEEL_FORCED_RPM;
+        // return FLYWHEEL_FORCED_RPM;
         // });
         break;
       case DEFAULT:
