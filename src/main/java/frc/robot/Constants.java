@@ -17,20 +17,25 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.robot.utils.RobotUtils.ActiveHub;
 
 /**
- * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
- * constants. This class should not be used for any other purpose. All constants should be declared
+ * The Constants class provides a convenient place for teams to hold robot-wide
+ * numerical or boolean
+ * constants. This class should not be used for any other purpose. All constants
+ * should be declared
  * globally (i.e. public static). Do not put anything functional in this class.
  *
- * <p>It is advised to statically import this class (or one of its inner classes) wherever the
+ * <p>
+ * It is advised to statically import this class (or one of its inner classes)
+ * wherever the
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
   // This is to load the apriltag field layout on robot initialization.
-  // It prevents our robot code from having a 5 second initial lag on enablement after new code is
+  // It prevents our robot code from having a 5 second initial lag on enablement
+  // after new code is
   // deployed.
   // This is load bearing code like that coconut jpg that keeps TF2 running -_-
-  public static final AprilTagFieldLayout FIELD_LAYOUT =
-      AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
+  public static final AprilTagFieldLayout FIELD_LAYOUT = AprilTagFieldLayout
+      .loadField(AprilTagFields.k2026RebuiltWelded);
 
   public static Alliance AUTO_WINNER;
   public static ActiveHub HUB_PHASE;
@@ -43,10 +48,16 @@ public final class Constants {
     REPLAY
   }
 
-  /** Frames to skip between processed frames while disabled. Only affects Limelight 4. */
+  /**
+   * Frames to skip between processed frames while disabled. Only affects
+   * Limelight 4.
+   */
   public static final int DISABLED_THROTTLE_SKIP_FRAMES = 200;
 
-  /** Frames to skip between processed frames while enabled. Only affects Limelight 4. */
+  /**
+   * Frames to skip between processed frames while enabled. Only affects Limelight
+   * 4.
+   */
   public static final int ENABLED_THROTTLE_SKIP_FRAMES = 0;
 
   static RobotType robotType;
@@ -122,15 +133,14 @@ public final class Constants {
      * @return RobotConfig for the WoodBot
      */
     public static RobotConfig createPathPlannerConfig() {
-      ModuleConfig moduleConfig =
-          new ModuleConfig(
-              WHEEL_RADIUS_METERS,
-              MAX_DRIVE_SPEED_MPS,
-              WHEEL_COF,
-              DCMotor.getKrakenX60Foc(1),
-              DRIVE_GEARING,
-              DRIVE_CURRENT_LIMIT_AMPS,
-              1);
+      ModuleConfig moduleConfig = new ModuleConfig(
+          WHEEL_RADIUS_METERS,
+          MAX_DRIVE_SPEED_MPS,
+          WHEEL_COF,
+          DCMotor.getKrakenX60Foc(1),
+          DRIVE_GEARING,
+          DRIVE_CURRENT_LIMIT_AMPS,
+          1);
 
       return new RobotConfig(
           MASS_KG,
@@ -143,16 +153,11 @@ public final class Constants {
     }
 
     // === SHOT CALCULATOR ===
-    public static final InterpolatingDoubleTreeMap shotHoodAngleMap =
-        new InterpolatingDoubleTreeMap();
-    public static final InterpolatingDoubleTreeMap shotFlywheelSpeedMap =
-        new InterpolatingDoubleTreeMap();
-    public static final InterpolatingDoubleTreeMap passHoodAngleMap =
-        new InterpolatingDoubleTreeMap();
-    public static final InterpolatingDoubleTreeMap passFlywheelSpeedMap =
-        new InterpolatingDoubleTreeMap();
-    public static final InterpolatingDoubleTreeMap timeOfFlightMap =
-        new InterpolatingDoubleTreeMap();
+    public static final InterpolatingDoubleTreeMap shotHoodAngleMap = new InterpolatingDoubleTreeMap();
+    public static final InterpolatingDoubleTreeMap shotFlywheelSpeedMap = new InterpolatingDoubleTreeMap();
+    public static final InterpolatingDoubleTreeMap passHoodAngleMap = new InterpolatingDoubleTreeMap();
+    public static final InterpolatingDoubleTreeMap passFlywheelSpeedMap = new InterpolatingDoubleTreeMap();
+    public static final InterpolatingDoubleTreeMap timeOfFlightMap = new InterpolatingDoubleTreeMap();
 
     public static final double MIN_SHOT_DISTANCE_METERS = 1.0;
     public static final double MAX_SHOT_DISTANCE_METERS = 5.0;
@@ -187,16 +192,11 @@ public final class Constants {
 
   public static class PracticeBotConstants {
     // === SHOT CALCULATOR ===
-    public static final InterpolatingDoubleTreeMap shotHoodAngleMap =
-        new InterpolatingDoubleTreeMap();
-    public static final InterpolatingDoubleTreeMap shotFlywheelSpeedMap =
-        new InterpolatingDoubleTreeMap();
-    public static final InterpolatingDoubleTreeMap passHoodAngleMap =
-        new InterpolatingDoubleTreeMap();
-    public static final InterpolatingDoubleTreeMap passFlywheelSpeedMap =
-        new InterpolatingDoubleTreeMap();
-    public static final InterpolatingDoubleTreeMap timeOfFlightMap =
-        new InterpolatingDoubleTreeMap();
+    public static final InterpolatingDoubleTreeMap shotHoodAngleMap = new InterpolatingDoubleTreeMap();
+    public static final InterpolatingDoubleTreeMap shotFlywheelSpeedMap = new InterpolatingDoubleTreeMap();
+    public static final InterpolatingDoubleTreeMap passHoodAngleMap = new InterpolatingDoubleTreeMap();
+    public static final InterpolatingDoubleTreeMap passFlywheelSpeedMap = new InterpolatingDoubleTreeMap();
+    public static final InterpolatingDoubleTreeMap timeOfFlightMap = new InterpolatingDoubleTreeMap();
 
     public static final double MIN_SHOT_DISTANCE_METERS = 0.0;
     public static final double MAX_SHOT_DISTANCE_METERS = 6.0;
@@ -305,18 +305,12 @@ public final class Constants {
     public static final int CLIMBER_MOTOR = 36;
 
     // === SHOT CALCULATOR ===
-    public static final InterpolatingDoubleTreeMap shotHoodAngleMap =
-        new InterpolatingDoubleTreeMap();
-    public static final InterpolatingDoubleTreeMap shotFlywheelSpeedMap =
-        new InterpolatingDoubleTreeMap();
-    public static final InterpolatingDoubleTreeMap passHoodAngleMap =
-        new InterpolatingDoubleTreeMap();
-    public static final InterpolatingDoubleTreeMap passFlywheelSpeedMap =
-        new InterpolatingDoubleTreeMap();
-    public static final InterpolatingDoubleTreeMap shotTimeOfFlightMap =
-        new InterpolatingDoubleTreeMap();
-    public static final InterpolatingDoubleTreeMap passTimeOfFlightMap =
-        new InterpolatingDoubleTreeMap();
+    public static final InterpolatingDoubleTreeMap shotHoodAngleMap = new InterpolatingDoubleTreeMap();
+    public static final InterpolatingDoubleTreeMap shotFlywheelSpeedMap = new InterpolatingDoubleTreeMap();
+    public static final InterpolatingDoubleTreeMap passHoodAngleMap = new InterpolatingDoubleTreeMap();
+    public static final InterpolatingDoubleTreeMap passFlywheelSpeedMap = new InterpolatingDoubleTreeMap();
+    public static final InterpolatingDoubleTreeMap shotTimeOfFlightMap = new InterpolatingDoubleTreeMap();
+    public static final InterpolatingDoubleTreeMap passTimeOfFlightMap = new InterpolatingDoubleTreeMap();
 
     public static final double MIN_SHOT_DISTANCE_METERS = 0.0;
     public static final double MAX_SHOT_DISTANCE_METERS = 6.0;

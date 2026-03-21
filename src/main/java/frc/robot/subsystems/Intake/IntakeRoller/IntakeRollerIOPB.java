@@ -38,8 +38,10 @@ public class IntakeRollerIOPB implements IntakeRollerIO {
 
   public IntakeRollerIOPB() {
     leftConfig.idleMode(IdleMode.kCoast);
+    rightConfig.idleMode(IdleMode.kCoast);
+
     leftConfig.inverted(true);
-    
+
     leftConfig.smartCurrentLimit(STALL_CURRENT_LIMIT_AMPS, FREE_CURRENT_LIMIT_AMPS);
     rightConfig.smartCurrentLimit(STALL_CURRENT_LIMIT_AMPS, FREE_CURRENT_LIMIT_AMPS);
 
@@ -77,7 +79,7 @@ public class IntakeRollerIOPB implements IntakeRollerIO {
     inputs.position[1] = rightEncoder.getPosition();
     inputs.statorCurrent[1] = motorRight.getOutputCurrent();
     inputs.velocity[1] = rightEncoder.getVelocity();
-    inputs.voltage[1] = motorRight.getBusVoltage() * motorLeft.getAppliedOutput();
+    inputs.voltage[1] = motorRight.getBusVoltage() * motorRight.getAppliedOutput();
     inputs.supplyCurrent = 0;
   }
 }
