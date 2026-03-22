@@ -115,6 +115,8 @@ public class SuperStructure extends SubsystemBase {
         () -> targetSelectionStateMachine.getActiveCalculator().calculateShot().hoodAngle());
     hood.setShouldDuckSupplier(
         () -> PositionUtils.isInDuckZone(robotPoseSupplier.get(), robotToShooter));
+    shooterStateMachine.setIsInAllianceZoneSupplier(
+        () -> PositionUtils.isInAllianceZone(robotPoseSupplier.get()));
   }
 
   // State machine methods
