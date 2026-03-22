@@ -121,6 +121,16 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
       false; // Tracks if facing-angle request has been applied
   private static final double SNAP_THRESHOLD = 0.3; // High tolerance to prevent accidental presses
 
+  private enum SnapDirection {
+    NONE,
+    UP,
+    DOWN,
+    LEFT,
+    RIGHT
+  }
+
+  private SnapDirection previousSnapDirection = SnapDirection.NONE;
+
   // Called once per scheduler cycle from fieldOrientedDriveCommand to update the snap target.
   // Kept outside the applyRequest lambda so it runs exactly once per cycle regardless of
   // how many times the request supplier is invoked.
@@ -131,16 +141,24 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     boolean pushRight = !yDominant && rightX > SNAP_THRESHOLD;
     boolean pushLeft = !yDominant && rightX < -SNAP_THRESHOLD;
 
+    SnapDirection currentSnapDirection;
+    if (pushUp) currentSnapDirection = SnapDirection.UP;
+    else if (pushDown) currentSnapDirection = SnapDirection.DOWN;
+    else if (pushRight) currentSnapDirection = SnapDirection.RIGHT;
+    else if (pushLeft) currentSnapDirection = SnapDirection.LEFT;
+    else currentSnapDirection = SnapDirection.NONE;
+
+    if (currentSnapDirection == previousSnapDirection) return;
+    previousSnapDirection = currentSnapDirection;
+
     // Blue-perspective base angles flipped automatically for Red via AllianceFlipUtil:
     //   up=0°, down=180°, right=270°, left=90°
-    if (pushUp) {
-      currentTargetAngle = AllianceFlipUtil.apply(Rotation2d.fromDegrees(0.0)).getDegrees();
-    } else if (pushDown) {
-      currentTargetAngle = AllianceFlipUtil.apply(Rotation2d.fromDegrees(180.0)).getDegrees();
-    } else if (pushRight) {
-      currentTargetAngle = AllianceFlipUtil.apply(Rotation2d.fromDegrees(270.0)).getDegrees();
-    } else if (pushLeft) {
-      currentTargetAngle = AllianceFlipUtil.apply(Rotation2d.fromDegrees(90.0)).getDegrees();
+    switch (currentSnapDirection) {
+      case UP -> currentTargetAngle = AllianceFlipUtil.apply(Rotation2d.fromDegrees(0.0)).getDegrees();
+      case DOWN -> currentTargetAngle = AllianceFlipUtil.apply(Rotation2d.fromDegrees(180.0)).getDegrees();
+      case RIGHT -> currentTargetAngle = AllianceFlipUtil.apply(Rotation2d.fromDegrees(270.0)).getDegrees();
+      case LEFT -> currentTargetAngle = AllianceFlipUtil.apply(Rotation2d.fromDegrees(90.0)).getDegrees();
+      case NONE -> {}
     }
   }
 
