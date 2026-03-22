@@ -92,57 +92,102 @@ public class Robot extends LoggedRobot {
    * <p>This runs after the mode specific periodic functions, but before LiveWindow and
    * SmartDashboard integrated updating.
    */
-  private final int TOTAL_TELEOP = 140; //seconds
- private int nonPhaseMatchTime = 0;//subtract form match time to display match time
- private   boolean isAuto = true;//starting condition
- private   boolean isTransitioning = false;
- private   boolean isTeleop = false;
-int countTilEndgame = 0;//integer count of how many teleop phases there are, when done will go to endgame;
-   private int secondsLeft = 20;
+  private enum MatchPhase {
+    AUTO,
+    TELEOP,
+    ENDGAME,
+    DISABLED
+  }
+
+  private MatchPhase currentPhase = MatchPhase.DISABLED;
+
+  private static final double ENDGAME_THRESHOLD = 20.0;
+  private static final int TELEOP_SHIFTS = 4;
+
+  private int teleopShift = 0;
+  private int lastMatchTime = 150;
+
   @Override
   public void robotPeriodic() {
-    // Runs the Scheduler.  This is responsible for polling buttons, adding newly-scheduled
-    // commands, running already-scheduled commands, removing finished or interrupted commands,
-    // and running subsystem periodic() methods.  This must be called from the robot's periodic
-    // block in order for anything in the Command-based framework to work.
-    SmartDashboard.putNumber("Match Time", DriverStation.getMatchTime());
 
-    SmartDashboard.putNumber("Time till next period", DriverStation.getMatchTime());
-    //auto, tele, or endgame to determine non phase match time
-    secondsLeft -=nonPhaseMatchTime;
-    if(isAuto &&  DriverStation.getMatchTime() > 20){
-      isTransitioning = true;
-      secondsLeft = 10;
-      nonPhaseMatchTime = 140-10;
-      isAuto = false;
-    }
-    else if( isTransitioning && DriverStation.getMatchTime() < 130){
-      isTeleop = true;
-      isTransitioning = false;
-      nonPhaseMatchTime = 130-25;
-      countTilEndgame++;
-    }
-    if(countTilEndgame < 4){
-      int matchTime = (int)DriverStation.getMatchTime();
-      if(matchTime ==105 || matchTime == 80 || matchTime == 55){
-        nonPhaseMatchTime = matchTime-25;
-        countTilEndgame++;//make only happen once per teleop shift
+    double matchTimeRaw = DriverStation.getMatchTime();
+    int matchTime = (int) matchTimeRaw;
+
+    // Phase Detection
+    if (!DriverStation.isEnabled()) {
+      currentPhase = MatchPhase.DISABLED;
+    } else if (DriverStation.isAutonomous()) {
+      currentPhase = MatchPhase.AUTO;
+    } else if (DriverStation.isTeleop()) {
+      if (matchTimeRaw <= ENDGAME_THRESHOLD) {
+        currentPhase = MatchPhase.ENDGAME;
+      } else {
+        currentPhase = MatchPhase.TELEOP;
       }
-    }else{
-      nonPhaseMatchTime = 
     }
 
+    // Teleop Shift Logic
+    if (currentPhase == MatchPhase.TELEOP) {
 
+      // Total usable teleop time before endgame
+      double usableTeleopTime = 135.0 - ENDGAME_THRESHOLD;
 
+      // Length of each shift
+      double shiftLength = usableTeleopTime / TELEOP_SHIFTS;
 
+      // Convert match time to "teleop elapsed"
+      double teleopElapsed = 135.0 - matchTimeRaw;
+
+      // Compute current shift
+      int calculatedShift = (int) (teleopElapsed / shiftLength);
+
+      // Clamp between 0 and TELEOP_SHIFTS-1
+      teleopShift = Math.min(calculatedShift, TELEOP_SHIFTS - 1);
+    } else if (currentPhase != MatchPhase.TELEOP) {
+      teleopShift = 0;
+    }
+    // Time Remaining in Phase
+    double timeLeftInPhase = 0;
+
+    switch (currentPhase) {
+      case AUTO:
+        timeLeftInPhase = matchTimeRaw;
+        break;
+
+      case TELEOP:
+        timeLeftInPhase = matchTimeRaw - ENDGAME_THRESHOLD;
+        break;
+
+      case ENDGAME:
+        timeLeftInPhase = matchTimeRaw;
+        break;
+
+      default:
+        timeLeftInPhase = 0;
+    }
+
+    // -------------------------------
+    // Dashboard Output
+    // -------------------------------
+    SmartDashboard.putNumber("Match Time", matchTimeRaw);
+    SmartDashboard.putString("Phase", currentPhase.name());
+    SmartDashboard.putNumber("Teleop Shift", teleopShift + 1); // 1–4 instead of 0–3
+    SmartDashboard.putNumber("Time Left In Phase", timeLeftInPhase);
+
+    // -------------------------------
+    // Optional: Hub Phase Logic Hook
+    // -------------------------------
     if (Objects.nonNull(Constants.HUB_PHASE)) {
       SmartDashboard.putString("HubPhase", Constants.HUB_PHASE.name());
     } else {
       SmartDashboard.putString("HubPhase", "BOTH");
-      nonPhaseMatchTime = 0;
     }
+
     SmartDashboard.putBoolean("HubActive", Constants.HUB_ACTIVE);
 
+    // -------------------------------
+    // Scheduler (unchanged)
+    // -------------------------------
     double t0 = Logger.getTimestamp() / 1.0e6;
     m_robotContainer.preSchedulerUpdate();
     double t1 = Logger.getTimestamp() / 1.0e6;
@@ -154,6 +199,8 @@ int countTilEndgame = 0;//integer count of how many teleop phases there are, whe
     Logger.recordOutput("LoopTiming/PreSchedulerSeconds", t1 - t0);
     Logger.recordOutput("LoopTiming/SchedulerSeconds", t2 - t1);
     Logger.recordOutput("LoopTiming/PostSchedulerSeconds", t3 - t2);
+
+    lastMatchTime = matchTime;
   }
 
   /** This function is called once each time the robot enters Disabled mode. */
