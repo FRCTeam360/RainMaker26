@@ -8,8 +8,8 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 16.396866666666668,
-        "y": 6.276222222222223
+        "x": 16.3384,
+        "y": 6.500344444444444
       },
       "isLocked": false,
       "linkedName": "FLIPPED altnostopend"
@@ -36,12 +36,12 @@
         "y": 7.094755555555555
       },
       "prevControl": {
-        "x": 10.37587965692896,
-        "y": 7.666631531577565
+        "x": 10.488976518601454,
+        "y": 7.657082108708683
       },
       "nextControl": {
-        "x": 10.394288888888891,
-        "y": 6.451622222222222
+        "x": 10.257866666666668,
+        "y": 6.412644444444444
       },
       "isLocked": false,
       "linkedName": null
@@ -100,8 +100,8 @@
         "y": 5.7207888888888885
       },
       "prevControl": {
-        "x": 12.723366666666667,
-        "y": 5.126166666666665
+        "x": 12.69397777777778,
+        "y": 5.009444444444443
       },
       "nextControl": null,
       "isLocked": false,
@@ -114,7 +114,7 @@
       "rotationDegrees": -173.06155567851783
     },
     {
-      "waypointRelativePos": 1.5236514522821594,
+      "waypointRelativePos": 1.6132780082987583,
       "rotationDegrees": -169.23600764629245
     },
     {
@@ -132,13 +132,17 @@
     {
       "waypointRelativePos": 5.182572614107897,
       "rotationDegrees": 0.0
+    },
+    {
+      "waypointRelativePos": 5.646473029045657,
+      "rotationDegrees": 0.0
     }
   ],
   "constraintZones": [
     {
       "name": "Constraints Zone",
       "minWaypointRelativePos": 1.786600496277912,
-      "maxWaypointRelativePos": 6.0,
+      "maxWaypointRelativePos": 5.371712158808926,
       "constraints": {
         "maxVelocity": 2.0,
         "maxAcceleration": 8.0,
@@ -167,7 +171,7 @@
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 34.0193
+    "rotation": 23.025492008527976
   },
   "useDefaultConstraints": true
 }
