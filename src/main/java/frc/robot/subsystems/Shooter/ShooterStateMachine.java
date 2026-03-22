@@ -14,7 +14,8 @@ import java.util.function.BooleanSupplier;
 import org.littletonrobotics.junction.Logger;
 
 /**
- * Manages the shooter state machine, coordinating the flywheel, hood, and flywheel kicker to
+ * Manages the shooter state machine, coordinating the flywheel, hood, and
+ * flywheel kicker to
  * determine when the shooter is ready to fire.
  */
 public class ShooterStateMachine {
@@ -52,10 +53,11 @@ public class ShooterStateMachine {
   /**
    * Creates a new ShooterStateMachine.
    *
-   * @param flywheel the flywheel subsystem
-   * @param hood the hood subsystem
-   * @param flywheelKicker the flywheel kicker subsystem
-   * @param isAlignedToTarget supplier that returns true when the robot is aligned to the target
+   * @param flywheel          the flywheel subsystem
+   * @param hood              the hood subsystem
+   * @param flywheelKicker    the flywheel kicker subsystem
+   * @param isAlignedToTarget supplier that returns true when the robot is aligned
+   *                          to the target
    */
   public ShooterStateMachine(
       Flywheel flywheel,
@@ -85,16 +87,20 @@ public class ShooterStateMachine {
   }
 
   /**
-   * Updates the shooter state based on wanted state, subsystem readiness, and alignment. Should be
+   * Updates the shooter state based on wanted state, subsystem readiness, and
+   * alignment. Should be
    * called every cycle by the SuperStructure.
    *
-   * <p>Uses the flywheel's internal state transitions to gate firing:
+   * <p>
+   * Uses the flywheel's internal state transitions to gate firing:
    *
    * <ul>
-   *   <li>{@link FlywheelInternalStates#AT_SETPOINT} — flywheel velocity is sustained in tolerance;
-   *       combined with hood and drivetrain readiness, transitions to FIRING
-   *   <li>{@link FlywheelInternalStates#UNDER_SHOOTING} — sustained RPM drop detected from a shot
-   *       passing through; reverts to PREPARING_TO_FIRE to restart the cycle
+   * <li>{@link FlywheelInternalStates#AT_SETPOINT} — flywheel velocity is
+   * sustained in tolerance;
+   * combined with hood and drivetrain readiness, transitions to FIRING
+   * <li>{@link FlywheelInternalStates#UNDER_SHOOTING} — sustained RPM drop
+   * detected from a shot
+   * passing through; reverts to PREPARING_TO_FIRE to restart the cycle
    * </ul>
    */
   public void update() {
@@ -123,14 +129,16 @@ public class ShooterStateMachine {
         Logger.recordOutput("Superstructure/Shooting/TargetReady", targetReady);
         SmartDashboard.putBoolean("Superstructure/Shooting/DrivetrainAligned", drivetrainAligned);
 
-        // Enter FIRING when flywheel reaches AT_SETPOINT (with hood + drivetrain ready).
-        // Stay in FIRING through bang-bang oscillations — only revert to PREPARING_TO_FIRE
-        // when UNDER_SHOOTING signals a sustained RPM drop from too many shots passing through.
-        boolean shouldFire =
-            (flywheelReady || (previousState == ShooterStates.FIRING && !flywheelUnderShooting))
-                && hoodReady
-                && drivetrainAligned
-                && targetReady;
+        // Enter FIRING when flywheel reaches AT_SETPOINT (with hood + drivetrain
+        // ready).
+        // Stay in FIRING through bang-bang oscillations — only revert to
+        // PREPARING_TO_FIRE
+        // when UNDER_SHOOTING signals a sustained RPM drop from too many shots passing
+        // through.
+        boolean shouldFire = (flywheelReady || (previousState == ShooterStates.FIRING && !flywheelUnderShooting))
+            && hoodReady
+            && drivetrainAligned
+            && targetReady;
 
         if (shouldFire) {
           currentState = ShooterStates.FIRING;
@@ -152,7 +160,8 @@ public class ShooterStateMachine {
   }
 
   /**
-   * Applies the current shooter state to subsystems. Sets flywheel, hood, and flywheel kicker
+   * Applies the current shooter state to subsystems. Sets flywheel, hood, and
+   * flywheel kicker
    * wanted states based on the current state.
    */
   public void apply() {

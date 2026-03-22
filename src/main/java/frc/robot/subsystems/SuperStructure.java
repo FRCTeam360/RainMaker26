@@ -108,12 +108,11 @@ public class SuperStructure extends SubsystemBase {
     this.hubShotCalculator = hubShotCalculator;
     this.robotPoseSupplier = robotPoseSupplier;
     this.robotToShooter = robotToShooter;
-    this.shooterStateMachine =
-        new ShooterStateMachine(
-            flywheel, hood, flywheelKicker, isAlignedToTarget, this::canShootToTarget);
+    this.shooterStateMachine = new ShooterStateMachine(
+        flywheel, hood, flywheelKicker, isAlignedToTarget, this::canShootToTarget);
     this.intakeStateMachine = new IntakeStateMachine(intakeRoller, intakePivot);
-    this.targetSelectionStateMachine =
-        new TargetSelectionStateMachine(hubShotCalculator, passCalculator, robotPoseSupplier);
+    this.targetSelectionStateMachine = new TargetSelectionStateMachine(hubShotCalculator, passCalculator,
+        robotPoseSupplier);
 
     flywheel.setShootVelocitySupplier(
         () -> {
@@ -251,8 +250,7 @@ public class SuperStructure extends SubsystemBase {
           // For AUTO_CYCLE_SHOOTING, check if hub is actually active based on game phase
           return canScoreAtHub() && hubShotCalculator.calculateShot().isValid();
         case PASSING:
-          boolean isInPassingZone =
-              PositionUtils.isInPassingZone(robotPoseSupplier.get(), robotToShooter);
+          boolean isInPassingZone = PositionUtils.isInPassingZone(robotPoseSupplier.get(), robotToShooter);
           return isInPassingZone;
         default:
           return true;
@@ -312,7 +310,8 @@ public class SuperStructure extends SubsystemBase {
   }
 
   /**
-   * Returns a command that toggles the intake between STOWED and INTAKING. If the intake is
+   * Returns a command that toggles the intake between STOWED and INTAKING. If the
+   * intake is
    * currently STOWED, it switches to INTAKING; otherwise it switches to STOWED.
    */
   public Command toggleIntakeStateCommand() {
@@ -327,7 +326,8 @@ public class SuperStructure extends SubsystemBase {
   }
 
   /**
-   * Returns whether the hub is currently active/shootable based on game time, alliance, and auto
+   * Returns whether the hub is currently active/shootable based on game time,
+   * alliance, and auto
    * winner. Does not require the superstructure to be in SHOOT_AT_HUB state.
    *
    * @return true if the hub is active and can be shot at, false otherwise.
@@ -342,16 +342,14 @@ public class SuperStructure extends SubsystemBase {
   public void periodic() {
     // Calculate shot and extract time of flight once per cycle
     cachedTimeOfFlight = hubShotCalculator.calculateShot().timeOfFlight();
-    RobotUtils.ActiveHub shootingPhase =
-        RobotUtils.getShootingPhase(
-            DriverStation.getMatchTime(), DriverStation.isTeleop(), cachedTimeOfFlight);
+    RobotUtils.ActiveHub shootingPhase = RobotUtils.getShootingPhase(
+        DriverStation.getMatchTime(), DriverStation.isTeleop(), cachedTimeOfFlight);
 
     // Calculate hub active once per cycle
-    cachedHubActive =
-        RobotUtils.hubActive(
-            DriverStation.getAlliance(),
-            RobotUtils.getAutoWinner(DriverStation.getGameSpecificMessage()),
-            shootingPhase);
+    cachedHubActive = RobotUtils.hubActive(
+        DriverStation.getAlliance(),
+        RobotUtils.getAutoWinner(DriverStation.getGameSpecificMessage()),
+        shootingPhase);
 
     // Runs the superstructure, shooter, and intake state machines
     updateState();
