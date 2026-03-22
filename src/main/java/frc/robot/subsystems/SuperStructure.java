@@ -69,12 +69,17 @@ public class SuperStructure extends SubsystemBase {
     UNJAMMING
   }
 
+  // Extra time after the ball enters the hub before it reaches the scoring sensor.
+  // Added to the time-of-flight value so we don't shoot into a hub that's about to go inactive
+  // before the ball actually registers as scored.
+  private static final double BALL_TO_SENSOR_DELAY_SECONDS = 0.0;
+
   // State variables
   private SuperWantedStates wantedSuperState = SuperWantedStates.IDLE;
   private SuperInternalStates currentSuperState = SuperInternalStates.IDLE;
   private SuperInternalStates previousSuperState = SuperInternalStates.IDLE;
   private ControlState controlState = ControlState.SUPERSTRUCTURE;
-  private boolean cachedHubActive = true;
+  private boolean cachedIsHubActive = true;
   private double cachedTimeOfFlight = 0.0;
 
   // Constructor
@@ -204,6 +209,16 @@ public class SuperStructure extends SubsystemBase {
     hopperRoller.setWantedState(HopperRollerStates.UNJAMMING);
   }
 
+  /**
+   * Returns the time-of-flight value used for hub shift boundary checks. Clamps to the minimum
+   * mapped TOF to handle very close range, then adds the sensor delay to account for the full time
+   * from ball release until it registers at the scoring sensor.
+   */
+  private double getHubShiftTimeOfFlight() {
+    return Math.max(cachedTimeOfFlight, hubShotCalculator.getMinTimeOfFlightSecs())
+        + BALL_TO_SENSOR_DELAY_SECONDS;
+  }
+
   private boolean canShootToTarget() {
     if (wantedSuperState == SuperWantedStates.AUTO_CYCLE_SHOOTING) {
       switch (currentSuperState) {
@@ -300,7 +315,7 @@ public class SuperStructure extends SubsystemBase {
    * @return true if the hub is active and can be shot at, false otherwise.
    */
   public boolean canScoreAtHub() {
-    return cachedHubActive;
+    return cachedIsHubActive;
   }
 
   // periodic
@@ -309,16 +324,16 @@ public class SuperStructure extends SubsystemBase {
   public void periodic() {
     // Calculate shot and extract time of flight once per cycle
     cachedTimeOfFlight = hubShotCalculator.calculateShot().timeOfFlight();
-    RobotUtils.ActiveHub shootingPhase =
-        RobotUtils.getShootingPhase(
-            DriverStation.getMatchTime(), DriverStation.isTeleop(), cachedTimeOfFlight);
+    RobotUtils.ActiveHub activeHub =
+        RobotUtils.getActiveHub(
+            DriverStation.getMatchTime(), DriverStation.isTeleop(), getHubShiftTimeOfFlight());
 
     // Calculate hub active once per cycle
-    cachedHubActive =
-        RobotUtils.hubActive(
+    cachedIsHubActive =
+        RobotUtils.isHubActiveForAlliance(
             DriverStation.getAlliance(),
             RobotUtils.getAutoWinner(DriverStation.getGameSpecificMessage()),
-            shootingPhase);
+            activeHub);
 
     // Runs the superstructure, shooter, and intake state machines
     updateState();
@@ -330,15 +345,15 @@ public class SuperStructure extends SubsystemBase {
     shooterStateMachine.apply();
     intakeStateMachine.apply();
 
-    SmartDashboard.putString("Shooting Phase", shootingPhase.toString());
-    SmartDashboard.putBoolean("Can Score in Hub", cachedHubActive);
+    SmartDashboard.putString("Active Hub", activeHub.toString());
+    SmartDashboard.putBoolean("Can Score in Hub", cachedIsHubActive);
 
     Logger.recordOutput("Superstructure/WantedSuperState", wantedSuperState);
     Logger.recordOutput("Superstructure/CurrentSuperState", currentSuperState);
     SmartDashboard.putString("Superstructure/CurrentSuperState", currentSuperState.toString());
     Logger.recordOutput("Superstructure/PreviousSuperState", previousSuperState);
     Logger.recordOutput("Superstructure/ControlState", controlState);
-    Logger.recordOutput("Superstructure/HubActive", cachedHubActive);
+    Logger.recordOutput("Superstructure/HubActive", cachedIsHubActive);
     shooterStateMachine.log();
     intakeStateMachine.log();
     targetSelectionStateMachine.log();

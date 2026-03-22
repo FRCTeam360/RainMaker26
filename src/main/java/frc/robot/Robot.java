@@ -277,7 +277,7 @@ public class Robot extends LoggedRobot {
     }
 
     boolean hubActive =
-        RobotUtils.hubActive(
+        RobotUtils.isHubActiveForAlliance(
             DriverStation.getAlliance(), Constants.AUTO_WINNER, Constants.HUB_PHASE);
     Constants.HUB_ACTIVE = hubActive;
   }

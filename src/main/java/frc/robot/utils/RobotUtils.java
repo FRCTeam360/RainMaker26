@@ -7,6 +7,8 @@ import java.io.File;
 import java.util.Optional;
 
 public class RobotUtils {
+  private static final double SHIFT_GRACE_PERIOD_SECONDS = 2.0;
+
   public enum ActiveHub {
     BOTH,
     AUTOLOSER,
@@ -60,7 +62,7 @@ public class RobotUtils {
    * @param timeOfFlight the time of flight of the shot in seconds
    * @return which hub(s) are currently active
    */
-  public static ActiveHub getShootingPhase(double gameTime, Boolean isTele, double timeOfFlight) {
+  public static ActiveHub getActiveHub(double gameTime, Boolean isTele, double timeOfFlight) {
     // gameTime is the getMatchTime() from DriverStation, isTele is the isTeleop() from
     // DriverStation
     ActiveHub activeHub = ActiveHub.BOTH;
@@ -71,17 +73,17 @@ public class RobotUtils {
     } else if (isTele) {
       if (gameTime <= 30) {
         activeHub = ActiveHub.BOTH; // END GAME
-      } else if (gameTime < 53) {
+      } else if (gameTime < 55 - SHIFT_GRACE_PERIOD_SECONDS) {
         activeHub = ActiveHub.AUTOWINNER; // ALLIANCE SHIFT 4
-      } else if (gameTime <= 55 && gameTime >= 53) {
+      } else if (gameTime <= 55 && gameTime >= 55 - SHIFT_GRACE_PERIOD_SECONDS) {
         activeHub = ActiveHub.BOTH; // ALLIANCE SHIFT GRACE PERIOD
-      } else if (gameTime < 78) {
+      } else if (gameTime < 80 - SHIFT_GRACE_PERIOD_SECONDS) {
         activeHub = ActiveHub.AUTOLOSER; // ALLIANCE SHIFT 3
-      } else if (gameTime <= 80 && gameTime >= 78) {
+      } else if (gameTime <= 80 && gameTime >= 80 - SHIFT_GRACE_PERIOD_SECONDS) {
         activeHub = ActiveHub.BOTH; // ALLIANCE SHIFT GRACE PERIOD
-      } else if (gameTime < 103) {
+      } else if (gameTime < 105 - SHIFT_GRACE_PERIOD_SECONDS) {
         activeHub = ActiveHub.AUTOWINNER; // ALLIANCE SHIFT 2
-      } else if (gameTime <= 105 && gameTime >= 103) {
+      } else if (gameTime <= 105 && gameTime >= 105 - SHIFT_GRACE_PERIOD_SECONDS) {
         activeHub = ActiveHub.BOTH; // ALLIANCE SHIFT GRACE PERIOD
       } else if (gameTime <= 130) {
         activeHub = ActiveHub.AUTOLOSER; // ALLIANCE SHIFT 1
@@ -102,10 +104,10 @@ public class RobotUtils {
    * @param gamePhase which hub(s) are active (auto winner's or auto loser's)
    * @return if our alliance's hub is active
    */
-  public static boolean hubActive(
+  public static boolean isHubActiveForAlliance(
       Optional<Alliance> alliance, Alliance autoWinner, ActiveHub gamePhase) {
     // alliance is our alliance, autoWinner is the result of getAutoWinner, gamePhase is the result
-    // of getShootingPhase
+    // of getActiveHub
     boolean hubActive = true;
     if (alliance.isPresent()) {
       if (gamePhase == null || autoWinner == null) {
