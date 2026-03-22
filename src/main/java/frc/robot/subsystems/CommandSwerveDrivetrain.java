@@ -33,9 +33,9 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
-import frc.robot.utils.AllianceFlipUtil;
 import frc.robot.generated.WoodBotDrivetrain.TunerSwerveDrivetrain;
 import frc.robot.subsystems.Vision.VisionMeasurement;
+import frc.robot.utils.AllianceFlipUtil;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.DoubleSupplier;
@@ -145,7 +145,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   }
 
   // Field-centric facing angle request for hub tracking
-  private final SwerveRequest.FieldCentricFacingAngle m_faceHubRequest =
+  private final SwerveRequest.FieldCentricFacingAngle angleFacingRequest =
       new SwerveRequest.FieldCentricFacingAngle()
           .withDeadband(maxSpeed.in(MetersPerSecond) * 0.01)
           .withRotationalDeadband(0.0)
@@ -176,14 +176,14 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                   isBlueAlliance ? velXMps : -velXMps,
                   isBlueAlliance ? velYMps : -velYMps,
                   headingLockEnabled && headingControllerActive
-                      ? m_faceHubRequest.HeadingController.getLastAppliedOutput()
+                      ? angleFacingRequest.HeadingController.getLastAppliedOutput()
                       : omegaRps,
                   getPosition().getRotation());
 
           if (headingLockEnabled) {
             updateSnapAngle(driveCont.getRightX(), driveCont.getRightY());
             headingControllerActive = true; // Mark that we've applied the facing-angle request
-            return m_faceHubRequest
+            return angleFacingRequest
                 .withVelocityX(isBlueAlliance ? velXMps : -velXMps)
                 .withVelocityY(isBlueAlliance ? velYMps : -velYMps)
                 .withTargetDirection(Rotation2d.fromDegrees(currentTargetAngle));
@@ -272,7 +272,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
               // facing-angle request has been applied at least once).
               double omegaRps =
                   controllerHasRun[0]
-                      ? m_faceHubRequest.HeadingController.getLastAppliedOutput()
+                      ? angleFacingRequest.HeadingController.getLastAppliedOutput()
                       : 0.0;
               controllerHasRun[0] = true;
 
@@ -290,14 +290,14 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
               // Pass operator-perspective values — CTRE applies operator perspective
               // internally via setOperatorPerspectiveForward
-              return m_faceHubRequest
+              return angleFacingRequest
                   .withVelocityX(isBlueAlliance ? rawVelXMps : -rawVelXMps)
                   .withVelocityY(isBlueAlliance ? rawVelYMps : -rawVelYMps)
                   .withTargetDirection(headingSupplier.get());
             })
         .finallyDo(
             () -> {
-              m_faceHubRequest.HeadingController.reset();
+              angleFacingRequest.HeadingController.reset();
               controllerHasRun[0] = false; // Reset so next schedule starts clean
             });
   }
@@ -391,11 +391,11 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     super(drivetrainConstants, modules);
     // Registers the subsystem so periodic runs
     CommandScheduler.getInstance().registerSubsystem(this);
-    m_faceHubRequest.HeadingController.setPID(HEADING_KP, HEADING_KI, HEADING_KD);
-    m_faceHubRequest.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
-    m_faceHubRequest.HeadingController.setIZone(HEADING_I_ZONE);
-    m_faceHubRequest.HeadingController.setTolerance(HEADING_TOLERANCE_RAD);
-    m_faceHubRequest.ForwardPerspective = ForwardPerspectiveValue.BlueAlliance;
+    angleFacingRequest.HeadingController.setPID(HEADING_KP, HEADING_KI, HEADING_KD);
+    angleFacingRequest.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
+    angleFacingRequest.HeadingController.setIZone(HEADING_I_ZONE);
+    angleFacingRequest.HeadingController.setTolerance(HEADING_TOLERANCE_RAD);
+    angleFacingRequest.ForwardPerspective = ForwardPerspectiveValue.BlueAlliance;
     if (Utils.isSimulation()) {
       startSimThread();
     }
@@ -586,8 +586,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     Logger.recordOutput(
         SUBSYSTEM_NAME + "DynamicHeadingToleranceDeg", Math.toDegrees(dynamicToleranceRad));
 
-    m_faceHubRequest.HeadingController.setTolerance(dynamicToleranceRad);
-    return m_faceHubRequest.HeadingController.atSetpoint();
+    angleFacingRequest.HeadingController.setTolerance(dynamicToleranceRad);
+    return angleFacingRequest.HeadingController.atSetpoint();
   }
 
   public double getAngle() {
