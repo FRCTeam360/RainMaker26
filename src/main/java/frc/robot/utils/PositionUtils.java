@@ -146,6 +146,8 @@ public class PositionUtils {
     }
   }
 
+  private static Pose2d[] raycast = new Pose2d[2];
+
   public static boolean canPass(Pose2d robotPose, Rotation2d shooterRotation) {
     boolean canPass = true;
     Translation2d start = robotPose.getTranslation();
@@ -162,12 +164,17 @@ public class PositionUtils {
     } else if (dy < 0) {
       maxDistance = Math.min(maxDistance, -start.getY() / dy);
     }
-    Translation2d end = start.plus(new Translation2d(maxDistance, shooterRotation));
-    int length = (int) Math.round(start.getDistance(end));
-    end = findIntersectionWithHub(start, end, shooterRotation, length);
-    Pose2d[] raycast = new Pose2d[] {robotPose, new Pose2d(end, shooterRotation)};
+    Translation2d raycastMax = start.plus(new Translation2d(maxDistance, shooterRotation));
+    int length = (int) Math.round(start.getDistance(raycastMax));
+    Translation2d raycastEnd = findIntersectionWithHub(start, raycastMax, shooterRotation, length);
+    raycast[0] = robotPose;
+    raycast[1] = new Pose2d(raycastEnd, shooterRotation);
     Logger.recordOutput("Raycast/Line", raycast);
-    return canPass;
+    if (raycastMax == raycastEnd) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   public static Translation2d findIntersectionWithHub(
