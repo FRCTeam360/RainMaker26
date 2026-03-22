@@ -92,6 +92,13 @@ public class Robot extends LoggedRobot {
    * <p>This runs after the mode specific periodic functions, but before LiveWindow and
    * SmartDashboard integrated updating.
    */
+  private final int TOTAL_TELEOP = 140; //seconds
+ private int nonPhaseMatchTime = 0;//subtract form match time to display match time
+ private   boolean isAuto = true;//starting condition
+ private   boolean isTransitioning = false;
+ private   boolean isTeleop = false;
+int countTilEndgame = 0;//integer count of how many teleop phases there are, when done will go to endgame;
+   private int secondsLeft = 20;
   @Override
   public void robotPeriodic() {
     // Runs the Scheduler.  This is responsible for polling buttons, adding newly-scheduled
@@ -99,10 +106,40 @@ public class Robot extends LoggedRobot {
     // and running subsystem periodic() methods.  This must be called from the robot's periodic
     // block in order for anything in the Command-based framework to work.
     SmartDashboard.putNumber("Match Time", DriverStation.getMatchTime());
+
+    SmartDashboard.putNumber("Time till next period", DriverStation.getMatchTime());
+    //auto, tele, or endgame to determine non phase match time
+    secondsLeft -=nonPhaseMatchTime;
+    if(isAuto &&  DriverStation.getMatchTime() > 20){
+      isTransitioning = true;
+      secondsLeft = 10;
+      nonPhaseMatchTime = 140-10;
+      isAuto = false;
+    }
+    else if( isTransitioning && DriverStation.getMatchTime() < 130){
+      isTeleop = true;
+      isTransitioning = false;
+      nonPhaseMatchTime = 130-25;
+      countTilEndgame++;
+    }
+    if(countTilEndgame < 4){
+      int matchTime = (int)DriverStation.getMatchTime();
+      if(matchTime ==105 || matchTime == 80 || matchTime == 55){
+        nonPhaseMatchTime = matchTime-25;
+        countTilEndgame++;//make only happen once per teleop shift
+      }
+    }else{
+      nonPhaseMatchTime = 
+    }
+
+
+
+
     if (Objects.nonNull(Constants.HUB_PHASE)) {
       SmartDashboard.putString("HubPhase", Constants.HUB_PHASE.name());
     } else {
       SmartDashboard.putString("HubPhase", "BOTH");
+      nonPhaseMatchTime = 0;
     }
     SmartDashboard.putBoolean("HubActive", Constants.HUB_ACTIVE);
 
