@@ -79,7 +79,8 @@ public class Robot extends LoggedRobot {
 
     Logger.start(); // Start logging! No more data receivers, replay sources, or metadata values may
     // be added.
-    // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
+    // Instantiate our RobotContainer. This will perform all our button bindings,
+    // and put our
     // autonomous chooser on the dashboard.
     WebServer.start(5800, Filesystem.getDeployDirectory().getPath());
     m_robotContainer = new RobotContainer();
@@ -94,6 +95,7 @@ public class Robot extends LoggedRobot {
    */
   private enum MatchPhase {
     AUTO,
+    TRANSITION,
     TELEOP,
     ENDGAME,
     DISABLED
@@ -101,11 +103,13 @@ public class Robot extends LoggedRobot {
 
   private MatchPhase currentPhase = MatchPhase.DISABLED;
 
-  private static final double ENDGAME_THRESHOLD = 20.0;
-  private static final int TELEOP_SHIFTS = 4;
-
   private int teleopShift = 0;
   private int lastMatchTime = 150;
+  private static final double TRANSITION_DURATION = 10.0;
+  private static final double ENDGAME_THRESHOLD = 30.0;
+  private static final double TELEOP_START_TIME = 140.0;
+
+  private static final int TELEOP_SHIFTS = 4;
 
   @Override
   public void robotPeriodic() {
@@ -113,70 +117,83 @@ public class Robot extends LoggedRobot {
     double matchTimeRaw = DriverStation.getMatchTime();
     int matchTime = (int) matchTimeRaw;
 
-    // Phase Detection
     if (!DriverStation.isEnabled()) {
       currentPhase = MatchPhase.DISABLED;
     } else if (DriverStation.isAutonomous()) {
       currentPhase = MatchPhase.AUTO;
     } else if (DriverStation.isTeleop()) {
-      if (matchTimeRaw <= ENDGAME_THRESHOLD) {
+      if (matchTimeRaw > TELEOP_START_TIME - TRANSITION_DURATION) {
+        currentPhase = MatchPhase.TRANSITION;
+      } else if (matchTimeRaw <= ENDGAME_THRESHOLD) {
         currentPhase = MatchPhase.ENDGAME;
       } else {
         currentPhase = MatchPhase.TELEOP;
       }
     }
 
-    // Teleop Shift Logic
+    double timeLeftInShift = 0;
+
     if (currentPhase == MatchPhase.TELEOP) {
-
-      // Total usable teleop time before endgame
-      double usableTeleopTime = 135.0 - ENDGAME_THRESHOLD;
-
-      // Length of each shift
+      double usableTeleopTime = (TELEOP_START_TIME - TRANSITION_DURATION) - ENDGAME_THRESHOLD;
       double shiftLength = usableTeleopTime / TELEOP_SHIFTS;
-
-      // Convert match time to "teleop elapsed"
-      double teleopElapsed = 135.0 - matchTimeRaw;
-
-      // Compute current shift
+      double teleopElapsed = (TELEOP_START_TIME - TRANSITION_DURATION) - matchTimeRaw;
       int calculatedShift = (int) (teleopElapsed / shiftLength);
-
-      // Clamp between 0 and TELEOP_SHIFTS-1
       teleopShift = Math.min(calculatedShift, TELEOP_SHIFTS - 1);
-    } else if (currentPhase != MatchPhase.TELEOP) {
+      double shiftStartTime = teleopShift * shiftLength;
+      double shiftElapsed = teleopElapsed - shiftStartTime;
+      timeLeftInShift = shiftLength - shiftElapsed;
+    } else {
       teleopShift = 0;
+      timeLeftInShift = 0;
     }
-    // Time Remaining in Phase
+
     double timeLeftInPhase = 0;
 
     switch (currentPhase) {
       case AUTO:
         timeLeftInPhase = matchTimeRaw;
         break;
-
+      case TRANSITION:
+        timeLeftInPhase = matchTimeRaw - (TELEOP_START_TIME - TRANSITION_DURATION);
+        break;
       case TELEOP:
         timeLeftInPhase = matchTimeRaw - ENDGAME_THRESHOLD;
         break;
-
       case ENDGAME:
         timeLeftInPhase = matchTimeRaw;
         break;
-
       default:
         timeLeftInPhase = 0;
     }
 
-    // -------------------------------
-    // Dashboard Output
-    // -------------------------------
+    double primaryTimeLeft = 0;
+
+    switch (currentPhase) {
+      case AUTO:
+        primaryTimeLeft = matchTimeRaw;
+        break;
+      case TRANSITION:
+        primaryTimeLeft = matchTimeRaw - (TELEOP_START_TIME - TRANSITION_DURATION);
+        break;
+      case TELEOP:
+        primaryTimeLeft = timeLeftInShift;
+        break;
+      case ENDGAME:
+        primaryTimeLeft = matchTimeRaw;
+        break;
+      default:
+        primaryTimeLeft = 0;
+    }
+
+    if (matchTimeRaw < 0) {
+      primaryTimeLeft = 0;
+    }
+
     SmartDashboard.putNumber("Match Time", matchTimeRaw);
     SmartDashboard.putString("Phase", currentPhase.name());
-    SmartDashboard.putNumber("Teleop Shift", teleopShift + 1); // 1–4 instead of 0–3
-    SmartDashboard.putNumber("Time Left In Phase", timeLeftInPhase);
+    SmartDashboard.putNumber("Teleop Shift", teleopShift + 1);
+    SmartDashboard.putNumber("Time Left in Phase", primaryTimeLeft);
 
-    // -------------------------------
-    // Optional: Hub Phase Logic Hook
-    // -------------------------------
     if (Objects.nonNull(Constants.HUB_PHASE)) {
       SmartDashboard.putString("HubPhase", Constants.HUB_PHASE.name());
     } else {
@@ -185,9 +202,6 @@ public class Robot extends LoggedRobot {
 
     SmartDashboard.putBoolean("HubActive", Constants.HUB_ACTIVE);
 
-    // -------------------------------
-    // Scheduler (unchanged)
-    // -------------------------------
     double t0 = Logger.getTimestamp() / 1.0e6;
     m_robotContainer.preSchedulerUpdate();
     double t1 = Logger.getTimestamp() / 1.0e6;
