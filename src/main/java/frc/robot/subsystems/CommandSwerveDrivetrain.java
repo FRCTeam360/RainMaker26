@@ -13,6 +13,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -112,6 +113,17 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   // Limits how much shoot-on-the-move compensation is needed.
   private static final double FACING_ANGLE_MAX_SPEED_FRACTION = 0.5;
 
+  // Slew rate limits for driver input (units: per second)
+  // Translation: maxSpeed m/s per second → reaches full speed in ~1 s from rest
+  private static final double TRANSLATION_SLEW_RATE_MPS_PER_S = 6.0;
+  // Rotation: maxAngularVelocity rad/s per second → reaches full rotation in ~1 s from rest
+  private static final double ROTATION_SLEW_RATE_RPS_PER_S = 10.0;
+
+  // Slew rate limiters for the two translation axes and rotation in fieldOrientedDriveCommand
+  private final SlewRateLimiter m_velXLimiter = new SlewRateLimiter(TRANSLATION_SLEW_RATE_MPS_PER_S);
+  private final SlewRateLimiter m_velYLimiter = new SlewRateLimiter(TRANSLATION_SLEW_RATE_MPS_PER_S);
+  private final SlewRateLimiter m_omegaLimiter = new SlewRateLimiter(ROTATION_SLEW_RATE_RPS_PER_S);
+
   // Field-centric facing angle request for hub tracking
   private final SwerveRequest.FieldCentricFacingAngle m_faceHubRequest =
       new SwerveRequest.FieldCentricFacingAngle()
@@ -126,34 +138,65 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             .withDeadband(maxSpeed.in(MetersPerSecond) * 0.01)
             .withRotationalDeadband(maxAngularVelocity.in(RadiansPerSecond) * 0.01)
             .withDriveRequestType(m_driveRequestType);
-    return this.applyRequest(
-        () -> {
-          double velXMps = Math.pow(driveCont.getLeftY(), 3) * maxSpeed.in(MetersPerSecond) * -1.0;
-          double velYMps = Math.pow(driveCont.getLeftX(), 3) * maxSpeed.in(MetersPerSecond) * -1.0;
-          double omegaRps =
-              Math.pow(driveCont.getRightX(), 2)
-                  * (maxAngularVelocity.in(RadiansPerSecond) / 2.0)
-                  * -Math.signum(driveCont.getRightX());
-          // Store as robot-relative to match getVelocity() convention.
-          // Operator-perspective velocities are converted to field-relative via
-          // alliance flip, then to robot-relative via fromFieldRelativeSpeeds.
-          boolean isBlueAlliance =
-              DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue;
-          commandedSpeeds =
-              ChassisSpeeds.fromFieldRelativeSpeeds(
-                  isBlueAlliance ? velXMps : -velXMps,
-                  isBlueAlliance ? velYMps : -velYMps,
-                  omegaRps,
-                  getPosition().getRotation());
-          return drive
-              .withVelocityX(velXMps) // Drive forward with negative Y (forward)
-              .withVelocityY(velYMps) // Drive left with negative X (left)
-              .withRotationalRate(omegaRps); // Drive
-        }
-        // counterclockwise
-        // with negative X
-        // (left)
-        );
+    return this.runOnce(() -> resetSlewLimiters())
+        .andThen(
+            this.applyRequest(
+                () -> {
+                  double[] v = calcDriverInputMps(driveCont);
+                  double velXMps = v[0];
+                  double velYMps = v[1];
+                  double omegaRps = v[2];
+                  // Store as robot-relative to match getVelocity() convention.
+                  // Operator-perspective velocities are converted to field-relative via
+                  // alliance flip, then to robot-relative via fromFieldRelativeSpeeds.
+                  boolean isBlueAlliance =
+                      DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue;
+                  commandedSpeeds =
+                      ChassisSpeeds.fromFieldRelativeSpeeds(
+                          isBlueAlliance ? velXMps : -velXMps,
+                          isBlueAlliance ? velYMps : -velYMps,
+                          omegaRps,
+                          getPosition().getRotation());
+                  return drive
+                      .withVelocityX(velXMps)
+                      .withVelocityY(velYMps)
+                      .withRotationalRate(omegaRps);
+                }));
+  }
+
+  /**
+   * Converts raw controller axes into slew-rate-limited field-relative velocities.
+   *
+   * <p>Applies a cubic response curve to translation and a squared curve (with sign preserved) to
+   * rotation, then passes each axis through its {@link SlewRateLimiter}.
+   *
+   * @param driveCont the driver Xbox controller
+   * @return {@code double[3]} — {@code [velXMps, velYMps, omegaRadPerSec]}
+   */
+  private double[] calcDriverInputMps(CommandXboxController driveCont) {
+    double velXMps =
+        m_velXLimiter.calculate(
+            Math.pow(driveCont.getLeftY(), 3) * maxSpeed.in(MetersPerSecond) * -1.0);
+    double velYMps =
+        m_velYLimiter.calculate(
+            Math.pow(driveCont.getLeftX(), 3) * maxSpeed.in(MetersPerSecond) * -1.0);
+    double omegaRps =
+        m_omegaLimiter.calculate(
+            Math.pow(driveCont.getRightX(), 2)
+                * (maxAngularVelocity.in(RadiansPerSecond) / 2.0)
+                * -Math.signum(driveCont.getRightX()));
+    return new double[] {velXMps, velYMps, omegaRps};
+  }
+
+  /**
+   * Resets all three slew rate limiters to the robot's current measured chassis speeds. Call this
+   * at the start of any drive command to avoid a velocity jump when switching commands.
+   */
+  private void resetSlewLimiters() {
+    ChassisSpeeds current = getVelocity();
+    m_velXLimiter.reset(current.vxMetersPerSecond);
+    m_velYLimiter.reset(current.vyMetersPerSecond);
+    m_omegaLimiter.reset(current.omegaRadiansPerSecond);
   }
 
   private final SwerveRequest.FieldCentric FIELD_CENTRIC_DRIVE =
