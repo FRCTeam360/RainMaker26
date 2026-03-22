@@ -26,7 +26,8 @@ import frc.robot.utils.RobotUtils.ActiveHub;
  */
 public final class Constants {
   // This is to load the apriltag field layout on robot initialization.
-  // It prevents our robot code from having a 5 second initial lag on enablement after new code is
+  // It prevents our robot code from having a 5 second initial lag on enablement
+  // after new code is
   // deployed.
   // This is load bearing code like that coconut jpg that keeps TF2 running -_-
   public static final AprilTagFieldLayout FIELD_LAYOUT =
@@ -73,6 +74,9 @@ public final class Constants {
   public static final class IOConstants {
     // === USB PATHS ===
     public static final String USB_ROOT_DIRECTORY = "/U";
+
+    // === POWER DISTRIBUTION ===
+    public static final int PDH_CAN_ID = 1; // REV PDH default CAN ID
   }
 
   public static final CANBus RIO_CANBUS = new CANBus("rio");
@@ -195,12 +199,18 @@ public final class Constants {
     public static final InterpolatingDoubleTreeMap timeOfFlightMap =
         new InterpolatingDoubleTreeMap();
 
-    public static final double MIN_SHOT_DISTANCE_METERS = 0.0;
+    public static final double HOOD_OFFSET = 2.0;
+
+    public static final double MIN_SHOT_DISTANCE_METERS = 1.25;
     public static final double MAX_SHOT_DISTANCE_METERS = 6.0;
+
+    public static final double MIN_PASS_DISTANCE_METERS = 1.0;
+    public static final double MAX_PASS_DISTANCE_METERS = 12.0;
 
     // === INTAKE ===
     public static final int INTAKE_PIVOT_ID = 14;
-    public static final int INTAKE_ROLLER_ID = 15;
+    public static final int LEFT_INTAKE_ROLLER_ID = 15;
+    public static final int RIGHT_INTAKE_ROLLER_ID = 25;
 
     // === CLIMBER ===
     public static final int CLIMBER_RIGHT_ID = 16;
@@ -230,44 +240,70 @@ public final class Constants {
     public static final CANBus CANBUS = new CANBus("Default Name");
 
     static {
-      shotHoodAngleMap.put(6.0, 18.0);
-      shotHoodAngleMap.put(5.0, 18.0); // TESTED
-      shotHoodAngleMap.put(4.0, 15.0);
-      shotHoodAngleMap.put(3.0, 6.0); // TESTED
-      shotHoodAngleMap.put(2.5, 4.0); // TESTED
-      shotHoodAngleMap.put(2.0, 2.0);
-      shotHoodAngleMap.put(1.0, 0.0);
-      shotHoodAngleMap.put(0.0, 0.0);
+      shotHoodAngleMap.put(6.0, 16.0);
+      shotHoodAngleMap.put(5.0, 16.0);
+
+      shotHoodAngleMap.put(4.0, 17.0);
+
+      shotHoodAngleMap.put(3.5, 16.0);
+      shotHoodAngleMap.put(3.0, 10.0);
+      shotHoodAngleMap.put(2.5, 6.0);
+      shotHoodAngleMap.put(2.0, 3.0);
+      shotHoodAngleMap.put(1.25, 0.0);
 
       // === SHOOTING VALUES ===
-      shotFlywheelSpeedMap.put(6.0, 2500.0);
-      shotFlywheelSpeedMap.put(5.0, 2500.0); // TESTED
-      shotFlywheelSpeedMap.put(4.0, 2250.0);
-      shotFlywheelSpeedMap.put(3.0, 2250.0); // TESTED
-      shotFlywheelSpeedMap.put(2.5, 2150.0); // TESTED
+      shotFlywheelSpeedMap.put(6.0, 2600.0);
+      shotFlywheelSpeedMap.put(5.0, 2550.0);
+
+      shotFlywheelSpeedMap.put(4.0, 2500.0);
+
+      shotFlywheelSpeedMap.put(3.5, 2325.0);
+      shotFlywheelSpeedMap.put(3.0, 2200.0);
+      shotFlywheelSpeedMap.put(2.5, 2100.0);
       shotFlywheelSpeedMap.put(2.0, 2000.0);
-      shotFlywheelSpeedMap.put(1.0, 1800.0);
-      shotFlywheelSpeedMap.put(0.0, 2000.0);
+      shotFlywheelSpeedMap.put(1.25, 1900.0);
 
-      passHoodAngleMap.put(15.0, 20.0);
-      // passHoodAngleMap.put(5.0, 20.0); // TESTED
-      // passHoodAngleMap.put(4.0, 20.0);
-      // passHoodAngleMap.put(3.0, 20.0); // TESTED
-      // passHoodAngleMap.put(2.5, 20.0); // TESTED
-      // passHoodAngleMap.put(2.0, 20.0);
-      passHoodAngleMap.put(1.0, 20.0);
-      passHoodAngleMap.put(0.0, 20.0);
+      // ARCED PASSING MAP
+      // passHoodAngleMap.put(15.0, 20.0);
+      // // passHoodAngleMap.put(5.0, 20.0); // TESTED
+      // // passHoodAngleMap.put(4.0, 20.0);
+      // // passHoodAngleMap.put(3.0, 20.0); // TESTED
+      // // passHoodAngleMap.put(2.5, 20.0); // TESTED
+      // // passHoodAngleMap.put(2.0, 20.0);
+      // passHoodAngleMap.put(1.0, 20.0);
+      // passHoodAngleMap.put(0.0, 20.0);
 
-      passFlywheelSpeedMap.put(15.0, 3500.0);
-      passFlywheelSpeedMap.put(5.0, 3000.0); // TESTED
-      passFlywheelSpeedMap.put(4.0, 2750.0);
-      passFlywheelSpeedMap.put(3.0, 2600.0); // TESTED
-      passFlywheelSpeedMap.put(2.5, 2500.0); // TESTED
-      passFlywheelSpeedMap.put(2.0, 2200.0);
-      passFlywheelSpeedMap.put(1.0, 2000.0);
-      passFlywheelSpeedMap.put(0.0, 2000.0);
+      // passFlywheelSpeedMap.put(15.0, 4500.0);
+      // passFlywheelSpeedMap.put(9.0, 4000.0);
+      // passFlywheelSpeedMap.put(7.0, 3500.0);
+      // passFlywheelSpeedMap.put(5.0, 3000.0); // TESTED
+      // passFlywheelSpeedMap.put(4.0, 2750.0);
+      // passFlywheelSpeedMap.put(3.0, 2600.0); // TESTED
+      // passFlywheelSpeedMap.put(2.5, 2500.0); // TESTED
+      // passFlywheelSpeedMap.put(2.0, 2200.0);
+      // passFlywheelSpeedMap.put(1.0, 2000.0);
+      // passFlywheelSpeedMap.put(0.0, 2000.0);
 
-      timeOfFlightMap.put(0.0, 0.0);
+      // AGGRESSIVE LOW ANGLE PASS MAP
+      passHoodAngleMap.put(12.0, 35.0);
+      passHoodAngleMap.put(9.0, 40.0);
+      passHoodAngleMap.put(1.0, 40.0);
+      passHoodAngleMap.put(0.0, 40.0);
+
+      passFlywheelSpeedMap.put(12.0, 4500.0);
+      passFlywheelSpeedMap.put(9.0, 3750.0);
+      passFlywheelSpeedMap.put(7.0, 3000.0);
+      passFlywheelSpeedMap.put(5.0, 2200.0); // TESTED
+      passFlywheelSpeedMap.put(4.0, 2000.0);
+      passFlywheelSpeedMap.put(3.0, 1700.0); // TESTED
+      passFlywheelSpeedMap.put(2.5, 1500.0); // TESTED
+      passFlywheelSpeedMap.put(2.0, 1500.0);
+      passFlywheelSpeedMap.put(1.0, 1500.0);
+      passFlywheelSpeedMap.put(0.0, 1500.0);
+
+      timeOfFlightMap.put(1.939, 0.82);
+      timeOfFlightMap.put(3.011, 1.26);
+      timeOfFlightMap.put(4.704, 1.37);
     }
   }
 

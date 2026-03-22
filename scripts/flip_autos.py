@@ -1,24 +1,23 @@
 #!/usr/bin/env python3
 """
-Radially flips PathPlanner autos and paths around the center of the field.
+Radially flips a single PathPlanner auto and its referenced paths around the
+center of the field.
 
-The 2026 REBUILT field has 180-degree rotational symmetry. Red alliance paths
-are the default. This script generates Blue alliance equivalents by rotating
-all coordinates 180 degrees around the field center.
+The 2026 REBUILT field has 180-degree rotational symmetry. This script generates
+the opposite-alliance equivalent by rotating all coordinates 180 degrees around
+the field center.
 
 Flip math:
   new_x = field_length - old_x
   new_y = field_width  - old_y
   new_rotation = rotation + 180 (wrapped to [-180, 180])
 
-Output files are prefixed with "FLIPPED " so they're easy to identify as generated.
-Review them in PathPlanner, then rename the ones you want to keep.
+Output files are prefixed with "FLIPPED " and have alliance tags swapped
+(Red<->Blue, [R]<->[B]) so they're easy to identify as generated.
 
 Usage:
-  python scripts/flip_autos.py                        # flip all Red & Blue tagged files
-  python scripts/flip_autos.py --auto "[R] Depot"     # flip one auto + its paths
-  python scripts/flip_autos.py --path "[R] Depot 1"   # flip one path only
-  python scripts/flip_autos.py --dry-run              # preview without writing
+  python scripts/flip_autos.py "Red middle sprint v2"         # flip auto + its paths
+  python scripts/flip_autos.py --dry-run "[R] Depot"           # preview without writing
 
 No external dependencies required - uses only the Python standard library.
 """
@@ -71,7 +70,6 @@ FLIPPED_PREFIX = "FLIPPED "
 
 def swap_alliance_in_name(name):
     """Swap alliance tags in a name. Red->Blue and Blue->Red."""
-    # Use placeholders to avoid double-swapping
     name = name.replace("[R]", "<<R>>").replace("[B]", "<<B>>")
     name = name.replace("Red", "<<RED>>").replace("Blue", "<<BLUE>>")
     name = name.replace("red", "<<red>>").replace("blue", "<<blue>>")
@@ -82,25 +80,12 @@ def swap_alliance_in_name(name):
 
 
 def make_flipped_name(name):
-    """Add 'FLIPPED ' prefix and swap alliance tags. Idempotent."""
+    """Add 'FLIPPED ' prefix and swap alliance tags."""
     if name.startswith(FLIPPED_PREFIX):
-        return name
+        # Strip prefix, swap back, then re-prefix with the new swap
+        inner = name[len(FLIPPED_PREFIX):]
+        return FLIPPED_PREFIX + swap_alliance_in_name(inner)
     return FLIPPED_PREFIX + swap_alliance_in_name(name)
-
-
-def is_red_name(name):
-    """Check if a name indicates a Red alliance path/auto."""
-    return "[R]" in name or "Red" in name or "red" in name
-
-
-def is_blue_name(name):
-    """Check if a name indicates a Blue alliance path/auto."""
-    return "[B]" in name or "Blue" in name or "blue" in name
-
-
-def is_flipped_name(name):
-    """Check if a name is already a FLIPPED output."""
-    return name.startswith(FLIPPED_PREFIX)
 
 
 # --- Coordinate flipping ---
@@ -130,7 +115,6 @@ def flip_path_data(path_data, field_length, field_width):
     """Flip all coordinates and rotations in a PathPlanner .path file."""
     data = copy.deepcopy(path_data)
 
-    # Flip waypoints
     for wp in data.get("waypoints", []):
         for key in ("anchor", "prevControl", "nextControl"):
             point = wp.get(key)
@@ -138,13 +122,14 @@ def flip_path_data(path_data, field_length, field_width):
                 point["x"], point["y"] = flip_point(
                     point["x"], point["y"], field_length, field_width
                 )
+        linked = wp.get("linkedName")
+        if linked is not None:
+            wp["linkedName"] = make_flipped_name(linked)
 
-    # Flip rotation targets
     for rt in data.get("rotationTargets", []):
         if "rotationDegrees" in rt:
             rt["rotationDegrees"] = flip_rotation(rt["rotationDegrees"])
 
-    # Flip point-towards zones
     for ptz in data.get("pointTowardsZones", []):
         pos = ptz.get("fieldPosition")
         if pos is not None:
@@ -152,12 +137,10 @@ def flip_path_data(path_data, field_length, field_width):
                 pos["x"], pos["y"], field_length, field_width
             )
 
-    # Flip goal end state rotation
     goal = data.get("goalEndState")
     if goal and "rotation" in goal:
         goal["rotation"] = flip_rotation(goal["rotation"])
 
-    # Flip ideal starting state rotation
     start = data.get("idealStartingState")
     if start and "rotation" in start:
         start["rotation"] = flip_rotation(start["rotation"])
@@ -176,7 +159,6 @@ def flip_auto_command(command, flip_name_fn):
         if path_name:
             cmd["data"]["pathName"] = flip_name_fn(path_name)
 
-    # Recurse into nested command groups (sequential, parallel, deadline, race)
     nested = cmd.get("data", {}).get("commands")
     if nested:
         cmd["data"]["commands"] = [
@@ -241,9 +223,8 @@ def flip_single_path(paths_dir, path_name, field_length, field_width, dry_run):
     return True
 
 
-def flip_single_auto(autos_dir, paths_dir, auto_name, field_length, field_width,
-                     dry_run, flip_paths=True):
-    """Flip a single .auto file and optionally its referenced paths."""
+def flip_single_auto(autos_dir, paths_dir, auto_name, field_length, field_width, dry_run):
+    """Flip a single .auto file and its referenced paths."""
     src = autos_dir / f"{auto_name}.auto"
     if not src.exists():
         print(f"  ERROR: Auto file not found: {src}")
@@ -251,15 +232,15 @@ def flip_single_auto(autos_dir, paths_dir, auto_name, field_length, field_width,
 
     auto_data = read_json(src)
 
-    # Flip referenced paths first
-    if flip_paths:
-        path_names = collect_path_names_from_command(auto_data.get("command", {}))
-        if path_names:
-            print(f"  Flipping {len(path_names)} referenced path(s)...")
-            for pn in path_names:
-                flip_single_path(paths_dir, pn, field_length, field_width, dry_run)
+    # Flip referenced paths
+    path_names = collect_path_names_from_command(auto_data.get("command", {}))
+    unique_paths = list(dict.fromkeys(path_names))  # deduplicate, preserve order
+    if unique_paths:
+        print(f"  Flipping {len(unique_paths)} referenced path(s)...")
+        for pn in unique_paths:
+            flip_single_path(paths_dir, pn, field_length, field_width, dry_run)
 
-    # Flip the auto (path references get FLIPPED prefix too)
+    # Flip the auto
     flipped = flip_auto_data(auto_data, make_flipped_name)
     dest_name = make_flipped_name(auto_name)
     dest = autos_dir / f"{dest_name}.auto"
@@ -267,66 +248,13 @@ def flip_single_auto(autos_dir, paths_dir, auto_name, field_length, field_width,
     return True
 
 
-def is_alliance_tagged(name):
-    """Check if a name has any alliance tag (Red or Blue)."""
-    return is_red_name(name) or is_blue_name(name)
-
-
-def flip_all(deploy_dir, field_length, field_width, dry_run):
-    """Flip all alliance-tagged autos and paths, outputting FLIPPED copies."""
-    paths_dir = deploy_dir / "paths"
-    autos_dir = deploy_dir / "autos"
-
-    # Flip paths
-    flipped_paths = set()
-    if paths_dir.exists():
-        for path_file in sorted(paths_dir.glob("*.path")):
-            name = path_file.stem
-            if is_flipped_name(name):
-                continue
-            if is_alliance_tagged(name):
-                print(f"Flipping path: {name} -> {make_flipped_name(name)}")
-                flip_single_path(paths_dir, name, field_length, field_width, dry_run)
-                flipped_paths.add(name)
-
-    # Flip autos (and any referenced paths not already flipped)
-    if autos_dir.exists():
-        for auto_file in sorted(autos_dir.glob("*.auto")):
-            name = auto_file.stem
-            if is_flipped_name(name):
-                continue
-            if is_alliance_tagged(name):
-                print(f"Flipping auto: {name} -> {make_flipped_name(name)}")
-                auto_data = read_json(auto_file)
-                ref_paths = collect_path_names_from_command(auto_data.get("command", {}))
-
-                # Flip any referenced paths we haven't already handled
-                for pn in ref_paths:
-                    if pn not in flipped_paths:
-                        print(f"  Flipping referenced path: {pn}")
-                        flip_single_path(
-                            paths_dir, pn, field_length, field_width, dry_run
-                        )
-                        flipped_paths.add(pn)
-
-                # Flip the auto
-                flipped = flip_auto_data(auto_data, make_flipped_name)
-                dest_name = make_flipped_name(name)
-                dest = autos_dir / f"{dest_name}.auto"
-                write_json(dest, flipped, dry_run)
-
-
 def main():
     parser = argparse.ArgumentParser(
-        description="Radially flip PathPlanner autos/paths for alliance conversion (2026 REBUILT)."
+        description="Radially flip a PathPlanner auto and its paths for alliance conversion (2026 REBUILT)."
     )
     parser.add_argument(
-        "--auto",
-        help="Flip a single auto by name (without .auto extension). Also flips its referenced paths.",
-    )
-    parser.add_argument(
-        "--path",
-        help="Flip a single path by name (without .path extension).",
+        "auto",
+        help="Name of the auto to flip (without .auto extension). Also flips its referenced paths.",
     )
     parser.add_argument(
         "--dry-run",
@@ -344,19 +272,8 @@ def main():
     print(f"Field dimensions: {field_length}m x {field_width}m")
     print()
 
-    if args.path:
-        print(f"Flipping path: {args.path}")
-        flip_single_path(paths_dir, args.path, field_length, field_width, args.dry_run)
-    elif args.auto:
-        print(f"Flipping auto: {args.auto}")
-        flip_single_auto(
-            autos_dir, paths_dir, args.auto, field_length, field_width,
-            args.dry_run
-        )
-    else:
-        print("Flipping all alliance-tagged autos and paths -> FLIPPED copies...")
-        print()
-        flip_all(deploy_dir, field_length, field_width, args.dry_run)
+    print(f"Flipping auto: {args.auto}")
+    flip_single_auto(autos_dir, paths_dir, args.auto, field_length, field_width, args.dry_run)
 
     print()
     print("Done.")

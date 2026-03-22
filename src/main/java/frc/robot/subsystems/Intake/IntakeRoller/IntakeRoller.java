@@ -13,8 +13,7 @@ import org.littletonrobotics.junction.Logger;
 
 public class IntakeRoller extends SubsystemBase {
   // Constants
-  private static final double INTAKE_VELOCITY_RPM = 3000.0;
-  private static final double JAMMED_SUPPLY_CURRENT_DRAW = 35.0;
+  private static final double INTAKE_VELOCITY_RPM = 3250.0;
   private static final double REVERSE_UNJAM_DUTY_CYCLE = -0.5;
   private static final double INTAKING_DUTY_CYCLE = 0.8;
   private static final double SHOOT_ASSIST_DUTY_CYCLE = 0.3;
@@ -146,6 +145,19 @@ public class IntakeRoller extends SubsystemBase {
 
   public void setVelocity(double velocity) {
     io.setVelocity(velocity);
+  }
+
+  /**
+   * Updates the closed-loop PID and feedforward gains.
+   *
+   * @param kP Proportional gain
+   * @param kI Integral gain
+   * @param kD Derivative gain
+   * @param kV Velocity feedforward gain
+   * @param kS Static feedforward gain
+   */
+  public void setPID(double kP, double kI, double kD, double kV, double kS) {
+    io.setPID(kP, kI, kD, kV, kS);
   }
 
   public void stop() {
