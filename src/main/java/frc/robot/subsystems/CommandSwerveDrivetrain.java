@@ -115,14 +115,16 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
   // Slew rate limits for driver input (units: per second)
   // Translation: maxSpeed m/s per second → reaches full speed in ~1 s from rest
-  private static final double TRANSLATION_SLEW_RATE_MPS_PER_S = 6.0;
+  private static final double TRANSLATION_SLEW_RATE_MPS_PER_S = 8.0;
   // Rotation: maxAngularVelocity rad/s per second → reaches full rotation in ~1 s from rest
   private static final double ROTATION_SLEW_RATE_RPS_PER_S = 10.0;
 
-  // Slew rate limiters for the two translation axes and rotation in fieldOrientedDriveCommand
-  private final SlewRateLimiter m_velXLimiter = new SlewRateLimiter(TRANSLATION_SLEW_RATE_MPS_PER_S);
-  private final SlewRateLimiter m_velYLimiter = new SlewRateLimiter(TRANSLATION_SLEW_RATE_MPS_PER_S);
-  private final SlewRateLimiter m_omegaLimiter = new SlewRateLimiter(ROTATION_SLEW_RATE_RPS_PER_S);
+  // Slew rate limiters for translation speed magnitude and |omega| in fieldOrientedDriveCommand.
+  // Negative rate is unlimited so deceleration is never restricted — only acceleration is limited.
+  private final SlewRateLimiter m_translationSpeedLimiter =
+      new SlewRateLimiter(TRANSLATION_SLEW_RATE_MPS_PER_S, -Double.MAX_VALUE, 0);
+  private final SlewRateLimiter m_omegaLimiter =
+      new SlewRateLimiter(ROTATION_SLEW_RATE_RPS_PER_S, -Double.MAX_VALUE, 0);
 
   // Field-centric facing angle request for hub tracking
   private final SwerveRequest.FieldCentricFacingAngle m_faceHubRequest =
@@ -168,35 +170,43 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
    * Converts raw controller axes into slew-rate-limited field-relative velocities.
    *
    * <p>Applies a cubic response curve to translation and a squared curve (with sign preserved) to
-   * rotation, then passes each axis through its {@link SlewRateLimiter}.
+   * rotation. Acceleration is slew-limited (translation by vector magnitude, rotation by |omega|);
+   * deceleration is unrestricted.
    *
    * @param driveCont the driver Xbox controller
    * @return {@code double[3]} — {@code [velXMps, velYMps, omegaRadPerSec]}
    */
   private double[] calcDriverInputMps(CommandXboxController driveCont) {
-    double velXMps =
-        m_velXLimiter.calculate(
-            Math.pow(driveCont.getLeftY(), 3) * maxSpeed.in(MetersPerSecond) * -1.0);
-    double velYMps =
-        m_velYLimiter.calculate(
-            Math.pow(driveCont.getLeftX(), 3) * maxSpeed.in(MetersPerSecond) * -1.0);
-    double omegaRps =
-        m_omegaLimiter.calculate(
-            Math.pow(driveCont.getRightX(), 2)
-                * (maxAngularVelocity.in(RadiansPerSecond) / 2.0)
-                * -Math.signum(driveCont.getRightX()));
+    double rawVelXMps = Math.pow(driveCont.getLeftY(), 3) * maxSpeed.in(MetersPerSecond) * -1.0;
+    double rawVelYMps = Math.pow(driveCont.getLeftX(), 3) * maxSpeed.in(MetersPerSecond) * -1.0;
+
+    // Limit the translation speed magnitude so both axes share one acceleration budget.
+    // Free deceleration is handled by the unlimited negative rate in m_translationSpeedLimiter.
+    double rawSpeedMps = Math.hypot(rawVelXMps, rawVelYMps);
+    double limitedSpeedMps = m_translationSpeedLimiter.calculate(rawSpeedMps);
+    double scale = rawSpeedMps > 1e-9 ? limitedSpeedMps / rawSpeedMps : 0.0;
+    double velXMps = rawVelXMps * scale;
+    double velYMps = rawVelYMps * scale;
+
+    // Limit |omega| only when accelerating; restore sign afterward.
+    double rawOmegaRps =
+        Math.pow(driveCont.getRightX(), 2)
+            * (maxAngularVelocity.in(RadiansPerSecond) / 2.0)
+            * -Math.signum(driveCont.getRightX());
+    double omegaRps = Math.copySign(m_omegaLimiter.calculate(Math.abs(rawOmegaRps)), rawOmegaRps);
+
     return new double[] {velXMps, velYMps, omegaRps};
   }
 
   /**
-   * Resets all three slew rate limiters to the robot's current measured chassis speeds. Call this
-   * at the start of any drive command to avoid a velocity jump when switching commands.
+   * Resets the slew rate limiters to the robot's current speed magnitudes. Call this at the start
+   * of any drive command to avoid a velocity jump when switching commands.
    */
   private void resetSlewLimiters() {
     ChassisSpeeds current = getVelocity();
-    m_velXLimiter.reset(current.vxMetersPerSecond);
-    m_velYLimiter.reset(current.vyMetersPerSecond);
-    m_omegaLimiter.reset(current.omegaRadiansPerSecond);
+    m_translationSpeedLimiter.reset(
+        Math.hypot(current.vxMetersPerSecond, current.vyMetersPerSecond));
+    m_omegaLimiter.reset(Math.abs(current.omegaRadiansPerSecond));
   }
 
   private final SwerveRequest.FieldCentric FIELD_CENTRIC_DRIVE =
