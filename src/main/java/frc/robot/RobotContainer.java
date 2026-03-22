@@ -325,7 +325,10 @@ public class RobotContainer {
             .setStateCommand(SuperWantedStates.SHOOT_AT_HUB)
             .alongWith(
                 drivetrain.faceAngleWhileDrivingCommand(
-                    () -> 0, () -> 0, () -> hubShotCalculator.calculateShot().targetHeading()))
+                    () -> 0,
+                    () -> 0,
+                    () -> hubShotCalculator.calculateShot().targetHeading(),
+                    () -> hubShotCalculator.calculateShot().headingVelocityRadPerSec()))
             .finallyDo(() -> superStructure.setWantedSuperState(SuperWantedStates.DEFAULT)));
 
     configVision();

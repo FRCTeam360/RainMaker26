@@ -273,7 +273,7 @@ public class ShotCalculator {
             shooterVelFieldXMps * timeOfFlightSecs, shooterVelFieldYMps * timeOfFlightSecs);
 
     Translation2d virtualTarget = target.minus(velocityOffset);
-    
+
     Logger.recordOutput(logVirtualTarget, new Pose2d(virtualTarget, Rotation2d.kZero));
     Logger.recordOutput(logTargetPosition, new Pose2d(target, Rotation2d.kZero));
     Logger.recordOutput(logHubPosition, FieldConstants.Hub.topCenterPoint);
