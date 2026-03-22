@@ -88,7 +88,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   private final DriveRequestType m_driveRequestType = DriveRequestType.Velocity;
   // TODO refactor into a constants file
   public static final LinearVelocity maxSpeed = MetersPerSecond.of(4.85);
-  public static final AngularVelocity maxAngularVelocity = RevolutionsPerSecond.of(4.0);
+  public static final AngularVelocity maxAngularVelocity = RevolutionsPerSecond.of(2.0);
 
   // Heading controller PID gains (from example code)
   private static final double HEADING_KP = 15.0;
@@ -119,6 +119,14 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   // Rotation: maxAngularVelocity rad/s per second → reaches full rotation in ~1 s from rest
   private static final double ROTATION_SLEW_RATE_RPS_PER_S = 10.0;
 
+  // Deadbands for swerve drive requests (1% of max speed/angular velocity)
+  private static final double TRANSLATION_DEADBAND_FRACTION = 0.01;
+  private static final double TRANSLATION_DEADBAND_MPS =
+      maxSpeed.in(MetersPerSecond) * TRANSLATION_DEADBAND_FRACTION;
+  private static final double ROTATION_DEADBAND_FRACTION = 0.01;
+  private static final double ROTATION_DEADBAND_RPS =
+      maxAngularVelocity.in(RadiansPerSecond) * ROTATION_DEADBAND_FRACTION;
+
   // Slew rate limiters for translation speed magnitude and |omega| in fieldOrientedDriveCommand.
   // Negative rate is unlimited so deceleration is never restricted — only acceleration is limited.
   private final SlewRateLimiter m_translationSpeedLimiter =
@@ -129,7 +137,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   // Field-centric facing angle request for hub tracking
   private final SwerveRequest.FieldCentricFacingAngle m_faceHubRequest =
       new SwerveRequest.FieldCentricFacingAngle()
-          .withDeadband(maxSpeed.in(MetersPerSecond) * 0.01)
+          .withDeadband(TRANSLATION_DEADBAND_MPS)
           .withRotationalDeadband(0.0)
           .withDriveRequestType(m_driveRequestType); // No deadband for rotation when facing point
 
@@ -137,8 +145,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
       CommandXboxController driveCont) { // field oriented drive command!
     SwerveRequest.FieldCentric drive =
         new SwerveRequest.FieldCentric() // creates a fieldcentric drive
-            .withDeadband(maxSpeed.in(MetersPerSecond) * 0.01)
-            .withRotationalDeadband(maxAngularVelocity.in(RadiansPerSecond) * 0.01)
+            .withDeadband(TRANSLATION_DEADBAND_MPS)
+            .withRotationalDeadband(ROTATION_DEADBAND_RPS)
             .withDriveRequestType(m_driveRequestType);
     return this.runOnce(() -> resetSlewLimiters())
         .andThen(
@@ -191,7 +199,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     // Limit |omega| only when accelerating; restore sign afterward.
     double rawOmegaRps =
         Math.pow(driveCont.getRightX(), 2)
-            * (maxAngularVelocity.in(RadiansPerSecond) / 2.0)
+            * maxAngularVelocity.in(RadiansPerSecond)
             * -Math.signum(driveCont.getRightX());
     double omegaRps = Math.copySign(m_omegaLimiter.calculate(Math.abs(rawOmegaRps)), rawOmegaRps);
 
@@ -211,8 +219,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
   private final SwerveRequest.FieldCentric FIELD_CENTRIC_DRIVE =
       new SwerveRequest.FieldCentric()
-          .withDeadband(maxSpeed.in(MetersPerSecond) * 0.01)
-          .withRotationalDeadband(maxAngularVelocity.in(RadiansPerSecond) * 0.01)
+          .withDeadband(TRANSLATION_DEADBAND_MPS)
+          .withRotationalDeadband(ROTATION_DEADBAND_RPS)
           .withDriveRequestType(m_driveRequestType);
 
   // Xout Command
