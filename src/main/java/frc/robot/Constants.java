@@ -10,8 +10,12 @@ import com.pathplanner.lib.config.RobotConfig;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.hal.HALUtil;
+import edu.wpi.first.math.InterpolatingMatrixTreeMap;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.robot.utils.RobotUtils.ActiveHub;
@@ -236,10 +240,22 @@ public final class Constants {
     public static final String LIMELIGHT_RIGHT = "limelight-right";
     public static final String LIMELIGHT_LEFT = "limelight-left";
 
+    public static final InterpolatingMatrixTreeMap<Double, N3, N1> LIMELIGHT_RIGHT_STD_DEV_MAP =
+        new InterpolatingMatrixTreeMap<>();
+    public static final InterpolatingMatrixTreeMap<Double, N3, N1> LIMELIGHT_LEFT_STD_DEV_MAP =
+        new InterpolatingMatrixTreeMap<>();
+
     // === CANBUS ===
     public static final CANBus CANBUS = new CANBus("Default Name");
 
     static {
+      // X and Y in meters, rotation in radians (999999 = ignore rotation)
+      LIMELIGHT_RIGHT_STD_DEV_MAP.put(0.1, VecBuilder.fill(0.5, 0.5, 999999.0));
+      LIMELIGHT_RIGHT_STD_DEV_MAP.put(8.0, VecBuilder.fill(3.0, 3.0, 999999.0));
+
+      LIMELIGHT_LEFT_STD_DEV_MAP.put(0.1, VecBuilder.fill(0.5, 0.5, 999999.0));
+      LIMELIGHT_LEFT_STD_DEV_MAP.put(8.0, VecBuilder.fill(3.0, 3.0, 999999.0));
+
       shotHoodAngleMap.put(6.0, 16.0);
       shotHoodAngleMap.put(5.0, 16.0);
 
