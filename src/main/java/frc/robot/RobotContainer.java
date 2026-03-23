@@ -305,7 +305,8 @@ public class RobotContainer {
                     .setStateCommand(SuperWantedStates.AUTO_CYCLE_SHOOTING)
                     .alongWith(
                         drivetrain.faceAngleWhileDrivingCommand(
-                            driverCont,
+                            () -> 0,
+                            () -> 0,
                             () -> {
                               if (superStructure.getCurrentSuperState()
                                   == SuperInternalStates.PASSING) {
