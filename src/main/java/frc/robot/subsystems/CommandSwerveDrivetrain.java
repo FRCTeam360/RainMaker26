@@ -122,6 +122,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
   public final Command fieldOrientedDriveCommand(
       CommandXboxController driveCont) { // field oriented drive command!
+        double defenseModeRotationScaler = (isDefenseMode ? 1.25 : 1.0);
+        double defenseModeTranslationScaler = (isDefenseMode ? 0.75 : 1.0);
     SwerveRequest.FieldCentric drive =
         new SwerveRequest.FieldCentric() // creates a fieldcentric drive
             .withDeadband(maxSpeed.in(MetersPerSecond) * 0.01)
@@ -129,12 +131,13 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             .withDriveRequestType(m_driveRequestType);
     return this.applyRequest(
         () -> {
-          double velXMps = Math.pow(driveCont.getLeftY(), 3) * maxSpeed.in(MetersPerSecond) * -1.0;
-          double velYMps = Math.pow(driveCont.getLeftX(), 3) * maxSpeed.in(MetersPerSecond) * -1.0;
+          double velXMps = Math.pow(driveCont.getLeftY(), 3) * maxSpeed.in(MetersPerSecond) * -1.0 * defenseModeTranslationScaler;
+          double velYMps = Math.pow(driveCont.getLeftX(), 3) * maxSpeed.in(MetersPerSecond) * -1.0 * defenseModeTranslationScaler;
           double omegaRps =
               Math.pow(driveCont.getRightX(), 2)
                   * (maxAngularVelocity.in(RadiansPerSecond) / 2.0)
-                  * -Math.signum(driveCont.getRightX());
+                  * -Math.signum(driveCont.getRightX())
+                  * defenseModeRotationScaler;
           // Store as robot-relative to match getVelocity() convention.
           // Operator-perspective velocities are converted to field-relative via
           // alliance flip, then to robot-relative via fromFieldRelativeSpeeds.
@@ -162,33 +165,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
           .withDeadband(maxSpeed.in(MetersPerSecond) * 0.01)
           .withRotationalDeadband(maxAngularVelocity.in(RadiansPerSecond) * 0.01)
           .withDriveRequestType(m_driveRequestType);
-
-  public void fieldOrientedDrive(CommandXboxController driveCont) {
-    double defenseModeRotationScaler = (isDefenseMode ? 1.25 : 1.0);
-    double defenseModeTranslationScaler = (isDefenseMode ? 0.75 : 1.0);
-    FIELD_CENTRIC_DRIVE.ForwardPerspective = ForwardPerspectiveValue.OperatorPerspective;
-    this.setControl(
-        FIELD_CENTRIC_DRIVE
-            .withVelocityX(
-                Math.pow(driveCont.getLeftY(), 3)
-                    * maxSpeed.in(MetersPerSecond)
-                    * -1.0
-                    * defenseModeTranslationScaler) // Drive forward with negative Y (forward)
-            .withVelocityY(
-                Math.pow(driveCont.getLeftX(), 3)
-                    * maxSpeed.in(MetersPerSecond)
-                    * -1.0
-                    * defenseModeTranslationScaler) // Drive left with negative X (left)
-            .withRotationalRate(
-                Math.pow(driveCont.getRightX(), 2)
-                    * (maxAngularVelocity.in(RadiansPerSecond) / 2.0)
-                    * -Math.signum(driveCont.getRightX())
-                    * defenseModeRotationScaler) // Drive
-        // counterclockwise
-        // with negative X
-        // (left)
-        );
-  }
 
   // defense mode command
   public void defenseMode() {
