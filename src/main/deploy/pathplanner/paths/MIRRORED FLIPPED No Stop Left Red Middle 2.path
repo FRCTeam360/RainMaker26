@@ -4,12 +4,12 @@
     {
       "anchor": {
         "x": 13.853567,
-        "y": 2.349211
+        "y": 5.720789
       },
       "prevControl": null,
       "nextControl": {
         "x": 14.555167,
-        "y": 2.086111
+        "y": 5.457689
       },
       "isLocked": false,
       "linkedName": "MIRRORED FLIPPED altnostopend"
@@ -105,7 +105,7 @@
       },
       "nextControl": {
         "x": 9.030067,
-        "y": 1.7840330000000002
+        "y": 1.7840330000000004
       },
       "isLocked": false,
       "linkedName": null
@@ -200,7 +200,7 @@
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -23.0255
+    "rotation": 23.0255
   },
   "useDefaultConstraints": false
 }
