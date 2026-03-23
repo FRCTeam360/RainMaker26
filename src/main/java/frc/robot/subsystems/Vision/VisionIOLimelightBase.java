@@ -4,6 +4,10 @@
 
 package frc.robot.subsystems.Vision;
 
+import edu.wpi.first.math.InterpolatingMatrixTreeMap;
+import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -31,9 +35,34 @@ public abstract class VisionIOLimelightBase implements VisionIO {
   protected final DoubleSupplier gyroAngleRateSupplier;
 
   private final boolean acceptMeasurements;
+  private final InterpolatingMatrixTreeMap<Double, N3, N1> customStdDevMap;
 
   /**
-   * Creates a new Limelight hardware layer.
+   * Creates a new Limelight hardware layer with a custom per-camera standard deviation map.
+   *
+   * @param name the NetworkTables name of the Limelight
+   * @param gyroAngleSupplier supplies the robot's gyro angle in degrees
+   * @param gyroAngleRateSupplier supplies the robot's gyro angular rate in degrees per second
+   * @param acceptMeasurements whether to process pose estimates from this Limelight
+   * @param customStdDevMap distance-to-std-dev map for this camera, or {@code null} to use the
+   *     global default
+   */
+  protected VisionIOLimelightBase(
+      String name,
+      DoubleSupplier gyroAngleSupplier,
+      DoubleSupplier gyroAngleRateSupplier,
+      boolean acceptMeasurements,
+      InterpolatingMatrixTreeMap<Double, N3, N1> customStdDevMap) {
+    table = NetworkTableInstance.getDefault().getTable(name);
+    this.name = name;
+    this.gyroAngleSupplier = gyroAngleSupplier;
+    this.gyroAngleRateSupplier = gyroAngleRateSupplier;
+    this.acceptMeasurements = acceptMeasurements;
+    this.customStdDevMap = customStdDevMap;
+  }
+
+  /**
+   * Creates a new Limelight hardware layer using the global default standard deviation map.
    *
    * @param name the NetworkTables name of the Limelight
    * @param gyroAngleSupplier supplies the robot's gyro angle in degrees
@@ -45,11 +74,12 @@ public abstract class VisionIOLimelightBase implements VisionIO {
       DoubleSupplier gyroAngleSupplier,
       DoubleSupplier gyroAngleRateSupplier,
       boolean acceptMeasurements) {
-    table = NetworkTableInstance.getDefault().getTable(name);
-    this.name = name;
-    this.gyroAngleSupplier = gyroAngleSupplier;
-    this.gyroAngleRateSupplier = gyroAngleRateSupplier;
-    this.acceptMeasurements = acceptMeasurements;
+    this(name, gyroAngleSupplier, gyroAngleRateSupplier, acceptMeasurements, null);
+  }
+
+  @Override
+  public Optional<InterpolatingMatrixTreeMap<Double, N3, N1>> getStdDevMap() {
+    return Optional.ofNullable(customStdDevMap);
   }
 
   /** Returns the NetworkTables name of this Limelight. */

@@ -4,8 +4,12 @@
 
 package frc.robot.subsystems.Vision;
 
+import edu.wpi.first.math.InterpolatingMatrixTreeMap;
+import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 import java.util.Optional;
 import org.littletonrobotics.junction.AutoLog;
 
@@ -55,6 +59,14 @@ public interface VisionIO {
    * tags visible. Returns empty if no confident estimate is available.
    */
   default Optional<Pose2d> getBootstrapPose() {
+    return Optional.empty();
+  }
+
+  /**
+   * Returns a per-camera distance-to-standard-deviation map, or empty to use the global default.
+   * Keys are distances in meters; values are [x, y, theta] standard deviation vectors.
+   */
+  default Optional<InterpolatingMatrixTreeMap<Double, N3, N1>> getStdDevMap() {
     return Optional.empty();
   }
 

@@ -169,7 +169,9 @@ public class Vision extends SubsystemBase {
         }
       }
 
-      Matrix<N3, N1> cprStdDevs = MEASUREMENT_STD_DEV_DISTANCE_MAP.get(closestTagDistance);
+      InterpolatingMatrixTreeMap<Double, N3, N1> stdDevMap =
+          ios.get(key).getStdDevMap().orElse(MEASUREMENT_STD_DEV_DISTANCE_MAP);
+      Matrix<N3, N1> cprStdDevs = stdDevMap.get(closestTagDistance);
 
       acceptedMeasurements.add(new VisionMeasurement(timestamp, pose, cprStdDevs));
     }

@@ -4,6 +4,9 @@
 
 package frc.robot.subsystems.Vision;
 
+import edu.wpi.first.math.InterpolatingMatrixTreeMap;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 import frc.robot.Constants;
 import frc.robot.utils.LimelightHelpers;
 import java.util.function.DoubleSupplier;
@@ -40,7 +43,25 @@ public class VisionIOLimelight4 extends VisionIOLimelightBase {
       DoubleSupplier gyroAngleSupplier,
       DoubleSupplier gyroAngleRateSupplier,
       boolean acceptMeasurements) {
-    super(name, gyroAngleSupplier, gyroAngleRateSupplier, acceptMeasurements);
+    this(name, gyroAngleSupplier, gyroAngleRateSupplier, acceptMeasurements, null);
+  }
+
+  /**
+   * Creates a new Limelight 4 hardware layer with a custom standard deviation map.
+   *
+   * @param name the NetworkTables name of the Limelight
+   * @param gyroAngleSupplier supplies the robot's gyro angle in degrees
+   * @param gyroAngleRateSupplier supplies the robot's gyro angular rate in degrees per second
+   * @param acceptMeasurements whether to process pose estimates from this Limelight
+   * @param customStdDevMap distance-to-std-dev map for this camera
+   */
+  public VisionIOLimelight4(
+      String name,
+      DoubleSupplier gyroAngleSupplier,
+      DoubleSupplier gyroAngleRateSupplier,
+      boolean acceptMeasurements,
+      InterpolatingMatrixTreeMap<Double, N3, N1> customStdDevMap) {
+    super(name, gyroAngleSupplier, gyroAngleRateSupplier, acceptMeasurements, customStdDevMap);
     LimelightHelpers.SetIMUAssistAlpha(name, IMU_ASSIST_ALPHA);
     LimelightHelpers.SetIMUMode(name, IMU_MODE_EXTERNAL_SEED);
     setThrottle(Constants.DISABLED_THROTTLE_SKIP_FRAMES);
