@@ -122,8 +122,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
   public final Command fieldOrientedDriveCommand(
       CommandXboxController driveCont) { // field oriented drive command!
-        double defenseModeRotationScaler = (isDefenseMode ? 1.25 : 1.0);
-        double defenseModeTranslationScaler = (isDefenseMode ? 0.75 : 1.0);
+    double defenseModeRotationScaler = (isDefenseMode ? 1.25 : 1.0);
+    double defenseModeTranslationScaler = (isDefenseMode ? 0.75 : 1.0);
     SwerveRequest.FieldCentric drive =
         new SwerveRequest.FieldCentric() // creates a fieldcentric drive
             .withDeadband(maxSpeed.in(MetersPerSecond) * 0.01)
@@ -131,8 +131,16 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             .withDriveRequestType(m_driveRequestType);
     return this.applyRequest(
         () -> {
-          double velXMps = Math.pow(driveCont.getLeftY(), 3) * maxSpeed.in(MetersPerSecond) * -1.0 * defenseModeTranslationScaler;
-          double velYMps = Math.pow(driveCont.getLeftX(), 3) * maxSpeed.in(MetersPerSecond) * -1.0 * defenseModeTranslationScaler;
+          double velXMps =
+              Math.pow(driveCont.getLeftY(), 3)
+                  * maxSpeed.in(MetersPerSecond)
+                  * -1.0
+                  * defenseModeTranslationScaler;
+          double velYMps =
+              Math.pow(driveCont.getLeftX(), 3)
+                  * maxSpeed.in(MetersPerSecond)
+                  * -1.0
+                  * defenseModeTranslationScaler;
           double omegaRps =
               Math.pow(driveCont.getRightX(), 2)
                   * (maxAngularVelocity.in(RadiansPerSecond) / 2.0)
