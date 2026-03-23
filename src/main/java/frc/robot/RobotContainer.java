@@ -461,8 +461,8 @@ public class RobotContainer {
     // defense mode
     driverCont
         .start()
-        .toggleOnTrue(
-            drivetrain.isDefenseMode ? drivetrain.defenseModeCmd() : drivetrain.defenseModeCmd());
+        .onTrue(
+            drivetrain.defenseModeCmd());
 
     // Drivetrain commands
     // driverCont.leftTrigger().whileTrue(drivetrain.faceHubWhileDriving(driverCont));

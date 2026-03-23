@@ -175,7 +175,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
           .withDriveRequestType(m_driveRequestType);
 
   // defense mode command
-  public void defenseMode() {
+  private void defenseMode() {
     if (isDefenseMode) {
       isDefenseMode = false;
     } else {
