@@ -41,6 +41,7 @@ public final class Constants {
     SIM,
     WOODBOT,
     PRACTICEBOT,
+    COMPBOT,
     REPLAY
   }
 
@@ -63,10 +64,14 @@ public final class Constants {
       robotType = Constants.RobotType.WOODBOT;
     } else if (serialAddress.equals(SerialAddressConstants.PRACTICE_SERIAL_ADDRESS)) {
       robotType = Constants.RobotType.PRACTICEBOT;
-    } else if (!Robot.isReal()) { // KEEP AT BOTTOM
+    }
+    else if (serialAddress.equals(SerialAddressConstants.COMP_SERIAL_ADDRESS)) {
+      robotType = Constants.RobotType.COMPBOT;
+    }
+     else if (!Robot.isReal()) { // KEEP AT BOTTOM
       robotType = Constants.RobotType.SIM;
     } else {
-      robotType = Constants.RobotType.PRACTICEBOT;
+      robotType = Constants.RobotType.COMPBOT;
     }
     return robotType;
   }
@@ -185,7 +190,10 @@ public final class Constants {
       passHoodAngleMap.put(6.0, 22.0);
     }
   }
-
+  public static class CompBotConstants{
+    public static final int CLIMBER_LEFT_ID = 0;
+    public static final int CLIMBER_RIGHT_ID = 0;
+  }
   public static class PracticeBotConstants {
     // === SHOT CALCULATOR ===
     public static final InterpolatingDoubleTreeMap shotHoodAngleMap =
@@ -408,6 +416,7 @@ public final class Constants {
   public static final class SerialAddressConstants {
     public static final String WOOD_SERIAL_ADDRESS = "032BE44A";
     public static final String PRACTICE_SERIAL_ADDRESS = "03260AD5";
+    public static final String COMP_SERIAL_ADDRESS = "XXXXXXXX";//add true address
   }
 
   public static double loopPeriodSecs; // add value

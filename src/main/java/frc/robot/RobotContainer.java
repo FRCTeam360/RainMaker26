@@ -25,6 +25,7 @@ import frc.robot.Constants.RobotType;
 import frc.robot.generated.PracticeBotDrivetrain;
 import frc.robot.generated.WoodBotDrivetrain;
 import frc.robot.subsystems.Climber.Climber;
+import frc.robot.subsystems.Climber.ClimberIOCB;
 import frc.robot.subsystems.Climber.ClimberIONoop;
 import frc.robot.subsystems.Climber.ClimberIOSim;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
@@ -209,7 +210,6 @@ public class RobotContainer {
                 0);
         break;
       case PRACTICEBOT:
-      default:
         drivetrain = PracticeBotDrivetrain.createDrivetrain();
         climber = new Climber(new ClimberIONoop());
         flywheel = new Flywheel(new FlywheelIOPBBangBang());
@@ -257,6 +257,56 @@ public class RobotContainer {
                 Constants.PracticeBotConstants.MAX_PASS_DISTANCE_METERS,
                 PracticeBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond),
                 0);
+        break;
+        case COMPBOT:
+        default:
+        //drivetrain = 
+        climber = new Climber(new ClimberIOCB());
+        //flywheel = new Flywheel(new FlywheelIOCBBangBang()); //add
+        //hood = new Hood(new HoodIOCB()); //add
+        //indexer = new Indexer(new IndexerIOCB()); //add
+        // vision = // TODO ADD OTHER LIMELIGHTS //add
+        //     new Vision(
+        //         Map.ofEntries(
+        //             Map.entry(
+        //                 Constants.CompBotConstants.LIMELIGHT_RIGHT,
+        //                 new VisionIOLimelight4(
+        //                     Constants.CompBotBotConstants.LIMELIGHT_RIGHT,
+        //                     () -> drivetrain.getAngle(),
+        //                     () -> drivetrain.getAngularRate(),
+        //                     true)),
+        //             Map.entry(
+        //                 Constants.CompBotConstants.LIMELIGHT_LEFT,
+        //                 new VisionIOLimelight4(
+        //                     Constants.CompBotConstants.LIMELIGHT_LEFT,
+        //                     () -> drivetrain.getAngle(),
+        //                     () -> drivetrain.getAngularRate(),
+        //                     true))));
+        //intakeRoller = new IntakeRoller(new IntakeRollerIOCB()); //add
+        // flywheelKicker = new FlywheelKicker(new FlywheelKickerIOPB());//add
+        // intakePivot = new IntakePivot(new IntakePivotIOPB());//add
+        // hopperRoller = new HopperRoller(new HopperRollerIOPB());//add
+
+        // robotShootingInfo =
+        //     new RobotShootingInfo(
+        //         Constants.CompBotConstants.shotHoodAngleMap,
+        //         Constants.CompBotConstants.shotFlywheelSpeedMap,
+        //         Constants.CompBotConstants.timeOfFlightMap,
+        //         ShooterConstants.COMPBOT_TO_SHOOTER,
+        //         Constants.CompBotConstants.MIN_SHOT_DISTANCE_METERS,
+        //         Constants.CompBotConstants.MAX_SHOT_DISTANCE_METERS,
+        //         CompBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond),
+        //         0); //add
+        // robotPassingInfo =
+        //     new RobotShootingInfo(
+        //         Constants.Com[BotConstants.passHoodAngleMap,
+        //         Constants.Com[BotConstants.passFlywheelSpeedMap,
+        //         Constants.Com[BotConstants.timeOfFlightMap,
+        //         ShooterConstants.COMPBOT_TO_SHOOTER,
+        //         Constants.CompBotConstants.MIN_PASS_DISTANCE_METERS,
+        //         Constants.CompBotConstants.MAX_PASS_DISTANCE_METERS,
+        //         CompBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond),
+        //         0); // add
         break;
     }
     hubShotCalculator =
