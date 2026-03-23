@@ -12,6 +12,7 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.utils.FieldConstants;
 import java.util.ArrayList;
@@ -204,6 +205,36 @@ public class Vision extends SubsystemBase {
     for (VisionIO io : ios.values()) {
       io.setThrottle(throttle);
     }
+  }
+
+  /**
+   * Returns a command that re-seeds the LL4 IMU from the external gyro, then re-enables IMU assist.
+   * Run after any drivetrain pose or heading reset to keep the LL4 IMU synchronized.
+   */
+  public Command reseedIMUCommand() {
+    return runOnce(this::enableIMUSeeding)
+        .andThen(Commands.waitSeconds(0.1))
+        .andThen(runOnce(this::enableIMUAssist))
+        .ignoringDisable(true);
+  }
+
+  /**
+   * Returns a command that continuously resets the drivetrain pose from MegaTag1 while disabled.
+   * Requires 2+ tags visible. Run while disabled to seed the Pigeon heading from vision so the LL4
+   * IMU has a correct field-relative heading before match start.
+   *
+   * @param resetPose consumer that resets the drivetrain pose (e.g. {@code drivetrain::resetPose})
+   */
+  public Command disabledBootstrapCommand(Consumer<Pose2d> resetPose) {
+    return run(() -> getBestBootstrapPose().ifPresent(resetPose)).ignoringDisable(true);
+  }
+
+  private Optional<Pose2d> getBestBootstrapPose() {
+    for (VisionIO io : ios.values()) {
+      Optional<Pose2d> pose = io.getBootstrapPose();
+      if (pose.isPresent()) return pose;
+    }
+    return Optional.empty();
   }
 
   /**

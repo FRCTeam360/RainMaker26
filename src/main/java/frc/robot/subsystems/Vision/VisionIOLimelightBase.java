@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems.Vision;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.NetworkTable;
@@ -20,6 +21,10 @@ import java.util.function.DoubleSupplier;
  * filtering, and MegaTag2 logic.
  */
 public abstract class VisionIOLimelightBase implements VisionIO {
+
+  private static final int BOOTSTRAP_MIN_TAG_COUNT = 2;
+  private static final double BOOTSTRAP_MAX_TAG_DISTANCE_METERS = 5.0;
+
   private final NetworkTable table;
   private final String name;
   protected final DoubleSupplier gyroAngleSupplier;
@@ -120,6 +125,21 @@ public abstract class VisionIOLimelightBase implements VisionIO {
 
     inputs.targetCount = targetCount;
     inputs.poseUpdated = true;
+  }
+
+  @Override
+  public Optional<Pose2d> getBootstrapPose() {
+    PoseEstimate mt1 = LimelightHelpers.getBotPoseEstimate_wpiBlue(name);
+    if (mt1 == null || mt1.tagCount < BOOTSTRAP_MIN_TAG_COUNT) return Optional.empty();
+    if (mt1.avgTagDist > BOOTSTRAP_MAX_TAG_DISTANCE_METERS) return Optional.empty();
+    Pose2d pose = mt1.pose;
+    if (pose.getX() < 0.0
+        || pose.getX() > FieldConstants.fieldLength
+        || pose.getY() < 0.0
+        || pose.getY() > FieldConstants.fieldWidth) {
+      return Optional.empty();
+    }
+    return Optional.of(pose);
   }
 
   private Optional<PoseEstimate> getMegatag2PoseEst() {

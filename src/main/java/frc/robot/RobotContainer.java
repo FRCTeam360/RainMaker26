@@ -13,6 +13,7 @@ import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -364,6 +365,12 @@ public class RobotContainer {
               drivetrain.addVisionMeasurements(measurements);
             });
     vision.setDefaultCommand(consumeVisionMeasurements.ignoringDisable(true));
+
+    // While disabled, use MegaTag1 to bootstrap the drivetrain pose from tag observations.
+    // This seeds the Pigeon heading, which Mode 1 cascades to the LL4 IMU, so that MegaTag2
+    // has a correct field-relative heading from the first frame of the match.
+    new Trigger(DriverStation::isDisabled)
+        .whileTrue(vision.disabledBootstrapCommand(drivetrain::resetPose));
   }
 
   private void configDefaultDrivingCommand() {
@@ -460,7 +467,7 @@ public class RobotContainer {
 
     // Drivetrain commands
     // driverCont.leftTrigger().whileTrue(drivetrain.faceHubWhileDriving(driverCont));
-    driverCont.back().onTrue(drivetrain.zeroCommand());
+    driverCont.back().onTrue(drivetrain.zeroCommand().andThen(vision.reseedIMUCommand()));
   }
 
   /** Configures bindings that are active only in independent (test) mode. */
@@ -540,7 +547,7 @@ public class RobotContainer {
     driverCont.pov(180).and(isIndependentMode).whileTrue(hood.setPositionCommand(30.0));
     driverCont.pov(270).and(isIndependentMode).whileTrue(hood.setPositionCommand(40.0));
 
-    driverCont.back().onTrue(drivetrain.zeroCommand());
+    driverCont.back().onTrue(drivetrain.zeroCommand().andThen(vision.reseedIMUCommand()));
 
     // intake stuff
     // driverCont
@@ -620,6 +627,7 @@ public class RobotContainer {
   /** Sets up vision to run at full performance and temperature */
   private void onEnableVision() {
     vision.setThrottle(Constants.ENABLED_THROTTLE_SKIP_FRAMES);
+    vision.enableIMUAssist();
   }
 
   /** Decouples the superstructure from subsystems for test mode. */

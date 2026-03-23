@@ -6,6 +6,7 @@ package frc.robot.subsystems.Vision;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import java.util.Optional;
 import org.littletonrobotics.junction.AutoLog;
 
 public interface VisionIO {
@@ -48,6 +49,14 @@ public interface VisionIO {
   default void takeSnapshot() {}
 
   default void resetSnapshot() {}
+
+  /**
+   * Returns a MegaTag1 pose estimate for initial pose bootstrapping while disabled. Requires 2+
+   * tags visible. Returns empty if no confident estimate is available.
+   */
+  default Optional<Pose2d> getBootstrapPose() {
+    return Optional.empty();
+  }
 
   /** Enables IMU seeding from external orientation data. Only relevant for Limelight 4. */
   default void enableIMUSeeding() {}
