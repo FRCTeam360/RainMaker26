@@ -154,10 +154,14 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     // Blue-perspective base angles flipped automatically for Red via AllianceFlipUtil:
     //   up=0°, down=180°, right=270°, left=90°
     switch (currentSnapDirection) {
-      case UP -> currentTargetAngle = AllianceFlipUtil.apply(Rotation2d.fromDegrees(0.0)).getDegrees();
-      case DOWN -> currentTargetAngle = AllianceFlipUtil.apply(Rotation2d.fromDegrees(180.0)).getDegrees();
-      case RIGHT -> currentTargetAngle = AllianceFlipUtil.apply(Rotation2d.fromDegrees(270.0)).getDegrees();
-      case LEFT -> currentTargetAngle = AllianceFlipUtil.apply(Rotation2d.fromDegrees(90.0)).getDegrees();
+      case UP ->
+          currentTargetAngle = AllianceFlipUtil.apply(Rotation2d.fromDegrees(0.0)).getDegrees();
+      case DOWN ->
+          currentTargetAngle = AllianceFlipUtil.apply(Rotation2d.fromDegrees(180.0)).getDegrees();
+      case RIGHT ->
+          currentTargetAngle = AllianceFlipUtil.apply(Rotation2d.fromDegrees(270.0)).getDegrees();
+      case LEFT ->
+          currentTargetAngle = AllianceFlipUtil.apply(Rotation2d.fromDegrees(90.0)).getDegrees();
       case NONE -> {}
     }
   }
