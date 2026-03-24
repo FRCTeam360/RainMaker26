@@ -36,6 +36,8 @@ public class IndexerIOPB implements IndexerIO {
 
     sparkMaxConfig.encoder.positionConversionFactor(1.0 / GEAR_RATIO);
     sparkMaxConfig.encoder.velocityConversionFactor(1.0 / GEAR_RATIO);
+    sparkMaxConfig.encoder.uvwMeasurementPeriod(10);
+    sparkMaxConfig.encoder.uvwAverageDepth(2);
 
     sparkMaxConfig.closedLoop.p(KP).i(KI).d(KD);
     sparkMaxConfig.closedLoop.feedForward.kV(KV).kS(KS);

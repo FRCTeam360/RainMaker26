@@ -30,6 +30,9 @@ public class IntakeRollerIOWB implements IntakeRollerIO {
     config.inverted(true);
     config.smartCurrentLimit(55);
 
+    config.encoder.quadratureMeasurementPeriod(25);
+    config.encoder.quadratureAverageDepth(8);
+
     config.closedLoop.p(0.0002).i(0.0).d(0.0);
     config.closedLoop.feedForward.kV(0.0018).kS(0.004);
 

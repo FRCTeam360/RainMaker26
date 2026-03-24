@@ -27,6 +27,8 @@ public class IndexerIOWB implements IndexerIO {
   public IndexerIOWB() {
     sparkMaxConfig.idleMode(IdleMode.kBrake);
     sparkMaxConfig.inverted(true);
+    sparkMaxConfig.encoder.uvwMeasurementPeriod(10);
+    sparkMaxConfig.encoder.uvwAverageDepth(2);
 
     sparkMaxConfig.closedLoop.p(0.0002).i(0.0).d(0.0);
     sparkMaxConfig.closedLoop.feedForward.kV(0.0021).kS(0.04);

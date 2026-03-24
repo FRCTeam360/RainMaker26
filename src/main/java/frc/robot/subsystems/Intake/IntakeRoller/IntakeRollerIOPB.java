@@ -48,8 +48,8 @@ public class IntakeRollerIOPB implements IntakeRollerIO {
 
     leftConfig.encoder.positionConversionFactor(1.0 / GEAR_RATIO);
     leftConfig.encoder.velocityConversionFactor(1.0 / GEAR_RATIO);
-    leftConfig.encoder.uvwMeasurementPeriod(10);
-    leftConfig.encoder.uvwAverageDepth(2);
+    leftConfig.encoder.quadratureMeasurementPeriod(25);
+    leftConfig.encoder.quadratureAverageDepth(8);
 
     leftConfig.closedLoop.p(KP).i(KI).d(KD);
     leftConfig.closedLoop.feedForward.kV(KV).kS(KS);

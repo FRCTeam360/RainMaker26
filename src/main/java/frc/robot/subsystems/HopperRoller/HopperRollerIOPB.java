@@ -40,8 +40,8 @@ public class HopperRollerIOPB implements HopperRollerIO {
 
     sparkFlexConfig.encoder.positionConversionFactor(1.0 / GEAR_RATIO);
     sparkFlexConfig.encoder.velocityConversionFactor(1.0 / GEAR_RATIO);
-    sparkFlexConfig.encoder.uvwMeasurementPeriod(10);
-    sparkFlexConfig.encoder.uvwAverageDepth(2);
+    sparkFlexConfig.encoder.quadratureMeasurementPeriod(25);
+    sparkFlexConfig.encoder.quadratureAverageDepth(8);
 
     sparkFlexConfig.closedLoop.p(KP).i(KI).d(KD);
     sparkFlexConfig.closedLoop.feedForward.kV(KV).kS(KS);
