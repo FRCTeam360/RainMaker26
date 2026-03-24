@@ -56,10 +56,13 @@ public final class Constants {
   static RobotType robotType;
 
   public static RobotType getRobotType() {
-    return robotType;
+    if (robotType != null) {
+      return robotType;
+    }
+    return initRobotType();
   }
 
-  static RobotType initRobotType() {
+  private static RobotType initRobotType() {
     String serialAddress = HALUtil.getSerialNumber();
 
     if (serialAddress.equals(SerialAddressConstants.WOOD_SERIAL_ADDRESS)) {
