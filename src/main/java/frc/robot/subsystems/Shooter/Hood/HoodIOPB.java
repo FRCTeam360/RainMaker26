@@ -104,8 +104,7 @@ public class HoodIOPB implements HoodIO {
    * @param positionDegrees target position in degrees
    */
   public void setPosition(double positionDegrees) {
-    hoodMotor.setControl(
-        positionVoltage.withPosition(Units.degreesToRotations(positionDegrees)));
+    hoodMotor.setControl(positionVoltage.withPosition(Units.degreesToRotations(positionDegrees)));
   }
 
   public void updateInputs(HoodIOInputs inputs) {
