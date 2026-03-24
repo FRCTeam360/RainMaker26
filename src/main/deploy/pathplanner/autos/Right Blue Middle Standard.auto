@@ -17,7 +17,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "MIRRORED FLIPPED No Stop Left Red Middle 1"
+                  "pathName": "Right Blue Middle Standard 1"
                 }
               },
               {
@@ -62,7 +62,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "MIRRORED FLIPPED No Stop Left Red Middle 2"
+                  "pathName": "Right Blue Middle Standard 2"
                 }
               },
               {
@@ -91,6 +91,6 @@
     }
   },
   "resetOdom": true,
-  "folder": null,
+  "folder": "Right Blue Middle Autos",
   "choreoAuto": false
 }

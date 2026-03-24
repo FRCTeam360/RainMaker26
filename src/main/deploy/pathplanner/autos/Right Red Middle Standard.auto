@@ -91,6 +91,6 @@
     }
   },
   "resetOdom": true,
-  "folder": null,
+  "folder": "Right Red Middle Autos",
   "choreoAuto": false
 }
