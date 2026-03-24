@@ -399,10 +399,7 @@ public class RobotContainer {
                         return passCalculator.calculateShot().targetHeading();
                       }
                       return hubShotCalculator.calculateShot().targetHeading();
-                    }))
-            .alongWith(
-                Commands.waitSeconds(1.25)
-                    .andThen(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING))));
+                    })));
     autoCycleTrigger.onFalse(
         superStructure
             .setStateCommand(SuperWantedStates.DEFAULT)
