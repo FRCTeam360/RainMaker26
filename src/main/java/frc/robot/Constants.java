@@ -55,8 +55,7 @@ public final class Constants {
 
   static RobotType robotType;
 
-  
-  public static LinearVelocity getMaxSpeed(){
+  public static LinearVelocity getMaxSpeed() {
     switch (getRobotType()) {
       case WOODBOT:
         return WoodBotConstants.maxSpeed;
@@ -69,7 +68,7 @@ public final class Constants {
     }
   }
 
-  public static AngularVelocity getMaxAngularVelocity(){
+  public static AngularVelocity getMaxAngularVelocity() {
     switch (getRobotType()) {
       case WOODBOT:
         return WoodBotConstants.maxAngularVelocity;
