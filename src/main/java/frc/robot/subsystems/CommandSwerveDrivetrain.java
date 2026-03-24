@@ -127,10 +127,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             .withDeadband(maxSpeed.in(MetersPerSecond) * 0.01)
             .withRotationalDeadband(maxAngularVelocity.in(RadiansPerSecond) * 0.01)
             .withDriveRequestType(m_driveRequestType);
+    double defenseModeRotationScaler = 1.25;
+    double defenseModeTranslationScaler = 0.75;
     return this.applyRequest(
         () -> {
-          double defenseModeRotationScaler = (isDefenseMode ? 1.25 : 1.0);
-          double defenseModeTranslationScaler = (isDefenseMode ? 0.75 : 1.0);
           double velXMps =
               Math.pow(driveCont.getLeftY(), 3)
                   * maxSpeed.in(MetersPerSecond)
@@ -146,6 +146,11 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                   * (maxAngularVelocity.in(RadiansPerSecond) / 2.0)
                   * -Math.signum(driveCont.getRightX())
                   * defenseModeRotationScaler;
+          if (isDefenseMode) {
+            velXMps *= defenseModeTranslationScaler;
+            velYMps *= defenseModeTranslationScaler;
+            omegaRps *= defenseModeRotationScaler;
+          }
           // Store as robot-relative to match getVelocity() convention.
           // Operator-perspective velocities are converted to field-relative via
           // alliance flip, then to robot-relative via fromFieldRelativeSpeeds.

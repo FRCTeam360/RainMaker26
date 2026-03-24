@@ -110,10 +110,6 @@ public final class Constants {
     // === CANBUS ===
     public static final CANBus CANBUS = new CANBus("Default Name");
 
-    // === MAXIMUMS ===
-    public static final LinearVelocity maxSpeed = MetersPerSecond.of(4.69);
-    public static final AngularVelocity maxAngularVelocity = RevolutionsPerSecond.of(4.0);
-
     // === PATHPLANNER CONFIG (as of Feb 20th tuning) ===
     public static final double MASS_KG = 60.0;
     public static final double MOI = 4.5;
@@ -311,10 +307,6 @@ public final class Constants {
 
     // === HOOD ===
     public static final int HOOD_MOTOR = 34;
-
-    // === MAXIMUMS ===
-    public static final LinearVelocity maxSpeed = MetersPerSecond.of(4.69);
-    public static final AngularVelocity maxAngularVelocity = RevolutionsPerSecond.of(4.0);
 
     // === CLIMBER ===
     public static final int CLIMBER_MOTOR = 36;
