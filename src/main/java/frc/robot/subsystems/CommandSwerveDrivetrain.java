@@ -51,7 +51,7 @@ import org.littletonrobotics.junction.Logger;
 public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Subsystem {
   public static final LinearVelocity maxSpeed = PracticeBotConstants.maxSpeed;
   public static final AngularVelocity maxAngularVelocity = PracticeBotConstants.maxAngularVelocity;
-  public boolean isDefenseMode = false;
+  private boolean isDefenseMode = false;
   private static final double kSimLoopPeriod = 0.004; // 4 ms
   private Notifier m_simNotifier = null;
   private double m_lastSimTime;
@@ -119,11 +119,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
           .withDeadband(maxSpeed.in(MetersPerSecond) * 0.01)
           .withRotationalDeadband(0.0)
           .withDriveRequestType(m_driveRequestType); // No deadband for rotation when facing point
-
+          
   public final Command fieldOrientedDriveCommand(
       CommandXboxController driveCont) { // field oriented drive command!
-    double defenseModeRotationScaler = (isDefenseMode ? 1.25 : 1.0);
-    double defenseModeTranslationScaler = (isDefenseMode ? 0.75 : 1.0);
     SwerveRequest.FieldCentric drive =
         new SwerveRequest.FieldCentric() // creates a fieldcentric drive
             .withDeadband(maxSpeed.in(MetersPerSecond) * 0.01)
@@ -131,6 +129,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             .withDriveRequestType(m_driveRequestType);
     return this.applyRequest(
         () -> {
+          double defenseModeRotationScaler = (isDefenseMode ? 1.25 : 1.0);
+          double defenseModeTranslationScaler = (isDefenseMode ? 0.75 : 1.0);
           double velXMps =
               Math.pow(driveCont.getLeftY(), 3)
                   * maxSpeed.in(MetersPerSecond)
@@ -176,11 +176,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
   // defense mode command
   private void defenseMode() {
-    if (isDefenseMode) {
-      isDefenseMode = false;
-    } else {
-      isDefenseMode = true;
-    }
+    isDefenseMode = !isDefenseMode;
   }
 
   public Command defenseModeCmd() {
