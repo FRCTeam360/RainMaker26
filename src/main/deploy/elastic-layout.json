@@ -10,7 +10,7 @@
           {
             "title": "Match Time",
             "x": 1024.0,
-            "y": 512.0,
+            "y": 384.0,
             "width": 512.0,
             "height": 128.0,
             "type": "Match Time",
@@ -28,7 +28,7 @@
             "x": 0.0,
             "y": 128.0,
             "width": 512.0,
-            "height": 512.0,
+            "height": 384.0,
             "type": "Camera Stream",
             "properties": {
               "topic": "/CameraPublisher/limelight-right",
@@ -54,7 +54,7 @@
             "x": 1024.0,
             "y": 0.0,
             "width": 512.0,
-            "height": 512.0,
+            "height": 384.0,
             "type": "Match Time",
             "properties": {
               "topic": "/SmartDashboard/Time Left in Phase",
@@ -70,7 +70,7 @@
             "x": 512.0,
             "y": 0.0,
             "width": 512.0,
-            "height": 640.0,
+            "height": 512.0,
             "type": "Boolean Box",
             "properties": {
               "topic": "/SmartDashboard/Can Score in Hub",
