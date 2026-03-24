@@ -140,7 +140,8 @@ public class SuperStructure extends SubsystemBase {
 
   private void updateState() {
     previousSuperState = currentSuperState;
-    checkAgitateTimer2Shoot();
+    if (getIntakeState() != IntakeInternalStates.INTAKING)
+      checkAgitateTimer2Shoot();
 
     switch (wantedSuperState) {
       case SHOOT_AT_HUB:

@@ -315,8 +315,8 @@ public class RobotContainer {
         "default", superStructure.setStateCommand(SuperWantedStates.DEFAULT));
     registerPathplannerCommand(
         "deploy intake", superStructure.setIntakeStateCommand(IntakeWantedStates.DEPLOYED));
-    registerPathplannerCommand(
-        "agitate intake", superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING));
+    // registerPathplannerCommand(
+    //     "agitate intake", superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING));
     registerPathplannerCommand(
         "shoot without timer",
         superStructure
@@ -437,16 +437,16 @@ public class RobotContainer {
       intakeTrigger.onTrue(superStructure.setIntakeStateCommand(IntakeWantedStates.INTAKING));
       intakeTrigger.whileFalse(superStructure.setIntakeStateCommand(IntakeWantedStates.IDLE));
 
-      Trigger agitateTrigger = driverCont.leftTrigger().and(isSuperstructureMode);
-      agitateTrigger.onTrue(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING));
-      agitateTrigger.onFalse(superStructure.setIntakeStateCommand(IntakeWantedStates.DEPLOYED));
+      //Trigger agitateTrigger = driverCont.leftTrigger().and(isSuperstructureMode);
+      //agitateTrigger.onTrue(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING));
+      //agitateTrigger.onFalse(superStructure.setIntakeStateCommand(IntakeWantedStates.DEPLOYED));
 
       // Y toggle: STOWED <-
       // > INTAKING. Gated out while agitate trigger is held.
       driverCont
           .y()
           .and(isSuperstructureMode)
-          .and(() -> !agitateTrigger.getAsBoolean())
+          //.and(() -> !agitateTrigger.getAsBoolean())
           .onTrue(superStructure.toggleIntakeStateCommand());
     }
 
