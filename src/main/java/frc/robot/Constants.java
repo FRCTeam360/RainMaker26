@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.*;
+
 import com.ctre.phoenix6.CANBus;
 import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.RobotConfig;
@@ -13,6 +15,8 @@ import edu.wpi.first.hal.HALUtil;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.robot.utils.RobotUtils.ActiveHub;
 
@@ -52,11 +56,40 @@ public final class Constants {
 
   static RobotType robotType;
 
-  public static RobotType getRobotType() {
-    return robotType;
+  public static LinearVelocity getMaxSpeed() {
+    switch (getRobotType()) {
+      case WOODBOT:
+        return WoodBotConstants.maxSpeed;
+      case PRACTICEBOT:
+        return PracticeBotConstants.maxSpeed;
+      case SIM:
+        return SimulationConstants.maxSpeed;
+      default:
+        return PracticeBotConstants.maxSpeed;
+    }
   }
 
-  static RobotType initRobotType() {
+  public static AngularVelocity getMaxAngularVelocity() {
+    switch (getRobotType()) {
+      case WOODBOT:
+        return WoodBotConstants.maxAngularVelocity;
+      case PRACTICEBOT:
+        return PracticeBotConstants.maxAngularVelocity;
+      case SIM:
+        return SimulationConstants.maxAngularVelocity;
+      default:
+        return PracticeBotConstants.maxAngularVelocity;
+    }
+  }
+
+  public static RobotType getRobotType() {
+    if (robotType != null) {
+      return robotType;
+    }
+    return initRobotType();
+  }
+
+  private static RobotType initRobotType() {
     String serialAddress = HALUtil.getSerialNumber();
 
     if (serialAddress.equals(SerialAddressConstants.WOOD_SERIAL_ADDRESS)) {
@@ -103,6 +136,10 @@ public final class Constants {
     // === LIMELIGHT ===
     public static final String LIMELIGHT_3 = "limelight";
     public static final String LIMELIGHT_4 = "limelight-two";
+
+    // === MAXIMUMS ===
+    public static final LinearVelocity maxSpeed = MetersPerSecond.of(4.85);
+    public static final AngularVelocity maxAngularVelocity = RevolutionsPerSecond.of(4.0);
 
     // === CANBUS ===
     public static final CANBus CANBUS = new CANBus("Default Name");
@@ -239,6 +276,10 @@ public final class Constants {
     // === CANBUS ===
     public static final CANBus CANBUS = new CANBus("Default Name");
 
+    // === MAXIMUMS ===
+    public static final LinearVelocity maxSpeed = MetersPerSecond.of(4.69);
+    public static final AngularVelocity maxAngularVelocity = RevolutionsPerSecond.of(4.0);
+
     static {
       shotHoodAngleMap.put(6.0, 16.0);
       shotHoodAngleMap.put(5.0, 16.0);
@@ -331,6 +372,10 @@ public final class Constants {
 
     // === CLIMBER ===
     public static final int CLIMBER_MOTOR = 36;
+
+    // === MAXIMUMS ===
+    public static final LinearVelocity maxSpeed = MetersPerSecond.of(4.69);
+    public static final AngularVelocity maxAngularVelocity = RevolutionsPerSecond.of(4.0);
 
     // === SHOT CALCULATOR ===
     public static final InterpolatingDoubleTreeMap shotHoodAngleMap =
