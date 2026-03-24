@@ -3,6 +3,7 @@ package frc.robot.subsystems;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -72,7 +73,7 @@ public class SuperStructure extends SubsystemBase {
   // Extra time after the ball enters the hub before it reaches the scoring sensor.
   // Added to the time-of-flight value so we don't shoot into a hub that's about to go inactive
   // before the ball actually registers as scored.
-  private static final double BALL_TO_SENSOR_DELAY_SECONDS = 0.0;
+  private static final double BALL_TO_SENSOR_DELAY_SECONDS = 0.5;
 
   private enum MatchPhase {
     AUTO,
@@ -90,6 +91,7 @@ public class SuperStructure extends SubsystemBase {
   private SuperInternalStates previousSuperState = SuperInternalStates.IDLE;
   private ControlState controlState = ControlState.SUPERSTRUCTURE;
   private boolean cachedIsHubActive = true;
+  private boolean cachedDisplayIsHubActive = true;
   private double cachedTimeOfFlight = 0.0;
 
   // Constructor
@@ -368,17 +370,24 @@ public class SuperStructure extends SubsystemBase {
     double primaryTimeLeft =
         currentPhase == MatchPhase.AUTO
             ? matchTimeRaw
-            : RobotUtils.getTimeUntilHubChange(matchTimeAdjusted);
+            : RobotUtils.getDisplayTimeUntilHubChange(matchTimeAdjusted);
 
     RobotUtils.ActiveHub activeHub =
         RobotUtils.getActiveHub(matchTimeRaw, DriverStation.isTeleop(), getHubShiftTimeOfFlight());
 
-    // Calculate hub active once per cycle
+    Alliance autoWinner = RobotUtils.getAutoWinner(DriverStation.getGameSpecificMessage());
+
+    // Calculate hub active once per cycle (used by shooter gate)
     cachedIsHubActive =
+        RobotUtils.isHubActiveForAlliance(DriverStation.getAlliance(), autoWinner, activeHub);
+
+    // Display-aligned hub active: uses grace-free phase boundaries so it flips
+    // at the same moment the Time Left in Phase countdown resets
+    cachedDisplayIsHubActive =
         RobotUtils.isHubActiveForAlliance(
             DriverStation.getAlliance(),
-            RobotUtils.getAutoWinner(DriverStation.getGameSpecificMessage()),
-            activeHub);
+            autoWinner,
+            RobotUtils.getDisplayActiveHub(matchTimeAdjusted));
 
     // Runs the superstructure, shooter, and intake state machines
     updateState();
@@ -395,7 +404,7 @@ public class SuperStructure extends SubsystemBase {
     SmartDashboard.putNumber("Teleop Shift", teleopShift + 1);
     SmartDashboard.putNumber("Time Left in Phase", primaryTimeLeft);
     SmartDashboard.putString("Active Hub", activeHub.toString());
-    SmartDashboard.putBoolean("Can Score in Hub", cachedIsHubActive);
+    SmartDashboard.putBoolean("Can Score in Hub", cachedDisplayIsHubActive);
 
     Logger.recordOutput("Superstructure/WantedSuperState", wantedSuperState);
     Logger.recordOutput("Superstructure/CurrentSuperState", currentSuperState);

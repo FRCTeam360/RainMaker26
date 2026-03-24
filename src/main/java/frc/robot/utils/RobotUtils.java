@@ -103,28 +103,46 @@ public class RobotUtils {
   }
 
   /**
-   * Returns the time in seconds until the next hub state change given an already-adjusted match
-   * time (i.e. matchTime - effectiveTimeOfFlight). Accounts for grace periods so this countdown
-   * reaches zero at the same moment getActiveHub changes state.
+   * Returns the active hub for display purposes using grace-free phase boundaries. Pass the
+   * TOF-adjusted match time so the display hub state flips at the same moment as the countdown.
    *
    * @param adjustedMatchTime match time remaining minus effective time of flight, in seconds
-   * @return seconds until the next hub state change, or 0 if the match is over
+   * @return which hub(s) are active for display purposes
    */
-  public static double getTimeUntilHubChange(double adjustedMatchTime) {
+  public static ActiveHub getDisplayActiveHub(double adjustedMatchTime) {
+    if (adjustedMatchTime > TRANSITION_END_SECONDS) {
+      return ActiveHub.BOTH;
+    } else if (adjustedMatchTime > SHIFT_1_END_SECONDS) {
+      return ActiveHub.AUTOLOSER;
+    } else if (adjustedMatchTime > SHIFT_2_END_SECONDS) {
+      return ActiveHub.AUTOWINNER;
+    } else if (adjustedMatchTime > SHIFT_3_END_SECONDS) {
+      return ActiveHub.AUTOLOSER;
+    } else if (adjustedMatchTime > ENDGAME_START_SECONDS) {
+      return ActiveHub.AUTOWINNER;
+    } else {
+      return ActiveHub.BOTH;
+    }
+  }
+
+  /**
+   * Returns the display countdown until the next hub shift boundary, ignoring grace periods. Grace
+   * periods are folded into the surrounding inactive window so the countdown never shows a
+   * sub-2-second grace segment. Uses TOF-adjusted time so the countdown hits zero exactly when a
+   * shot fired now would land at the shift boundary.
+   *
+   * @param adjustedMatchTime match time remaining minus effective time of flight, in seconds
+   * @return seconds until the next hub shift boundary for display, or 0 if the match is over
+   */
+  public static double getDisplayTimeUntilHubChange(double adjustedMatchTime) {
     if (adjustedMatchTime > TRANSITION_END_SECONDS) {
       return adjustedMatchTime - TRANSITION_END_SECONDS;
     } else if (adjustedMatchTime > SHIFT_1_END_SECONDS) {
       return adjustedMatchTime - SHIFT_1_END_SECONDS;
-    } else if (adjustedMatchTime >= SHIFT_1_END_SECONDS - SHIFT_GRACE_PERIOD_SECONDS) {
-      return adjustedMatchTime - (SHIFT_1_END_SECONDS - SHIFT_GRACE_PERIOD_SECONDS);
     } else if (adjustedMatchTime > SHIFT_2_END_SECONDS) {
       return adjustedMatchTime - SHIFT_2_END_SECONDS;
-    } else if (adjustedMatchTime >= SHIFT_2_END_SECONDS - SHIFT_GRACE_PERIOD_SECONDS) {
-      return adjustedMatchTime - (SHIFT_2_END_SECONDS - SHIFT_GRACE_PERIOD_SECONDS);
     } else if (adjustedMatchTime > SHIFT_3_END_SECONDS) {
       return adjustedMatchTime - SHIFT_3_END_SECONDS;
-    } else if (adjustedMatchTime >= SHIFT_3_END_SECONDS - SHIFT_GRACE_PERIOD_SECONDS) {
-      return adjustedMatchTime - (SHIFT_3_END_SECONDS - SHIFT_GRACE_PERIOD_SECONDS);
     } else if (adjustedMatchTime > ENDGAME_START_SECONDS) {
       return adjustedMatchTime - ENDGAME_START_SECONDS;
     } else {
