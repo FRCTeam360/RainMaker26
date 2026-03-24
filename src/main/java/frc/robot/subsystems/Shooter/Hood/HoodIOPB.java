@@ -9,6 +9,7 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -40,6 +41,7 @@ public class HoodIOPB implements HoodIO {
   private final TalonFXConfiguration config = new TalonFXConfiguration();
 
   private final MotionMagicVoltage motionMagicPosition = new MotionMagicVoltage(0);
+  private final PositionVoltage positionVoltage = new PositionVoltage(0);
 
   private final StatusSignal<Angle> positionSignal;
   private final StatusSignal<AngularVelocity> velocitySignal;
@@ -103,7 +105,7 @@ public class HoodIOPB implements HoodIO {
    */
   public void setPosition(double positionDegrees) {
     hoodMotor.setControl(
-        motionMagicPosition.withPosition(Units.degreesToRotations(positionDegrees)));
+        positionVoltage.withPosition(Units.degreesToRotations(positionDegrees)));
   }
 
   public void updateInputs(HoodIOInputs inputs) {
