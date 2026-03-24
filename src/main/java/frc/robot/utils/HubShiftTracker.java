@@ -128,16 +128,25 @@ public class HubShiftTracker {
     if (currentPhase == MatchPhase.AUTO) {
       // Countdown to end of auto.
       primaryTimeLeft = matchTimeRaw;
-    } else if (currentPhase == MatchPhase.ENDGAME
-        && matchTimeRaw <= RobotUtils.ENDGAME_START_SECONDS) {
-      // Raw time has also crossed the endgame boundary — count down to end of match.
-      primaryTimeLeft = matchTimeRaw;
+    } else if (currentPhase == MatchPhase.ENDGAME) {
+      if (matchTimeRaw <= RobotUtils.ENDGAME_START_SECONDS) {
+        // Raw has also crossed — both alliances are in endgame. Count down to end of match.
+        primaryTimeLeft = matchTimeRaw;
+      } else {
+        // TOF-early window: adjusted crossed ENDGAME_START but raw hasn't yet.
+        // Keep counting with adjusted time so the display is smooth for the inactive alliance
+        // (AUTOLOSER in shift 4) whose countdown was already running toward zero.
+        // Active alliance (AUTOWINNER) uses raw time — no jump since raw is still in shift 4.
+        double timeForCountdown = hubActiveByRaw ? matchTimeRaw : matchTimeAdjusted;
+        primaryTimeLeft = RobotUtils.getDisplayTimeUntilHubChange(timeForCountdown);
+      }
     } else if (currentPhase == MatchPhase.TRANSITION) {
       // Both hubs active — no TOF offset. Show raw seconds until shift 1 begins.
       primaryTimeLeft = matchTimeRaw - RobotUtils.TRANSITION_END_SECONDS;
     } else {
-      // Teleop shifts (including TOF-early window entering endgame).
-      // Hub active by raw → count down with raw time (no early cutoff, grace covers us).
+      // Teleop shifts.
+      // Hub active by raw → count down with raw time (no early cutoff, grace covers in-flight
+      // balls).
       // Hub inactive by raw → count down with adjusted time (hits zero when a ball fired now
       //   would land while the hub is still active, i.e. the last safe moment to shoot).
       double timeForCountdown = hubActiveByRaw ? matchTimeRaw : matchTimeAdjusted;
