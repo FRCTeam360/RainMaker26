@@ -20,6 +20,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
+
+import javax.xml.crypto.KeySelector.Purpose;
+
 import org.littletonrobotics.junction.Logger;
 
 public class Vision extends SubsystemBase {
@@ -152,10 +155,7 @@ public class Vision extends SubsystemBase {
       double timestamp = input.timestampSeconds;
 
       // Skip measurements that are not with in the field boundary
-      if (pose.getX() < 0.0
-          || pose.getX() > FieldConstants.fieldLength
-          || pose.getY() < 0.0
-          || pose.getY() > FieldConstants.fieldWidth) {
+      if (isPoseOutOfBounds(pose)) {
         rejectedMeasurements++;
         continue;
       }
@@ -213,4 +213,11 @@ public class Vision extends SubsystemBase {
       Consumer<List<VisionMeasurement>> visionMeasurementConsumer) {
     return run(() -> visionMeasurementConsumer.accept(acceptedMeasurements));
   }
+
+  public boolean isPoseOutOfBounds(Pose2d pose) {
+      return pose.getX() < 0.0
+          || pose.getX() > FieldConstants.fieldLength
+          || pose.getY() < 0.0
+          || pose.getY() > FieldConstants.fieldWidth;
+    }
 }
