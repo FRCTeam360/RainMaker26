@@ -33,6 +33,8 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
 import frc.robot.Constants.PracticeBotConstants;
+import frc.robot.Constants.SimulationConstants;
+import frc.robot.Constants.WoodBotConstants;
 import frc.robot.generated.WoodBotDrivetrain.TunerSwerveDrivetrain;
 import frc.robot.subsystems.Vision.VisionMeasurement;
 import java.util.List;
@@ -49,8 +51,8 @@ import org.littletonrobotics.junction.Logger;
  * https://v6.docs.ctr-electronics.com/en/stable/docs/tuner/tuner-swerve/index.html
  */
 public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Subsystem {
-  public static final LinearVelocity maxSpeed = PracticeBotConstants.maxSpeed;
-  public static final AngularVelocity maxAngularVelocity = PracticeBotConstants.maxAngularVelocity;
+  private LinearVelocity maxSpeed = Constants.getMaxSpeed();
+  private AngularVelocity maxAngularVelocity = Constants.getMaxAngularVelocity();
   private boolean isDefenseMode = false;
   private static final double kSimLoopPeriod = 0.004; // 4 ms
   private Notifier m_simNotifier = null;
@@ -131,21 +133,12 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     double defenseModeTranslationScaler = 0.75;
     return this.applyRequest(
         () -> {
-          double velXMps =
-              Math.pow(driveCont.getLeftY(), 3)
-                  * maxSpeed.in(MetersPerSecond)
-                  * -1.0
-                  * defenseModeTranslationScaler;
-          double velYMps =
-              Math.pow(driveCont.getLeftX(), 3)
-                  * maxSpeed.in(MetersPerSecond)
-                  * -1.0
-                  * defenseModeTranslationScaler;
+          double velXMps = Math.pow(driveCont.getLeftY(), 3) * maxSpeed.in(MetersPerSecond) * -1.0;
+          double velYMps = Math.pow(driveCont.getLeftX(), 3) * maxSpeed.in(MetersPerSecond) * -1.0;
           double omegaRps =
               Math.pow(driveCont.getRightX(), 2)
                   * (maxAngularVelocity.in(RadiansPerSecond) / 2.0)
-                  * -Math.signum(driveCont.getRightX())
-                  * defenseModeRotationScaler;
+                  * -Math.signum(driveCont.getRightX());
           if (isDefenseMode) {
             velXMps *= defenseModeTranslationScaler;
             velYMps *= defenseModeTranslationScaler;
