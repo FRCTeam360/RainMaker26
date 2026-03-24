@@ -77,62 +77,71 @@ public class TestWhenCanShootInHubLogic {
   @Test
   void hubActiveShouldBeTrue() {
     Boolean hubActive =
-        RobotUtils.isHubActiveForAlliance(Optional.of(Alliance.Blue), Alliance.Blue, ActiveHub.AUTOWINNER);
+        RobotUtils.isHubActiveForAlliance(
+            Optional.of(Alliance.Blue), Alliance.Blue, ActiveHub.AUTOWINNER);
     assertEquals(true, hubActive);
   }
 
   @Test
   void hubActiveShouldBeTrue2() {
     Boolean hubActive =
-        RobotUtils.isHubActiveForAlliance(Optional.of(Alliance.Blue), Alliance.Red, ActiveHub.AUTOLOSER);
+        RobotUtils.isHubActiveForAlliance(
+            Optional.of(Alliance.Blue), Alliance.Red, ActiveHub.AUTOLOSER);
     assertEquals(true, hubActive);
   }
 
   @Test
   void hubActiveShouldBeTrue3() {
     Boolean hubActive =
-        RobotUtils.isHubActiveForAlliance(Optional.of(Alliance.Red), Alliance.Red, ActiveHub.AUTOWINNER);
+        RobotUtils.isHubActiveForAlliance(
+            Optional.of(Alliance.Red), Alliance.Red, ActiveHub.AUTOWINNER);
     assertEquals(true, hubActive);
   }
 
   @Test
   void hubActiveShouldBeTrue4() {
     Boolean hubActive =
-        RobotUtils.isHubActiveForAlliance(Optional.of(Alliance.Red), Alliance.Blue, ActiveHub.AUTOLOSER);
+        RobotUtils.isHubActiveForAlliance(
+            Optional.of(Alliance.Red), Alliance.Blue, ActiveHub.AUTOLOSER);
     assertEquals(true, hubActive);
   }
 
   @Test
   void hubActiveShouldBeFalse() {
     Boolean hubActive =
-        RobotUtils.isHubActiveForAlliance(Optional.of(Alliance.Blue), Alliance.Red, ActiveHub.AUTOWINNER);
+        RobotUtils.isHubActiveForAlliance(
+            Optional.of(Alliance.Blue), Alliance.Red, ActiveHub.AUTOWINNER);
     assertEquals(false, hubActive);
   }
 
   @Test
   void hubActiveShouldBeFalse2() {
     Boolean hubActive =
-        RobotUtils.isHubActiveForAlliance(Optional.of(Alliance.Blue), Alliance.Blue, ActiveHub.AUTOLOSER);
+        RobotUtils.isHubActiveForAlliance(
+            Optional.of(Alliance.Blue), Alliance.Blue, ActiveHub.AUTOLOSER);
     assertEquals(false, hubActive);
   }
 
   @Test
   void hubActiveShouldBeFalse3() {
     Boolean hubActive =
-        RobotUtils.isHubActiveForAlliance(Optional.of(Alliance.Red), Alliance.Blue, ActiveHub.AUTOWINNER);
+        RobotUtils.isHubActiveForAlliance(
+            Optional.of(Alliance.Red), Alliance.Blue, ActiveHub.AUTOWINNER);
     assertEquals(false, hubActive);
   }
 
   @Test
   void hubActiveShouldBeFalse4() {
     Boolean hubActive =
-        RobotUtils.isHubActiveForAlliance(Optional.of(Alliance.Red), Alliance.Red, ActiveHub.AUTOLOSER);
+        RobotUtils.isHubActiveForAlliance(
+            Optional.of(Alliance.Red), Alliance.Red, ActiveHub.AUTOLOSER);
     assertEquals(false, hubActive);
   }
 
   @Test
   void hubActiveShouldBeTrueByDefault() {
-    Boolean hubActive = RobotUtils.isHubActiveForAlliance(Optional.of(Alliance.Red), Alliance.Red, null);
+    Boolean hubActive =
+        RobotUtils.isHubActiveForAlliance(Optional.of(Alliance.Red), Alliance.Red, null);
     assertEquals(true, hubActive);
   }
 }

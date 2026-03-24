@@ -8,32 +8,11 @@
         "layouts": [],
         "containers": [
           {
-            "title": "Field",
-            "x": 384.0,
-            "y": 0.0,
-            "width": 768.0,
-            "height": 384.0,
-            "type": "Field",
-            "properties": {
-              "topic": "/SmartDashboard/Field",
-              "period": 0.06,
-              "field_game": "Reefscape",
-              "robot_width": 0.92,
-              "robot_length": 0.85,
-              "show_other_objects": true,
-              "show_trajectories": true,
-              "field_rotation": 0.0,
-              "robot_color": 4294198070,
-              "trajectory_color": 4294967295,
-              "show_robot_outside_widget": true
-            }
-          },
-          {
             "title": "Match Time",
-            "x": 1152.0,
-            "y": 0.0,
-            "width": 384.0,
-            "height": 384.0,
+            "x": 1024.0,
+            "y": 512.0,
+            "width": 512.0,
+            "height": 128.0,
             "type": "Match Time",
             "properties": {
               "topic": "/SmartDashboard/Match Time",
@@ -45,51 +24,11 @@
             }
           },
           {
-            "title": "CurrentSuperState",
-            "x": 768.0,
-            "y": 384.0,
-            "width": 384.0,
-            "height": 256.0,
-            "type": "Large Text Display",
-            "properties": {
-              "topic": "/SmartDashboard/Superstructure/CurrentSuperState",
-              "period": 0.06,
-              "data_type": "string"
-            }
-          },
-          {
-            "title": "Swerve Drive",
-            "x": 384.0,
-            "y": 384.0,
-            "width": 384.0,
-            "height": 256.0,
-            "type": "SwerveDrive",
-            "properties": {
-              "topic": "/SmartDashboard/Swerve Drive",
-              "period": 0.06,
-              "show_robot_rotation": true,
-              "rotation_unit": "Radians"
-            }
-          },
-          {
-            "title": "Shooting Phase",
-            "x": 1152.0,
-            "y": 512.0,
-            "width": 384.0,
-            "height": 128.0,
-            "type": "Large Text Display",
-            "properties": {
-              "topic": "/SmartDashboard/Shooting Phase",
-              "period": 0.06,
-              "data_type": "string"
-            }
-          },
-          {
             "title": "limelight-right",
             "x": 0.0,
-            "y": 0.0,
-            "width": 384.0,
-            "height": 384.0,
+            "y": 128.0,
+            "width": 512.0,
+            "height": 512.0,
             "type": "Camera Stream",
             "properties": {
               "topic": "/CameraPublisher/limelight-right",
@@ -98,33 +37,49 @@
             }
           },
           {
-            "title": "HubActive",
-            "x": 0.0,
-            "y": 384.0,
-            "width": 384.0,
-            "height": 256.0,
-            "type": "Boolean Box",
-            "properties": {
-              "topic": "/AdvantageKit/RealOutputs/Superstructure/HubActive",
-              "period": 0.06,
-              "data_type": "boolean",
-              "true_color": 4283215696,
-              "false_color": 4294198070,
-              "true_icon": "None",
-              "false_icon": "None"
-            }
-          },
-          {
             "title": "Auto Chooser",
-            "x": 1152.0,
-            "y": 384.0,
-            "width": 384.0,
+            "x": 0.0,
+            "y": 0.0,
+            "width": 512.0,
             "height": 128.0,
             "type": "ComboBox Chooser",
             "properties": {
               "topic": "/SmartDashboard/Auto Chooser",
               "period": 0.06,
               "sort_options": false
+            }
+          },
+          {
+            "title": "Time Left in Phase",
+            "x": 1024.0,
+            "y": 0.0,
+            "width": 512.0,
+            "height": 512.0,
+            "type": "Match Time",
+            "properties": {
+              "topic": "/SmartDashboard/Time Left in Phase",
+              "period": 0.06,
+              "data_type": "double",
+              "time_display_mode": "Minutes and Seconds",
+              "red_start_time": 20,
+              "yellow_start_time": 30
+            }
+          },
+          {
+            "title": "Can Score in Hub",
+            "x": 512.0,
+            "y": 0.0,
+            "width": 512.0,
+            "height": 640.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/SmartDashboard/Can Score in Hub",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
             }
           }
         ]

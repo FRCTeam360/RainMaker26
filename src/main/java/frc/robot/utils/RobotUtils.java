@@ -1,13 +1,18 @@
 package frc.robot.utils;
 
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants;
 import java.io.File;
 import java.util.Optional;
 
 public class RobotUtils {
   private static final double SHIFT_GRACE_PERIOD_SECONDS = 2.0;
+
+  public static final double TRANSITION_END_SECONDS = 130;
+  public static final double SHIFT_1_END_SECONDS = 105;
+  public static final double SHIFT_2_END_SECONDS = 80;
+  public static final double SHIFT_3_END_SECONDS = 55;
+  public static final double ENDGAME_START_SECONDS = 30;
 
   public enum ActiveHub {
     BOTH,
@@ -71,28 +76,53 @@ public class RobotUtils {
     if (!isTele) {
       activeHub = ActiveHub.BOTH; // AUTO
     } else if (isTele) {
-      if (gameTime <= 30) {
+      if (gameTime <= ENDGAME_START_SECONDS) {
         activeHub = ActiveHub.BOTH; // END GAME
-      } else if (gameTime < 55 - SHIFT_GRACE_PERIOD_SECONDS) {
+      } else if (gameTime < SHIFT_3_END_SECONDS - SHIFT_GRACE_PERIOD_SECONDS) {
         activeHub = ActiveHub.AUTOWINNER; // ALLIANCE SHIFT 4
-      } else if (gameTime <= 55 && gameTime >= 55 - SHIFT_GRACE_PERIOD_SECONDS) {
+      } else if (gameTime <= SHIFT_3_END_SECONDS
+          && gameTime >= SHIFT_3_END_SECONDS - SHIFT_GRACE_PERIOD_SECONDS) {
         activeHub = ActiveHub.BOTH; // ALLIANCE SHIFT GRACE PERIOD
-      } else if (gameTime < 80 - SHIFT_GRACE_PERIOD_SECONDS) {
+      } else if (gameTime < SHIFT_2_END_SECONDS - SHIFT_GRACE_PERIOD_SECONDS) {
         activeHub = ActiveHub.AUTOLOSER; // ALLIANCE SHIFT 3
-      } else if (gameTime <= 80 && gameTime >= 80 - SHIFT_GRACE_PERIOD_SECONDS) {
+      } else if (gameTime <= SHIFT_2_END_SECONDS
+          && gameTime >= SHIFT_2_END_SECONDS - SHIFT_GRACE_PERIOD_SECONDS) {
         activeHub = ActiveHub.BOTH; // ALLIANCE SHIFT GRACE PERIOD
-      } else if (gameTime < 105 - SHIFT_GRACE_PERIOD_SECONDS) {
+      } else if (gameTime < SHIFT_1_END_SECONDS - SHIFT_GRACE_PERIOD_SECONDS) {
         activeHub = ActiveHub.AUTOWINNER; // ALLIANCE SHIFT 2
-      } else if (gameTime <= 105 && gameTime >= 105 - SHIFT_GRACE_PERIOD_SECONDS) {
+      } else if (gameTime <= SHIFT_1_END_SECONDS
+          && gameTime >= SHIFT_1_END_SECONDS - SHIFT_GRACE_PERIOD_SECONDS) {
         activeHub = ActiveHub.BOTH; // ALLIANCE SHIFT GRACE PERIOD
-      } else if (gameTime <= 130) {
+      } else if (gameTime <= TRANSITION_END_SECONDS) {
         activeHub = ActiveHub.AUTOLOSER; // ALLIANCE SHIFT 1
       } else {
         return ActiveHub.BOTH; // TRANSITION
       }
     }
-    SmartDashboard.putString("ActiveHub", activeHub.name());
     return activeHub;
+  }
+
+  /**
+   * Returns the time in seconds until the next hub state change (shift boundary) given an
+   * already-adjusted match time (i.e. matchTime - effectiveTimeOfFlight).
+   *
+   * @param adjustedMatchTime match time remaining minus effective time of flight, in seconds
+   * @return seconds until the next shift boundary, or 0 if the match is over
+   */
+  public static double getTimeUntilHubChange(double adjustedMatchTime) {
+    if (adjustedMatchTime > TRANSITION_END_SECONDS) {
+      return adjustedMatchTime - TRANSITION_END_SECONDS;
+    } else if (adjustedMatchTime > SHIFT_1_END_SECONDS) {
+      return adjustedMatchTime - SHIFT_1_END_SECONDS;
+    } else if (adjustedMatchTime > SHIFT_2_END_SECONDS) {
+      return adjustedMatchTime - SHIFT_2_END_SECONDS;
+    } else if (adjustedMatchTime > SHIFT_3_END_SECONDS) {
+      return adjustedMatchTime - SHIFT_3_END_SECONDS;
+    } else if (adjustedMatchTime > ENDGAME_START_SECONDS) {
+      return adjustedMatchTime - ENDGAME_START_SECONDS;
+    } else {
+      return Math.max(0, adjustedMatchTime);
+    }
   }
 
   /**

@@ -74,7 +74,17 @@ public class SuperStructure extends SubsystemBase {
   // before the ball actually registers as scored.
   private static final double BALL_TO_SENSOR_DELAY_SECONDS = 0.0;
 
+  private enum MatchPhase {
+    AUTO,
+    TRANSITION,
+    TELEOP,
+    ENDGAME,
+    DISABLED
+  }
+
   // State variables
+  private MatchPhase currentPhase = MatchPhase.DISABLED;
+  private int teleopShift = 0;
   private SuperWantedStates wantedSuperState = SuperWantedStates.IDLE;
   private SuperInternalStates currentSuperState = SuperInternalStates.IDLE;
   private SuperInternalStates previousSuperState = SuperInternalStates.IDLE;
@@ -324,9 +334,39 @@ public class SuperStructure extends SubsystemBase {
   public void periodic() {
     // Calculate shot and extract time of flight once per cycle
     cachedTimeOfFlight = hubShotCalculator.calculateShot().timeOfFlight();
+    double matchTimeRaw = DriverStation.getMatchTime();
+    double matchTimeAdjusted = matchTimeRaw - getHubShiftTimeOfFlight();
+
+    if (!DriverStation.isEnabled()) {
+      currentPhase = MatchPhase.DISABLED;
+    } else if (DriverStation.isAutonomous()) {
+      currentPhase = MatchPhase.AUTO;
+    } else if (DriverStation.isTeleop()) {
+      if (matchTimeAdjusted > RobotUtils.TRANSITION_END_SECONDS) {
+        currentPhase = MatchPhase.TRANSITION;
+      } else if (matchTimeAdjusted <= RobotUtils.ENDGAME_START_SECONDS) {
+        currentPhase = MatchPhase.ENDGAME;
+      } else {
+        currentPhase = MatchPhase.TELEOP;
+      }
+    }
+
+    if (currentPhase == MatchPhase.TELEOP) {
+      if (matchTimeAdjusted > RobotUtils.SHIFT_1_END_SECONDS) teleopShift = 1;
+      else if (matchTimeAdjusted > RobotUtils.SHIFT_2_END_SECONDS) teleopShift = 2;
+      else if (matchTimeAdjusted > RobotUtils.SHIFT_3_END_SECONDS) teleopShift = 3;
+      else teleopShift = 4;
+    } else {
+      teleopShift = 0;
+    }
+
+    double primaryTimeLeft =
+        currentPhase == MatchPhase.AUTO
+            ? matchTimeRaw
+            : RobotUtils.getTimeUntilHubChange(matchTimeAdjusted);
+
     RobotUtils.ActiveHub activeHub =
-        RobotUtils.getActiveHub(
-            DriverStation.getMatchTime(), DriverStation.isTeleop(), getHubShiftTimeOfFlight());
+        RobotUtils.getActiveHub(matchTimeRaw, DriverStation.isTeleop(), getHubShiftTimeOfFlight());
 
     // Calculate hub active once per cycle
     cachedIsHubActive =
@@ -345,6 +385,10 @@ public class SuperStructure extends SubsystemBase {
     shooterStateMachine.apply();
     intakeStateMachine.apply();
 
+    SmartDashboard.putNumber("Match Time", matchTimeRaw);
+    SmartDashboard.putString("Phase", currentPhase.name());
+    SmartDashboard.putNumber("Teleop Shift", teleopShift + 1);
+    SmartDashboard.putNumber("Time Left in Phase", primaryTimeLeft);
     SmartDashboard.putString("Active Hub", activeHub.toString());
     SmartDashboard.putBoolean("Can Score in Hub", cachedIsHubActive);
 

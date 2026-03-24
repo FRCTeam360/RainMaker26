@@ -93,115 +93,8 @@ public class Robot extends LoggedRobot {
    * <p>This runs after the mode specific periodic functions, but before LiveWindow and
    * SmartDashboard integrated updating.
    */
-  private enum MatchPhase {
-    AUTO,
-    TRANSITION,
-    TELEOP,
-    ENDGAME,
-    DISABLED
-  }
-
-  private MatchPhase currentPhase = MatchPhase.DISABLED;
-
-  private int teleopShift = 0;
-  private int lastMatchTime = 150;
-  private static final double TRANSITION_DURATION = 10.0;
-  private static final double ENDGAME_THRESHOLD = 30.0;
-  private static final double TELEOP_START_TIME = 140.0;
-
-  private static final int TELEOP_SHIFTS = 4;
-
   @Override
   public void robotPeriodic() {
-
-    double matchTimeRaw = DriverStation.getMatchTime();
-    int matchTime = (int) matchTimeRaw;
-
-    if (!DriverStation.isEnabled()) {
-      currentPhase = MatchPhase.DISABLED;
-    } else if (DriverStation.isAutonomous()) {
-      currentPhase = MatchPhase.AUTO;
-    } else if (DriverStation.isTeleop()) {
-      if (matchTimeRaw > TELEOP_START_TIME - TRANSITION_DURATION) {
-        currentPhase = MatchPhase.TRANSITION;
-      } else if (matchTimeRaw <= ENDGAME_THRESHOLD) {
-        currentPhase = MatchPhase.ENDGAME;
-      } else {
-        currentPhase = MatchPhase.TELEOP;
-      }
-    }
-
-    double timeLeftInShift = 0;
-
-    if (currentPhase == MatchPhase.TELEOP) {
-      double usableTeleopTime = (TELEOP_START_TIME - TRANSITION_DURATION) - ENDGAME_THRESHOLD;
-      double shiftLength = usableTeleopTime / TELEOP_SHIFTS;
-      double teleopElapsed = (TELEOP_START_TIME - TRANSITION_DURATION) - matchTimeRaw;
-      int calculatedShift = (int) (teleopElapsed / shiftLength);
-      teleopShift = Math.min(calculatedShift, TELEOP_SHIFTS - 1);
-      double shiftStartTime = teleopShift * shiftLength;
-      double shiftElapsed = teleopElapsed - shiftStartTime;
-      timeLeftInShift = shiftLength - shiftElapsed;
-    } else {
-      teleopShift = 0;
-      timeLeftInShift = 0;
-    }
-
-    double timeLeftInPhase = 0;
-
-    switch (currentPhase) {
-      case AUTO:
-        timeLeftInPhase = matchTimeRaw;
-        break;
-      case TRANSITION:
-        timeLeftInPhase = matchTimeRaw - (TELEOP_START_TIME - TRANSITION_DURATION);
-        break;
-      case TELEOP:
-        timeLeftInPhase = matchTimeRaw - ENDGAME_THRESHOLD;
-        break;
-      case ENDGAME:
-        timeLeftInPhase = matchTimeRaw;
-        break;
-      default:
-        timeLeftInPhase = 0;
-    }
-
-    double primaryTimeLeft = 0;
-
-    switch (currentPhase) {
-      case AUTO:
-        primaryTimeLeft = matchTimeRaw;
-        break;
-      case TRANSITION:
-        primaryTimeLeft = matchTimeRaw - (TELEOP_START_TIME - TRANSITION_DURATION);
-        break;
-      case TELEOP:
-        primaryTimeLeft = timeLeftInShift;
-        break;
-      case ENDGAME:
-        primaryTimeLeft = matchTimeRaw;
-        break;
-      default:
-        primaryTimeLeft = 0;
-    }
-
-    if (matchTimeRaw < 0) {
-      primaryTimeLeft = 0;
-    }
-
-    SmartDashboard.putNumber("Match Time", matchTimeRaw);
-    SmartDashboard.putString("Phase", currentPhase.name());
-    SmartDashboard.putNumber("Teleop Shift", teleopShift + 1);
-    SmartDashboard.putNumber("Time Left in Phase", primaryTimeLeft);
-
-    if (Objects.nonNull(Constants.HUB_PHASE)) {
-      SmartDashboard.putString("HubPhase", Constants.HUB_PHASE.name());
-    } else {
-      SmartDashboard.putString("HubPhase", "BOTH");
-    }
-
-    SmartDashboard.putBoolean("HubActive", Constants.HUB_ACTIVE);
-
     double t0 = Logger.getTimestamp() / 1.0e6;
     m_robotContainer.preSchedulerUpdate();
     double t1 = Logger.getTimestamp() / 1.0e6;
@@ -213,8 +106,6 @@ public class Robot extends LoggedRobot {
     Logger.recordOutput("LoopTiming/PreSchedulerSeconds", t1 - t0);
     Logger.recordOutput("LoopTiming/SchedulerSeconds", t2 - t1);
     Logger.recordOutput("LoopTiming/PostSchedulerSeconds", t3 - t2);
-
-    lastMatchTime = matchTime;
   }
 
   /** This function is called once each time the robot enters Disabled mode. */
@@ -268,18 +159,10 @@ public class Robot extends LoggedRobot {
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
-    if (Objects.nonNull(Constants.HUB_PHASE)) {
-      Logger.recordOutput("HubPhase", Constants.HUB_PHASE);
-    }
     Logger.recordOutput("AutoWinner", Constants.AUTO_WINNER);
     if (Objects.nonNull(Constants.AUTO_WINNER)) {
       SmartDashboard.putString("AutoWinner", Constants.AUTO_WINNER.name());
     }
-
-    boolean hubActive =
-        RobotUtils.isHubActiveForAlliance(
-            DriverStation.getAlliance(), Constants.AUTO_WINNER, Constants.HUB_PHASE);
-    Constants.HUB_ACTIVE = hubActive;
   }
 
   @Override
