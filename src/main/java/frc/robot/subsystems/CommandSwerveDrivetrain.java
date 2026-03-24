@@ -175,12 +175,12 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
           .withDriveRequestType(m_driveRequestType);
 
   // defense mode command
-  private void defenseMode() {
+  private void toggleDefenseMode() {
     isDefenseMode = !isDefenseMode;
   }
 
-  public Command defenseModeCmd() {
-    return this.runOnce(() -> defenseMode());
+  public Command toggleDefenseModeCmd() {
+    return this.runOnce(() -> toggleDefenseMode());
   }
 
   // Xout Command
@@ -593,6 +593,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     Logger.recordOutput(SUBSYSTEM_NAME + "CurrentState", state.ModuleStates);
     Logger.recordOutput(SUBSYSTEM_NAME + "TargetState", state.ModuleTargets);
     Logger.recordOutput(SUBSYSTEM_NAME + "Using Vision", hasVisionMeasurements);
+    Logger.recordOutput(SUBSYSTEM_NAME + "Is Defense Mode", isDefenseMode);
 
     // Log whether vision measurements have been applied (useful for analysis)
     /*
