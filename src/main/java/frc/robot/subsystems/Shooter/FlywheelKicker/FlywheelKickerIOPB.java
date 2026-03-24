@@ -27,7 +27,7 @@ public class FlywheelKickerIOPB implements FlywheelKickerIO {
   private static final double SPINUP_KD = 0.0;
 
   // Hold config - smooth setpoint maintenance with tuned PID
-  private static final double HOLD_KP = 0.0010;
+  private static final double HOLD_KP = 0.00175; // Old HOLD_KP: 0.0010
   private static final double HOLD_KI = 0.0;
   private static final double HOLD_KD = 0.0;
 
