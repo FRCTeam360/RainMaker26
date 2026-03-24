@@ -103,21 +103,28 @@ public class RobotUtils {
   }
 
   /**
-   * Returns the time in seconds until the next hub state change (shift boundary) given an
-   * already-adjusted match time (i.e. matchTime - effectiveTimeOfFlight).
+   * Returns the time in seconds until the next hub state change given an already-adjusted match
+   * time (i.e. matchTime - effectiveTimeOfFlight). Accounts for grace periods so this countdown
+   * reaches zero at the same moment getActiveHub changes state.
    *
    * @param adjustedMatchTime match time remaining minus effective time of flight, in seconds
-   * @return seconds until the next shift boundary, or 0 if the match is over
+   * @return seconds until the next hub state change, or 0 if the match is over
    */
   public static double getTimeUntilHubChange(double adjustedMatchTime) {
     if (adjustedMatchTime > TRANSITION_END_SECONDS) {
       return adjustedMatchTime - TRANSITION_END_SECONDS;
     } else if (adjustedMatchTime > SHIFT_1_END_SECONDS) {
       return adjustedMatchTime - SHIFT_1_END_SECONDS;
+    } else if (adjustedMatchTime >= SHIFT_1_END_SECONDS - SHIFT_GRACE_PERIOD_SECONDS) {
+      return adjustedMatchTime - (SHIFT_1_END_SECONDS - SHIFT_GRACE_PERIOD_SECONDS);
     } else if (adjustedMatchTime > SHIFT_2_END_SECONDS) {
       return adjustedMatchTime - SHIFT_2_END_SECONDS;
+    } else if (adjustedMatchTime >= SHIFT_2_END_SECONDS - SHIFT_GRACE_PERIOD_SECONDS) {
+      return adjustedMatchTime - (SHIFT_2_END_SECONDS - SHIFT_GRACE_PERIOD_SECONDS);
     } else if (adjustedMatchTime > SHIFT_3_END_SECONDS) {
       return adjustedMatchTime - SHIFT_3_END_SECONDS;
+    } else if (adjustedMatchTime >= SHIFT_3_END_SECONDS - SHIFT_GRACE_PERIOD_SECONDS) {
+      return adjustedMatchTime - (SHIFT_3_END_SECONDS - SHIFT_GRACE_PERIOD_SECONDS);
     } else if (adjustedMatchTime > ENDGAME_START_SECONDS) {
       return adjustedMatchTime - ENDGAME_START_SECONDS;
     } else {

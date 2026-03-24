@@ -332,8 +332,13 @@ public class SuperStructure extends SubsystemBase {
 
   @Override
   public void periodic() {
-    // Calculate shot and extract time of flight once per cycle
-    cachedTimeOfFlight = hubShotCalculator.calculateShot().timeOfFlight();
+    // Calculate shot and extract time of flight once per cycle.
+    // Only use the calculated TOF when the shot is valid; fall back to the minimum
+    // so an out-of-range pose doesn't produce a huge TOF that shifts gameTime into
+    // the endgame bucket and keeps cachedIsHubActive stuck at true.
+    var hubShot = hubShotCalculator.calculateShot();
+    cachedTimeOfFlight =
+        hubShot.isValid() ? hubShot.timeOfFlight() : hubShotCalculator.getMinTimeOfFlightSecs();
     double matchTimeRaw = DriverStation.getMatchTime();
     double matchTimeAdjusted = matchTimeRaw - getHubShiftTimeOfFlight();
 
