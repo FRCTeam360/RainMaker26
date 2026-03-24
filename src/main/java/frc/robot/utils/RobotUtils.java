@@ -103,36 +103,56 @@ public class RobotUtils {
   }
 
   /**
-   * Returns the active hub for display purposes using grace-free phase boundaries. Pass the
-   * TOF-adjusted match time so the display hub state flips at the same moment as the countdown.
+   * Returns the active hub for display purposes, with grace periods invisible to the driver.
+   *
+   * <p>The grace period (BOTH) at each shift boundary is for the opponent's in-flight balls — from
+   * our alliance's perspective, our hub goes active immediately at the raw boundary with no delay,
+   * and goes inactive immediately at the next raw boundary with no grace. So the display simply
+   * uses the raw {@code SHIFT_X_END_SECONDS} boundaries, and grace is silently absorbed into the
+   * adjacent active window.
+   *
+   * <p>Boundaries use the raw shift times so the display flips at the same moment as {@link
+   * #getDisplayTimeUntilHubChange}. Pass the TOF-adjusted match time so the display turns active
+   * exactly when a ball fired now would land while the hub is still active.
+   *
+   * <p>Phase map (adjustedMatchTime = raw - TOF - sensorDelay):
+   *
+   * <pre>
+   *  > 130         BOTH        (transition — both always active)
+   *  105–130       AUTOLOSER   (shift 1: autoloser active, autowinner inactive)
+   *   80–105       AUTOWINNER  (shift 2: autowinner active, autoloser inactive; includes 103–105 grace)
+   *   55–80        AUTOLOSER   (shift 3: autoloser active, autowinner inactive; includes 78–80 grace)
+   *   30–55        AUTOWINNER  (shift 4: autowinner active, autoloser inactive; includes 53–55 grace)
+   *  ≤ 30          BOTH        (endgame — both always active)
+   * </pre>
    *
    * @param adjustedMatchTime match time remaining minus effective time of flight, in seconds
    * @return which hub(s) are active for display purposes
    */
   public static ActiveHub getDisplayActiveHub(double adjustedMatchTime) {
     if (adjustedMatchTime > TRANSITION_END_SECONDS) {
-      return ActiveHub.BOTH;
+      return ActiveHub.BOTH; // transition
     } else if (adjustedMatchTime > SHIFT_1_END_SECONDS) {
-      return ActiveHub.AUTOLOSER;
+      return ActiveHub.AUTOLOSER; // shift 1 (inactive for autowinner, active for autoloser)
     } else if (adjustedMatchTime > SHIFT_2_END_SECONDS) {
-      return ActiveHub.AUTOWINNER;
+      return ActiveHub.AUTOWINNER; // shift 2 + grace folded in
     } else if (adjustedMatchTime > SHIFT_3_END_SECONDS) {
-      return ActiveHub.AUTOLOSER;
+      return ActiveHub.AUTOLOSER; // shift 3 + grace folded in
     } else if (adjustedMatchTime > ENDGAME_START_SECONDS) {
-      return ActiveHub.AUTOWINNER;
+      return ActiveHub.AUTOWINNER; // shift 4 + grace folded in
     } else {
-      return ActiveHub.BOTH;
+      return ActiveHub.BOTH; // endgame
     }
   }
 
   /**
-   * Returns the display countdown until the next hub shift boundary, ignoring grace periods. Grace
-   * periods are folded into the surrounding inactive window so the countdown never shows a
-   * sub-2-second grace segment. Uses TOF-adjusted time so the countdown hits zero exactly when a
-   * shot fired now would land at the shift boundary.
+   * Returns the display countdown until the next hub phase change. Grace periods are folded into
+   * the adjacent active window, so the countdown and {@link #getDisplayActiveHub} always flip at
+   * the same boundary. Uses TOF-adjusted time so the countdown hits zero exactly when a ball fired
+   * now would land at the phase boundary.
    *
    * @param adjustedMatchTime match time remaining minus effective time of flight, in seconds
-   * @return seconds until the next hub shift boundary for display, or 0 if the match is over
+   * @return seconds until the next display hub phase change, or 0 if in endgame/done
    */
   public static double getDisplayTimeUntilHubChange(double adjustedMatchTime) {
     if (adjustedMatchTime > TRANSITION_END_SECONDS) {

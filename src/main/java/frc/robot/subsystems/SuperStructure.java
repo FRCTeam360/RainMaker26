@@ -368,7 +368,7 @@ public class SuperStructure extends SubsystemBase {
     }
 
     double primaryTimeLeft =
-        currentPhase == MatchPhase.AUTO
+        (currentPhase == MatchPhase.AUTO || currentPhase == MatchPhase.ENDGAME)
             ? matchTimeRaw
             : RobotUtils.getDisplayTimeUntilHubChange(matchTimeAdjusted);
 
