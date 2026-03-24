@@ -288,7 +288,7 @@ public class SuperStructure extends SubsystemBase {
     return new InstantCommand(
         () -> {
           if (intakeStateMachine.getState() == IntakeStateMachine.IntakeInternalStates.STOWED) {
-            intakeStateMachine.setWantedState(IntakeWantedStates.INTAKING);
+            intakeStateMachine.setWantedState(IntakeWantedStates.DEPLOYED);
           } else {
             intakeStateMachine.setWantedState(IntakeWantedStates.STOWED);
           }
