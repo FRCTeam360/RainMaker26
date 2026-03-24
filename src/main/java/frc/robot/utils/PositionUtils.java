@@ -151,18 +151,21 @@ public class PositionUtils {
   public static boolean canPass(Pose2d robotPose, Rotation2d shooterRotation) {
     boolean canPass = true;
     Translation2d start = robotPose.getTranslation();
-    double dx = shooterRotation.getCos();
-    double dy = shooterRotation.getSin();
+    Rotation2d endRotation = shooterRotation.minus(Rotation2d.k180deg);
+    double dxOfShooter = shooterRotation.getCos();
+    double dxOfEnd = endRotation.getCos();
+    double dyOfShooter = shooterRotation.getSin();
+    double dyOfEnd = endRotation.getSin();
     double maxDistance = Double.MAX_VALUE;
-    if (dx > 0) {
-      maxDistance = Math.min(maxDistance, (FieldConstants.fieldLength - start.getX()) / dx);
-    } else if (dx < 0) {
-      maxDistance = Math.min(maxDistance, -start.getX() / dx);
+    if (dxOfShooter > 0) {
+      maxDistance = Math.min(maxDistance, (FieldConstants.fieldLength - start.getX()) / dxOfShooter);
+    } else if (dxOfShooter < 0) {
+      maxDistance = Math.min(maxDistance, -start.getX() / dxOfShooter);
     }
-    if (dy > 0) {
-      maxDistance = Math.min(maxDistance, (FieldConstants.fieldWidth - start.getY()) / dy);
-    } else if (dy < 0) {
-      maxDistance = Math.min(maxDistance, -start.getY() / dy);
+    if (dyOfShooter > 0) {
+      maxDistance = Math.min(maxDistance, (FieldConstants.fieldWidth - start.getY()) / dyOfShooter);
+    } else if (dyOfShooter < 0) {
+      maxDistance = Math.min(maxDistance, -start.getY() / dyOfShooter);
     }
     Translation2d raycastMax = start.plus(new Translation2d(maxDistance, shooterRotation));
     int length = (int) Math.round(start.getDistance(raycastMax));
@@ -184,7 +187,6 @@ public class PositionUtils {
       double x = start.getX() + (end.getX() - start.getX()) * spotOnLine;
       double y = start.getY() + (end.getY() - start.getY()) * spotOnLine;
       Translation2d point = new Translation2d(x, y);
-      Logger.recordOutput("Raycast/Point", point);
       if (blueAllianceHub.contains(point) || redAllianceHub.contains(point)) {
         return point;
       }
