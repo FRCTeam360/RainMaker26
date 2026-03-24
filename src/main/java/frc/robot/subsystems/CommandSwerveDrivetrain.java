@@ -119,7 +119,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
           .withDeadband(maxSpeed.in(MetersPerSecond) * 0.01)
           .withRotationalDeadband(0.0)
           .withDriveRequestType(m_driveRequestType); // No deadband for rotation when facing point
-          
+
   public final Command fieldOrientedDriveCommand(
       CommandXboxController driveCont) { // field oriented drive command!
     SwerveRequest.FieldCentric drive =
