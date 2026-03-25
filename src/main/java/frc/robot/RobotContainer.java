@@ -253,8 +253,8 @@ public class RobotContainer {
                 Constants.PracticeBotConstants.passFlywheelSpeedMap,
                 Constants.PracticeBotConstants.timeOfFlightMap,
                 ShooterConstants.PRACTICEBOT_TO_SHOOTER,
-                Constants.PracticeBotConstants.MIN_SHOT_DISTANCE_METERS,
-                Constants.PracticeBotConstants.MAX_SHOT_DISTANCE_METERS,
+                Constants.PracticeBotConstants.MIN_PASS_DISTANCE_METERS,
+                Constants.PracticeBotConstants.MAX_PASS_DISTANCE_METERS,
                 PracticeBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond),
                 0);
         break;
@@ -302,12 +302,23 @@ public class RobotContainer {
         Commands.waitSeconds(4)
             .deadlineFor(
                 superStructure
-                    .setStateCommand(SuperWantedStates.SHOOT_AT_HUB)
+                    .setStateCommand(SuperWantedStates.AUTO_CYCLE_SHOOTING)
                     .alongWith(
                         drivetrain.faceAngleWhileDrivingCommand(
                             () -> 0,
                             () -> 0,
-                            () -> hubShotCalculator.calculateShot().targetHeading())))
+                            () -> {
+                              if (superStructure.getCurrentSuperState()
+                                  == SuperInternalStates.PASSING) {
+                                return passCalculator.calculateShot().targetHeading();
+                              }
+                              return hubShotCalculator.calculateShot().targetHeading();
+                            }))
+                    .alongWith(
+                        Commands.waitSeconds(1.25)
+                            .andThen(
+                                superStructure.setIntakeStateCommand(
+                                    IntakeWantedStates.AGITATING))))
             .andThen(superStructure.setStateCommand(SuperWantedStates.DEFAULT)));
     registerPathplannerCommand(
         "stow intake", superStructure.setIntakeStateCommand(IntakeWantedStates.STOWED));
@@ -401,7 +412,7 @@ public class RobotContainer {
                       return hubShotCalculator.calculateShot().targetHeading();
                     }))
             .alongWith(
-                Commands.waitSeconds(1.0)
+                Commands.waitSeconds(1.25)
                     .andThen(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING))));
     autoCycleTrigger.onFalse(
         superStructure
@@ -458,6 +469,9 @@ public class RobotContainer {
     driverCont.a().onTrue(superStructure.setStateCommand(SuperWantedStates.UNJAMMING));
     driverCont.a().onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
 
+    // defense mode
+    driverCont.start().onTrue(drivetrain.toggleDefenseModeCmd());
+
     // Drivetrain commands
     // driverCont.leftTrigger().whileTrue(drivetrain.faceHubWhileDriving(driverCont));
     driverCont.back().onTrue(drivetrain.zeroCommand());
@@ -470,19 +484,19 @@ public class RobotContainer {
     driverCont
         .leftBumper()
         .and(isIndependentMode)
-        .whileTrue(intakeRoller.setVelocityCommand(4000.0));
+        .whileTrue(intakeRoller.setVelocityCommand(3000.0));
     driverCont
         .rightBumper()
         .and(isIndependentMode)
-        .whileTrue(intakeRoller.setDutyCycleCommand(-0.2));
+        .whileTrue(intakeRoller.setDutyCycleCommand(-0.6));
     driverCont.rightTrigger().and(isIndependentMode).whileTrue(indexer.setDutyCycleCommand(0.2));
     driverCont.leftTrigger().and(isIndependentMode).whileTrue(indexer.setDutyCycleCommand(-0.2));
 
     // driverCont.a().and(isIndependentMode).whileTrue(indexer.setDutyCycleCommand(0.5));
 
     // hood bindings
-    driverCont.pov(0).and(isIndependentMode).onTrue(hood.setPositionCommand(20.0));
-    driverCont.pov(180).and(isIndependentMode).onTrue(hood.moveToZeroAndZero());
+    driverCont.pov(0).and(isIndependentMode).onTrue(hood.setPositionCommand(40.0));
+    driverCont.pov(180).and(isIndependentMode).onTrue(hood.setPositionCommand(0.0));
 
     driverCont.pov(90).and(isIndependentMode).whileTrue(flywheelKicker.setDutyCycleCommand(0.2));
     driverCont.pov(270).and(isIndependentMode).whileTrue(flywheelKicker.setDutyCycleCommand(-0.2));
@@ -495,16 +509,7 @@ public class RobotContainer {
     driverCont.b().and(isIndependentMode).whileTrue(hopperRoller.setDutyCycleCommand(-0.2));
 
     driverCont.start().and(isIndependentMode).whileTrue(flywheel.setDutyCycleCommand(0.2));
-    driverCont.back().and(isIndependentMode).whileTrue(flywheel.setDutyCycleCommand(-0.2));
-
-    // flywheel bindings
-    // driverCont.x().and(isIndependentMode).whileTrue(flywheel.setVelocityCommand(3000.0));
-    // driverCont.y().and(isIndependentMode).whileTrue(flywheel.setVelocityCommand(4000.0));
-
-    // configureIntakeTestBindings(isIndependentMode);
-    // configureFullShootingTestBindings(isIndependentMode);
-    // configureHoodTestBindings(isIndependentMode);
-    // configureClimberTestBindings(isIndependentMode);
+    driverCont.back().and(isIndependentMode).whileTrue(hood.zero());
   }
 
   void configureHoodTestBindings(BooleanSupplier isIndependentMode) {

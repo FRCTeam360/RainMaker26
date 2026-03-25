@@ -50,6 +50,9 @@ import org.littletonrobotics.junction.Logger;
  * https://v6.docs.ctr-electronics.com/en/stable/docs/tuner/tuner-swerve/index.html
  */
 public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Subsystem {
+  private LinearVelocity maxSpeed = Constants.getMaxSpeed();
+  private AngularVelocity maxAngularVelocity = Constants.getMaxAngularVelocity();
+  private boolean isDefenseMode = false;
   private static final double kSimLoopPeriod = 0.004; // 4 ms
   private Notifier m_simNotifier = null;
   private double m_lastSimTime;
@@ -87,24 +90,21 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   private final SwerveRequest.SysIdSwerveRotation m_rotationCharacterization =
       new SwerveRequest.SysIdSwerveRotation();
   private final DriveRequestType m_driveRequestType = DriveRequestType.Velocity;
-  // TODO refactor into a constants file
-  public static final LinearVelocity maxSpeed = MetersPerSecond.of(4.85);
-  public static final AngularVelocity maxAngularVelocity = RevolutionsPerSecond.of(4.0);
 
   // Heading controller PID gains (from example code)
-  private static final double HEADING_KP = 6.0;
+  private static final double HEADING_KP = 15.0;
   // Ki is intentionally 0 — heading error naturally bleeds off as the robot moves.
   // Integrator windup during long auto paths or sustained tracking can cause overshoot.
   private static final double HEADING_KI = 0.00;
   // Current Kd is near-zero and provides almost no damping. Recommended starting point
   // is ~0.1 (= KP/60), tunable up to ~0.3 before gyro noise begins to amplify.
   // Example: private static final double HEADING_KD = 0.1;
-  private static final double HEADING_KD = 0.005;
+  private static final double HEADING_KD = 1.0; // 1.0 Kd is prob the highest we should go
   // IZone is only relevant if Ki > 0. If Ki is ever enabled, a reasonable starting
   // value is ~0.17 rad (~10°) — small enough to only integrate near the setpoint.
   // Example: private static final double HEADING_I_ZONE = Math.toRadians(10.0);
   private static final double HEADING_I_ZONE = 0.0;
-  private static final double HEADING_TOLERANCE_RAD = Math.toRadians(3.0);
+  private static final double HEADING_TOLERANCE_RAD = Math.toRadians(1.5);
   // Extra heading tolerance granted per m/s of translational speed.
   // Compensates for the PID steady-state tracking lag when the heading setpoint moves
   // (setpoint rate ≈ v/d rad/s; lag ≈ rate/KP). Tunable — start at ~5°/m/s.
@@ -180,6 +180,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             .withDeadband(maxSpeed.in(MetersPerSecond) * 0.01)
             .withRotationalDeadband(maxAngularVelocity.in(RadiansPerSecond) * 0.01)
             .withDriveRequestType(m_driveRequestType);
+    double defenseModeRotationScaler = 1.25;
+    double defenseModeTranslationScaler = 0.75;
     return this.applyRequest(
         () -> {
           double velXMps = Math.pow(driveCont.getLeftY(), 3) * maxSpeed.in(MetersPerSecond) * -1.0;
@@ -188,6 +190,11 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
               Math.pow(driveCont.getRightX(), 2)
                   * (maxAngularVelocity.in(RadiansPerSecond) / 2.0)
                   * -Math.signum(driveCont.getRightX());
+          if (isDefenseMode) {
+            velXMps *= defenseModeTranslationScaler;
+            velYMps *= defenseModeTranslationScaler;
+            omegaRps *= defenseModeRotationScaler;
+          }
           // Store as robot-relative to match getVelocity() convention.
           // Operator-perspective velocities are converted to field-relative via
           // alliance flip, then to robot-relative via fromFieldRelativeSpeeds.
@@ -227,6 +234,15 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
           .withDeadband(maxSpeed.in(MetersPerSecond) * 0.01)
           .withRotationalDeadband(maxAngularVelocity.in(RadiansPerSecond) * 0.01)
           .withDriveRequestType(m_driveRequestType);
+
+  // defense mode command
+  private void toggleDefenseMode() {
+    isDefenseMode = !isDefenseMode;
+  }
+
+  public Command toggleDefenseModeCmd() {
+    return this.runOnce(() -> toggleDefenseMode());
+  }
 
   // Xout Command
   public void xOut() {
@@ -671,6 +687,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     Logger.recordOutput(SUBSYSTEM_NAME + "CurrentState", state.ModuleStates);
     Logger.recordOutput(SUBSYSTEM_NAME + "TargetState", state.ModuleTargets);
     Logger.recordOutput(SUBSYSTEM_NAME + "Using Vision", hasVisionMeasurements);
+    Logger.recordOutput(SUBSYSTEM_NAME + "Is Defense Mode", isDefenseMode);
 
     // Log whether vision measurements have been applied (useful for analysis)
     /*

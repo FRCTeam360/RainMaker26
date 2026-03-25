@@ -115,6 +115,8 @@ public class SuperStructure extends SubsystemBase {
         () -> targetSelectionStateMachine.getActiveCalculator().calculateShot().hoodAngle());
     hood.setShouldDuckSupplier(
         () -> PositionUtils.isInDuckZone(robotPoseSupplier.get(), robotToShooter));
+    shooterStateMachine.setIsInAllianceZoneSupplier(
+        () -> PositionUtils.isInAllianceZone(robotPoseSupplier.get()));
   }
 
   // State machine methods
@@ -286,7 +288,7 @@ public class SuperStructure extends SubsystemBase {
     return new InstantCommand(
         () -> {
           if (intakeStateMachine.getState() == IntakeStateMachine.IntakeInternalStates.STOWED) {
-            intakeStateMachine.setWantedState(IntakeWantedStates.INTAKING);
+            intakeStateMachine.setWantedState(IntakeWantedStates.DEPLOYED);
           } else {
             intakeStateMachine.setWantedState(IntakeWantedStates.STOWED);
           }

@@ -12,7 +12,7 @@
         "y": 0.702242
       },
       "isLocked": false,
-      "linkedName": "Othersideend6"
+      "linkedName": "FLIPPED Othersideend6"
     },
     {
       "anchor": {
@@ -53,11 +53,11 @@
       },
       "prevControl": {
         "x": 9.881723,
-        "y": 0.425641
+        "y": 0.42564100000000005
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "Othersideend3"
+      "linkedName": "FLIPPED Othersideend3"
     }
   ],
   "rotationTargets": [
@@ -70,10 +70,10 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 3.0,
-    "maxAcceleration": 6.0,
-    "maxAngularVelocity": 540.0,
-    "maxAngularAcceleration": 720.0,
+    "maxVelocity": 4.0,
+    "maxAcceleration": 8.0,
+    "maxAngularVelocity": 360.0,
+    "maxAngularAcceleration": 540.0,
     "nominalVoltage": 12.0,
     "unlimited": false
   },
