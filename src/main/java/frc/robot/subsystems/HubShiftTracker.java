@@ -6,7 +6,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.subsystems.Shooter.ShotCalculator;
 import frc.robot.subsystems.Shooter.ShotCalculator.ShootingParams;
 import frc.robot.utils.RobotUtils;
-
 import java.util.Optional;
 import org.littletonrobotics.junction.Logger;
 
@@ -115,8 +114,10 @@ public class HubShiftTracker {
     // Turns ON early (adjusted time) so driver can shoot as soon as ball will land while active.
     // Turns OFF at raw boundary — 2 s grace covers any in-flight balls fired before the boundary.
     hubActiveForDisplay =
-        RobotUtils.isHubActiveForAlliance(alliance, autoWinner, getDisplayActiveHub(matchTimeAdjusted))
-            || RobotUtils.isHubActiveForAlliance(alliance, autoWinner, getDisplayActiveHub(matchTimeRaw));
+        RobotUtils.isHubActiveForAlliance(
+                alliance, autoWinner, getDisplayActiveHub(matchTimeAdjusted))
+            || RobotUtils.isHubActiveForAlliance(
+                alliance, autoWinner, getDisplayActiveHub(matchTimeRaw));
 
     // --- Primary countdown ---
     // Determine whether raw time still shows the hub as active for our alliance.
@@ -228,5 +229,4 @@ public class HubShiftTracker {
       return Math.max(0, adjustedMatchTime);
     }
   }
-
 }
