@@ -1,0 +1,56 @@
+flowchart TD
+    rightBumper[Right Bumper]
+     --> SHOOT_AT_HUB(Super structure state set to shoot at hub)
+    SHOOT_AT_HUB--> HUB[Targets Hub]
+    SHOOT_AT_HUB --> INTERNAL_SHOOT_AT_HUB(Internal  super state set shoot at hub)
+    -->|shares code with passing state, different targets| SHOOTER_STATE_MACHINE_SHOOTING(Shooter state set to shooting)
+    INTERNAL_SHOOT_AT_HUB --> isShooterStateFireing{Is shooter state Fireing?}
+    -->|yes| isFiringSS(Indexer state set to indexing, Hopper roller state set to rolling)
+    isShooterStateFireing -->|no| isntFiringSS[Indexer state is off, Hopper roller state set to unjamming]
+    SHOOTER_STATE_MACHINE_SHOOTING --> canFire{are conditions met to shoot at target}
+    canFire --> |yes| SHOOTER_FIREING(Shooter state set to fireing) ---> SHOOTING_AIMING_KICKING
+    canFire --> |no| cantFireCheck{Are subsystems ready}
+    -->|yes| SHOOTER_AIMED(Shooter state set to aimed)
+    cantFireCheck --> |no| SHOOTER_PREPARING_TO_FIRE(Shooter state set to prepare to fire)-->
+    SHOOTER_AIMED --> KICKING_AND_AIMING(Flywheel kicker state set to kick, hood state set to aiming) 
+    -->SHOOTER_STATE_MACHINE_SHOOTING
+    isFiringSS--> SHOOTING_AIMING_KICKING(Flywheel state set to shooting, hood state set to aiming, flywheel kicker state set to kicking)
+    SHOOTING_AIMING_KICKING --> isFlywheelAtGoalSetpoint{Is flywheel speed at setpoint given by shot calculator?}
+    -->|yes| FLYWHEEL_AT_SETPOINT[Flywheel holds velocity currently running]
+    isFlywheelAtGoalSetpoint --> |no| SETINGVELOCITYOFFLYWHEEL[Flywheel velocity changes to meet setpoint]
+    SHOOTING_AIMING_KICKING --> HOOD_AIMING[Sets hood to angle provided by shot calculator]
+    SHOOTING_AIMING_KICKING --> FLYWHEEL_KICKING{Is flywheel kicker speed at setpoint given by shot calculator?}
+    -->|yes| FLYWHEEL_KICKER_AT_SETPOINT[Flywheel kicker holds velocity currently running]
+    FLYWHEEL_KICKING --> |no| SETINGVELOCITYOFFLYWHEELKICKER[Flywheel kicker velocity changes to meet setpoint]
+    KICKING_AND_AIMING-->HOOD_AIMING
+    KICKING_AND_AIMING --> FLYWHEEL_KICKING
+
+    rightTrigger[Right Trigger]
+    --> AUTO_CYCLE_SHOOTING_AND_AGITATING(Super state set to auto cycle shooting, the intake state is set to agitating)
+    AUTO_CYCLE_SHOOTING_AND_AGITATING --> agitateAtSetPoint{Is the the intake at a setpoint position ?}
+    agitateAtSetPoint --> |no| AGITATION_NOT_AT_SETPOINT[Intake continues to agitate in current direction, checks position to see if at setpoint and change state] --> agitateAtSetPoint
+    agitateAtSetPoint --> |yes| AGITATION_AT_SETPOINT[Checks if the intake is at the high or low setpoint and toggles the setpoint to the inverse of the current setpoint]
+    AUTO_CYCLE_SHOOTING_AND_AGITATING --> TARGET_AUTO{Targets either the hub or the outpost based on the robots position reletive to the field}
+    TARGET_AUTO --> |hub| SHOOT_AT_HUB
+    TARGET_AUTO --> |Outpost| SHOOT_AT_OUTPOST(Sets target to hub)
+    --> PASSING(Shooter state set to passing) -->isShooterStateFireing
+
+    b[B button]
+    --> SHOOT_AT_OUTPOST
+
+    leftBumper[Left Bumper]
+    --> INTAKING(Intake state set to intaking)
+    -->INTAKE_ROLLER_INTAKING(Intake roller state set to intaking)
+    INTAKING-->INTAKE_PIVOT_DEPLOYED(Intake pivot state set to deployed) --> intakePivotRPM(Intake pivot set to RPM of 3500 if not the woodbot, otherwise its set to a dutycycle of 0.7)
+    INTAKE_ROLLER_INTAKING --> setIntakeRollerToSetpoint[Intake roller position is set to a setpoint]
+
+    leftTrigger[Left Trigger]
+    -->INTAKE_STATE_AGITATING(Intake state set to agitate)
+    -->agitateAtSetPoint
+
+
+
+
+
+
+    
