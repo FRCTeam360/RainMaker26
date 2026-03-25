@@ -4,8 +4,8 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.subsystems.Shooter.ShotCalculator;
+import frc.robot.subsystems.Shooter.ShotCalculator.ShootingParams;
 import frc.robot.utils.RobotUtils;
-import frc.robot.utils.RobotUtils.ActiveHub;
 
 import java.util.Optional;
 import org.littletonrobotics.junction.Logger;
@@ -71,7 +71,7 @@ public class HubShiftTracker {
     // --- TOF ---
     // Only use the calculated TOF when the shot is valid; fall back to the minimum so an
     // out-of-range pose doesn't produce a huge TOF that shifts gameTime into the endgame bucket.
-    var hubShot = hubShotCalculator.calculateShot();
+    ShootingParams hubShot = hubShotCalculator.calculateShot();
     cachedTimeOfFlight =
         hubShot.isValid() ? hubShot.timeOfFlight() : hubShotCalculator.getMinTimeOfFlightSecs();
 
