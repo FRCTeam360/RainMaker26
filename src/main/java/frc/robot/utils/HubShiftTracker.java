@@ -112,18 +112,15 @@ public class HubShiftTracker {
     // Turns ON early (adjusted time) so driver can shoot as soon as ball will land while active.
     // Turns OFF at raw boundary — 2 s grace covers any in-flight balls fired before the boundary.
     hubActiveForDisplay =
-        RobotUtils.isHubActiveForAlliance(
-                alliance, autoWinner, RobotUtils.getDisplayActiveHub(matchTimeAdjusted))
-            || RobotUtils.isHubActiveForAlliance(
-                alliance, autoWinner, RobotUtils.getDisplayActiveHub(matchTimeRaw));
+        RobotUtils.isHubActiveForAlliance(alliance, autoWinner, getDisplayActiveHub(matchTimeAdjusted))
+            || RobotUtils.isHubActiveForAlliance(alliance, autoWinner, getDisplayActiveHub(matchTimeRaw));
 
     // --- Primary countdown ---
     // Determine whether raw time still shows the hub as active for our alliance.
     // This is the source of truth for which time to count down from — we don't want the
     // countdown to snap to the TOF duration in the last effectiveTof seconds before inactive.
     boolean hubActiveByRaw =
-        RobotUtils.isHubActiveForAlliance(
-            alliance, autoWinner, RobotUtils.getDisplayActiveHub(matchTimeRaw));
+        RobotUtils.isHubActiveForAlliance(alliance, autoWinner, getDisplayActiveHub(matchTimeRaw));
 
     if (currentPhase == MatchPhase.AUTO) {
       // Countdown to end of auto.
@@ -138,7 +135,7 @@ public class HubShiftTracker {
         // (AUTOLOSER in shift 4) whose countdown was already running toward zero.
         // Active alliance (AUTOWINNER) uses raw time — no jump since raw is still in shift 4.
         double timeForCountdown = hubActiveByRaw ? matchTimeRaw : matchTimeAdjusted;
-        primaryTimeLeft = RobotUtils.getDisplayTimeUntilHubChange(timeForCountdown);
+        primaryTimeLeft = getDisplayTimeUntilHubChange(timeForCountdown);
       }
     } else if (currentPhase == MatchPhase.TRANSITION) {
       // Both hubs active — no TOF offset. Show raw seconds until shift 1 begins.
@@ -150,7 +147,7 @@ public class HubShiftTracker {
       // Hub inactive by raw → count down with adjusted time (hits zero when a ball fired now
       //   would land while the hub is still active, i.e. the last safe moment to shoot).
       double timeForCountdown = hubActiveByRaw ? matchTimeRaw : matchTimeAdjusted;
-      primaryTimeLeft = RobotUtils.getDisplayTimeUntilHubChange(timeForCountdown);
+      primaryTimeLeft = getDisplayTimeUntilHubChange(timeForCountdown);
     }
   }
 
@@ -184,44 +181,6 @@ public class HubShiftTracker {
     return hubActive;
   }
 
-  /**
-   * Returns the display hub-active state for the Elastic dashboard ("Can Score in Hub"). Turns ON
-   * slightly before the raw active boundary (by TOF) and turns OFF at the raw inactive boundary.
-   *
-   * @return true if the driver should consider their hub open
-   */
-  public boolean isHubActiveForDisplay() {
-    return hubActiveForDisplay;
-  }
-
-  /**
-   * Returns the countdown value for the "Time Left in Phase" Elastic widget, in seconds.
-   *
-   * @return seconds until the next relevant phase transition for the driver
-   */
-  public double getPrimaryTimeLeft() {
-    return primaryTimeLeft;
-  }
-
-  /**
-   * Returns the current teleop shift number (1–4), or 0 when not in a shifting teleop phase.
-   *
-   * @return current shift number
-   */
-  public int getTeleopShift() {
-    return teleopShift;
-  }
-
-  /**
-   * Returns the raw {@link RobotUtils.ActiveHub} used by the shooter gate this cycle. Reflects the
-   * full grace-period logic.
-   *
-   * @return which hub(s) are accepting balls for the shooter gate
-   */
-  public RobotUtils.ActiveHub getActiveHub() {
-    return activeHub;
-  }
-
   // -------------------------------------------------------------------------
   // Private helpers
   // -------------------------------------------------------------------------
@@ -234,4 +193,37 @@ public class HubShiftTracker {
     return Math.max(cachedTimeOfFlight, hubShotCalculator.getMinTimeOfFlightSecs())
         + BALL_TO_SENSOR_DELAY_SECONDS;
   }
+
+  private RobotUtils.ActiveHub getDisplayActiveHub(double adjustedMatchTime) {
+    if (adjustedMatchTime > RobotUtils.TRANSITION_END_SECONDS) {
+      return RobotUtils.ActiveHub.BOTH;
+    } else if (adjustedMatchTime > RobotUtils.SHIFT_1_END_SECONDS) {
+      return RobotUtils.ActiveHub.AUTOLOSER;
+    } else if (adjustedMatchTime > RobotUtils.SHIFT_2_END_SECONDS) {
+      return RobotUtils.ActiveHub.AUTOWINNER;
+    } else if (adjustedMatchTime > RobotUtils.SHIFT_3_END_SECONDS) {
+      return RobotUtils.ActiveHub.AUTOLOSER;
+    } else if (adjustedMatchTime > RobotUtils.ENDGAME_START_SECONDS) {
+      return RobotUtils.ActiveHub.AUTOWINNER;
+    } else {
+      return RobotUtils.ActiveHub.BOTH;
+    }
+  }
+
+  private double getDisplayTimeUntilHubChange(double adjustedMatchTime) {
+    if (adjustedMatchTime > RobotUtils.TRANSITION_END_SECONDS) {
+      return adjustedMatchTime - RobotUtils.TRANSITION_END_SECONDS;
+    } else if (adjustedMatchTime > RobotUtils.SHIFT_1_END_SECONDS) {
+      return adjustedMatchTime - RobotUtils.SHIFT_1_END_SECONDS;
+    } else if (adjustedMatchTime > RobotUtils.SHIFT_2_END_SECONDS) {
+      return adjustedMatchTime - RobotUtils.SHIFT_2_END_SECONDS;
+    } else if (adjustedMatchTime > RobotUtils.SHIFT_3_END_SECONDS) {
+      return adjustedMatchTime - RobotUtils.SHIFT_3_END_SECONDS;
+    } else if (adjustedMatchTime > RobotUtils.ENDGAME_START_SECONDS) {
+      return adjustedMatchTime - RobotUtils.ENDGAME_START_SECONDS;
+    } else {
+      return Math.max(0, adjustedMatchTime);
+    }
+  }
+
 }
