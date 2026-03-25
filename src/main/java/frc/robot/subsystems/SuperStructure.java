@@ -25,7 +25,6 @@ import frc.robot.subsystems.Shooter.ShotCalculator;
 import frc.robot.subsystems.Shooter.TargetSelectionStateMachine;
 import frc.robot.subsystems.Shooter.TargetSelectionStateMachine.TargetInternalStates;
 import frc.robot.subsystems.Shooter.TargetSelectionStateMachine.TargetWantedStates;
-import frc.robot.utils.HubShiftTracker;
 import frc.robot.utils.PositionUtils;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
