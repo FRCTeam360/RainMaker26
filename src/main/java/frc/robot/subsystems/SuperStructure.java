@@ -221,10 +221,16 @@ public class SuperStructure extends SubsystemBase {
           if (!DriverStation.isFMSAttached()) {
             return true;
           }
+          // Allow shooting if explicitly commanded to shoot at hub (manual override)
+          if (wantedSuperState == SuperWantedStates.SHOOT_AT_HUB) {
+            return true;
+          }
           // For AUTO_CYCLE_SHOOTING, check if hub is actually active based on game phase
           return canScoreAtHub() && hubShotCalculator.calculateShot().isValid();
         case PASSING:
-          return PositionUtils.isInPassingZone(robotPoseSupplier.get(), robotToShooter);
+          boolean isInPassingZone =
+              PositionUtils.isInPassingZone(robotPoseSupplier.get(), robotToShooter);
+          return isInPassingZone;
         default:
           return true;
       }
