@@ -401,7 +401,7 @@ public class RobotContainer {
                       return hubShotCalculator.calculateShot().targetHeading();
                     }))
             .alongWith(
-                Commands.waitSeconds(1.25)
+                Commands.waitSeconds(1.75)
                     .andThen(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING))));
     autoCycleTrigger.onFalse(
         superStructure
@@ -428,6 +428,9 @@ public class RobotContainer {
                     drivetrain.faceAngleWhileDrivingCommand(
                         driverCont, () -> passCalculator.calculateShot().targetHeading())));
     driverCont.b().onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
+
+    driverCont.x().whileTrue(superStructure.setIntakeStateCommand(IntakeWantedStates.REVERSING));
+    driverCont.x().whileFalse(superStructure.setIntakeStateCommand(IntakeWantedStates.IDLE));
 
     // Left trigger held: agitate. Release: back to intaking.
     if (Constants.getRobotType() == RobotType.WOODBOT) {
