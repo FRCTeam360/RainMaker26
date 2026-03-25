@@ -17,7 +17,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "FLIPPED Right Red Middle Standard 1"
+                  "pathName": "Right Blue Middle Standard 1"
                 }
               },
               {
@@ -51,12 +51,6 @@
                 "data": {
                   "name": "shoot at hub"
                 }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "agitate intake"
-                }
               }
             ]
           }
@@ -68,7 +62,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "FLIPPED Right Red Middle Standard 2"
+                  "pathName": "Right Blue Middle Standard 2"
                 }
               },
               {
@@ -89,12 +83,6 @@
                 "data": {
                   "name": "shoot at hub"
                 }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "agitate intake"
-                }
               }
             ]
           }
@@ -103,6 +91,6 @@
     }
   },
   "resetOdom": true,
-  "folder": null,
+  "folder": "Right Blue Middle Autos",
   "choreoAuto": false
 }

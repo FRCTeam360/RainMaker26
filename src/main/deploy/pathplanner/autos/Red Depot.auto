@@ -79,12 +79,6 @@
                       "data": {
                         "name": "shoot without timer"
                       }
-                    },
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "agitate intake"
-                      }
                     }
                   ]
                 }

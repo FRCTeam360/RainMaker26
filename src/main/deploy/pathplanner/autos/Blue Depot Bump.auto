@@ -57,12 +57,6 @@
                 "data": {
                   "name": "shoot at hub"
                 }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "agitate intake"
-                }
               }
             ]
           }
@@ -132,12 +126,6 @@
                 "type": "named",
                 "data": {
                   "name": "shoot at hub"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "agitate intake"
                 }
               }
             ]

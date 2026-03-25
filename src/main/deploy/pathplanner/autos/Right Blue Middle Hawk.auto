@@ -17,7 +17,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "Blue left middle 1"
+                  "pathName": "Right Blue Middle Hawk 1"
                 }
               },
               {
@@ -47,44 +47,6 @@
           "data": {
             "commands": [
               {
-                "type": "path",
-                "data": {
-                  "pathName": "Blue left middle 2"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "basic intake"
-                }
-              }
-            ]
-          }
-        },
-        {
-          "type": "deadline",
-          "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "Blue left middle 3"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "basic intake"
-                }
-              }
-            ]
-          }
-        },
-        {
-          "type": "deadline",
-          "data": {
-            "commands": [
-              {
                 "type": "named",
                 "data": {
                   "name": "shoot at hub"
@@ -100,7 +62,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "Blue left middle 4"
+                  "pathName": "Right Blue Middle Hawk 2"
                 }
               },
               {
@@ -110,31 +72,6 @@
                 }
               }
             ]
-          }
-        },
-        {
-          "type": "deadline",
-          "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "Blue left middle 5"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "basic intake"
-                }
-              }
-            ]
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Blue left middle 3"
           }
         },
         {
@@ -154,6 +91,6 @@
     }
   },
   "resetOdom": true,
-  "folder": null,
+  "folder": "Right Blue Middle Autos",
   "choreoAuto": false
 }

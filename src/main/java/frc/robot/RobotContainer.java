@@ -302,12 +302,23 @@ public class RobotContainer {
         Commands.waitSeconds(4)
             .deadlineFor(
                 superStructure
-                    .setStateCommand(SuperWantedStates.SHOOT_AT_HUB)
+                    .setStateCommand(SuperWantedStates.AUTO_CYCLE_SHOOTING)
                     .alongWith(
                         drivetrain.faceAngleWhileDrivingCommand(
                             () -> 0,
                             () -> 0,
-                            () -> hubShotCalculator.calculateShot().targetHeading())))
+                            () -> {
+                              if (superStructure.getCurrentSuperState()
+                                  == SuperInternalStates.PASSING) {
+                                return passCalculator.calculateShot().targetHeading();
+                              }
+                              return hubShotCalculator.calculateShot().targetHeading();
+                            }))
+                    .alongWith(
+                        Commands.waitSeconds(1.25)
+                            .andThen(
+                                superStructure.setIntakeStateCommand(
+                                    IntakeWantedStates.AGITATING))))
             .andThen(superStructure.setStateCommand(SuperWantedStates.DEFAULT)));
     registerPathplannerCommand(
         "stow intake", superStructure.setIntakeStateCommand(IntakeWantedStates.STOWED));
@@ -460,6 +471,9 @@ public class RobotContainer {
 
     driverCont.a().onTrue(superStructure.setStateCommand(SuperWantedStates.UNJAMMING));
     driverCont.a().onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
+
+    // defense mode
+    driverCont.start().onTrue(drivetrain.toggleDefenseModeCmd());
 
     // Drivetrain commands
     // driverCont.leftTrigger().whileTrue(drivetrain.faceHubWhileDriving(driverCont));
