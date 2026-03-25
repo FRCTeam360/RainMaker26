@@ -23,7 +23,8 @@ public class IntakeStateMachine {
     INTAKING,
     STOWED,
     AGITATING,
-    DEPLOYED
+    DEPLOYED,
+    DEPLOYED_ASSIST_SHOOTING
   }
 
   /** Internal states representing the resolved intake behavior. */
@@ -32,7 +33,8 @@ public class IntakeStateMachine {
     INTAKING,
     STOWED,
     AGITATING,
-    DEPLOYED
+    DEPLOYED,
+    DEPLOYED_ASSIST_SHOOTING
   }
 
   // Subsystem refs
@@ -89,6 +91,9 @@ public class IntakeStateMachine {
       case DEPLOYED:
         currentState = IntakeInternalStates.DEPLOYED;
         break;
+      case DEPLOYED_ASSIST_SHOOTING:
+        currentState = IntakeInternalStates.DEPLOYED_ASSIST_SHOOTING;
+        break;
       case IDLE:
       default:
         currentState = IntakeInternalStates.IDLE;
@@ -103,6 +108,10 @@ public class IntakeStateMachine {
   public void apply() {
     switch (currentState) {
       case DEPLOYED:
+        intakePivot.setWantedState(IntakePivotWantedStates.DEPLOYED);
+        break;
+      case DEPLOYED_ASSIST_SHOOTING:
+        intakeRoller.setWantedState(IntakeRollerStates.ASSIST_SHOOTING);
         intakePivot.setWantedState(IntakePivotWantedStates.DEPLOYED);
         break;
       case INTAKING:
