@@ -16,7 +16,7 @@ Output files are prefixed with "FLIPPED " and have alliance tags swapped
 (Red<->Blue, [R]<->[B]) so they're easy to identify as generated.
 
 Usage:
-  python scripts/flip_autos.py "Red middle sprint v2"         # flip auto + its paths
+  python scripts/flip_autos.py "Red middle sprint v2"         # flip auto + its paths   
   python scripts/flip_autos.py --dry-run "[R] Depot"           # preview without writing
 
 No external dependencies required - uses only the Python standard library.
