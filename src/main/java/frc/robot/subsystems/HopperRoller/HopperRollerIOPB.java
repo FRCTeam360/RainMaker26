@@ -20,7 +20,7 @@ public class HopperRollerIOPB implements HopperRollerIO {
   private static final int STALL_CURRENT_LIMIT_AMPS = 70;
   private static final int FREE_CURRENT_LIMIT_AMPS = 50;
 
-  private static final double KP = 0.00035; // can be 0.000350
+  private static final double KP = 0.000375; // can be 0.000350
   private static final double KI = 0.0;
   private static final double KD = 0.0;
   private static final double KV = 0.0017;
