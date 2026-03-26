@@ -81,9 +81,12 @@ import java.util.function.BooleanSupplier;
 import org.littletonrobotics.junction.Logger;
 
 /**
- * This class is where the bulk of the robot should be declared. Since Command-based is a
- * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
- * periodic methods (other than the scheduler calls). Instead, the structure of the robot (including
+ * This class is where the bulk of the robot should be declared. Since
+ * Command-based is a
+ * "declarative" paradigm, very little robot logic should actually be handled in
+ * the {@link Robot}
+ * periodic methods (other than the scheduler calls). Instead, the structure of
+ * the robot (including
  * subsystems, commands, and trigger mappings) should be declared here.
  */
 public class RobotContainer {
@@ -116,7 +119,10 @@ public class RobotContainer {
 
   private static final double FLYWHEEL_KICKER_WARMUP_VELOCITY_RPM = 4000.0;
 
-  /** Threshold above which a loop cycle is considered an overrun (22ms for a 20ms loop). */
+  /**
+   * Threshold above which a loop cycle is considered an overrun (22ms for a 20ms
+   * loop).
+   */
   private static final double LOOP_OVERRUN_THRESHOLD_SECONDS = 0.022;
 
   private double lastCycleTimestamp = Logger.getTimestamp() / 1.0e6;
@@ -125,7 +131,9 @@ public class RobotContainer {
   private RobotShootingInfo robotShootingInfo;
   private RobotShootingInfo robotPassingInfo;
 
-  /** The container for the robot. Contains subsystems, OI devices, and commands. */
+  /**
+   * The container for the robot. Contains subsystems, OI devices, and commands.
+   */
   public RobotContainer() {
     // Pre-load all PathPlanner path files into memory to avoid disk I/O during auto
     PathProvider.initialize();
@@ -135,9 +143,8 @@ public class RobotContainer {
         drivetrain = WoodBotDrivetrain.createDrivetrain();
         climber = new Climber(new ClimberIOSim());
         intakePivot = new IntakePivot(new IntakePivotIOSim());
-        vision =
-            new Vision(
-                Map.of("photonSim", new VisionIOPhotonSim(() -> drivetrain.getState().Pose)));
+        vision = new Vision(
+            Map.of("photonSim", new VisionIOPhotonSim(() -> drivetrain.getState().Pose)));
         flywheel = new Flywheel(new FlywheelIOSim());
         hood = new Hood(new HoodIOSim());
         indexer = new Indexer(new IndexerIOSim());
@@ -145,26 +152,24 @@ public class RobotContainer {
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOSim());
         hopperRoller = new HopperRoller(new HopperRollerIOSim());
 
-        robotShootingInfo =
-            new RobotShootingInfo(
-                Constants.SimulationConstants.shotHoodAngleMap,
-                Constants.SimulationConstants.shotFlywheelSpeedMap,
-                Constants.SimulationConstants.shotTimeOfFlightMap,
-                ShooterConstants.SIM_TO_SHOOTER,
-                Constants.SimulationConstants.MIN_SHOT_DISTANCE_METERS,
-                Constants.SimulationConstants.MAX_SHOT_DISTANCE_METERS,
-                WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond),
-                0);
-        robotPassingInfo =
-            new RobotShootingInfo(
-                Constants.SimulationConstants.passHoodAngleMap,
-                Constants.SimulationConstants.passFlywheelSpeedMap,
-                Constants.SimulationConstants.passTimeOfFlightMap,
-                ShooterConstants.SIM_TO_SHOOTER,
-                Constants.SimulationConstants.MIN_PASS_DISTANCE_METERS,
-                Constants.SimulationConstants.MAX_PASS_DISTANCE_METERS,
-                WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond),
-                0);
+        robotShootingInfo = new RobotShootingInfo(
+            Constants.SimulationConstants.shotHoodAngleMap,
+            Constants.SimulationConstants.shotFlywheelSpeedMap,
+            Constants.SimulationConstants.shotTimeOfFlightMap,
+            ShooterConstants.SIM_TO_SHOOTER,
+            Constants.SimulationConstants.MIN_SHOT_DISTANCE_METERS,
+            Constants.SimulationConstants.MAX_SHOT_DISTANCE_METERS,
+            WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond),
+            0);
+        robotPassingInfo = new RobotShootingInfo(
+            Constants.SimulationConstants.passHoodAngleMap,
+            Constants.SimulationConstants.passFlywheelSpeedMap,
+            Constants.SimulationConstants.passTimeOfFlightMap,
+            ShooterConstants.SIM_TO_SHOOTER,
+            Constants.SimulationConstants.MIN_PASS_DISTANCE_METERS,
+            Constants.SimulationConstants.MAX_PASS_DISTANCE_METERS,
+            WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond),
+            0);
         break;
       case WOODBOT:
         drivetrain = WoodBotDrivetrain.createDrivetrain();
@@ -172,41 +177,38 @@ public class RobotContainer {
         flywheel = new Flywheel(new FlywheelIOWBBangBang());
         hood = new Hood(new HoodIOWB());
         indexer = new Indexer(new IndexerIOWB());
-        vision =
-            new Vision(
-                Map.ofEntries(
-                    Map.entry(
+        vision = new Vision(
+            Map.ofEntries(
+                Map.entry(
+                    Constants.WoodBotConstants.LIMELIGHT_3,
+                    new VisionIOLimelight3G(
                         Constants.WoodBotConstants.LIMELIGHT_3,
-                        new VisionIOLimelight3G(
-                            Constants.WoodBotConstants.LIMELIGHT_3,
-                            () -> drivetrain.getAngle(),
-                            () -> drivetrain.getAngularRate(),
-                            true))));
+                        () -> drivetrain.getAngle(),
+                        () -> drivetrain.getAngularRate(),
+                        true))));
         intakeRoller = new IntakeRoller(new IntakeRollerIOWB());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOWB());
         intakePivot = new IntakePivot(new IntakePivotIONoop());
         hopperRoller = new HopperRoller(new HopperRollerIONoop());
 
-        robotShootingInfo =
-            new RobotShootingInfo(
-                Constants.WoodBotConstants.shotHoodAngleMap,
-                Constants.WoodBotConstants.shotFlywheelSpeedMap,
-                Constants.WoodBotConstants.timeOfFlightMap,
-                ShooterConstants.WOODBOT_TO_SHOOTER,
-                Constants.WoodBotConstants.MIN_SHOT_DISTANCE_METERS,
-                Constants.WoodBotConstants.MAX_SHOT_DISTANCE_METERS,
-                WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond),
-                250);
-        robotPassingInfo =
-            new RobotShootingInfo(
-                Constants.WoodBotConstants.shotHoodAngleMap,
-                Constants.WoodBotConstants.shotFlywheelSpeedMap,
-                Constants.WoodBotConstants.timeOfFlightMap,
-                ShooterConstants.WOODBOT_TO_SHOOTER,
-                Constants.WoodBotConstants.MIN_SHOT_DISTANCE_METERS,
-                Constants.WoodBotConstants.MAX_SHOT_DISTANCE_METERS,
-                WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond),
-                0);
+        robotShootingInfo = new RobotShootingInfo(
+            Constants.WoodBotConstants.shotHoodAngleMap,
+            Constants.WoodBotConstants.shotFlywheelSpeedMap,
+            Constants.WoodBotConstants.timeOfFlightMap,
+            ShooterConstants.WOODBOT_TO_SHOOTER,
+            Constants.WoodBotConstants.MIN_SHOT_DISTANCE_METERS,
+            Constants.WoodBotConstants.MAX_SHOT_DISTANCE_METERS,
+            WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond),
+            250);
+        robotPassingInfo = new RobotShootingInfo(
+            Constants.WoodBotConstants.shotHoodAngleMap,
+            Constants.WoodBotConstants.shotFlywheelSpeedMap,
+            Constants.WoodBotConstants.timeOfFlightMap,
+            ShooterConstants.WOODBOT_TO_SHOOTER,
+            Constants.WoodBotConstants.MIN_SHOT_DISTANCE_METERS,
+            Constants.WoodBotConstants.MAX_SHOT_DISTANCE_METERS,
+            WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond),
+            0);
         break;
       case PRACTICEBOT:
       default:
@@ -237,66 +239,61 @@ public class RobotContainer {
         intakePivot = new IntakePivot(new IntakePivotIOPB());
         hopperRoller = new HopperRoller(new HopperRollerIOPB());
 
-        robotShootingInfo =
-            new RobotShootingInfo(
-                Constants.PracticeBotConstants.shotHoodAngleMap,
-                Constants.PracticeBotConstants.shotFlywheelSpeedMap,
-                Constants.PracticeBotConstants.timeOfFlightMap,
-                ShooterConstants.PRACTICEBOT_TO_SHOOTER,
-                Constants.PracticeBotConstants.MIN_SHOT_DISTANCE_METERS,
-                Constants.PracticeBotConstants.MAX_SHOT_DISTANCE_METERS,
-                PracticeBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond),
-                0);
-        robotPassingInfo =
-            new RobotShootingInfo(
-                Constants.PracticeBotConstants.passHoodAngleMap,
-                Constants.PracticeBotConstants.passFlywheelSpeedMap,
-                Constants.PracticeBotConstants.timeOfFlightMap,
-                ShooterConstants.PRACTICEBOT_TO_SHOOTER,
-                Constants.PracticeBotConstants.MIN_PASS_DISTANCE_METERS,
-                Constants.PracticeBotConstants.MAX_PASS_DISTANCE_METERS,
-                PracticeBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond),
-                0);
+        robotShootingInfo = new RobotShootingInfo(
+            Constants.PracticeBotConstants.shotHoodAngleMap,
+            Constants.PracticeBotConstants.shotFlywheelSpeedMap,
+            Constants.PracticeBotConstants.timeOfFlightMap,
+            ShooterConstants.PRACTICEBOT_TO_SHOOTER,
+            Constants.PracticeBotConstants.MIN_SHOT_DISTANCE_METERS,
+            Constants.PracticeBotConstants.MAX_SHOT_DISTANCE_METERS,
+            PracticeBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond),
+            0);
+        robotPassingInfo = new RobotShootingInfo(
+            Constants.PracticeBotConstants.passHoodAngleMap,
+            Constants.PracticeBotConstants.passFlywheelSpeedMap,
+            Constants.PracticeBotConstants.timeOfFlightMap,
+            ShooterConstants.PRACTICEBOT_TO_SHOOTER,
+            Constants.PracticeBotConstants.MIN_PASS_DISTANCE_METERS,
+            Constants.PracticeBotConstants.MAX_PASS_DISTANCE_METERS,
+            PracticeBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond),
+            0);
         break;
     }
-    hubShotCalculator =
-        new ShotCalculator(
-            "HubShotCalc",
-            drivetrain::getPosition,
-            () -> AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint.toTranslation2d()),
-            drivetrain::getCommandedVelocity,
-            robotShootingInfo);
-    passCalculator =
-        new ShotCalculator(
-            "PassCalc",
-            drivetrain::getPosition,
-            () ->
-                PositionUtils.getCloserPassTarget(
-                    drivetrain.getPosition(),
-                    AllianceFlipUtil.apply(FieldConstants.RightBump.passingPoint),
-                    AllianceFlipUtil.apply(FieldConstants.LeftBump.passingPoint)),
-            drivetrain::getCommandedVelocity,
-            robotPassingInfo);
+    hubShotCalculator = new ShotCalculator(
+        "HubShotCalc",
+        drivetrain::getPosition,
+        () -> AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint.toTranslation2d()),
+        drivetrain::getCommandedVelocity,
+        robotShootingInfo);
+    passCalculator = new ShotCalculator(
+        "PassCalc",
+        drivetrain::getPosition,
+        () -> PositionUtils.getCloserPassTarget(
+            drivetrain.getPosition(),
+            AllianceFlipUtil.apply(FieldConstants.RightBump.passingPoint),
+            AllianceFlipUtil.apply(FieldConstants.LeftBump.passingPoint)),
+        drivetrain::getCommandedVelocity,
+        robotPassingInfo);
     // Configure the trigger bindings
     // TODO: Re-enable superStructure construction and PathPlanner commands
 
-    superStructure =
-        new SuperStructure(
-            intakeRoller,
-            indexer,
-            flywheelKicker,
-            flywheel,
-            hood,
-            intakePivot,
-            hopperRoller,
-            hubShotCalculator,
-            passCalculator,
-            drivetrain::isAlignedToTarget,
-            drivetrain::getPosition,
-            robotShootingInfo.robotToShooter());
+    superStructure = new SuperStructure(
+        intakeRoller,
+        indexer,
+        flywheelKicker,
+        flywheel,
+        hood,
+        intakePivot,
+        hopperRoller,
+        hubShotCalculator,
+        passCalculator,
+        drivetrain::isAlignedToTarget,
+        drivetrain::getPosition,
+        robotShootingInfo.robotToShooter());
     registerPathplannerCommand(
         "basic intake", superStructure.setIntakeStateCommand(IntakeWantedStates.INTAKING));
-    // TODO: add end condition based on state from SuperStructure (based on sensor inputs)
+    // TODO: add end condition based on state from SuperStructure (based on sensor
+    // inputs)
     registerPathplannerCommand(
         "shoot at hub",
         Commands.waitSeconds(4)
@@ -316,7 +313,8 @@ public class RobotContainer {
     registerPathplannerCommand(
         "deploy intake", superStructure.setIntakeStateCommand(IntakeWantedStates.DEPLOYED));
     // registerPathplannerCommand(
-    //     "agitate intake", superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING));
+    // "agitate intake",
+    // superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING));
     registerPathplannerCommand(
         "shoot without timer",
         superStructure
@@ -358,11 +356,10 @@ public class RobotContainer {
   }
 
   private void configVision() {
-    Command consumeVisionMeasurements =
-        vision.consumeVisionMeasurements(
-            measurements -> {
-              drivetrain.addVisionMeasurements(measurements);
-            });
+    Command consumeVisionMeasurements = vision.consumeVisionMeasurements(
+        measurements -> {
+          drivetrain.addVisionMeasurements(measurements);
+        });
     vision.setDefaultCommand(consumeVisionMeasurements.ignoringDisable(true));
   }
 
@@ -371,22 +368,27 @@ public class RobotContainer {
   }
 
   /**
-   * Use this method to define your trigger->command mappings. Triggers can be created via the
-   * {@link Trigger#Trigger(java.util.function.BooleanSupplier)} constructor with an arbitrary
+   * Use this method to define your trigger->command mappings. Triggers can be
+   * created via the
+   * {@link Trigger#Trigger(java.util.function.BooleanSupplier)} constructor with
+   * an arbitrary
    * predicate, or via the named factories in {@link
-   * edu.wpi.first.wpilibj2.command.button.CommandGenericHID}'s subclasses for {@link
-   * CommandXboxController Xbox}/{@link edu.wpi.first.wpilibj2.command.button.CommandPS4Controller
-   * PS4} controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
+   * edu.wpi.first.wpilibj2.command.button.CommandGenericHID}'s subclasses for
+   * {@link
+   * CommandXboxController
+   * Xbox}/{@link edu.wpi.first.wpilibj2.command.button.CommandPS4Controller
+   * PS4} controllers or
+   * {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
    * joysticks}.
    */
   private void configureBindings() {
-    BooleanSupplier isSuperstructureMode =
-        () -> superStructure.getControlState() == ControlState.SUPERSTRUCTURE;
-    BooleanSupplier isIndependentMode =
-        () -> superStructure.getControlState() == ControlState.INDEPENDENT;
+    BooleanSupplier isSuperstructureMode = () -> superStructure.getControlState() == ControlState.SUPERSTRUCTURE;
+    BooleanSupplier isIndependentMode = () -> superStructure.getControlState() == ControlState.INDEPENDENT;
 
-    // Auto-cycle: right trigger auto-selects hub or outpost based on alliance zone position.
-    // The heading supplier dynamically picks the correct calculator based on resolved state.
+    // Auto-cycle: right trigger auto-selects hub or outpost based on alliance zone
+    // position.
+    // The heading supplier dynamically picks the correct calculator based on
+    // resolved state.
     Trigger autoCycleTrigger = driverCont.rightTrigger().and(isSuperstructureMode);
     autoCycleTrigger.whileTrue(
         superStructure
@@ -426,20 +428,20 @@ public class RobotContainer {
     driverCont.b().onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
 
     // Left trigger held: agitate. Release: back to intaking.
-      Trigger intakeTrigger = driverCont.leftTrigger().and(isSuperstructureMode);
-      intakeTrigger.onTrue(superStructure.setIsIntakingCommand(true));
-      intakeTrigger.onTrue(superStructure.setIsIntakingCommand(false));
-      //Trigger agitateTrigger = driverCont.leftTrigger().and(isSuperstructureMode);
-      //agitateTrigger.onTrue(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING));
-      //agitateTrigger.onFalse(superStructure.setIntakeStateCommand(IntakeWantedStates.DEPLOYED));
+    Trigger intakeTrigger = driverCont.leftTrigger().and(isSuperstructureMode);
+    intakeTrigger.onTrue(superStructure.setIsIntakingCommand(true));
+    intakeTrigger.onTrue(superStructure.setIsIntakingCommand(false));
+    // Trigger agitateTrigger = driverCont.leftTrigger().and(isSuperstructureMode);
+    // agitateTrigger.onTrue(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING));
+    // agitateTrigger.onFalse(superStructure.setIntakeStateCommand(IntakeWantedStates.DEPLOYED));
 
-      // Y toggle: STOWED <-
-      // > INTAKING. Gated out while agitate trigger is held.
-      driverCont
-          .y()
-          .and(isSuperstructureMode)
-          //.and(() -> !agitateTrigger.getAsBoolean())
-          .onTrue(superStructure.toggleIntakeStateCommand());
+    // Y toggle: STOWED <-
+    // > INTAKING. Gated out while agitate trigger is held.
+    driverCont
+        .y()
+        .and(isSuperstructureMode)
+        // .and(() -> !agitateTrigger.getAsBoolean())
+        .onTrue(superStructure.toggleIntakeStateCommand());
 
     configureIndependentModeBindings(isIndependentMode);
 
@@ -492,10 +494,8 @@ public class RobotContainer {
 
   /** Configures full intake to shooting test bindings for independent mode. */
   private void configureFullShootingTestBindings() {
-    BooleanSupplier isSuperstructureMode =
-        () -> superStructure.getControlState() == ControlState.SUPERSTRUCTURE;
-    BooleanSupplier isIndependentMode =
-        () -> superStructure.getControlState() == ControlState.INDEPENDENT;
+    BooleanSupplier isSuperstructureMode = () -> superStructure.getControlState() == ControlState.SUPERSTRUCTURE;
+    BooleanSupplier isIndependentMode = () -> superStructure.getControlState() == ControlState.INDEPENDENT;
 
     driverCont.rightTrigger().and(isIndependentMode).whileTrue(flywheel.setVelocityCommand(4000));
     driverCont
@@ -532,18 +532,19 @@ public class RobotContainer {
 
     // intake stuff
     // driverCont
-    //     .axisMagnitudeGreaterThan(5, 0.1)
-    //     .and(isIndependentMode)
-    //     .whileTrue(intakePivot.setDutyCycleCommand(() -> -driverCont.getRightY() * 0.2));
+    // .axisMagnitudeGreaterThan(5, 0.1)
+    // .and(isIndependentMode)
+    // .whileTrue(intakePivot.setDutyCycleCommand(() -> -driverCont.getRightY() *
+    // 0.2));
 
     // driverCont
-    //     .rightBumper()
-    //     .and(isIndependentMode)
-    //     .whileTrue(intakePivot.setPositionCommand(() -> 0.0));
+    // .rightBumper()
+    // .and(isIndependentMode)
+    // .whileTrue(intakePivot.setPositionCommand(() -> 0.0));
     // driverCont
-    //     .leftBumper()
-    //     .and(isIndependentMode)
-    //     .whileTrue(intakePivot.setPositionCommand(() -> 90.0));
+    // .leftBumper()
+    // .and(isIndependentMode)
+    // .whileTrue(intakePivot.setPositionCommand(() -> 90.0));
     // Intake rollers: A = in, B = out
     // driverCont.a().and(isIndependentMode).whileTrue(intakeRoller.setDutyCycleCommand(0.2));
     // driverCont.b().and(isIndependentMode).whileTrue(intakeRoller.setDutyCycleCommand(-0.2));
@@ -580,7 +581,7 @@ public class RobotContainer {
   public void onDisable() {
     superStructure.setControlState(ControlState.SUPERSTRUCTURE);
     superStructure.setWantedSuperState(SuperWantedStates.IDLE);
-    superStructure.setIntakeState(IntakeWantedStates.IDLE);
+    // superStructure.setIntakeState(IntakeWantedStates.IDLE); //is this needed?
     drivetrain.setControl(new SwerveRequest.Idle());
     climber.stop();
     flywheel.stop();
@@ -598,10 +599,11 @@ public class RobotContainer {
     // Ensures superstructure control mode is active when enabled
     superStructure.setControlState(ControlState.SUPERSTRUCTURE);
     superStructure.setWantedSuperState(SuperWantedStates.DEFAULT);
-    superStructure.setIntakeState(
-        Constants.getRobotType() == RobotType.WOODBOT
-            ? IntakeWantedStates.IDLE
-            : IntakeWantedStates.IDLE);
+    // superStructure.setIntakeState(
+    //     Constants.getRobotType() == RobotType.WOODBOT
+    //         ? IntakeWantedStates.IDLE
+    //         : IntakeWantedStates.IDLE);//is this intentionl?
+    superStructure.setIntakeState(IntakeWantedStates.IDLE);
     onEnableVision();
   }
 
@@ -618,7 +620,8 @@ public class RobotContainer {
   }
 
   /**
-   * Pre-computes cached values (e.g. shot parameters) before the command scheduler runs. Must be
+   * Pre-computes cached values (e.g. shot parameters) before the command
+   * scheduler runs. Must be
    * called in {@link Robot#robotPeriodic()} before {@link
    * edu.wpi.first.wpilibj2.command.CommandScheduler#run()}.
    */
@@ -643,11 +646,14 @@ public class RobotContainer {
   }
 
   /**
-   * Flushes NetworkTables after the command scheduler runs. This ensures all values written during
-   * subsystem periodic methods (e.g., robot orientation for Limelights) are sent in a single batch.
+   * Flushes NetworkTables after the command scheduler runs. This ensures all
+   * values written during
+   * subsystem periodic methods (e.g., robot orientation for Limelights) are sent
+   * in a single batch.
    * Required for all Limelights (not just LL4) because {@link
    * VisionIOLimelightBase#updateInputs(VisionIO.VisionIOInputs)} uses {@code
-   * SetRobotOrientation_NoFlush}. Must be called in {@link Robot#robotPeriodic()} after {@link
+   * SetRobotOrientation_NoFlush}. Must be called in {@link Robot#robotPeriodic()}
+   * after {@link
    * edu.wpi.first.wpilibj2.command.CommandScheduler#run()}.
    */
   public void postSchedulerUpdate() {
