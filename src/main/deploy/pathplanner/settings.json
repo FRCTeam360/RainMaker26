@@ -7,7 +7,10 @@
     "MIRRORED Red Left Middle Hawk",
     "FLIPPED Blue Right Middle Hawk",
     "FLIPPED MIRRORED Blue Left Middle Hawk",
-    "FLIPPED MIRRORED Blue Right Middle Hawk"
+    "FLIPPED MIRRORED Blue Right Middle Hawk",
+    "MIRRORED Red Left Middle Hook",
+    "FLIPPED Blue Right Middle Hook",
+    "FLIPPED MIRRORED Blue Left Middle Hook"
   ],
   "autoFolders": [
     "MASTER RED RIGHT",
