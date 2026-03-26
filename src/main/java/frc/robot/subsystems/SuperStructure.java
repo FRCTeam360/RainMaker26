@@ -197,7 +197,11 @@ public class SuperStructure extends SubsystemBase {
   // Subsystem state helpers
 
   private void shooting() {
-    shooterStateMachine.setWantedState(ShooterWantedStates.SHOOTING);
+    if (currentSuperState == SuperInternalStates.FORCED_SHOT) {
+      shooterStateMachine.setWantedState(ShooterWantedStates.FORCED_SHOT);
+    } else {
+      shooterStateMachine.setWantedState(ShooterWantedStates.SHOOTING);
+    }
 
     if (shooterStateMachine.getState() == ShooterStates.FIRING) {
       indexer.setWantedState(IndexerStates.INDEXING);
@@ -206,8 +210,6 @@ public class SuperStructure extends SubsystemBase {
       indexer.setWantedState(IndexerStates.OFF);
       hopperRoller.setWantedState(HopperRollerStates.PREVENT_JAM);
     }
-    if (currentSuperState == SuperInternalStates.FORCED_SHOT)
-      shooterStateMachine.setWantedState(ShooterWantedStates.FORCED_SHOT);
   }
 
   private void passive_preparing() {
