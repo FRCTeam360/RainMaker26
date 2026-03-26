@@ -47,6 +47,10 @@ public class SuperStructure extends SubsystemBase {
   private final Supplier<Pose2d> robotPoseSupplier;
   private final Transform2d robotToShooter;
 
+  // shooting @ 3 meters
+  private static final double HOOD_FORCED_ANGLE = 10.0;
+  private static final double FLYWHEEL_FORCED_RPM = 2200.0;
+
   // Enums
   public enum SuperWantedStates {
     DEFAULT,
@@ -58,7 +62,8 @@ public class SuperStructure extends SubsystemBase {
     DEFENSE,
     X_OUT,
     EJECTING,
-    UNJAMMING
+    UNJAMMING,
+    FORCED_SHOT
   }
 
   public enum SuperInternalStates {
@@ -66,7 +71,8 @@ public class SuperStructure extends SubsystemBase {
     IDLE, // everything is stopped
     SHOOTING_AT_HUB,
     PASSING,
-    UNJAMMING
+    UNJAMMING,
+    FORCED_SHOT
   }
 
   // State variables
@@ -110,9 +116,19 @@ public class SuperStructure extends SubsystemBase {
         new TargetSelectionStateMachine(hubShotCalculator, passCalculator, robotPoseSupplier);
 
     flywheel.setShootVelocitySupplier(
-        () -> targetSelectionStateMachine.getActiveCalculator().calculateShot().flywheelSpeed());
+        () -> {
+          if (currentSuperState == SuperInternalStates.FORCED_SHOT) {
+            return FLYWHEEL_FORCED_RPM;
+          }
+          return targetSelectionStateMachine.getActiveCalculator().calculateShot().flywheelSpeed();
+        });
     hood.setHoodAngleSupplier(
-        () -> targetSelectionStateMachine.getActiveCalculator().calculateShot().hoodAngle());
+        () -> {
+          if (currentSuperState == SuperInternalStates.FORCED_SHOT) {
+            return HOOD_FORCED_ANGLE;
+          }
+          return targetSelectionStateMachine.getActiveCalculator().calculateShot().hoodAngle();
+        });
     hood.setShouldDuckSupplier(
         () -> PositionUtils.isInDuckZone(robotPoseSupplier.get(), robotToShooter));
     shooterStateMachine.setIsInAllianceZoneSupplier(
@@ -147,6 +163,9 @@ public class SuperStructure extends SubsystemBase {
       case UNJAMMING:
         currentSuperState = SuperInternalStates.UNJAMMING;
         break;
+      case FORCED_SHOT:
+        currentSuperState = SuperInternalStates.FORCED_SHOT;
+        break;
       case DEFAULT:
       default:
         targetSelectionStateMachine.setWantedState(TargetWantedStates.AUTO);
@@ -167,6 +186,9 @@ public class SuperStructure extends SubsystemBase {
       case UNJAMMING:
         unjamming();
         break;
+      case FORCED_SHOT:
+        shooting();
+        break;
       case DEFAULT:
         passive_preparing();
         break;
@@ -176,7 +198,11 @@ public class SuperStructure extends SubsystemBase {
   // Subsystem state helpers
 
   private void shooting() {
-    shooterStateMachine.setWantedState(ShooterWantedStates.SHOOTING);
+    if (currentSuperState == SuperInternalStates.FORCED_SHOT) {
+      shooterStateMachine.setWantedState(ShooterWantedStates.FORCED_SHOT);
+    } else {
+      shooterStateMachine.setWantedState(ShooterWantedStates.SHOOTING);
+    }
 
     if (shooterStateMachine.getState() == ShooterStates.FIRING) {
       indexer.setWantedState(IndexerStates.INDEXING);
