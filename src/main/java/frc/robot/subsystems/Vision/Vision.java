@@ -20,9 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
-
-import javax.xml.crypto.KeySelector.Purpose;
-
 import org.littletonrobotics.junction.Logger;
 
 public class Vision extends SubsystemBase {
@@ -137,7 +134,6 @@ public class Vision extends SubsystemBase {
     }
 
     for (Map.Entry<String, VisionIOInputsAutoLogged> entry : visionInputs.entrySet()) {
-      String key = entry.getKey();
       VisionIOInputsAutoLogged input = entry.getValue();
 
       // Count total detections (pose updates attempted)
