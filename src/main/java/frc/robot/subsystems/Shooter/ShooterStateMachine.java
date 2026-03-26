@@ -18,7 +18,6 @@ import org.littletonrobotics.junction.Logger;
  * determine when the shooter is ready to fire.
  */
 public class ShooterStateMachine {
-  private boolean isForced = false;
 
   // Enums
   public enum ShooterWantedStates {
@@ -109,46 +108,10 @@ public class ShooterStateMachine {
 
     switch (wantedState) {
       case FORCED_SHOT:
-        isForced = true;
+        handleShooting(true);
+        break;
       case SHOOTING:
-        FlywheelInternalStates flywheelState = flywheel.getState();
-        boolean flywheelReady = flywheelState == FlywheelInternalStates.AT_SETPOINT;
-        boolean flywheelUnderShooting = flywheelState == FlywheelInternalStates.UNDER_SHOOTING;
-        boolean hoodReady = hood.getState() == HoodInternalStates.AT_SETPOINT;
-        boolean drivetrainAligned = isForced ? true : isAlignedToTarget.getAsBoolean();
-        boolean targetReady = isForced ? true : canShootToTarget.getAsBoolean();
-        isForced = false;
-
-        Logger.recordOutput("Superstructure/Shooting/FlywheelState", flywheelState);
-        // SmartDashboard.putString("Superstructure/Shooting/FlywheelState",
-        // flywheelState.toString());
-        Logger.recordOutput("Superstructure/Shooting/FlywheelReady", flywheelReady);
-        SmartDashboard.putBoolean("Superstructure/Shooting/FlywheelReady", flywheelReady);
-        Logger.recordOutput("Superstructure/Shooting/HoodReady", hoodReady);
-        SmartDashboard.putBoolean("Superstructure/Shooting/HoodReady", hoodReady);
-        Logger.recordOutput("Superstructure/Shooting/DrivetrainAligned", drivetrainAligned);
-        Logger.recordOutput("Superstructure/Shooting/TargetReady", targetReady);
-        SmartDashboard.putBoolean("Superstructure/Shooting/DrivetrainAligned", drivetrainAligned);
-
-        // AIMED requires flywheel and hood to be genuinely at setpoint.
-        // Bang-bang oscillations during firing are tolerated to stay in FIRING —
-        // only revert when UNDER_SHOOTING signals a sustained RPM drop.
-        boolean inBangBang = previousState == ShooterStates.FIRING && !flywheelUnderShooting;
-        boolean subsystemsReady = flywheelReady && hoodReady && drivetrainAligned;
-        boolean shouldFire =
-            (flywheelReady || inBangBang) && hoodReady && drivetrainAligned && targetReady;
-
-        Logger.recordOutput("Superstructure/Shooting/InBangBang", inBangBang);
-        Logger.recordOutput("Superstructure/Shooting/SubsystemsReady", subsystemsReady);
-        Logger.recordOutput("Superstructure/Shooting/ShouldFire", shouldFire);
-
-        if (shouldFire) {
-          currentState = ShooterStates.FIRING;
-        } else if (subsystemsReady) {
-          currentState = ShooterStates.AIMED;
-        } else {
-          currentState = ShooterStates.PREPARING_TO_FIRE;
-        }
+        handleShooting(false);
         break;
       case PASSIVE_SHOOTER:
         currentState =
@@ -161,6 +124,51 @@ public class ShooterStateMachine {
       default:
         currentState = ShooterStates.IDLE;
         break;
+    }
+  }
+
+  /**
+   * Handles the shooting state logic, determining readiness and transitioning states.
+   *
+   * @param isForced if true, bypasses drivetrain alignment and target readiness checks
+   */
+  private void handleShooting(boolean isForced) {
+    FlywheelInternalStates flywheelState = flywheel.getState();
+    boolean flywheelReady = flywheelState == FlywheelInternalStates.AT_SETPOINT;
+    boolean flywheelUnderShooting = flywheelState == FlywheelInternalStates.UNDER_SHOOTING;
+    boolean hoodReady = hood.getState() == HoodInternalStates.AT_SETPOINT;
+    boolean drivetrainAligned = isForced || isAlignedToTarget.getAsBoolean();
+    boolean targetReady = isForced || canShootToTarget.getAsBoolean();
+
+    Logger.recordOutput("Superstructure/Shooting/FlywheelState", flywheelState);
+    // SmartDashboard.putString("Superstructure/Shooting/FlywheelState",
+    // flywheelState.toString());
+    Logger.recordOutput("Superstructure/Shooting/FlywheelReady", flywheelReady);
+    SmartDashboard.putBoolean("Superstructure/Shooting/FlywheelReady", flywheelReady);
+    Logger.recordOutput("Superstructure/Shooting/HoodReady", hoodReady);
+    SmartDashboard.putBoolean("Superstructure/Shooting/HoodReady", hoodReady);
+    Logger.recordOutput("Superstructure/Shooting/DrivetrainAligned", drivetrainAligned);
+    Logger.recordOutput("Superstructure/Shooting/TargetReady", targetReady);
+    SmartDashboard.putBoolean("Superstructure/Shooting/DrivetrainAligned", drivetrainAligned);
+
+    // AIMED requires flywheel and hood to be genuinely at setpoint.
+    // Bang-bang oscillations during firing are tolerated to stay in FIRING —
+    // only revert when UNDER_SHOOTING signals a sustained RPM drop.
+    boolean inBangBang = previousState == ShooterStates.FIRING && !flywheelUnderShooting;
+    boolean subsystemsReady = flywheelReady && hoodReady && drivetrainAligned;
+    boolean shouldFire =
+        (flywheelReady || inBangBang) && hoodReady && drivetrainAligned && targetReady;
+
+    Logger.recordOutput("Superstructure/Shooting/InBangBang", inBangBang);
+    Logger.recordOutput("Superstructure/Shooting/SubsystemsReady", subsystemsReady);
+    Logger.recordOutput("Superstructure/Shooting/ShouldFire", shouldFire);
+
+    if (shouldFire) {
+      currentState = ShooterStates.FIRING;
+    } else if (subsystemsReady) {
+      currentState = ShooterStates.AIMED;
+    } else {
+      currentState = ShooterStates.PREPARING_TO_FIRE;
     }
   }
 
