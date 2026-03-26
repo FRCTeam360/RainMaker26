@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems.Intake.IntakeRoller;
 
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -70,11 +71,11 @@ public class IntakeRoller extends SubsystemBase {
     previousState = currentState;
     switch (wantedState) {
       case INTAKING:
-        // if (isJammed()) {
-        //   currentState = IntakeRollerStates.JAMMED;
-        // } else {
-        // }
-        currentState = IntakeRollerStates.INTAKING;
+        if (isJammed()) {
+          currentState = IntakeRollerStates.REVERSING;
+        } else {
+          currentState = IntakeRollerStates.INTAKING;
+        }
         break;
       case ASSIST_SHOOTING:
         currentState = IntakeRollerStates.ASSIST_SHOOTING;
@@ -125,6 +126,20 @@ public class IntakeRoller extends SubsystemBase {
 
   private void reversing() {
     setDutyCycle(REVERSE_DUTY_CYCLE);
+  }
+
+  private boolean isJammed() {
+    Timer stallTimer = new Timer();
+    if (inputs.statorCurrent[0] < 50.0 && inputs.statorCurrent[1] < 50.0) {
+      if (inputs.velocity[0] < 10.0 && inputs.velocity[1] < 10.0) {
+        stallTimer.start();
+        while (stallTimer.get() < 0.25) {
+          reversing();
+        }
+        stallTimer.stop();
+        stallTimer.reset();
+      }
+    } 
   }
 
   // private void unjamIntake() {
