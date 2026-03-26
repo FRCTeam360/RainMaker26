@@ -14,6 +14,7 @@ Mirror math:
 
 Output files are prefixed with "MIRRORED " and have side tags swapped
 (Left<->Right, [L]<->[R]) so they're easy to identify as generated.
+Mirrored paths are placed in a subfolder named after the new auto.
 
 Usage:
   python scripts/mirror_autos.py "Blue Left Middle"         # mirror auto + its paths
@@ -79,13 +80,20 @@ def swap_side_in_name(name):
     return name
 
 
+def strip_master(name):
+    """Remove 'Master' (case insensitive) from a name and clean up extra spaces."""
+    import re
+    name = re.sub(r'(?i)master\s*', '', name)
+    return ' '.join(name.split())
+
+
 def make_mirrored_name(name):
-    """Add 'MIRRORED ' prefix and swap side tags."""
+    """Add 'MIRRORED ' prefix, swap side tags, and strip 'Master'."""
     if name.startswith(MIRRORED_PREFIX):
         # Strip prefix, swap back, then re-prefix with the new swap
         inner = name[len(MIRRORED_PREFIX):]
-        return MIRRORED_PREFIX + swap_side_in_name(inner)
-    return MIRRORED_PREFIX + swap_side_in_name(name)
+        return MIRRORED_PREFIX + strip_master(swap_side_in_name(inner))
+    return MIRRORED_PREFIX + strip_master(swap_side_in_name(name))
 
 
 # --- Coordinate mirroring ---
@@ -208,8 +216,22 @@ def write_json(file_path, data, dry_run=False):
 
 # --- Main logic ---
 
-def mirror_single_path(paths_dir, path_name, field_width, dry_run):
-    """Mirror a single .path file and write as a MIRRORED copy."""
+def register_path_folder(deploy_dir, folder_name, dry_run):
+    """Add a folder name to settings.json pathFolders if not already present."""
+    settings_path = deploy_dir / "settings.json"
+    if not settings_path.exists():
+        print(f"  WARNING: settings.json not found, skipping folder registration")
+        return
+    settings = read_json(settings_path)
+    folders = settings.get("pathFolders", [])
+    if folder_name not in folders:
+        folders.append(folder_name)
+        settings["pathFolders"] = folders
+        write_json(settings_path, settings, dry_run)
+
+
+def mirror_single_path(paths_dir, path_name, field_width, dest_folder, dry_run):
+    """Mirror a single .path file and write as a MIRRORED copy in dest_folder."""
     src = paths_dir / f"{path_name}.path"
     if not src.exists():
         print(f"  WARNING: Path file not found: {src}")
@@ -217,13 +239,14 @@ def mirror_single_path(paths_dir, path_name, field_width, dry_run):
 
     data = read_json(src)
     mirrored = mirror_path_data(data, field_width)
+    mirrored["folder"] = dest_folder
     dest_name = make_mirrored_name(path_name)
     dest = paths_dir / f"{dest_name}.path"
     write_json(dest, mirrored, dry_run)
     return True
 
 
-def mirror_single_auto(autos_dir, paths_dir, auto_name, field_width, dry_run):
+def mirror_single_auto(autos_dir, paths_dir, deploy_dir, auto_name, field_width, dry_run):
     """Mirror a single .auto file and its referenced paths."""
     src = autos_dir / f"{auto_name}.auto"
     if not src.exists():
@@ -231,19 +254,22 @@ def mirror_single_auto(autos_dir, paths_dir, auto_name, field_width, dry_run):
         return False
 
     auto_data = read_json(src)
+    dest_auto_name = make_mirrored_name(auto_name)
 
-    # Mirror referenced paths
+    # Register the path folder in settings.json
+    register_path_folder(deploy_dir, dest_auto_name, dry_run)
+
+    # Mirror referenced paths into a folder named after the new auto
     path_names = collect_path_names_from_command(auto_data.get("command", {}))
     unique_paths = list(dict.fromkeys(path_names))  # deduplicate, preserve order
     if unique_paths:
-        print(f"  Mirroring {len(unique_paths)} referenced path(s)...")
+        print(f"  Mirroring {len(unique_paths)} referenced path(s) into folder '{dest_auto_name}'...")
         for pn in unique_paths:
-            mirror_single_path(paths_dir, pn, field_width, dry_run)
+            mirror_single_path(paths_dir, pn, field_width, dest_auto_name, dry_run)
 
     # Mirror the auto
     mirrored = mirror_auto_data(auto_data, make_mirrored_name)
-    dest_name = make_mirrored_name(auto_name)
-    dest = autos_dir / f"{dest_name}.auto"
+    dest = autos_dir / f"{dest_auto_name}.auto"
     write_json(dest, mirrored, dry_run)
     return True
 
@@ -273,7 +299,7 @@ def main():
     print()
 
     print(f"Mirroring auto: {args.auto}")
-    mirror_single_auto(autos_dir, paths_dir, args.auto, field_width, args.dry_run)
+    mirror_single_auto(autos_dir, paths_dir, deploy_dir, args.auto, field_width, args.dry_run)
 
     print()
     print("Done.")
