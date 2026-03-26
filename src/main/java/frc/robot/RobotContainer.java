@@ -478,6 +478,8 @@ public class RobotContainer {
     // Drivetrain commands
     // driverCont.leftTrigger().whileTrue(drivetrain.faceHubWhileDriving(driverCont));
     driverCont.back().onTrue(drivetrain.zeroCommand());
+
+    driverCont.rightStick().onTrue(drivetrain.toggleHeadingLockCommand());
   }
 
   /** Configures bindings that are active only in independent (test) mode. */
