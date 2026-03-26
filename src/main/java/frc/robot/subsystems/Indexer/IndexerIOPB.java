@@ -39,6 +39,8 @@ public class IndexerIOPB implements IndexerIO {
 
     sparkMaxConfig.closedLoop.p(KP).i(KI).d(KD);
     sparkMaxConfig.closedLoop.feedForward.kV(KV).kS(KS);
+    sparkMaxConfig.encoder.uvwMeasurementPeriod(10);
+    sparkMaxConfig.encoder.uvwAverageDepth(2);
 
     indexerMotor.configure(
         sparkMaxConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
