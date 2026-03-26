@@ -91,6 +91,6 @@
     }
   },
   "resetOdom": true,
-  "folder": "BLUE LEFT AUTOS",
+  "folder": "BLUE RIGHT AUTOS",
   "choreoAuto": false
 }

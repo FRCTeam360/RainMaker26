@@ -217,10 +217,11 @@ def write_json(file_path, data, dry_run=False):
 # --- Main logic ---
 
 # Maps the source auto's folder to the destination folder after flipping.
-# Flipping Red Right -> Blue Left, Red Left -> Blue Right.
+# A 180-degree flip swaps alliance but keeps the same side (both drivers face inward):
+# Red Right -> Blue Right, Red Left -> Blue Left.
 FLIPPED_AUTO_FOLDER_MAP = {
-    "MASTER RED RIGHT": "BLUE LEFT AUTOS",
-    "RED LEFT AUTOS": "BLUE RIGHT AUTOS",
+    "MASTER RED RIGHT": "BLUE RIGHT AUTOS",
+    "RED LEFT AUTOS": "BLUE LEFT AUTOS",
 }
 
 

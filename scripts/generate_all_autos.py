@@ -3,9 +3,9 @@
 Generates all three alliance/side variants of a MASTER Red Right auto.
 
 Given a single MASTER Red Right auto, produces:
-  - MIRRORED Red Left  -> RED LEFT AUTOS   (left/right mirror)
-  - FLIPPED Blue Left  -> BLUE LEFT AUTOS  (180-degree flip)
-  - FLIPPED MIRRORED Blue Right -> BLUE RIGHT AUTOS (flip of the mirror)
+  - MIRRORED Red Left        -> RED LEFT AUTOS   (left/right mirror)
+  - FLIPPED Blue Right       -> BLUE RIGHT AUTOS (180-degree flip)
+  - FLIPPED MIRRORED Blue Left -> BLUE LEFT AUTOS  (flip of the mirror)
 
 Usage:
   python scripts/generate_all_autos.py "MASTER Red Right Middle Hook"
@@ -55,15 +55,15 @@ def main():
     mirror_autos.mirror_single_auto(autos_dir, paths_dir, deploy_dir, args.auto, field_width, args.dry_run)
     print()
 
-    # 2. Flip: Red Right -> Blue Left (BLUE LEFT AUTOS)
+    # 2. Flip: Red Right -> Blue Right (BLUE RIGHT AUTOS)
     flipped_name = flip_autos.make_flipped_name(args.auto)
-    print(f"[2/3] Flipping  -> '{flipped_name}' (BLUE LEFT AUTOS)")
+    print(f"[2/3] Flipping  -> '{flipped_name}' (BLUE RIGHT AUTOS)")
     flip_autos.flip_single_auto(autos_dir, paths_dir, deploy_dir, args.auto, field_length, field_width, args.dry_run)
     print()
 
-    # 3. Flip the mirror: Red Left -> Blue Right (BLUE RIGHT AUTOS)
+    # 3. Flip the mirror: Red Left -> Blue Left (BLUE LEFT AUTOS)
     flipped_mirrored_name = flip_autos.make_flipped_name(mirrored_name)
-    print(f"[3/3] Flipping mirrored -> '{flipped_mirrored_name}' (BLUE RIGHT AUTOS)")
+    print(f"[3/3] Flipping mirrored -> '{flipped_mirrored_name}' (BLUE LEFT AUTOS)")
     flip_autos.flip_single_auto(autos_dir, paths_dir, deploy_dir, mirrored_name, field_length, field_width, args.dry_run)
     print()
 

@@ -6,11 +6,11 @@
     "MIRRORED Red Right Middle Hawk",
     "MIRRORED Red Left Middle Hawk",
     "FLIPPED Blue Right Middle Hawk",
-    "FLIPPED MIRRORED Blue Left Middle Hawk"
+    "FLIPPED MIRRORED Blue Left Middle Hawk",
+    "FLIPPED MIRRORED Blue Right Middle Hawk"
   ],
   "autoFolders": [
     "MASTER RED RIGHT",
-    "New Folder",
     "RED LEFT AUTOS",
     "BLUE LEFT AUTOS",
     "BLUE RIGHT AUTOS"
