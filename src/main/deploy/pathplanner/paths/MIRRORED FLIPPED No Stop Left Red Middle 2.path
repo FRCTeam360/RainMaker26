@@ -4,12 +4,12 @@
     {
       "anchor": {
         "x": 13.853567,
-        "y": 5.720789
+        "y": 2.349211
       },
       "prevControl": null,
       "nextControl": {
         "x": 14.555167,
-        "y": 5.457689
+        "y": 2.086111
       },
       "isLocked": false,
       "linkedName": "MIRRORED FLIPPED altnostopend"
@@ -105,7 +105,7 @@
       },
       "nextControl": {
         "x": 9.030067,
-        "y": 1.7840330000000004
+        "y": 1.784033
       },
       "isLocked": false,
       "linkedName": null
@@ -143,11 +143,11 @@
     },
     {
       "waypointRelativePos": 5.05,
-      "rotationDegrees": -164.63249187453388
+      "rotationDegrees": -164.6325
     },
     {
       "waypointRelativePos": 6.182572614107897,
-      "rotationDegrees": -10.0248780409865
+      "rotationDegrees": -10.0249
     },
     {
       "waypointRelativePos": 6.610788381742736,
@@ -200,7 +200,7 @@
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 23.0255
+    "rotation": -23.0255
   },
   "useDefaultConstraints": false
 }

@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 8.026389,
-        "y": 3.011833
+        "x": 2.7741333333333333,
+        "y": 2.709755555555556
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.876348,
-        "y": 3.394536
+        "x": 0.6240923333333339,
+        "y": 3.0924585555555564
       },
       "isLocked": false,
       "linkedName": "FLIPPED blue middle 2 end"
@@ -37,7 +37,7 @@
       },
       "prevControl": {
         "x": 3.793736,
-        "y": 0.287797
+        "y": 0.2877970000000001
       },
       "nextControl": {
         "x": 2.725411,
@@ -52,8 +52,8 @@
         "y": 2.466144
       },
       "prevControl": {
-        "x": 3.027924,
-        "y": 2.279292
+        "x": 3.0279241459144575,
+        "y": 2.2792918358465646
       },
       "nextControl": null,
       "isLocked": false,
@@ -83,13 +83,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -127.942
+    "rotation": -127.94200000000001
   },
   "reversed": false,
   "folder": null,
   "idealStartingState": {
     "velocity": 0.0,
-    "rotation": 100.84
+    "rotation": -134.99999999999997
   },
   "useDefaultConstraints": false
 }
