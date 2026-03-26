@@ -4,7 +4,8 @@
   "holonomicMode": true,
   "pathFolders": [],
   "autoFolders": [
-    "New Folder"
+    "New Folder",
+    "MASTERS"
   ],
   "defaultMaxVel": 4.0,
   "defaultMaxAccel": 8.0,
