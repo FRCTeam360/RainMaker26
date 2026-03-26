@@ -225,6 +225,7 @@ public class SuperStructure extends SubsystemBase {
     indexer.setWantedState(Indexer.IndexerStates.OFF);
     hopperRoller.setWantedState(HopperRollerStates.PREVENT_JAM);
     shooterStateMachine.setWantedState(ShooterWantedStates.PASSIVE_SHOOTER);
+    setIntakeStateCommand(IntakeWantedStates.DEPLOYED);
   }
 
   private void stopped() {

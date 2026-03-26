@@ -7,11 +7,16 @@ import frc.robot.subsystems.Intake.IntakeRoller.IntakeRoller.IntakeRollerStates;
 import org.littletonrobotics.junction.Logger;
 
 /**
- * Manages the intake state machine, coordinating the intake rollers and intake pivot to centralize
- * intake logic. Called by the SuperStructure each cycle via update(), apply(), and log().
+ * Manages the intake state machine, coordinating the intake rollers and intake
+ * pivot to centralize
+ * intake logic. Called by the SuperStructure each cycle via update(), apply(),
+ * and log().
  *
- * <p>The intake state is controlled exclusively by driver inputs through the SuperStructure's
- * setIntakeState() / setIntakeStateCommand() API. The SuperStructure's internal state helpers
+ * <p>
+ * The intake state is controlled exclusively by driver inputs through the
+ * SuperStructure's
+ * setIntakeState() / setIntakeStateCommand() API. The SuperStructure's internal
+ * state helpers
  * (shooting, idle, etc.) do not write to this state machine.
  */
 public class IntakeStateMachine {
@@ -48,7 +53,7 @@ public class IntakeStateMachine {
    * Creates a new IntakeStateMachine.
    *
    * @param intakeRoller the intake roller subsystem
-   * @param intakePivot the intake pivot subsystem
+   * @param intakePivot  the intake pivot subsystem
    */
   public IntakeStateMachine(IntakeRoller intakeRoller, IntakePivot intakePivot) {
     this.intakeRoller = intakeRoller;
@@ -70,7 +75,8 @@ public class IntakeStateMachine {
   }
 
   /**
-   * Updates the intake state based on wanted state. Should be called every cycle by the
+   * Updates the intake state based on wanted state. Should be called every cycle
+   * by the
    * SuperStructure.
    */
   public void update() {
@@ -97,7 +103,8 @@ public class IntakeStateMachine {
   }
 
   /**
-   * Applies the current intake state to the intake and intake pivot subsystems. Sets their wanted
+   * Applies the current intake state to the intake and intake pivot subsystems.
+   * Sets their wanted
    * states based on the resolved internal state.
    */
   public void apply() {

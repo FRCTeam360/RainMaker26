@@ -402,8 +402,7 @@ public class RobotContainer {
                     })));
     autoCycleTrigger.onFalse(
         superStructure
-            .setStateCommand(SuperWantedStates.DEFAULT)
-            .alongWith(superStructure.setIntakeStateCommand(IntakeWantedStates.DEPLOYED)));
+            .setStateCommand(SuperWantedStates.DEFAULT));
 
     // Manual override: force shoot at hub regardless of position
     Trigger forceHubTrigger = driverCont.rightBumper().and(isSuperstructureMode);
