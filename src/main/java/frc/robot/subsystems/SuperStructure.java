@@ -48,8 +48,8 @@ public class SuperStructure extends SubsystemBase {
   private final Transform2d robotToShooter;
 
   // shooting @ 3 meters
-  private final double HOOD_FORCED_ANGLE = 10.0;
-  private final double FLYWHEEL_FORCED_RPM = 2200.0;
+  private static final double HOOD_FORCED_ANGLE = 10.0;
+  private static final double FLYWHEEL_FORCED_RPM = 2200.0;
 
   // Enums
   public enum SuperWantedStates {
