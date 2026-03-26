@@ -149,23 +149,20 @@ public class PositionUtils {
   private static Pose2d[] raycast = new Pose2d[2];
 
   public static boolean canPass(Pose2d robotPose, Rotation2d shooterRotation) {
-    boolean canPass = true;
     Translation2d start = robotPose.getTranslation();
-    Rotation2d endRotation = shooterRotation.minus(Rotation2d.k180deg);
-    double dxOfShooter = shooterRotation.getCos();
-    double dxOfEnd = endRotation.getCos();
-    double dyOfShooter = shooterRotation.getSin();
-    double dyOfEnd = endRotation.getSin();
+    double dx = shooterRotation.getCos();
+    double dy = shooterRotation.getSin();
     double maxDistance = Double.MAX_VALUE;
-    if (dxOfShooter > 0) {
-      maxDistance = Math.min(maxDistance, (FieldConstants.fieldLength - start.getX()) / dxOfShooter);
-    } else if (dxOfShooter < 0) {
-      maxDistance = Math.min(maxDistance, -start.getX() / dxOfShooter);
+    if (dx > 0) {
+      maxDistance =
+          Math.min(maxDistance, (FieldConstants.fieldLength - start.getX()) / dx);
+    } else if (dx < 0) {
+      maxDistance = Math.min(maxDistance, -start.getX() / dx);
     }
-    if (dyOfShooter > 0) {
-      maxDistance = Math.min(maxDistance, (FieldConstants.fieldWidth - start.getY()) / dyOfShooter);
-    } else if (dyOfShooter < 0) {
-      maxDistance = Math.min(maxDistance, -start.getY() / dyOfShooter);
+    if (dy > 0) {
+      maxDistance = Math.min(maxDistance, (FieldConstants.fieldWidth - start.getY()) / dy);
+    } else if (dy < 0) {
+      maxDistance = Math.min(maxDistance, -start.getY() / dy);
     }
     Translation2d raycastMax = start.plus(new Translation2d(maxDistance, shooterRotation));
     int length = (int) Math.round(start.getDistance(raycastMax));
