@@ -2,7 +2,9 @@
   "robotWidth": 0.917,
   "robotLength": 0.812,
   "holonomicMode": true,
-  "pathFolders": [],
+  "pathFolders": [
+    "MIRRORED Red Right Middle Hawk"
+  ],
   "autoFolders": [
     "New Folder",
     "MASTERS"
