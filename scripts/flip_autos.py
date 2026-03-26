@@ -216,6 +216,15 @@ def write_json(file_path, data, dry_run=False):
 
 # --- Main logic ---
 
+# Maps the source auto's folder to the destination folder after flipping.
+# A 180-degree flip swaps alliance but keeps the same side (both drivers face inward):
+# Red Right -> Blue Right, Red Left -> Blue Left.
+FLIPPED_AUTO_FOLDER_MAP = {
+    "MASTER RED RIGHT": "BLUE RIGHT AUTOS",
+    "RED LEFT AUTOS": "BLUE LEFT AUTOS",
+}
+
+
 def register_path_folder(deploy_dir, folder_name, dry_run):
     """Add a folder name to settings.json pathFolders if not already present."""
     settings_path = deploy_dir / "settings.json"
@@ -227,6 +236,20 @@ def register_path_folder(deploy_dir, folder_name, dry_run):
     if folder_name not in folders:
         folders.append(folder_name)
         settings["pathFolders"] = folders
+        write_json(settings_path, settings, dry_run)
+
+
+def register_auto_folder(deploy_dir, folder_name, dry_run):
+    """Add a folder name to settings.json autoFolders if not already present."""
+    settings_path = deploy_dir / "settings.json"
+    if not settings_path.exists():
+        print(f"  WARNING: settings.json not found, skipping auto folder registration")
+        return
+    settings = read_json(settings_path)
+    folders = settings.get("autoFolders", [])
+    if folder_name not in folders:
+        folders.append(folder_name)
+        settings["autoFolders"] = folders
         write_json(settings_path, settings, dry_run)
 
 
@@ -256,8 +279,16 @@ def flip_single_auto(autos_dir, paths_dir, deploy_dir, auto_name, field_length, 
     auto_data = read_json(src)
     dest_auto_name = make_flipped_name(auto_name)
 
-    # Register the path folder in settings.json
+    # Determine destination auto folder based on the source auto's folder
+    src_folder = auto_data.get("folder", "")
+    dest_auto_folder = FLIPPED_AUTO_FOLDER_MAP.get(src_folder)
+    if dest_auto_folder is None:
+        print(f"  WARNING: Source folder '{src_folder}' not in FLIPPED_AUTO_FOLDER_MAP; no folder will be set.")
+
+    # Register the path folder and auto folder in settings.json
     register_path_folder(deploy_dir, dest_auto_name, dry_run)
+    if dest_auto_folder:
+        register_auto_folder(deploy_dir, dest_auto_folder, dry_run)
 
     # Flip referenced paths into a folder named after the new auto
     path_names = collect_path_names_from_command(auto_data.get("command", {}))
@@ -267,8 +298,10 @@ def flip_single_auto(autos_dir, paths_dir, deploy_dir, auto_name, field_length, 
         for pn in unique_paths:
             flip_single_path(paths_dir, pn, field_length, field_width, dest_auto_name, dry_run)
 
-    # Flip the auto
+    # Flip the auto and place it in the mapped destination folder
     flipped = flip_auto_data(auto_data, make_flipped_name)
+    if dest_auto_folder:
+        flipped["folder"] = dest_auto_folder
     dest = autos_dir / f"{dest_auto_name}.auto"
     write_json(dest, flipped, dry_run)
     return True

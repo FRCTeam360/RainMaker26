@@ -216,6 +216,9 @@ def write_json(file_path, data, dry_run=False):
 
 # --- Main logic ---
 
+MIRRORED_AUTO_FOLDER = "RED LEFT AUTOS"
+
+
 def register_path_folder(deploy_dir, folder_name, dry_run):
     """Add a folder name to settings.json pathFolders if not already present."""
     settings_path = deploy_dir / "settings.json"
@@ -227,6 +230,20 @@ def register_path_folder(deploy_dir, folder_name, dry_run):
     if folder_name not in folders:
         folders.append(folder_name)
         settings["pathFolders"] = folders
+        write_json(settings_path, settings, dry_run)
+
+
+def register_auto_folder(deploy_dir, folder_name, dry_run):
+    """Add a folder name to settings.json autoFolders if not already present."""
+    settings_path = deploy_dir / "settings.json"
+    if not settings_path.exists():
+        print(f"  WARNING: settings.json not found, skipping auto folder registration")
+        return
+    settings = read_json(settings_path)
+    folders = settings.get("autoFolders", [])
+    if folder_name not in folders:
+        folders.append(folder_name)
+        settings["autoFolders"] = folders
         write_json(settings_path, settings, dry_run)
 
 
@@ -256,8 +273,9 @@ def mirror_single_auto(autos_dir, paths_dir, deploy_dir, auto_name, field_width,
     auto_data = read_json(src)
     dest_auto_name = make_mirrored_name(auto_name)
 
-    # Register the path folder in settings.json
+    # Register the path folder and auto folder in settings.json
     register_path_folder(deploy_dir, dest_auto_name, dry_run)
+    register_auto_folder(deploy_dir, MIRRORED_AUTO_FOLDER, dry_run)
 
     # Mirror referenced paths into a folder named after the new auto
     path_names = collect_path_names_from_command(auto_data.get("command", {}))
@@ -267,8 +285,9 @@ def mirror_single_auto(autos_dir, paths_dir, deploy_dir, auto_name, field_width,
         for pn in unique_paths:
             mirror_single_path(paths_dir, pn, field_width, dest_auto_name, dry_run)
 
-    # Mirror the auto
+    # Mirror the auto and place it in the RED LEFT AUTOS folder
     mirrored = mirror_auto_data(auto_data, make_mirrored_name)
+    mirrored["folder"] = MIRRORED_AUTO_FOLDER
     dest = autos_dir / f"{dest_auto_name}.auto"
     write_json(dest, mirrored, dry_run)
     return True
