@@ -3,11 +3,17 @@
   "robotLength": 0.812,
   "holonomicMode": true,
   "pathFolders": [
-    "MIRRORED Red Right Middle Hawk"
+    "MIRRORED Red Right Middle Hawk",
+    "MIRRORED Red Left Middle Hawk",
+    "FLIPPED Blue Right Middle Hawk",
+    "FLIPPED MIRRORED Blue Left Middle Hawk"
   ],
   "autoFolders": [
+    "MASTER RED RIGHT",
     "New Folder",
-    "MASTERS"
+    "RED LEFT AUTOS",
+    "BLUE LEFT AUTOS",
+    "BLUE RIGHT AUTOS"
   ],
   "defaultMaxVel": 4.0,
   "defaultMaxAccel": 8.0,
