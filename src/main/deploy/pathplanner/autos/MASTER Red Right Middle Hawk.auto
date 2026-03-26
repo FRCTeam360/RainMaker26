@@ -17,7 +17,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "Right Blue Middle Standard 1"
+                  "pathName": "MIRRORED FLIPPED Right Red Middle Hawk 1"
                 }
               },
               {
@@ -62,7 +62,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "Right Blue Middle Standard 2"
+                  "pathName": "MIRRORED FLIPPED Right Red Middle Hawk 2"
                 }
               },
               {
@@ -91,6 +91,6 @@
     }
   },
   "resetOdom": true,
-  "folder": "Right Blue Middle Autos",
+  "folder": "MASTERS",
   "choreoAuto": false
 }

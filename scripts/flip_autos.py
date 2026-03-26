@@ -17,7 +17,7 @@ Output files are prefixed with "FLIPPED " and have alliance tags swapped
 Flipped paths are placed in a subfolder named after the new auto.
 
 Usage:
-  python scripts/flip_autos.py "Red middle sprint v2"         # flip auto + its paths
+  python scripts/flip_autos.py "Red middle sprint v2"         # flip auto + its paths   
   python scripts/flip_autos.py --dry-run "[R] Depot"           # preview without writing
 
 No external dependencies required - uses only the Python standard library.
