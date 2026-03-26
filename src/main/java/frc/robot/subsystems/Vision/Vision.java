@@ -211,9 +211,9 @@ public class Vision extends SubsystemBase {
   }
 
   public boolean isPoseOutOfBounds(Pose2d pose) {
-      return pose.getX() < 0.0
-          || pose.getX() > FieldConstants.fieldLength
-          || pose.getY() < 0.0
-          || pose.getY() > FieldConstants.fieldWidth;
-    }
+    return pose.getX() < 0.0
+        || pose.getX() > FieldConstants.fieldLength
+        || pose.getY() < 0.0
+        || pose.getY() > FieldConstants.fieldWidth;
+  }
 }
