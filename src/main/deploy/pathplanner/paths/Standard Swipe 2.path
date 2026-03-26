@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 13.497847222222221,
-        "y": 5.578159722222222
+        "x": 13.873055555555556,
+        "y": 5.467934027777778
       },
       "prevControl": null,
       "nextControl": {
-        "x": 15.151232638888889,
-        "y": 5.672638888888889
+        "x": 15.526440972222224,
+        "y": 5.562413194444445
       },
       "isLocked": false,
       "linkedName": "Standard Swipe 1 End"
@@ -96,12 +96,12 @@
     },
     {
       "anchor": {
-        "x": 13.497847222222221,
-        "y": 5.578159722222222
+        "x": 13.873055555555556,
+        "y": 5.467934027777778
       },
       "prevControl": {
-        "x": 10.36201143844734,
-        "y": 6.036378393703309
+        "x": 10.737219771780675,
+        "y": 5.926152699258865
       },
       "nextControl": null,
       "isLocked": false,
@@ -137,10 +137,10 @@
   "constraintZones": [
     {
       "name": "Constraints Zone",
-      "minWaypointRelativePos": 3.7074626865671636,
+      "minWaypointRelativePos": 3.215880893300248,
       "maxWaypointRelativePos": 5.1761194029850754,
       "constraints": {
-        "maxVelocity": 2.5,
+        "maxVelocity": 2.0,
         "maxAcceleration": 8.0,
         "maxAngularVelocity": 540.0,
         "maxAngularAcceleration": 720.0,
@@ -154,8 +154,8 @@
   "globalConstraints": {
     "maxVelocity": 4.0,
     "maxAcceleration": 8.0,
-    "maxAngularVelocity": 540.0,
-    "maxAngularAcceleration": 720.0,
+    "maxAngularVelocity": 360.0,
+    "maxAngularAcceleration": 540.0,
     "nominalVoltage": 12.0,
     "unlimited": false
   },
@@ -164,7 +164,7 @@
     "rotation": 44.99999999999995
   },
   "reversed": false,
-  "folder": "New Folder",
+  "folder": null,
   "idealStartingState": {
     "velocity": 0,
     "rotation": 40.76360520094129

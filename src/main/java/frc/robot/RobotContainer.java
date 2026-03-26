@@ -315,7 +315,7 @@ public class RobotContainer {
                               return hubShotCalculator.calculateShot().targetHeading();
                             }))
                     .alongWith(
-                        Commands.waitSeconds(1.25)
+                        Commands.waitSeconds(2.0)
                             .andThen(
                                 superStructure.setIntakeStateCommand(
                                     IntakeWantedStates.AGITATING))))
@@ -412,7 +412,7 @@ public class RobotContainer {
                       return hubShotCalculator.calculateShot().targetHeading();
                     }))
             .alongWith(
-                Commands.waitSeconds(1.75)
+                Commands.waitSeconds(2.0)
                     .andThen(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING))));
     autoCycleTrigger.onFalse(
         superStructure
