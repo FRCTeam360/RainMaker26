@@ -134,7 +134,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
           double velYMps =
               -ControllerHelper.modifyAxisCubic(driveCont.getLeftX(), maxSpeed.in(MetersPerSecond));
           double omegaRps =
-              ControllerHelper.modifyAxisCubed(
+              -ControllerHelper.modifyAxisCubed(
                   driveCont.getRightX(), maxAngularVelocity.in(RadiansPerSecond) / 2.0);
           // Store as robot-relative to match getVelocity() convention.
           // Operator-perspective velocities are converted to field-relative via
