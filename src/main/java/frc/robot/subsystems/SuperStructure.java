@@ -8,6 +8,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
+import frc.robot.Constants.RobotType;
 import frc.robot.subsystems.HopperRoller.HopperRoller;
 import frc.robot.subsystems.HopperRoller.HopperRoller.HopperRollerStates;
 import frc.robot.subsystems.Indexer.Indexer;
@@ -78,6 +80,11 @@ public class SuperStructure extends SubsystemBase {
   private ControlState controlState = ControlState.SUPERSTRUCTURE;
   private boolean cachedHubActive = true;
   private double cachedTimeOfFlight = 0.0;
+  private boolean isIntaking = false;
+
+  public Command setIsIntakingCommand(boolean isIntaking){
+    return new InstantCommand(()-> this.isIntaking = isIntaking);
+  }
 
   private Timer agitateTimer = new Timer();
 
@@ -171,6 +178,14 @@ public class SuperStructure extends SubsystemBase {
         targetSelectionStateMachine.setWantedState(TargetWantedStates.AUTO);
         currentSuperState = SuperInternalStates.DEFAULT;
         break;
+    }
+    if (isIntaking)
+      setIntakeStateCommand(IntakeWantedStates.INTAKING);
+    else {
+      if (Constants.getRobotType() == RobotType.WOODBOT)
+        setIntakeStateCommand(IntakeWantedStates.DEPLOYED);
+      else
+        setIntakeStateCommand(IntakeWantedStates.IDLE);
     }
   }
 

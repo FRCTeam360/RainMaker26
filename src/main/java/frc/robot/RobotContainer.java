@@ -427,16 +427,9 @@ public class RobotContainer {
     driverCont.b().onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
 
     // Left trigger held: agitate. Release: back to intaking.
-    if (Constants.getRobotType() == RobotType.WOODBOT) {
       Trigger intakeTrigger = driverCont.leftTrigger().and(isSuperstructureMode);
-      intakeTrigger.onTrue(superStructure.setIntakeStateCommand(IntakeWantedStates.INTAKING));
-      intakeTrigger.whileFalse(superStructure.setIntakeStateCommand(IntakeWantedStates.DEPLOYED));
-
-    } else {
-      Trigger intakeTrigger = driverCont.leftBumper().and(isSuperstructureMode);
-      intakeTrigger.onTrue(superStructure.setIntakeStateCommand(IntakeWantedStates.INTAKING));
-      intakeTrigger.whileFalse(superStructure.setIntakeStateCommand(IntakeWantedStates.IDLE));
-
+      intakeTrigger.onTrue(superStructure.setIsIntakingCommand(true));
+      intakeTrigger.onTrue(superStructure.setIsIntakingCommand(false));
       //Trigger agitateTrigger = driverCont.leftTrigger().and(isSuperstructureMode);
       //agitateTrigger.onTrue(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING));
       //agitateTrigger.onFalse(superStructure.setIntakeStateCommand(IntakeWantedStates.DEPLOYED));
@@ -448,7 +441,6 @@ public class RobotContainer {
           .and(isSuperstructureMode)
           //.and(() -> !agitateTrigger.getAsBoolean())
           .onTrue(superStructure.toggleIntakeStateCommand());
-    }
 
     configureIndependentModeBindings(isIndependentMode);
 
