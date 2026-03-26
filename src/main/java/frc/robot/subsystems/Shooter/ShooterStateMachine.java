@@ -31,8 +31,10 @@ public class ShooterStateMachine {
 
   public enum ShooterStates {
     PREPARING_TO_FIRE,
+    AIMED,
     FIRING,
     WAITING,
+    STANDBY,
     UNJAMMING,
     IDLE
   }
@@ -43,6 +45,7 @@ public class ShooterStateMachine {
   private final FlywheelKicker flywheelKicker;
   private final BooleanSupplier isAlignedToTarget;
   private final BooleanSupplier canShootToTarget;
+  private BooleanSupplier isInAllianceZone = () -> false;
 
   // State variables
   private ShooterWantedStates wantedState = ShooterWantedStates.IDLE;
@@ -84,6 +87,10 @@ public class ShooterStateMachine {
     wantedState = state;
   }
 
+  public void setIsInAllianceZoneSupplier(BooleanSupplier supplier) {
+    this.isInAllianceZone = supplier;
+  }
+
   /**
    * Updates the shooter state based on wanted state, subsystem readiness, and alignment. Should be
    * called every cycle by the SuperStructure.
@@ -123,26 +130,29 @@ public class ShooterStateMachine {
         Logger.recordOutput("Superstructure/Shooting/TargetReady", targetReady);
         SmartDashboard.putBoolean("Superstructure/Shooting/DrivetrainAligned", drivetrainAligned);
 
-        // Enter FIRING when flywheel reaches AT_SETPOINT (with hood + drivetrain
-        // ready).
-        // Stay in FIRING through bang-bang oscillations — only revert to
-        // PREPARING_TO_FIRE
-        // when UNDER_SHOOTING signals a sustained RPM drop from too many shots passing
-        // through.
+        // AIMED requires flywheel and hood to be genuinely at setpoint.
+        // Bang-bang oscillations during firing are tolerated to stay in FIRING —
+        // only revert when UNDER_SHOOTING signals a sustained RPM drop.
+        boolean inBangBang = previousState == ShooterStates.FIRING && !flywheelUnderShooting;
+        boolean subsystemsReady = flywheelReady && hoodReady && drivetrainAligned;
         boolean shouldFire =
-            (flywheelReady || (previousState == ShooterStates.FIRING && !flywheelUnderShooting))
-                && hoodReady
-                && drivetrainAligned
-                && targetReady;
+            (flywheelReady || inBangBang) && hoodReady && drivetrainAligned && targetReady;
+
+        Logger.recordOutput("Superstructure/Shooting/InBangBang", inBangBang);
+        Logger.recordOutput("Superstructure/Shooting/SubsystemsReady", subsystemsReady);
+        Logger.recordOutput("Superstructure/Shooting/ShouldFire", shouldFire);
 
         if (shouldFire) {
           currentState = ShooterStates.FIRING;
+        } else if (subsystemsReady) {
+          currentState = ShooterStates.AIMED;
         } else {
           currentState = ShooterStates.PREPARING_TO_FIRE;
         }
         break;
       case PASSIVE_SHOOTER:
-        currentState = ShooterStates.WAITING;
+        currentState =
+            isInAllianceZone.getAsBoolean() ? ShooterStates.STANDBY : ShooterStates.WAITING;
         break;
       case REVERSING:
         currentState = ShooterStates.UNJAMMING;
@@ -161,6 +171,7 @@ public class ShooterStateMachine {
   public void apply() {
     switch (currentState) {
       case PREPARING_TO_FIRE:
+      case AIMED:
         flywheel.setWantedState(FlywheelWantedStates.SHOOTING);
         hood.setWantedState(HoodWantedStates.AIMING);
         if (Constants.getRobotType() != Constants.RobotType.WOODBOT) {
@@ -175,6 +186,11 @@ public class ShooterStateMachine {
         flywheelKicker.setWantedState(FlywheelKickerStates.KICKING);
         break;
       case WAITING:
+        flywheel.setWantedState(FlywheelWantedStates.IDLE);
+        hood.setWantedState(HoodWantedStates.DUCKED);
+        flywheelKicker.setWantedState(FlywheelKickerStates.IDLE);
+        break;
+      case STANDBY:
         flywheel.setWantedState(FlywheelWantedStates.COASTING);
         hood.setWantedState(HoodWantedStates.DUCKED);
         flywheelKicker.setWantedState(FlywheelKickerStates.IDLE);
@@ -182,7 +198,6 @@ public class ShooterStateMachine {
       case UNJAMMING:
         flywheel.setWantedState(FlywheelWantedStates.IDLE);
         hood.setWantedState(HoodWantedStates.IDLE);
-
         flywheelKicker.setWantedState(FlywheelKickerStates.REVERSING);
         break;
       case IDLE:

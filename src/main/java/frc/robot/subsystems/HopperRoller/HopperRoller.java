@@ -11,8 +11,9 @@ import org.littletonrobotics.junction.Logger;
 
 public class HopperRoller extends SubsystemBase {
   // Constants
+  private static final double ROLLER_VELOCITY_RPM = 4000.0;
   private static final double ROLLER_DUTY_CYCLE = 0.80;
-  private static final double PREVENT_JAM_DUTY_CYCLE = -0.2;
+  private static final double PREVENT_JAM_DUTY_CYCLE = -0.04;
   private static final double UNJAMMING_DUTY_CYCLE = -0.95;
 
   // IO fields
@@ -75,7 +76,7 @@ public class HopperRoller extends SubsystemBase {
   private void applyState() {
     switch (currentState) {
       case ROLLING:
-        setDutyCycle(ROLLER_DUTY_CYCLE);
+        setVelocity(ROLLER_VELOCITY_RPM);
         break;
       case PREVENT_JAM:
         setDutyCycle(PREVENT_JAM_DUTY_CYCLE);
@@ -94,6 +95,10 @@ public class HopperRoller extends SubsystemBase {
 
   public void setDutyCycle(double dutyCycle) {
     io.setDutyCycle(dutyCycle);
+  }
+
+  public void setVelocity(double rpm) {
+    io.setVelocity(rpm);
   }
 
   public void stop() {
