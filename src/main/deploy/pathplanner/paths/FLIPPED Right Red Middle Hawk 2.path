@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 13.853567,
-        "y": 5.720789
+        "x": 2.686433,
+        "y": 2.349211
       },
       "prevControl": null,
       "nextControl": {
-        "x": 14.555167,
-        "y": 5.983889
+        "x": 3.388033,
+        "y": 2.6123109999999996
       },
       "isLocked": false,
       "linkedName": "FLIPPED MIRRORED FLIPPED altnostopend"
@@ -204,7 +204,7 @@
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 23.0255
+    "rotation": -156.9745
   },
   "useDefaultConstraints": false
 }
