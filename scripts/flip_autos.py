@@ -14,6 +14,7 @@ Flip math:
 
 Output files are prefixed with "FLIPPED " and have alliance tags swapped
 (Red<->Blue, [R]<->[B]) so they're easy to identify as generated.
+Flipped paths are placed in a subfolder named after the new auto.
 
 Usage:
   python scripts/flip_autos.py "Red middle sprint v2"         # flip auto + its paths
@@ -79,13 +80,20 @@ def swap_alliance_in_name(name):
     return name
 
 
+def strip_master(name):
+    """Remove 'Master' (case insensitive) from a name and clean up extra spaces."""
+    import re
+    name = re.sub(r'(?i)master\s*', '', name)
+    return ' '.join(name.split())
+
+
 def make_flipped_name(name):
-    """Add 'FLIPPED ' prefix and swap alliance tags."""
+    """Add 'FLIPPED ' prefix, swap alliance tags, and strip 'Master'."""
     if name.startswith(FLIPPED_PREFIX):
         # Strip prefix, swap back, then re-prefix with the new swap
         inner = name[len(FLIPPED_PREFIX):]
-        return FLIPPED_PREFIX + swap_alliance_in_name(inner)
-    return FLIPPED_PREFIX + swap_alliance_in_name(name)
+        return FLIPPED_PREFIX + strip_master(swap_alliance_in_name(inner))
+    return FLIPPED_PREFIX + strip_master(swap_alliance_in_name(name))
 
 
 # --- Coordinate flipping ---
@@ -208,8 +216,8 @@ def write_json(file_path, data, dry_run=False):
 
 # --- Main logic ---
 
-def flip_single_path(paths_dir, path_name, field_length, field_width, dry_run):
-    """Flip a single .path file and write as a FLIPPED copy."""
+def flip_single_path(paths_dir, path_name, field_length, field_width, dest_folder, dry_run):
+    """Flip a single .path file and write as a FLIPPED copy into dest_folder."""
     src = paths_dir / f"{path_name}.path"
     if not src.exists():
         print(f"  WARNING: Path file not found: {src}")
@@ -217,8 +225,9 @@ def flip_single_path(paths_dir, path_name, field_length, field_width, dry_run):
 
     data = read_json(src)
     flipped = flip_path_data(data, field_length, field_width)
+    flipped["folder"] = dest_folder
     dest_name = make_flipped_name(path_name)
-    dest = paths_dir / f"{dest_name}.path"
+    dest = paths_dir / dest_folder / f"{dest_name}.path"
     write_json(dest, flipped, dry_run)
     return True
 
@@ -231,19 +240,19 @@ def flip_single_auto(autos_dir, paths_dir, auto_name, field_length, field_width,
         return False
 
     auto_data = read_json(src)
+    dest_auto_name = make_flipped_name(auto_name)
 
-    # Flip referenced paths
+    # Flip referenced paths into a folder named after the new auto
     path_names = collect_path_names_from_command(auto_data.get("command", {}))
     unique_paths = list(dict.fromkeys(path_names))  # deduplicate, preserve order
     if unique_paths:
-        print(f"  Flipping {len(unique_paths)} referenced path(s)...")
+        print(f"  Flipping {len(unique_paths)} referenced path(s) into folder '{dest_auto_name}'...")
         for pn in unique_paths:
-            flip_single_path(paths_dir, pn, field_length, field_width, dry_run)
+            flip_single_path(paths_dir, pn, field_length, field_width, dest_auto_name, dry_run)
 
     # Flip the auto
     flipped = flip_auto_data(auto_data, make_flipped_name)
-    dest_name = make_flipped_name(auto_name)
-    dest = autos_dir / f"{dest_name}.auto"
+    dest = autos_dir / f"{dest_auto_name}.auto"
     write_json(dest, flipped, dry_run)
     return True
 
