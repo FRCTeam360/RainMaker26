@@ -10,7 +10,7 @@
           {
             "title": "limelight-right",
             "x": 0.0,
-            "y": 128.0,
+            "y": 256.0,
             "width": 512.0,
             "height": 384.0,
             "type": "Camera Stream",
@@ -38,7 +38,7 @@
             "x": 512.0,
             "y": 0.0,
             "width": 512.0,
-            "height": 512.0,
+            "height": 640.0,
             "type": "Boolean Box",
             "properties": {
               "topic": "/SmartDashboard/Can Score in Hub",
@@ -55,7 +55,7 @@
             "x": 1024.0,
             "y": 0.0,
             "width": 512.0,
-            "height": 512.0,
+            "height": 640.0,
             "type": "Match Time",
             "properties": {
               "topic": "/SmartDashboard/Time Left in Phase",
@@ -63,6 +63,22 @@
               "data_type": "double",
               "time_display_mode": "Minutes and Seconds",
               "red_start_time": 20,
+              "yellow_start_time": 30
+            }
+          },
+          {
+            "title": "Match Time",
+            "x": 0.0,
+            "y": 128.0,
+            "width": 512.0,
+            "height": 128.0,
+            "type": "Match Time",
+            "properties": {
+              "topic": "/SmartDashboard/Match Time",
+              "period": 0.033,
+              "data_type": "double",
+              "time_display_mode": "Minutes and Seconds",
+              "red_start_time": 15,
               "yellow_start_time": 30
             }
           }
