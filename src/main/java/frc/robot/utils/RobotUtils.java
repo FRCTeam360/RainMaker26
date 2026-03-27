@@ -7,6 +7,8 @@ import java.util.Optional;
 
 public class RobotUtils {
   private static final double SHIFT_GRACE_PERIOD_SECONDS = 2.0;
+  private static final double INDEXER_TO_FLYWHEEL_SECONDS = 0.4;
+  private static final double HUB_TO_SENSOR_SECONDS = 2.0;
 
   public static final double TRANSITION_END_SECONDS = 130;
   public static final double SHIFT_1_END_SECONDS = 105;
@@ -67,33 +69,34 @@ public class RobotUtils {
    * @param timeOfFlight the time of flight of the shot in seconds
    * @return which hub(s) are currently active
    */
-  public static ActiveHub getActiveHub(double gameTime, Boolean isTele, double timeOfFlight) {
+  public static ActiveHub getActiveHubAtShotLanding(
+      double gameTime, Boolean isTele, double timeOfFlight) {
     // gameTime is the getMatchTime() from DriverStation, isTele is the isTeleop() from
     // DriverStation
     ActiveHub activeHub = ActiveHub.BOTH;
-    gameTime -= timeOfFlight;
+    double timeAtShotLanding = gameTime - (timeOfFlight + INDEXER_TO_FLYWHEEL_SECONDS);
     // Sets phases based on the current time in the game
     if (!isTele) {
       activeHub = ActiveHub.BOTH; // AUTO
     } else if (isTele) {
-      if (gameTime <= ENDGAME_START_SECONDS) {
+      if (timeAtShotLanding <= ENDGAME_START_SECONDS) {
         activeHub = ActiveHub.BOTH; // END GAME
-      } else if (gameTime < SHIFT_3_END_SECONDS - SHIFT_GRACE_PERIOD_SECONDS) {
+      } else if (timeAtShotLanding < SHIFT_3_END_SECONDS - SHIFT_GRACE_PERIOD_SECONDS) {
         activeHub = ActiveHub.AUTOWINNER; // ALLIANCE SHIFT 4
-      } else if (gameTime <= SHIFT_3_END_SECONDS
-          && gameTime >= SHIFT_3_END_SECONDS - SHIFT_GRACE_PERIOD_SECONDS) {
+      } else if (timeAtShotLanding <= SHIFT_3_END_SECONDS
+          && timeAtShotLanding >= SHIFT_3_END_SECONDS - SHIFT_GRACE_PERIOD_SECONDS) {
         activeHub = ActiveHub.BOTH; // ALLIANCE SHIFT GRACE PERIOD
-      } else if (gameTime < SHIFT_2_END_SECONDS - SHIFT_GRACE_PERIOD_SECONDS) {
+      } else if (timeAtShotLanding < SHIFT_2_END_SECONDS - SHIFT_GRACE_PERIOD_SECONDS) {
         activeHub = ActiveHub.AUTOLOSER; // ALLIANCE SHIFT 3
-      } else if (gameTime <= SHIFT_2_END_SECONDS
-          && gameTime >= SHIFT_2_END_SECONDS - SHIFT_GRACE_PERIOD_SECONDS) {
+      } else if (timeAtShotLanding <= SHIFT_2_END_SECONDS
+          && timeAtShotLanding >= SHIFT_2_END_SECONDS - SHIFT_GRACE_PERIOD_SECONDS) {
         activeHub = ActiveHub.BOTH; // ALLIANCE SHIFT GRACE PERIOD
-      } else if (gameTime < SHIFT_1_END_SECONDS - SHIFT_GRACE_PERIOD_SECONDS) {
+      } else if (timeAtShotLanding < SHIFT_1_END_SECONDS - SHIFT_GRACE_PERIOD_SECONDS) {
         activeHub = ActiveHub.AUTOWINNER; // ALLIANCE SHIFT 2
-      } else if (gameTime <= SHIFT_1_END_SECONDS
-          && gameTime >= SHIFT_1_END_SECONDS - SHIFT_GRACE_PERIOD_SECONDS) {
+      } else if (timeAtShotLanding <= SHIFT_1_END_SECONDS
+          && timeAtShotLanding >= SHIFT_1_END_SECONDS - SHIFT_GRACE_PERIOD_SECONDS) {
         activeHub = ActiveHub.BOTH; // ALLIANCE SHIFT GRACE PERIOD
-      } else if (gameTime <= TRANSITION_END_SECONDS) {
+      } else if (timeAtShotLanding <= TRANSITION_END_SECONDS) {
         activeHub = ActiveHub.AUTOLOSER; // ALLIANCE SHIFT 1
       } else {
         return ActiveHub.BOTH; // TRANSITION

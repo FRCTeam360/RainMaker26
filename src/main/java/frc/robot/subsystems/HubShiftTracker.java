@@ -67,8 +67,7 @@ public class HubShiftTracker {
    */
   public void update() {
     double matchTimeRaw = DriverStation.getMatchTime();
-    double effectiveTof = hubShotCalculator.getMinTimeOfFlightSecs();
-    double matchTimeAdjusted = matchTimeRaw - effectiveTof;
+    double matchTimeAdjusted = matchTimeRaw;
 
     // --- Phase detection (uses adjusted time so phase flips TOF-early) ---
     if (!DriverStation.isEnabled()) {
@@ -96,7 +95,7 @@ public class HubShiftTracker {
     }
 
     // --- Shooter gate (with grace period) ---
-    activeHub = RobotUtils.getActiveHub(matchTimeRaw, DriverStation.isTeleop(), effectiveTof);
+    activeHub = RobotUtils.getActiveHubAtShotLanding(matchTimeRaw, DriverStation.isTeleop(), 0.0);
     Alliance autoWinner = RobotUtils.getAutoWinner(DriverStation.getGameSpecificMessage());
     Optional<Alliance> alliance = DriverStation.getAlliance();
 

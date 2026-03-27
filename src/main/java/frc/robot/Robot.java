@@ -8,6 +8,7 @@ import edu.wpi.first.net.WebServer;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -83,6 +84,7 @@ public class Robot extends LoggedRobot {
     // and put our
     // autonomous chooser on the dashboard.
     WebServer.start(5800, Filesystem.getDeployDirectory().getPath());
+    RobotController.setBrownoutVoltage(6.3); // DANGER DANGER DANGER ALWAYS TEST
     m_robotContainer = new RobotContainer();
   }
 

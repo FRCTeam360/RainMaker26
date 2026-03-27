@@ -26,6 +26,7 @@ import frc.robot.subsystems.Shooter.TargetSelectionStateMachine;
 import frc.robot.subsystems.Shooter.TargetSelectionStateMachine.TargetInternalStates;
 import frc.robot.subsystems.Shooter.TargetSelectionStateMachine.TargetWantedStates;
 import frc.robot.utils.PositionUtils;
+import frc.robot.utils.RobotUtils;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
@@ -74,6 +75,8 @@ public class SuperStructure extends SubsystemBase {
   private SuperInternalStates currentSuperState = SuperInternalStates.IDLE;
   private SuperInternalStates previousSuperState = SuperInternalStates.IDLE;
   private ControlState controlState = ControlState.SUPERSTRUCTURE;
+  private boolean cachedHubActive = true;
+  private double cachedTimeOfFlight = 0.0;
 
   // Constructor
 
@@ -212,16 +215,16 @@ public class SuperStructure extends SubsystemBase {
    * @return true if the hub is active and can be shot at, false otherwise.
    */
   public boolean canScoreAtHub() {
-    return hubShiftTracker.isHubActive();
+    return cachedHubActive;
   }
 
   private boolean canShootToTarget() {
     if (wantedSuperState == SuperWantedStates.AUTO_CYCLE_SHOOTING) {
       switch (currentSuperState) {
         case SHOOTING_AT_HUB:
-          if (!DriverStation.isFMSAttached()) {
-            return true;
-          }
+          // if (!DriverStation.isFMSAttached()) {
+          //   return true;
+          // }
           // Allow shooting if explicitly commanded to shoot at hub (manual override)
           if (wantedSuperState == SuperWantedStates.SHOOT_AT_HUB) {
             return true;
@@ -309,6 +312,18 @@ public class SuperStructure extends SubsystemBase {
   @Override
   public void periodic() {
     hubShiftTracker.update();
+    // Calculate shot and extract time of flight once per cycle
+    cachedTimeOfFlight = hubShotCalculator.calculateShot().timeOfFlight();
+    RobotUtils.ActiveHub shootingPhase =
+        RobotUtils.getActiveHubAtShotLanding(
+            DriverStation.getMatchTime(), DriverStation.isTeleop(), cachedTimeOfFlight);
+
+    // Calculate hub active once per cycle
+    cachedHubActive =
+        RobotUtils.isHubActiveForAlliance(
+            DriverStation.getAlliance(),
+            RobotUtils.getAutoWinner(DriverStation.getGameSpecificMessage()),
+            shootingPhase);
 
     // Runs the superstructure, shooter, and intake state machines
     updateState();
@@ -320,6 +335,8 @@ public class SuperStructure extends SubsystemBase {
     shooterStateMachine.apply();
     intakeStateMachine.apply();
 
+    SmartDashboard.putString("Shooting Phase", shootingPhase.toString());
+    SmartDashboard.putBoolean("Can Score in Hub", cachedHubActive);
     SmartDashboard.putNumber("Match Time", DriverStation.getMatchTime());
     hubShiftTracker.log();
 
@@ -328,6 +345,7 @@ public class SuperStructure extends SubsystemBase {
     SmartDashboard.putString("Superstructure/CurrentSuperState", currentSuperState.toString());
     Logger.recordOutput("Superstructure/PreviousSuperState", previousSuperState);
     Logger.recordOutput("Superstructure/ControlState", controlState);
+    Logger.recordOutput("Superstructure/HubActive", cachedHubActive);
     shooterStateMachine.log();
     intakeStateMachine.log();
     targetSelectionStateMachine.log();
