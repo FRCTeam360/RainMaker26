@@ -4,7 +4,6 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.subsystems.Shooter.ShotCalculator;
-import frc.robot.subsystems.Shooter.ShotCalculator.ShootingParams;
 import frc.robot.utils.RobotUtils;
 import java.util.Optional;
 import org.littletonrobotics.junction.Logger;
@@ -67,15 +66,8 @@ public class HubShiftTracker {
    * Reads DriverStation directly for match time, alliance, and game-specific message.
    */
   public void update() {
-    // --- TOF ---
-    // Only use the calculated TOF when the shot is valid; fall back to the minimum so an
-    // out-of-range pose doesn't produce a huge TOF that shifts gameTime into the endgame bucket.
-    ShootingParams hubShot = hubShotCalculator.calculateShot();
-    cachedTimeOfFlight =
-        hubShot.isValid() ? hubShot.timeOfFlight() : hubShotCalculator.getMinTimeOfFlightSecs();
-
     double matchTimeRaw = DriverStation.getMatchTime();
-    double effectiveTof = getEffectiveTof();
+    double effectiveTof = hubShotCalculator.getMinTimeOfFlightSecs();
     double matchTimeAdjusted = matchTimeRaw - effectiveTof;
 
     // --- Phase detection (uses adjusted time so phase flips TOF-early) ---
@@ -172,7 +164,6 @@ public class HubShiftTracker {
     Logger.recordOutput("HubShift/ActiveHub", activeHub.toString());
     Logger.recordOutput("HubShift/HubActive", hubActive);
     Logger.recordOutput("HubShift/HubActiveDisplay", hubActiveForDisplay);
-    Logger.recordOutput("HubShift/EffectiveTOF", getEffectiveTof());
   }
 
   /**
@@ -188,15 +179,6 @@ public class HubShiftTracker {
   // -------------------------------------------------------------------------
   // Private helpers
   // -------------------------------------------------------------------------
-
-  /**
-   * Returns the effective time-of-flight used for all shift boundary adjustments. Clamps to the
-   * minimum mapped TOF to handle out-of-range poses, then adds the sensor delay.
-   */
-  private double getEffectiveTof() {
-    return Math.max(cachedTimeOfFlight, hubShotCalculator.getMinTimeOfFlightSecs())
-        + BALL_TO_SENSOR_DELAY_SECONDS;
-  }
 
   private RobotUtils.ActiveHub getDisplayActiveHub(double adjustedMatchTime) {
     if (adjustedMatchTime > RobotUtils.TRANSITION_END_SECONDS) {
