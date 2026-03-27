@@ -15,10 +15,10 @@ public class IndexerIOPB implements IndexerIO {
   private static final double GEAR_RATIO =
       1.0 / 1.0; // its not very useful to set the output velocity in this system, but its 9.0
   private static final int CURRENT_LIMIT_AMPS = 40;
-  private static final double KP = 0.0003;
+  private static final double KP = 0.0006; // was 0.0003
   private static final double KI = 0.0;
   private static final double KD = 0.0;
-  private static final double KV = 0.0022;
+  private static final double KV = 0.0021;
   private static final double KS = 0.04;
 
   /** Creates a new IndexerIOPB. */
@@ -39,6 +39,8 @@ public class IndexerIOPB implements IndexerIO {
 
     sparkMaxConfig.closedLoop.p(KP).i(KI).d(KD);
     sparkMaxConfig.closedLoop.feedForward.kV(KV).kS(KS);
+    sparkMaxConfig.encoder.uvwMeasurementPeriod(10);
+    sparkMaxConfig.encoder.uvwAverageDepth(2);
 
     indexerMotor.configure(
         sparkMaxConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);

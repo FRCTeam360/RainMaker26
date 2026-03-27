@@ -46,6 +46,7 @@ public class SuperStructure extends SubsystemBase {
   private final ShotCalculator hubShotCalculator;
   private final Supplier<Pose2d> robotPoseSupplier;
   private final Transform2d robotToShooter;
+  private final HubShiftTracker hubShiftTracker;
 
   // shooting @ 3 meters
   private static final double HOOD_FORCED_ANGLE = 10.0;
@@ -108,6 +109,7 @@ public class SuperStructure extends SubsystemBase {
     this.hubShotCalculator = hubShotCalculator;
     this.robotPoseSupplier = robotPoseSupplier;
     this.robotToShooter = robotToShooter;
+    this.hubShiftTracker = new HubShiftTracker(hubShotCalculator);
     this.shooterStateMachine =
         new ShooterStateMachine(
             flywheel, hood, flywheelKicker, isAlignedToTarget, this::canShootToTarget);
@@ -232,17 +234,21 @@ public class SuperStructure extends SubsystemBase {
     hopperRoller.setWantedState(HopperRollerStates.UNJAMMING);
   }
 
+  /**
+   * Returns whether the hub is currently active/shootable based on game time, alliance, and auto
+   * winner. Does not require the superstructure to be in SHOOT_AT_HUB state.
+   *
+   * @return true if the hub is active and can be shot at, false otherwise.
+   */
+  public boolean canScoreAtHub() {
+    return cachedHubActive;
+  }
+
   private boolean canShootToTarget() {
     if (wantedSuperState == SuperWantedStates.AUTO_CYCLE_SHOOTING) {
       switch (currentSuperState) {
         case SHOOTING_AT_HUB:
-          if (!DriverStation.isFMSAttached()) {
-            return true;
-          }
           // Allow shooting if explicitly commanded to shoot at hub (manual override)
-          if (wantedSuperState == SuperWantedStates.SHOOT_AT_HUB) {
-            return true;
-          }
           // For AUTO_CYCLE_SHOOTING, check if hub is actually active based on game phase
           return canScoreAtHub() && hubShotCalculator.calculateShot().isValid();
         case PASSING:
@@ -321,29 +327,20 @@ public class SuperStructure extends SubsystemBase {
         });
   }
 
-  /**
-   * Returns whether the hub is currently active/shootable based on game time, alliance, and auto
-   * winner. Does not require the superstructure to be in SHOOT_AT_HUB state.
-   *
-   * @return true if the hub is active and can be shot at, false otherwise.
-   */
-  public boolean canScoreAtHub() {
-    return cachedHubActive;
-  }
-
   // periodic
 
   @Override
   public void periodic() {
+    hubShiftTracker.update();
     // Calculate shot and extract time of flight once per cycle
     cachedTimeOfFlight = hubShotCalculator.calculateShot().timeOfFlight();
     RobotUtils.ActiveHub shootingPhase =
-        RobotUtils.getShootingPhase(
+        RobotUtils.getActiveHubAtShotLanding(
             DriverStation.getMatchTime(), DriverStation.isTeleop(), cachedTimeOfFlight);
 
     // Calculate hub active once per cycle
     cachedHubActive =
-        RobotUtils.hubActive(
+        RobotUtils.isHubActiveForAlliance(
             DriverStation.getAlliance(),
             RobotUtils.getAutoWinner(DriverStation.getGameSpecificMessage()),
             shootingPhase);
@@ -360,6 +357,8 @@ public class SuperStructure extends SubsystemBase {
 
     SmartDashboard.putString("Shooting Phase", shootingPhase.toString());
     SmartDashboard.putBoolean("Can Score in Hub", cachedHubActive);
+    SmartDashboard.putNumber("Match Time", DriverStation.getMatchTime());
+    hubShiftTracker.log();
 
     Logger.recordOutput("Superstructure/WantedSuperState", wantedSuperState);
     Logger.recordOutput("Superstructure/CurrentSuperState", currentSuperState);

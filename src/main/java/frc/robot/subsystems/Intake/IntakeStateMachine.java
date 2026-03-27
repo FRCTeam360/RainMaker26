@@ -23,7 +23,8 @@ public class IntakeStateMachine {
     INTAKING,
     STOWED,
     AGITATING,
-    DEPLOYED
+    DEPLOYED,
+    REVERSING
   }
 
   /** Internal states representing the resolved intake behavior. */
@@ -32,7 +33,8 @@ public class IntakeStateMachine {
     INTAKING,
     STOWED,
     AGITATING,
-    DEPLOYED
+    DEPLOYED,
+    REVERSING
   }
 
   // Subsystem refs
@@ -89,6 +91,9 @@ public class IntakeStateMachine {
       case DEPLOYED:
         currentState = IntakeInternalStates.DEPLOYED;
         break;
+      case REVERSING:
+        currentState = IntakeInternalStates.REVERSING;
+        break;
       case IDLE:
       default:
         currentState = IntakeInternalStates.IDLE;
@@ -116,6 +121,9 @@ public class IntakeStateMachine {
       case STOWED:
         intakeRoller.setWantedState(IntakeRollerStates.IDLE);
         intakePivot.setWantedState(IntakePivotWantedStates.STOWED);
+        break;
+      case REVERSING:
+        intakeRoller.setWantedState(IntakeRollerStates.REVERSING);
         break;
       case IDLE:
       default:

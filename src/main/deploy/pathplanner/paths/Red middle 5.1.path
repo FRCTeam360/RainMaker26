@@ -12,7 +12,7 @@
         "y": 6.286233333333334
       },
       "isLocked": false,
-      "linkedName": "3.3 end"
+      "linkedName": null
     },
     {
       "anchor": {
@@ -57,7 +57,7 @@
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "red middle right 5.1 end"
+      "linkedName": null
     }
   ],
   "rotationTargets": [
