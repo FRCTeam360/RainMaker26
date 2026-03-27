@@ -441,6 +441,8 @@ public class RobotContainer {
     driverCont.b().onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
 
     driverCont.x().whileTrue(superStructure.setIntakeStateCommand(IntakeWantedStates.REVERSING));
+    // TODO: check that this works with just an on false because this will set the intake to idle
+    // constantly and that's probably not what we want but it did work on the field
     driverCont.x().whileFalse(superStructure.setIntakeStateCommand(IntakeWantedStates.IDLE));
 
     // Left trigger held: agitate. Release: back to intaking.

@@ -17,7 +17,6 @@ public class IntakeRoller extends SubsystemBase {
   private static final double REVERSE_UNJAM_DUTY_CYCLE = -0.5;
   private static final double INTAKING_DUTY_CYCLE = 0.8;
   private static final double SHOOT_ASSIST_DUTY_CYCLE = 0.3;
-  private static final double REVERSE_DUTY_CYCLE = -1.0;
   private static final double REVERSE_VELOCITY_RPM = -3250.0;
 
   // IO fields
