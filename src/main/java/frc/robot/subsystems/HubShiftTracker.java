@@ -28,7 +28,7 @@ public class HubShiftTracker {
   // Extra time after the ball enters the hub before it reaches the scoring sensor.
   // Added to the TOF so we don't shoot into a hub that's about to go inactive before the ball
   // actually registers as scored.
-  private static final double BALL_TO_SENSOR_DELAY_SECONDS = 1.0;
+  private static final double BALL_TO_SENSOR_DELAY_SECONDS = 0.5;
 
   private enum MatchPhase {
     AUTO,

@@ -11,7 +11,7 @@ Usage:
   python scripts/generate_all_autos.py "MASTER Red Right Middle Hook"
   python scripts/generate_all_autos.py --dry-run "MASTER Red Right Middle Hook"
 
-No external dependencies required - uses only the Python standard library.
+No external dependencies required - uses only the Python standard library.   
 """
 
 import argparse
