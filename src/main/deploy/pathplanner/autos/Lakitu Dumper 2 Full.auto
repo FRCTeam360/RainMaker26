@@ -1,0 +1,61 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Lakitu Dumper 1"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Lakitu Dumper 2"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Lakitu Dumper 3"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Lakitu Dumper 4"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Lakitu Dumper 5"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Lakitu Dumper 6"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Lakitu Dumper 7"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Lakitu Dumper 4"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": "MASTER RED RIGHT",
+  "choreoAuto": false
+}
