@@ -38,6 +38,7 @@ public class LakituFollowPathCommand extends Command {
   private static final double RECOVERY_MAX_ANGULAR_VELOCITY_RAD_PER_SEC = Math.toRadians(360);
   private static final double RECOVERY_MAX_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ =
       Math.toRadians(540);
+  private static final double END_TOLERANCE_METERS = 0.5;
 
   private static final Set<String> registeredPaths = new HashSet<>();
 
@@ -142,6 +143,30 @@ public class LakituFollowPathCommand extends Command {
 
     if (activeCommand.isFinished()) {
       activeCommand.end(false);
+
+      List<Pose2d> pathPoses = originalPath.getPathPoses();
+      Pose2d endPose = pathPoses.get(pathPoses.size() - 1);
+      double endDistance =
+          poseSupplier.get().getTranslation().getDistance(endPose.getTranslation());
+
+      if (endDistance > END_TOLERANCE_METERS) {
+        recoveryAttempts++;
+        Logger.recordOutput("Lakitu/RecoveryAttempts", recoveryAttempts);
+        Logger.recordOutput("Lakitu/EndDeviationMeters", endDistance);
+
+        if (recoveryAttempts > MAX_RECOVERY_ATTEMPTS) {
+          activeCommand = null;
+          state = State.FAILED;
+          logState();
+          return;
+        }
+
+        startRecovery();
+        state = State.RECOVERING;
+        logState();
+        return;
+      }
+
       activeCommand = null;
       pathCompleted = true;
       return;
