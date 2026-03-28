@@ -1,17 +1,14 @@
 package frc.robot.commands;
 
-import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
-import com.pathplanner.lib.path.Waypoint;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
@@ -21,8 +18,8 @@ import org.littletonrobotics.junction.Logger;
  *
  * <p>Monitors the distance between the robot's current pose and the path follower's target pose
  * every cycle. If the deviation exceeds a threshold (indicating a collision or major disturbance),
- * the system interrupts the current path, generates an on-the-fly recovery path back to the start
- * of the current path segment, and restarts the original path.
+ * the system interrupts the current path, pathfinds back to the start of the current path segment,
+ * and restarts the original path.
  *
  * <p>Paths must be registered via {@link #registerPath(String)} to receive Lakitu recovery
  * behavior. Unregistered paths use standard path following.
@@ -70,6 +67,15 @@ public class LakituFollowPathCommand extends Command {
     return registeredPaths.contains(pathName);
   }
 
+  /**
+   * Returns the recovery path constraints used for pathfinding back to checkpoints.
+   *
+   * @return the {@link PathConstraints} for recovery paths
+   */
+  public static PathConstraints getRecoveryConstraints() {
+    return RECOVERY_CONSTRAINTS;
+  }
+
   private enum State {
     FOLLOWING,
     RECOVERING,
@@ -77,7 +83,8 @@ public class LakituFollowPathCommand extends Command {
   }
 
   private final PathPlannerPath originalPath;
-  private final Function<PathPlannerPath, Command> commandBuilder;
+  private final Function<PathPlannerPath, Command> followCommandBuilder;
+  private final BiFunction<Pose2d, PathConstraints, Command> pathfindCommandBuilder;
   private final Supplier<Pose2d> poseSupplier;
   private final Supplier<Pose2d> targetPoseSupplier;
 
@@ -90,7 +97,9 @@ public class LakituFollowPathCommand extends Command {
    * Creates a new LakituFollowPathCommand.
    *
    * @param path the original path to follow
-   * @param commandBuilder function that creates a FollowPathCommand for a given path
+   * @param followCommandBuilder function that creates a FollowPathCommand for a given path
+   * @param pathfindCommandBuilder function that creates a PathfindingCommand to a target pose with
+   *     given constraints
    * @param poseSupplier supplier of the robot's current estimated pose
    * @param targetPoseSupplier supplier of the path follower's current target pose (from
    *     PathPlannerLogging callback)
@@ -98,12 +107,14 @@ public class LakituFollowPathCommand extends Command {
    */
   public LakituFollowPathCommand(
       PathPlannerPath path,
-      Function<PathPlannerPath, Command> commandBuilder,
+      Function<PathPlannerPath, Command> followCommandBuilder,
+      BiFunction<Pose2d, PathConstraints, Command> pathfindCommandBuilder,
       Supplier<Pose2d> poseSupplier,
       Supplier<Pose2d> targetPoseSupplier,
       Subsystem... requirements) {
     this.originalPath = path;
-    this.commandBuilder = commandBuilder;
+    this.followCommandBuilder = followCommandBuilder;
+    this.pathfindCommandBuilder = pathfindCommandBuilder;
     this.poseSupplier = poseSupplier;
     this.targetPoseSupplier = targetPoseSupplier;
     addRequirements(requirements);
@@ -183,8 +194,7 @@ public class LakituFollowPathCommand extends Command {
   private void handlePathTimerExpired() {
     List<Pose2d> pathPoses = originalPath.getPathPoses();
     Pose2d endPose = pathPoses.get(pathPoses.size() - 1);
-    double endDistance =
-        poseSupplier.get().getTranslation().getDistance(endPose.getTranslation());
+    double endDistance = poseSupplier.get().getTranslation().getDistance(endPose.getTranslation());
 
     if (endDistance <= END_TOLERANCE_METERS) {
       activeCommand = null;
@@ -231,7 +241,7 @@ public class LakituFollowPathCommand extends Command {
   }
 
   private void startFollowing() {
-    activeCommand = commandBuilder.apply(originalPath);
+    activeCommand = followCommandBuilder.apply(originalPath);
     activeCommand.initialize();
     Logger.recordOutput("Lakitu/Active", true);
     Logger.recordOutput("Lakitu/Path", originalPath.name);
@@ -244,15 +254,14 @@ public class LakituFollowPathCommand extends Command {
     double distanceToCheckpoint =
         currentPose.getTranslation().getDistance(checkpointPose.getTranslation());
 
-    // If already at the checkpoint, skip recovery and restart the path directly
+    // If already at the checkpoint, skip pathfinding and restart the path directly
     if (distanceToCheckpoint < MIN_RECOVERY_DISTANCE_METERS) {
       startFollowing();
       transitionTo(State.FOLLOWING);
       return;
     }
 
-    PathPlannerPath recoveryPath = buildRecoveryPath(currentPose, checkpointPose);
-    activeCommand = commandBuilder.apply(recoveryPath);
+    activeCommand = pathfindCommandBuilder.apply(checkpointPose, RECOVERY_CONSTRAINTS);
     activeCommand.initialize();
 
     Logger.recordOutput("Lakitu/RecoveryTarget", checkpointPose);
@@ -267,23 +276,6 @@ public class LakituFollowPathCommand extends Command {
     return originalPath
         .getStartingHolonomicPose()
         .orElseGet(() -> originalPath.getPathPoses().get(0));
-  }
-
-  /** Builds an on-the-fly path from the robot's current position to the checkpoint. */
-  private PathPlannerPath buildRecoveryPath(Pose2d from, Pose2d to) {
-    Translation2d delta = to.getTranslation().minus(from.getTranslation());
-    Rotation2d travelHeading = delta.getAngle();
-
-    List<Waypoint> waypoints =
-        PathPlannerPath.waypointsFromPoses(
-            new Pose2d(from.getTranslation(), travelHeading),
-            new Pose2d(to.getTranslation(), travelHeading));
-
-    PathPlannerPath path =
-        new PathPlannerPath(
-            waypoints, RECOVERY_CONSTRAINTS, null, new GoalEndState(0.0, to.getRotation()));
-    path.name = "Lakitu Recovery";
-    return path;
   }
 
   private void transitionTo(State newState) {

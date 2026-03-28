@@ -11,9 +11,11 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.swerve.SwerveRequest.ForwardPerspectiveValue;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.FollowPathCommand;
+import com.pathplanner.lib.commands.PathfindingCommand;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -574,6 +576,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
               return new LakituFollowPathCommand(
                   path,
                   this::buildFollowPathCommand,
+                  this::buildPathfindCommand,
                   this::getPosition,
                   this::getLatestPathTargetPose,
                   this);
@@ -631,6 +634,37 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             new PIDConstants(PP_ROTATION_KP, PP_ROTATION_KI, PP_ROTATION_KD)),
         pathPlannerConfig,
         () -> false,
+        this);
+  }
+
+  /**
+   * Builds a PathfindingCommand that navigates to the given target pose using obstacle-aware
+   * pathfinding. Used by {@link LakituFollowPathCommand} for recovery paths.
+   *
+   * @param targetPose the pose to pathfind to
+   * @param constraints the path constraints for the pathfinding command
+   * @return a command that pathfinds to the target pose
+   */
+  private Command buildPathfindCommand(Pose2d targetPose, PathConstraints constraints) {
+    return new PathfindingCommand(
+        targetPose,
+        constraints,
+        0.0, // goal end velocity (stop at checkpoint)
+        this::getPosition,
+        this::getVelocity,
+        (speeds, feedforwards) -> {
+          setCommandedSpeeds(speeds);
+          setControl(
+              m_pathApplyRobotSpeeds
+                  .withSpeeds(ChassisSpeeds.discretize(speeds, 0.020))
+                  .withWheelForceFeedforwardsX(feedforwards.robotRelativeForcesXNewtons())
+                  .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons())
+                  .withDriveRequestType(m_driveRequestType));
+        },
+        new PPHolonomicDriveController(
+            new PIDConstants(PP_TRANSLATION_KP, PP_TRANSLATION_KI, PP_TRANSLATION_KD),
+            new PIDConstants(PP_ROTATION_KP, PP_ROTATION_KI, PP_ROTATION_KD)),
+        pathPlannerConfig,
         this);
   }
 

@@ -10,6 +10,7 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.FollowPathCommand;
+import com.pathplanner.lib.commands.PathfindingCommand;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -301,6 +302,12 @@ public class RobotContainer {
     LakituFollowPathCommand.registerPath("Lakitu Path 4");
     LakituFollowPathCommand.registerPath("No Stop Right Red Middle 1");
     LakituFollowPathCommand.registerPath("No Stop Right Red Middle 2");
+    LakituFollowPathCommand.registerPath("Red middle 1");
+    LakituFollowPathCommand.registerPath("Red middle 2.1");
+    LakituFollowPathCommand.registerPath("Red middle 3.3");
+    LakituFollowPathCommand.registerPath("Red middle 5.1");
+    LakituFollowPathCommand.registerPath("Red middle 6.1");
+    LakituFollowPathCommand.registerPath("Red middle 7.1");
 
     registerPathplannerCommand(
         "basic intake", superStructure.setIntakeStateCommand(IntakeWantedStates.INTAKING));
@@ -362,8 +369,7 @@ public class RobotContainer {
     SmartDashboard.putData("Auto Chooser", autoChooser);
 
     CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
-    // Uncomment this if pathplanner starts to suck on loading
-    // CommandScheduler.getInstance().schedule(PathfindingCommand.warmupCommand());
+    CommandScheduler.getInstance().schedule(PathfindingCommand.warmupCommand());
   }
 
   public void registerPathplannerCommand(String name, Command command) {
