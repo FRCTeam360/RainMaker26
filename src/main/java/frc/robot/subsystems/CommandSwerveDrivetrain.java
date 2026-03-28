@@ -10,9 +10,12 @@ import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.swerve.SwerveRequest.ForwardPerspectiveValue;
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.path.PathPlannerPath;
+import frc.robot.commands.LakituFollowPathCommand;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -70,6 +73,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
   // Commanded speeds for shoot-on-the-move compensation (tracks what we tell the robot to do)
   private ChassisSpeeds commandedSpeeds = new ChassisSpeeds();
+
+  // Latest target pose from PathPlanner's path follower, updated via logging callback.
+  // Used by LakituFollowPathCommand to detect deviations.
+  private Pose2d latestPathTargetPose = new Pose2d();
 
   /* Blue alliance sees forward as 0 degrees (toward red alliance wall) */
   private static final Rotation2d kBlueAlliancePerspectiveRotation = Rotation2d.kZero;
@@ -532,6 +539,38 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
   private void configureAutoBuilder() {
     try {
+      AutoBuilder.configureCustom(
+          (PathPlannerPath path) -> {
+            if (LakituFollowPathCommand.isRegistered(path.name)) {
+              return new LakituFollowPathCommand(
+                  path,
+                  this::buildFollowPathCommand,
+                  this::getPosition,
+                  this::getLatestPathTargetPose,
+                  this);
+            }
+            return buildFollowPathCommand(path);
+          },
+          this::getPosition,
+          this::resetPose,
+          () -> false,
+          true);
+    } catch (Exception ex) {
+      DriverStation.reportError(
+          "Failed to load PathPlanner config and configure AutoBuilder", ex.getStackTrace());
+    }
+  }
+
+  /**
+   * Builds a FollowPathCommand for the given path using this drivetrain's configuration. Used
+   * directly by {@link AutoBuilder} for normal paths and by {@link LakituFollowPathCommand} for
+   * both original and recovery path commands.
+   *
+   * @param path the path to follow
+   * @return a command that follows the path
+   */
+  private Command buildFollowPathCommand(PathPlannerPath path) {
+    try {
       RobotConfig config;
       // TODO rework this so it's unified with the top level robot builder class
       if (Constants.getRobotType() == Constants.RobotType.WOODBOT) {
@@ -540,11 +579,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         config = RobotConfig.fromGUISettings();
       }
 
-      AutoBuilder.configure(
-          this::getPosition, // Supplier of current robot pose (uses cached state)
-          this::resetPose, // Consumer for seeding pose against auto
-          this::getVelocity, // Supplier of current robot speeds (uses cached state)
-          // Consumer of ChassisSpeeds and feedforwards to drive the robot
+      return new FollowPathCommand(
+          path,
+          this::getPosition,
+          this::getVelocity,
           (speeds, feedforwards) -> {
             setCommandedSpeeds(speeds);
             setControl(
@@ -558,14 +596,12 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
               new PIDConstants(PP_TRANSLATION_KP, PP_TRANSLATION_KI, PP_TRANSLATION_KD),
               new PIDConstants(PP_ROTATION_KP, PP_ROTATION_KI, PP_ROTATION_KD)),
           config,
-          // Assume the path needs to be flipped for Red vs Blue, this is normally the
-          // case
           () -> false,
-          this // Subsystem for requirements
-          );
+          this);
     } catch (Exception ex) {
       DriverStation.reportError(
-          "Failed to load PathPlanner config and configure AutoBuilder", ex.getStackTrace());
+          "Failed to build FollowPathCommand for Lakitu recovery", ex.getStackTrace());
+      return new InstantCommand();
     }
   }
 
@@ -784,6 +820,26 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
    */
   private void setCommandedSpeeds(ChassisSpeeds speeds) {
     this.commandedSpeeds = speeds;
+  }
+
+  /**
+   * Returns the latest target pose from the PathPlanner path follower. Updated each cycle via the
+   * {@link com.pathplanner.lib.util.PathPlannerLogging} callback.
+   *
+   * @return the latest target {@link Pose2d} on the active path
+   */
+  public Pose2d getLatestPathTargetPose() {
+    return latestPathTargetPose;
+  }
+
+  /**
+   * Sets the latest path target pose. Called from the PathPlannerLogging callback in
+   * RobotContainer.
+   *
+   * @param pose the current target pose from the path follower
+   */
+  public void setLatestPathTargetPose(Pose2d pose) {
+    this.latestPathTargetPose = pose;
   }
 
   /**

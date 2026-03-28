@@ -348,7 +348,10 @@ public class RobotContainer {
         (poses -> Logger.recordOutput("Swerve/ActivePath", poses.toArray(new Pose2d[0]))));
 
     PathPlannerLogging.setLogTargetPoseCallback(
-        pose -> Logger.recordOutput("Swerve/TargetPathPose", pose));
+        pose -> {
+          Logger.recordOutput("Swerve/TargetPathPose", pose);
+          drivetrain.setLatestPathTargetPose(pose);
+        });
 
     autoChooser = AutoBuilder.buildAutoChooser();
     SmartDashboard.putData("Auto Chooser", autoChooser);
