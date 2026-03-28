@@ -55,10 +55,22 @@ classDef output fill:#FFB67A,stroke:#FFF,color:#5E1C00,stroke-width:10px,font-si
     -->INTAKE_STATE_AGITATING(Intake state set to agitate):::action
     -->agitateAtSetPoint
 
-    b[A button]:::input
-
+    a[A button]:::input
+    --> UNJAMMING(Set superstructure state to unjamming):::action
+    UNJAMMING --> INDEXER_REVERSING(Sets indexer state to reversing):::action
+UNJAMMING --> SHOOTER_REVERSING(Sets shooter state to reversing):::action
+UNJAMMING -->  HOPPER_ROLLER_UNJAMMING(Sets hopper roller state to unjamming):::action
+INDEXER_REVERSING-->setIndexReversing[Sets the indexer to a reversing duty cycle of -0.35]:::output
+SHOOTER_REVERSING--> FLYWHEEL_IDLE(Sets flywheel state to idle):::action
+SHOOTER_REVERSING--> HOOD_IDLE(Sets hood state to idle):::action
+SHOOTER_REVERSING-->FLYWHEEL_KICKER_REVERSING(Sets flywheel kicker state to idle):::action
+FLYWHEEL_IDLE--> FLYWHEEL_DEFAULT[Stops flywheel motor]:::output
+HOOD_IDLE-->HOOD_DEFAULT[Stops hood motor]:::output
+FLYWHEEL_KICKER_REVERSING--> flywheelReverse[Reverses with the flywheel dutycycle set to a speed of -0.95]
+HOPPER_ROLLER_UNJAMMING--> hopperRollerReverse[Reverses with the hopper roller dutycycle set to a speed of -0.95]
 
     x[X button]:::input
+    -->
 
     linkStyle 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,4 stroke:#grey,stroke-width:4px,color:white,background-color:white;
     
