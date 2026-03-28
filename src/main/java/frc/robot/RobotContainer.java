@@ -355,11 +355,8 @@ public class RobotContainer {
     PathPlannerLogging.setLogActivePathCallback(
         (poses -> Logger.recordOutput("Swerve/ActivePath", poses.toArray(new Pose2d[0]))));
 
-    PathPlannerLogging.setLogTargetPoseCallback(
-        pose -> {
-          Logger.recordOutput("Swerve/TargetPathPose", pose);
-          drivetrain.setLatestPathTargetPose(pose);
-        });
+    // Target pose callback is set up in CommandSwerveDrivetrain.configureAutoBuilder()
+    // to keep the Lakitu coupling self-contained.
 
     autoChooser = AutoBuilder.buildAutoChooser();
     SmartDashboard.putData("Auto Chooser", autoChooser);

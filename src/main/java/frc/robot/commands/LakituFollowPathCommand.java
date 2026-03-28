@@ -31,15 +31,23 @@ import org.littletonrobotics.junction.Logger;
  */
 public class LakituFollowPathCommand extends Command {
 
+  // --- Deviation thresholds ---
   private static final double RECOVERY_THRESHOLD_METERS = 1.5;
-  private static final int MAX_RECOVERY_ATTEMPTS = 2;
-  private static final double RECOVERY_MAX_VELOCITY_MPS = 3.0;
-  private static final double RECOVERY_MAX_ACCELERATION_MPSSQ = 6.0;
-  private static final double RECOVERY_MAX_ANGULAR_VELOCITY_RAD_PER_SEC = Math.toRadians(360);
-  private static final double RECOVERY_MAX_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ =
-      Math.toRadians(540);
   private static final double END_TOLERANCE_METERS = 0.5;
+  private static final double MIN_RECOVERY_DISTANCE_METERS = 0.3;
 
+  // --- Recovery limits ---
+  private static final int MAX_RECOVERY_ATTEMPTS = 2;
+
+  // --- Recovery path constraints ---
+  private static final PathConstraints RECOVERY_CONSTRAINTS =
+      new PathConstraints(
+          3.0, // maxVelocityMPS
+          6.0, // maxAccelerationMPSSq
+          Math.toRadians(360), // maxAngularVelocityRadPerSec
+          Math.toRadians(540)); // maxAngularAccelerationRadPerSecSq
+
+  // --- Path registry ---
   private static final Set<String> registeredPaths = new HashSet<>();
 
   /**
@@ -138,61 +146,20 @@ public class LakituFollowPathCommand extends Command {
     return pathCompleted || state == State.FAILED;
   }
 
+  // ---------------------------------------------------------------------------
+  // State handlers
+  // ---------------------------------------------------------------------------
+
   private void executeFollowing() {
     activeCommand.execute();
 
     if (activeCommand.isFinished()) {
       activeCommand.end(false);
-
-      List<Pose2d> pathPoses = originalPath.getPathPoses();
-      Pose2d endPose = pathPoses.get(pathPoses.size() - 1);
-      double endDistance =
-          poseSupplier.get().getTranslation().getDistance(endPose.getTranslation());
-
-      if (endDistance > END_TOLERANCE_METERS) {
-        recoveryAttempts++;
-        Logger.recordOutput("Lakitu/RecoveryAttempts", recoveryAttempts);
-        Logger.recordOutput("Lakitu/EndDeviationMeters", endDistance);
-
-        if (recoveryAttempts > MAX_RECOVERY_ATTEMPTS) {
-          activeCommand = null;
-          state = State.FAILED;
-          logState();
-          return;
-        }
-
-        startRecovery();
-        state = State.RECOVERING;
-        logState();
-        return;
-      }
-
-      activeCommand = null;
-      pathCompleted = true;
+      handlePathTimerExpired();
       return;
     }
 
-    double deviationMeters =
-        poseSupplier.get().getTranslation().getDistance(targetPoseSupplier.get().getTranslation());
-    Logger.recordOutput("Lakitu/DeviationMeters", deviationMeters);
-
-    if (deviationMeters > RECOVERY_THRESHOLD_METERS) {
-      recoveryAttempts++;
-      Logger.recordOutput("Lakitu/RecoveryAttempts", recoveryAttempts);
-
-      if (recoveryAttempts > MAX_RECOVERY_ATTEMPTS) {
-        activeCommand.end(true);
-        activeCommand = null;
-        state = State.FAILED;
-        logState();
-        return;
-      }
-
-      activeCommand.end(true);
-      startRecovery();
-      state = State.RECOVERING;
-      logState();
-    }
+    checkMidPathDeviation();
   }
 
   private void executeRecovering() {
@@ -201,9 +168,66 @@ public class LakituFollowPathCommand extends Command {
     if (activeCommand.isFinished()) {
       activeCommand.end(false);
       startFollowing();
-      state = State.FOLLOWING;
-      logState();
+      transitionTo(State.FOLLOWING);
     }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Deviation checks
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Called when the inner FollowPathCommand's timer expires. Checks whether the robot actually
+   * reached the end of the path. If not, triggers recovery.
+   */
+  private void handlePathTimerExpired() {
+    List<Pose2d> pathPoses = originalPath.getPathPoses();
+    Pose2d endPose = pathPoses.get(pathPoses.size() - 1);
+    double endDistance =
+        poseSupplier.get().getTranslation().getDistance(endPose.getTranslation());
+
+    if (endDistance <= END_TOLERANCE_METERS) {
+      activeCommand = null;
+      pathCompleted = true;
+      return;
+    }
+
+    Logger.recordOutput("Lakitu/EndDeviationMeters", endDistance);
+    triggerRecoveryOrFail();
+  }
+
+  /** Called every cycle during FOLLOWING to check if the robot has drifted too far from target. */
+  private void checkMidPathDeviation() {
+    double deviationMeters =
+        poseSupplier.get().getTranslation().getDistance(targetPoseSupplier.get().getTranslation());
+    Logger.recordOutput("Lakitu/DeviationMeters", deviationMeters);
+
+    if (deviationMeters > RECOVERY_THRESHOLD_METERS) {
+      activeCommand.end(true);
+      triggerRecoveryOrFail();
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Recovery logic
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Attempts recovery if attempts remain, otherwise transitions to FAILED. Shared by both the
+   * mid-path deviation check and the end-of-path tolerance check.
+   */
+  private void triggerRecoveryOrFail() {
+    recoveryAttempts++;
+    Logger.recordOutput("Lakitu/RecoveryAttempts", recoveryAttempts);
+
+    if (recoveryAttempts > MAX_RECOVERY_ATTEMPTS) {
+      activeCommand = null;
+      transitionTo(State.FAILED);
+      return;
+    }
+
+    startRecovery();
+    transitionTo(State.RECOVERING);
   }
 
   private void startFollowing() {
@@ -215,33 +239,56 @@ public class LakituFollowPathCommand extends Command {
 
   private void startRecovery() {
     Pose2d currentPose = poseSupplier.get();
-    Pose2d checkpointPose =
-        originalPath.getStartingHolonomicPose().orElseGet(() -> originalPath.getPathPoses().get(0));
+    Pose2d checkpointPose = getCheckpointPose();
 
-    Translation2d delta = checkpointPose.getTranslation().minus(currentPose.getTranslation());
-    Rotation2d travelHeading = delta.getAngle();
+    double distanceToCheckpoint =
+        currentPose.getTranslation().getDistance(checkpointPose.getTranslation());
 
-    List<Waypoint> waypoints =
-        PathPlannerPath.waypointsFromPoses(
-            new Pose2d(currentPose.getTranslation(), travelHeading),
-            new Pose2d(checkpointPose.getTranslation(), travelHeading));
+    // If already at the checkpoint, skip recovery and restart the path directly
+    if (distanceToCheckpoint < MIN_RECOVERY_DISTANCE_METERS) {
+      startFollowing();
+      transitionTo(State.FOLLOWING);
+      return;
+    }
 
-    PathPlannerPath recoveryPath =
-        new PathPlannerPath(
-            waypoints,
-            new PathConstraints(
-                RECOVERY_MAX_VELOCITY_MPS,
-                RECOVERY_MAX_ACCELERATION_MPSSQ,
-                RECOVERY_MAX_ANGULAR_VELOCITY_RAD_PER_SEC,
-                RECOVERY_MAX_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ),
-            null,
-            new GoalEndState(0.0, checkpointPose.getRotation()));
-    recoveryPath.name = "Lakitu Recovery";
-
+    PathPlannerPath recoveryPath = buildRecoveryPath(currentPose, checkpointPose);
     activeCommand = commandBuilder.apply(recoveryPath);
     activeCommand.initialize();
 
     Logger.recordOutput("Lakitu/RecoveryTarget", checkpointPose);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Helpers
+  // ---------------------------------------------------------------------------
+
+  /** Returns the starting pose of the original path (the "checkpoint" to recover to). */
+  private Pose2d getCheckpointPose() {
+    return originalPath
+        .getStartingHolonomicPose()
+        .orElseGet(() -> originalPath.getPathPoses().get(0));
+  }
+
+  /** Builds an on-the-fly path from the robot's current position to the checkpoint. */
+  private PathPlannerPath buildRecoveryPath(Pose2d from, Pose2d to) {
+    Translation2d delta = to.getTranslation().minus(from.getTranslation());
+    Rotation2d travelHeading = delta.getAngle();
+
+    List<Waypoint> waypoints =
+        PathPlannerPath.waypointsFromPoses(
+            new Pose2d(from.getTranslation(), travelHeading),
+            new Pose2d(to.getTranslation(), travelHeading));
+
+    PathPlannerPath path =
+        new PathPlannerPath(
+            waypoints, RECOVERY_CONSTRAINTS, null, new GoalEndState(0.0, to.getRotation()));
+    path.name = "Lakitu Recovery";
+    return path;
+  }
+
+  private void transitionTo(State newState) {
+    state = newState;
+    logState();
   }
 
   private void logState() {

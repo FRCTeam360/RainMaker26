@@ -15,6 +15,7 @@ import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathPlannerPath;
+import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -35,6 +36,7 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
+import frc.robot.Robot;
 import frc.robot.commands.LakituFollowPathCommand;
 import frc.robot.generated.WoodBotDrivetrain.TunerSwerveDrivetrain;
 import frc.robot.subsystems.Vision.VisionMeasurement;
@@ -67,10 +69,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   // Keep track of when vision measurements are added for logging context
   private boolean hasVisionMeasurements = false;
 
-  // Simulate a 1-second collision stall for testing Lakitu recovery. Set to true via
-  // NetworkTables to trigger — automatically resets after 1 second.
+  // Simulate a 1-second collision stall for testing Lakitu recovery (sim only).
+  // Set to true via NetworkTables to trigger — automatically resets after 1 second.
   private final LoggedNetworkBoolean simulateStall =
-      new LoggedNetworkBoolean("/Tuning/Swerve/SimulateStall", false);
+      Robot.isReal() ? null : new LoggedNetworkBoolean("/Tuning/Swerve/SimulateStall", false);
   private static final double STALL_DURATION_SECONDS = 1.0;
   private double stallStartTime = -1;
 
@@ -545,8 +547,27 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   private static final double PP_ROTATION_KI = 0.0;
   private static final double PP_ROTATION_KD = 0.0;
 
+  // Cached PathPlanner robot config, loaded once during configureAutoBuilder()
+  private RobotConfig pathPlannerConfig;
+
   private void configureAutoBuilder() {
     try {
+      // TODO rework this so it's unified with the top level robot builder class
+      if (Constants.getRobotType() == Constants.RobotType.WOODBOT) {
+        pathPlannerConfig = Constants.WoodBotConstants.createPathPlannerConfig();
+      } else {
+        pathPlannerConfig = RobotConfig.fromGUISettings();
+      }
+
+      // Register callback so Lakitu can read the path follower's target pose each cycle.
+      // This is set here (not in RobotContainer) to keep the coupling explicit — the
+      // drivetrain owns both the target pose field and the AutoBuilder config.
+      PathPlannerLogging.setLogTargetPoseCallback(
+          pose -> {
+            latestPathTargetPose = pose;
+            Logger.recordOutput("Swerve/TargetPathPose", pose);
+          });
+
       AutoBuilder.configureCustom(
           (PathPlannerPath path) -> {
             if (LakituFollowPathCommand.isRegistered(path.name)) {
@@ -578,21 +599,13 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
    * @return a command that follows the path
    */
   private Command buildFollowPathCommand(PathPlannerPath path) {
-    try {
-      RobotConfig config;
-      // TODO rework this so it's unified with the top level robot builder class
-      if (Constants.getRobotType() == Constants.RobotType.WOODBOT) {
-        config = Constants.WoodBotConstants.createPathPlannerConfig();
-      } else {
-        config = RobotConfig.fromGUISettings();
-      }
-
-      return new FollowPathCommand(
-          path,
-          this::getPosition,
-          this::getVelocity,
-          (speeds, feedforwards) -> {
-            setCommandedSpeeds(speeds);
+    return new FollowPathCommand(
+        path,
+        this::getPosition,
+        this::getVelocity,
+        (speeds, feedforwards) -> {
+          setCommandedSpeeds(speeds);
+          if (simulateStall != null) {
             if (simulateStall.get() && stallStartTime < 0) {
               stallStartTime = edu.wpi.first.wpilibj.Timer.getFPGATimestamp();
             }
@@ -605,24 +618,20 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
               stallStartTime = -1;
               simulateStall.set(false);
             }
-            setControl(
-                m_pathApplyRobotSpeeds
-                    .withSpeeds(ChassisSpeeds.discretize(speeds, 0.020))
-                    .withWheelForceFeedforwardsX(feedforwards.robotRelativeForcesXNewtons())
-                    .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons())
-                    .withDriveRequestType(m_driveRequestType));
-          },
-          new PPHolonomicDriveController(
-              new PIDConstants(PP_TRANSLATION_KP, PP_TRANSLATION_KI, PP_TRANSLATION_KD),
-              new PIDConstants(PP_ROTATION_KP, PP_ROTATION_KI, PP_ROTATION_KD)),
-          config,
-          () -> false,
-          this);
-    } catch (Exception ex) {
-      DriverStation.reportError(
-          "Failed to build FollowPathCommand for Lakitu recovery", ex.getStackTrace());
-      return new InstantCommand();
-    }
+          }
+          setControl(
+              m_pathApplyRobotSpeeds
+                  .withSpeeds(ChassisSpeeds.discretize(speeds, 0.020))
+                  .withWheelForceFeedforwardsX(feedforwards.robotRelativeForcesXNewtons())
+                  .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons())
+                  .withDriveRequestType(m_driveRequestType));
+        },
+        new PPHolonomicDriveController(
+            new PIDConstants(PP_TRANSLATION_KP, PP_TRANSLATION_KI, PP_TRANSLATION_KD),
+            new PIDConstants(PP_ROTATION_KP, PP_ROTATION_KI, PP_ROTATION_KD)),
+        pathPlannerConfig,
+        () -> false,
+        this);
   }
 
   /**
@@ -850,16 +859,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
    */
   public Pose2d getLatestPathTargetPose() {
     return latestPathTargetPose;
-  }
-
-  /**
-   * Sets the latest path target pose. Called from the PathPlannerLogging callback in
-   * RobotContainer.
-   *
-   * @param pose the current target pose from the path follower
-   */
-  public void setLatestPathTargetPose(Pose2d pose) {
-    this.latestPathTargetPose = pose;
   }
 
   /**
