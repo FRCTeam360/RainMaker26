@@ -299,6 +299,8 @@ public class RobotContainer {
     LakituFollowPathCommand.registerPath("Lakitu Path 2");
     LakituFollowPathCommand.registerPath("Lakitu Path 3");
     LakituFollowPathCommand.registerPath("Lakitu Path 4");
+    LakituFollowPathCommand.registerPath("No Stop Right Red Middle 1");
+    LakituFollowPathCommand.registerPath("No Stop Right Red Middle 2");
 
     registerPathplannerCommand(
         "basic intake", superStructure.setIntakeStateCommand(IntakeWantedStates.INTAKING));
