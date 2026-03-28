@@ -148,10 +148,7 @@ public class LakituFollowPathCommand extends Command {
     }
 
     double deviationMeters =
-        poseSupplier
-            .get()
-            .getTranslation()
-            .getDistance(targetPoseSupplier.get().getTranslation());
+        poseSupplier.get().getTranslation().getDistance(targetPoseSupplier.get().getTranslation());
     Logger.recordOutput("Lakitu/DeviationMeters", deviationMeters);
 
     if (deviationMeters > RECOVERY_THRESHOLD_METERS) {

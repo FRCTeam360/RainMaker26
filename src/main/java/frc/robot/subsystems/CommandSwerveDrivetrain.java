@@ -15,7 +15,6 @@ import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathPlannerPath;
-import frc.robot.commands.LakituFollowPathCommand;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -36,6 +35,7 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
+import frc.robot.commands.LakituFollowPathCommand;
 import frc.robot.generated.WoodBotDrivetrain.TunerSwerveDrivetrain;
 import frc.robot.subsystems.Vision.VisionMeasurement;
 import frc.robot.utils.AllianceFlipUtil;
@@ -44,6 +44,7 @@ import java.util.Optional;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 
 /**
  * Class that extends the Phoenix 6 SwerveDrivetrain class and implements Subsystem so it can easily
@@ -65,6 +66,13 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
   // Keep track of when vision measurements are added for logging context
   private boolean hasVisionMeasurements = false;
+
+  // Simulate a 1-second collision stall for testing Lakitu recovery. Set to true via
+  // NetworkTables to trigger — automatically resets after 1 second.
+  private final LoggedNetworkBoolean simulateStall =
+      new LoggedNetworkBoolean("/Tuning/Swerve/SimulateStall", false);
+  private static final double STALL_DURATION_SECONDS = 1.0;
+  private double stallStartTime = -1;
 
   // Lazily-cached state copy. Invalidated once per cycle via clearCachedState() in
   // preSchedulerUpdate(), then populated on first access via getCachedState().
@@ -585,6 +593,18 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
           this::getVelocity,
           (speeds, feedforwards) -> {
             setCommandedSpeeds(speeds);
+            if (simulateStall.get() && stallStartTime < 0) {
+              stallStartTime = edu.wpi.first.wpilibj.Timer.getFPGATimestamp();
+            }
+            if (stallStartTime >= 0) {
+              if (edu.wpi.first.wpilibj.Timer.getFPGATimestamp() - stallStartTime
+                  < STALL_DURATION_SECONDS) {
+                setControl(xOutReq);
+                return;
+              }
+              stallStartTime = -1;
+              simulateStall.set(false);
+            }
             setControl(
                 m_pathApplyRobotSpeeds
                     .withSpeeds(ChassisSpeeds.discretize(speeds, 0.020))

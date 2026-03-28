@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.RobotType;
+import frc.robot.commands.LakituFollowPathCommand;
 import frc.robot.generated.PracticeBotDrivetrain;
 import frc.robot.generated.WoodBotDrivetrain;
 import frc.robot.subsystems.Climber.Climber;
@@ -294,6 +295,11 @@ public class RobotContainer {
             drivetrain::isAlignedToTarget,
             drivetrain::getPosition,
             robotShootingInfo.robotToShooter());
+    LakituFollowPathCommand.registerPath("Lakitu Path 1");
+    LakituFollowPathCommand.registerPath("Lakitu Path 2");
+    LakituFollowPathCommand.registerPath("Lakitu Path 3");
+    LakituFollowPathCommand.registerPath("Lakitu Path 4");
+
     registerPathplannerCommand(
         "basic intake", superStructure.setIntakeStateCommand(IntakeWantedStates.INTAKING));
     // TODO: add end condition based on state from SuperStructure (based on sensor inputs)

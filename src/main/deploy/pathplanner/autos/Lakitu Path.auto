@@ -27,6 +27,30 @@
           "data": {
             "pathName": "Lakitu Path 4"
           }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Lakitu Path 1"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Lakitu Path 2"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Lakitu Path 3"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Lakitu Path 4"
+          }
         }
       ]
     }
