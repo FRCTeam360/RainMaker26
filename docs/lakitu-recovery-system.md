@@ -20,6 +20,14 @@ Result: target runs off the end of the path, auto timing is ruined
 
 The robot either finishes the path far from where it should be, or the remaining auto segments start from the wrong position, cascading into a failed autonomous routine.
 
+## Goals
+
+1. **Work within the existing PathPlanner API** — Use PathPlanner's public API for path construction and following. No forks, no monkey-patching, no internal API access. If PathPlanner can do it, we use PathPlanner to do it.
+2. **Drop-in wrapper for existing autos** — The recovery system should wrap the standard follow-path command. Existing auto files and path files should not need modification.
+3. **On-the-fly path to starting position** — When recovery triggers, an on-the-fly path is constructed from wherever the robot currently is directly to the start of the current path segment, using PathPlanner's on-the-fly path API. No AD* pathfinding, no pre-planned recovery paths — just a straight shot back to the checkpoint. This means path designers must place segment start/end positions in open, unobstructed areas of the field so the recovery path can reach them from anywhere.
+4. **GUI workflow unchanged** — Base paths are authored, edited, and maintained entirely through the PathPlanner GUI as normal. The recovery system operates at the command layer — it has no effect on `.path` or `.auto` files. Path designers never need to think about Lakitu when editing paths.
+5. **Observable and debuggable** — Every recovery event, state transition, and distance measurement is logged to AdvantageKit so the team can review what happened in post-match analysis.
+
 ## The Mario Kart Lakitu Analogy
 
 In Mario Kart, when a kart falls off the track or goes out of bounds, **Lakitu** (the cloud-riding Koopa with a fishing rod) picks the kart up and places it back at the last valid checkpoint. The race continues from that checkpoint — the driver loses some time, but they're back on course and can finish the race.
@@ -30,7 +38,7 @@ We apply the same concept to autonomous path following:
 |---|---|
 | Kart goes out of bounds | Robot deviates beyond a distance threshold from the target pose |
 | Lakitu picks up the kart | System interrupts the current path follower |
-| Kart placed at last checkpoint | Robot pathfinds back to the **start of the current path segment** |
+| Kart placed at last checkpoint | Robot retraces the original path back to the **start of the current path segment** |
 | Race continues from checkpoint | Path segment restarts from the beginning |
 
 The **checkpoint** is the starting pose of whichever path segment the robot was following when the deviation was detected. Just like in Mario Kart, the driver (auto routine) loses time on recovery, but the alternative — careening further off course — is worse.
@@ -51,7 +59,7 @@ If the distance exceeds a configurable threshold (default: 1.5 meters), the syst
 
 When the threshold is breached:
 1. **Stop** the current path follower immediately
-2. **Generate an on-the-fly path** from the robot's current position back to the start of the current path segment, using obstacle-aware pathfinding
+2. **Build a recovery path on-the-fly** from the robot's current position directly to the start of the current path segment using PathPlanner's on-the-fly path API. This is a simple point-to-point path — no obstacle avoidance, which is why path start/end positions must be in open, unobstructed areas of the field.
 3. **Follow the recovery path** back to the checkpoint
 
 ### Step 4: Restart the Path
@@ -98,7 +106,7 @@ If recovery itself fails (robot gets knocked off again during the recovery path)
 
 **States:**
 - **FOLLOWING** — Normal operation. The wrapped path follower is active. Distance is monitored every cycle.
-- **RECOVERING** — The original path has been interrupted. The robot is pathfinding back to the checkpoint (start of the current path segment). Distance monitoring is paused during recovery since the pathfinder manages its own corrections.
+- **RECOVERING** — The original path has been interrupted. The robot is following an on-the-fly path directly back to the checkpoint (start of the current path segment). Distance monitoring is paused during recovery.
 - **FAILED** — Maximum recovery attempts exhausted. The command reports itself as finished so the auto sequence can proceed to the next step.
 
 ## Data Flow
@@ -133,11 +141,11 @@ If recovery itself fails (robot gets knocked off again during the recovery path)
                        │
                        ▼ (on breach)
     ┌─────────────────────────────────────┐
-    │       Recovery Path Generator       │
+    │     On-The-Fly Path Constructor     │
     │                                     │
-    │  Generate obstacle-aware path from  │
+    │  Build direct path:                 │
     │  current pose → path start pose     │
-    │  using field navigation grid        │
+    │  using PathPlanner's on-the-fly API │
     └─────────────────────────────────────┘
 ```
 
@@ -152,15 +160,15 @@ The key insight is that PathPlanner already computes and exposes the target pose
 | **Recovery path max velocity** | 3.0 m/s | Slower than normal path speed (4.0 m/s) to prioritize accuracy during recovery. The robot needs to arrive precisely at the checkpoint, not race there. |
 | **Recovery path max acceleration** | 6.0 m/s² | Reduced from the normal 8.0 m/s² for smoother, more predictable recovery motion. |
 
-All parameters should be tunable on the dashboard during testing so the team can dial in values for specific field conditions and robot configurations.
+All parameters are named constants in code, tuned through testing.
 
 ## Tradeoffs and Limitations
 
 ### Time Cost
-Recovery is not free. Pathfinding back to the checkpoint and restarting the path segment takes time — potentially 2–4 seconds depending on how far off-path the robot was knocked. In a 15-second autonomous window, this may mean the last path segment or scoring action gets cut. **However**, an unrecovered collision typically ruins the *entire* remaining auto, so spending time on recovery to save 2–3 remaining segments is almost always the better trade.
+Recovery is not free. Retracing back to the checkpoint and restarting the path segment takes time — potentially 2–4 seconds depending on how far off-path the robot was knocked. In a 15-second autonomous window, this may mean the last path segment or scoring action gets cut. **However**, an unrecovered collision typically ruins the *entire* remaining auto, so spending time on recovery to save 2–3 remaining segments is almost always the better trade.
 
-### First Recovery Latency
-The on-the-fly pathfinding algorithm needs to be warmed up at robot initialization. Without warmup, the first pathfind call may take 50–200ms (2.5–10 control cycles). This is a one-time cost per match and can be addressed by running a warmup command during robot init.
+### Recovery Assumes Clear Line to Checkpoint
+The on-the-fly recovery path is a direct route from the robot's current position to the path start. If a field element is between the robot and the checkpoint, the recovery path will drive through it. This is mitigated by the design constraint that path start/end positions must be placed in open, unobstructed areas of the field.
 
 ### Vision Pose Estimation During Recovery
 If the robot is knocked into a position with poor AprilTag visibility, the pose estimate itself may drift. The recovery system trusts the pose estimator — if the estimate is wrong, recovery will pathfind to the wrong location. This is an inherent limitation: recovery quality is only as good as the pose estimate.
