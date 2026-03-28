@@ -315,7 +315,7 @@ public class RobotContainer {
                               return hubShotCalculator.calculateShot().targetHeading();
                             }))
                     .alongWith(
-                        Commands.waitSeconds(1.25)
+                        Commands.waitSeconds(2.0)
                             .andThen(
                                 superStructure.setIntakeStateCommand(
                                     IntakeWantedStates.AGITATING))))
@@ -412,7 +412,7 @@ public class RobotContainer {
                       return hubShotCalculator.calculateShot().targetHeading();
                     }))
             .alongWith(
-                Commands.waitSeconds(1.25)
+                Commands.waitSeconds(2.5)
                     .andThen(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING))));
     autoCycleTrigger.onFalse(
         superStructure
@@ -439,6 +439,11 @@ public class RobotContainer {
                     drivetrain.faceAngleWhileDrivingCommand(
                         driverCont, () -> passCalculator.calculateShot().targetHeading())));
     driverCont.b().onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
+
+    driverCont.x().whileTrue(superStructure.setIntakeStateCommand(IntakeWantedStates.REVERSING));
+    // TODO: check that this works with just an on false because this will set the intake to idle
+    // constantly and that's probably not what we want but it did work on the field
+    driverCont.x().whileFalse(superStructure.setIntakeStateCommand(IntakeWantedStates.IDLE));
 
     // Left trigger held: agitate. Release: back to intaking.
     if (Constants.getRobotType() == RobotType.WOODBOT) {
@@ -475,6 +480,8 @@ public class RobotContainer {
     // Drivetrain commands
     // driverCont.leftTrigger().whileTrue(drivetrain.faceHubWhileDriving(driverCont));
     driverCont.back().onTrue(drivetrain.zeroCommand());
+
+    driverCont.rightStick().onTrue(drivetrain.toggleHeadingLockCommand());
   }
 
   /** Configures bindings that are active only in independent (test) mode. */

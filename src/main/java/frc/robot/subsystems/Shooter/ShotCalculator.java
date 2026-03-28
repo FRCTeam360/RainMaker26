@@ -241,6 +241,16 @@ public class ShotCalculator {
   }
 
   /**
+   * Returns the time-of-flight value at the minimum distance key in the map — i.e., the shortest
+   * possible flight time for any shot.
+   *
+   * @return minimum time of flight in seconds
+   */
+  public double getMinTimeOfFlightSecs() {
+    return timeOfFlightMap.get(minDistanceMeters);
+  }
+
+  /**
    * Clears the cached shooting parameters, forcing a recalculation on the next call to {@link
    * #calculateShot()}.
    */

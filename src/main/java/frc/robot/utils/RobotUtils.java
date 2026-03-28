@@ -1,12 +1,21 @@
 package frc.robot.utils;
 
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants;
 import java.io.File;
 import java.util.Optional;
 
 public class RobotUtils {
+  private static final double SHIFT_GRACE_PERIOD_SECONDS = 2.0;
+  private static final double INDEXER_TO_FLYWHEEL_SECONDS = 0.4;
+  private static final double HUB_TO_SENSOR_SECONDS = 2.0;
+
+  public static final double TRANSITION_END_SECONDS = 130;
+  public static final double SHIFT_1_END_SECONDS = 105;
+  public static final double SHIFT_2_END_SECONDS = 80;
+  public static final double SHIFT_3_END_SECONDS = 55;
+  public static final double ENDGAME_START_SECONDS = 30;
+
   public enum ActiveHub {
     BOTH,
     AUTOLOSER,
@@ -60,36 +69,39 @@ public class RobotUtils {
    * @param timeOfFlight the time of flight of the shot in seconds
    * @return which hub(s) are currently active
    */
-  public static ActiveHub getShootingPhase(double gameTime, Boolean isTele, double timeOfFlight) {
+  public static ActiveHub getActiveHubAtShotLanding(
+      double gameTime, Boolean isTele, double timeOfFlight) {
     // gameTime is the getMatchTime() from DriverStation, isTele is the isTeleop() from
     // DriverStation
     ActiveHub activeHub = ActiveHub.BOTH;
-    gameTime -= timeOfFlight;
+    double timeAtShotLanding = gameTime - (timeOfFlight + INDEXER_TO_FLYWHEEL_SECONDS);
     // Sets phases based on the current time in the game
     if (!isTele) {
       activeHub = ActiveHub.BOTH; // AUTO
     } else if (isTele) {
-      if (gameTime <= 30) {
+      if (timeAtShotLanding <= ENDGAME_START_SECONDS) {
         activeHub = ActiveHub.BOTH; // END GAME
-      } else if (gameTime < 53) {
+      } else if (timeAtShotLanding < SHIFT_3_END_SECONDS - SHIFT_GRACE_PERIOD_SECONDS) {
         activeHub = ActiveHub.AUTOWINNER; // ALLIANCE SHIFT 4
-      } else if (gameTime <= 55 && gameTime >= 53) {
+      } else if (timeAtShotLanding <= SHIFT_3_END_SECONDS
+          && timeAtShotLanding >= SHIFT_3_END_SECONDS - SHIFT_GRACE_PERIOD_SECONDS) {
         activeHub = ActiveHub.BOTH; // ALLIANCE SHIFT GRACE PERIOD
-      } else if (gameTime < 78) {
+      } else if (timeAtShotLanding < SHIFT_2_END_SECONDS - SHIFT_GRACE_PERIOD_SECONDS) {
         activeHub = ActiveHub.AUTOLOSER; // ALLIANCE SHIFT 3
-      } else if (gameTime <= 80 && gameTime >= 78) {
+      } else if (timeAtShotLanding <= SHIFT_2_END_SECONDS
+          && timeAtShotLanding >= SHIFT_2_END_SECONDS - SHIFT_GRACE_PERIOD_SECONDS) {
         activeHub = ActiveHub.BOTH; // ALLIANCE SHIFT GRACE PERIOD
-      } else if (gameTime < 103) {
+      } else if (timeAtShotLanding < SHIFT_1_END_SECONDS - SHIFT_GRACE_PERIOD_SECONDS) {
         activeHub = ActiveHub.AUTOWINNER; // ALLIANCE SHIFT 2
-      } else if (gameTime <= 105 && gameTime >= 103) {
+      } else if (timeAtShotLanding <= SHIFT_1_END_SECONDS
+          && timeAtShotLanding >= SHIFT_1_END_SECONDS - SHIFT_GRACE_PERIOD_SECONDS) {
         activeHub = ActiveHub.BOTH; // ALLIANCE SHIFT GRACE PERIOD
-      } else if (gameTime <= 130) {
+      } else if (timeAtShotLanding <= TRANSITION_END_SECONDS) {
         activeHub = ActiveHub.AUTOLOSER; // ALLIANCE SHIFT 1
       } else {
         return ActiveHub.BOTH; // TRANSITION
       }
     }
-    SmartDashboard.putString("ActiveHub", activeHub.name());
     return activeHub;
   }
 
@@ -102,10 +114,10 @@ public class RobotUtils {
    * @param gamePhase which hub(s) are active (auto winner's or auto loser's)
    * @return if our alliance's hub is active
    */
-  public static boolean hubActive(
+  public static boolean isHubActiveForAlliance(
       Optional<Alliance> alliance, Alliance autoWinner, ActiveHub gamePhase) {
     // alliance is our alliance, autoWinner is the result of getAutoWinner, gamePhase is the result
-    // of getShootingPhase
+    // of getActiveHub
     boolean hubActive = true;
     if (alliance.isPresent()) {
       if (gamePhase == null || autoWinner == null) {
