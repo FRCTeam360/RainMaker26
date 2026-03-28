@@ -423,10 +423,7 @@ public class RobotContainer {
     Trigger forceHubTrigger = driverCont.rightBumper().and(isSuperstructureMode);
     forceHubTrigger.whileTrue(
         superStructure
-            .setStateCommand(SuperWantedStates.SHOOT_AT_HUB)
-            .alongWith(
-                drivetrain.faceAngleWhileDrivingCommand(
-                    driverCont, () -> hubShotCalculator.calculateShot().targetHeading())));
+            .setStateCommand(SuperWantedStates.FORCED_SHOT));
     forceHubTrigger.onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
 
     // Manual override: force pass to outpost regardless of position
