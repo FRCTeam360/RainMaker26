@@ -33,6 +33,7 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
+import frc.robot.commands.FollowPathHFCommand;
 import frc.robot.generated.WoodBotDrivetrain.TunerSwerveDrivetrain;
 import frc.robot.subsystems.Vision.VisionMeasurement;
 import frc.robot.utils.AllianceFlipUtil;
@@ -77,6 +78,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   private static final Rotation2d kRedAlliancePerspectiveRotation = Rotation2d.k180deg;
   /* Keep track if we've ever applied the operator perspective before or not */
   private boolean m_hasAppliedOperatorPerspective = false;
+
+  // 100Hz path-following controller (254-style threading optimization)
+  private HighFrequencyPathController highFreqController;
+  private RobotConfig pathPlannerConfig;
 
   // Apply Robot Speeds
   private final SwerveRequest.ApplyRobotSpeeds m_pathApplyRobotSpeeds =
@@ -532,41 +537,62 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
   private void configureAutoBuilder() {
     try {
-      RobotConfig config;
       // TODO rework this so it's unified with the top level robot builder class
       if (Constants.getRobotType() == Constants.RobotType.WOODBOT) {
-        config = Constants.WoodBotConstants.createPathPlannerConfig();
+        pathPlannerConfig = Constants.WoodBotConstants.createPathPlannerConfig();
       } else {
-        config = RobotConfig.fromGUISettings();
+        pathPlannerConfig = RobotConfig.fromGUISettings();
       }
 
-      AutoBuilder.configure(
-          this::getPosition, // Supplier of current robot pose (uses cached state)
-          this::resetPose, // Consumer for seeding pose against auto
-          this::getVelocity, // Supplier of current robot speeds (uses cached state)
-          // Consumer of ChassisSpeeds and feedforwards to drive the robot
-          (speeds, feedforwards) -> {
-            setCommandedSpeeds(speeds);
-            setControl(
-                m_pathApplyRobotSpeeds
-                    .withSpeeds(ChassisSpeeds.discretize(speeds, 0.020))
-                    .withWheelForceFeedforwardsX(feedforwards.robotRelativeForcesXNewtons())
-                    .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons())
-                    .withDriveRequestType(m_driveRequestType));
-          },
+      // Create the 100Hz high-frequency controller (254-style threading optimization).
+      // The PID controller runs at 100Hz on a priority-41 thread instead of the main 50Hz loop.
+      // This provides tighter trajectory tracking and is decoupled from main loop jitter.
+      PPHolonomicDriveController ppController =
           new PPHolonomicDriveController(
               new PIDConstants(PP_TRANSLATION_KP, PP_TRANSLATION_KI, PP_TRANSLATION_KD),
-              new PIDConstants(PP_ROTATION_KP, PP_ROTATION_KI, PP_ROTATION_KD)),
-          config,
-          // Assume the path needs to be flipped for Red vs Blue, this is normally the
-          // case
+              new PIDConstants(PP_ROTATION_KP, PP_ROTATION_KI, PP_ROTATION_KD),
+              CONTROLLER_PERIOD_SECONDS);
+
+      highFreqController =
+          new HighFrequencyPathController(
+              ppController,
+              // samplePoseAt with a small lookahead could be used here for latency
+              // compensation, but for the prototype we use the direct pose
+              this::getPosition,
+              this::setControl);
+
+      // Use configureCustom so we can supply our own FollowPathHFCommand that delegates
+      // trajectory execution to the 100Hz controller thread instead of the 50Hz main loop.
+      AutoBuilder.configureCustom(
+          (path) ->
+              new FollowPathHFCommand(
+                  path,
+                  this::getPosition,
+                  this::getVelocity,
+                  highFreqController,
+                  pathPlannerConfig,
+                  () -> false,
+                  this),
+          this::getPosition,
+          this::resetPose,
           () -> false,
-          this // Subsystem for requirements
-          );
+          pathPlannerConfig.isHolonomic);
     } catch (Exception ex) {
       DriverStation.reportError(
           "Failed to load PathPlanner config and configure AutoBuilder", ex.getStackTrace());
     }
+  }
+
+  /** Period used for the high-frequency path controller, in seconds. */
+  private static final double CONTROLLER_PERIOD_SECONDS = 0.01;
+
+  /**
+   * Returns the 100Hz high-frequency path controller for use by custom commands.
+   *
+   * @return the high-frequency controller instance
+   */
+  public HighFrequencyPathController getHighFreqController() {
+    return highFreqController;
   }
 
   /**
