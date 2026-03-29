@@ -51,6 +51,8 @@ public class SuperStructure extends SubsystemBase {
   // shooting @ 3 meters
   private static final double HOOD_FORCED_ANGLE = 10.0;
   private static final double FLYWHEEL_FORCED_RPM = 2200.0;
+  private static final double HOOD_FORCED_TRENCH_ANGLE = 10.0;
+  private static final double FLYWHEEL_FORCED_TRENCH_RPM = 2200.0;
 
   // Enums
   public enum SuperWantedStates {
@@ -64,7 +66,8 @@ public class SuperStructure extends SubsystemBase {
     X_OUT,
     EJECTING,
     UNJAMMING,
-    FORCED_SHOT
+    FORCED_SHOT,
+    FORCED_SHOOT_TRENCH
   }
 
   public enum SuperInternalStates {
@@ -73,7 +76,8 @@ public class SuperStructure extends SubsystemBase {
     SHOOTING_AT_HUB,
     PASSING,
     UNJAMMING,
-    FORCED_SHOT
+    FORCED_SHOT,
+    FORCED_SHOOT_TRENCH
   }
 
   // State variables
@@ -122,12 +126,18 @@ public class SuperStructure extends SubsystemBase {
           if (currentSuperState == SuperInternalStates.FORCED_SHOT) {
             return FLYWHEEL_FORCED_RPM;
           }
+          if (currentSuperState == SuperInternalStates.FORCED_SHOOT_TRENCH) {
+            return FLYWHEEL_FORCED_TRENCH_RPM;
+          }
           return targetSelectionStateMachine.getActiveCalculator().calculateShot().flywheelSpeed();
         });
     hood.setHoodAngleSupplier(
         () -> {
           if (currentSuperState == SuperInternalStates.FORCED_SHOT) {
             return HOOD_FORCED_ANGLE;
+          }
+          if (currentSuperState == SuperInternalStates.FORCED_SHOOT_TRENCH) {
+            return HOOD_FORCED_TRENCH_ANGLE;
           }
           return targetSelectionStateMachine.getActiveCalculator().calculateShot().hoodAngle();
         });
@@ -168,6 +178,9 @@ public class SuperStructure extends SubsystemBase {
       case FORCED_SHOT:
         currentSuperState = SuperInternalStates.FORCED_SHOT;
         break;
+      case FORCED_SHOOT_TRENCH:
+        currentSuperState = SuperInternalStates.FORCED_SHOOT_TRENCH;
+        break;
       case DEFAULT:
       default:
         targetSelectionStateMachine.setWantedState(TargetWantedStates.AUTO);
@@ -189,6 +202,7 @@ public class SuperStructure extends SubsystemBase {
         unjamming();
         break;
       case FORCED_SHOT:
+      case FORCED_SHOOT_TRENCH:
         shooting();
         break;
       case DEFAULT:
@@ -201,6 +215,8 @@ public class SuperStructure extends SubsystemBase {
 
   private void shooting() {
     if (currentSuperState == SuperInternalStates.FORCED_SHOT) {
+      shooterStateMachine.setWantedState(ShooterWantedStates.FORCED_SHOT);
+    } else if (currentSuperState == SuperInternalStates.FORCED_SHOOT_TRENCH) {
       shooterStateMachine.setWantedState(ShooterWantedStates.FORCED_SHOT);
     } else {
       shooterStateMachine.setWantedState(ShooterWantedStates.SHOOTING);
