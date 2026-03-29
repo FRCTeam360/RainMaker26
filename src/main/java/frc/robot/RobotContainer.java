@@ -315,7 +315,7 @@ public class RobotContainer {
                               return hubShotCalculator.calculateShot().targetHeading();
                             }))
                     .alongWith(
-                        Commands.waitSeconds(1.75)
+                        Commands.waitSeconds(2.25)
                             .andThen(
                                 superStructure.setIntakeStateCommand(
                                     IntakeWantedStates.AGITATING))))
