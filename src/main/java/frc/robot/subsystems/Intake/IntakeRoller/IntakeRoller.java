@@ -13,7 +13,7 @@ import org.littletonrobotics.junction.Logger;
 
 public class IntakeRoller extends SubsystemBase {
   // Constants
-  private static final double INTAKE_VELOCITY_RPM = 2000.0;
+  private static final double INTAKE_VELOCITY_RPM = 4000.0;
   private static final double REVERSE_UNJAM_DUTY_CYCLE = -0.5;
   private static final double INTAKING_DUTY_CYCLE = 0.8;
   private static final double SHOOT_ASSIST_DUTY_CYCLE = 0.3;
