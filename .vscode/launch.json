@@ -9,7 +9,11 @@
       "name": "AutomatedTestMain",
       "request": "launch",
       "mainClass": "frc.robot.test.AutomatedTestMain",
-      "projectName": "RainMaker26"
+      "projectName": "RainMaker26",
+      "vmArgs": "-Djava.library.path=${workspaceFolder}/build/jni/release",
+      "env": {
+        "LD_LIBRARY_PATH": "${workspaceFolder}/build/jni/release"
+      }
     },
     {
       "type": "wpilib",
@@ -22,6 +26,18 @@
       "name": "WPILib roboRIO Debug",
       "request": "launch",
       "desktop": false
+    },
+    {
+      "type": "java",
+      "name": "Debug JUnit Tests",
+      "request": "launch",
+      "mainClass": "org.junit.platform.console.ConsoleLauncher",
+      "args": ["--select-package=frc", "--details=verbose"],
+      "projectName": "RainMaker26",
+      "vmArgs": "-Djava.library.path=${workspaceFolder}/build/jni/release",
+      "env": {
+        "LD_LIBRARY_PATH": "${workspaceFolder}/build/jni/release"
+      }
     },
     {
       "type": "java",
