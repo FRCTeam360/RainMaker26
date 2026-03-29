@@ -29,10 +29,10 @@ public class IntakeRollerIOPB implements IntakeRollerIO {
   private final SparkFlex motorLeft =
       new SparkFlex(
           PracticeBotConstants.RIGHT_INTAKE_ROLLER_ID, MotorType.kBrushless); // original motor
-  private final SparkFlex motorRight =
-      new SparkFlex(PracticeBotConstants.LEFT_INTAKE_ROLLER_ID, MotorType.kBrushless);
+  // private final SparkFlex motorRight =
+  //     new SparkFlex(PracticeBotConstants.LEFT_INTAKE_ROLLER_ID, MotorType.kBrushless);
   private final RelativeEncoder leftEncoder = motorLeft.getEncoder();
-  private final RelativeEncoder rightEncoder = motorRight.getEncoder();
+  // private final RelativeEncoder rightEncoder = motorRight.getEncoder();
   private final SparkFlexConfig leftConfig = new SparkFlexConfig();
   private final SparkFlexConfig rightConfig = new SparkFlexConfig();
   private final SparkClosedLoopController closedLoopController;
@@ -56,8 +56,8 @@ public class IntakeRollerIOPB implements IntakeRollerIO {
 
     motorLeft.configure(leftConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     rightConfig.follow(motorLeft, false);
-    motorRight.configure(
-        rightConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    // motorRight.configure(
+    //     rightConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     closedLoopController = motorLeft.getClosedLoopController();
   }
 
@@ -87,10 +87,10 @@ public class IntakeRollerIOPB implements IntakeRollerIO {
     inputs.statorCurrent[0] = motorLeft.getOutputCurrent();
     inputs.velocity[0] = leftEncoder.getVelocity();
     inputs.voltage[0] = motorLeft.getBusVoltage() * motorLeft.getAppliedOutput();
-    inputs.position[1] = rightEncoder.getPosition();
-    inputs.statorCurrent[1] = motorRight.getOutputCurrent();
-    inputs.velocity[1] = rightEncoder.getVelocity();
-    inputs.voltage[1] = motorRight.getBusVoltage() * motorRight.getAppliedOutput();
+    // inputs.position[1] = rightEncoder.getPosition();
+    // inputs.statorCurrent[1] = motorRight.getOutputCurrent();
+    // inputs.velocity[1] = rightEncoder.getVelocity();
+    // inputs.voltage[1] = motorRight.getBusVoltage() * motorRight.getAppliedOutput();
     inputs.supplyCurrent = 0;
   }
 }
