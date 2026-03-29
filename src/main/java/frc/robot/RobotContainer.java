@@ -315,7 +315,7 @@ public class RobotContainer {
                               return hubShotCalculator.calculateShot().targetHeading();
                             }))
                     .alongWith(
-                        Commands.waitSeconds(2.25)
+                        Commands.waitSeconds(1.75)
                             .andThen(
                                 superStructure.setIntakeStateCommand(
                                     IntakeWantedStates.AGITATING))))
@@ -425,11 +425,7 @@ public class RobotContainer {
     forceHubTrigger.onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
 
     // Manual override: force pass to outpost regardless of position
-    driverCont
-        .b()
-        .whileTrue(
-            superStructure
-                .setStateCommand(SuperWantedStates.FORCED_SHOOT_TRENCH));
+    driverCont.b().whileTrue(superStructure.setStateCommand(SuperWantedStates.FORCED_SHOOT_TRENCH));
     driverCont.b().onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
 
     driverCont.x().whileTrue(superStructure.setIntakeStateCommand(IntakeWantedStates.REVERSING));
