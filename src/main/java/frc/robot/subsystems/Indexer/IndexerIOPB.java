@@ -23,7 +23,6 @@ public class IndexerIOPB implements IndexerIO {
 
   /** Creates a new IndexerIOPB. */
   private final SparkMax indexerMotor =
-  
       new SparkMax(Constants.PracticeBotConstants.TWINDEXER_ID, MotorType.kBrushless);
 
   private final RelativeEncoder encoder = indexerMotor.getEncoder();
