@@ -4,8 +4,8 @@
 
 package frc.robot.subsystems.Shooter.Hood;
 
-import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXSConfiguration;

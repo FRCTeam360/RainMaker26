@@ -146,8 +146,7 @@ public class FlywheelIOPBBangBang implements FlywheelIO {
     motors[0].getConfigurator().apply(rightConfig);
     motors[0].setNeutralMode(NeutralModeValue.Coast);
 
-    motors[1].setControl(
-        new Follower(this.rightMotorId, MotorAlignmentValue.Opposed));
+    motors[1].setControl(new Follower(this.rightMotorId, MotorAlignmentValue.Opposed));
 
     rightStatorCurrentSignal = motors[0].getStatorCurrent();
     rightSupplyCurrentSignal = motors[0].getSupplyCurrent();

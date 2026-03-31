@@ -412,7 +412,8 @@ public final class Constants {
 
     // === MAXIMUMS ===
     public static final LinearVelocity maxSpeed = PracticeBotConstants.maxSpeed;
-    public static final AngularVelocity maxAngularVelocity = PracticeBotConstants.maxAngularVelocity;
+    public static final AngularVelocity maxAngularVelocity =
+        PracticeBotConstants.maxAngularVelocity;
   }
 
   public static class SimulationConstants {
