@@ -42,7 +42,7 @@ public class FlywheelKickerIOPB implements FlywheelKickerIO {
 
   /** Creates a new FlywheelKickerIOPB. */
   private final SparkFlex flywheelKickerMotor =
-      new SparkFlex(Constants.PracticeBotConstants.FLYWHEEL_KICKER_ID, MotorType.kBrushless);
+      new SparkFlex(getFlywheelKickerId(), MotorType.kBrushless);
 
   private final RelativeEncoder encoder = flywheelKickerMotor.getEncoder();
   private final SparkFlexConfig sparkFlexConfig = new SparkFlexConfig();
@@ -107,6 +107,12 @@ public class FlywheelKickerIOPB implements FlywheelKickerIO {
 
     // BaseStatusSignal.setUpdateFrequencyForAll(50, distanceSignal, isDetectedSignal);
     // canSensor.optimizeBusUtilization();
+  }
+
+  private static int getFlywheelKickerId() {
+    return Constants.getRobotType() == Constants.RobotType.COMPBOT
+        ? Constants.CompBotConstants.FLYWHEEL_KICKER_ID
+        : Constants.PracticeBotConstants.FLYWHEEL_KICKER_ID;
   }
 
   public void updateInputs(FlywheelKickerIOInputs inputs) {

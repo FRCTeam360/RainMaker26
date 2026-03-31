@@ -41,6 +41,7 @@ public final class Constants {
   public static enum RobotType {
     SIM,
     WOODBOT,
+    COMPBOT,
     PRACTICEBOT,
     REPLAY
   }
@@ -57,6 +58,8 @@ public final class Constants {
     switch (getRobotType()) {
       case WOODBOT:
         return WoodBotConstants.maxSpeed;
+      case COMPBOT:
+        return CompBotConstants.maxSpeed;
       case PRACTICEBOT:
         return PracticeBotConstants.maxSpeed;
       case SIM:
@@ -70,6 +73,8 @@ public final class Constants {
     switch (getRobotType()) {
       case WOODBOT:
         return WoodBotConstants.maxAngularVelocity;
+      case COMPBOT:
+        return CompBotConstants.maxAngularVelocity;
       case PRACTICEBOT:
         return PracticeBotConstants.maxAngularVelocity;
       case SIM:
@@ -91,12 +96,14 @@ public final class Constants {
 
     if (serialAddress.equals(SerialAddressConstants.WOOD_SERIAL_ADDRESS)) {
       robotType = Constants.RobotType.WOODBOT;
+    } else if (serialAddress.equals(SerialAddressConstants.COMP_SERIAL_ADDRESS)) {
+      robotType = Constants.RobotType.COMPBOT;
     } else if (serialAddress.equals(SerialAddressConstants.PRACTICE_SERIAL_ADDRESS)) {
       robotType = Constants.RobotType.PRACTICEBOT;
     } else if (!Robot.isReal()) { // KEEP AT BOTTOM
       robotType = Constants.RobotType.SIM;
     } else {
-      robotType = Constants.RobotType.PRACTICEBOT;
+      robotType = Constants.RobotType.COMPBOT;
     }
     return robotType;
   }
@@ -347,6 +354,67 @@ public final class Constants {
     }
   }
 
+  public static class CompBotConstants {
+    // === SHOT CALCULATOR ===
+    public static final InterpolatingDoubleTreeMap shotHoodAngleMap =
+        PracticeBotConstants.shotHoodAngleMap;
+    public static final InterpolatingDoubleTreeMap shotFlywheelSpeedMap =
+        PracticeBotConstants.shotFlywheelSpeedMap;
+    public static final InterpolatingDoubleTreeMap passHoodAngleMap =
+        PracticeBotConstants.passHoodAngleMap;
+    public static final InterpolatingDoubleTreeMap passFlywheelSpeedMap =
+        PracticeBotConstants.passFlywheelSpeedMap;
+    public static final InterpolatingDoubleTreeMap timeOfFlightMap =
+        PracticeBotConstants.timeOfFlightMap;
+
+    public static final double HOOD_OFFSET = PracticeBotConstants.HOOD_OFFSET;
+
+    public static final double MIN_SHOT_DISTANCE_METERS =
+        PracticeBotConstants.MIN_SHOT_DISTANCE_METERS;
+    public static final double MAX_SHOT_DISTANCE_METERS =
+        PracticeBotConstants.MAX_SHOT_DISTANCE_METERS;
+
+    public static final double MIN_PASS_DISTANCE_METERS =
+        PracticeBotConstants.MIN_PASS_DISTANCE_METERS;
+    public static final double MAX_PASS_DISTANCE_METERS =
+        PracticeBotConstants.MAX_PASS_DISTANCE_METERS;
+
+    // === INTAKE ===
+    public static final int INTAKE_PIVOT_ID = 14;
+    public static final int LEFT_INTAKE_ROLLER_ID = 15;
+    public static final int RIGHT_INTAKE_ROLLER_ID = 16;
+
+    // === CLIMBER ===
+    public static final int CLIMBER_RIGHT_ID = 17;
+    public static final int CLIMBER_LEFT_ID = 18;
+
+    // === FLYWHEEL ===
+    public static final int FLYWHEEL_RIGHT_ID = 19;
+    public static final int FLYWHEEL_LEFT_ID = 20;
+
+    // === FLYWHEEL KICKER ===
+    public static final int FLYWHEEL_KICKER_ID = 21;
+    public static final int FLYWHEEL_KICKER_SENSOR_ID = 22;
+
+    // === HOPPER ===
+    public static final int HOPPER_ROLLER_ID = 23;
+    public static final int TWINDEXER_ID = 24;
+
+    // === HOOD ===
+    public static final int HOOD_ID = 25;
+
+    // === LIMELIGHT ===
+    public static final String LIMELIGHT_RIGHT = "limelight-right";
+    public static final String LIMELIGHT_LEFT = "limelight-left";
+
+    // === CANBUS ===
+    public static final CANBus CANBUS = new CANBus("Default Name");
+
+    // === MAXIMUMS ===
+    public static final LinearVelocity maxSpeed = PracticeBotConstants.maxSpeed;
+    public static final AngularVelocity maxAngularVelocity = PracticeBotConstants.maxAngularVelocity;
+  }
+
   public static class SimulationConstants {
     public static final double SIM_TICK_RATE_S = 0.02;
 
@@ -451,6 +519,7 @@ public final class Constants {
 
   public static final class SerialAddressConstants {
     public static final String WOOD_SERIAL_ADDRESS = "032BE44A";
+    public static final String COMP_SERIAL_ADDRESS = "";
     public static final String PRACTICE_SERIAL_ADDRESS = "03260AD5";
   }
 

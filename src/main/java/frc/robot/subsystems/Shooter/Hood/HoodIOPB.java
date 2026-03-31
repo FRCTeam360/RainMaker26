@@ -36,7 +36,7 @@ public class HoodIOPB implements HoodIO {
   private static final double MOTION_MAGIC_CRUISE_VELOCITY_RPS = 2.0;
   private static final double MOTION_MAGIC_JERK_RPS3 = 1200.0;
   private final TalonFXS hoodMotor =
-      new TalonFXS(Constants.PracticeBotConstants.HOOD_ID, Constants.PracticeBotConstants.CANBUS);
+      new TalonFXS(getHoodId(), getCanBus());
   private final TalonFXSConfiguration config = new TalonFXSConfiguration();
 
   private final MotionMagicVoltage motionMagicPosition = new MotionMagicVoltage(0);
@@ -94,6 +94,18 @@ public class HoodIOPB implements HoodIO {
     hoodMotor.optimizeBusUtilization();
 
     setZero();
+  }
+
+  private static int getHoodId() {
+    return Constants.getRobotType() == Constants.RobotType.COMPBOT
+        ? Constants.CompBotConstants.HOOD_ID
+        : Constants.PracticeBotConstants.HOOD_ID;
+  }
+
+  private static com.ctre.phoenix6.CANBus getCanBus() {
+    return Constants.getRobotType() == Constants.RobotType.COMPBOT
+        ? Constants.CompBotConstants.CANBUS
+        : Constants.PracticeBotConstants.CANBUS;
   }
 
   /**

@@ -22,7 +22,7 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
-import frc.robot.Constants.PracticeBotConstants;
+import frc.robot.Constants;
 
 /**
  * Practice bot flywheel IO implementation using bang-bang control on dual TalonFX motors.
@@ -58,10 +58,21 @@ public class FlywheelIOPBBangBang implements FlywheelIO {
   private static final double MAX_POSITIVE_DUTY_CYCLE = 1.0;
   private static final double SUPPLY_CURRENT_LIMIT_AMPS = 70.0;
   private static final double GEAR_RATIO = 1.0;
+  private static final int RIGHT_MOTOR_ID =
+      Constants.getRobotType() == Constants.RobotType.COMPBOT
+          ? Constants.CompBotConstants.FLYWHEEL_RIGHT_ID
+          : Constants.PracticeBotConstants.FLYWHEEL_RIGHT_ID;
+  private static final int LEFT_MOTOR_ID =
+      Constants.getRobotType() == Constants.RobotType.COMPBOT
+          ? Constants.CompBotConstants.FLYWHEEL_LEFT_ID
+          : Constants.PracticeBotConstants.FLYWHEEL_LEFT_ID;
+  private static final com.ctre.phoenix6.CANBus FLYWHEEL_CANBUS =
+      Constants.getRobotType() == Constants.RobotType.COMPBOT
+          ? Constants.CompBotConstants.CANBUS
+          : Constants.PracticeBotConstants.CANBUS;
 
   private final TalonFX[] motors = {
-    new TalonFX(PracticeBotConstants.FLYWHEEL_RIGHT_ID, PracticeBotConstants.CANBUS),
-    new TalonFX(PracticeBotConstants.FLYWHEEL_LEFT_ID, PracticeBotConstants.CANBUS)
+    new TalonFX(RIGHT_MOTOR_ID, FLYWHEEL_CANBUS), new TalonFX(LEFT_MOTOR_ID, FLYWHEEL_CANBUS)
   };
   private TalonFXConfiguration rightConfig = new TalonFXConfiguration();
   private TalonFXConfiguration leftConfig = new TalonFXConfiguration();
@@ -139,7 +150,7 @@ public class FlywheelIOPBBangBang implements FlywheelIO {
     motors[0].setNeutralMode(NeutralModeValue.Coast);
 
     motors[1].setControl(
-        new Follower(PracticeBotConstants.FLYWHEEL_RIGHT_ID, MotorAlignmentValue.Opposed));
+        new Follower(RIGHT_MOTOR_ID, MotorAlignmentValue.Opposed));
 
     rightStatorCurrentSignal = motors[0].getStatorCurrent();
     rightSupplyCurrentSignal = motors[0].getSupplyCurrent();

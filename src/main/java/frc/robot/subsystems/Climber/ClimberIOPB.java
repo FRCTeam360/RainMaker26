@@ -14,7 +14,7 @@ import com.revrobotics.spark.config.ClosedLoopConfig;
 import com.revrobotics.spark.config.EncoderConfig;
 import com.revrobotics.spark.config.LimitSwitchConfig.Behavior;
 import com.revrobotics.spark.config.SparkMaxConfig;
-import frc.robot.Constants.PracticeBotConstants;
+import frc.robot.Constants;
 
 public class ClimberIOPB implements ClimberIO {
 
@@ -25,9 +25,9 @@ public class ClimberIOPB implements ClimberIO {
   private static final double MOTOR_ROTATIONS_TO_INCHES = 1.732;
 
   private final SparkMax leftClimberMotor =
-      new SparkMax(PracticeBotConstants.CLIMBER_LEFT_ID, MotorType.kBrushless);
+      new SparkMax(getClimberLeftId(), MotorType.kBrushless);
   private final SparkMax rightClimberMotor =
-      new SparkMax(PracticeBotConstants.CLIMBER_RIGHT_ID, MotorType.kBrushless);
+      new SparkMax(getClimberRightId(), MotorType.kBrushless);
 
   private final RelativeEncoder leftClimberEncoder = leftClimberMotor.getEncoder();
   private final RelativeEncoder rightClimberEncoder = rightClimberMotor.getEncoder();
@@ -88,6 +88,18 @@ public class ClimberIOPB implements ClimberIO {
         leftConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     rightClimberMotor.configure(
         rightConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+  }
+
+  private static int getClimberLeftId() {
+    return Constants.getRobotType() == Constants.RobotType.COMPBOT
+        ? Constants.CompBotConstants.CLIMBER_LEFT_ID
+        : Constants.PracticeBotConstants.CLIMBER_LEFT_ID;
+  }
+
+  private static int getClimberRightId() {
+    return Constants.getRobotType() == Constants.RobotType.COMPBOT
+        ? Constants.CompBotConstants.CLIMBER_RIGHT_ID
+        : Constants.PracticeBotConstants.CLIMBER_RIGHT_ID;
   }
 
   public void setLeftDutyCycle(double dutyCycle) {

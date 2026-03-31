@@ -48,8 +48,7 @@ public class IntakePivotIOPB implements IntakePivotIO {
   private static final double PEAK_REVERSE_VOLTAGE = -12.0;
 
   private final TalonFX intakePivot =
-      new TalonFX(
-          Constants.PracticeBotConstants.INTAKE_PIVOT_ID, Constants.PracticeBotConstants.CANBUS);
+      new TalonFX(getIntakePivotId(), getCanBus());
 
   private final DutyCycleOut dutyCycleOut = new DutyCycleOut(0);
   private final MotionMagicVoltage motionMagicPosition = new MotionMagicVoltage(0.0);
@@ -113,6 +112,18 @@ public class IntakePivotIOPB implements IntakePivotIO {
         supplyCurrentSignal,
         motorVoltageSignal);
     intakePivot.optimizeBusUtilization();
+  }
+
+  private static int getIntakePivotId() {
+    return Constants.getRobotType() == Constants.RobotType.COMPBOT
+        ? Constants.CompBotConstants.INTAKE_PIVOT_ID
+        : Constants.PracticeBotConstants.INTAKE_PIVOT_ID;
+  }
+
+  private static com.ctre.phoenix6.CANBus getCanBus() {
+    return Constants.getRobotType() == Constants.RobotType.COMPBOT
+        ? Constants.CompBotConstants.CANBUS
+        : Constants.PracticeBotConstants.CANBUS;
   }
 
   public void setZero() {

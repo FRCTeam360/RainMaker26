@@ -27,7 +27,7 @@ public class HopperRollerIOPB implements HopperRollerIO {
   private static final double KS = 0.04;
 
   private final SparkFlex hopperRollerMotor =
-      new SparkFlex(Constants.PracticeBotConstants.HOPPER_ROLLER_ID, MotorType.kBrushless);
+      new SparkFlex(getHopperRollerId(), MotorType.kBrushless);
 
   private final RelativeEncoder encoder = hopperRollerMotor.getEncoder();
   private final SparkFlexConfig sparkFlexConfig = new SparkFlexConfig();
@@ -50,6 +50,12 @@ public class HopperRollerIOPB implements HopperRollerIO {
         sparkFlexConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
     closedLoopController = hopperRollerMotor.getClosedLoopController();
+  }
+
+  private static int getHopperRollerId() {
+    return Constants.getRobotType() == Constants.RobotType.COMPBOT
+        ? Constants.CompBotConstants.HOPPER_ROLLER_ID
+        : Constants.PracticeBotConstants.HOPPER_ROLLER_ID;
   }
 
   public void updateInputs(HopperRollerIOInputs inputs) {
