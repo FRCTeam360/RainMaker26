@@ -134,10 +134,16 @@ public class Robot extends LoggedRobot {
     }
     double t3 = Logger.getTimestamp() / 1.0e6;
 
+    // Fire a single setControl() frame to pre-accelerate or pre-position swerve modules,
+    // bypassing the 1-2 cycle command scheduler pipeline delay
+    m_robotContainer.preAccelerateAuto();
+    double t4 = Logger.getTimestamp() / 1.0e6;
+
     Logger.recordOutput("AutoInitTiming/OnEnableSeconds", t1 - t0);
     Logger.recordOutput("AutoInitTiming/GetAutoCommandSeconds", t2 - t1);
     Logger.recordOutput("AutoInitTiming/ScheduleSeconds", t3 - t2);
-    Logger.recordOutput("AutoInitTiming/TotalSeconds", t3 - t0);
+    Logger.recordOutput("AutoInitTiming/PreAccelerateSeconds", t4 - t3);
+    Logger.recordOutput("AutoInitTiming/TotalSeconds", t4 - t0);
   }
 
   /** This function is called periodically during autonomous. */

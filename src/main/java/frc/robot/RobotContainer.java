@@ -7,13 +7,11 @@ package frc.robot;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
 import com.ctre.phoenix6.swerve.SwerveRequest;
-import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -71,6 +69,8 @@ import frc.robot.subsystems.Vision.VisionIOLimelight4;
 import frc.robot.subsystems.Vision.VisionIOLimelightBase;
 import frc.robot.subsystems.Vision.VisionIOPhotonSim;
 import frc.robot.utils.AllianceFlipUtil;
+import frc.robot.utils.AutoChooser;
+import frc.robot.utils.AutoPreAccelerator;
 import frc.robot.utils.CommandLogger;
 import frc.robot.utils.FieldConstants;
 import frc.robot.utils.PathProvider;
@@ -89,7 +89,7 @@ import org.littletonrobotics.junction.Logger;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private CommandSwerveDrivetrain drivetrain;
-  private SendableChooser<Command> autoChooser;
+  private AutoChooser autoChooser;
   private Flywheel flywheel;
   private Hood hood;
   private Indexer indexer;
@@ -129,6 +129,8 @@ public class RobotContainer {
   public RobotContainer() {
     // Pre-load all PathPlanner path files into memory to avoid disk I/O during auto
     PathProvider.initialize();
+    // Parse auto files to build pre-acceleration lookup (must run after PathProvider)
+    AutoPreAccelerator.initialize();
 
     switch (Constants.getRobotType()) {
       case SIM:
@@ -350,8 +352,8 @@ public class RobotContainer {
     PathPlannerLogging.setLogTargetPoseCallback(
         pose -> Logger.recordOutput("Swerve/TargetPathPose", pose));
 
-    autoChooser = AutoBuilder.buildAutoChooser();
-    SmartDashboard.putData("Auto Chooser", autoChooser);
+    autoChooser = new AutoChooser();
+    SmartDashboard.putData("Auto Chooser", autoChooser.getSendableChooser());
 
     CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
     // Uncomment this if pathplanner starts to suck on loading
@@ -681,7 +683,15 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    // An example command will be run in autonomous
     return autoChooser.getSelected();
+  }
+
+  /**
+   * Fires a single pre-acceleration frame to the drivetrain, bypassing the command scheduler to
+   * eliminate the 1-2 cycle pipeline delay before the first drive command. Call from
+   * autonomousInit() after scheduling the auto command.
+   */
+  public void preAccelerateAuto() {
+    AutoPreAccelerator.preAccelerate(autoChooser.getSelectedName(), drivetrain);
   }
 }
