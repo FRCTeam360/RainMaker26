@@ -47,6 +47,11 @@ public class SuperStructure extends SubsystemBase {
   private final ShotCalculator hubShotCalculator;
   private final Supplier<Pose2d> robotPoseSupplier;
   private final Transform2d robotToShooter;
+  private final HubShiftTracker hubShiftTracker;
+
+  // shooting @ 3 meters
+  private static final double HOOD_FORCED_ANGLE = 10.0;
+  private static final double FLYWHEEL_FORCED_RPM = 2200.0;
 
   // Enums
   public enum SuperWantedStates {
@@ -59,7 +64,8 @@ public class SuperStructure extends SubsystemBase {
     DEFENSE,
     X_OUT,
     EJECTING,
-    UNJAMMING
+    UNJAMMING,
+    FORCED_SHOT
   }
 
   public enum SuperInternalStates {
@@ -67,7 +73,8 @@ public class SuperStructure extends SubsystemBase {
     IDLE, // everything is stopped
     SHOOTING_AT_HUB,
     PASSING,
-    UNJAMMING
+    UNJAMMING,
+    FORCED_SHOT
   }
 
   // State variables
@@ -103,6 +110,7 @@ public class SuperStructure extends SubsystemBase {
     this.hubShotCalculator = hubShotCalculator;
     this.robotPoseSupplier = robotPoseSupplier;
     this.robotToShooter = robotToShooter;
+    this.hubShiftTracker = new HubShiftTracker(hubShotCalculator);
     this.shooterStateMachine =
         new ShooterStateMachine(
             flywheel, hood, flywheelKicker, isAlignedToTarget, this::canShootToTarget);
@@ -111,11 +119,23 @@ public class SuperStructure extends SubsystemBase {
         new TargetSelectionStateMachine(hubShotCalculator, passCalculator, robotPoseSupplier);
 
     flywheel.setShootVelocitySupplier(
-        () -> targetSelectionStateMachine.getActiveCalculator().calculateShot().flywheelSpeed());
+        () -> {
+          if (currentSuperState == SuperInternalStates.FORCED_SHOT) {
+            return FLYWHEEL_FORCED_RPM;
+          }
+          return targetSelectionStateMachine.getActiveCalculator().calculateShot().flywheelSpeed();
+        });
     hood.setHoodAngleSupplier(
-        () -> targetSelectionStateMachine.getActiveCalculator().calculateShot().hoodAngle());
+        () -> {
+          if (currentSuperState == SuperInternalStates.FORCED_SHOT) {
+            return HOOD_FORCED_ANGLE;
+          }
+          return targetSelectionStateMachine.getActiveCalculator().calculateShot().hoodAngle();
+        });
     hood.setShouldDuckSupplier(
         () -> PositionUtils.isInDuckZone(robotPoseSupplier.get(), robotToShooter));
+    shooterStateMachine.setIsInAllianceZoneSupplier(
+        () -> PositionUtils.isInAllianceZone(robotPoseSupplier.get()));
   }
 
   // State machine methods
@@ -146,6 +166,9 @@ public class SuperStructure extends SubsystemBase {
       case UNJAMMING:
         currentSuperState = SuperInternalStates.UNJAMMING;
         break;
+      case FORCED_SHOT:
+        currentSuperState = SuperInternalStates.FORCED_SHOT;
+        break;
       case DEFAULT:
       default:
         targetSelectionStateMachine.setWantedState(TargetWantedStates.AUTO);
@@ -166,6 +189,9 @@ public class SuperStructure extends SubsystemBase {
       case UNJAMMING:
         unjamming();
         break;
+      case FORCED_SHOT:
+        shooting();
+        break;
       case DEFAULT:
         passive_preparing();
         break;
@@ -175,7 +201,11 @@ public class SuperStructure extends SubsystemBase {
   // Subsystem state helpers
 
   private void shooting() {
-    shooterStateMachine.setWantedState(ShooterWantedStates.SHOOTING);
+    if (currentSuperState == SuperInternalStates.FORCED_SHOT) {
+      shooterStateMachine.setWantedState(ShooterWantedStates.FORCED_SHOT);
+    } else {
+      shooterStateMachine.setWantedState(ShooterWantedStates.SHOOTING);
+    }
 
     if (shooterStateMachine.getState() == ShooterStates.FIRING) {
       indexer.setWantedState(IndexerStates.INDEXING);
@@ -205,17 +235,21 @@ public class SuperStructure extends SubsystemBase {
     hopperRoller.setWantedState(HopperRollerStates.UNJAMMING);
   }
 
+  /**
+   * Returns whether the hub is currently active/shootable based on game time, alliance, and auto
+   * winner. Does not require the superstructure to be in SHOOT_AT_HUB state.
+   *
+   * @return true if the hub is active and can be shot at, false otherwise.
+   */
+  public boolean canScoreAtHub() {
+    return cachedHubActive;
+  }
+
   private boolean canShootToTarget() {
     if (wantedSuperState == SuperWantedStates.AUTO_CYCLE_SHOOTING) {
       switch (currentSuperState) {
         case SHOOTING_AT_HUB:
-          if (!DriverStation.isFMSAttached()) {
-            return true;
-          }
           // Allow shooting if explicitly commanded to shoot at hub (manual override)
-          if (wantedSuperState == SuperWantedStates.SHOOT_AT_HUB) {
-            return true;
-          }
           // For AUTO_CYCLE_SHOOTING, check if hub is actually active based on game phase
           return canScoreAtHub() && hubShotCalculator.calculateShot().isValid();
         case PASSING:
@@ -287,21 +321,11 @@ public class SuperStructure extends SubsystemBase {
     return new InstantCommand(
         () -> {
           if (intakeStateMachine.getState() == IntakeStateMachine.IntakeInternalStates.STOWED) {
-            intakeStateMachine.setWantedState(IntakeWantedStates.INTAKING);
+            intakeStateMachine.setWantedState(IntakeWantedStates.DEPLOYED);
           } else {
             intakeStateMachine.setWantedState(IntakeWantedStates.STOWED);
           }
         });
-  }
-
-  /**
-   * Returns whether the hub is currently active/shootable based on game time, alliance, and auto
-   * winner. Does not require the superstructure to be in SHOOT_AT_HUB state.
-   *
-   * @return true if the hub is active and can be shot at, false otherwise.
-   */
-  public boolean canScoreAtHub() {
-    return cachedHubActive;
   }
 
   // periodic
@@ -311,15 +335,16 @@ public class SuperStructure extends SubsystemBase {
     Pose2d robotPose = robotPoseSupplier.get();
     // this is just for testing purposes, delete after integrating into passing function
     PositionUtils.canPass(robotPose, robotPose.getRotation().plus(Rotation2d.k180deg));
+    hubShiftTracker.update();
     // Calculate shot and extract time of flight once per cycle
     cachedTimeOfFlight = hubShotCalculator.calculateShot().timeOfFlight();
     RobotUtils.ActiveHub shootingPhase =
-        RobotUtils.getShootingPhase(
+        RobotUtils.getActiveHubAtShotLanding(
             DriverStation.getMatchTime(), DriverStation.isTeleop(), cachedTimeOfFlight);
 
     // Calculate hub active once per cycle
     cachedHubActive =
-        RobotUtils.hubActive(
+        RobotUtils.isHubActiveForAlliance(
             DriverStation.getAlliance(),
             RobotUtils.getAutoWinner(DriverStation.getGameSpecificMessage()),
             shootingPhase);
@@ -336,6 +361,8 @@ public class SuperStructure extends SubsystemBase {
 
     SmartDashboard.putString("Shooting Phase", shootingPhase.toString());
     SmartDashboard.putBoolean("Can Score in Hub", cachedHubActive);
+    SmartDashboard.putNumber("Match Time", DriverStation.getMatchTime());
+    hubShiftTracker.log();
 
     Logger.recordOutput("Superstructure/WantedSuperState", wantedSuperState);
     Logger.recordOutput("Superstructure/CurrentSuperState", currentSuperState);

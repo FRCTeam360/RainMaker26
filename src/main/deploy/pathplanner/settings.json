@@ -2,8 +2,25 @@
   "robotWidth": 0.917,
   "robotLength": 0.812,
   "holonomicMode": true,
-  "pathFolders": [],
-  "autoFolders": [],
+  "pathFolders": [
+    "MIRRORED Red Right Middle Hawk",
+    "MIRRORED Red Left Middle Hawk",
+    "FLIPPED Blue Right Middle Hawk",
+    "FLIPPED MIRRORED Blue Left Middle Hawk",
+    "FLIPPED MIRRORED Blue Right Middle Hawk",
+    "MIRRORED Red Left Middle Hook",
+    "FLIPPED Blue Right Middle Hook",
+    "FLIPPED MIRRORED Blue Left Middle Hook",
+    "MIRRORED Red Left Middle Standard",
+    "FLIPPED Blue Right Middle Standard",
+    "FLIPPED MIRRORED Blue Left Middle Standard"
+  ],
+  "autoFolders": [
+    "MASTER RED RIGHT",
+    "RED LEFT AUTOS",
+    "BLUE LEFT AUTOS",
+    "BLUE RIGHT AUTOS"
+  ],
   "defaultMaxVel": 4.0,
   "defaultMaxAccel": 8.0,
   "defaultMaxAngVel": 360.0,

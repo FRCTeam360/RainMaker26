@@ -18,18 +18,22 @@ import org.littletonrobotics.junction.Logger;
  * determine when the shooter is ready to fire.
  */
 public class ShooterStateMachine {
+
   // Enums
   public enum ShooterWantedStates {
     IDLE,
     SHOOTING,
     PASSIVE_SHOOTER,
-    REVERSING
+    REVERSING,
+    FORCED_SHOT
   }
 
   public enum ShooterStates {
     PREPARING_TO_FIRE,
+    AIMED,
     FIRING,
     WAITING,
+    STANDBY,
     UNJAMMING,
     IDLE
   }
@@ -40,6 +44,7 @@ public class ShooterStateMachine {
   private final FlywheelKicker flywheelKicker;
   private final BooleanSupplier isAlignedToTarget;
   private final BooleanSupplier canShootToTarget;
+  private BooleanSupplier isInAllianceZone = () -> false;
 
   // State variables
   private ShooterWantedStates wantedState = ShooterWantedStates.IDLE;
@@ -81,6 +86,10 @@ public class ShooterStateMachine {
     wantedState = state;
   }
 
+  public void setIsInAllianceZoneSupplier(BooleanSupplier supplier) {
+    this.isInAllianceZone = supplier;
+  }
+
   /**
    * Updates the shooter state based on wanted state, subsystem readiness, and alignment. Should be
    * called every cycle by the SuperStructure.
@@ -98,42 +107,15 @@ public class ShooterStateMachine {
     previousState = currentState;
 
     switch (wantedState) {
+      case FORCED_SHOT:
+        handleShooting(true);
+        break;
       case SHOOTING:
-        FlywheelInternalStates flywheelState = flywheel.getState();
-        boolean flywheelReady = flywheelState == FlywheelInternalStates.AT_SETPOINT;
-        boolean flywheelUnderShooting = flywheelState == FlywheelInternalStates.UNDER_SHOOTING;
-        boolean hoodReady = hood.getState() == HoodInternalStates.AT_SETPOINT;
-        boolean drivetrainAligned = isAlignedToTarget.getAsBoolean();
-        boolean targetReady = canShootToTarget.getAsBoolean();
-
-        Logger.recordOutput("Superstructure/Shooting/FlywheelState", flywheelState);
-        // SmartDashboard.putString("Superstructure/Shooting/FlywheelState",
-        // flywheelState.toString());
-        Logger.recordOutput("Superstructure/Shooting/FlywheelReady", flywheelReady);
-        SmartDashboard.putBoolean("Superstructure/Shooting/FlywheelReady", flywheelReady);
-        Logger.recordOutput("Superstructure/Shooting/HoodReady", hoodReady);
-        SmartDashboard.putBoolean("Superstructure/Shooting/HoodReady", hoodReady);
-        Logger.recordOutput("Superstructure/Shooting/DrivetrainAligned", drivetrainAligned);
-        Logger.recordOutput("Superstructure/Shooting/TargetReady", targetReady);
-        SmartDashboard.putBoolean("Superstructure/Shooting/DrivetrainAligned", drivetrainAligned);
-
-        // Enter FIRING when flywheel reaches AT_SETPOINT (with hood + drivetrain ready).
-        // Stay in FIRING through bang-bang oscillations — only revert to PREPARING_TO_FIRE
-        // when UNDER_SHOOTING signals a sustained RPM drop from too many shots passing through.
-        boolean shouldFire =
-            (flywheelReady || (previousState == ShooterStates.FIRING && !flywheelUnderShooting))
-                && hoodReady
-                && drivetrainAligned
-                && targetReady;
-
-        if (shouldFire) {
-          currentState = ShooterStates.FIRING;
-        } else {
-          currentState = ShooterStates.PREPARING_TO_FIRE;
-        }
+        handleShooting(false);
         break;
       case PASSIVE_SHOOTER:
-        currentState = ShooterStates.WAITING;
+        currentState =
+            isInAllianceZone.getAsBoolean() ? ShooterStates.STANDBY : ShooterStates.WAITING;
         break;
       case REVERSING:
         currentState = ShooterStates.UNJAMMING;
@@ -146,12 +128,58 @@ public class ShooterStateMachine {
   }
 
   /**
+   * Handles the shooting state logic, determining readiness and transitioning states.
+   *
+   * @param isForced if true, bypasses drivetrain alignment and target readiness checks
+   */
+  private void handleShooting(boolean isForced) {
+    FlywheelInternalStates flywheelState = flywheel.getState();
+    boolean flywheelReady = flywheelState == FlywheelInternalStates.AT_SETPOINT;
+    boolean flywheelUnderShooting = flywheelState == FlywheelInternalStates.UNDER_SHOOTING;
+    boolean hoodReady = hood.getState() == HoodInternalStates.AT_SETPOINT;
+    boolean drivetrainAligned = isForced || isAlignedToTarget.getAsBoolean();
+    boolean targetReady = isForced || canShootToTarget.getAsBoolean();
+
+    Logger.recordOutput("Superstructure/Shooting/FlywheelState", flywheelState);
+    // SmartDashboard.putString("Superstructure/Shooting/FlywheelState",
+    // flywheelState.toString());
+    Logger.recordOutput("Superstructure/Shooting/FlywheelReady", flywheelReady);
+    SmartDashboard.putBoolean("Superstructure/Shooting/FlywheelReady", flywheelReady);
+    Logger.recordOutput("Superstructure/Shooting/HoodReady", hoodReady);
+    SmartDashboard.putBoolean("Superstructure/Shooting/HoodReady", hoodReady);
+    Logger.recordOutput("Superstructure/Shooting/DrivetrainAligned", drivetrainAligned);
+    Logger.recordOutput("Superstructure/Shooting/TargetReady", targetReady);
+    SmartDashboard.putBoolean("Superstructure/Shooting/DrivetrainAligned", drivetrainAligned);
+
+    // AIMED requires flywheel and hood to be genuinely at setpoint.
+    // Bang-bang oscillations during firing are tolerated to stay in FIRING —
+    // only revert when UNDER_SHOOTING signals a sustained RPM drop.
+    boolean inBangBang = previousState == ShooterStates.FIRING && !flywheelUnderShooting;
+    boolean subsystemsReady = flywheelReady && hoodReady && drivetrainAligned;
+    boolean shouldFire =
+        (flywheelReady || inBangBang) && hoodReady && drivetrainAligned && targetReady;
+
+    Logger.recordOutput("Superstructure/Shooting/InBangBang", inBangBang);
+    Logger.recordOutput("Superstructure/Shooting/SubsystemsReady", subsystemsReady);
+    Logger.recordOutput("Superstructure/Shooting/ShouldFire", shouldFire);
+
+    if (shouldFire) {
+      currentState = ShooterStates.FIRING;
+    } else if (subsystemsReady) {
+      currentState = ShooterStates.AIMED;
+    } else {
+      currentState = ShooterStates.PREPARING_TO_FIRE;
+    }
+  }
+
+  /**
    * Applies the current shooter state to subsystems. Sets flywheel, hood, and flywheel kicker
    * wanted states based on the current state.
    */
   public void apply() {
     switch (currentState) {
       case PREPARING_TO_FIRE:
+      case AIMED:
         flywheel.setWantedState(FlywheelWantedStates.SHOOTING);
         hood.setWantedState(HoodWantedStates.AIMING);
         if (Constants.getRobotType() != Constants.RobotType.WOODBOT) {
@@ -166,6 +194,11 @@ public class ShooterStateMachine {
         flywheelKicker.setWantedState(FlywheelKickerStates.KICKING);
         break;
       case WAITING:
+        flywheel.setWantedState(FlywheelWantedStates.IDLE);
+        hood.setWantedState(HoodWantedStates.DUCKED);
+        flywheelKicker.setWantedState(FlywheelKickerStates.IDLE);
+        break;
+      case STANDBY:
         flywheel.setWantedState(FlywheelWantedStates.COASTING);
         hood.setWantedState(HoodWantedStates.DUCKED);
         flywheelKicker.setWantedState(FlywheelKickerStates.IDLE);
@@ -173,7 +206,6 @@ public class ShooterStateMachine {
       case UNJAMMING:
         flywheel.setWantedState(FlywheelWantedStates.IDLE);
         hood.setWantedState(HoodWantedStates.IDLE);
-
         flywheelKicker.setWantedState(FlywheelKickerStates.REVERSING);
         break;
       case IDLE:
