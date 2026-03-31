@@ -46,7 +46,7 @@ classDef output fill:#FFB67A,stroke:#FFF,color:#5E1C00,stroke-width:10px,font-si
 
     leftBumper[Left Bumper]:::input
     --> INTAKING(Intake state set to intaking):::action
-    -->INTAKE_ROLLER_INTAKING(Intake roller state set to intaking):::action;
+    --->INTAKE_ROLLER_INTAKING(Intake roller state set to intaking):::action;
     INTAKING-->INTAKE_PIVOT_DEPLOYED(Intake pivot state set to deployed):::action
      --> intakePivotRPM(Intake roller set to RPM of 3500 if not the woodbot, otherwise its set to a dutycycle of 0.7):::action;
     INTAKE_ROLLER_INTAKING --> setIntakeRollerToSetpoint[Intake roller position is set to a setpoint]:::output
