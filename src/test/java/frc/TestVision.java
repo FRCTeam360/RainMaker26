@@ -47,7 +47,7 @@ public class TestVision { // Make test cases for isRobotOutOfBounds method
     // X = 1 and Y = 1 should return false
     Pose2d pose = new Pose2d(1, 1, null);
     boolean isFalse = vision.isPoseOutOfBounds(pose);
-    assertFalse(isFalse, "Pose should be out of bounds");
+    assertFalse(isFalse, "Pose should be in bounds");
   }
 
   @Test
