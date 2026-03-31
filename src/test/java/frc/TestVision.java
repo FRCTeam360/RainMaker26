@@ -44,22 +44,22 @@ public class TestVision { // Make test cases for isRobotOutOfBounds method
 
   @Test
   void isRobotInBounds() {
-    // X = -1 and Y = -1 should return false
-    Pose2d pose = new Pose2d(1, -1, null);
+    // X = 1 and Y = 1 should return false
+    Pose2d pose = new Pose2d(1, 1, null);
     boolean isFalse = vision.isPoseOutOfBounds(pose);
     assertFalse(isFalse, "Pose should be out of bounds");
   }
 
   @Test
   void isRobotInBounds2() {
-    Pose2d pose = new Pose2d(FieldConstants.fieldLength, -1, null);
+    Pose2d pose = new Pose2d(FieldConstants.fieldLength, 1, null);
     boolean isFalse = vision.isPoseOutOfBounds(pose);
     assertFalse(isFalse, "Pose should be in bounds");
   }
 
   @Test
   void isRobotInBounds3() {
-    Pose2d pose = new Pose2d(-1, FieldConstants.fieldWidth, null);
+    Pose2d pose = new Pose2d(1, FieldConstants.fieldWidth, null);
     boolean isFalse = vision.isPoseOutOfBounds(pose);
     assertFalse(isFalse, "Pose should be in bounds");
   }
