@@ -148,6 +148,7 @@ public class PositionUtils {
   }
 
   private static Pose2d[] raycast = new Pose2d[2];
+  private static Pose2d[] poseToHub = new Pose2d[2];
 
   public static boolean canPass(Pose2d robotPose, Rotation2d shooterRotation) {
     Translation2d start = robotPose.getTranslation();
