@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems.Shooter.Hood;
 
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.Slot0Configs;
@@ -35,8 +36,7 @@ public class HoodIOPB implements HoodIO {
   private static final double MOTION_MAGIC_ACCELERATION_RPS2 = 4.0;
   private static final double MOTION_MAGIC_CRUISE_VELOCITY_RPS = 2.0;
   private static final double MOTION_MAGIC_JERK_RPS3 = 1200.0;
-  private final TalonFXS hoodMotor =
-      new TalonFXS(getHoodId(), getCanBus());
+  private final TalonFXS hoodMotor;
   private final TalonFXSConfiguration config = new TalonFXSConfiguration();
 
   private final MotionMagicVoltage motionMagicPosition = new MotionMagicVoltage(0);
@@ -52,6 +52,12 @@ public class HoodIOPB implements HoodIO {
   }
 
   public HoodIOPB() {
+    this(Constants.PracticeBotConstants.HOOD_ID, Constants.PracticeBotConstants.CANBUS);
+  }
+
+  protected HoodIOPB(int hoodId, CANBus canBus) {
+    hoodMotor = new TalonFXS(hoodId, canBus);
+
     Slot0Configs slot0Configs = config.Slot0;
     slot0Configs.kA = KA;
     slot0Configs.kD = KD;
@@ -94,18 +100,6 @@ public class HoodIOPB implements HoodIO {
     hoodMotor.optimizeBusUtilization();
 
     setZero();
-  }
-
-  private static int getHoodId() {
-    return Constants.getRobotType() == Constants.RobotType.COMPBOT
-        ? Constants.CompBotConstants.HOOD_ID
-        : Constants.PracticeBotConstants.HOOD_ID;
-  }
-
-  private static com.ctre.phoenix6.CANBus getCanBus() {
-    return Constants.getRobotType() == Constants.RobotType.COMPBOT
-        ? Constants.CompBotConstants.CANBUS
-        : Constants.PracticeBotConstants.CANBUS;
   }
 
   /**

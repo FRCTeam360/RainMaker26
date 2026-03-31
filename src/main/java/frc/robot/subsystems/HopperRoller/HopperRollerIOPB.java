@@ -13,7 +13,7 @@ import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
-import frc.robot.Constants;
+import frc.robot.Constants.PracticeBotConstants;
 
 public class HopperRollerIOPB implements HopperRollerIO {
   private static final double GEAR_RATIO = 1.0;
@@ -26,14 +26,20 @@ public class HopperRollerIOPB implements HopperRollerIO {
   private static final double KV = 0.0017;
   private static final double KS = 0.04;
 
-  private final SparkFlex hopperRollerMotor =
-      new SparkFlex(getHopperRollerId(), MotorType.kBrushless);
+  private final SparkFlex hopperRollerMotor;
 
-  private final RelativeEncoder encoder = hopperRollerMotor.getEncoder();
+  private final RelativeEncoder encoder;
   private final SparkFlexConfig sparkFlexConfig = new SparkFlexConfig();
   private final SparkClosedLoopController closedLoopController;
 
   public HopperRollerIOPB() {
+    this(PracticeBotConstants.HOPPER_ROLLER_ID);
+  }
+
+  protected HopperRollerIOPB(int hopperRollerId) {
+    hopperRollerMotor = new SparkFlex(hopperRollerId, MotorType.kBrushless);
+    encoder = hopperRollerMotor.getEncoder();
+
     sparkFlexConfig.idleMode(IdleMode.kBrake);
     sparkFlexConfig.inverted(true);
     sparkFlexConfig.smartCurrentLimit(STALL_CURRENT_LIMIT_AMPS, FREE_CURRENT_LIMIT_AMPS);
@@ -50,12 +56,6 @@ public class HopperRollerIOPB implements HopperRollerIO {
         sparkFlexConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
     closedLoopController = hopperRollerMotor.getClosedLoopController();
-  }
-
-  private static int getHopperRollerId() {
-    return Constants.getRobotType() == Constants.RobotType.COMPBOT
-        ? Constants.CompBotConstants.HOPPER_ROLLER_ID
-        : Constants.PracticeBotConstants.HOPPER_ROLLER_ID;
   }
 
   public void updateInputs(HopperRollerIOInputs inputs) {

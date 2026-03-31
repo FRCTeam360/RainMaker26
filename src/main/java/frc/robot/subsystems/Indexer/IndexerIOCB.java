@@ -1,3 +1,11 @@
 package frc.robot.subsystems.Indexer;
 
-public class IndexerIOCB extends IndexerIOPB {}
+import frc.robot.Constants.CompBotConstants;
+
+public class IndexerIOCB extends IndexerIOPB {
+  private static final int TWINDEXER_ID = CompBotConstants.TWINDEXER_ID;
+
+  public IndexerIOCB() {
+    super(TWINDEXER_ID);
+  }
+}

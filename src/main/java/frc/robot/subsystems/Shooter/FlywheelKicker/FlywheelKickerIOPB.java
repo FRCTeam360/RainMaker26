@@ -14,7 +14,7 @@ import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
-import frc.robot.Constants;
+import frc.robot.Constants.PracticeBotConstants;
 
 public class FlywheelKickerIOPB implements FlywheelKickerIO {
   private static final double GEAR_RATIO = 1.0;
@@ -41,10 +41,9 @@ public class FlywheelKickerIOPB implements FlywheelKickerIO {
   private static final double MAX_POSITIVE_OUTPUT = 1.0;
 
   /** Creates a new FlywheelKickerIOPB. */
-  private final SparkFlex flywheelKickerMotor =
-      new SparkFlex(getFlywheelKickerId(), MotorType.kBrushless);
+  private final SparkFlex flywheelKickerMotor;
 
-  private final RelativeEncoder encoder = flywheelKickerMotor.getEncoder();
+  private final RelativeEncoder encoder;
   private final SparkFlexConfig sparkFlexConfig = new SparkFlexConfig();
   private final SparkClosedLoopController closedLoopController;
 
@@ -57,6 +56,13 @@ public class FlywheelKickerIOPB implements FlywheelKickerIO {
   // private final StatusSignal<Boolean> isDetectedSignal;
 
   public FlywheelKickerIOPB() {
+    this(PracticeBotConstants.FLYWHEEL_KICKER_ID);
+  }
+
+  protected FlywheelKickerIOPB(int flywheelKickerId) {
+    flywheelKickerMotor = new SparkFlex(flywheelKickerId, MotorType.kBrushless);
+    encoder = flywheelKickerMotor.getEncoder();
+
     // Configure base motor settings
     sparkFlexConfig.idleMode(IdleMode.kCoast);
     sparkFlexConfig.inverted(false);
@@ -107,12 +113,6 @@ public class FlywheelKickerIOPB implements FlywheelKickerIO {
 
     // BaseStatusSignal.setUpdateFrequencyForAll(50, distanceSignal, isDetectedSignal);
     // canSensor.optimizeBusUtilization();
-  }
-
-  private static int getFlywheelKickerId() {
-    return Constants.getRobotType() == Constants.RobotType.COMPBOT
-        ? Constants.CompBotConstants.FLYWHEEL_KICKER_ID
-        : Constants.PracticeBotConstants.FLYWHEEL_KICKER_ID;
   }
 
   public void updateInputs(FlywheelKickerIOInputs inputs) {

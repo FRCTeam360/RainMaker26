@@ -9,7 +9,7 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
-import frc.robot.Constants;
+import frc.robot.Constants.PracticeBotConstants;
 
 public class IndexerIOPB implements IndexerIO {
   private static final double GEAR_RATIO =
@@ -22,14 +22,19 @@ public class IndexerIOPB implements IndexerIO {
   private static final double KS = 0.04;
 
   /** Creates a new IndexerIOPB. */
-  private final SparkMax indexerMotor =
-      new SparkMax(getTwindexerId(), MotorType.kBrushless);
+  private final SparkMax indexerMotor;
 
-  private final RelativeEncoder encoder = indexerMotor.getEncoder();
+  private final RelativeEncoder encoder;
   private final SparkMaxConfig sparkMaxConfig = new SparkMaxConfig();
   private final SparkClosedLoopController closedLoopController;
 
   public IndexerIOPB() {
+    this(PracticeBotConstants.TWINDEXER_ID);
+  }
+
+  protected IndexerIOPB(int twindexerId) {
+    indexerMotor = new SparkMax(twindexerId, MotorType.kBrushless);
+    encoder = indexerMotor.getEncoder();
     sparkMaxConfig.idleMode(IdleMode.kCoast);
     sparkMaxConfig.inverted(false);
     sparkMaxConfig.smartCurrentLimit(CURRENT_LIMIT_AMPS);
@@ -46,12 +51,6 @@ public class IndexerIOPB implements IndexerIO {
         sparkMaxConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
     closedLoopController = indexerMotor.getClosedLoopController();
-  }
-
-  private static int getTwindexerId() {
-    return Constants.getRobotType() == Constants.RobotType.COMPBOT
-        ? Constants.CompBotConstants.TWINDEXER_ID
-        : Constants.PracticeBotConstants.TWINDEXER_ID;
   }
 
   public void updateInputs(IndexerIOInputs inputs) {

@@ -13,7 +13,7 @@ import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
-import frc.robot.Constants;
+import frc.robot.Constants.PracticeBotConstants;
 
 public class IntakeRollerIOPB implements IntakeRollerIO {
   private static final double GEAR_RATIO = 1.0;
@@ -26,16 +26,24 @@ public class IntakeRollerIOPB implements IntakeRollerIO {
   private static final double KV = 0.0017;
   private static final double KS = 0.01;
 
-  private final SparkFlex motorLeft =
-      new SparkFlex(getLeftIntakeRollerId(), MotorType.kBrushless); // original motor
-  private final SparkFlex motorRight = new SparkFlex(getRightIntakeRollerId(), MotorType.kBrushless);
-  private final RelativeEncoder leftEncoder = motorLeft.getEncoder();
-  private final RelativeEncoder rightEncoder = motorRight.getEncoder();
+  private final SparkFlex motorLeft;
+  private final SparkFlex motorRight;
+  private final RelativeEncoder leftEncoder;
+  private final RelativeEncoder rightEncoder;
   private final SparkFlexConfig leftConfig = new SparkFlexConfig();
   private final SparkFlexConfig rightConfig = new SparkFlexConfig();
   private final SparkClosedLoopController closedLoopController;
 
   public IntakeRollerIOPB() {
+    this(PracticeBotConstants.LEFT_INTAKE_ROLLER_ID, PracticeBotConstants.RIGHT_INTAKE_ROLLER_ID);
+  }
+
+  protected IntakeRollerIOPB(int leftMotorId, int rightMotorId) {
+    motorLeft = new SparkFlex(leftMotorId, MotorType.kBrushless);
+    motorRight = new SparkFlex(rightMotorId, MotorType.kBrushless);
+    leftEncoder = motorLeft.getEncoder();
+    rightEncoder = motorRight.getEncoder();
+
     leftConfig.idleMode(IdleMode.kCoast);
     rightConfig.idleMode(IdleMode.kCoast);
 
@@ -57,18 +65,6 @@ public class IntakeRollerIOPB implements IntakeRollerIO {
     motorRight.configure(
         rightConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     closedLoopController = motorLeft.getClosedLoopController();
-  }
-
-  private static int getLeftIntakeRollerId() {
-    return Constants.getRobotType() == Constants.RobotType.COMPBOT
-        ? Constants.CompBotConstants.LEFT_INTAKE_ROLLER_ID
-        : Constants.PracticeBotConstants.LEFT_INTAKE_ROLLER_ID;
-  }
-
-  private static int getRightIntakeRollerId() {
-    return Constants.getRobotType() == Constants.RobotType.COMPBOT
-        ? Constants.CompBotConstants.RIGHT_INTAKE_ROLLER_ID
-        : Constants.PracticeBotConstants.RIGHT_INTAKE_ROLLER_ID;
   }
 
   public void setDutyCycle(double duty) {
