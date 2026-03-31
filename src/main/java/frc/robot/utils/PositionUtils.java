@@ -154,8 +154,7 @@ public class PositionUtils {
     double dy = shooterRotation.getSin();
     double maxDistance = Double.MAX_VALUE;
     if (dx > 0) {
-      maxDistance =
-          Math.min(maxDistance, (FieldConstants.fieldLength - start.getX()) / dx);
+      maxDistance = Math.min(maxDistance, (FieldConstants.fieldLength - start.getX()) / dx);
     } else if (dx < 0) {
       maxDistance = Math.min(maxDistance, -start.getX() / dx);
     }
