@@ -299,7 +299,7 @@ public class RobotContainer {
     // TODO: add end condition based on state from SuperStructure (based on sensor inputs)
     registerPathplannerCommand(
         "shoot at hub",
-        Commands.waitSeconds(4)
+        Commands.waitSeconds(4.5)
             .deadlineFor(
                 superStructure
                     .setStateCommand(SuperWantedStates.AUTO_CYCLE_SHOOTING)
@@ -315,7 +315,7 @@ public class RobotContainer {
                               return hubShotCalculator.calculateShot().targetHeading();
                             }))
                     .alongWith(
-                        Commands.waitSeconds(2.0)
+                        Commands.waitSeconds(2.25)
                             .andThen(
                                 superStructure.setIntakeStateCommand(
                                     IntakeWantedStates.AGITATING))))
@@ -421,23 +421,11 @@ public class RobotContainer {
 
     // Manual override: force shoot at hub regardless of position
     Trigger forceHubTrigger = driverCont.rightBumper().and(isSuperstructureMode);
-    forceHubTrigger.whileTrue(
-        superStructure
-            .setStateCommand(SuperWantedStates.SHOOT_AT_HUB)
-            .alongWith(
-                drivetrain.faceAngleWhileDrivingCommand(
-                    driverCont, () -> hubShotCalculator.calculateShot().targetHeading())));
+    forceHubTrigger.whileTrue(superStructure.setStateCommand(SuperWantedStates.FORCED_SHOT));
     forceHubTrigger.onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
 
     // Manual override: force pass to outpost regardless of position
-    driverCont
-        .b()
-        .whileTrue(
-            superStructure
-                .setStateCommand(SuperWantedStates.SHOOT_AT_OUTPOST)
-                .alongWith(
-                    drivetrain.faceAngleWhileDrivingCommand(
-                        driverCont, () -> passCalculator.calculateShot().targetHeading())));
+    driverCont.b().whileTrue(superStructure.setStateCommand(SuperWantedStates.FORCED_SHOOT_TRENCH));
     driverCont.b().onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
 
     driverCont.x().whileTrue(superStructure.setIntakeStateCommand(IntakeWantedStates.REVERSING));
