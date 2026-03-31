@@ -3,6 +3,7 @@ package frc.robot.subsystems;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -80,6 +81,9 @@ public class SuperStructure extends SubsystemBase {
     FORCED_SHOOT_TRENCH
   }
 
+  // Agitation delay after first FIRING transition during a shooting wanted state
+  private static final double AGITATE_DELAY_SECONDS = 1.0;
+
   // State variables
   private SuperWantedStates wantedSuperState = SuperWantedStates.IDLE;
   private SuperInternalStates currentSuperState = SuperInternalStates.IDLE;
@@ -87,6 +91,10 @@ public class SuperStructure extends SubsystemBase {
   private ControlState controlState = ControlState.SUPERSTRUCTURE;
   private boolean cachedHubActive = true;
   private double cachedTimeOfFlight = 0.0;
+
+  // Agitation timer state — tracks the first FIRING transition per shooting session
+  private final Timer agitateTimer = new Timer();
+  private boolean agitateTimerStarted = false;
 
   // Constructor
 
@@ -225,6 +233,17 @@ public class SuperStructure extends SubsystemBase {
     if (shooterStateMachine.getState() == ShooterStates.FIRING) {
       indexer.setWantedState(IndexerStates.INDEXING);
       hopperRoller.setWantedState(HopperRollerStates.ROLLING);
+
+      // Start agitate timer on first transition to FIRING this shooting session
+      if (!agitateTimerStarted) {
+        agitateTimer.restart();
+        agitateTimerStarted = true;
+      }
+
+      // Auto-agitate intake after delay
+      if (agitateTimer.hasElapsed(AGITATE_DELAY_SECONDS)) {
+        intakeStateMachine.setWantedState(IntakeWantedStates.AGITATING);
+      }
     } else {
       indexer.setWantedState(IndexerStates.OFF);
       hopperRoller.setWantedState(HopperRollerStates.PREVENT_JAM);
@@ -242,12 +261,19 @@ public class SuperStructure extends SubsystemBase {
     indexer.setWantedState(Indexer.IndexerStates.OFF);
     hopperRoller.setWantedState(HopperRollerStates.OFF);
     shooterStateMachine.setWantedState(ShooterWantedStates.IDLE);
+    resetAgitateTimer();
   }
 
   private void unjamming() {
     indexer.setWantedState(IndexerStates.REVERSING);
     shooterStateMachine.setWantedState(ShooterWantedStates.REVERSING);
     hopperRoller.setWantedState(HopperRollerStates.UNJAMMING);
+    resetAgitateTimer();
+  }
+
+  private void resetAgitateTimer() {
+    agitateTimer.stop();
+    agitateTimerStarted = false;
   }
 
   /**
@@ -382,6 +408,8 @@ public class SuperStructure extends SubsystemBase {
     Logger.recordOutput("Superstructure/PreviousSuperState", previousSuperState);
     Logger.recordOutput("Superstructure/ControlState", controlState);
     Logger.recordOutput("Superstructure/HubActive", cachedHubActive);
+    Logger.recordOutput("Superstructure/AgitateTimerStarted", agitateTimerStarted);
+    Logger.recordOutput("Superstructure/AgitateTimerElapsed", agitateTimer.get());
     shooterStateMachine.log();
     intakeStateMachine.log();
     targetSelectionStateMachine.log();
