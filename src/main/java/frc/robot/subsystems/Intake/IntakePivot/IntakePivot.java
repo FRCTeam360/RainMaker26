@@ -135,12 +135,12 @@ public class IntakePivot extends SubsystemBase {
             progressiveTimer.restart();
             progressiveTimerStarted = true;
           }
-          if (isStalling()) {
-            stallBackoffDegrees += STALL_BACKOFF_DEGREES;
-            currentState = IntakePivotInternalStates.STALLING;
-            break;
-          }
-          stallBackoffDegrees = 0.0;
+          // if (isStalling()) {
+          //   stallBackoffDegrees += STALL_BACKOFF_DEGREES;
+          //   currentState = IntakePivotInternalStates.STALLING;
+          //   break;
+          // }
+          // stallBackoffDegrees = 0.0;
           double elapsedSeconds = progressiveTimer.get();
           double progress = Math.min(elapsedSeconds / PROGRESSIVE_AGITATE_DURATION_SECONDS, 1.0);
           double basePositionDegrees =
