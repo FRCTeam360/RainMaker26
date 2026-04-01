@@ -327,7 +327,7 @@ public class RobotContainer {
     registerPathplannerCommand(
         "deploy intake", superStructure.setIntakeStateCommand(IntakeWantedStates.DEPLOYED));
     registerPathplannerCommand(
-        "agitate intake", superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING_HIGH));
+        "agitate intake", superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING_PROGRESSIVE));
     registerPathplannerCommand(
         "shoot without timer",
         superStructure
