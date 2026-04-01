@@ -7,9 +7,10 @@ package frc.robot.subsystems.Shooter.Hood;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.Slot0Configs;
-import com.ctre.phoenix6.configs.TalonFXSConfiguration;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
-import com.ctre.phoenix6.hardware.TalonFXS;
+import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.util.Units;
@@ -35,11 +36,12 @@ public class HoodIOPB implements HoodIO {
   private static final double MOTION_MAGIC_ACCELERATION_RPS2 = 4.0;
   private static final double MOTION_MAGIC_CRUISE_VELOCITY_RPS = 2.0;
   private static final double MOTION_MAGIC_JERK_RPS3 = 1200.0;
-  private final TalonFXS hoodMotor =
-      new TalonFXS(Constants.PracticeBotConstants.HOOD_ID, Constants.PracticeBotConstants.CANBUS);
-  private final TalonFXSConfiguration config = new TalonFXSConfiguration();
+  private final TalonFX hoodMotor =
+      new TalonFX(Constants.PracticeBotConstants.HOOD_ID, Constants.PracticeBotConstants.CANBUS);
+  private final TalonFXConfiguration config = new TalonFXConfiguration();
 
   private final MotionMagicVoltage motionMagicPosition = new MotionMagicVoltage(0);
+  private final PositionVoltage positionVoltage = new PositionVoltage(0);
 
   private final StatusSignal<Angle> positionSignal;
   private final StatusSignal<AngularVelocity> velocitySignal;
@@ -61,7 +63,7 @@ public class HoodIOPB implements HoodIO {
     slot0Configs.kS = KS;
     slot0Configs.kV = KV;
 
-    config.ExternalFeedback.SensorToMechanismRatio = GEAR_RATIO;
+    config.Feedback.SensorToMechanismRatio = GEAR_RATIO;
 
     config.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
     config.SoftwareLimitSwitch.ForwardSoftLimitThreshold =
@@ -104,6 +106,10 @@ public class HoodIOPB implements HoodIO {
   public void setPosition(double positionDegrees) {
     hoodMotor.setControl(
         motionMagicPosition.withPosition(Units.degreesToRotations(positionDegrees)));
+  }
+
+  public void setPositionAggressive(double positionDegrees) {
+    hoodMotor.setControl(positionVoltage.withPosition(Units.degreesToRotations(positionDegrees)));
   }
 
   public void updateInputs(HoodIOInputs inputs) {

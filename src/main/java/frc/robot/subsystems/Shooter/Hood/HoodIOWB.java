@@ -47,7 +47,10 @@ public class HoodIOWB implements HoodIO {
   }
 
   public void setPosition(double position) {
-    // old:encoder.setPosition(position);
+    controller.setSetpoint(position, ControlType.kPosition);
+  }
+
+  public void setPositionAggressive(double position) {
     controller.setSetpoint(position, ControlType.kPosition);
   }
 

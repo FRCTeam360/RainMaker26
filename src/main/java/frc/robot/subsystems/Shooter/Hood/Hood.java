@@ -158,6 +158,10 @@ public class Hood extends SubsystemBase {
     io.setPosition(position);
   }
 
+  public void setPositionAggressive(double position) {
+    io.setPositionAggressive(position);
+  }
+
   public double getPosition() {
     return inputs.position;
   }

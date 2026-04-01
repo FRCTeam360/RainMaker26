@@ -6,4 +6,6 @@ public class HoodIONoop implements HoodIO {
   public void setDutyCycle(double dutyCycle) {}
 
   public void setPosition(double position) {}
+
+  public void setPositionAggressive(double position) {}
 }

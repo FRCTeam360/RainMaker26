@@ -24,5 +24,7 @@ public interface HoodIO {
 
   public void setPosition(double position);
 
+  public void setPositionAggressive(double position);
+
   public void setZero();
 }

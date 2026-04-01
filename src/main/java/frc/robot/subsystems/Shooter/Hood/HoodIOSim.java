@@ -128,7 +128,12 @@ public class HoodIOSim implements HoodIO {
   /** Set position in degrees (matches PB IO) */
   @Override
   public void setPosition(double positionDegrees) {
-    // Convert degrees to rotations for the sim motor
+    double rotations = positionDegrees / 360.0;
+    motorControllerSim.setControl(positionRequest.withPosition(rotations));
+  }
+
+  @Override
+  public void setPositionAggressive(double positionDegrees) {
     double rotations = positionDegrees / 360.0;
     motorControllerSim.setControl(positionRequest.withPosition(rotations));
   }
