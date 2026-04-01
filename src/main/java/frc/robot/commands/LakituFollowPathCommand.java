@@ -91,24 +91,37 @@ public class LakituFollowPathCommand extends Command {
     return RECOVERY_CONSTRAINTS;
   }
 
-  private enum State {
+  // Enums
+
+  /** Wanted states set externally to request Lakitu behavior. */
+  public enum LakituWantedStates {
+    FOLLOW_PATH,
+    RECOVER
+  }
+
+  /** Internal states representing the resolved Lakitu behavior. */
+  public enum LakituInternalStates {
     FOLLOWING,
     PATHFINDING_TO_RECOVERY,
     FOLLOWING_RECOVERY,
+    COMPLETED,
     FAILED
   }
 
+  // Dependencies
   private final PathPlannerPath originalPath;
   private final Function<PathPlannerPath, Command> followCommandBuilder;
   private final BiFunction<Pose2d, PathConstraints, Command> pathfindCommandBuilder;
   private final Supplier<Pose2d> poseSupplier;
   private final Supplier<Pose2d> targetPoseSupplier;
+  private final PathPlannerPath recoveryPath;
 
+  // State variables
+  private LakituWantedStates wantedState = LakituWantedStates.FOLLOW_PATH;
+  private LakituInternalStates currentState = LakituInternalStates.FOLLOWING;
+  private LakituInternalStates previousState = LakituInternalStates.FOLLOWING;
   private Command activeCommand;
-  private State state;
   private int recoveryAttempts;
-  private boolean pathCompleted;
-  private PathPlannerPath recoveryPath;
 
   /**
    * Creates a new LakituFollowPathCommand.
@@ -140,33 +153,37 @@ public class LakituFollowPathCommand extends Command {
     String recoveryPathName = registeredPaths.get(path.name);
     if (recoveryPathName != null) {
       this.recoveryPath = PathProvider.fromPathFile(recoveryPathName);
+    } else {
+      this.recoveryPath = null;
     }
+  }
+
+  // State machine methods
+
+  /** Returns the current internal state. */
+  public LakituInternalStates getState() {
+    return currentState;
   }
 
   @Override
   public void initialize() {
-    state = State.FOLLOWING;
+    wantedState = LakituWantedStates.FOLLOW_PATH;
+    currentState = LakituInternalStates.FOLLOWING;
+    previousState = LakituInternalStates.FOLLOWING;
     recoveryAttempts = 0;
-    pathCompleted = false;
-    startFollowing();
-    logState();
+    startActiveCommand(followCommandBuilder.apply(originalPath));
   }
 
   @Override
   public void execute() {
-    switch (state) {
-      case FOLLOWING:
-        executeFollowing();
-        break;
-      case PATHFINDING_TO_RECOVERY:
-        executePathfindingToRecovery();
-        break;
-      case FOLLOWING_RECOVERY:
-        executeFollowingRecovery();
-        break;
-      case FAILED:
-        break;
-    }
+    applyState();
+    updateState();
+
+    Logger.recordOutput("Lakitu/WantedState", wantedState);
+    Logger.recordOutput("Lakitu/CurrentState", currentState);
+    Logger.recordOutput("Lakitu/PreviousState", previousState);
+    Logger.recordOutput("Lakitu/RecoveryAttempts", recoveryAttempts);
+    Logger.recordOutput("Lakitu/Path", originalPath.name);
   }
 
   @Override
@@ -175,153 +192,106 @@ public class LakituFollowPathCommand extends Command {
       activeCommand.end(true);
       activeCommand = null;
     }
-    Logger.recordOutput("Lakitu/Active", false);
   }
 
   @Override
   public boolean isFinished() {
-    return pathCompleted || state == State.FAILED;
+    return currentState == LakituInternalStates.COMPLETED
+        || currentState == LakituInternalStates.FAILED;
   }
-
-  // ---------------------------------------------------------------------------
-  // State handlers
-  // ---------------------------------------------------------------------------
-
-  private void executeFollowing() {
-    activeCommand.execute();
-
-    if (activeCommand.isFinished()) {
-      activeCommand.end(false);
-
-      // Only check end-of-path deviation if a recovery path exists
-      if (recoveryPath != null) {
-        handlePathTimerExpired();
-      } else {
-        activeCommand = null;
-        pathCompleted = true;
-      }
-      return;
-    }
-
-    // Only monitor deviation if a recovery path exists
-    if (recoveryPath != null) {
-      checkMidPathDeviation();
-    }
-  }
-
-  private void executePathfindingToRecovery() {
-    activeCommand.execute();
-
-    if (activeCommand.isFinished()) {
-      activeCommand.end(false);
-      startFollowingRecovery();
-      transitionTo(State.FOLLOWING_RECOVERY);
-    }
-  }
-
-  private void executeFollowingRecovery() {
-    activeCommand.execute();
-
-    if (activeCommand.isFinished()) {
-      activeCommand.end(false);
-      activeCommand = null;
-      pathCompleted = true;
-    }
-  }
-
-  // ---------------------------------------------------------------------------
-  // Deviation checks
-  // ---------------------------------------------------------------------------
 
   /**
-   * Called when the inner FollowPathCommand's timer expires. Checks whether the robot actually
-   * reached the end of the path. If not, triggers recovery.
+   * Resolves the wanted state into an internal state based on active command completion and
+   * deviation checks.
    */
-  private void handlePathTimerExpired() {
-    List<Pose2d> pathPoses = originalPath.getPathPoses();
-    Pose2d endPose = pathPoses.get(pathPoses.size() - 1);
-    double endDistance = poseSupplier.get().getTranslation().getDistance(endPose.getTranslation());
+  private void updateState() {
+    previousState = currentState;
 
-    if (endDistance <= END_TOLERANCE_METERS) {
-      activeCommand = null;
-      pathCompleted = true;
-      return;
+    switch (wantedState) {
+      case FOLLOW_PATH:
+        if (activeCommand.isFinished()) {
+          activeCommand.end(false);
+          if (recoveryPath != null && !isAtEndOfPath()) {
+            transitionToRecovery();
+          } else {
+            currentState = LakituInternalStates.COMPLETED;
+          }
+        } else if (recoveryPath != null && getDeviation() > RECOVERY_THRESHOLD_METERS) {
+          activeCommand.end(true);
+          transitionToRecovery();
+        }
+        break;
+      case RECOVER:
+        if (activeCommand.isFinished()) {
+          activeCommand.end(false);
+
+          if (currentState == LakituInternalStates.PATHFINDING_TO_RECOVERY) {
+            currentState = LakituInternalStates.FOLLOWING_RECOVERY;
+            startActiveCommand(followCommandBuilder.apply(recoveryPath));
+          } else if (currentState == LakituInternalStates.FOLLOWING_RECOVERY) {
+            currentState = LakituInternalStates.COMPLETED;
+          }
+        }
+        break;
     }
-
-    Logger.recordOutput("Lakitu/EndDeviationMeters", endDistance);
-    triggerRecoveryOrFail();
   }
 
-  /** Called every cycle during FOLLOWING to check if the robot has drifted too far from target. */
-  private void checkMidPathDeviation() {
-    double deviationMeters =
-        poseSupplier.get().getTranslation().getDistance(targetPoseSupplier.get().getTranslation());
-    Logger.recordOutput("Lakitu/DeviationMeters", deviationMeters);
-
-    if (deviationMeters > RECOVERY_THRESHOLD_METERS) {
-      activeCommand.end(true);
-      triggerRecoveryOrFail();
+  /** Executes the active command for the current internal state. */
+  private void applyState() {
+    switch (currentState) {
+      case FOLLOWING:
+      case PATHFINDING_TO_RECOVERY:
+      case FOLLOWING_RECOVERY:
+        activeCommand.execute();
+        break;
+      case COMPLETED:
+      case FAILED:
+      default:
+        break;
     }
-  }
-
-  // ---------------------------------------------------------------------------
-  // Recovery logic
-  // ---------------------------------------------------------------------------
-
-  /**
-   * Attempts recovery if attempts remain, otherwise transitions to FAILED. Shared by both the
-   * mid-path deviation check and the end-of-path tolerance check.
-   */
-  private void triggerRecoveryOrFail() {
-    recoveryAttempts++;
-    Logger.recordOutput("Lakitu/RecoveryAttempts", recoveryAttempts);
-
-    if (recoveryAttempts > MAX_RECOVERY_ATTEMPTS) {
-      activeCommand = null;
-      transitionTo(State.FAILED);
-      return;
-    }
-
-    startPathfindingToRecovery();
-    transitionTo(State.PATHFINDING_TO_RECOVERY);
-  }
-
-  private void startFollowing() {
-    activeCommand = followCommandBuilder.apply(originalPath);
-    activeCommand.initialize();
-    Logger.recordOutput("Lakitu/Active", true);
-    Logger.recordOutput("Lakitu/Path", originalPath.name);
-  }
-
-  /** Starts pathfinding toward the recovery path's starting pose. */
-  private void startPathfindingToRecovery() {
-    Pose2d recoveryTarget =
-        recoveryPath.getStartingHolonomicPose().orElseGet(() -> recoveryPath.getPathPoses().get(0));
-
-    activeCommand = pathfindCommandBuilder.apply(recoveryTarget, RECOVERY_CONSTRAINTS);
-    activeCommand.initialize();
-
-    Logger.recordOutput("Lakitu/RecoveryTarget", recoveryTarget);
-  }
-
-  /** Starts following the recovery path after pathfinding has reached its start. */
-  private void startFollowingRecovery() {
-    activeCommand = followCommandBuilder.apply(recoveryPath);
-    activeCommand.initialize();
-    Logger.recordOutput("Lakitu/FollowingRecoveryPath", recoveryPath.name);
   }
 
   // ---------------------------------------------------------------------------
   // Helpers
   // ---------------------------------------------------------------------------
 
-  private void transitionTo(State newState) {
-    state = newState;
-    logState();
+  /** Transitions to recovery, or fails if max attempts are exceeded. */
+  private void transitionToRecovery() {
+    recoveryAttempts++;
+
+    if (recoveryAttempts > MAX_RECOVERY_ATTEMPTS) {
+      currentState = LakituInternalStates.FAILED;
+      activeCommand = null;
+      return;
+    }
+
+    wantedState = LakituWantedStates.RECOVER;
+    currentState = LakituInternalStates.PATHFINDING_TO_RECOVERY;
+
+    Pose2d recoveryTarget =
+        recoveryPath.getStartingHolonomicPose().orElseGet(() -> recoveryPath.getPathPoses().get(0));
+    startActiveCommand(pathfindCommandBuilder.apply(recoveryTarget, RECOVERY_CONSTRAINTS));
   }
 
-  private void logState() {
-    Logger.recordOutput("Lakitu/State", state.name());
-    Logger.recordOutput("Lakitu/RecoveryAttempts", recoveryAttempts);
+  /** Returns the distance between the robot's current pose and the path follower's target. */
+  private double getDeviation() {
+    return poseSupplier
+        .get()
+        .getTranslation()
+        .getDistance(targetPoseSupplier.get().getTranslation());
+  }
+
+  /** Returns whether the robot is within tolerance of the original path's end pose. */
+  private boolean isAtEndOfPath() {
+    List<Pose2d> pathPoses = originalPath.getPathPoses();
+    Pose2d endPose = pathPoses.get(pathPoses.size() - 1);
+    return poseSupplier.get().getTranslation().getDistance(endPose.getTranslation())
+        <= END_TOLERANCE_METERS;
+  }
+
+  /** Starts a new active command, initializing it immediately. */
+  private void startActiveCommand(Command command) {
+    activeCommand = command;
+    activeCommand.initialize();
   }
 }
