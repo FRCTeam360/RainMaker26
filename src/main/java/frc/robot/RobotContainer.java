@@ -300,8 +300,8 @@ public class RobotContainer {
     LakituFollowPathCommand.registerPath("Lakitu Path 2");
     LakituFollowPathCommand.registerPath("Lakitu Path 3");
     LakituFollowPathCommand.registerPath("Lakitu Path 4");
-    LakituFollowPathCommand.registerPath("No Stop Right Red Middle 1");
-    LakituFollowPathCommand.registerPath("No Stop Right Red Middle 2");
+    LakituFollowPathCommand.registerPath("No Stop Right Red Middle 1", "Lakitu Test Recovery 21");
+    LakituFollowPathCommand.registerPath("No Stop Right Red Middle 2", "Lakitu Test Recovery 21");
     LakituFollowPathCommand.registerPath("Red middle 1");
     LakituFollowPathCommand.registerPath("Red middle 2.1");
     LakituFollowPathCommand.registerPath("Red middle 3.3");

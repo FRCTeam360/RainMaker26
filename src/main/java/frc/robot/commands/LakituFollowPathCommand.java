@@ -5,9 +5,10 @@ import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
-import java.util.HashSet;
+import frc.robot.utils.PathProvider;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -18,11 +19,15 @@ import org.littletonrobotics.junction.Logger;
  *
  * <p>Monitors the distance between the robot's current pose and the path follower's target pose
  * every cycle. If the deviation exceeds a threshold (indicating a collision or major disturbance),
- * the system interrupts the current path, pathfinds back to the start of the current path segment,
- * and restarts the original path.
+ * the system interrupts the current path, pathfinds to a designated recovery path, and follows that
+ * recovery path to get the robot back on track.
  *
- * <p>Paths must be registered via {@link #registerPath(String)} to receive Lakitu recovery
- * behavior. Unregistered paths use standard path following.
+ * <p>Recovery paths are pre-planned in PathPlanner and registered as pairs with their original
+ * paths via {@link #registerPath(String, String)}. This ensures recovery trajectories are smooth
+ * and optimized, rather than restarting the original path from the beginning.
+ *
+ * <p>Paths registered without a recovery path via {@link #registerPath(String)} will follow
+ * normally without recovery behavior.
  *
  * @see <a href="docs/lakitu-recovery-system.md">Lakitu Recovery System Design Doc</a>
  */
@@ -31,7 +36,6 @@ public class LakituFollowPathCommand extends Command {
   // --- Deviation thresholds ---
   private static final double RECOVERY_THRESHOLD_METERS = 1.5;
   private static final double END_TOLERANCE_METERS = 0.5;
-  private static final double MIN_RECOVERY_DISTANCE_METERS = 0.3;
 
   // --- Recovery limits ---
   private static final int MAX_RECOVERY_ATTEMPTS = 2;
@@ -44,17 +48,28 @@ public class LakituFollowPathCommand extends Command {
           Math.toRadians(360), // maxAngularVelocityRadPerSec
           Math.toRadians(540)); // maxAngularAccelerationRadPerSecSq
 
-  // --- Path registry ---
-  private static final Set<String> registeredPaths = new HashSet<>();
+  // --- Path registry: original path name -> recovery path name ---
+  private static final Map<String, String> registeredPaths = new HashMap<>();
 
   /**
-   * Register a path name for Lakitu recovery behavior. Paths not registered will use standard path
-   * following when passed through the command builder.
+   * Register a path for Lakitu recovery with a designated recovery path. When the robot is
+   * disrupted during the original path, it will pathfind to the recovery path and follow it.
+   *
+   * @param pathName the name of the original path (matching the .path filename)
+   * @param recoveryPathName the name of the recovery path to follow after disruption
+   */
+  public static void registerPath(String pathName, String recoveryPathName) {
+    registeredPaths.put(pathName, recoveryPathName);
+  }
+
+  /**
+   * Register a path for Lakitu wrapping without a recovery path. The path will follow normally
+   * without recovery behavior on disruption.
    *
    * @param pathName the name of the path (matching the .path filename)
    */
   public static void registerPath(String pathName) {
-    registeredPaths.add(pathName);
+    registeredPaths.put(pathName, null);
   }
 
   /**
@@ -64,13 +79,13 @@ public class LakituFollowPathCommand extends Command {
    * @return true if the path should use Lakitu recovery
    */
   public static boolean isRegistered(String pathName) {
-    return registeredPaths.contains(pathName);
+    return registeredPaths.containsKey(pathName);
   }
 
   /**
-   * Returns the recovery path constraints used for pathfinding back to checkpoints.
+   * Returns the recovery path constraints used for pathfinding to recovery paths.
    *
-   * @return the {@link PathConstraints} for recovery paths
+   * @return the {@link PathConstraints} for recovery pathfinding
    */
   public static PathConstraints getRecoveryConstraints() {
     return RECOVERY_CONSTRAINTS;
@@ -78,7 +93,8 @@ public class LakituFollowPathCommand extends Command {
 
   private enum State {
     FOLLOWING,
-    RECOVERING,
+    PATHFINDING_TO_RECOVERY,
+    FOLLOWING_RECOVERY,
     FAILED
   }
 
@@ -92,6 +108,7 @@ public class LakituFollowPathCommand extends Command {
   private State state;
   private int recoveryAttempts;
   private boolean pathCompleted;
+  private PathPlannerPath recoveryPath;
 
   /**
    * Creates a new LakituFollowPathCommand.
@@ -118,6 +135,12 @@ public class LakituFollowPathCommand extends Command {
     this.poseSupplier = poseSupplier;
     this.targetPoseSupplier = targetPoseSupplier;
     addRequirements(requirements);
+
+    // Pre-load recovery path if one is registered
+    String recoveryPathName = registeredPaths.get(path.name);
+    if (recoveryPathName != null) {
+      this.recoveryPath = PathProvider.fromPathFile(recoveryPathName);
+    }
   }
 
   @Override
@@ -135,8 +158,11 @@ public class LakituFollowPathCommand extends Command {
       case FOLLOWING:
         executeFollowing();
         break;
-      case RECOVERING:
-        executeRecovering();
+      case PATHFINDING_TO_RECOVERY:
+        executePathfindingToRecovery();
+        break;
+      case FOLLOWING_RECOVERY:
+        executeFollowingRecovery();
         break;
       case FAILED:
         break;
@@ -166,20 +192,40 @@ public class LakituFollowPathCommand extends Command {
 
     if (activeCommand.isFinished()) {
       activeCommand.end(false);
-      handlePathTimerExpired();
+
+      // Only check end-of-path deviation if a recovery path exists
+      if (recoveryPath != null) {
+        handlePathTimerExpired();
+      } else {
+        activeCommand = null;
+        pathCompleted = true;
+      }
       return;
     }
 
-    checkMidPathDeviation();
+    // Only monitor deviation if a recovery path exists
+    if (recoveryPath != null) {
+      checkMidPathDeviation();
+    }
   }
 
-  private void executeRecovering() {
+  private void executePathfindingToRecovery() {
     activeCommand.execute();
 
     if (activeCommand.isFinished()) {
       activeCommand.end(false);
-      startFollowing();
-      transitionTo(State.FOLLOWING);
+      startFollowingRecovery();
+      transitionTo(State.FOLLOWING_RECOVERY);
+    }
+  }
+
+  private void executeFollowingRecovery() {
+    activeCommand.execute();
+
+    if (activeCommand.isFinished()) {
+      activeCommand.end(false);
+      activeCommand = null;
+      pathCompleted = true;
     }
   }
 
@@ -236,8 +282,8 @@ public class LakituFollowPathCommand extends Command {
       return;
     }
 
-    startRecovery();
-    transitionTo(State.RECOVERING);
+    startPathfindingToRecovery();
+    transitionTo(State.PATHFINDING_TO_RECOVERY);
   }
 
   private void startFollowing() {
@@ -247,36 +293,27 @@ public class LakituFollowPathCommand extends Command {
     Logger.recordOutput("Lakitu/Path", originalPath.name);
   }
 
-  private void startRecovery() {
-    Pose2d currentPose = poseSupplier.get();
-    Pose2d checkpointPose = getCheckpointPose();
+  /** Starts pathfinding toward the recovery path's starting pose. */
+  private void startPathfindingToRecovery() {
+    Pose2d recoveryTarget =
+        recoveryPath.getStartingHolonomicPose().orElseGet(() -> recoveryPath.getPathPoses().get(0));
 
-    double distanceToCheckpoint =
-        currentPose.getTranslation().getDistance(checkpointPose.getTranslation());
-
-    // If already at the checkpoint, skip pathfinding and restart the path directly
-    if (distanceToCheckpoint < MIN_RECOVERY_DISTANCE_METERS) {
-      startFollowing();
-      transitionTo(State.FOLLOWING);
-      return;
-    }
-
-    activeCommand = pathfindCommandBuilder.apply(checkpointPose, RECOVERY_CONSTRAINTS);
+    activeCommand = pathfindCommandBuilder.apply(recoveryTarget, RECOVERY_CONSTRAINTS);
     activeCommand.initialize();
 
-    Logger.recordOutput("Lakitu/RecoveryTarget", checkpointPose);
+    Logger.recordOutput("Lakitu/RecoveryTarget", recoveryTarget);
+  }
+
+  /** Starts following the recovery path after pathfinding has reached its start. */
+  private void startFollowingRecovery() {
+    activeCommand = followCommandBuilder.apply(recoveryPath);
+    activeCommand.initialize();
+    Logger.recordOutput("Lakitu/FollowingRecoveryPath", recoveryPath.name);
   }
 
   // ---------------------------------------------------------------------------
   // Helpers
   // ---------------------------------------------------------------------------
-
-  /** Returns the starting pose of the original path (the "checkpoint" to recover to). */
-  private Pose2d getCheckpointPose() {
-    return originalPath
-        .getStartingHolonomicPose()
-        .orElseGet(() -> originalPath.getPathPoses().get(0));
-  }
 
   private void transitionTo(State newState) {
     state = newState;
