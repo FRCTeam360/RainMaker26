@@ -153,7 +153,7 @@ public class IntakePivot extends SubsystemBase {
       case SWITCHING_AGITATE_TARGET_HIGH:
       case SWITCHING_AGITATE_TARGET_LOW:
       case PROGRESSIVE_AGITATING:
-        setPosition(getTargetPosition());
+        setPositionAggressive(getTargetPosition());
         break;
       case IDLE:
       default:
@@ -212,6 +212,14 @@ public class IntakePivot extends SubsystemBase {
 
   public void setPosition(double value) {
     io.setPosition(value);
+  }
+
+  public void setPositionSmooth(double value) {
+    io.setPositionSmooth(value);
+  }
+
+  public void setPositionAggressive(double value) {
+    io.setPositionAggressive(value);
   }
 
   public boolean atSetpoint(double setpoint) {

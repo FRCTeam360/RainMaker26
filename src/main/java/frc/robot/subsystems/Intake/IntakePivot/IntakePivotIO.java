@@ -22,6 +22,10 @@ public interface IntakePivotIO {
 
   public void setPosition(double position);
 
+  public void setPositionSmooth(double position);
+
+  public void setPositionAggressive(double position);
+
   public void setDutyCycle(double value);
 
   public default void updateInputs(IntakePivotIOInputs inputs) {}
