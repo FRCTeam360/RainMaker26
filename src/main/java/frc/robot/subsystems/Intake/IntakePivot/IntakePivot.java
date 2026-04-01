@@ -15,8 +15,10 @@ public class IntakePivot extends SubsystemBase {
   // Constants
   private static final double STOWED_POSITION_DEGREES = 0.0;
   private static final double DEPLOYED_POSITION_DEGREES = 97.0;
-  private static final double HIGH_AGITATED_POSITION_DEGREES = 45.0;
-  private static final double LOW_AGITATED_POSITION_DEGREES = 70.0;
+  private static final double AGITATE_LOW_UPPER_POSITION_DEGREES = 20.0;
+  private static final double AGITATE_LOW_LOWER_POSITION_DEGREES = 0.0;
+  private static final double AGITATE_HIGH_UPPER_POSITION_DEGREES = 75.0;
+  private static final double AGITATE_HIGH_LOWER_POSITION_DEGREES = 55.0;
   private static final double STACK_FUEL_POSITION_DEGREES = 20.0;
   private static final double TOLERANCE_DEGREES = 2.0;
   // IO fields
@@ -27,7 +29,8 @@ public class IntakePivot extends SubsystemBase {
     IDLE,
     STOWED,
     DEPLOYED,
-    AGITATE_HOPPER,
+    AGITATE_HOPPER_LOW,
+    AGITATE_HOPPER_HIGH,
     STACK_FUEL
   }
 
@@ -84,10 +87,12 @@ public class IntakePivot extends SubsystemBase {
                 ? IntakePivotInternalStates.AT_SETPOINT
                 : IntakePivotInternalStates.MOVING_TO_SETPOINT;
         break;
-      case AGITATE_HOPPER:
+      case AGITATE_HOPPER_LOW:
+      case AGITATE_HOPPER_HIGH:
         {
-          double target =
-              agitateTargetHigh ? HIGH_AGITATED_POSITION_DEGREES : LOW_AGITATED_POSITION_DEGREES;
+          double upperTarget = getAgitateUpperPosition();
+          double lowerTarget = getAgitateLowerPosition();
+          double target = agitateTargetHigh ? upperTarget : lowerTarget;
           boolean atTarget = atSetpoint(target);
           if (previousState == IntakePivotInternalStates.MOVING_TO_SETPOINT && atTarget) {
             currentState =
@@ -129,10 +134,23 @@ public class IntakePivot extends SubsystemBase {
     }
   }
 
+  private double getAgitateUpperPosition() {
+    return wantedState == IntakePivotWantedStates.AGITATE_HOPPER_HIGH
+        ? AGITATE_HIGH_UPPER_POSITION_DEGREES
+        : AGITATE_LOW_UPPER_POSITION_DEGREES;
+  }
+
+  private double getAgitateLowerPosition() {
+    return wantedState == IntakePivotWantedStates.AGITATE_HOPPER_HIGH
+        ? AGITATE_HIGH_LOWER_POSITION_DEGREES
+        : AGITATE_LOW_LOWER_POSITION_DEGREES;
+  }
+
   private double getTargetPosition() {
     switch (wantedState) {
-      case AGITATE_HOPPER:
-        return agitateTargetHigh ? HIGH_AGITATED_POSITION_DEGREES : LOW_AGITATED_POSITION_DEGREES;
+      case AGITATE_HOPPER_LOW:
+      case AGITATE_HOPPER_HIGH:
+        return agitateTargetHigh ? getAgitateUpperPosition() : getAgitateLowerPosition();
       case DEPLOYED:
         return DEPLOYED_POSITION_DEGREES;
       case STOWED:

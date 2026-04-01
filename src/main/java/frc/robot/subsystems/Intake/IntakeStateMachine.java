@@ -22,7 +22,8 @@ public class IntakeStateMachine {
     IDLE,
     INTAKING,
     STOWED,
-    AGITATING,
+    AGITATING_LOW,
+    AGITATING_HIGH,
     DEPLOYED,
     REVERSING
   }
@@ -32,7 +33,8 @@ public class IntakeStateMachine {
     IDLE,
     INTAKING,
     STOWED,
-    AGITATING,
+    AGITATING_LOW,
+    AGITATING_HIGH,
     DEPLOYED,
     REVERSING
   }
@@ -85,8 +87,11 @@ public class IntakeStateMachine {
       case STOWED:
         currentState = IntakeInternalStates.STOWED;
         break;
-      case AGITATING:
-        currentState = IntakeInternalStates.AGITATING;
+      case AGITATING_LOW:
+        currentState = IntakeInternalStates.AGITATING_LOW;
+        break;
+      case AGITATING_HIGH:
+        currentState = IntakeInternalStates.AGITATING_HIGH;
         break;
       case DEPLOYED:
         currentState = IntakeInternalStates.DEPLOYED;
@@ -114,9 +119,13 @@ public class IntakeStateMachine {
         intakeRoller.setWantedState(IntakeRollerStates.INTAKING);
         intakePivot.setWantedState(IntakePivotWantedStates.DEPLOYED);
         break;
-      case AGITATING:
+      case AGITATING_LOW:
         intakeRoller.setWantedState(IntakeRollerStates.ASSIST_SHOOTING);
-        intakePivot.setWantedState(IntakePivotWantedStates.AGITATE_HOPPER);
+        intakePivot.setWantedState(IntakePivotWantedStates.AGITATE_HOPPER_LOW);
+        break;
+      case AGITATING_HIGH:
+        intakeRoller.setWantedState(IntakeRollerStates.ASSIST_SHOOTING);
+        intakePivot.setWantedState(IntakePivotWantedStates.AGITATE_HOPPER_HIGH);
         break;
       case STOWED:
         intakeRoller.setWantedState(IntakeRollerStates.IDLE);
