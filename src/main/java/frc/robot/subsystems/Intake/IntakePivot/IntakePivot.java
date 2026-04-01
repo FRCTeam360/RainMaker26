@@ -25,6 +25,10 @@ public class IntakePivot extends SubsystemBase {
   private static final double PROGRESSIVE_AGITATE_DURATION_SECONDS = 6.0;
   private static final double PROGRESSIVE_AGITATE_DIP_DEGREES = 10.0;
   private static final double PROGRESSIVE_AGITATE_OSCILLATIONS_PER_SECOND = 2.0;
+  // Stall detection constants
+  private static final double STALL_CURRENT_THRESHOLD_AMPS = 40.0;
+  private static final double STALL_VELOCITY_THRESHOLD_DPS = 5.0;
+  private static final double STALL_BACKOFF_DEGREES = 10.0;
   // IO fields
   private final IntakePivotIO io;
   private final IntakePivotIOInputsAutoLogged inputs = new IntakePivotIOInputsAutoLogged();
@@ -35,8 +39,7 @@ public class IntakePivot extends SubsystemBase {
     DEPLOYED,
     AGITATE_HOPPER_LOW,
     AGITATE_HOPPER_HIGH,
-    AGITATE_PROGRESSIVE,
-    STACK_FUEL
+    AGITATE_PROGRESSIVE
   }
 
   public enum IntakePivotInternalStates {
@@ -45,7 +48,9 @@ public class IntakePivot extends SubsystemBase {
     AT_SETPOINT,
     SWITCHING_AGITATE_TARGET_HIGH,
     SWITCHING_AGITATE_TARGET_LOW,
-    PROGRESSIVE_AGITATING
+    PROGRESSIVE_AGITATING,
+    PROGRESSIVE_COMPLETE,
+    STALLING
   }
 
   // State variables
@@ -58,6 +63,8 @@ public class IntakePivot extends SubsystemBase {
   // For progressive agitate
   private final Timer progressiveTimer = new Timer();
   private boolean progressiveTimerStarted = false;
+  // Stall backoff — accumulated degrees to back off toward deployed
+  private double stallBackoffDegrees = 0.0;
 
   // Constructor
 
@@ -73,13 +80,6 @@ public class IntakePivot extends SubsystemBase {
   }
 
   public void setWantedState(IntakePivotWantedStates state) {
-    if (state == IntakePivotWantedStates.AGITATE_PROGRESSIVE && wantedState != state) {
-      progressiveTimer.restart();
-      progressiveTimerStarted = true;
-    }
-    if (state != IntakePivotWantedStates.AGITATE_PROGRESSIVE) {
-      progressiveTimerStarted = false;
-    }
     wantedState = state;
   }
 
@@ -131,6 +131,16 @@ public class IntakePivot extends SubsystemBase {
         }
       case AGITATE_PROGRESSIVE:
         {
+          if (!progressiveTimerStarted) {
+            progressiveTimer.restart();
+            progressiveTimerStarted = true;
+          }
+          if (isStalling()) {
+            stallBackoffDegrees += STALL_BACKOFF_DEGREES;
+            currentState = IntakePivotInternalStates.STALLING;
+            break;
+          }
+          stallBackoffDegrees = 0.0;
           double elapsedSeconds = progressiveTimer.get();
           double progress = Math.min(elapsedSeconds / PROGRESSIVE_AGITATE_DURATION_SECONDS, 1.0);
           double basePositionDegrees =
@@ -138,18 +148,23 @@ public class IntakePivot extends SubsystemBase {
                   + (STOWED_POSITION_DEGREES - DEPLOYED_POSITION_DEGREES) * progress;
           if (elapsedSeconds >= PROGRESSIVE_AGITATE_DURATION_SECONDS
               || basePositionDegrees <= STOWED_POSITION_DEGREES + PROGRESSIVE_AGITATE_DIP_DEGREES) {
-            wantedState = IntakePivotWantedStates.STOWED;
-            currentState = IntakePivotInternalStates.AT_SETPOINT;
+            progressiveTimerStarted = false;
+            currentState = IntakePivotInternalStates.PROGRESSIVE_COMPLETE;
           } else {
             currentState = IntakePivotInternalStates.PROGRESSIVE_AGITATING;
           }
           break;
         }
-      case STACK_FUEL:
       default:
+        stallBackoffDegrees = 0.0;
         currentState = IntakePivotInternalStates.IDLE;
         break;
     }
+  }
+
+  private boolean isStalling() {
+    return inputs.statorCurrent > STALL_CURRENT_THRESHOLD_AMPS
+        && Math.abs(inputs.velocity) < STALL_VELOCITY_THRESHOLD_DPS;
   }
 
   private void applyState() {
@@ -159,10 +174,17 @@ public class IntakePivot extends SubsystemBase {
       case SWITCHING_AGITATE_TARGET_HIGH:
       case SWITCHING_AGITATE_TARGET_LOW:
       case PROGRESSIVE_AGITATING:
-        setPositionAggressive(getTargetPosition());
+      case STALLING:
+        double target = getTargetPosition() + stallBackoffDegrees;
+        target = Math.max(STOWED_POSITION_DEGREES, Math.min(target, DEPLOYED_POSITION_DEGREES));
+        setPositionAggressive(target);
+        break;
+      case PROGRESSIVE_COMPLETE:
+        setPositionSmooth(STOWED_POSITION_DEGREES);
         break;
       case IDLE:
       default:
+        stallBackoffDegrees = 0.0;
         stop();
     }
   }
@@ -232,8 +254,6 @@ public class IntakePivot extends SubsystemBase {
   public boolean atSetpoint(double setpoint) {
     return Math.abs(inputs.position - setpoint) < TOLERANCE_DEGREES;
   }
-
-  // No longer needed: shouldLowToHigh/shouldHighToLow
 
   public void setDutyCycle(double value) {
     io.setDutyCycle(value);
