@@ -132,7 +132,13 @@ public class IntakePivot extends SubsystemBase {
       case AGITATE_PROGRESSIVE:
         {
           double elapsedSeconds = progressiveTimer.get();
-          if (elapsedSeconds >= PROGRESSIVE_AGITATE_DURATION_SECONDS) {
+          double progress = Math.min(elapsedSeconds / PROGRESSIVE_AGITATE_DURATION_SECONDS, 1.0);
+          double basePositionDegrees =
+              DEPLOYED_POSITION_DEGREES
+                  + (STOWED_POSITION_DEGREES - DEPLOYED_POSITION_DEGREES) * progress;
+          if (elapsedSeconds >= PROGRESSIVE_AGITATE_DURATION_SECONDS
+              || basePositionDegrees <= STOWED_POSITION_DEGREES + PROGRESSIVE_AGITATE_DIP_DEGREES) {
+            wantedState = IntakePivotWantedStates.STOWED;
             currentState = IntakePivotInternalStates.AT_SETPOINT;
           } else {
             currentState = IntakePivotInternalStates.PROGRESSIVE_AGITATING;
@@ -189,7 +195,8 @@ public class IntakePivot extends SubsystemBase {
     double halfPeriodSeconds = 1.0 / (2.0 * PROGRESSIVE_AGITATE_OSCILLATIONS_PER_SECOND);
     boolean dipped = (elapsedSeconds % (2.0 * halfPeriodSeconds)) >= halfPeriodSeconds;
     double oscillation = dipped ? PROGRESSIVE_AGITATE_DIP_DEGREES : 0.0;
-    return basePositionDegrees + oscillation;
+    double position = basePositionDegrees + oscillation;
+    return Math.max(STOWED_POSITION_DEGREES, Math.min(position, DEPLOYED_POSITION_DEGREES));
   }
 
   private double getTargetPosition() {
