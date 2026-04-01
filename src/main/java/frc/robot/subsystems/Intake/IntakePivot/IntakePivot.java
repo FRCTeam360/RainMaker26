@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems.Intake.IntakePivot;
 
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -19,8 +20,11 @@ public class IntakePivot extends SubsystemBase {
   private static final double AGITATE_LOW_LOWER_POSITION_DEGREES = 0.0;
   private static final double AGITATE_HIGH_UPPER_POSITION_DEGREES = 75.0;
   private static final double AGITATE_HIGH_LOWER_POSITION_DEGREES = 55.0;
-  private static final double STACK_FUEL_POSITION_DEGREES = 20.0;
   private static final double TOLERANCE_DEGREES = 2.0;
+  // Progressive agitate constants
+  private static final double PROGRESSIVE_AGITATE_DURATION_SECONDS = 6.0;
+  private static final double PROGRESSIVE_AGITATE_DIP_DEGREES = 10.0;
+  private static final double PROGRESSIVE_AGITATE_OSCILLATIONS_PER_SECOND = 2.0;
   // IO fields
   private final IntakePivotIO io;
   private final IntakePivotIOInputsAutoLogged inputs = new IntakePivotIOInputsAutoLogged();
@@ -31,6 +35,7 @@ public class IntakePivot extends SubsystemBase {
     DEPLOYED,
     AGITATE_HOPPER_LOW,
     AGITATE_HOPPER_HIGH,
+    AGITATE_PROGRESSIVE,
     STACK_FUEL
   }
 
@@ -39,7 +44,8 @@ public class IntakePivot extends SubsystemBase {
     MOVING_TO_SETPOINT,
     AT_SETPOINT,
     SWITCHING_AGITATE_TARGET_HIGH,
-    SWITCHING_AGITATE_TARGET_LOW
+    SWITCHING_AGITATE_TARGET_LOW,
+    PROGRESSIVE_AGITATING
   }
 
   // State variables
@@ -49,6 +55,9 @@ public class IntakePivot extends SubsystemBase {
   private ControlState controlState = ControlState.SUPERSTRUCTURE;
   // For agitation cycle
   private boolean agitateTargetHigh = true;
+  // For progressive agitate
+  private final Timer progressiveTimer = new Timer();
+  private boolean progressiveTimerStarted = false;
 
   // Constructor
 
@@ -64,6 +73,13 @@ public class IntakePivot extends SubsystemBase {
   }
 
   public void setWantedState(IntakePivotWantedStates state) {
+    if (state == IntakePivotWantedStates.AGITATE_PROGRESSIVE && wantedState != state) {
+      progressiveTimer.restart();
+      progressiveTimerStarted = true;
+    }
+    if (state != IntakePivotWantedStates.AGITATE_PROGRESSIVE) {
+      progressiveTimerStarted = false;
+    }
     wantedState = state;
   }
 
@@ -113,6 +129,16 @@ public class IntakePivot extends SubsystemBase {
           }
           break;
         }
+      case AGITATE_PROGRESSIVE:
+        {
+          double elapsedSeconds = progressiveTimer.get();
+          if (elapsedSeconds >= PROGRESSIVE_AGITATE_DURATION_SECONDS) {
+            currentState = IntakePivotInternalStates.AT_SETPOINT;
+          } else {
+            currentState = IntakePivotInternalStates.PROGRESSIVE_AGITATING;
+          }
+          break;
+        }
       case STACK_FUEL:
       default:
         currentState = IntakePivotInternalStates.IDLE;
@@ -126,6 +152,7 @@ public class IntakePivot extends SubsystemBase {
       case AT_SETPOINT:
       case SWITCHING_AGITATE_TARGET_HIGH:
       case SWITCHING_AGITATE_TARGET_LOW:
+      case PROGRESSIVE_AGITATING:
         setPosition(getTargetPosition());
         break;
       case IDLE:
@@ -146,11 +173,32 @@ public class IntakePivot extends SubsystemBase {
         : AGITATE_LOW_LOWER_POSITION_DEGREES;
   }
 
+  /**
+   * Computes the progressive agitate setpoint as a function of elapsed time. Linearly interpolates
+   * from deployed to stowed over the configured duration, with a square wave dip toward deployed
+   * superimposed for maximum aggression.
+   */
+  private double getProgressiveAgitatePosition() {
+    double elapsedSeconds = progressiveTimer.get();
+    double progress = Math.min(elapsedSeconds / PROGRESSIVE_AGITATE_DURATION_SECONDS, 1.0);
+    // Linear interpolation from deployed toward stowed
+    double basePositionDegrees =
+        DEPLOYED_POSITION_DEGREES
+            + (STOWED_POSITION_DEGREES - DEPLOYED_POSITION_DEGREES) * progress;
+    // Square wave: snap between base and base + dip (toward deployed, never below stowed)
+    double halfPeriodSeconds = 1.0 / (2.0 * PROGRESSIVE_AGITATE_OSCILLATIONS_PER_SECOND);
+    boolean dipped = (elapsedSeconds % (2.0 * halfPeriodSeconds)) >= halfPeriodSeconds;
+    double oscillation = dipped ? PROGRESSIVE_AGITATE_DIP_DEGREES : 0.0;
+    return basePositionDegrees + oscillation;
+  }
+
   private double getTargetPosition() {
     switch (wantedState) {
       case AGITATE_HOPPER_LOW:
       case AGITATE_HOPPER_HIGH:
         return agitateTargetHigh ? getAgitateUpperPosition() : getAgitateLowerPosition();
+      case AGITATE_PROGRESSIVE:
+        return getProgressiveAgitatePosition();
       case DEPLOYED:
         return DEPLOYED_POSITION_DEGREES;
       case STOWED:

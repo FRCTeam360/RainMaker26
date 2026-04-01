@@ -318,7 +318,7 @@ public class RobotContainer {
                         Commands.waitSeconds(2.25)
                             .andThen(
                                 superStructure.setIntakeStateCommand(
-                                    IntakeWantedStates.AGITATING_HIGH))))
+                                    IntakeWantedStates.AGITATING_PROGRESSIVE))))
             .andThen(superStructure.setStateCommand(SuperWantedStates.DEFAULT)));
     registerPathplannerCommand(
         "stow intake", superStructure.setIntakeStateCommand(IntakeWantedStates.STOWED));
@@ -414,7 +414,8 @@ public class RobotContainer {
             .alongWith(
                 Commands.waitSeconds(2.5)
                     .andThen(
-                        superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING_HIGH))));
+                        superStructure.setIntakeStateCommand(
+                            IntakeWantedStates.AGITATING_PROGRESSIVE))));
     autoCycleTrigger.onFalse(
         superStructure
             .setStateCommand(SuperWantedStates.DEFAULT)
@@ -447,7 +448,7 @@ public class RobotContainer {
 
       Trigger agitateTrigger = driverCont.leftTrigger().and(isSuperstructureMode);
       agitateTrigger.onTrue(
-          superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING_HIGH));
+          superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING_PROGRESSIVE));
       agitateTrigger.onFalse(superStructure.setIntakeStateCommand(IntakeWantedStates.DEPLOYED));
 
       // Y toggle: STOWED <-
