@@ -23,7 +23,7 @@ import frc.robot.Constants;
 public class HoodIOPB implements HoodIO {
   private static final double GEAR_RATIO = 3.0 / 1.0 * 170.0 / 10.0;
   // 1/3 * 170/10
-  private static final double KP = 300.0;
+  private static final double KP = 750.0;
   private static final double KI = 0.0;
   private static final double KD = 0.0;
   private static final double KA = 0.0;
