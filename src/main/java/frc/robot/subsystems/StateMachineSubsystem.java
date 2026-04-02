@@ -34,6 +34,7 @@ public abstract class StateMachineSubsystem<
       updateState();
       applyState();
     }
+    logOutputs();
   }
 
   protected abstract void logOutputs();
