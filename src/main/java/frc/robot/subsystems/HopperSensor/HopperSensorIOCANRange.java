@@ -8,29 +8,35 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANrangeConfiguration;
 import com.ctre.phoenix6.hardware.CANrange;
+import com.ctre.phoenix6.signals.UpdateModeValue;
 import edu.wpi.first.units.measure.Distance;
+import frc.robot.Constants;
 
 public class HopperSensorIOCANRange implements HopperSensorIO {
 
-  private final CANrange canRange;
+  private static final int SENSOR_UPDATE_FREQUENCY_HZ = 50;
+  private static final int MIN_SIGNAL_STRENGTH = 2000;
+  private static final double PROXIMITY_THRESHOLD_METERS = 0.1;
+
+  private final CANrange canRange =
+      new CANrange(
+          Constants.PracticeBotConstants.HOPPER_SENSOR_ID, Constants.PracticeBotConstants.CANBUS);
+
   private final StatusSignal<Distance> distanceSignal;
   private final StatusSignal<Boolean> isDetectedSignal;
 
-  /**
-   * Creates a new HopperSensorIOCANRange.
-   *
-   * @param canId CAN ID of the CANRange sensor
-   * @param canBus CAN bus name the sensor is on
-   * @param config configuration to apply to the CANRange
-   */
-  public HopperSensorIOCANRange(int canId, String canBus, CANrangeConfiguration config) {
-    canRange = new CANrange(canId, canBus);
+  public HopperSensorIOCANRange() {
+    CANrangeConfiguration config = new CANrangeConfiguration();
+    config.ProximityParams.MinSignalStrengthForValidMeasurement = MIN_SIGNAL_STRENGTH;
+    config.ProximityParams.ProximityThreshold = PROXIMITY_THRESHOLD_METERS;
+    config.ToFParams.withUpdateMode(UpdateModeValue.LongRangeUserFreq);
     canRange.getConfigurator().apply(config);
 
     distanceSignal = canRange.getDistance();
     isDetectedSignal = canRange.getIsDetected();
 
-    BaseStatusSignal.setUpdateFrequencyForAll(50, distanceSignal, isDetectedSignal);
+    BaseStatusSignal.setUpdateFrequencyForAll(
+        SENSOR_UPDATE_FREQUENCY_HZ, distanceSignal, isDetectedSignal);
     canRange.optimizeBusUtilization();
   }
 

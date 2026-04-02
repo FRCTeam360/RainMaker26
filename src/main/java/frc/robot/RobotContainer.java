@@ -6,8 +6,6 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
-import com.ctre.phoenix6.configs.CANrangeConfiguration;
-import com.ctre.phoenix6.signals.UpdateModeValue;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
@@ -244,16 +242,7 @@ public class RobotContainer {
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOPB());
         intakePivot = new IntakePivot(new IntakePivotIOPB());
         hopperRoller = new HopperRoller(new HopperRollerIOPB());
-        CANrangeConfiguration hopperSensorConfig = new CANrangeConfiguration();
-        hopperSensorConfig.ProximityParams.MinSignalStrengthForValidMeasurement = 2000;
-        hopperSensorConfig.ProximityParams.ProximityThreshold = 0.1; // meters
-        hopperSensorConfig.ToFParams.withUpdateMode(UpdateModeValue.ShortRangeUserFreq);
-        hopperSensor =
-            new HopperSensor(
-                new HopperSensorIOCANRange(
-                    Constants.PracticeBotConstants.HOPPER_SENSOR_ID,
-                    Constants.PracticeBotConstants.CANBUS.getName(),
-                    hopperSensorConfig));
+        hopperSensor = new HopperSensor(new HopperSensorIOCANRange());
 
         robotShootingInfo =
             new RobotShootingInfo(
