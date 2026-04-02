@@ -99,8 +99,6 @@ public class RobotContainer {
   private HopperRoller hopperRoller;
   private FlywheelKicker flywheelKicker;
   private Climber climber;
-  private BooleanSupplier canShootInHub;
-
   private SuperStructure superStructure;
 
   private ShotCalculator hubShotCalculator;
@@ -113,8 +111,6 @@ public class RobotContainer {
   private final CommandXboxController driverCont = new CommandXboxController(0);
   private final CommandXboxController operatorCont = new CommandXboxController(1);
   private final CommandXboxController testCont1 = new CommandXboxController(5);
-
-  private static final double FLYWHEEL_KICKER_WARMUP_VELOCITY_RPM = 4000.0;
 
   /** Threshold above which a loop cycle is considered an overrun (22ms for a 20ms loop). */
   private static final double LOOP_OVERRUN_THRESHOLD_SECONDS = 0.022;
@@ -511,91 +507,7 @@ public class RobotContainer {
     driverCont.y().and(isIndependentMode).whileTrue(hood.zero());
   }
 
-  /** Configures full intake to shooting test bindings for independent mode. */
-  private void configureFullShootingTestBindings() {
-    BooleanSupplier isSuperstructureMode =
-        () -> superStructure.getControlState() == ControlState.SUPERSTRUCTURE;
-    BooleanSupplier isIndependentMode =
-        () -> superStructure.getControlState() == ControlState.INDEPENDENT;
 
-    driverCont.rightTrigger().and(isIndependentMode).whileTrue(flywheel.setVelocityCommand(4000));
-    driverCont
-        .a()
-        .and(isIndependentMode)
-        .whileTrue(
-            indexer
-                .setDutyCycleCommand(() -> 0.75)
-                .alongWith(
-                    hopperRoller.setDutyCycleCommand(0.75),
-                    flywheelKicker.setVelocityCommand(4000.0)));
-    driverCont
-        .b()
-        .and(isIndependentMode)
-        .whileTrue(
-            indexer
-                .setDutyCycleCommand(() -> -0.3)
-                .alongWith(
-                    hopperRoller.setDutyCycleCommand(-0.3),
-                    flywheelKicker.setDutyCycleCommand(-0.3),
-                    intakeRoller.setDutyCycleCommand(-0.2)));
-    driverCont.x().and(isIndependentMode).whileTrue(intakePivot.setPositionCommand(() -> 93.0));
-    driverCont.y().and(isIndependentMode).whileTrue(intakePivot.setPositionCommand(() -> 0.0));
-    driverCont
-        .leftTrigger()
-        .and(isIndependentMode)
-        .whileTrue(intakeRoller.setVelocityCommand(1000.0));
-    driverCont.pov(0).and(isIndependentMode).whileTrue(hood.setPositionCommand(0.0));
-    driverCont.pov(90).and(isIndependentMode).whileTrue(hood.setPositionCommand(15.0));
-    driverCont.pov(180).and(isIndependentMode).whileTrue(hood.setPositionCommand(30.0));
-    driverCont.pov(270).and(isIndependentMode).whileTrue(hood.setPositionCommand(40.0));
-
-    driverCont.back().onTrue(drivetrain.zeroCommand());
-
-    // intake stuff
-    // driverCont
-    //     .axisMagnitudeGreaterThan(5, 0.1)
-    //     .and(isIndependentMode)
-    //     .whileTrue(intakePivot.setDutyCycleCommand(() -> -driverCont.getRightY() * 0.2));
-
-    // driverCont
-    //     .rightBumper()
-    //     .and(isIndependentMode)
-    //     .whileTrue(intakePivot.setPositionCommand(() -> 0.0));
-    // driverCont
-    //     .leftBumper()
-    //     .and(isIndependentMode)
-    //     .whileTrue(intakePivot.setPositionCommand(() -> 90.0));
-    // Intake rollers: A = in, B = out
-    // driverCont.a().and(isIndependentMode).whileTrue(intakeRoller.setDutyCycleCommand(0.2));
-    // driverCont.b().and(isIndependentMode).whileTrue(intakeRoller.setDutyCycleCommand(-0.2));
-  }
-
-  /** Configures climber test bindings for independent mode. */
-  private void configureClimberTestBindings(BooleanSupplier isIndependentMode) {
-    driverCont.x().and(isIndependentMode).whileTrue(climber.setLeftDutyCycleCommand(0.1));
-    driverCont.y().and(isIndependentMode).whileTrue(climber.setRightDutyCycleCommand(0.1));
-  }
-
-  /** Configures intake and intake pivot test bindings for independent mode. */
-  private void configureIntakeTestBindings(BooleanSupplier isIndependentMode) {
-    // Intake pivot: right joystick Y axis controls duty cycle
-    driverCont
-        .axisMagnitudeGreaterThan(5, 0.1)
-        .and(isIndependentMode)
-        .whileTrue(intakePivot.setDutyCycleCommand(() -> -driverCont.getRightY() * 0.2));
-
-    driverCont
-        .rightBumper()
-        .and(isIndependentMode)
-        .whileTrue(intakePivot.setPositionCommand(() -> 0.0));
-    driverCont
-        .leftBumper()
-        .and(isIndependentMode)
-        .whileTrue(intakePivot.setPositionCommand(() -> 90.0));
-    // Intake rollers: A = in, B = out
-    driverCont.a().and(isIndependentMode).whileTrue(intakeRoller.setDutyCycleCommand(0.2));
-    driverCont.b().and(isIndependentMode).whileTrue(intakeRoller.setDutyCycleCommand(-0.2));
-  }
 
   /** Stops all subsystems safely when the robot is disabled. */
   public void onDisable() {
