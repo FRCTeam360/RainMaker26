@@ -9,12 +9,12 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
-import frc.robot.Constants.PracticeBotConstants;
+import frc.robot.Constants;
 
 public class IndexerIOPB implements IndexerIO {
   private static final double GEAR_RATIO =
       1.0 / 1.0; // its not very useful to set the output velocity in this system, but its 9.0
-  private static final int CURRENT_LIMIT_AMPS = 40;
+  private static final int CURRENT_LIMIT_AMPS = 50;
   private static final double KP = 0.0006; // was 0.0003
   private static final double KI = 0.0;
   private static final double KD = 0.0;
@@ -22,19 +22,14 @@ public class IndexerIOPB implements IndexerIO {
   private static final double KS = 0.04;
 
   /** Creates a new IndexerIOPB. */
-  private final SparkMax indexerMotor;
+  private final SparkMax indexerMotor =
+      new SparkMax(Constants.PracticeBotConstants.TWINDEXER_ID, MotorType.kBrushless);
 
-  private final RelativeEncoder encoder;
+  private final RelativeEncoder encoder = indexerMotor.getEncoder();
   private final SparkMaxConfig sparkMaxConfig = new SparkMaxConfig();
   private final SparkClosedLoopController closedLoopController;
 
   public IndexerIOPB() {
-    this(PracticeBotConstants.TWINDEXER_ID);
-  }
-
-  protected IndexerIOPB(int twindexerId) {
-    indexerMotor = new SparkMax(twindexerId, MotorType.kBrushless);
-    encoder = indexerMotor.getEncoder();
     sparkMaxConfig.idleMode(IdleMode.kCoast);
     sparkMaxConfig.inverted(false);
     sparkMaxConfig.smartCurrentLimit(CURRENT_LIMIT_AMPS);

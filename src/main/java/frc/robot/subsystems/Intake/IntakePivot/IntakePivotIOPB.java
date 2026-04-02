@@ -5,7 +5,6 @@
 package frc.robot.subsystems.Intake.IntakePivot;
 
 import com.ctre.phoenix6.BaseStatusSignal;
-import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
@@ -48,7 +47,9 @@ public class IntakePivotIOPB implements IntakePivotIO {
   private static final double PEAK_FORWARD_VOLTAGE = 12.0;
   private static final double PEAK_REVERSE_VOLTAGE = -12.0;
 
-  private final TalonFX intakePivot;
+  private final TalonFX intakePivot =
+      new TalonFX(
+          Constants.PracticeBotConstants.INTAKE_PIVOT_ID, Constants.PracticeBotConstants.CANBUS);
 
   private final DutyCycleOut dutyCycleOut = new DutyCycleOut(0);
   private final MotionMagicVoltage motionMagicPosition = new MotionMagicVoltage(0.0);
@@ -63,12 +64,6 @@ public class IntakePivotIOPB implements IntakePivotIO {
 
   /** Creates a new IntakePivotIOPB. */
   public IntakePivotIOPB() {
-    this(Constants.PracticeBotConstants.INTAKE_PIVOT_ID, Constants.PracticeBotConstants.CANBUS);
-  }
-
-  protected IntakePivotIOPB(int intakePivotId, CANBus canBus) {
-    intakePivot = new TalonFX(intakePivotId, canBus);
-
     // FIXME: NEUTRAL MODE BRAKE
     config.CurrentLimits.StatorCurrentLimit = STATOR_CURRENT_LIMIT_AMPS;
     config.CurrentLimits.SupplyCurrentLimit = SUPPLY_CURRENT_LIMIT_AMPS;

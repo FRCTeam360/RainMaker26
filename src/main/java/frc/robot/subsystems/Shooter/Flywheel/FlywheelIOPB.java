@@ -18,7 +18,7 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
-import frc.robot.Constants;
+import frc.robot.Constants.PracticeBotConstants;
 
 public class FlywheelIOPB implements FlywheelIO {
   private static final double GEAR_RATIO = 1.0;
@@ -33,8 +33,11 @@ public class FlywheelIOPB implements FlywheelIO {
   private static final double MAX_NEGATIVE_TORQUE_CURRENT = -200.0;
   private static final double MAX_POSITIVE_TORQUE_CURRENT = STATOR_CURRENT_LIMIT_AMPS;
   private static final double SUPPLY_CURRENT_LIMIT_AMPS = 60.0;
-  private final TalonFX[] motors;
-  private final int rightMotorId;
+
+  private final TalonFX[] motors = {
+    new TalonFX(PracticeBotConstants.FLYWHEEL_RIGHT_ID, PracticeBotConstants.CANBUS),
+    new TalonFX(PracticeBotConstants.FLYWHEEL_LEFT_ID, PracticeBotConstants.CANBUS)
+  };
   private TalonFXConfiguration rightConfig = new TalonFXConfiguration();
   private TalonFXConfiguration leftConfig = new TalonFXConfiguration();
 
@@ -50,16 +53,6 @@ public class FlywheelIOPB implements FlywheelIO {
   private final StatusSignal<Voltage> leftMotorVoltageSignal;
 
   public FlywheelIOPB() {
-    this(
-        Constants.PracticeBotConstants.FLYWHEEL_RIGHT_ID,
-        Constants.PracticeBotConstants.FLYWHEEL_LEFT_ID,
-        Constants.PracticeBotConstants.CANBUS);
-  }
-
-  protected FlywheelIOPB(int rightMotorId, int leftMotorId, com.ctre.phoenix6.CANBus canBus) {
-    this.rightMotorId = rightMotorId;
-    motors = new TalonFX[] {new TalonFX(rightMotorId, canBus), new TalonFX(leftMotorId, canBus)};
-
     Slot0Configs slot0Configs = rightConfig.Slot0;
     slot0Configs.kA = KA;
     slot0Configs.kD = KD;
@@ -98,7 +91,7 @@ public class FlywheelIOPB implements FlywheelIO {
     for (int i = 1; i < motors.length; i++) {
       motors[i].setControl(
           new Follower(
-              this.rightMotorId,
+              PracticeBotConstants.FLYWHEEL_RIGHT_ID,
               (oddFollower ? MotorAlignmentValue.Opposed : MotorAlignmentValue.Aligned)));
       oddFollower = !oddFollower;
     }

@@ -22,7 +22,7 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
-import frc.robot.Constants;
+import frc.robot.Constants.PracticeBotConstants;
 
 /**
  * Practice bot flywheel IO implementation using bang-bang control on dual TalonFX motors.
@@ -58,8 +58,11 @@ public class FlywheelIOPBBangBang implements FlywheelIO {
   private static final double MAX_POSITIVE_DUTY_CYCLE = 1.0;
   private static final double SUPPLY_CURRENT_LIMIT_AMPS = 70.0;
   private static final double GEAR_RATIO = 1.0;
-  private final TalonFX[] motors;
-  private final int rightMotorId;
+
+  private final TalonFX[] motors = {
+    new TalonFX(PracticeBotConstants.FLYWHEEL_RIGHT_ID, PracticeBotConstants.CANBUS),
+    new TalonFX(PracticeBotConstants.FLYWHEEL_LEFT_ID, PracticeBotConstants.CANBUS)
+  };
   private TalonFXConfiguration rightConfig = new TalonFXConfiguration();
   private TalonFXConfiguration leftConfig = new TalonFXConfiguration();
 
@@ -84,17 +87,6 @@ public class FlywheelIOPBBangBang implements FlywheelIO {
 
   /** Constructs the practice bot flywheel IO and configures both TalonFX motors. */
   public FlywheelIOPBBangBang() {
-    this(
-        Constants.PracticeBotConstants.FLYWHEEL_RIGHT_ID,
-        Constants.PracticeBotConstants.FLYWHEEL_LEFT_ID,
-        Constants.PracticeBotConstants.CANBUS);
-  }
-
-  protected FlywheelIOPBBangBang(
-      int rightMotorId, int leftMotorId, com.ctre.phoenix6.CANBus canBus) {
-    this.rightMotorId = rightMotorId;
-    motors = new TalonFX[] {new TalonFX(rightMotorId, canBus), new TalonFX(leftMotorId, canBus)};
-
     // Reset all motors to factory defaults before applying custom config
     TalonFXConfiguration defaultConfig = new TalonFXConfiguration();
     for (TalonFX motor : motors) {
@@ -146,7 +138,8 @@ public class FlywheelIOPBBangBang implements FlywheelIO {
     motors[0].getConfigurator().apply(rightConfig);
     motors[0].setNeutralMode(NeutralModeValue.Coast);
 
-    motors[1].setControl(new Follower(this.rightMotorId, MotorAlignmentValue.Opposed));
+    motors[1].setControl(
+        new Follower(PracticeBotConstants.FLYWHEEL_RIGHT_ID, MotorAlignmentValue.Opposed));
 
     rightStatorCurrentSignal = motors[0].getStatorCurrent();
     rightSupplyCurrentSignal = motors[0].getSupplyCurrent();
