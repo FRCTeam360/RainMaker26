@@ -99,12 +99,10 @@ public class HubShiftTracker {
     Alliance autoWinner = RobotUtils.getAutoWinner(DriverStation.getGameSpecificMessage());
     Optional<Alliance> alliance = DriverStation.getAlliance();
 
-
     boolean weWonAuto = false;
     if (alliance.isPresent()) {
-     weWonAuto = autoWinner == alliance.get();
+      weWonAuto = autoWinner == alliance.get();
     }
-    
 
     hubActive = RobotUtils.isHubActiveForAlliance(alliance, autoWinner, activeHub);
 
