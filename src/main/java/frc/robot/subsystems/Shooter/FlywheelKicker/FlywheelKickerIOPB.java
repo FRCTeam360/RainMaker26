@@ -48,13 +48,7 @@ public class FlywheelKickerIOPB implements FlywheelKickerIO {
   private final SparkFlexConfig sparkFlexConfig = new SparkFlexConfig();
   private final SparkClosedLoopController closedLoopController;
 
-  // FIXME: reimplement when CANRange is added to practice bot
-  // private final CANrange canSensor =
-  //     new CANrange(Constants.PracticeBotConstants.FLYWHEEL_KICKER_SENSOR_ID,
-  // Constants.RIO_CANBUS);
-
-  // private final StatusSignal<Distance> distanceSignal;
-  // private final StatusSignal<Boolean> isDetectedSignal;
+  // CANRange sensor moved to HopperSensor subsystem
 
   public FlywheelKickerIOPB() {
     // Configure base motor settings
