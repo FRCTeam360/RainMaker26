@@ -22,6 +22,8 @@ import edu.wpi.first.wpilibj.simulation.DIOSim;
 import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 import edu.wpi.first.wpilibj.simulation.RoboRioSim;
 import frc.robot.Constants.SimulationConstants;
+import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 public class IntakeRollerIOSim implements IntakeRollerIO {
   // Match PracticeBot (PB) config
@@ -33,6 +35,7 @@ public class IntakeRollerIOSim implements IntakeRollerIO {
   private static final double KV = 0.0019;
   private static final double KS = 0.04;
   private static final double MOI = 0.0008; // Moment of inertia in kg·m²
+  private static final double SIMULATED_STALL_CURRENT_AMPS = 80.0;
 
   // Motor and control
   private final SparkFlex motorControllerSim =
@@ -43,6 +46,15 @@ public class IntakeRollerIOSim implements IntakeRollerIO {
   private final DigitalInput sensor =
       new DigitalInput(SimulationConstants.INTAKE_ROLLER_SENSOR_PORT);
   private final DIOSim sensorSim = new DIOSim(sensor);
+
+  // Jam disturbance injection for testing anti-jam logic
+  private final LoggedNetworkBoolean injectJam =
+      new LoggedNetworkBoolean("/Tuning/IntakeRoller/InjectJam", false);
+  private final LoggedNetworkNumber jamDurationSeconds =
+      new LoggedNetworkNumber("/Tuning/IntakeRoller/JamDurationSeconds", 1.0);
+
+  private double jamStartTime = 0.0;
+  private boolean jamActive = false;
 
   // Simulation
   private final DCMotor gearbox = DCMotor.getNeoVortex(1);
@@ -82,10 +94,27 @@ public class IntakeRollerIOSim implements IntakeRollerIO {
   @Override
   public void updateInputs(IntakeRollerIOInputs inputs) {
     // Step 1: Get the commanded voltage from motor and apply to simulation
-    double appliedVoltage = motorControllerSim.get() * 12.0; // Assume 12V bus
-    intakeSim.setInputVoltage(appliedVoltage);
+    double motorVoltage = motorControllerSim.get() * 12.0; // Assume 12V bus
+
+    // Check if jam should be injected
+    if (injectJam.get() && !jamActive) {
+      jamStartTime = edu.wpi.first.wpilibj.Timer.getFPGATimestamp();
+      jamActive = true;
+    }
+
+    // Check if jam duration has elapsed
+    if (jamActive
+        && edu.wpi.first.wpilibj.Timer.getFPGATimestamp() - jamStartTime
+            > jamDurationSeconds.get()) {
+      jamActive = false;
+      injectJam.set(false);
+    }
+
+    // Apply jam: zero out voltage to stall the motor
+    double appliedVoltage = jamActive ? 0.0 : motorVoltage;
 
     // Step 2: Update the simulation by one timestep
+    intakeSim.setInputVoltage(appliedVoltage);
     intakeSim.update(SimulationConstants.SIM_TICK_RATE_S);
 
     // Step 3: Simple sensor simulation - triggers based on velocity
@@ -99,7 +128,8 @@ public class IntakeRollerIOSim implements IntakeRollerIO {
     // Step 5: Read all inputs from the SIMULATED VALUES (source of truth)
     inputs.velocity[0] = intakeSim.getAngularVelocityRPM(); // SparkFlex encoder default is RPM
     inputs.voltage[0] = appliedVoltage;
-    inputs.statorCurrent[0] = intakeSim.getCurrentDrawAmps();
+    inputs.statorCurrent[0] =
+        jamActive ? SIMULATED_STALL_CURRENT_AMPS : intakeSim.getCurrentDrawAmps();
     inputs.supplyCurrent = intakeSim.getCurrentDrawAmps();
     inputs.sensor = sensorSim.getValue();
     inputs.position[0] = 0.0; // Not tracked for flywheel
