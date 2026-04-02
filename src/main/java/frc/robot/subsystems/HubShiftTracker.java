@@ -99,6 +99,13 @@ public class HubShiftTracker {
     Alliance autoWinner = RobotUtils.getAutoWinner(DriverStation.getGameSpecificMessage());
     Optional<Alliance> alliance = DriverStation.getAlliance();
 
+
+    boolean weWonAuto = false;
+    if (alliance.isPresent()) {
+     weWonAuto = autoWinner == alliance.get();
+    }
+    
+
     hubActive = RobotUtils.isHubActiveForAlliance(alliance, autoWinner, activeHub);
 
     // --- Display hub active (asymmetric TOF) ---
@@ -135,6 +142,9 @@ public class HubShiftTracker {
     } else if (currentPhase == MatchPhase.TRANSITION) {
       // Both hubs active — no TOF offset. Show raw seconds until shift 1 begins.
       primaryTimeLeft = matchTimeRaw - RobotUtils.TRANSITION_END_SECONDS;
+      if (!weWonAuto) {
+        primaryTimeLeft += RobotUtils.SHIFT_SECONDS;
+      }
     } else {
       // Teleop shifts.
       // Hub active by raw → count down with raw time (no early cutoff, grace covers in-flight
