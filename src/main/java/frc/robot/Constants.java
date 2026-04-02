@@ -18,7 +18,6 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import frc.robot.utils.RobotUtils.ActiveHub;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -38,8 +37,6 @@ public final class Constants {
       AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
 
   public static Alliance AUTO_WINNER;
-  public static ActiveHub HUB_PHASE;
-  public static boolean HUB_ACTIVE;
 
   public static enum RobotType {
     SIM,
@@ -342,9 +339,11 @@ public final class Constants {
       passFlywheelSpeedMap.put(1.0, 1500.0);
       passFlywheelSpeedMap.put(0.0, 1500.0);
 
-      timeOfFlightMap.put(1.939, 0.82);
-      timeOfFlightMap.put(3.011, 1.26);
-      timeOfFlightMap.put(4.704, 1.37);
+      timeOfFlightMap.put(0.0, 1.05);
+      timeOfFlightMap.put(1.75, 1.05);
+      timeOfFlightMap.put(2.05, 1.0);
+      timeOfFlightMap.put(3.1, 1.05);
+      timeOfFlightMap.put(4.8, 1.02);
     }
   }
 

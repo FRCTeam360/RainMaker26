@@ -27,12 +27,12 @@ public class FlywheelKickerIOPB implements FlywheelKickerIO {
   private static final double SPINUP_KD = 0.0;
 
   // Hold config - smooth setpoint maintenance with tuned PID
-  private static final double HOLD_KP = 0.0010;
+  private static final double HOLD_KP = 0.0019;
   private static final double HOLD_KI = 0.0;
   private static final double HOLD_KD = 0.0;
 
   // Feedforward (shared across all slots)
-  private static final double KV = 0.0012;
+  private static final double KV = 0.0017;
   private static final double KS = 0.04;
 
   private static final double MIN_SIGNAL_STRENGTH = 2000; // unknown unit
@@ -63,8 +63,8 @@ public class FlywheelKickerIOPB implements FlywheelKickerIO {
     sparkFlexConfig.smartCurrentLimit(STALL_CURRENT_LIMIT_AMPS, FREE_CURRENT_LIMIT_AMPS);
     sparkFlexConfig.encoder.positionConversionFactor(1.0 / GEAR_RATIO);
     sparkFlexConfig.encoder.velocityConversionFactor(1.0 / GEAR_RATIO);
-    sparkFlexConfig.encoder.uvwMeasurementPeriod(10);
-    sparkFlexConfig.encoder.uvwAverageDepth(2);
+    sparkFlexConfig.encoder.quadratureMeasurementPeriod(25);
+    sparkFlexConfig.encoder.quadratureAverageDepth(8);
 
     // Configure Slot 0: Spinup - aggressive acceleration
     sparkFlexConfig

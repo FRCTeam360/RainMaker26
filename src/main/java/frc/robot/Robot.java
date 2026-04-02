@@ -8,6 +8,7 @@ import edu.wpi.first.net.WebServer;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -79,9 +80,11 @@ public class Robot extends LoggedRobot {
 
     Logger.start(); // Start logging! No more data receivers, replay sources, or metadata values may
     // be added.
-    // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
+    // Instantiate our RobotContainer. This will perform all our button bindings,
+    // and put our
     // autonomous chooser on the dashboard.
     WebServer.start(5800, Filesystem.getDeployDirectory().getPath());
+    RobotController.setBrownoutVoltage(6.3); // DANGER DANGER DANGER ALWAYS TEST
     m_robotContainer = new RobotContainer();
   }
 
@@ -94,18 +97,6 @@ public class Robot extends LoggedRobot {
    */
   @Override
   public void robotPeriodic() {
-    // Runs the Scheduler.  This is responsible for polling buttons, adding newly-scheduled
-    // commands, running already-scheduled commands, removing finished or interrupted commands,
-    // and running subsystem periodic() methods.  This must be called from the robot's periodic
-    // block in order for anything in the Command-based framework to work.
-    SmartDashboard.putNumber("Match Time", DriverStation.getMatchTime());
-    if (Objects.nonNull(Constants.HUB_PHASE)) {
-      SmartDashboard.putString("HubPhase", Constants.HUB_PHASE.name());
-    } else {
-      SmartDashboard.putString("HubPhase", "BOTH");
-    }
-    SmartDashboard.putBoolean("HubActive", Constants.HUB_ACTIVE);
-
     double t0 = Logger.getTimestamp() / 1.0e6;
     m_robotContainer.preSchedulerUpdate();
     double t1 = Logger.getTimestamp() / 1.0e6;
@@ -170,18 +161,10 @@ public class Robot extends LoggedRobot {
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
-    if (Objects.nonNull(Constants.HUB_PHASE)) {
-      Logger.recordOutput("HubPhase", Constants.HUB_PHASE);
-    }
     Logger.recordOutput("AutoWinner", Constants.AUTO_WINNER);
     if (Objects.nonNull(Constants.AUTO_WINNER)) {
       SmartDashboard.putString("AutoWinner", Constants.AUTO_WINNER.name());
     }
-
-    boolean hubActive =
-        RobotUtils.hubActive(
-            DriverStation.getAlliance(), Constants.AUTO_WINNER, Constants.HUB_PHASE);
-    Constants.HUB_ACTIVE = hubActive;
   }
 
   @Override
