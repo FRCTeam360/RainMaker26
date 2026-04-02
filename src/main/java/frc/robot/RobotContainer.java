@@ -507,8 +507,6 @@ public class RobotContainer {
     driverCont.y().and(isIndependentMode).whileTrue(hood.zero());
   }
 
-
-
   /** Stops all subsystems safely when the robot is disabled. */
   public void onDisable() {
     superStructure.setControlState(ControlState.SUPERSTRUCTURE);
