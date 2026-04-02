@@ -24,8 +24,17 @@ public class IntakeRoller extends SubsystemBase {
   private final IntakeRollerIO io;
   private final IntakeRollerIOInputsAutoLogged inputs = new IntakeRollerIOInputsAutoLogged();
 
+  // Jam detection constants
+  private static final double JAM_STATOR_CURRENT_THRESHOLD_AMPS = 50.0;
+  private static final double JAM_VELOCITY_THRESHOLD_RPM = 10.0;
+  private static final double JAM_DURATION_SECONDS = 0.25;
+  private static final double UNJAM_DURATION_SECONDS = 0.15;
+
   // Other fields
   private DoubleSupplier dutyCycleSupplier = () -> INTAKING_DUTY_CYCLE;
+  private final Timer stallTimer = new Timer();
+  private final Timer unjamTimer = new Timer();
+  private boolean unjamming = false;
 
   // Enums
   public enum IntakeRollerStates {
@@ -71,7 +80,20 @@ public class IntakeRoller extends SubsystemBase {
     previousState = currentState;
     switch (wantedState) {
       case INTAKING:
-        if (isJammed()) {
+        if (unjamming) {
+          unjamTimer.start();
+          if (unjamTimer.get() >= UNJAM_DURATION_SECONDS) {
+            unjamming = false;
+            unjamTimer.stop();
+            unjamTimer.reset();
+            currentState = IntakeRollerStates.INTAKING;
+          } else {
+            currentState = IntakeRollerStates.REVERSING;
+          }
+        } else if (isJammed()) {
+          unjamming = true;
+          unjamTimer.reset();
+          unjamTimer.start();
           currentState = IntakeRollerStates.REVERSING;
         } else {
           currentState = IntakeRollerStates.INTAKING;
@@ -129,17 +151,21 @@ public class IntakeRoller extends SubsystemBase {
   }
 
   private boolean isJammed() {
-    Timer stallTimer = new Timer();
-    if (inputs.statorCurrent[0] < 50.0 && inputs.statorCurrent[1] < 50.0) {
-      if (inputs.velocity[0] < 10.0 && inputs.velocity[1] < 10.0) {
-        stallTimer.start();
-        while (stallTimer.get() < 0.25) {
-          reversing();
-        }
-        stallTimer.stop();
-        stallTimer.reset();
-      }
-    } 
+    boolean highCurrent =
+        inputs.statorCurrent[0] > JAM_STATOR_CURRENT_THRESHOLD_AMPS
+            || inputs.statorCurrent[1] > JAM_STATOR_CURRENT_THRESHOLD_AMPS;
+    boolean lowVelocity =
+        Math.abs(inputs.velocity[0]) < JAM_VELOCITY_THRESHOLD_RPM
+            && Math.abs(inputs.velocity[1]) < JAM_VELOCITY_THRESHOLD_RPM;
+
+    if (highCurrent && lowVelocity) {
+      stallTimer.start();
+    } else {
+      stallTimer.stop();
+      stallTimer.reset();
+    }
+
+    return stallTimer.get() >= JAM_DURATION_SECONDS;
   }
 
   // private void unjamIntake() {
