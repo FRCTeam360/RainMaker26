@@ -210,7 +210,7 @@ public class Vision extends SubsystemBase {
     return run(() -> visionMeasurementConsumer.accept(acceptedMeasurements));
   }
 
-  public boolean isPoseOutOfBounds(Pose2d pose) {
+  public static boolean isPoseOutOfBounds(Pose2d pose) {
     return pose.getX() < 0.0
         || pose.getX() > FieldConstants.fieldLength
         || pose.getY() < 0.0
