@@ -13,6 +13,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -34,6 +35,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
 import frc.robot.generated.WoodBotDrivetrain.TunerSwerveDrivetrain;
+import frc.robot.lib.BLine.FollowPath;
 import frc.robot.subsystems.Vision.VisionMeasurement;
 import frc.robot.utils.AllianceFlipUtil;
 import java.util.List;
@@ -567,6 +569,51 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
       DriverStation.reportError(
           "Failed to load PathPlanner config and configure AutoBuilder", ex.getStackTrace());
     }
+  }
+
+  // BLine AutoBuilder PID gains — initial values derived from PathPlanner tuning.
+  // Translation/rotation are intentionally lower than PP since BLine's controller
+  // semantics differ (distance-to-goal vs time-parameterized).
+  private static final double BLINE_TRANSLATION_KP = 5.0;
+  private static final double BLINE_TRANSLATION_KI = 0.0;
+  private static final double BLINE_TRANSLATION_KD = 0.0;
+  private static final double BLINE_ROTATION_KP = 3.0;
+  private static final double BLINE_ROTATION_KI = 0.0;
+  private static final double BLINE_ROTATION_KD = 0.0;
+  private static final double BLINE_CROSS_TRACK_KP = 2.0;
+  private static final double BLINE_CROSS_TRACK_KI = 0.0;
+  private static final double BLINE_CROSS_TRACK_KD = 0.0;
+
+  /**
+   * Creates a reusable BLine FollowPath.Builder configured for this drivetrain. The builder can be
+   * used to construct path-following commands via {@code builder.build(path)}.
+   *
+   * @return a configured {@link FollowPath.Builder}
+   */
+  public FollowPath.Builder createBLinePathBuilder() {
+    return new FollowPath.Builder(
+            this,
+            this::getPosition,
+            this::getVelocity,
+            this::driveRobotRelative,
+            new PIDController(BLINE_TRANSLATION_KP, BLINE_TRANSLATION_KI, BLINE_TRANSLATION_KD),
+            new PIDController(BLINE_ROTATION_KP, BLINE_ROTATION_KI, BLINE_ROTATION_KD),
+            new PIDController(BLINE_CROSS_TRACK_KP, BLINE_CROSS_TRACK_KI, BLINE_CROSS_TRACK_KD))
+        .withPoseReset(this::resetPose);
+  }
+
+  /**
+   * Drives the robot with the given robot-relative chassis speeds. Used as the drive consumer for
+   * BLine path following (no feedforwards — BLine doesn't provide them).
+   *
+   * @param speeds robot-relative chassis speeds
+   */
+  public void driveRobotRelative(ChassisSpeeds speeds) {
+    setCommandedSpeeds(speeds);
+    setControl(
+        m_pathApplyRobotSpeeds
+            .withSpeeds(ChassisSpeeds.discretize(speeds, 0.020))
+            .withDriveRequestType(m_driveRequestType));
   }
 
   /**

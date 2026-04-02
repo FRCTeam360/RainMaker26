@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.RobotType;
+import frc.robot.autos.BLineAutos;
 import frc.robot.generated.PracticeBotDrivetrain;
 import frc.robot.generated.WoodBotDrivetrain;
 import frc.robot.subsystems.Climber.Climber;
@@ -351,6 +352,12 @@ public class RobotContainer {
         pose -> Logger.recordOutput("Swerve/TargetPathPose", pose));
 
     autoChooser = AutoBuilder.buildAutoChooser();
+
+    // Register BLine auto variants alongside PathPlanner autos for A/B testing
+    BLineAutos bLineAutos =
+        new BLineAutos(drivetrain, superStructure, hubShotCalculator, passCalculator);
+    bLineAutos.registerAutos(autoChooser);
+
     SmartDashboard.putData("Auto Chooser", autoChooser);
 
     CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
