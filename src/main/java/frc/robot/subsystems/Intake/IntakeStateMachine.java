@@ -96,8 +96,7 @@ public class IntakeStateMachine {
         currentState = IntakeInternalStates.AGITATING_HIGH;
         break;
       case AGITATING_PROGRESSIVE:
-        if (intakePivot.getState()
-            == IntakePivot.IntakePivotInternalStates.PROGRESSIVE_COMPLETE) {
+        if (intakePivot.getState() == IntakePivot.IntakePivotInternalStates.PROGRESSIVE_COMPLETE) {
           currentState = IntakeInternalStates.DEPLOYED;
         } else {
           currentState = IntakeInternalStates.AGITATING_PROGRESSIVE;
