@@ -64,7 +64,6 @@ public class IndexerIOSim implements IndexerIO {
     motorConfig.closedLoop.feedForward.kV(0.0021).kS(0.04);
   }
 
-  
   public void updateInputs(IndexerIOInputs inputs) {
     // --- AdvantageScope tuning (sim-only) ---
     if (tuningEnabled.get()) {
