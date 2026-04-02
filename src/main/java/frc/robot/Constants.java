@@ -357,27 +357,23 @@ public final class Constants {
   public static class CompBotConstants {
     // === SHOT CALCULATOR ===
     public static final InterpolatingDoubleTreeMap shotHoodAngleMap =
-        PracticeBotConstants.shotHoodAngleMap;
+        new InterpolatingDoubleTreeMap();
     public static final InterpolatingDoubleTreeMap shotFlywheelSpeedMap =
-        PracticeBotConstants.shotFlywheelSpeedMap;
+        new InterpolatingDoubleTreeMap();
     public static final InterpolatingDoubleTreeMap passHoodAngleMap =
-        PracticeBotConstants.passHoodAngleMap;
+        new InterpolatingDoubleTreeMap();
     public static final InterpolatingDoubleTreeMap passFlywheelSpeedMap =
-        PracticeBotConstants.passFlywheelSpeedMap;
+        new InterpolatingDoubleTreeMap();
     public static final InterpolatingDoubleTreeMap timeOfFlightMap =
-        PracticeBotConstants.timeOfFlightMap;
+        new InterpolatingDoubleTreeMap();
 
-    public static final double HOOD_OFFSET = PracticeBotConstants.HOOD_OFFSET;
+    public static final double HOOD_OFFSET = 2.0;
 
-    public static final double MIN_SHOT_DISTANCE_METERS =
-        PracticeBotConstants.MIN_SHOT_DISTANCE_METERS;
-    public static final double MAX_SHOT_DISTANCE_METERS =
-        PracticeBotConstants.MAX_SHOT_DISTANCE_METERS;
+    public static final double MIN_SHOT_DISTANCE_METERS = 1.25;
+    public static final double MAX_SHOT_DISTANCE_METERS = 6.0;
 
-    public static final double MIN_PASS_DISTANCE_METERS =
-        PracticeBotConstants.MIN_PASS_DISTANCE_METERS;
-    public static final double MAX_PASS_DISTANCE_METERS =
-        PracticeBotConstants.MAX_PASS_DISTANCE_METERS;
+    public static final double MIN_PASS_DISTANCE_METERS = 1.0;
+    public static final double MAX_PASS_DISTANCE_METERS = 12.0;
 
     // === INTAKE ===
     public static final int INTAKE_PIVOT_ID = 14;
@@ -411,9 +407,50 @@ public final class Constants {
     public static final CANBus CANBUS = new CANBus("Default Name");
 
     // === MAXIMUMS ===
-    public static final LinearVelocity maxSpeed = PracticeBotConstants.maxSpeed;
-    public static final AngularVelocity maxAngularVelocity =
-        PracticeBotConstants.maxAngularVelocity;
+    public static final LinearVelocity maxSpeed = MetersPerSecond.of(4.69);
+    public static final AngularVelocity maxAngularVelocity = RevolutionsPerSecond.of(4.0);
+
+    static {
+      shotHoodAngleMap.put(6.0, 16.0);
+      shotHoodAngleMap.put(5.0, 16.0);
+      shotHoodAngleMap.put(4.0, 17.0);
+      shotHoodAngleMap.put(3.5, 16.0);
+      shotHoodAngleMap.put(3.0, 10.0);
+      shotHoodAngleMap.put(2.5, 6.0);
+      shotHoodAngleMap.put(2.0, 3.0);
+      shotHoodAngleMap.put(1.25, 0.0);
+
+      shotFlywheelSpeedMap.put(6.0, 2600.0);
+      shotFlywheelSpeedMap.put(5.0, 2550.0);
+      shotFlywheelSpeedMap.put(4.0, 2500.0);
+      shotFlywheelSpeedMap.put(3.5, 2325.0);
+      shotFlywheelSpeedMap.put(3.0, 2200.0);
+      shotFlywheelSpeedMap.put(2.5, 2100.0);
+      shotFlywheelSpeedMap.put(2.0, 2000.0);
+      shotFlywheelSpeedMap.put(1.25, 1900.0);
+
+      passHoodAngleMap.put(12.0, 35.0);
+      passHoodAngleMap.put(9.0, 40.0);
+      passHoodAngleMap.put(1.0, 40.0);
+      passHoodAngleMap.put(0.0, 40.0);
+
+      passFlywheelSpeedMap.put(12.0, 4500.0);
+      passFlywheelSpeedMap.put(9.0, 3750.0);
+      passFlywheelSpeedMap.put(7.0, 3000.0);
+      passFlywheelSpeedMap.put(5.0, 2200.0);
+      passFlywheelSpeedMap.put(4.0, 2000.0);
+      passFlywheelSpeedMap.put(3.0, 1700.0);
+      passFlywheelSpeedMap.put(2.5, 1500.0);
+      passFlywheelSpeedMap.put(2.0, 1500.0);
+      passFlywheelSpeedMap.put(1.0, 1500.0);
+      passFlywheelSpeedMap.put(0.0, 1500.0);
+
+      timeOfFlightMap.put(0.0, 1.05);
+      timeOfFlightMap.put(1.75, 1.05);
+      timeOfFlightMap.put(2.05, 1.0);
+      timeOfFlightMap.put(3.1, 1.05);
+      timeOfFlightMap.put(4.8, 1.02);
+    }
   }
 
   public static class SimulationConstants {
