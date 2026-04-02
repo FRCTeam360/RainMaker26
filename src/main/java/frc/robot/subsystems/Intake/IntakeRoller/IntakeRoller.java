@@ -26,7 +26,7 @@ public class IntakeRoller extends SubsystemBase {
 
   // Jam detection constants
   private static final double JAM_STATOR_CURRENT_THRESHOLD_AMPS = 50.0;
-  private static final double JAM_VELOCITY_THRESHOLD_RPM = 10.0;
+  private static final double JAM_VELOCITY_THRESHOLD_RPM = 50.0;
   private static final double JAM_DURATION_SECONDS = 0.25;
   private static final double UNJAM_DURATION_SECONDS = 0.15;
 
@@ -34,15 +34,14 @@ public class IntakeRoller extends SubsystemBase {
   private DoubleSupplier dutyCycleSupplier = () -> INTAKING_DUTY_CYCLE;
   private final Timer stallTimer = new Timer();
   private final Timer unjamTimer = new Timer();
-  private boolean unjamming = false;
 
   // Enums
   public enum IntakeRollerStates {
     IDLE,
     INTAKING,
     ASSIST_SHOOTING,
-    REVERSING
-    // JAMMED
+    REVERSING,
+    JAMMED
   }
 
   // State variables
@@ -80,21 +79,19 @@ public class IntakeRoller extends SubsystemBase {
     previousState = currentState;
     switch (wantedState) {
       case INTAKING:
-        if (unjamming) {
+        if (currentState == IntakeRollerStates.REVERSING) {
           unjamTimer.start();
           if (unjamTimer.get() >= UNJAM_DURATION_SECONDS) {
-            unjamming = false;
             unjamTimer.stop();
             unjamTimer.reset();
             currentState = IntakeRollerStates.INTAKING;
-          } else {
-            currentState = IntakeRollerStates.REVERSING;
           }
-        } else if (isJammed()) {
-          unjamming = true;
+        } else if (currentState == IntakeRollerStates.JAMMED) {
           unjamTimer.reset();
           unjamTimer.start();
           currentState = IntakeRollerStates.REVERSING;
+        } else if (isJammed()) {
+          currentState = IntakeRollerStates.JAMMED;
         } else {
           currentState = IntakeRollerStates.INTAKING;
         }
@@ -109,8 +106,6 @@ public class IntakeRoller extends SubsystemBase {
       default:
         currentState = IntakeRollerStates.IDLE;
         break;
-        // case JAMMED:
-        //   currentState = IntakeRollerStates.JAMMED;
     }
   }
 
@@ -125,12 +120,13 @@ public class IntakeRoller extends SubsystemBase {
       case REVERSING:
         reversing();
         break;
+      case JAMMED:
+        stop();
+        break;
       case IDLE:
       default:
         stop();
         break;
-        // case JAMMED:
-        //   unjamIntake();
     }
   }
 
@@ -151,14 +147,14 @@ public class IntakeRoller extends SubsystemBase {
   }
 
   private boolean isJammed() {
-    boolean highCurrent =
-        inputs.statorCurrent[0] > JAM_STATOR_CURRENT_THRESHOLD_AMPS
-            || inputs.statorCurrent[1] > JAM_STATOR_CURRENT_THRESHOLD_AMPS;
+    // boolean highCurrent =
+    //     inputs.statorCurrent[0] > JAM_STATOR_CURRENT_THRESHOLD_AMPS
+    //         || inputs.statorCurrent[1] > JAM_STATOR_CURRENT_THRESHOLD_AMPS;
     boolean lowVelocity =
         Math.abs(inputs.velocity[0]) < JAM_VELOCITY_THRESHOLD_RPM
-            && Math.abs(inputs.velocity[1]) < JAM_VELOCITY_THRESHOLD_RPM;
+            || Math.abs(inputs.velocity[1]) < JAM_VELOCITY_THRESHOLD_RPM;
 
-    if (highCurrent && lowVelocity) {
+    if (lowVelocity) {
       stallTimer.start();
     } else {
       stallTimer.stop();
