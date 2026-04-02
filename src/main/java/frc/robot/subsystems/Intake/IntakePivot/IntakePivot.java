@@ -21,6 +21,9 @@ public class IntakePivot extends SubsystemBase {
   private static final double AGITATE_HIGH_UPPER_POSITION_DEGREES = 75.0;
   private static final double AGITATE_HIGH_LOWER_POSITION_DEGREES = 55.0;
   private static final double TOLERANCE_DEGREES = 2.0;
+  private static final double SOFT_LIMIT_PROXIMITY_DEGREES = 5.0;
+  private static final double FORWARD_SOFT_LIMIT_DEGREES = 97.0;
+  private static final double REVERSE_SOFT_LIMIT_DEGREES = 0.0;
   // Progressive agitate constants
   private static final double PROGRESSIVE_AGITATE_DURATION_SECONDS = 6.0;
   private static final double PROGRESSIVE_AGITATE_DIP_DEGREES = 10.0;
@@ -167,6 +170,11 @@ public class IntakePivot extends SubsystemBase {
         && Math.abs(inputs.velocity) < STALL_VELOCITY_THRESHOLD_DPS;
   }
 
+  private boolean isNearSoftLimit(double targetDegrees) {
+    return targetDegrees <= REVERSE_SOFT_LIMIT_DEGREES + SOFT_LIMIT_PROXIMITY_DEGREES
+        || targetDegrees >= FORWARD_SOFT_LIMIT_DEGREES - SOFT_LIMIT_PROXIMITY_DEGREES;
+  }
+
   private void applyState() {
     switch (currentState) {
       case MOVING_TO_SETPOINT:
@@ -177,7 +185,11 @@ public class IntakePivot extends SubsystemBase {
       case STALLING:
         double target = getTargetPosition() + stallBackoffDegrees;
         target = Math.max(STOWED_POSITION_DEGREES, Math.min(target, DEPLOYED_POSITION_DEGREES));
-        setPositionAggressive(target);
+        if (isNearSoftLimit(target)) {
+          setPositionSmooth(target);
+        } else {
+          setPositionAggressive(target);
+        }
         break;
       case PROGRESSIVE_COMPLETE:
         setPositionSmooth(STOWED_POSITION_DEGREES);

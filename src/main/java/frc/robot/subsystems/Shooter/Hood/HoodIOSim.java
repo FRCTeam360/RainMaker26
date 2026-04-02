@@ -125,9 +125,8 @@ public class HoodIOSim implements HoodIO {
     visualizer.update(hoodSim.getAngleRads());
   }
 
-  /** Set position in degrees (matches PB IO) */
   @Override
-  public void setPosition(double positionDegrees) {
+  public void setPositionSmooth(double positionDegrees) {
     double rotations = positionDegrees / 360.0;
     motorControllerSim.setControl(positionRequest.withPosition(rotations));
   }

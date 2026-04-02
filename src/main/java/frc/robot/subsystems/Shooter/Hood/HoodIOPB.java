@@ -98,12 +98,7 @@ public class HoodIOPB implements HoodIO {
     setZero();
   }
 
-  /**
-   * Sets the hood position.
-   *
-   * @param positionDegrees target position in degrees
-   */
-  public void setPosition(double positionDegrees) {
+  public void setPositionSmooth(double positionDegrees) {
     hoodMotor.setControl(
         motionMagicPosition.withPosition(Units.degreesToRotations(positionDegrees)));
   }

@@ -22,7 +22,7 @@ public interface HoodIO {
 
   public void setDutyCycle(double dutyCycle);
 
-  public void setPosition(double position);
+  public void setPositionSmooth(double position);
 
   public void setPositionAggressive(double position);
 
