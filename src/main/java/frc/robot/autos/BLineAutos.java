@@ -821,10 +821,8 @@ public class BLineAutos {
     // GUI-designed paths (single path per auto for testing)
     chooser.addOption("[BLine] Drive Test", followPath(new Path("drive test")));
     chooser.addOption(
-        "[BLine] Blue Right Aggressive First Swipe",
-        followPath(new Path("Blue Right Aggressive first swipe")));
-    chooser.addOption(
-        "[BLine] Blue Right Aggressive Second Swipe",
-        followPath(new Path("Blue Right Aggressive Second Swipe")));
+        "[BLine] Blue Right Aggressive",
+        followPath(new Path("Blue Right Aggressive first swipe"))
+            .andThen(followPath(new Path("Blue Right Aggressive Second Swipe"))));
   }
 }
