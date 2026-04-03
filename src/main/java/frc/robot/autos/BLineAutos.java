@@ -150,7 +150,7 @@ public class BLineAutos {
 
   /** Shortcut: follow path with intake deployed after a short delay. */
   private Command pathWithIntake(Path path) {
-    return followPath(path).deadlineFor(Commands.waitSeconds(0.1).andThen(basicIntake()));
+    return followPath(path).deadlineFor(Commands.waitSeconds(0.05).andThen(basicIntake()));
   }
 
   /** Shortcut: follow path with immediate intake. */
@@ -822,7 +822,8 @@ public class BLineAutos {
     chooser.addOption("[BLine] Drive Test", followPath(new Path("drive test")));
     chooser.addOption(
         "[BLine] Blue Right Aggressive",
-        followPath(new Path("Blue Right Aggressive first swipe"))
-            .andThen(followPath(new Path("Blue Right Aggressive Second Swipe"))));
+        pathWithIntake(new Path("Blue Right Aggressive first swipe"))
+            .andThen(shootAtHub())
+            .andThen(pathWithImmediateIntake(new Path("Blue Right Aggressive Second Swipe"))));
   }
 }
