@@ -121,7 +121,7 @@ public class SuperStructure extends SubsystemBase {
     this.shooterStateMachine =
         new ShooterStateMachine(
             flywheel, hood, flywheelKicker, isAlignedToTarget, this::canShootToTarget);
-    this.intakeStateMachine = new IntakeStateMachine(intakeRoller, intakePivot);
+    this.intakeStateMachine = new IntakeStateMachine(intakeRoller, intakePivot, hopperSensor);
     this.targetSelectionStateMachine =
         new TargetSelectionStateMachine(hubShotCalculator, passCalculator, robotPoseSupplier);
 
