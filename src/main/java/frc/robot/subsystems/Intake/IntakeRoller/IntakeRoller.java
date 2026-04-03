@@ -43,8 +43,8 @@ public class IntakeRoller extends SubsystemBase {
     INTAKING,
     ASSIST_SHOOTING,
     REVERSING,
-    JAMMED,
-    UNJAMMING
+    JAM_DETECTED,
+    REVERSING_UNJAM
   }
 
   // State variables
@@ -78,14 +78,14 @@ public class IntakeRoller extends SubsystemBase {
     previousState = currentState;
     switch (wantedState) {
       case INTAKING:
-        if (currentState == IntakeRollerStates.UNJAMMING) {
+        if (currentState == IntakeRollerStates.REVERSING_UNJAM) {
           handleUnjamming();
-        } else if (currentState == IntakeRollerStates.JAMMED) {
+        } else if (currentState == IntakeRollerStates.JAM_DETECTED) {
           handleJammed();
         } else if (isJammed()) {
           stallTimer.stop();
           stallTimer.reset();
-          currentState = IntakeRollerStates.JAMMED;
+          currentState = IntakeRollerStates.JAM_DETECTED;
         } else {
           currentState = IntakeRollerStates.INTAKING;
         }
@@ -110,8 +110,8 @@ public class IntakeRoller extends SubsystemBase {
   }
 
   /**
-   * Called each cycle while currentState is UNJAMMING. Waits for the unjam window to expire, then
-   * returns to INTAKING.
+   * Called each cycle while currentState is REVERSING_UNJAM. Waits for the unjam window to expire,
+   * then returns to INTAKING.
    */
   private void handleUnjamming() {
     if (unjamTimer.get() >= UNJAM_DURATION_SECONDS) {
@@ -121,19 +121,19 @@ public class IntakeRoller extends SubsystemBase {
   }
 
   /**
-   * Called each cycle while currentState is JAMMED. Attempts up to MAX_UNJAM_ATTEMPTS unjam
+   * Called each cycle while currentState is JAM_DETECTED. Attempts up to MAX_UNJAM_ATTEMPTS unjam
    * cycles; gives up and stays stopped if the limit is reached.
    */
   private void handleJammed() {
     if (unjamAttempts >= MAX_UNJAM_ATTEMPTS) {
       // Give up — too many failed unjam cycles, stay stopped
-      currentState = IntakeRollerStates.JAMMED;
+      currentState = IntakeRollerStates.JAM_DETECTED;
     } else {
       unjamAttempts++;
       unjamTimer.stop();
       unjamTimer.reset();
       unjamTimer.start();
-      currentState = IntakeRollerStates.UNJAMMING;
+      currentState = IntakeRollerStates.REVERSING_UNJAM;
     }
   }
 
@@ -155,10 +155,10 @@ public class IntakeRoller extends SubsystemBase {
       case REVERSING:
         reversing();
         break;
-      case UNJAMMING:
+      case REVERSING_UNJAM:
         unjamming();
         break;
-      case JAMMED:
+      case JAM_DETECTED:
         stop();
         break;
       case IDLE:
