@@ -296,6 +296,7 @@ public class RobotContainer {
             hood,
             intakePivot,
             hopperRoller,
+            hopperSensor,
             hubShotCalculator,
             passCalculator,
             drivetrain::isAlignedToTarget,
