@@ -20,7 +20,7 @@ public class Hood extends SubsystemBase {
   private static final double TOLERANCE = 1.0;
   private static final double HOOD_UP_THRESHOLD = 2.0; // degrees - threshold for "hood is up"
   private static final double SOFT_LIMIT_PROXIMITY_DEGREES = 5.0;
-  private static final double FORWARD_SOFT_LIMIT_DEGREES = 47.0;
+  private static final double FORWARD_SOFT_LIMIT_DEGREES = 42.0;
   private static final double REVERSE_SOFT_LIMIT_DEGREES = 0.0;
 
   // IO fields

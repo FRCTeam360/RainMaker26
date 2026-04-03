@@ -129,11 +129,11 @@ public class IntakeStateMachine {
         intakePivot.setWantedState(IntakePivotWantedStates.DEPLOYED);
         break;
       case AGITATING_LOW:
-        // intakeRoller.setWantedState(IntakeRollerStates.ASSIST_SHOOTING);
+        intakeRoller.setWantedState(IntakeRollerStates.ASSIST_SHOOTING);
         intakePivot.setWantedState(IntakePivotWantedStates.AGITATE_HOPPER_LOW);
         break;
       case AGITATING_HIGH:
-        // intakeRoller.setWantedState(IntakeRollerStates.ASSIST_SHOOTING);
+        intakeRoller.setWantedState(IntakeRollerStates.ASSIST_SHOOTING);
         intakePivot.setWantedState(IntakePivotWantedStates.AGITATE_HOPPER_HIGH);
         break;
       case AGITATING_PROGRESSIVE:
