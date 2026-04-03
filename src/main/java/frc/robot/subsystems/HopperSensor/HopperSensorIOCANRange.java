@@ -16,8 +16,8 @@ public class HopperSensorIOCANRange implements HopperSensorIO {
 
   private static final int SENSOR_UPDATE_FREQUENCY_HZ = 50;
   private static final int MIN_SIGNAL_STRENGTH = 2000;
-  private static final double PROXIMITY_THRESHOLD_METERS = 0.3;
-  private static final double PROXIMITY_HYSTERESIS_METERS = 0.2;
+  private static final double PROXIMITY_THRESHOLD_METERS = 0.22;
+  private static final double PROXIMITY_HYSTERESIS_METERS = 0.01;
   private static final double FOV_CENTER_X_DEGREES = 0.0;
   private static final double FOV_CENTER_Y_DEGREES = 0.0;
   private static final double FOV_RANGE_X_DEGREES = 27.0;
