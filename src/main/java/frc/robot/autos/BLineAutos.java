@@ -817,5 +817,14 @@ public class BLineAutos {
         "[BLine] FLIPPED MIRRORED Blue Left Middle Hawk", flippedMirroredBlueLeftMiddleHawk());
     chooser.addOption(
         "[BLine] FLIPPED MIRRORED Blue Left Middle Hook", flippedMirroredBlueLeftMiddleHook());
+
+    // GUI-designed paths (single path per auto for testing)
+    chooser.addOption("[BLine] Drive Test", followPath(new Path("drive test")));
+    chooser.addOption(
+        "[BLine] Blue Right Aggressive First Swipe",
+        followPath(new Path("Blue Right Aggressive first swipe")));
+    chooser.addOption(
+        "[BLine] Blue Right Aggressive Second Swipe",
+        followPath(new Path("Blue Right Aggressive Second Swipe")));
   }
 }
