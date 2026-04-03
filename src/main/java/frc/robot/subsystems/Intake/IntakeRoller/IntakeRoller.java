@@ -126,8 +126,9 @@ public class IntakeRoller extends SubsystemBase {
    */
   private void handleJammed() {
     if (unjamAttempts >= MAX_UNJAM_ATTEMPTS) {
-      // Give up — too many failed unjam cycles, stay stopped
-      currentState = IntakeRollerStates.JAM_DETECTED;
+      // Give up unjamming — resume intaking and let the driver decide
+      resetJamState();
+      currentState = IntakeRollerStates.INTAKING;
     } else {
       unjamAttempts++;
       unjamTimer.stop();
