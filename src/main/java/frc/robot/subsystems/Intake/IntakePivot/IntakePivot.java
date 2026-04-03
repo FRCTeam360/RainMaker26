@@ -91,6 +91,7 @@ public class IntakePivot extends SubsystemBase {
     previousState = currentState;
     switch (wantedState) {
       case STOWED:
+        progressiveStarted = false;
         if (atSetpoint(STOWED_POSITION_DEGREES)) {
           currentState = IntakePivotInternalStates.AT_SETPOINT;
         } else {
@@ -98,6 +99,7 @@ public class IntakePivot extends SubsystemBase {
         }
         break;
       case DEPLOYED:
+        progressiveStarted = false;
         currentState =
             atSetpoint(DEPLOYED_POSITION_DEGREES)
                 ? IntakePivotInternalStates.AT_SETPOINT
@@ -105,6 +107,7 @@ public class IntakePivot extends SubsystemBase {
         break;
       case AGITATE_HOPPER_LOW:
       case AGITATE_HOPPER_HIGH:
+        progressiveStarted = false;
         {
           double upperTarget = getAgitateUpperPosition();
           double lowerTarget = getAgitateLowerPosition();
@@ -167,6 +170,7 @@ public class IntakePivot extends SubsystemBase {
         }
       default:
         stallBackoffDegrees = 0.0;
+        progressiveStarted = false;
         currentState = IntakePivotInternalStates.IDLE;
         break;
     }
