@@ -11,13 +11,14 @@ import org.littletonrobotics.junction.Logger;
 
 public class HopperSensor extends SubsystemBase {
 
-  private static final double SENSOR_ACTIVATED_DEBOUNCE_SECONDS = 0.04;
+  private static final double SENSOR_ACTIVATED_DEBOUNCE_SECONDS = 0.1;
 
   private final HopperSensorIO io;
   private final HopperSensorIOInputsAutoLogged inputs = new HopperSensorIOInputsAutoLogged();
   private final Debouncer sensorActivatedDebouncer =
-      new Debouncer(SENSOR_ACTIVATED_DEBOUNCE_SECONDS, DebounceType.kFalling);
+      new Debouncer(SENSOR_ACTIVATED_DEBOUNCE_SECONDS, DebounceType.kBoth);
   private boolean debouncedSensorActivated = false;
+  private boolean previousDebouncedSensorActivated = false;
 
   public HopperSensor(HopperSensorIO io) {
     this.io = io;
@@ -28,6 +29,11 @@ public class HopperSensor extends SubsystemBase {
     return debouncedSensorActivated;
   }
 
+  /** Returns whether the sensor detects an object in the previous cycle. */
+  public boolean wasPrevActivated() {
+    return previousDebouncedSensorActivated;
+  }
+
   /** Returns the distance reported by the sensor in meters. */
   public double getDistanceMeters() {
     return inputs.distanceMeters;
@@ -36,9 +42,13 @@ public class HopperSensor extends SubsystemBase {
   @Override
   public void periodic() {
     io.updateInputs(inputs);
+    previousDebouncedSensorActivated = debouncedSensorActivated;
     debouncedSensorActivated = sensorActivatedDebouncer.calculate(inputs.sensorActivated);
     Logger.processInputs("HopperSensor", inputs);
     Logger.recordOutput(
         "Subsystems/HopperSensor/SensorActivatedDebounced", debouncedSensorActivated);
+    Logger.recordOutput(
+        "Subsystems/HopperSensor/PreviousDebouncedSensorActivated",
+        previousDebouncedSensorActivated);
   }
 }

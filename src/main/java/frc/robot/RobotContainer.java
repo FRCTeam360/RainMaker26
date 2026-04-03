@@ -420,7 +420,7 @@ public class RobotContainer {
                       return hubShotCalculator.calculateShot().targetHeading();
                     }))
             .alongWith(
-                Commands.waitSeconds(2.5)
+                Commands.waitSeconds(0.0)
                     .andThen(
                         superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING_LOW))));
     autoCycleTrigger.onFalse(
