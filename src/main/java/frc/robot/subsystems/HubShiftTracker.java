@@ -5,7 +5,6 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.utils.RobotUtils;
 import frc.robot.utils.RobotUtils.ActiveHub;
-
 import java.util.Optional;
 import org.littletonrobotics.junction.Logger;
 
@@ -56,8 +55,7 @@ public class HubShiftTracker {
    *
    * @param hubShotCalculator the shot calculator used to read the current time-of-flight
    */
-  public HubShiftTracker() {
-  }
+  public HubShiftTracker() {}
 
   // -------------------------------------------------------------------------
   // Public API
@@ -75,7 +73,7 @@ public class HubShiftTracker {
     // use temp variables to avoid updating actual variables until new values are known
     double tempTimeUntilShootingPhaseChange = timeUntilShootingPhaseChange;
     ActiveHub tempActiveHub = ActiveHub.BOTH;
-    int tempTeleopShift = 0; 
+    int tempTeleopShift = 0;
     boolean tempIsOurHubActive = true;
 
     if (!DriverStation.isEnabled()) {
@@ -83,7 +81,8 @@ public class HubShiftTracker {
       tempTimeUntilShootingPhaseChange = 0; // we don't need a matchTime when disabled
     } else if (DriverStation.isAutonomous()) {
       currentPhase = MatchPhase.AUTO;
-      tempTimeUntilShootingPhaseChange = matchTime; // in auto the matchTime is equal to auto phase time
+      tempTimeUntilShootingPhaseChange =
+          matchTime; // in auto the matchTime is equal to auto phase time
     } else if (DriverStation.isTeleop()) {
       if (autoWinner == null) {
         autoWinner = RobotUtils.getAutoWinner(DriverStation.getGameSpecificMessage());
@@ -105,7 +104,7 @@ public class HubShiftTracker {
       } else {
         currentPhase = MatchPhase.TELEOP;
 
-        if (matchTime > SHIFT_1_END_SECONDS_SHOOTING) { 
+        if (matchTime > SHIFT_1_END_SECONDS_SHOOTING) {
           tempTeleopShift = 1;
           tempActiveHub = ActiveHub.AUTOLOSER;
           tempIsOurHubActive = !weWonAuto;
@@ -120,12 +119,13 @@ public class HubShiftTracker {
           tempActiveHub = ActiveHub.AUTOLOSER;
           tempIsOurHubActive = !weWonAuto;
           tempTimeUntilShootingPhaseChange = matchTime - SHIFT_3_END_SECONDS_SHOOTING;
-        } else { 
+        } else {
           tempTeleopShift = 4;
           tempActiveHub = ActiveHub.AUTOWINNER;
           tempIsOurHubActive = weWonAuto;
           if (weWonAuto) {
-            tempTimeUntilShootingPhaseChange = matchTime; // we can score from 4th shift until end of match
+            tempTimeUntilShootingPhaseChange =
+                matchTime; // we can score from 4th shift until end of match
           } else {
             tempTimeUntilShootingPhaseChange = matchTime - ENDGAME_START_SECONDS_SHOOTING;
           }
