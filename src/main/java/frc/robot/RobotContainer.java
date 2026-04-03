@@ -322,11 +322,7 @@ public class RobotContainer {
                               }
                               return hubShotCalculator.calculateShot().targetHeading();
                             }))
-                    .alongWith(
-                        Commands.waitSeconds(0.0)
-                            .andThen(
-                                superStructure.setIntakeStateCommand(
-                                    IntakeWantedStates.AGITATING))))
+                    .alongWith(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING)))
             .andThen(superStructure.setStateCommand(SuperWantedStates.DEFAULT)));
     registerPathplannerCommand(
         "stow intake", superStructure.setIntakeStateCommand(IntakeWantedStates.STOWED));
@@ -419,9 +415,7 @@ public class RobotContainer {
                       }
                       return hubShotCalculator.calculateShot().targetHeading();
                     }))
-            .alongWith(
-                Commands.waitSeconds(0.0)
-                    .andThen(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING))));
+            .alongWith(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING)));
     autoCycleTrigger.onFalse(
         superStructure
             .setStateCommand(SuperWantedStates.DEFAULT)
