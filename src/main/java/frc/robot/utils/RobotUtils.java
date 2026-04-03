@@ -3,18 +3,16 @@ package frc.robot.utils;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.robot.Constants;
 import java.io.File;
-import java.util.Optional;
 
 public class RobotUtils {
-  private static final double SHIFT_GRACE_PERIOD_SECONDS = 2.0;
-  private static final double INDEXER_TO_FLYWHEEL_SECONDS = 0.4;
-  private static final double HUB_TO_SENSOR_SECONDS = 2.0;
+  public static final double SHIFT_TIME_SECONDS = 25;
+  public static final double TIME_TO_SCORE = 2.0; // TODO set to real value
+  public static final double TRANSITION_END_SECONDS_SHOOTING = 130 + TIME_TO_SCORE;
+  public static final double SHIFT_1_END_SECONDS_SHOOTING = 105 + TIME_TO_SCORE;
+  public static final double SHIFT_2_END_SECONDS_SHOOTING = 80 + TIME_TO_SCORE;
+  public static final double SHIFT_3_END_SECONDS_SHOOTING = 55 + TIME_TO_SCORE;
+  public static final double ENDGAME_START_SECONDS_SHOOTING = 30 + TIME_TO_SCORE;
 
-  public static final double TRANSITION_END_SECONDS = 130;
-  public static final double SHIFT_1_END_SECONDS = 105;
-  public static final double SHIFT_2_END_SECONDS = 80;
-  public static final double SHIFT_3_END_SECONDS = 55;
-  public static final double ENDGAME_START_SECONDS = 30;
 
   public enum ActiveHub {
     BOTH,
@@ -59,96 +57,5 @@ public class RobotUtils {
     }
     // called when no data was received from driver station
     return null;
-  }
-
-  /**
-   * Returns which alliance's hub is active based on the gameTime from DriverStation
-   *
-   * @param gameTime the gameTime from DriverStation
-   * @param isTele if the game is in teleop or auto. Can be accessed by DriverStation.isTeleop()
-   * @param timeOfFlight the time of flight of the shot in seconds
-   * @return which hub(s) are currently active
-   */
-  public static ActiveHub getActiveHubAtShotLanding(
-      double gameTime, Boolean isTele, double timeOfFlight) {
-    // gameTime is the getMatchTime() from DriverStation, isTele is the isTeleop() from
-    // DriverStation
-    ActiveHub activeHub = ActiveHub.BOTH;
-    double timeAtShotLanding = gameTime - (timeOfFlight + INDEXER_TO_FLYWHEEL_SECONDS);
-    // Sets phases based on the current time in the game
-    if (!isTele) {
-      activeHub = ActiveHub.BOTH; // AUTO
-    } else if (isTele) {
-      if (timeAtShotLanding <= ENDGAME_START_SECONDS) {
-        activeHub = ActiveHub.BOTH; // END GAME
-      } else if (timeAtShotLanding < SHIFT_3_END_SECONDS - SHIFT_GRACE_PERIOD_SECONDS) {
-        activeHub = ActiveHub.AUTOWINNER; // ALLIANCE SHIFT 4
-      } else if (timeAtShotLanding <= SHIFT_3_END_SECONDS
-          && timeAtShotLanding >= SHIFT_3_END_SECONDS - SHIFT_GRACE_PERIOD_SECONDS) {
-        activeHub = ActiveHub.BOTH; // ALLIANCE SHIFT GRACE PERIOD
-      } else if (timeAtShotLanding < SHIFT_2_END_SECONDS - SHIFT_GRACE_PERIOD_SECONDS) {
-        activeHub = ActiveHub.AUTOLOSER; // ALLIANCE SHIFT 3
-      } else if (timeAtShotLanding <= SHIFT_2_END_SECONDS
-          && timeAtShotLanding >= SHIFT_2_END_SECONDS - SHIFT_GRACE_PERIOD_SECONDS) {
-        activeHub = ActiveHub.BOTH; // ALLIANCE SHIFT GRACE PERIOD
-      } else if (timeAtShotLanding < SHIFT_1_END_SECONDS - SHIFT_GRACE_PERIOD_SECONDS) {
-        activeHub = ActiveHub.AUTOWINNER; // ALLIANCE SHIFT 2
-      } else if (timeAtShotLanding <= SHIFT_1_END_SECONDS
-          && timeAtShotLanding >= SHIFT_1_END_SECONDS - SHIFT_GRACE_PERIOD_SECONDS) {
-        activeHub = ActiveHub.BOTH; // ALLIANCE SHIFT GRACE PERIOD
-      } else if (timeAtShotLanding <= TRANSITION_END_SECONDS) {
-        activeHub = ActiveHub.AUTOLOSER; // ALLIANCE SHIFT 1
-      } else {
-        return ActiveHub.BOTH; // TRANSITION
-      }
-    }
-    return activeHub;
-  }
-
-  /**
-   * Returns if our alliance's hub is active based on which alliance we're on, which alliance won
-   * auto, and which hub(s) are open
-   *
-   * @param alliance the alliance we're on from DriverStation
-   * @param autoWinner the alliance that won auto
-   * @param gamePhase which hub(s) are active (auto winner's or auto loser's)
-   * @return if our alliance's hub is active
-   */
-  public static boolean isHubActiveForAlliance(
-      Optional<Alliance> alliance, Alliance autoWinner, ActiveHub gamePhase) {
-    // alliance is our alliance, autoWinner is the result of getAutoWinner, gamePhase is the result
-    // of getActiveHub
-    boolean hubActive = true;
-    if (alliance.isPresent()) {
-      if (gamePhase == null || autoWinner == null) {
-        return true;
-      }
-      switch (gamePhase) {
-          // during auto, transitional phase, and end game
-        case BOTH:
-          return true;
-          // during alliance shifts 1 and 3:
-        case AUTOLOSER:
-          if (alliance.get() == autoWinner) {
-            hubActive = false;
-          } else {
-            hubActive = true;
-          }
-          return hubActive;
-          // during alliance shifts 2 and 4:
-        case AUTOWINNER:
-          if (alliance.get() == autoWinner) {
-            hubActive = true;
-          } else {
-            hubActive = false;
-          }
-          return hubActive;
-        default:
-      }
-    } else {
-      // this is called when no alliance has been received from driver station
-      return true;
-    }
-    return hubActive;
   }
 }

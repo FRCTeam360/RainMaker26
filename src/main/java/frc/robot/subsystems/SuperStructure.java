@@ -86,7 +86,6 @@ public class SuperStructure extends SubsystemBase {
   private SuperInternalStates previousSuperState = SuperInternalStates.IDLE;
   private ControlState controlState = ControlState.SUPERSTRUCTURE;
   private boolean cachedHubActive = true;
-  private double cachedTimeOfFlight = 0.0;
 
   // Constructor
 
@@ -113,7 +112,7 @@ public class SuperStructure extends SubsystemBase {
     this.hubShotCalculator = hubShotCalculator;
     this.robotPoseSupplier = robotPoseSupplier;
     this.robotToShooter = robotToShooter;
-    this.hubShiftTracker = new HubShiftTracker(hubShotCalculator);
+    this.hubShiftTracker = new HubShiftTracker();
     this.shooterStateMachine =
         new ShooterStateMachine(
             flywheel, hood, flywheelKicker, isAlignedToTarget, this::canShootToTarget);
@@ -348,18 +347,8 @@ public class SuperStructure extends SubsystemBase {
   @Override
   public void periodic() {
     hubShiftTracker.update();
-    // Calculate shot and extract time of flight once per cycle
-    cachedTimeOfFlight = hubShotCalculator.calculateShot().timeOfFlight();
-    RobotUtils.ActiveHub shootingPhase =
-        RobotUtils.getActiveHubAtShotLanding(
-            DriverStation.getMatchTime(), DriverStation.isTeleop(), cachedTimeOfFlight);
-
-    // Calculate hub active once per cycle
-    cachedHubActive =
-        RobotUtils.isHubActiveForAlliance(
-            DriverStation.getAlliance(),
-            RobotUtils.getAutoWinner(DriverStation.getGameSpecificMessage()),
-            shootingPhase);
+    RobotUtils.ActiveHub shootingPhase = hubShiftTracker.getActiveHub();
+    cachedHubActive = hubShiftTracker.isOurHubActive();
 
     // Runs the superstructure, shooter, and intake state machines
     updateState();
