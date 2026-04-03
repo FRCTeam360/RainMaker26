@@ -29,11 +29,13 @@ public class IntakeRoller extends SubsystemBase {
   private static final double JAM_VELOCITY_THRESHOLD_RPM = 50.0;
   private static final double JAM_DURATION_SECONDS = 0.25;
   private static final double UNJAM_DURATION_SECONDS = 0.15;
+  private static final int MAX_UNJAM_ATTEMPTS = 3;
 
   // Other fields
   private DoubleSupplier dutyCycleSupplier = () -> INTAKING_DUTY_CYCLE;
   private final Timer stallTimer = new Timer();
   private final Timer unjamTimer = new Timer();
+  private int unjamAttempts = 0;
 
   // Enums
   public enum IntakeRollerStates {
@@ -41,7 +43,8 @@ public class IntakeRoller extends SubsystemBase {
     INTAKING,
     ASSIST_SHOOTING,
     REVERSING,
-    JAMMED
+    JAMMED,
+    UNJAMMING
   }
 
   // State variables
@@ -79,17 +82,23 @@ public class IntakeRoller extends SubsystemBase {
     previousState = currentState;
     switch (wantedState) {
       case INTAKING:
-        if (currentState == IntakeRollerStates.REVERSING) {
-          unjamTimer.start();
+        if (currentState == IntakeRollerStates.UNJAMMING) {
+          // Wait out the unjam reverse window, then return to intaking
           if (unjamTimer.get() >= UNJAM_DURATION_SECONDS) {
-            unjamTimer.stop();
-            unjamTimer.reset();
+            resetJamState();
             currentState = IntakeRollerStates.INTAKING;
           }
         } else if (currentState == IntakeRollerStates.JAMMED) {
-          unjamTimer.reset();
-          unjamTimer.start();
-          currentState = IntakeRollerStates.REVERSING;
+          if (unjamAttempts >= MAX_UNJAM_ATTEMPTS) {
+            // Give up — too many failed unjam cycles, stay stopped
+            currentState = IntakeRollerStates.JAMMED;
+          } else {
+            unjamAttempts++;
+            unjamTimer.stop();
+            unjamTimer.reset();
+            unjamTimer.start();
+            currentState = IntakeRollerStates.UNJAMMING;
+          }
         } else if (isJammed()) {
           stallTimer.stop();
           stallTimer.reset();
@@ -99,16 +108,27 @@ public class IntakeRoller extends SubsystemBase {
         }
         break;
       case ASSIST_SHOOTING:
+        resetJamState();
         currentState = IntakeRollerStates.ASSIST_SHOOTING;
         break;
       case REVERSING:
+        resetJamState();
         currentState = IntakeRollerStates.REVERSING;
         break;
       case IDLE:
       default:
+        resetJamState();
         currentState = IntakeRollerStates.IDLE;
         break;
     }
+  }
+
+  private void resetJamState() {
+    stallTimer.stop();
+    stallTimer.reset();
+    unjamTimer.stop();
+    unjamTimer.reset();
+    unjamAttempts = 0;
   }
 
   private void applyState() {
@@ -121,6 +141,9 @@ public class IntakeRoller extends SubsystemBase {
         break;
       case REVERSING:
         reversing();
+        break;
+      case UNJAMMING:
+        unjamming();
         break;
       case JAMMED:
         stop();
@@ -148,13 +171,17 @@ public class IntakeRoller extends SubsystemBase {
     setVelocity(REVERSE_VELOCITY_RPM);
   }
 
+  private void unjamming() {
+    setDutyCycle(REVERSE_UNJAM_DUTY_CYCLE);
+  }
+
   private boolean isJammed() {
     boolean highCurrent =
         inputs.statorCurrent[0] > JAM_STATOR_CURRENT_THRESHOLD_AMPS
-            || inputs.statorCurrent[1] > JAM_STATOR_CURRENT_THRESHOLD_AMPS;
+            && inputs.statorCurrent[1] > JAM_STATOR_CURRENT_THRESHOLD_AMPS;
     boolean lowVelocity =
         Math.abs(inputs.velocity[0]) < JAM_VELOCITY_THRESHOLD_RPM
-            || Math.abs(inputs.velocity[1]) < JAM_VELOCITY_THRESHOLD_RPM;
+            && Math.abs(inputs.velocity[1]) < JAM_VELOCITY_THRESHOLD_RPM;
 
     if (highCurrent && lowVelocity) {
       stallTimer.start();
@@ -232,6 +259,6 @@ public class IntakeRoller extends SubsystemBase {
     Logger.recordOutput("Subsystems/IntakeRoller/CurrentState", currentState);
     Logger.recordOutput("Subsystems/IntakeRoller/PreviousState", previousState);
     Logger.recordOutput("Subsystems/IntakeRoller/ControlState", controlState);
-    // Logger.recordOutput("Subsystems/IntakeRoller/PreviousState", isJammed());
+    Logger.recordOutput("Subsystems/IntakeRoller/UnjamAttempts", unjamAttempts);
   }
 }
