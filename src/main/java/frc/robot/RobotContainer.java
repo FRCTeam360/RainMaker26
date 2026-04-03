@@ -34,6 +34,9 @@ import frc.robot.subsystems.HopperRoller.HopperRoller;
 import frc.robot.subsystems.HopperRoller.HopperRollerIONoop;
 import frc.robot.subsystems.HopperRoller.HopperRollerIOPB;
 import frc.robot.subsystems.HopperRoller.HopperRollerIOSim;
+import frc.robot.subsystems.HopperSensor.HopperSensor;
+import frc.robot.subsystems.HopperSensor.HopperSensorIOCANRange;
+import frc.robot.subsystems.HopperSensor.HopperSensorIONoop;
 import frc.robot.subsystems.Indexer.Indexer;
 import frc.robot.subsystems.Indexer.IndexerIOPB;
 import frc.robot.subsystems.Indexer.IndexerIOSim;
@@ -98,6 +101,7 @@ public class RobotContainer {
   private IntakeRoller intakeRoller;
   private IntakePivot intakePivot;
   private HopperRoller hopperRoller;
+  private HopperSensor hopperSensor;
   private FlywheelKicker flywheelKicker;
   private Climber climber;
   private BooleanSupplier canShootInHub;
@@ -145,6 +149,7 @@ public class RobotContainer {
         intakeRoller = new IntakeRoller(new IntakeRollerIOSim());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOSim());
         hopperRoller = new HopperRoller(new HopperRollerIOSim());
+        hopperSensor = new HopperSensor(new HopperSensorIONoop());
 
         robotShootingInfo =
             new RobotShootingInfo(
@@ -187,6 +192,7 @@ public class RobotContainer {
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOWB());
         intakePivot = new IntakePivot(new IntakePivotIONoop());
         hopperRoller = new HopperRoller(new HopperRollerIONoop());
+        hopperSensor = new HopperSensor(new HopperSensorIONoop());
 
         robotShootingInfo =
             new RobotShootingInfo(
@@ -237,6 +243,7 @@ public class RobotContainer {
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOPB());
         intakePivot = new IntakePivot(new IntakePivotIOPB());
         hopperRoller = new HopperRoller(new HopperRollerIOPB());
+        hopperSensor = new HopperSensor(new HopperSensorIOCANRange());
 
         robotShootingInfo =
             new RobotShootingInfo(
@@ -290,6 +297,7 @@ public class RobotContainer {
             hood,
             intakePivot,
             hopperRoller,
+            hopperSensor,
             hubShotCalculator,
             passCalculator,
             drivetrain::isAlignedToTarget,
@@ -315,11 +323,7 @@ public class RobotContainer {
                               }
                               return hubShotCalculator.calculateShot().targetHeading();
                             }))
-                    .alongWith(
-                        Commands.waitSeconds(2.25)
-                            .andThen(
-                                superStructure.setIntakeStateCommand(
-                                    IntakeWantedStates.AGITATING))))
+                    .alongWith(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING)))
             .andThen(superStructure.setStateCommand(SuperWantedStates.DEFAULT)));
     registerPathplannerCommand(
         "stow intake", superStructure.setIntakeStateCommand(IntakeWantedStates.STOWED));
@@ -418,9 +422,7 @@ public class RobotContainer {
                       }
                       return hubShotCalculator.calculateShot().targetHeading();
                     }))
-            .alongWith(
-                Commands.waitSeconds(2.5)
-                    .andThen(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING))));
+            .alongWith(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING)));
     autoCycleTrigger.onFalse(
         superStructure
             .setStateCommand(SuperWantedStates.DEFAULT)
