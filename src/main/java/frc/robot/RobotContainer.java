@@ -318,7 +318,7 @@ public class RobotContainer {
                         Commands.waitSeconds(2.25)
                             .andThen(
                                 superStructure.setIntakeStateCommand(
-                                    IntakeWantedStates.AGITATING_PROGRESSIVE))))
+                                    IntakeWantedStates.AGITATING_LOW))))
             .andThen(superStructure.setStateCommand(SuperWantedStates.DEFAULT)));
     registerPathplannerCommand(
         "stow intake", superStructure.setIntakeStateCommand(IntakeWantedStates.STOWED));
@@ -327,8 +327,7 @@ public class RobotContainer {
     registerPathplannerCommand(
         "deploy intake", superStructure.setIntakeStateCommand(IntakeWantedStates.DEPLOYED));
     registerPathplannerCommand(
-        "agitate intake",
-        superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING_PROGRESSIVE));
+        "agitate intake", superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING_LOW));
     registerPathplannerCommand(
         "shoot without timer",
         superStructure
@@ -415,8 +414,7 @@ public class RobotContainer {
             .alongWith(
                 Commands.waitSeconds(2.5)
                     .andThen(
-                        superStructure.setIntakeStateCommand(
-                            IntakeWantedStates.AGITATING_PROGRESSIVE))));
+                        superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING_LOW))));
     autoCycleTrigger.onFalse(
         superStructure
             .setStateCommand(SuperWantedStates.DEFAULT)
@@ -448,8 +446,7 @@ public class RobotContainer {
       intakeTrigger.whileFalse(superStructure.setIntakeStateCommand(IntakeWantedStates.IDLE));
 
       Trigger agitateTrigger = driverCont.leftTrigger().and(isSuperstructureMode);
-      agitateTrigger.onTrue(
-          superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING_PROGRESSIVE));
+      agitateTrigger.onTrue(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING_LOW));
       agitateTrigger.onFalse(superStructure.setIntakeStateCommand(IntakeWantedStates.DEPLOYED));
 
       // Y toggle: STOWED <-
