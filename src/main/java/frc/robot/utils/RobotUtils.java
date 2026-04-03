@@ -5,14 +5,6 @@ import frc.robot.Constants;
 import java.io.File;
 
 public class RobotUtils {
-  public static final double SHIFT_TIME_SECONDS = 25;
-  public static final double TIME_TO_SCORE = 2.0; // TODO set to real value
-  public static final double TRANSITION_END_SECONDS_SHOOTING = 130 + TIME_TO_SCORE;
-  public static final double SHIFT_1_END_SECONDS_SHOOTING = 105 + TIME_TO_SCORE;
-  public static final double SHIFT_2_END_SECONDS_SHOOTING = 80 + TIME_TO_SCORE;
-  public static final double SHIFT_3_END_SECONDS_SHOOTING = 55 + TIME_TO_SCORE;
-  public static final double ENDGAME_START_SECONDS_SHOOTING = 30 + TIME_TO_SCORE;
-
 
   public enum ActiveHub {
     BOTH,
