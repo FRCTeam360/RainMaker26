@@ -2,8 +2,6 @@ package frc.robot.subsystems.Shooter.FlywheelKicker;
 
 // import com.ctre.phoenix6.BaseStatusSignal;
 // import com.ctre.phoenix6.StatusSignal;
-import com.ctre.phoenix6.configs.CANrangeConfiguration;
-import com.ctre.phoenix6.signals.UpdateModeValue;
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
@@ -48,8 +46,6 @@ public class FlywheelKickerIOPB implements FlywheelKickerIO {
   private final SparkFlexConfig sparkFlexConfig = new SparkFlexConfig();
   private final SparkClosedLoopController closedLoopController;
 
-  // CANRange sensor moved to HopperSensor subsystem
-
   public FlywheelKickerIOPB() {
     // Configure base motor settings
     sparkFlexConfig.idleMode(IdleMode.kCoast);
@@ -89,18 +85,6 @@ public class FlywheelKickerIOPB implements FlywheelKickerIO {
         sparkFlexConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
     closedLoopController = flywheelKickerMotor.getClosedLoopController();
-
-    CANrangeConfiguration sensorConfig = new CANrangeConfiguration();
-    sensorConfig.ProximityParams.MinSignalStrengthForValidMeasurement = MIN_SIGNAL_STRENGTH;
-    sensorConfig.ProximityParams.ProximityThreshold = PROXIMITY_THRESHOLD_METERS;
-    sensorConfig.ToFParams.withUpdateMode(UpdateModeValue.ShortRangeUserFreq);
-    // canSensor.getConfigurator().apply(sensorConfig);
-
-    // distanceSignal = canSensor.getDistance();
-    // isDetectedSignal = canSensor.getIsDetected();
-
-    // BaseStatusSignal.setUpdateFrequencyForAll(50, distanceSignal, isDetectedSignal);
-    // canSensor.optimizeBusUtilization();
   }
 
   public void updateInputs(FlywheelKickerIOInputs inputs) {
@@ -110,9 +94,7 @@ public class FlywheelKickerIOPB implements FlywheelKickerIO {
     inputs.velocity = encoder.getVelocity();
     inputs.voltage = flywheelKickerMotor.getBusVoltage() * flywheelKickerMotor.getAppliedOutput();
     inputs.sensorProximity = 0.0;
-    // inputs.sensorProximity = canSensor.getDistance().getValueAsDouble();
     inputs.sensorActivated = false;
-    // inputs.sensorActivated = canSensor.getIsDetected().getValue();
   }
 
   public void setDutyCycle(double dutyCycle) {
