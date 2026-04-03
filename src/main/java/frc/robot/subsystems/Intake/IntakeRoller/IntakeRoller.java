@@ -13,16 +13,13 @@ import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
 public class IntakeRoller extends SubsystemBase {
-  // Constants
+  // Motor output constants
   private static final double INTAKE_VELOCITY_RPM = 4000.0;
-  private static final double REVERSE_UNJAM_DUTY_CYCLE = -0.5;
+  private static final double WOODBOT_INTAKING_DUTY_CYCLE = 0.7;
   private static final double INTAKING_DUTY_CYCLE = 0.8;
   private static final double SHOOT_ASSIST_DUTY_CYCLE = 0.3;
   private static final double REVERSE_VELOCITY_RPM = -3250.0;
-
-  // IO fields
-  private final IntakeRollerIO io;
-  private final IntakeRollerIOInputsAutoLogged inputs = new IntakeRollerIOInputsAutoLogged();
+  private static final double REVERSE_UNJAM_DUTY_CYCLE = -0.5;
 
   // Jam detection constants
   private static final double JAM_STATOR_CURRENT_THRESHOLD_AMPS = 50.0;
@@ -31,8 +28,11 @@ public class IntakeRoller extends SubsystemBase {
   private static final double UNJAM_DURATION_SECONDS = 0.15;
   private static final int MAX_UNJAM_ATTEMPTS = 3;
 
-  // Other fields
-  private DoubleSupplier dutyCycleSupplier = () -> INTAKING_DUTY_CYCLE;
+  // IO fields
+  private final IntakeRollerIO io;
+  private final IntakeRollerIOInputsAutoLogged inputs = new IntakeRollerIOInputsAutoLogged();
+
+  // Jam tracking fields
   private final Timer stallTimer = new Timer();
   private final Timer unjamTimer = new Timer();
   private int unjamAttempts = 0;
@@ -74,31 +74,14 @@ public class IntakeRoller extends SubsystemBase {
     this.controlState = controlState;
   }
 
-  public void setDutyCycleSupplier(DoubleSupplier dutyCycleSupplier) {
-    this.dutyCycleSupplier = dutyCycleSupplier;
-  }
-
   private void updateState() {
     previousState = currentState;
     switch (wantedState) {
       case INTAKING:
         if (currentState == IntakeRollerStates.UNJAMMING) {
-          // Wait out the unjam reverse window, then return to intaking
-          if (unjamTimer.get() >= UNJAM_DURATION_SECONDS) {
-            resetJamState();
-            currentState = IntakeRollerStates.INTAKING;
-          }
+          handleUnjamming();
         } else if (currentState == IntakeRollerStates.JAMMED) {
-          if (unjamAttempts >= MAX_UNJAM_ATTEMPTS) {
-            // Give up — too many failed unjam cycles, stay stopped
-            currentState = IntakeRollerStates.JAMMED;
-          } else {
-            unjamAttempts++;
-            unjamTimer.stop();
-            unjamTimer.reset();
-            unjamTimer.start();
-            currentState = IntakeRollerStates.UNJAMMING;
-          }
+          handleJammed();
         } else if (isJammed()) {
           stallTimer.stop();
           stallTimer.reset();
@@ -109,17 +92,48 @@ public class IntakeRoller extends SubsystemBase {
         break;
       case ASSIST_SHOOTING:
         resetJamState();
+        unjamAttempts = 0;
         currentState = IntakeRollerStates.ASSIST_SHOOTING;
         break;
       case REVERSING:
         resetJamState();
+        unjamAttempts = 0;
         currentState = IntakeRollerStates.REVERSING;
         break;
       case IDLE:
       default:
         resetJamState();
+        unjamAttempts = 0;
         currentState = IntakeRollerStates.IDLE;
         break;
+    }
+  }
+
+  /**
+   * Called each cycle while currentState is UNJAMMING. Waits for the unjam window to expire, then
+   * returns to INTAKING.
+   */
+  private void handleUnjamming() {
+    if (unjamTimer.get() >= UNJAM_DURATION_SECONDS) {
+      resetJamState();
+      currentState = IntakeRollerStates.INTAKING;
+    }
+  }
+
+  /**
+   * Called each cycle while currentState is JAMMED. Attempts up to MAX_UNJAM_ATTEMPTS unjam
+   * cycles; gives up and stays stopped if the limit is reached.
+   */
+  private void handleJammed() {
+    if (unjamAttempts >= MAX_UNJAM_ATTEMPTS) {
+      // Give up — too many failed unjam cycles, stay stopped
+      currentState = IntakeRollerStates.JAMMED;
+    } else {
+      unjamAttempts++;
+      unjamTimer.stop();
+      unjamTimer.reset();
+      unjamTimer.start();
+      currentState = IntakeRollerStates.UNJAMMING;
     }
   }
 
@@ -128,7 +142,6 @@ public class IntakeRoller extends SubsystemBase {
     stallTimer.reset();
     unjamTimer.stop();
     unjamTimer.reset();
-    unjamAttempts = 0;
   }
 
   private void applyState() {
@@ -163,7 +176,7 @@ public class IntakeRoller extends SubsystemBase {
     if (Constants.getRobotType() != Constants.RobotType.WOODBOT) {
       setVelocity(INTAKE_VELOCITY_RPM);
     } else {
-      setDutyCycle(0.7);
+      setDutyCycle(WOODBOT_INTAKING_DUTY_CYCLE);
     }
   }
 
@@ -192,16 +205,6 @@ public class IntakeRoller extends SubsystemBase {
 
     return stallTimer.get() >= JAM_DURATION_SECONDS;
   }
-
-  // private void unjamIntake() {
-  //   if (isJammed()) {
-  //     this.setDutyCycle(REVERSE_UNJAM_DUTY_CYCLE);
-  //   }
-  // }
-
-  // private boolean isJammed() {
-  //   return inputs.supplyCurrent >= JAMMED_SUPPLY_CURRENT_DRAW;
-  // }
 
   // IO delegation methods
 
