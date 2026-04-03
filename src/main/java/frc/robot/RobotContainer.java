@@ -33,6 +33,9 @@ import frc.robot.subsystems.HopperRoller.HopperRoller;
 import frc.robot.subsystems.HopperRoller.HopperRollerIONoop;
 import frc.robot.subsystems.HopperRoller.HopperRollerIOPB;
 import frc.robot.subsystems.HopperRoller.HopperRollerIOSim;
+import frc.robot.subsystems.HopperSensor.HopperSensor;
+import frc.robot.subsystems.HopperSensor.HopperSensorIOCANRange;
+import frc.robot.subsystems.HopperSensor.HopperSensorIONoop;
 import frc.robot.subsystems.Indexer.Indexer;
 import frc.robot.subsystems.Indexer.IndexerIOPB;
 import frc.robot.subsystems.Indexer.IndexerIOSim;
@@ -97,6 +100,7 @@ public class RobotContainer {
   private IntakeRoller intakeRoller;
   private IntakePivot intakePivot;
   private HopperRoller hopperRoller;
+  private HopperSensor hopperSensor;
   private FlywheelKicker flywheelKicker;
   private Climber climber;
   private BooleanSupplier canShootInHub;
@@ -144,6 +148,7 @@ public class RobotContainer {
         intakeRoller = new IntakeRoller(new IntakeRollerIOSim());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOSim());
         hopperRoller = new HopperRoller(new HopperRollerIOSim());
+        hopperSensor = new HopperSensor(new HopperSensorIONoop());
 
         robotShootingInfo =
             new RobotShootingInfo(
@@ -186,6 +191,7 @@ public class RobotContainer {
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOWB());
         intakePivot = new IntakePivot(new IntakePivotIONoop());
         hopperRoller = new HopperRoller(new HopperRollerIONoop());
+        hopperSensor = new HopperSensor(new HopperSensorIONoop());
 
         robotShootingInfo =
             new RobotShootingInfo(
@@ -236,6 +242,7 @@ public class RobotContainer {
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOPB());
         intakePivot = new IntakePivot(new IntakePivotIOPB());
         hopperRoller = new HopperRoller(new HopperRollerIOPB());
+        hopperSensor = new HopperSensor(new HopperSensorIOCANRange());
 
         robotShootingInfo =
             new RobotShootingInfo(
@@ -289,6 +296,7 @@ public class RobotContainer {
             hood,
             intakePivot,
             hopperRoller,
+            hopperSensor,
             hubShotCalculator,
             passCalculator,
             drivetrain::isAlignedToTarget,
@@ -299,15 +307,22 @@ public class RobotContainer {
     // TODO: add end condition based on state from SuperStructure (based on sensor inputs)
     registerPathplannerCommand(
         "shoot at hub",
-        Commands.waitSeconds(4)
+        Commands.waitSeconds(4.5)
             .deadlineFor(
                 superStructure
-                    .setStateCommand(SuperWantedStates.SHOOT_AT_HUB)
+                    .setStateCommand(SuperWantedStates.AUTO_CYCLE_SHOOTING)
                     .alongWith(
                         drivetrain.faceAngleWhileDrivingCommand(
                             () -> 0,
                             () -> 0,
-                            () -> hubShotCalculator.calculateShot().targetHeading())))
+                            () -> {
+                              if (superStructure.getCurrentSuperState()
+                                  == SuperInternalStates.PASSING) {
+                                return passCalculator.calculateShot().targetHeading();
+                              }
+                              return hubShotCalculator.calculateShot().targetHeading();
+                            }))
+                    .alongWith(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING)))
             .andThen(superStructure.setStateCommand(SuperWantedStates.DEFAULT)));
     registerPathplannerCommand(
         "stow intake", superStructure.setIntakeStateCommand(IntakeWantedStates.STOWED));
@@ -400,9 +415,7 @@ public class RobotContainer {
                       }
                       return hubShotCalculator.calculateShot().targetHeading();
                     }))
-            .alongWith(
-                Commands.waitSeconds(1.25)
-                    .andThen(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING))));
+            .alongWith(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING)));
     autoCycleTrigger.onFalse(
         superStructure
             .setStateCommand(SuperWantedStates.DEFAULT)
@@ -410,24 +423,17 @@ public class RobotContainer {
 
     // Manual override: force shoot at hub regardless of position
     Trigger forceHubTrigger = driverCont.rightBumper().and(isSuperstructureMode);
-    forceHubTrigger.whileTrue(
-        superStructure
-            .setStateCommand(SuperWantedStates.SHOOT_AT_HUB)
-            .alongWith(
-                drivetrain.faceAngleWhileDrivingCommand(
-                    driverCont, () -> hubShotCalculator.calculateShot().targetHeading())));
+    forceHubTrigger.whileTrue(superStructure.setStateCommand(SuperWantedStates.FORCED_SHOT));
     forceHubTrigger.onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
 
     // Manual override: force pass to outpost regardless of position
-    driverCont
-        .b()
-        .whileTrue(
-            superStructure
-                .setStateCommand(SuperWantedStates.SHOOT_AT_OUTPOST)
-                .alongWith(
-                    drivetrain.faceAngleWhileDrivingCommand(
-                        driverCont, () -> passCalculator.calculateShot().targetHeading())));
+    driverCont.b().whileTrue(superStructure.setStateCommand(SuperWantedStates.FORCED_SHOOT_TRENCH));
     driverCont.b().onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
+
+    driverCont.x().whileTrue(superStructure.setIntakeStateCommand(IntakeWantedStates.REVERSING));
+    // TODO: check that this works with just an on false because this will set the intake to idle
+    // constantly and that's probably not what we want but it did work on the field
+    driverCont.x().whileFalse(superStructure.setIntakeStateCommand(IntakeWantedStates.IDLE));
 
     // Left trigger held: agitate. Release: back to intaking.
     if (Constants.getRobotType() == RobotType.WOODBOT) {
@@ -458,9 +464,14 @@ public class RobotContainer {
     driverCont.a().onTrue(superStructure.setStateCommand(SuperWantedStates.UNJAMMING));
     driverCont.a().onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
 
+    // defense mode
+    driverCont.start().onTrue(drivetrain.toggleDefenseModeCmd());
+
     // Drivetrain commands
     // driverCont.leftTrigger().whileTrue(drivetrain.faceHubWhileDriving(driverCont));
     driverCont.back().onTrue(drivetrain.zeroCommand());
+
+    driverCont.rightStick().onTrue(drivetrain.toggleHeadingLockCommand());
   }
 
   /** Configures bindings that are active only in independent (test) mode. */

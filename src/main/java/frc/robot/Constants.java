@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.*;
+
 import com.ctre.phoenix6.CANBus;
 import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.RobotConfig;
@@ -13,8 +15,9 @@ import edu.wpi.first.hal.HALUtil;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import frc.robot.utils.RobotUtils.ActiveHub;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -34,8 +37,6 @@ public final class Constants {
       AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
 
   public static Alliance AUTO_WINNER;
-  public static ActiveHub HUB_PHASE;
-  public static boolean HUB_ACTIVE;
 
   public static enum RobotType {
     SIM,
@@ -52,11 +53,40 @@ public final class Constants {
 
   static RobotType robotType;
 
-  public static RobotType getRobotType() {
-    return robotType;
+  public static LinearVelocity getMaxSpeed() {
+    switch (getRobotType()) {
+      case WOODBOT:
+        return WoodBotConstants.maxSpeed;
+      case PRACTICEBOT:
+        return PracticeBotConstants.maxSpeed;
+      case SIM:
+        return SimulationConstants.maxSpeed;
+      default:
+        return PracticeBotConstants.maxSpeed;
+    }
   }
 
-  static RobotType initRobotType() {
+  public static AngularVelocity getMaxAngularVelocity() {
+    switch (getRobotType()) {
+      case WOODBOT:
+        return WoodBotConstants.maxAngularVelocity;
+      case PRACTICEBOT:
+        return PracticeBotConstants.maxAngularVelocity;
+      case SIM:
+        return SimulationConstants.maxAngularVelocity;
+      default:
+        return PracticeBotConstants.maxAngularVelocity;
+    }
+  }
+
+  public static RobotType getRobotType() {
+    if (robotType != null) {
+      return robotType;
+    }
+    return initRobotType();
+  }
+
+  private static RobotType initRobotType() {
     String serialAddress = HALUtil.getSerialNumber();
 
     if (serialAddress.equals(SerialAddressConstants.WOOD_SERIAL_ADDRESS)) {
@@ -103,6 +133,10 @@ public final class Constants {
     // === LIMELIGHT ===
     public static final String LIMELIGHT_3 = "limelight";
     public static final String LIMELIGHT_4 = "limelight-two";
+
+    // === MAXIMUMS ===
+    public static final LinearVelocity maxSpeed = MetersPerSecond.of(4.85);
+    public static final AngularVelocity maxAngularVelocity = RevolutionsPerSecond.of(4.0);
 
     // === CANBUS ===
     public static final CANBus CANBUS = new CANBus("Default Name");
@@ -222,7 +256,9 @@ public final class Constants {
 
     // === FLYWHEEL KICKER ===
     public static final int FLYWHEEL_KICKER_ID = 20;
-    public static final int FLYWHEEL_KICKER_SENSOR_ID = 21;
+
+    // === HOPPER SENSOR ===
+    public static final int HOPPER_SENSOR_ID = 21;
 
     // === HOPPER ===
     public static final int HOPPER_ROLLER_ID = 22;
@@ -238,6 +274,10 @@ public final class Constants {
 
     // === CANBUS ===
     public static final CANBus CANBUS = new CANBus("Default Name");
+
+    // === MAXIMUMS ===
+    public static final LinearVelocity maxSpeed = MetersPerSecond.of(4.69);
+    public static final AngularVelocity maxAngularVelocity = RevolutionsPerSecond.of(4.0);
 
     static {
       shotHoodAngleMap.put(6.0, 16.0);
@@ -301,9 +341,11 @@ public final class Constants {
       passFlywheelSpeedMap.put(1.0, 1500.0);
       passFlywheelSpeedMap.put(0.0, 1500.0);
 
-      timeOfFlightMap.put(1.939, 0.82);
-      timeOfFlightMap.put(3.011, 1.26);
-      timeOfFlightMap.put(4.704, 1.37);
+      timeOfFlightMap.put(0.0, 1.05);
+      timeOfFlightMap.put(1.75, 1.05);
+      timeOfFlightMap.put(2.05, 1.0);
+      timeOfFlightMap.put(3.1, 1.05);
+      timeOfFlightMap.put(4.8, 1.02);
     }
   }
 
@@ -331,6 +373,10 @@ public final class Constants {
 
     // === CLIMBER ===
     public static final int CLIMBER_MOTOR = 36;
+
+    // === MAXIMUMS ===
+    public static final LinearVelocity maxSpeed = MetersPerSecond.of(4.69);
+    public static final AngularVelocity maxAngularVelocity = RevolutionsPerSecond.of(4.0);
 
     // === SHOT CALCULATOR ===
     public static final InterpolatingDoubleTreeMap shotHoodAngleMap =

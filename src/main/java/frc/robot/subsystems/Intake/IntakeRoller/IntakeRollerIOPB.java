@@ -17,13 +17,13 @@ import frc.robot.Constants.PracticeBotConstants;
 
 public class IntakeRollerIOPB implements IntakeRollerIO {
   private static final double GEAR_RATIO = 1.0;
-  private static final int STALL_CURRENT_LIMIT_AMPS = 60;
-  private static final int FREE_CURRENT_LIMIT_AMPS = 50;
+  private static final int STALL_CURRENT_LIMIT_AMPS = 70;
+  private static final int FREE_CURRENT_LIMIT_AMPS = 60;
 
-  private static final double KP = 0.00011;
+  private static final double KP = 0.0002;
   private static final double KI = 0.0;
   private static final double KD = 0.0;
-  private static final double KV = 0.0019;
+  private static final double KV = 0.0017;
   private static final double KS = 0.01;
 
   private final SparkFlex motorLeft =
@@ -48,8 +48,8 @@ public class IntakeRollerIOPB implements IntakeRollerIO {
 
     leftConfig.encoder.positionConversionFactor(1.0 / GEAR_RATIO);
     leftConfig.encoder.velocityConversionFactor(1.0 / GEAR_RATIO);
-    leftConfig.encoder.uvwMeasurementPeriod(10);
-    leftConfig.encoder.uvwAverageDepth(2);
+    leftConfig.encoder.quadratureMeasurementPeriod(25);
+    leftConfig.encoder.quadratureAverageDepth(8);
 
     leftConfig.closedLoop.p(KP).i(KI).d(KD);
     leftConfig.closedLoop.feedForward.kV(KV).kS(KS);
