@@ -4,13 +4,20 @@
 
 package frc.robot.subsystems.HopperSensor;
 
+import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
 
 public class HopperSensor extends SubsystemBase {
 
+  private static final double SENSOR_ACTIVATED_DEBOUNCE_SECONDS = 0.04;
+
   private final HopperSensorIO io;
   private final HopperSensorIOInputsAutoLogged inputs = new HopperSensorIOInputsAutoLogged();
+  private final Debouncer sensorActivatedDebouncer =
+      new Debouncer(SENSOR_ACTIVATED_DEBOUNCE_SECONDS, DebounceType.kFalling);
+  private boolean debouncedSensorActivated = false;
 
   public HopperSensor(HopperSensorIO io) {
     this.io = io;
@@ -18,7 +25,7 @@ public class HopperSensor extends SubsystemBase {
 
   /** Returns whether the sensor detects an object. */
   public boolean isActivated() {
-    return inputs.sensorActivated;
+    return debouncedSensorActivated;
   }
 
   /** Returns the distance reported by the sensor in meters. */
@@ -29,6 +36,8 @@ public class HopperSensor extends SubsystemBase {
   @Override
   public void periodic() {
     io.updateInputs(inputs);
+    debouncedSensorActivated = sensorActivatedDebouncer.calculate(inputs.sensorActivated);
     Logger.processInputs("HopperSensor", inputs);
+    Logger.recordOutput("Subsystems/HopperSensor/SensorActivatedDebounced", debouncedSensorActivated);
   }
 }
