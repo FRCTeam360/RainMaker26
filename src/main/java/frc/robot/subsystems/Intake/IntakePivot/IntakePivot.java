@@ -50,8 +50,7 @@ public class IntakePivot extends SubsystemBase {
     AT_SETPOINT,
     SWITCHING_AGITATE_TARGET_HIGH,
     SWITCHING_AGITATE_TARGET_LOW,
-    PROGRESSIVE_COMPLETE,
-    STALLING
+    PROGRESSIVE_COMPLETE
   }
 
   // State variables
@@ -193,7 +192,6 @@ public class IntakePivot extends SubsystemBase {
       case AT_SETPOINT:
       case SWITCHING_AGITATE_TARGET_HIGH:
       case SWITCHING_AGITATE_TARGET_LOW:
-      case STALLING:
         double target = getTargetPosition() + stallBackoffDegrees;
         target = Math.max(STOWED_POSITION_DEGREES, Math.min(target, DEPLOYED_POSITION_DEGREES));
         if (isNearSoftLimit(target)) {
