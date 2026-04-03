@@ -113,10 +113,6 @@ public class IntakeStateMachine {
             && hopperSensor.wasPrevActivated()
             && !hopperSensor.isActivated()) {
           overSpindexerState = BallsOverSpindexerState.NOT_FULL;
-        } else if (currentState == IntakeInternalStates.AGITATING_HIGH
-            && !hopperSensor.wasPrevActivated()
-            && hopperSensor.isActivated()) {
-          overSpindexerState = BallsOverSpindexerState.FULL;
         }
 
         // act on the latching behavior
@@ -200,5 +196,6 @@ public class IntakeStateMachine {
     Logger.recordOutput("Superstructure/WantedIntakeState", wantedState);
     Logger.recordOutput("Superstructure/CurrentIntakeState", currentState);
     Logger.recordOutput("Superstructure/PreviousIntakeState", previousState);
+    Logger.recordOutput("Superstructure/BallsOverHopperState", overSpindexerState);
   }
 }
