@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.HopperRoller.HopperRoller;
 import frc.robot.subsystems.HopperRoller.HopperRoller.HopperRollerStates;
+import frc.robot.subsystems.HopperSensor.HopperSensor;
 import frc.robot.subsystems.Indexer.Indexer;
 import frc.robot.subsystems.Indexer.Indexer.IndexerStates;
 import frc.robot.subsystems.Intake.IntakePivot.IntakePivot;
@@ -40,6 +41,7 @@ public class SuperStructure extends SubsystemBase {
   private final Hood hood;
   private final IntakePivot intakePivot;
   private final HopperRoller hopperRoller;
+  private final HopperSensor hopperSensor;
   private final ShooterStateMachine shooterStateMachine;
   private final IntakeStateMachine intakeStateMachine;
   private final TargetSelectionStateMachine targetSelectionStateMachine;
@@ -98,6 +100,7 @@ public class SuperStructure extends SubsystemBase {
       Hood hood,
       IntakePivot intakePivot,
       HopperRoller hopperRoller,
+      HopperSensor hopperSensor,
       ShotCalculator hubShotCalculator,
       ShotCalculator passCalculator,
       BooleanSupplier isAlignedToTarget,
@@ -110,6 +113,7 @@ public class SuperStructure extends SubsystemBase {
     this.hood = hood;
     this.intakePivot = intakePivot;
     this.hopperRoller = hopperRoller;
+    this.hopperSensor = hopperSensor;
     this.hubShotCalculator = hubShotCalculator;
     this.robotPoseSupplier = robotPoseSupplier;
     this.robotToShooter = robotToShooter;
