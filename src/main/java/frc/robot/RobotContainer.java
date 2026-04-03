@@ -324,8 +324,9 @@ public class RobotContainer {
                     .alongWith(
                         Commands.waitSeconds(2.25)
                             .andThen(
-                                superStructure.setIntakeStateCommand(
-                                    IntakeWantedStates.AGITATING))))
+                                // superStructure.setIntakeStateCommand(
+                                //     IntakeWantedStates.AGITATING)
+                                )))
             .andThen(superStructure.setStateCommand(SuperWantedStates.DEFAULT)));
     registerPathplannerCommand(
         "stow intake", superStructure.setIntakeStateCommand(IntakeWantedStates.STOWED));
@@ -420,7 +421,9 @@ public class RobotContainer {
                     }))
             .alongWith(
                 Commands.waitSeconds(2.5)
-                    .andThen(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING))));
+                    .andThen(
+                        // superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING)
+                        )));
     autoCycleTrigger.onFalse(
         superStructure
             .setStateCommand(SuperWantedStates.DEFAULT)
