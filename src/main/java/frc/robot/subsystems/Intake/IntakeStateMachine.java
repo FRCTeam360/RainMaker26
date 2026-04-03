@@ -23,8 +23,6 @@ public class IntakeStateMachine {
     IDLE,
     INTAKING,
     STOWED,
-    AGITATING_LOW,
-    AGITATING_HIGH,
     AGITATING_PROGRESSIVE,
     DEPLOYED,
     REVERSING,
@@ -121,15 +119,6 @@ public class IntakeStateMachine {
         } else {
           currentState = IntakeInternalStates.AGITATING_LOW;
         }
-        break;
-      case AGITATING_LOW:
-        if (!hopperSensor.isActivated()) {
-          currentState = IntakeInternalStates.AGITATING_HIGH;
-        }
-        currentState = IntakeInternalStates.AGITATING_LOW;
-        break;
-      case AGITATING_HIGH:
-        currentState = IntakeInternalStates.AGITATING_HIGH;
         break;
       case AGITATING_PROGRESSIVE:
         if (intakePivot.getState() == IntakePivot.IntakePivotInternalStates.PROGRESSIVE_COMPLETE) {
