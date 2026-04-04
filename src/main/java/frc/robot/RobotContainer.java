@@ -10,9 +10,12 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.FollowPathCommand;
+import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -87,8 +90,11 @@ import frc.robot.utils.CommandLogger;
 import frc.robot.utils.FieldConstants;
 import frc.robot.utils.PathProvider;
 import frc.robot.utils.PositionUtils;
+
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -427,8 +433,27 @@ public class RobotContainer {
     PathPlannerLogging.setLogTargetPoseCallback(
         pose -> Logger.recordOutput("Swerve/TargetPathPose", pose));
 
-    autoChooser = AutoBuilder.buildAutoChooser();
-    SmartDashboard.putData("Auto Chooser", autoChooser);
+    SendableChooser<Command> chooser = new SendableChooser<>();
+    List<String> autoNames = AutoBuilder.getAllAutoNames();
+
+    for (String autoName : autoNames) {
+      if (DriverStation.getAlliance() == Optional.of(Alliance.Red)) {
+        if (autoName.contains("Red")){
+          PathPlannerAuto auto = new PathPlannerAuto(autoName);
+          chooser.addOption(auto.getName(), auto);
+        }
+      } else if (DriverStation.getAlliance() == Optional.of(Alliance.Blue)) {
+        if (autoName.contains("Blue")){
+          PathPlannerAuto auto = new PathPlannerAuto(autoName);
+          chooser.addOption(auto.getName(), auto);
+        }
+      } else {
+        PathPlannerAuto auto = new PathPlannerAuto(autoName);
+        chooser.addOption(auto.getName(), auto);
+      }
+    }
+
+    SmartDashboard.putData("Auto Chooser", chooser);
 
     CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
     // Uncomment this if pathplanner starts to suck on loading
