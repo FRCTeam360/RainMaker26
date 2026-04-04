@@ -13,6 +13,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -38,7 +39,10 @@ import frc.robot.generated.WoodBotDrivetrain.TunerSwerveDrivetrain;
 import frc.robot.lib.BLine.FollowPath;
 import frc.robot.subsystems.Vision.VisionMeasurement;
 import frc.robot.utils.AllianceFlipUtil;
+import edu.wpi.first.math.Pair;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
@@ -440,6 +444,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
       startSimThread();
     }
     configureAutoBuilder();
+    configureAutoLogging();
     SmartDashboard.putData("Field", field);
     SmartDashboard.putData(
         "Swerve Drive",
@@ -569,6 +574,38 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
       DriverStation.reportError(
           "Failed to load PathPlanner config and configure AutoBuilder", ex.getStackTrace());
     }
+  }
+
+  // Key cache for BLine logging — populated once per unique BLine key, reused every loop.
+  private final Map<String, String> blineKeyCache = new HashMap<>();
+
+  private String blineKey(String rawKey) {
+    return blineKeyCache.computeIfAbsent(
+        rawKey, k -> "Autos/BLine/" + k.replace("FollowPath/", ""));
+  }
+
+  private void configureAutoLogging() {
+    // PathPlanner — log under Autos/PathPlanner/
+    PathPlannerLogging.setLogCurrentPoseCallback(
+        pose -> Logger.recordOutput("Autos/PathPlanner/currentPose", pose));
+    PathPlannerLogging.setLogTargetPoseCallback(
+        pose -> Logger.recordOutput("Autos/PathPlanner/targetPose", pose));
+    PathPlannerLogging.setLogActivePathCallback(
+        path -> Logger.recordOutput("Autos/PathPlanner/activePath", path.toArray(new Pose2d[0])));
+
+    // BLine — log under Autos/BLine/; keys are interned via blineKeyCache on first use
+    FollowPath.setPoseLoggingConsumer(
+        (Pair<String, edu.wpi.first.math.geometry.Pose2d> pair) ->
+            Logger.recordOutput(blineKey(pair.getFirst()), pair.getSecond()));
+    FollowPath.setTranslationListLoggingConsumer(
+        (Pair<String, edu.wpi.first.math.geometry.Translation2d[]> pair) ->
+            Logger.recordOutput(blineKey(pair.getFirst()), pair.getSecond()));
+    FollowPath.setBooleanLoggingConsumer(
+        (Pair<String, Boolean> pair) ->
+            Logger.recordOutput(blineKey(pair.getFirst()), pair.getSecond()));
+    FollowPath.setDoubleLoggingConsumer(
+        (Pair<String, Double> pair) ->
+            Logger.recordOutput(blineKey(pair.getFirst()), pair.getSecond()));
   }
 
   // BLine AutoBuilder PID gains — initial values derived from PathPlanner tuning.
