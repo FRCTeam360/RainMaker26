@@ -41,7 +41,7 @@ public class Vision extends SubsystemBase {
     MEASUREMENT_STD_DEV_DISTANCE_MAP.put(
         0.1,
         VecBuilder.fill(
-            0.5, 0.5, 999999.0)); // Close tags ( at 10 cm): very high confidence (50 cm std dev)
+            0.25, 0.25, 999999.0)); // Close tags ( at 10 cm): very high confidence (50 cm std dev)
     MEASUREMENT_STD_DEV_DISTANCE_MAP.put(
         8.0,
         VecBuilder.fill(
@@ -134,7 +134,6 @@ public class Vision extends SubsystemBase {
     }
 
     for (Map.Entry<String, VisionIOInputsAutoLogged> entry : visionInputs.entrySet()) {
-      String key = entry.getKey();
       VisionIOInputsAutoLogged input = entry.getValue();
 
       // Count total detections (pose updates attempted)
@@ -152,10 +151,7 @@ public class Vision extends SubsystemBase {
       double timestamp = input.timestampSeconds;
 
       // Skip measurements that are not with in the field boundary
-      if (pose.getX() < 0.0
-          || pose.getX() > FieldConstants.fieldLength
-          || pose.getY() < 0.0
-          || pose.getY() > FieldConstants.fieldWidth) {
+      if (isPoseOutOfBounds(pose)) {
         rejectedMeasurements++;
         continue;
       }
@@ -212,5 +208,12 @@ public class Vision extends SubsystemBase {
   public Command consumeVisionMeasurements(
       Consumer<List<VisionMeasurement>> visionMeasurementConsumer) {
     return run(() -> visionMeasurementConsumer.accept(acceptedMeasurements));
+  }
+
+  public static boolean isPoseOutOfBounds(Pose2d pose) {
+    return pose.getX() < 0.0
+        || pose.getX() > FieldConstants.fieldLength
+        || pose.getY() < 0.0
+        || pose.getY() > FieldConstants.fieldWidth;
   }
 }

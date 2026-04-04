@@ -46,8 +46,11 @@ public class HoodIOWB implements HoodIO {
     controller = hoodMotor.getClosedLoopController();
   }
 
-  public void setPosition(double position) {
-    // old:encoder.setPosition(position);
+  public void setPositionSmooth(double position) {
+    controller.setSetpoint(position, ControlType.kPosition);
+  }
+
+  public void setPositionAggressive(double position) {
     controller.setSetpoint(position, ControlType.kPosition);
   }
 

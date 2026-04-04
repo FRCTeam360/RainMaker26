@@ -22,39 +22,51 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.RobotType;
+import frc.robot.generated.CompBotDrivetrain;
 import frc.robot.generated.PracticeBotDrivetrain;
 import frc.robot.generated.WoodBotDrivetrain;
 import frc.robot.subsystems.Climber.Climber;
+import frc.robot.subsystems.Climber.ClimberIOCB;
 import frc.robot.subsystems.Climber.ClimberIONoop;
 import frc.robot.subsystems.Climber.ClimberIOSim;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.ControlState;
 import frc.robot.subsystems.HopperRoller.HopperRoller;
+import frc.robot.subsystems.HopperRoller.HopperRollerIOCB;
 import frc.robot.subsystems.HopperRoller.HopperRollerIONoop;
 import frc.robot.subsystems.HopperRoller.HopperRollerIOPB;
 import frc.robot.subsystems.HopperRoller.HopperRollerIOSim;
+import frc.robot.subsystems.HopperSensor.HopperSensor;
+import frc.robot.subsystems.HopperSensor.HopperSensorIOCANRange;
+import frc.robot.subsystems.HopperSensor.HopperSensorIONoop;
 import frc.robot.subsystems.Indexer.Indexer;
+import frc.robot.subsystems.Indexer.IndexerIOCB;
 import frc.robot.subsystems.Indexer.IndexerIOPB;
 import frc.robot.subsystems.Indexer.IndexerIOSim;
 import frc.robot.subsystems.Indexer.IndexerIOWB;
 import frc.robot.subsystems.Intake.IntakePivot.IntakePivot;
+import frc.robot.subsystems.Intake.IntakePivot.IntakePivotIOCB;
 import frc.robot.subsystems.Intake.IntakePivot.IntakePivotIONoop;
 import frc.robot.subsystems.Intake.IntakePivot.IntakePivotIOPB;
 import frc.robot.subsystems.Intake.IntakePivot.IntakePivotIOSim;
 import frc.robot.subsystems.Intake.IntakeRoller.IntakeRoller;
+import frc.robot.subsystems.Intake.IntakeRoller.IntakeRollerIOCB;
 import frc.robot.subsystems.Intake.IntakeRoller.IntakeRollerIOPB;
 import frc.robot.subsystems.Intake.IntakeRoller.IntakeRollerIOSim;
 import frc.robot.subsystems.Intake.IntakeRoller.IntakeRollerIOWB;
 import frc.robot.subsystems.Intake.IntakeStateMachine.IntakeWantedStates;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel;
+import frc.robot.subsystems.Shooter.Flywheel.FlywheelIOCBBangBang;
 import frc.robot.subsystems.Shooter.Flywheel.FlywheelIOPBBangBang;
 import frc.robot.subsystems.Shooter.Flywheel.FlywheelIOSim;
 import frc.robot.subsystems.Shooter.Flywheel.FlywheelIOWBBangBang;
 import frc.robot.subsystems.Shooter.FlywheelKicker.FlywheelKicker;
+import frc.robot.subsystems.Shooter.FlywheelKicker.FlywheelKickerIOCB;
 import frc.robot.subsystems.Shooter.FlywheelKicker.FlywheelKickerIOPB;
 import frc.robot.subsystems.Shooter.FlywheelKicker.FlywheelKickerIOSim;
 import frc.robot.subsystems.Shooter.FlywheelKicker.FlywheelKickerIOWB;
 import frc.robot.subsystems.Shooter.Hood.Hood;
+import frc.robot.subsystems.Shooter.Hood.HoodIOCB;
 import frc.robot.subsystems.Shooter.Hood.HoodIOPB;
 import frc.robot.subsystems.Shooter.Hood.HoodIOSim;
 import frc.robot.subsystems.Shooter.Hood.HoodIOWB;
@@ -97,6 +109,7 @@ public class RobotContainer {
   private IntakeRoller intakeRoller;
   private IntakePivot intakePivot;
   private HopperRoller hopperRoller;
+  private HopperSensor hopperSensor;
   private FlywheelKicker flywheelKicker;
   private Climber climber;
   private BooleanSupplier canShootInHub;
@@ -124,6 +137,7 @@ public class RobotContainer {
 
   private RobotShootingInfo robotShootingInfo;
   private RobotShootingInfo robotPassingInfo;
+  private double indexerToFlywheelSeconds;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -144,6 +158,7 @@ public class RobotContainer {
         intakeRoller = new IntakeRoller(new IntakeRollerIOSim());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOSim());
         hopperRoller = new HopperRoller(new HopperRollerIOSim());
+        hopperSensor = new HopperSensor(new HopperSensorIONoop());
 
         robotShootingInfo =
             new RobotShootingInfo(
@@ -165,6 +180,7 @@ public class RobotContainer {
                 Constants.SimulationConstants.MAX_PASS_DISTANCE_METERS,
                 WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond),
                 0);
+        indexerToFlywheelSeconds = Constants.SimulationConstants.INDEXER_TO_FLYWHEEL_SECONDS;
         break;
       case WOODBOT:
         drivetrain = WoodBotDrivetrain.createDrivetrain();
@@ -186,6 +202,7 @@ public class RobotContainer {
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOWB());
         intakePivot = new IntakePivot(new IntakePivotIONoop());
         hopperRoller = new HopperRoller(new HopperRollerIONoop());
+        hopperSensor = new HopperSensor(new HopperSensorIONoop());
 
         robotShootingInfo =
             new RobotShootingInfo(
@@ -207,9 +224,9 @@ public class RobotContainer {
                 Constants.WoodBotConstants.MAX_SHOT_DISTANCE_METERS,
                 WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond),
                 0);
+        indexerToFlywheelSeconds = Constants.WoodBotConstants.INDEXER_TO_FLYWHEEL_SECONDS;
         break;
       case PRACTICEBOT:
-      default:
         drivetrain = PracticeBotDrivetrain.createDrivetrain();
         climber = new Climber(new ClimberIONoop());
         flywheel = new Flywheel(new FlywheelIOPBBangBang());
@@ -236,6 +253,11 @@ public class RobotContainer {
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOPB());
         intakePivot = new IntakePivot(new IntakePivotIOPB());
         hopperRoller = new HopperRoller(new HopperRollerIOPB());
+        hopperSensor =
+            new HopperSensor(
+                new HopperSensorIOCANRange(
+                    Constants.PracticeBotConstants.HOPPER_SENSOR_ID,
+                    Constants.PracticeBotConstants.CANBUS));
 
         robotShootingInfo =
             new RobotShootingInfo(
@@ -253,10 +275,67 @@ public class RobotContainer {
                 Constants.PracticeBotConstants.passFlywheelSpeedMap,
                 Constants.PracticeBotConstants.timeOfFlightMap,
                 ShooterConstants.PRACTICEBOT_TO_SHOOTER,
-                Constants.PracticeBotConstants.MIN_SHOT_DISTANCE_METERS,
-                Constants.PracticeBotConstants.MAX_SHOT_DISTANCE_METERS,
+                Constants.PracticeBotConstants.MIN_PASS_DISTANCE_METERS,
+                Constants.PracticeBotConstants.MAX_PASS_DISTANCE_METERS,
                 PracticeBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond),
                 0);
+        indexerToFlywheelSeconds = Constants.PracticeBotConstants.INDEXER_TO_FLYWHEEL_SECONDS;
+        break;
+      case COMPBOT:
+      default:
+        drivetrain = CompBotDrivetrain.createDrivetrain();
+        climber = new Climber(new ClimberIOCB());
+        flywheel = new Flywheel(new FlywheelIOCBBangBang());
+        hood = new Hood(new HoodIOCB());
+        indexer = new Indexer(new IndexerIOCB());
+        vision =
+            new Vision(
+                Map.ofEntries(
+                    Map.entry(
+                        Constants.CompBotConstants.LIMELIGHT_RIGHT,
+                        new VisionIOLimelight4(
+                            Constants.CompBotConstants.LIMELIGHT_RIGHT,
+                            () -> drivetrain.getAngle(),
+                            () -> drivetrain.getAngularRate(),
+                            true)),
+                    Map.entry(
+                        Constants.CompBotConstants.LIMELIGHT_LEFT,
+                        new VisionIOLimelight4(
+                            Constants.CompBotConstants.LIMELIGHT_LEFT,
+                            () -> drivetrain.getAngle(),
+                            () -> drivetrain.getAngularRate(),
+                            true))));
+        intakeRoller = new IntakeRoller(new IntakeRollerIOCB());
+        flywheelKicker = new FlywheelKicker(new FlywheelKickerIOCB());
+        intakePivot = new IntakePivot(new IntakePivotIOCB());
+        hopperRoller = new HopperRoller(new HopperRollerIOCB());
+        hopperSensor =
+            new HopperSensor(
+                new HopperSensorIOCANRange(
+                    Constants.CompBotConstants.HOPPER_SENSOR_ID,
+                    Constants.CompBotConstants.CANBUS));
+
+        robotShootingInfo =
+            new RobotShootingInfo(
+                Constants.CompBotConstants.shotHoodAngleMap,
+                Constants.CompBotConstants.shotFlywheelSpeedMap,
+                Constants.CompBotConstants.timeOfFlightMap,
+                ShooterConstants.COMPBOT_TO_SHOOTER,
+                Constants.CompBotConstants.MIN_SHOT_DISTANCE_METERS,
+                Constants.CompBotConstants.MAX_SHOT_DISTANCE_METERS,
+                CompBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond),
+                0);
+        robotPassingInfo =
+            new RobotShootingInfo(
+                Constants.CompBotConstants.passHoodAngleMap,
+                Constants.CompBotConstants.passFlywheelSpeedMap,
+                Constants.CompBotConstants.timeOfFlightMap,
+                ShooterConstants.COMPBOT_TO_SHOOTER,
+                Constants.CompBotConstants.MIN_PASS_DISTANCE_METERS,
+                Constants.CompBotConstants.MAX_PASS_DISTANCE_METERS,
+                CompBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond),
+                0);
+        indexerToFlywheelSeconds = Constants.CompBotConstants.INDEXER_TO_FLYWHEEL_SECONDS;
         break;
     }
     hubShotCalculator =
@@ -289,25 +368,34 @@ public class RobotContainer {
             hood,
             intakePivot,
             hopperRoller,
+            hopperSensor,
             hubShotCalculator,
             passCalculator,
             drivetrain::isAlignedToTarget,
             drivetrain::getPosition,
-            robotShootingInfo.robotToShooter());
+            robotShootingInfo.robotToShooter(),
+            indexerToFlywheelSeconds);
     registerPathplannerCommand(
         "basic intake", superStructure.setIntakeStateCommand(IntakeWantedStates.INTAKING));
     // TODO: add end condition based on state from SuperStructure (based on sensor inputs)
     registerPathplannerCommand(
         "shoot at hub",
-        Commands.waitSeconds(4)
+        Commands.waitSeconds(4.5)
             .deadlineFor(
                 superStructure
-                    .setStateCommand(SuperWantedStates.SHOOT_AT_HUB)
+                    .setStateCommand(SuperWantedStates.AUTO_CYCLE_SHOOTING)
                     .alongWith(
                         drivetrain.faceAngleWhileDrivingCommand(
                             () -> 0,
                             () -> 0,
-                            () -> hubShotCalculator.calculateShot().targetHeading())))
+                            () -> {
+                              if (superStructure.getCurrentSuperState()
+                                  == SuperInternalStates.PASSING) {
+                                return passCalculator.calculateShot().targetHeading();
+                              }
+                              return hubShotCalculator.calculateShot().targetHeading();
+                            }))
+                    .alongWith(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING)))
             .andThen(superStructure.setStateCommand(SuperWantedStates.DEFAULT)));
     registerPathplannerCommand(
         "stow intake", superStructure.setIntakeStateCommand(IntakeWantedStates.STOWED));
@@ -400,9 +488,7 @@ public class RobotContainer {
                       }
                       return hubShotCalculator.calculateShot().targetHeading();
                     }))
-            .alongWith(
-                Commands.waitSeconds(1.0)
-                    .andThen(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING))));
+            .alongWith(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING)));
     autoCycleTrigger.onFalse(
         superStructure
             .setStateCommand(SuperWantedStates.DEFAULT)
@@ -410,24 +496,17 @@ public class RobotContainer {
 
     // Manual override: force shoot at hub regardless of position
     Trigger forceHubTrigger = driverCont.rightBumper().and(isSuperstructureMode);
-    forceHubTrigger.whileTrue(
-        superStructure
-            .setStateCommand(SuperWantedStates.SHOOT_AT_HUB)
-            .alongWith(
-                drivetrain.faceAngleWhileDrivingCommand(
-                    driverCont, () -> hubShotCalculator.calculateShot().targetHeading())));
+    forceHubTrigger.whileTrue(superStructure.setStateCommand(SuperWantedStates.FORCED_SHOT));
     forceHubTrigger.onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
 
     // Manual override: force pass to outpost regardless of position
-    driverCont
-        .b()
-        .whileTrue(
-            superStructure
-                .setStateCommand(SuperWantedStates.SHOOT_AT_OUTPOST)
-                .alongWith(
-                    drivetrain.faceAngleWhileDrivingCommand(
-                        driverCont, () -> passCalculator.calculateShot().targetHeading())));
+    driverCont.b().whileTrue(superStructure.setStateCommand(SuperWantedStates.FORCED_SHOOT_TRENCH));
     driverCont.b().onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
+
+    driverCont.x().whileTrue(superStructure.setIntakeStateCommand(IntakeWantedStates.REVERSING));
+    // TODO: check that this works with just an on false because this will set the intake to idle
+    // constantly and that's probably not what we want but it did work on the field
+    driverCont.x().whileFalse(superStructure.setIntakeStateCommand(IntakeWantedStates.IDLE));
 
     // Left trigger held: agitate. Release: back to intaking.
     if (Constants.getRobotType() == RobotType.WOODBOT) {
@@ -458,9 +537,14 @@ public class RobotContainer {
     driverCont.a().onTrue(superStructure.setStateCommand(SuperWantedStates.UNJAMMING));
     driverCont.a().onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
 
+    // defense mode
+    driverCont.start().onTrue(drivetrain.toggleDefenseModeCmd());
+
     // Drivetrain commands
     // driverCont.leftTrigger().whileTrue(drivetrain.faceHubWhileDriving(driverCont));
     driverCont.back().onTrue(drivetrain.zeroCommand());
+
+    driverCont.rightStick().onTrue(drivetrain.toggleHeadingLockCommand());
   }
 
   /** Configures bindings that are active only in independent (test) mode. */
@@ -468,19 +552,19 @@ public class RobotContainer {
     driverCont
         .leftBumper()
         .and(isIndependentMode)
-        .whileTrue(intakeRoller.setVelocityCommand(4000.0));
+        .whileTrue(intakeRoller.setVelocityCommand(3000.0));
     driverCont
         .rightBumper()
         .and(isIndependentMode)
-        .whileTrue(intakeRoller.setDutyCycleCommand(-0.2));
+        .whileTrue(intakeRoller.setDutyCycleCommand(-0.6));
     driverCont.rightTrigger().and(isIndependentMode).whileTrue(indexer.setDutyCycleCommand(0.2));
     driverCont.leftTrigger().and(isIndependentMode).whileTrue(indexer.setDutyCycleCommand(-0.2));
 
     // driverCont.a().and(isIndependentMode).whileTrue(indexer.setDutyCycleCommand(0.5));
 
     // hood bindings
-    driverCont.pov(0).and(isIndependentMode).onTrue(hood.setPositionCommand(20.0));
-    driverCont.pov(180).and(isIndependentMode).onTrue(hood.moveToZeroAndZero());
+    driverCont.pov(0).and(isIndependentMode).onTrue(hood.setPositionCommand(40.0));
+    driverCont.pov(180).and(isIndependentMode).onTrue(hood.setPositionCommand(0.0));
 
     driverCont.pov(90).and(isIndependentMode).whileTrue(flywheelKicker.setDutyCycleCommand(0.2));
     driverCont.pov(270).and(isIndependentMode).whileTrue(flywheelKicker.setDutyCycleCommand(-0.2));
@@ -493,16 +577,7 @@ public class RobotContainer {
     driverCont.b().and(isIndependentMode).whileTrue(hopperRoller.setDutyCycleCommand(-0.2));
 
     driverCont.start().and(isIndependentMode).whileTrue(flywheel.setDutyCycleCommand(0.2));
-    driverCont.back().and(isIndependentMode).whileTrue(flywheel.setDutyCycleCommand(-0.2));
-
-    // flywheel bindings
-    // driverCont.x().and(isIndependentMode).whileTrue(flywheel.setVelocityCommand(3000.0));
-    // driverCont.y().and(isIndependentMode).whileTrue(flywheel.setVelocityCommand(4000.0));
-
-    // configureIntakeTestBindings(isIndependentMode);
-    // configureFullShootingTestBindings(isIndependentMode);
-    // configureHoodTestBindings(isIndependentMode);
-    // configureClimberTestBindings(isIndependentMode);
+    driverCont.back().and(isIndependentMode).whileTrue(hood.zero());
   }
 
   void configureHoodTestBindings(BooleanSupplier isIndependentMode) {

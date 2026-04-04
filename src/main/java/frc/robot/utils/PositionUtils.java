@@ -5,7 +5,6 @@ import edu.wpi.first.math.geometry.Rectangle2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.robot.utils.FieldConstants.LinesHorizontal;
@@ -103,14 +102,16 @@ public class PositionUtils {
     double robotX = robotPose.getX();
     boolean result;
     if (AllianceFlipUtil.shouldFlip()) {
-      result =
-          robotX
-              >= AllianceFlipUtil.applyX(LinesVertical.allianceZone + Units.inchesToMeters(24.0));
+      result = robotX >= getAllianceEdge();
     } else {
-      result = robotX <= LinesVertical.allianceZone;
+      result = robotX <= getAllianceEdge();
     }
     Logger.recordOutput("PositionUtils/IsInAllianceZone", result);
     return result;
+  }
+
+  private static double getAllianceEdge() {
+    return AllianceFlipUtil.applyX(LinesVertical.hubCenter);
   }
 
   public static boolean isInPassingZone(Pose2d robotPose, Transform2d robotToShooter) {

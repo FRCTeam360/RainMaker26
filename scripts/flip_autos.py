@@ -14,9 +14,10 @@ Flip math:
 
 Output files are prefixed with "FLIPPED " and have alliance tags swapped
 (Red<->Blue, [R]<->[B]) so they're easy to identify as generated.
+Flipped paths are placed in a subfolder named after the new auto.
 
 Usage:
-  python scripts/flip_autos.py "Red middle sprint v2"         # flip auto + its paths
+  python scripts/flip_autos.py "Red middle sprint v2"         # flip auto + its paths   
   python scripts/flip_autos.py --dry-run "[R] Depot"           # preview without writing
 
 No external dependencies required - uses only the Python standard library.
@@ -79,13 +80,20 @@ def swap_alliance_in_name(name):
     return name
 
 
+def strip_master(name):
+    """Remove 'Master' (case insensitive) from a name and clean up extra spaces."""
+    import re
+    name = re.sub(r'(?i)master\s*', '', name)
+    return ' '.join(name.split())
+
+
 def make_flipped_name(name):
-    """Add 'FLIPPED ' prefix and swap alliance tags."""
+    """Add 'FLIPPED ' prefix, swap alliance tags, and strip 'Master'."""
     if name.startswith(FLIPPED_PREFIX):
         # Strip prefix, swap back, then re-prefix with the new swap
         inner = name[len(FLIPPED_PREFIX):]
-        return FLIPPED_PREFIX + swap_alliance_in_name(inner)
-    return FLIPPED_PREFIX + swap_alliance_in_name(name)
+        return FLIPPED_PREFIX + strip_master(swap_alliance_in_name(inner))
+    return FLIPPED_PREFIX + strip_master(swap_alliance_in_name(name))
 
 
 # --- Coordinate flipping ---
@@ -208,8 +216,45 @@ def write_json(file_path, data, dry_run=False):
 
 # --- Main logic ---
 
-def flip_single_path(paths_dir, path_name, field_length, field_width, dry_run):
-    """Flip a single .path file and write as a FLIPPED copy."""
+# Maps the source auto's folder to the destination folder after flipping.
+# A 180-degree flip swaps alliance but keeps the same side (both drivers face inward):
+# Red Right -> Blue Right, Red Left -> Blue Left.
+FLIPPED_AUTO_FOLDER_MAP = {
+    "MASTER RED RIGHT": "BLUE RIGHT AUTOS",
+    "RED LEFT AUTOS": "BLUE LEFT AUTOS",
+}
+
+
+def register_path_folder(deploy_dir, folder_name, dry_run):
+    """Add a folder name to settings.json pathFolders if not already present."""
+    settings_path = deploy_dir / "settings.json"
+    if not settings_path.exists():
+        print(f"  WARNING: settings.json not found, skipping folder registration")
+        return
+    settings = read_json(settings_path)
+    folders = settings.get("pathFolders", [])
+    if folder_name not in folders:
+        folders.append(folder_name)
+        settings["pathFolders"] = folders
+        write_json(settings_path, settings, dry_run)
+
+
+def register_auto_folder(deploy_dir, folder_name, dry_run):
+    """Add a folder name to settings.json autoFolders if not already present."""
+    settings_path = deploy_dir / "settings.json"
+    if not settings_path.exists():
+        print(f"  WARNING: settings.json not found, skipping auto folder registration")
+        return
+    settings = read_json(settings_path)
+    folders = settings.get("autoFolders", [])
+    if folder_name not in folders:
+        folders.append(folder_name)
+        settings["autoFolders"] = folders
+        write_json(settings_path, settings, dry_run)
+
+
+def flip_single_path(paths_dir, path_name, field_length, field_width, dest_folder, dry_run):
+    """Flip a single .path file and write as a FLIPPED copy in dest_folder."""
     src = paths_dir / f"{path_name}.path"
     if not src.exists():
         print(f"  WARNING: Path file not found: {src}")
@@ -217,13 +262,14 @@ def flip_single_path(paths_dir, path_name, field_length, field_width, dry_run):
 
     data = read_json(src)
     flipped = flip_path_data(data, field_length, field_width)
+    flipped["folder"] = dest_folder
     dest_name = make_flipped_name(path_name)
     dest = paths_dir / f"{dest_name}.path"
     write_json(dest, flipped, dry_run)
     return True
 
 
-def flip_single_auto(autos_dir, paths_dir, auto_name, field_length, field_width, dry_run):
+def flip_single_auto(autos_dir, paths_dir, deploy_dir, auto_name, field_length, field_width, dry_run):
     """Flip a single .auto file and its referenced paths."""
     src = autos_dir / f"{auto_name}.auto"
     if not src.exists():
@@ -231,19 +277,32 @@ def flip_single_auto(autos_dir, paths_dir, auto_name, field_length, field_width,
         return False
 
     auto_data = read_json(src)
+    dest_auto_name = make_flipped_name(auto_name)
 
-    # Flip referenced paths
+    # Determine destination auto folder based on the source auto's folder
+    src_folder = auto_data.get("folder", "")
+    dest_auto_folder = FLIPPED_AUTO_FOLDER_MAP.get(src_folder)
+    if dest_auto_folder is None:
+        print(f"  WARNING: Source folder '{src_folder}' not in FLIPPED_AUTO_FOLDER_MAP; no folder will be set.")
+
+    # Register the path folder and auto folder in settings.json
+    register_path_folder(deploy_dir, dest_auto_name, dry_run)
+    if dest_auto_folder:
+        register_auto_folder(deploy_dir, dest_auto_folder, dry_run)
+
+    # Flip referenced paths into a folder named after the new auto
     path_names = collect_path_names_from_command(auto_data.get("command", {}))
     unique_paths = list(dict.fromkeys(path_names))  # deduplicate, preserve order
     if unique_paths:
-        print(f"  Flipping {len(unique_paths)} referenced path(s)...")
+        print(f"  Flipping {len(unique_paths)} referenced path(s) into folder '{dest_auto_name}'...")
         for pn in unique_paths:
-            flip_single_path(paths_dir, pn, field_length, field_width, dry_run)
+            flip_single_path(paths_dir, pn, field_length, field_width, dest_auto_name, dry_run)
 
-    # Flip the auto
+    # Flip the auto and place it in the mapped destination folder
     flipped = flip_auto_data(auto_data, make_flipped_name)
-    dest_name = make_flipped_name(auto_name)
-    dest = autos_dir / f"{dest_name}.auto"
+    if dest_auto_folder:
+        flipped["folder"] = dest_auto_folder
+    dest = autos_dir / f"{dest_auto_name}.auto"
     write_json(dest, flipped, dry_run)
     return True
 
@@ -273,7 +332,7 @@ def main():
     print()
 
     print(f"Flipping auto: {args.auto}")
-    flip_single_auto(autos_dir, paths_dir, args.auto, field_length, field_width, args.dry_run)
+    flip_single_auto(autos_dir, paths_dir, deploy_dir, args.auto, field_length, field_width, args.dry_run)
 
     print()
     print("Done.")

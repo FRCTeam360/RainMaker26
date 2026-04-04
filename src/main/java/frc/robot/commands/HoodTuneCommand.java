@@ -34,7 +34,7 @@ public class HoodTuneCommand extends Command {
 
   @Override
   public void execute() {
-    hood.setPosition(tunablePosition.get());
+    hood.setPositionSmooth(tunablePosition.get());
   }
 
   @Override
