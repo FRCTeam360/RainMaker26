@@ -87,7 +87,7 @@ public class HubShiftTracker {
   }
 
   private double getTimeUntilNextShiftBoundary(double matchTime, boolean weAreAutoWinner) {
-    if (matchTime > RobotUtils.TRANSITION_END_SECONDS) {
+    if (weAreAutoWinner && matchTime > RobotUtils.TRANSITION_END_SECONDS) {
       return matchTime - RobotUtils.TRANSITION_END_SECONDS;
     } else if (matchTime > RobotUtils.SHIFT_1_END_SECONDS) {
       return matchTime - RobotUtils.SHIFT_1_END_SECONDS;
@@ -95,7 +95,7 @@ public class HubShiftTracker {
       return matchTime - RobotUtils.SHIFT_2_END_SECONDS;
     } else if (matchTime > RobotUtils.SHIFT_3_END_SECONDS) {
       return matchTime - RobotUtils.SHIFT_3_END_SECONDS;
-    } else if (matchTime > RobotUtils.ENDGAME_START_SECONDS) {
+    } else if (!weAreAutoWinner && matchTime > RobotUtils.ENDGAME_START_SECONDS) {
       return matchTime - RobotUtils.ENDGAME_START_SECONDS;
     } else {
       return Math.max(0, matchTime);
