@@ -47,12 +47,8 @@ public class ClimberIOCB implements ClimberIO {
 
   /** Creates a new ClimberIOCB. */
   public ClimberIOCB() {
-    this(CompBotConstants.CLIMBER_LEFT_ID, CompBotConstants.CLIMBER_RIGHT_ID);
-  }
-
-  protected ClimberIOCB(int climberLeftId, int climberRightId) {
-    leftClimberMotor = new SparkMax(climberLeftId, MotorType.kBrushless);
-    rightClimberMotor = new SparkMax(climberRightId, MotorType.kBrushless);
+    leftClimberMotor = new SparkMax(CompBotConstants.CLIMBER_LEFT_ID, MotorType.kBrushless);
+    rightClimberMotor = new SparkMax(CompBotConstants.CLIMBER_RIGHT_ID, MotorType.kBrushless);
     leftClimberEncoder = leftClimberMotor.getEncoder();
     rightClimberEncoder = rightClimberMotor.getEncoder();
 

@@ -42,11 +42,7 @@ public class FlywheelKickerIOCB implements FlywheelKickerIO {
   private final SparkClosedLoopController closedLoopController;
 
   public FlywheelKickerIOCB() {
-    this(CompBotConstants.FLYWHEEL_KICKER_ID);
-  }
-
-  protected FlywheelKickerIOCB(int flywheelKickerId) {
-    flywheelKickerMotor = new SparkFlex(flywheelKickerId, MotorType.kBrushless);
+    flywheelKickerMotor = new SparkFlex(CompBotConstants.FLYWHEEL_KICKER_ID, MotorType.kBrushless);
     encoder = flywheelKickerMotor.getEncoder();
 
     // Configure base motor settings

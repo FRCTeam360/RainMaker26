@@ -84,16 +84,14 @@ public class FlywheelIOCBBangBang implements FlywheelIO {
 
   /** Constructs the comp bot flywheel IO and configures both TalonFX motors. */
   public FlywheelIOCBBangBang() {
-    this(
-        Constants.CompBotConstants.FLYWHEEL_RIGHT_ID,
-        Constants.CompBotConstants.FLYWHEEL_LEFT_ID,
-        Constants.CompBotConstants.CANBUS);
-  }
-
-  protected FlywheelIOCBBangBang(
-      int rightMotorId, int leftMotorId, com.ctre.phoenix6.CANBus canBus) {
-    this.rightMotorId = rightMotorId;
-    motors = new TalonFX[] {new TalonFX(rightMotorId, canBus), new TalonFX(leftMotorId, canBus)};
+    this.rightMotorId = Constants.CompBotConstants.FLYWHEEL_RIGHT_ID;
+    motors =
+        new TalonFX[] {
+          new TalonFX(
+              Constants.CompBotConstants.FLYWHEEL_RIGHT_ID, Constants.CompBotConstants.CANBUS),
+          new TalonFX(
+              Constants.CompBotConstants.FLYWHEEL_LEFT_ID, Constants.CompBotConstants.CANBUS)
+        };
 
     // Reset all motors to factory defaults before applying custom config
     TalonFXConfiguration defaultConfig = new TalonFXConfiguration();

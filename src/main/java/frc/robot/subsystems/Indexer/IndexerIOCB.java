@@ -29,11 +29,7 @@ public class IndexerIOCB implements IndexerIO {
   private final SparkClosedLoopController closedLoopController;
 
   public IndexerIOCB() {
-    this(CompBotConstants.TWINDEXER_ID);
-  }
-
-  protected IndexerIOCB(int twindexerId) {
-    indexerMotor = new SparkMax(twindexerId, MotorType.kBrushless);
+    indexerMotor = new SparkMax(CompBotConstants.TWINDEXER_ID, MotorType.kBrushless);
     encoder = indexerMotor.getEncoder();
     sparkMaxConfig.idleMode(IdleMode.kCoast);
     sparkMaxConfig.inverted(false);

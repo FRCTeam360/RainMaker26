@@ -35,12 +35,8 @@ public class IntakeRollerIOCB implements IntakeRollerIO {
   private final SparkClosedLoopController closedLoopController;
 
   public IntakeRollerIOCB() {
-    this(CompBotConstants.LEFT_INTAKE_ROLLER_ID, CompBotConstants.RIGHT_INTAKE_ROLLER_ID);
-  }
-
-  protected IntakeRollerIOCB(int leftMotorId, int rightMotorId) {
-    motorLeft = new SparkFlex(leftMotorId, MotorType.kBrushless);
-    motorRight = new SparkFlex(rightMotorId, MotorType.kBrushless);
+    motorLeft = new SparkFlex(CompBotConstants.LEFT_INTAKE_ROLLER_ID, MotorType.kBrushless);
+    motorRight = new SparkFlex(CompBotConstants.RIGHT_INTAKE_ROLLER_ID, MotorType.kBrushless);
     leftEncoder = motorLeft.getEncoder();
     rightEncoder = motorRight.getEncoder();
 

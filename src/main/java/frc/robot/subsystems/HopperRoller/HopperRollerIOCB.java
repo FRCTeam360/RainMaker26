@@ -33,11 +33,7 @@ public class HopperRollerIOCB implements HopperRollerIO {
   private final SparkClosedLoopController closedLoopController;
 
   public HopperRollerIOCB() {
-    this(CompBotConstants.HOPPER_ROLLER_ID);
-  }
-
-  protected HopperRollerIOCB(int hopperRollerId) {
-    hopperRollerMotor = new SparkFlex(hopperRollerId, MotorType.kBrushless);
+    hopperRollerMotor = new SparkFlex(CompBotConstants.HOPPER_ROLLER_ID, MotorType.kBrushless);
     encoder = hopperRollerMotor.getEncoder();
 
     sparkFlexConfig.idleMode(IdleMode.kBrake);

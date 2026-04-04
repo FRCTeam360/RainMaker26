@@ -5,7 +5,6 @@
 package frc.robot.subsystems.Intake.IntakePivot;
 
 import com.ctre.phoenix6.BaseStatusSignal;
-import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
@@ -66,11 +65,8 @@ public class IntakePivotIOCB implements IntakePivotIO {
 
   /** Creates a new IntakePivotIOCB. */
   public IntakePivotIOCB() {
-    this(Constants.CompBotConstants.INTAKE_PIVOT_ID, Constants.CompBotConstants.CANBUS);
-  }
-
-  protected IntakePivotIOCB(int intakePivotId, CANBus canBus) {
-    intakePivot = new TalonFX(intakePivotId, canBus);
+    intakePivot =
+        new TalonFX(Constants.CompBotConstants.INTAKE_PIVOT_ID, Constants.CompBotConstants.CANBUS);
 
     // FIXME: NEUTRAL MODE BRAKE
     config.CurrentLimits.StatorCurrentLimit = STATOR_CURRENT_LIMIT_AMPS;

@@ -5,7 +5,6 @@
 package frc.robot.subsystems.Shooter.Hood;
 
 import com.ctre.phoenix6.BaseStatusSignal;
-import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -55,11 +54,7 @@ public class HoodIOCB implements HoodIO {
   }
 
   public HoodIOCB() {
-    this(Constants.CompBotConstants.HOOD_ID, Constants.CompBotConstants.CANBUS);
-  }
-
-  protected HoodIOCB(int hoodId, CANBus canBus) {
-    hoodMotor = new TalonFX(hoodId, canBus);
+    hoodMotor = new TalonFX(Constants.CompBotConstants.HOOD_ID, Constants.CompBotConstants.CANBUS);
 
     Slot0Configs slot0Configs = config.Slot0;
     slot0Configs.kA = KA;
