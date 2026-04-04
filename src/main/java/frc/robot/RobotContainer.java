@@ -250,7 +250,11 @@ public class RobotContainer {
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOPB());
         intakePivot = new IntakePivot(new IntakePivotIOPB());
         hopperRoller = new HopperRoller(new HopperRollerIOPB());
-        hopperSensor = new HopperSensor(new HopperSensorIOCANRange());
+        hopperSensor =
+            new HopperSensor(
+                new HopperSensorIOCANRange(
+                    Constants.PracticeBotConstants.HOPPER_SENSOR_ID,
+                    Constants.PracticeBotConstants.CANBUS));
 
         robotShootingInfo =
             new RobotShootingInfo(

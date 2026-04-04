@@ -11,7 +11,6 @@ import com.ctre.phoenix6.configs.CANrangeConfiguration;
 import com.ctre.phoenix6.hardware.CANrange;
 import com.ctre.phoenix6.signals.UpdateModeValue;
 import edu.wpi.first.units.measure.Distance;
-import frc.robot.Constants;
 
 public class HopperSensorIOCANRange implements HopperSensorIO {
 
@@ -28,10 +27,6 @@ public class HopperSensorIOCANRange implements HopperSensorIO {
 
   private final StatusSignal<Distance> distanceSignal;
   private final StatusSignal<Boolean> isDetectedSignal;
-
-  public HopperSensorIOCANRange() {
-    this(Constants.PracticeBotConstants.HOPPER_SENSOR_ID, Constants.PracticeBotConstants.CANBUS);
-  }
 
   public HopperSensorIOCANRange(int sensorId, CANBus canBus) {
     canRange = new CANrange(sensorId, canBus);
