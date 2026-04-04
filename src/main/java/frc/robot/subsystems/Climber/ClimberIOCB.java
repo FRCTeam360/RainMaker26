@@ -24,13 +24,10 @@ public class ClimberIOCB implements ClimberIO {
   // TODO measure this empirically to get a better ratio
   private static final double MOTOR_ROTATIONS_TO_INCHES = 1.732;
 
-  private final SparkMax leftClimberMotor;
   private final SparkMax rightClimberMotor;
 
-  private final RelativeEncoder leftClimberEncoder;
   private final RelativeEncoder rightClimberEncoder;
 
-  private final SparkMaxConfig leftConfig = new SparkMaxConfig();
   private final SparkMaxConfig rightConfig = new SparkMaxConfig();
 
   private static final double kP = 0;
@@ -41,39 +38,21 @@ public class ClimberIOCB implements ClimberIO {
   private static final double FORWARD_SOFT_LIMIT_INCHES = 36.0;
 
   public void zeroBoth() {
-    leftClimberEncoder.setPosition(0.0);
     rightClimberEncoder.setPosition(0.0);
   }
 
   /** Creates a new ClimberIOCB. */
   public ClimberIOCB() {
-    leftClimberMotor = new SparkMax(CompBotConstants.CLIMBER_LEFT_ID, MotorType.kBrushless);
     rightClimberMotor = new SparkMax(CompBotConstants.CLIMBER_RIGHT_ID, MotorType.kBrushless);
-    leftClimberEncoder = leftClimberMotor.getEncoder();
     rightClimberEncoder = rightClimberMotor.getEncoder();
 
     ClosedLoopConfig closedLoopConfig = new ClosedLoopConfig();
-    EncoderConfig leftEncoderConfig = new EncoderConfig();
     EncoderConfig rightEncoderConfig = new EncoderConfig();
 
     closedLoopConfig.pid(kP, kI, kD);
-    leftEncoderConfig.positionConversionFactor(GEAR_RATIO);
-    leftEncoderConfig.velocityConversionFactor(GEAR_RATIO);
 
     rightEncoderConfig.positionConversionFactor(GEAR_RATIO);
     rightEncoderConfig.velocityConversionFactor(GEAR_RATIO);
-
-    leftConfig.inverted(true);
-    leftConfig.apply(leftEncoderConfig);
-    leftConfig.apply(closedLoopConfig);
-    leftConfig
-        .limitSwitch
-        .forwardLimitSwitchPosition(FORWARD_SOFT_LIMIT_INCHES / MOTOR_ROTATIONS_TO_INCHES)
-        .forwardLimitSwitchTriggerBehavior(Behavior.kStopMovingMotor);
-    leftConfig
-        .limitSwitch
-        .reverseLimitSwitchPosition(REVERSE_SOFT_LIMIT_INCHES / MOTOR_ROTATIONS_TO_INCHES)
-        .reverseLimitSwitchTriggerBehavior(Behavior.kStopMovingMotor);
 
     rightConfig.inverted(false);
     rightConfig.apply(rightEncoderConfig);
@@ -87,25 +66,17 @@ public class ClimberIOCB implements ClimberIO {
         .reverseLimitSwitchPosition(REVERSE_SOFT_LIMIT_INCHES)
         .reverseLimitSwitchTriggerBehavior(Behavior.kStopMovingMotor);
 
-    leftClimberMotor.configure(
-        leftConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     rightClimberMotor.configure(
         rightConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 
-  public void setLeftDutyCycle(double dutyCycle) {
-    leftClimberMotor.set(dutyCycle);
-  }
+  public void setLeftDutyCycle(double dutyCycle) {}
 
   public void setRightDutyCycle(double dutyCycle) {
     rightClimberMotor.set(dutyCycle);
   }
 
-  public void setLeftPosition(double position) {
-    leftClimberMotor
-        .getClosedLoopController()
-        .setSetpoint(position / MOTOR_ROTATIONS_TO_INCHES, ControlType.kPosition);
-  }
+  public void setLeftPosition(double position) {}
 
   public void setRightPosition(double position) {
     rightClimberMotor
@@ -114,17 +85,11 @@ public class ClimberIOCB implements ClimberIO {
   }
 
   public void updateInputs(ClimberIOInputs inputs) {
-    inputs.climberLeftDutyCycle = leftClimberMotor.getAppliedOutput();
     inputs.climberRightDutyCycle = rightClimberMotor.getAppliedOutput();
-    inputs.climberLeftPosition = leftClimberEncoder.getPosition() * MOTOR_ROTATIONS_TO_INCHES;
     inputs.climberRightPosition = rightClimberEncoder.getPosition() * MOTOR_ROTATIONS_TO_INCHES;
-    inputs.climberLeftVelocity =
-        leftClimberEncoder.getVelocity() * MOTOR_ROTATIONS_TO_INCHES / 60.0;
     inputs.climberRightVelocity =
         rightClimberEncoder.getVelocity() * MOTOR_ROTATIONS_TO_INCHES / 60.0;
-    inputs.climberLeftCurrent = leftClimberMotor.getOutputCurrent();
     inputs.climberRightCurrent = rightClimberMotor.getOutputCurrent();
-    inputs.climberLeftTemp = leftClimberMotor.getMotorTemperature();
     inputs.climberRightTemp = rightClimberMotor.getMotorTemperature();
   }
 }

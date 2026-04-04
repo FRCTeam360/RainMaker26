@@ -390,24 +390,23 @@ public final class Constants {
 
     // === CLIMBER ===
     public static final int CLIMBER_RIGHT_ID = 17;
-    public static final int CLIMBER_LEFT_ID = 18;
 
     // === FLYWHEEL ===
-    public static final int FLYWHEEL_RIGHT_ID = 19;
-    public static final int FLYWHEEL_LEFT_ID = 20;
+    public static final int FLYWHEEL_RIGHT_ID = 18;
+    public static final int FLYWHEEL_LEFT_ID = 19;
 
     // === FLYWHEEL KICKER ===
-    public static final int FLYWHEEL_KICKER_ID = 21;
+    public static final int FLYWHEEL_KICKER_ID = 20;
 
     // === HOPPER SENSOR ===
-    public static final int HOPPER_SENSOR_ID = 22;
+    public static final int HOPPER_SENSOR_ID = 21;
 
     // === HOPPER ===
-    public static final int HOPPER_ROLLER_ID = 23;
-    public static final int TWINDEXER_ID = 24;
+    public static final int HOPPER_ROLLER_ID = 22;
+    public static final int TWINDEXER_ID = 23;
 
     // === HOOD ===
-    public static final int HOOD_ID = 25;
+    public static final int HOOD_ID = 24;
 
     // === LIMELIGHT ===
     public static final String LIMELIGHT_RIGHT = "limelight-right";
