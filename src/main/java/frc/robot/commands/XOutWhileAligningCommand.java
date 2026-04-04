@@ -90,7 +90,7 @@ public class XOutWhileAligningCommand extends Command {
     double vy = velocityYSupplier.getAsDouble();
     Rotation2d heading = headingSupplier.get();
 
-    updateState(vx, vy);
+    updateState(vx, vy, heading);
     applyState(vx, vy, heading);
   }
 
@@ -99,8 +99,9 @@ public class XOutWhileAligningCommand extends Command {
    *
    * @param vx sampled X velocity (operator-perspective) in m/s
    * @param vy sampled Y velocity (operator-perspective) in m/s
+   * @param heading sampled target heading
    */
-  private void updateState(double vx, double vy) {
+  private void updateState(double vx, double vy, Rotation2d heading) {
     double commandedSpeedMps = Math.hypot(vx, vy);
     boolean hasDriverInput =
         commandedSpeedMps > drivetrain.maxSpeed.in(MetersPerSecond) * DRIVER_INPUT_THRESHOLD;
@@ -116,7 +117,7 @@ public class XOutWhileAligningCommand extends Command {
 
       case X_OUT:
         double headingErrorRad =
-            headingSupplier.get().minus(drivetrain.getRotation2d()).getRadians();
+            heading.minus(drivetrain.getRotation2d()).getRadians();
         // TODO: Verify and tune this tolerance on the real robot. Intentionally uses the
         // static (tighter) tolerance rather than the dynamic one because the robot is
         // stationary while x-outed, so there is no speed-based reason to widen it.
