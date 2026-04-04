@@ -324,9 +324,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
       DoubleSupplier velocityXSupplier,
       DoubleSupplier velocityYSupplier,
       Supplier<Rotation2d> headingSupplier) {
-    // Tracks whether the heading controller has produced at least one output.
-    // Reset in end action so each new schedule starts clean.
-    boolean[] controllerHasRun = {false};
     return this.runEnd(
         () -> {
           double rawVelXMps = velocityXSupplier.getAsDouble();
@@ -337,23 +334,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
           double fieldVelXMps = isBlueAlliance ? rawVelXMps : -rawVelXMps;
           double fieldVelYMps = isBlueAlliance ? rawVelYMps : -rawVelYMps;
 
-          // Gate on controllerHasRun to avoid consuming stale output on the first cycle
-          // after the controller was reset (getLastAppliedOutput() returns 0 until the
-          // facing-angle request has been applied at least once).
-          if (!controllerHasRun[0]) {
-            controllerHasRun[0] = true;
-            // Zero out omega for the first cycle — faceAngleWhileDriving will read
-            // getLastAppliedOutput() which is stale until the request runs once.
-            commandedSpeeds =
-                ChassisSpeeds.fromFieldRelativeSpeeds(
-                    fieldVelXMps, fieldVelYMps, 0.0, getPosition().getRotation());
-          }
-
           faceAngleWhileDriving(fieldVelXMps, fieldVelYMps, headingSupplier.get());
         },
         () -> {
           angleFacingRequest.HeadingController.reset();
-          controllerHasRun[0] = false;
         });
   }
 
