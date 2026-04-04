@@ -106,7 +106,7 @@ import org.littletonrobotics.junction.Logger;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private CommandSwerveDrivetrain drivetrain;
-  private SendableChooser<Command> autoChooser;
+  public static SendableChooser<Command> autoChooser;
   private Flywheel flywheel;
   private Hood hood;
   private Indexer indexer;
@@ -431,29 +431,7 @@ public class RobotContainer {
 
     PathPlannerLogging.setLogTargetPoseCallback(
         pose -> Logger.recordOutput("Swerve/TargetPathPose", pose));
-
-    SendableChooser<Command> chooser = new SendableChooser<>();
-    List<String> autoNames = AutoBuilder.getAllAutoNames();
-
-    for (String autoName : autoNames) {
-      if (DriverStation.getAlliance() == Optional.of(Alliance.Red)) {
-        if (autoName.contains("Red")) {
-          PathPlannerAuto auto = new PathPlannerAuto(autoName);
-          chooser.addOption(auto.getName(), auto);
-        }
-      } else if (DriverStation.getAlliance() == Optional.of(Alliance.Blue)) {
-        if (autoName.contains("Blue")) {
-          PathPlannerAuto auto = new PathPlannerAuto(autoName);
-          chooser.addOption(auto.getName(), auto);
-        }
-      } else {
-        PathPlannerAuto auto = new PathPlannerAuto(autoName);
-        chooser.addOption(auto.getName(), auto);
-      }
-    }
-
-    SmartDashboard.putData("Auto Chooser", chooser);
-
+      
     CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
     // Uncomment this if pathplanner starts to suck on loading
     // CommandScheduler.getInstance().schedule(PathfindingCommand.warmupCommand());
