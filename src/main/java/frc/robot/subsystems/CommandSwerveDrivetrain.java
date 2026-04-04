@@ -188,7 +188,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
           double velYMps = Math.pow(driveCont.getLeftX(), 3) * maxSpeed.in(MetersPerSecond) * -1.0;
           double omegaRps =
               Math.pow(driveCont.getRightX(), 2)
-                  * (maxAngularVelocity.in(RadiansPerSecond) / 2.0)
+                  * (maxAngularVelocity.in(RadiansPerSecond))
                   * -Math.signum(driveCont.getRightX());
           if (isDefenseMode) {
             velXMps *= defenseModeTranslationScaler;
