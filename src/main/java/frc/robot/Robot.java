@@ -37,7 +37,7 @@ public class Robot extends LoggedRobot {
   private Command m_autonomousCommand;
 
   private final RobotContainer m_robotContainer;
-  private Optional<Alliance> lastAllianceState;
+  private Optional<Alliance> lastAllianceState = Optional.empty();
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -126,7 +126,7 @@ public class Robot extends LoggedRobot {
   @Override
   public void disabledPeriodic() {
     if (DriverStation.isDSAttached()) {
-      if (DriverStation.getAlliance() != lastAllianceState) {
+      if (!DriverStation.getAlliance().equals(lastAllianceState)) {
 
         lastAllianceState = DriverStation.getAlliance();
         RobotContainer.autoChooser.close();
@@ -134,12 +134,12 @@ public class Robot extends LoggedRobot {
         List<String> autoNames = AutoBuilder.getAllAutoNames();
 
         for (String autoName : autoNames) {
-          if (DriverStation.getAlliance() == Optional.of(Alliance.Red)) {
+          if (lastAllianceState.equals(Optional.of(Alliance.Red))) {
             if (autoName.contains("Red")) {
               PathPlannerAuto auto = new PathPlannerAuto(autoName);
               RobotContainer.autoChooser.addOption(auto.getName(), auto);
             }
-          } else if (DriverStation.getAlliance() == Optional.of(Alliance.Blue)) {
+          } else if (lastAllianceState.equals(Optional.of(Alliance.Blue))) {
             if (autoName.contains("Blue")) {
               PathPlannerAuto auto = new PathPlannerAuto(autoName);
               RobotContainer.autoChooser.addOption(auto.getName(), auto);
