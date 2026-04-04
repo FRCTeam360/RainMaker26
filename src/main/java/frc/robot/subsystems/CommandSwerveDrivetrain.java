@@ -93,18 +93,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
   // Heading controller PID gains (from example code)
   private static final double HEADING_KP = 15.0;
-  // Ki is intentionally 0 — heading error naturally bleeds off as the robot moves.
-  // Integrator windup during long auto paths or sustained tracking can cause overshoot.
-  private static final double HEADING_KI = 0.00;
-  // Current Kd is near-zero and provides almost no damping. Recommended starting point
-  // is ~0.1 (= KP/60), tunable up to ~0.3 before gyro noise begins to amplify.
-  // Example: private static final double HEADING_KD = 0.1;
+  private static final double HEADING_KI = 0.2;
   private static final double HEADING_KD = 1.0; // 1.0 Kd is prob the highest we should go
-  // IZone is only relevant if Ki > 0. If Ki is ever enabled, a reasonable starting
-  // value is ~0.17 rad (~10°) — small enough to only integrate near the setpoint.
-  // Example: private static final double HEADING_I_ZONE = Math.toRadians(10.0);
-  private static final double HEADING_I_ZONE = 0.0;
-  private static final double HEADING_TOLERANCE_RAD = Math.toRadians(1.5);
+  private static final double HEADING_I_ZONE = Math.toRadians(10.0);
+  private static final double HEADING_TOLERANCE_RAD = Math.toRadians(3.0);
   // Extra heading tolerance granted per m/s of translational speed.
   // Compensates for the PID steady-state tracking lag when the heading setpoint moves
   // (setpoint rate ≈ v/d rad/s; lag ≈ rate/KP). Tunable — start at ~5°/m/s.
@@ -188,7 +180,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
           double velYMps = Math.pow(driveCont.getLeftX(), 3) * maxSpeed.in(MetersPerSecond) * -1.0;
           double omegaRps =
               Math.pow(driveCont.getRightX(), 2)
-                  * (maxAngularVelocity.in(RadiansPerSecond) / 2.0)
+                  * (maxAngularVelocity.in(RadiansPerSecond))
                   * -Math.signum(driveCont.getRightX());
           if (isDefenseMode) {
             velXMps *= defenseModeTranslationScaler;

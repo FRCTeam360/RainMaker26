@@ -27,6 +27,9 @@ public class XOutWhileAligningCommand extends Command {
   /** Minimum commanded velocity (fraction of max speed) to count as driver input. */
   private static final double DRIVER_INPUT_THRESHOLD = 0.05;
 
+  /** Heading tolerance for drivebase alignment checks in this command (tighter than default). */
+  private static final double HEADING_TOLERANCE_RAD = Math.toRadians(1.5);
+
   private enum State {
     FACING_ANGLE,
     X_OUT
@@ -110,17 +113,15 @@ public class XOutWhileAligningCommand extends Command {
 
     switch (state) {
       case FACING_ANGLE:
-        if (!hasDriverInput && drivetrain.isAlignedToTarget()) {
+        double entryErrorRad = heading.minus(drivetrain.getRotation2d()).getRadians();
+        if (!hasDriverInput && Math.abs(entryErrorRad) < HEADING_TOLERANCE_RAD) {
           state = State.X_OUT;
         }
         break;
 
       case X_OUT:
         double headingErrorRad = heading.minus(drivetrain.getRotation2d()).getRadians();
-        // TODO: Verify and tune this tolerance on the real robot. Intentionally uses the
-        // static (tighter) tolerance rather than the dynamic one because the robot is
-        // stationary while x-outed, so there is no speed-based reason to widen it.
-        boolean stillAligned = Math.abs(headingErrorRad) < drivetrain.getHeadingToleranceRad();
+        boolean stillAligned = Math.abs(headingErrorRad) < HEADING_TOLERANCE_RAD;
 
         if (hasDriverInput || !stillAligned) {
           state = State.FACING_ANGLE;

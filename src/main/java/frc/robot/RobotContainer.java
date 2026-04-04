@@ -22,7 +22,6 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.RobotType;
-import frc.robot.commands.XOutWhileAligningCommand;
 import frc.robot.generated.PracticeBotDrivetrain;
 import frc.robot.generated.WoodBotDrivetrain;
 import frc.robot.subsystems.Climber.Climber;
@@ -408,8 +407,7 @@ public class RobotContainer {
         superStructure
             .setStateCommand(SuperWantedStates.AUTO_CYCLE_SHOOTING)
             .alongWith(
-                new XOutWhileAligningCommand(
-                    drivetrain,
+                drivetrain.faceAngleWhileDrivingCommand(
                     driverCont,
                     () -> {
                       if (superStructure.getCurrentSuperState() == SuperInternalStates.PASSING) {

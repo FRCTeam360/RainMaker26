@@ -1,5 +1,6 @@
 package frc.robot.subsystems.Shooter;
 
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel;
@@ -19,6 +20,8 @@ import org.littletonrobotics.junction.Logger;
  */
 public class ShooterStateMachine {
 
+  private static final double DISTURBANCE_TIMEOUT_SECONDS = 0.25;
+
   // Enums
   public enum ShooterWantedStates {
     IDLE,
@@ -32,6 +35,7 @@ public class ShooterStateMachine {
     PREPARING_TO_FIRE,
     AIMED,
     FIRING,
+    DISTURBED,
     WAITING,
     STANDBY,
     UNJAMMING,
@@ -50,6 +54,7 @@ public class ShooterStateMachine {
   private ShooterWantedStates wantedState = ShooterWantedStates.IDLE;
   private ShooterStates currentState = ShooterStates.IDLE;
   private ShooterStates previousState = ShooterStates.IDLE;
+  private double disturbanceStartTimestampSeconds = Double.NaN;
 
   /**
    * Creates a new ShooterStateMachine.
@@ -139,6 +144,36 @@ public class ShooterStateMachine {
     boolean hoodReady = hood.getState() == HoodInternalStates.AT_SETPOINT;
     boolean drivetrainAligned = isForced || isAlignedToTarget.getAsBoolean();
     boolean targetReady = isForced || canShootToTarget.getAsBoolean();
+    boolean hoodAndDriveReady = hoodReady && drivetrainAligned;
+    boolean wasFiringOrDisturbed =
+        previousState == ShooterStates.FIRING || previousState == ShooterStates.DISTURBED;
+    boolean disturbanceActive = wasFiringOrDisturbed && !hoodAndDriveReady;
+
+    if (disturbanceActive) {
+      if (previousState != ShooterStates.DISTURBED
+          || Double.isNaN(disturbanceStartTimestampSeconds)) {
+        disturbanceStartTimestampSeconds = Timer.getFPGATimestamp();
+      }
+
+      boolean disturbanceTimedOut =
+          Timer.getFPGATimestamp() - disturbanceStartTimestampSeconds
+              >= DISTURBANCE_TIMEOUT_SECONDS;
+
+      Logger.recordOutput("Superstructure/Shooting/DisturbanceTimedOut", disturbanceTimedOut);
+      Logger.recordOutput(
+          "Superstructure/Shooting/DisturbanceWindowSec", DISTURBANCE_TIMEOUT_SECONDS);
+
+      if (disturbanceTimedOut) {
+        disturbanceStartTimestampSeconds = Double.NaN;
+        currentState = ShooterStates.PREPARING_TO_FIRE;
+      } else {
+        currentState = ShooterStates.DISTURBED;
+      }
+
+      return;
+    }
+
+    disturbanceStartTimestampSeconds = Double.NaN;
 
     Logger.recordOutput("Superstructure/Shooting/FlywheelState", flywheelState);
     // SmartDashboard.putString("Superstructure/Shooting/FlywheelState",
@@ -154,14 +189,17 @@ public class ShooterStateMachine {
     // AIMED requires flywheel and hood to be genuinely at setpoint.
     // Bang-bang oscillations during firing are tolerated to stay in FIRING —
     // only revert when UNDER_SHOOTING signals a sustained RPM drop.
-    boolean inBangBang = previousState == ShooterStates.FIRING && !flywheelUnderShooting;
-    boolean subsystemsReady = flywheelReady && hoodReady && drivetrainAligned;
-    boolean shouldFire =
-        (flywheelReady || inBangBang) && hoodReady && drivetrainAligned && targetReady;
+    boolean inBangBang = wasFiringOrDisturbed && !flywheelUnderShooting;
+    boolean subsystemsReady = flywheelReady && hoodAndDriveReady;
+    boolean shouldFire = (flywheelReady || inBangBang) && hoodAndDriveReady && targetReady;
 
     Logger.recordOutput("Superstructure/Shooting/InBangBang", inBangBang);
     Logger.recordOutput("Superstructure/Shooting/SubsystemsReady", subsystemsReady);
     Logger.recordOutput("Superstructure/Shooting/ShouldFire", shouldFire);
+    Logger.recordOutput("Superstructure/Shooting/DisturbanceActive", false);
+    Logger.recordOutput("Superstructure/Shooting/DisturbanceTimedOut", false);
+    Logger.recordOutput(
+        "Superstructure/Shooting/DisturbanceWindowSec", DISTURBANCE_TIMEOUT_SECONDS);
 
     if (shouldFire) {
       currentState = ShooterStates.FIRING;
@@ -189,6 +227,7 @@ public class ShooterStateMachine {
         }
         break;
       case FIRING:
+      case DISTURBED:
         flywheel.setWantedState(FlywheelWantedStates.SHOOTING);
         hood.setWantedState(HoodWantedStates.AIMING);
         flywheelKicker.setWantedState(FlywheelKickerStates.KICKING);
