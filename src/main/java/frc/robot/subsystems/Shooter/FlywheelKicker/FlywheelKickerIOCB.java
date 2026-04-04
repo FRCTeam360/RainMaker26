@@ -1,9 +1,5 @@
 package frc.robot.subsystems.Shooter.FlywheelKicker;
 
-// import com.ctre.phoenix6.BaseStatusSignal;
-// import com.ctre.phoenix6.StatusSignal;
-import com.ctre.phoenix6.configs.CANrangeConfiguration;
-import com.ctre.phoenix6.signals.UpdateModeValue;
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
@@ -35,8 +31,6 @@ public class FlywheelKickerIOCB implements FlywheelKickerIO {
   private static final double KV = 0.0017;
   private static final double KS = 0.04;
 
-  private static final double MIN_SIGNAL_STRENGTH = 2000; // unknown unit
-  private static final double PROXIMITY_THRESHOLD_METERS = 0.1;
   private static final double MAX_NEGATIVE_OUTPUT = 0.0;
   private static final double MAX_POSITIVE_OUTPUT = 1.0;
 
@@ -46,14 +40,6 @@ public class FlywheelKickerIOCB implements FlywheelKickerIO {
   private final RelativeEncoder encoder;
   private final SparkFlexConfig sparkFlexConfig = new SparkFlexConfig();
   private final SparkClosedLoopController closedLoopController;
-
-  // FIXME: reimplement when CANRange is added to comp bot
-  // private final CANrange canSensor =
-  //     new CANrange(Constants.CompBotConstants.FLYWHEEL_KICKER_SENSOR_ID,
-  // Constants.RIO_CANBUS);
-
-  // private final StatusSignal<Distance> distanceSignal;
-  // private final StatusSignal<Boolean> isDetectedSignal;
 
   public FlywheelKickerIOCB() {
     this(CompBotConstants.FLYWHEEL_KICKER_ID);
@@ -101,18 +87,6 @@ public class FlywheelKickerIOCB implements FlywheelKickerIO {
         sparkFlexConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
     closedLoopController = flywheelKickerMotor.getClosedLoopController();
-
-    CANrangeConfiguration sensorConfig = new CANrangeConfiguration();
-    sensorConfig.ProximityParams.MinSignalStrengthForValidMeasurement = MIN_SIGNAL_STRENGTH;
-    sensorConfig.ProximityParams.ProximityThreshold = PROXIMITY_THRESHOLD_METERS;
-    sensorConfig.ToFParams.withUpdateMode(UpdateModeValue.ShortRangeUserFreq);
-    // canSensor.getConfigurator().apply(sensorConfig);
-
-    // distanceSignal = canSensor.getDistance();
-    // isDetectedSignal = canSensor.getIsDetected();
-
-    // BaseStatusSignal.setUpdateFrequencyForAll(50, distanceSignal, isDetectedSignal);
-    // canSensor.optimizeBusUtilization();
   }
 
   public void updateInputs(FlywheelKickerIOInputs inputs) {
@@ -122,9 +96,7 @@ public class FlywheelKickerIOCB implements FlywheelKickerIO {
     inputs.velocity = encoder.getVelocity();
     inputs.voltage = flywheelKickerMotor.getBusVoltage() * flywheelKickerMotor.getAppliedOutput();
     inputs.sensorProximity = 0.0;
-    // inputs.sensorProximity = canSensor.getDistance().getValueAsDouble();
     inputs.sensorActivated = false;
-    // inputs.sensorActivated = canSensor.getIsDetected().getValue();
   }
 
   public void setDutyCycle(double dutyCycle) {
