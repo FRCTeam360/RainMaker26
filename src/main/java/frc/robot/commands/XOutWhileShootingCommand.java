@@ -68,14 +68,8 @@ public class XOutWhileShootingCommand extends Command {
       Supplier<Rotation2d> headingSupplier) {
     this(
         drivetrain,
-        () ->
-            Math.pow(driveCont.getLeftY(), 3)
-                * CommandSwerveDrivetrain.maxSpeed.in(MetersPerSecond)
-                * -1.0,
-        () ->
-            Math.pow(driveCont.getLeftX(), 3)
-                * CommandSwerveDrivetrain.maxSpeed.in(MetersPerSecond)
-                * -1.0,
+        () -> Math.pow(driveCont.getLeftY(), 3) * drivetrain.maxSpeed.in(MetersPerSecond) * -1.0,
+        () -> Math.pow(driveCont.getLeftX(), 3) * drivetrain.maxSpeed.in(MetersPerSecond) * -1.0,
         headingSupplier);
   }
 

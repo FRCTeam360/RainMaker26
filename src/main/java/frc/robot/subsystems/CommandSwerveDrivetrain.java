@@ -645,23 +645,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     return angleFacingRequest.HeadingController.atSetpoint();
   }
 
-  /**
-   * Returns whether the heading controller is aligned to its target angle within the configured
-   * tolerance.
-   *
-   * <p>Note: This only returns meaningful results while a {@link
-   * SwerveRequest.FieldCentricFacingAngle} request is actively being applied. Before the first PID
-   * calculation, this returns false.
-   *
-   * @return true if the heading error is within {@link #HEADING_TOLERANCE_RAD}
-   */
-  public boolean isAlignedToTarget() {
-    return m_faceHubRequest.HeadingController.atSetpoint();
-  }
-
   /** Resets the facing-angle heading controller so it must re-converge from scratch. */
   public void resetHeadingController() {
-    m_faceHubRequest.HeadingController.reset();
+    angleFacingRequest.HeadingController.reset();
   }
 
   /**
