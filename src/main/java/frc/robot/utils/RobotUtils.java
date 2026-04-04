@@ -16,7 +16,6 @@ public class RobotUtils {
   public static final double SHIFT_2_END_SECONDS = 80;
   public static final double SHIFT_3_END_SECONDS = 55;
   public static final double ENDGAME_START_SECONDS = 30;
-  public static final double SHIFT_SECONDS = 25;
 
   public enum ActiveHub {
     BOTH,
