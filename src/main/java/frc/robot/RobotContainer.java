@@ -322,8 +322,8 @@ public class RobotContainer {
                                 return passCalculator.calculateShot().targetHeading();
                               }
                               return hubShotCalculator.calculateShot().targetHeading();
-                            }))
-                    .alongWith(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING)))
+                            })))
+            .alongWith(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING))
             .andThen(superStructure.setStateCommand(SuperWantedStates.DEFAULT)));
     registerPathplannerCommand(
         "stow intake", superStructure.setIntakeStateCommand(IntakeWantedStates.STOWED));

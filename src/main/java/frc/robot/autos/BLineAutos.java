@@ -126,12 +126,8 @@ public class BLineAutos {
                                 return passCalculator.calculateShot().targetHeading();
                               }
                               return hubShotCalculator.calculateShot().targetHeading();
-                            }))
-                    .alongWith(
-                        Commands.waitSeconds(2.25)
-                            .andThen(
-                                superStructure.setIntakeStateCommand(
-                                    IntakeWantedStates.AGITATING))))
+                            })))
+            .alongWith(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING))
             .andThen(superStructure.setStateCommand(SuperWantedStates.DEFAULT)),
         "shoot at hub");
   }
@@ -160,6 +156,12 @@ public class BLineAutos {
 
   private Command followPath(Path path) {
     return pathBuilder.build(path);
+  }
+
+  private static Path flippedPath(String pathName) {
+    Path path = new Path(pathName);
+    path.flip();
+    return path;
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
@@ -824,6 +826,14 @@ public class BLineAutos {
         "[BLine] Blue Right Aggressive",
         pathWithIntake(new Path("Blue Right Aggressive first swipe"))
             .andThen(shootAtHub())
-            .andThen(pathWithImmediateIntake(new Path("Blue Right Aggressive Second Swipe"))));
+            .andThen(pathWithImmediateIntake(new Path("Blue Right Aggressive Second Swipe")))
+            .andThen(shootAtHub()));
+
+    chooser.addOption(
+        "[BLine] Red Right Aggressive Swipe",
+        pathWithIntake(flippedPath("Blue Right Aggressive first swipe"))
+            .andThen(shootAtHub())
+            .andThen(pathWithImmediateIntake(flippedPath("Blue Right Aggressive Second Swipe")))
+            .andThen(shootAtHub()));
   }
 }
