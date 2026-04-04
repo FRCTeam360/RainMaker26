@@ -196,6 +196,8 @@ public final class Constants {
     public static final InterpolatingDoubleTreeMap timeOfFlightMap =
         new InterpolatingDoubleTreeMap();
 
+    public static final double INDEXER_TO_FLYWHEEL_SECONDS = 0.4;
+
     public static final double MIN_SHOT_DISTANCE_METERS = 1.0;
     public static final double MAX_SHOT_DISTANCE_METERS = 5.0;
 
@@ -241,6 +243,8 @@ public final class Constants {
         new InterpolatingDoubleTreeMap();
 
     public static final double HOOD_OFFSET = 2.0;
+
+    public static final double INDEXER_TO_FLYWHEEL_SECONDS = 0.4;
 
     public static final double MIN_SHOT_DISTANCE_METERS = 1.25;
     public static final double MAX_SHOT_DISTANCE_METERS = 6.0;
@@ -371,6 +375,8 @@ public final class Constants {
 
     public static final double HOOD_OFFSET = 2.0;
 
+    public static final double INDEXER_TO_FLYWHEEL_SECONDS = 0.4;
+
     public static final double MIN_SHOT_DISTANCE_METERS = 1.25;
     public static final double MAX_SHOT_DISTANCE_METERS = 6.0;
 
@@ -500,6 +506,8 @@ public final class Constants {
         new InterpolatingDoubleTreeMap();
     public static final InterpolatingDoubleTreeMap passTimeOfFlightMap =
         new InterpolatingDoubleTreeMap();
+
+    public static final double INDEXER_TO_FLYWHEEL_SECONDS = 0.4;
 
     public static final double MIN_SHOT_DISTANCE_METERS = 0.0;
     public static final double MAX_SHOT_DISTANCE_METERS = 6.0;

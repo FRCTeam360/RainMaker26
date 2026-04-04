@@ -137,6 +137,7 @@ public class RobotContainer {
 
   private RobotShootingInfo robotShootingInfo;
   private RobotShootingInfo robotPassingInfo;
+  private double indexerToFlywheelSeconds;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -179,6 +180,7 @@ public class RobotContainer {
                 Constants.SimulationConstants.MAX_PASS_DISTANCE_METERS,
                 WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond),
                 0);
+        indexerToFlywheelSeconds = Constants.SimulationConstants.INDEXER_TO_FLYWHEEL_SECONDS;
         break;
       case WOODBOT:
         drivetrain = WoodBotDrivetrain.createDrivetrain();
@@ -222,6 +224,7 @@ public class RobotContainer {
                 Constants.WoodBotConstants.MAX_SHOT_DISTANCE_METERS,
                 WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond),
                 0);
+        indexerToFlywheelSeconds = Constants.WoodBotConstants.INDEXER_TO_FLYWHEEL_SECONDS;
         break;
       case PRACTICEBOT:
         drivetrain = PracticeBotDrivetrain.createDrivetrain();
@@ -276,6 +279,7 @@ public class RobotContainer {
                 Constants.PracticeBotConstants.MAX_PASS_DISTANCE_METERS,
                 PracticeBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond),
                 0);
+        indexerToFlywheelSeconds = Constants.PracticeBotConstants.INDEXER_TO_FLYWHEEL_SECONDS;
         break;
       case COMPBOT:
       default:
@@ -331,6 +335,7 @@ public class RobotContainer {
                 Constants.CompBotConstants.MAX_PASS_DISTANCE_METERS,
                 CompBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond),
                 0);
+        indexerToFlywheelSeconds = Constants.CompBotConstants.INDEXER_TO_FLYWHEEL_SECONDS;
         break;
     }
     hubShotCalculator =
@@ -368,7 +373,8 @@ public class RobotContainer {
             passCalculator,
             drivetrain::isAlignedToTarget,
             drivetrain::getPosition,
-            robotShootingInfo.robotToShooter());
+            robotShootingInfo.robotToShooter(),
+            indexerToFlywheelSeconds);
     registerPathplannerCommand(
         "basic intake", superStructure.setIntakeStateCommand(IntakeWantedStates.INTAKING));
     // TODO: add end condition based on state from SuperStructure (based on sensor inputs)
