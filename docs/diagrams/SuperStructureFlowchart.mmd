@@ -1,0 +1,59 @@
+---
+title: SuperStructure State Machine - Flowchart View
+---
+flowchart TB
+    Start([Robot Enabled]) --> DefaultWanted
+
+    %% Default State
+    DefaultWanted["DEFAULT<br/>---<br/>Ready to act<br/>Passive shooter running<br/>Intake deployed"]
+
+    %% Operational States
+    ShootHub["SHOOT_AT_HUB<br/>---<br/>Scoring at hub<br/>Uses hub calculator"]
+    ShootOutpost["SHOOT_AT_OUTPOST<br/>---<br/>Passing to outpost<br/>Uses pass calculator"]
+    AutoCycle["AUTO_CYCLE_SHOOTING<br/>---<br/>Auto target selection<br/>Hub or Outpost based on zone"]
+    Unjam["UNJAMMING<br/>---<br/>Clearing jam<br/>All reversing"]
+    Defense["DEFENSE<br/>---<br/>Not yet implemented"]
+    XOut["X_OUT<br/>---<br/>Not yet implemented"]
+    Ejecting["EJECTING<br/>---<br/>Not yet implemented"]
+
+    %% Idle State
+    IdleState["IDLE<br/>---<br/>All subsystems stopped<br/>Disabled/test only"]
+
+    %% Transitions from DEFAULT (the busy hub)
+    DefaultWanted -->|"Force hub button"| ShootHub
+    DefaultWanted -->|"Force outpost button"| ShootOutpost
+    DefaultWanted -->|"Auto cycle button"| AutoCycle
+    DefaultWanted -->|"A button"| Unjam
+    DefaultWanted -->|"Defense button"| Defense
+    DefaultWanted -->|"X-out button"| XOut
+    DefaultWanted -->|"Eject button"| Ejecting
+
+    %% Return transitions (all go back to DEFAULT)
+    ShootHub -.-> DefaultWanted
+    ShootOutpost -.-> DefaultWanted
+    AutoCycle -.-> DefaultWanted
+    Unjam -.-> DefaultWanted
+    Defense -.-> DefaultWanted
+    XOut -.-> DefaultWanted
+    Ejecting -.-> DefaultWanted
+
+    %% Mode change
+    IdleState ==>|"Mode -> Auto/Teleop"| DefaultWanted
+
+    %% Subsystem detail callouts
+    DefaultWanted -.- DefaultDetails["Subsystems:<br/>- TargetSelection -> AUTO<br/>- ShooterStateMachine -> PASSIVE_SHOOTER<br/>- IntakeStateMachine -> DEPLOYED<br/>- HopperRoller -> OFF"]
+
+    ShootHub -.- ShootDetails["Shooting Sequence:<br/>1. PREPARING_TO_FIRE<br/>   - Spin up flywheel/hood<br/>   - Wait for at setpoint<br/>2. FIRING<br/>   - IntakeStateMachine -> AGITATING<br/>   - Indexer -> INDEXING<br/>   - HopperRoller -> ROLLING"]
+
+    style DefaultWanted fill:#bbdefb,stroke:#0d47a1,stroke-width:3px,color:#000
+    style ShootHub fill:#ffcc80,stroke:#e65100,stroke-width:2px,color:#000
+    style ShootOutpost fill:#ffcc80,stroke:#e65100,stroke-width:2px,color:#000
+    style AutoCycle fill:#a5d6a7,stroke:#1b5e20,stroke-width:2px,color:#000
+    style Unjam fill:#ef9a9a,stroke:#b71c1c,stroke-width:2px,color:#000
+    style Defense fill:#b0bec5,stroke:#37474f,stroke-width:2px,stroke-dasharray:5,color:#000
+    style XOut fill:#b0bec5,stroke:#37474f,stroke-width:2px,stroke-dasharray:5,color:#000
+    style Ejecting fill:#b0bec5,stroke:#37474f,stroke-width:2px,stroke-dasharray:5,color:#000
+    style IdleState fill:#e0e0e0,stroke:#212121,stroke-width:2px,color:#000
+
+    classDef detailBox fill:#fff9c4,stroke:#f57f17,stroke-width:1px,stroke-dasharray:3,color:#000
+    class DefaultDetails,ShootDetails detailBox

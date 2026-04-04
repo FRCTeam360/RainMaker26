@@ -15,13 +15,16 @@ public interface HoodIO {
     public double statorCurrent = 0.0;
     public double velocity = 0.0;
     public double position = 0.0;
+    public double positionRotations = 0.0;
   }
 
   public default void updateInputs(HoodIOInputs inputs) {}
 
   public void setDutyCycle(double dutyCycle);
 
-  public void setPosition(double position);
+  public void setPositionSmooth(double position);
 
-  public void setEncoder(double position);
+  public void setPositionAggressive(double position);
+
+  public void setZero();
 }

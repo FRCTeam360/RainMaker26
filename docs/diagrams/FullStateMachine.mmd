@@ -1,0 +1,125 @@
+---
+title: Full State Machine (All Layers)
+---
+stateDiagram-v2
+    [*] --> DefaultState
+
+    state "DEFAULT" as DefaultState {
+        [*] --> default_subsystems
+        state "All Subsystems" as default_subsystems {
+            def_intake: IntakeStateMachine -> DEPLOYED
+            def_shooter: ShooterStateMachine -> PASSIVE_SHOOTER
+            def_target: TargetSelection -> AUTO
+            def_hopper: HopperRoller -> OFF
+            def_indexer: Indexer -> OFF
+        }
+    }
+
+    state IDLE {
+        [*] --> idle_subsystems
+        state "All Subsystems" as idle_subsystems {
+            idle_intake: IntakeStateMachine -> IDLE
+            idle_shooter: ShooterStateMachine -> IDLE
+            idle_hopper: HopperRoller -> OFF
+            idle_indexer: Indexer -> OFF
+        }
+    }
+
+    state SHOOT_AT_HUB {
+        [*] --> hub_PREPARING
+
+        state "PREPARING_TO_FIRE" as hub_PREPARING {
+            hub_prep_fw: Flywheel -> SHOOTING (SPINNING_UP)
+            hub_prep_hood: Hood -> AIMING (MOVING)
+            hub_prep_kicker: FlywheelKicker -> KICKING (WoodBot IDLE)
+        }
+
+        state "FIRING" as hub_FIRING {
+            hub_fire_fw: Flywheel -> SHOOTING (AT_SETPOINT / RECOVERING)
+            hub_fire_hood: Hood -> AIMING (AT_SETPOINT)
+            hub_fire_kicker: FlywheelKicker -> KICKING
+            hub_fire_intake: IntakeStateMachine -> AGITATING
+            hub_fire_indexer: Indexer -> INDEXING
+            hub_fire_hopper: HopperRoller -> ROLLING
+        }
+
+        hub_PREPARING --> hub_FIRING : Flywheel AT_SETPOINT<br>AND Hood AT_SETPOINT<br>AND aligned
+        hub_FIRING --> hub_PREPARING : Flywheel UNDER_SHOOTING<br>OR hood lost OR alignment lost
+    }
+
+    state SHOOT_AT_OUTPOST {
+        [*] --> out_PREPARING
+
+        state "PREPARING_TO_FIRE" as out_PREPARING {
+            out_prep_fw: Flywheel -> SHOOTING (SPINNING_UP)
+            out_prep_hood: Hood -> AIMING (MOVING)
+            out_prep_kicker: FlywheelKicker -> KICKING (WoodBot IDLE)
+        }
+
+        state "FIRING" as out_FIRING {
+            out_fire_fw: Flywheel -> SHOOTING (AT_SETPOINT / RECOVERING)
+            out_fire_hood: Hood -> AIMING (AT_SETPOINT)
+            out_fire_kicker: FlywheelKicker -> KICKING
+            out_fire_intake: IntakeStateMachine -> AGITATING
+            out_fire_indexer: Indexer -> INDEXING
+            out_fire_hopper: HopperRoller -> ROLLING
+        }
+
+        out_PREPARING --> out_FIRING : Flywheel AT_SETPOINT<br>AND Hood AT_SETPOINT<br>AND aligned
+        out_FIRING --> out_PREPARING : Flywheel UNDER_SHOOTING<br>OR hood lost OR alignment lost
+    }
+
+    state AUTO_CYCLE_SHOOTING {
+        [*] --> auto_choice
+        state auto_choice <<choice>>
+        auto_choice --> auto_hub : In alliance zone
+        auto_choice --> auto_outpost : Outside alliance zone
+
+        auto_hub: Target -> HUB (hub shot calculator)
+        auto_outpost: Target -> OUTPOST (pass calculator)
+    }
+
+    state UNJAMMING {
+        [*] --> unjam_subsystems
+        state "All Subsystems" as unjam_subsystems {
+            unjam_shooter: ShooterStateMachine -> REVERSING
+            unjam_intake: IntakeStateMachine -> IDLE
+            unjam_indexer: Indexer -> REVERSING
+            unjam_hopper: HopperRoller -> UNJAMMING
+        }
+    }
+
+    state DEFENSE {
+        defense_note: Not yet implemented
+    }
+
+    state X_OUT {
+        xout_note: Not yet implemented
+    }
+
+    state EJECTING {
+        ejecting_note: Not yet implemented
+    }
+
+    DefaultState --> SHOOT_AT_HUB : Force hub button
+    SHOOT_AT_HUB --> DefaultState : Button released
+
+    DefaultState --> SHOOT_AT_OUTPOST : Force outpost button
+    SHOOT_AT_OUTPOST --> DefaultState : Button released
+
+    DefaultState --> AUTO_CYCLE_SHOOTING : Auto cycle button
+    AUTO_CYCLE_SHOOTING --> DefaultState : Button released
+
+    DefaultState --> UNJAMMING : Unjam button
+    UNJAMMING --> DefaultState : Button released
+
+    DefaultState --> DEFENSE : Defense button
+    DEFENSE --> DefaultState : Button released
+
+    DefaultState --> X_OUT : X-out button
+    X_OUT --> DefaultState : Button released
+
+    DefaultState --> EJECTING : Eject button
+    EJECTING --> DefaultState : Button released
+
+    IDLE --> DefaultState : Mode -> Auto/Teleop

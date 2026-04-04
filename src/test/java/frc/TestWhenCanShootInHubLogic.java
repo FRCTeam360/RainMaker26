@@ -1,6 +1,6 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
+// // Copyright (c) FIRST and other WPILib contributors.
+// // Open Source Software; you can modify and/or share it under the terms of
+// // the WPILib BSD license file in the root directory of this project.
 package frc;
 
 import static frc.robot.utils.RobotUtils.ActiveHub.*;
@@ -16,31 +16,31 @@ import org.junit.jupiter.api.Test;
 public class TestWhenCanShootInHubLogic {
   @Test
   void hubPhaseShouldBeBOTH() {
-    ActiveHub activeHub = RobotUtils.getHubPhase(25.0, true);
+    ActiveHub activeHub = RobotUtils.getActiveHubAtShotLanding(25.0, true, 0.0);
     assertEquals(BOTH, activeHub);
   }
 
   @Test
   void hubPhaseShouldBeBOTH2() {
-    ActiveHub activeHub = RobotUtils.getHubPhase(360, true);
+    ActiveHub activeHub = RobotUtils.getActiveHubAtShotLanding(360, true, 0.0);
     assertEquals(BOTH, activeHub);
   }
 
   @Test
   void hubPhaseShouldBeBOTHAuto() {
-    ActiveHub activeHub = RobotUtils.getHubPhase(25.0, false);
+    ActiveHub activeHub = RobotUtils.getActiveHubAtShotLanding(25.0, false, 0.0);
     assertEquals(BOTH, activeHub);
   }
 
   @Test
   void hubPhaseShouldBeAUTOLOSER() {
-    ActiveHub activeHub = RobotUtils.getHubPhase(75.0, true);
+    ActiveHub activeHub = RobotUtils.getActiveHubAtShotLanding(75.0, true, 0.0);
     assertEquals(AUTOLOSER, activeHub);
   }
 
   @Test
   void hubPhaseShouldBeAUTOWINNER() {
-    ActiveHub activeHub = RobotUtils.getHubPhase(50.0, true);
+    ActiveHub activeHub = RobotUtils.getActiveHubAtShotLanding(50.0, true, 0.0);
     assertEquals(AUTOWINNER, activeHub);
   }
 
@@ -77,62 +77,71 @@ public class TestWhenCanShootInHubLogic {
   @Test
   void hubActiveShouldBeTrue() {
     Boolean hubActive =
-        RobotUtils.hubActive(Optional.of(Alliance.Blue), Alliance.Blue, ActiveHub.AUTOWINNER);
+        RobotUtils.isHubActiveForAlliance(
+            Optional.of(Alliance.Blue), Alliance.Blue, ActiveHub.AUTOWINNER);
     assertEquals(true, hubActive);
   }
 
   @Test
   void hubActiveShouldBeTrue2() {
     Boolean hubActive =
-        RobotUtils.hubActive(Optional.of(Alliance.Blue), Alliance.Red, ActiveHub.AUTOLOSER);
+        RobotUtils.isHubActiveForAlliance(
+            Optional.of(Alliance.Blue), Alliance.Red, ActiveHub.AUTOLOSER);
     assertEquals(true, hubActive);
   }
 
   @Test
   void hubActiveShouldBeTrue3() {
     Boolean hubActive =
-        RobotUtils.hubActive(Optional.of(Alliance.Red), Alliance.Red, ActiveHub.AUTOWINNER);
+        RobotUtils.isHubActiveForAlliance(
+            Optional.of(Alliance.Red), Alliance.Red, ActiveHub.AUTOWINNER);
     assertEquals(true, hubActive);
   }
 
   @Test
   void hubActiveShouldBeTrue4() {
     Boolean hubActive =
-        RobotUtils.hubActive(Optional.of(Alliance.Red), Alliance.Blue, ActiveHub.AUTOLOSER);
+        RobotUtils.isHubActiveForAlliance(
+            Optional.of(Alliance.Red), Alliance.Blue, ActiveHub.AUTOLOSER);
     assertEquals(true, hubActive);
   }
 
   @Test
   void hubActiveShouldBeFalse() {
     Boolean hubActive =
-        RobotUtils.hubActive(Optional.of(Alliance.Blue), Alliance.Red, ActiveHub.AUTOWINNER);
+        RobotUtils.isHubActiveForAlliance(
+            Optional.of(Alliance.Blue), Alliance.Red, ActiveHub.AUTOWINNER);
     assertEquals(false, hubActive);
   }
 
   @Test
   void hubActiveShouldBeFalse2() {
     Boolean hubActive =
-        RobotUtils.hubActive(Optional.of(Alliance.Blue), Alliance.Blue, ActiveHub.AUTOLOSER);
+        RobotUtils.isHubActiveForAlliance(
+            Optional.of(Alliance.Blue), Alliance.Blue, ActiveHub.AUTOLOSER);
     assertEquals(false, hubActive);
   }
 
   @Test
   void hubActiveShouldBeFalse3() {
     Boolean hubActive =
-        RobotUtils.hubActive(Optional.of(Alliance.Red), Alliance.Blue, ActiveHub.AUTOWINNER);
+        RobotUtils.isHubActiveForAlliance(
+            Optional.of(Alliance.Red), Alliance.Blue, ActiveHub.AUTOWINNER);
     assertEquals(false, hubActive);
   }
 
   @Test
   void hubActiveShouldBeFalse4() {
     Boolean hubActive =
-        RobotUtils.hubActive(Optional.of(Alliance.Red), Alliance.Red, ActiveHub.AUTOLOSER);
+        RobotUtils.isHubActiveForAlliance(
+            Optional.of(Alliance.Red), Alliance.Red, ActiveHub.AUTOLOSER);
     assertEquals(false, hubActive);
   }
 
   @Test
-  void hubActiveShouldBeNull() {
-    Boolean hubActive = RobotUtils.hubActive(Optional.of(Alliance.Red), Alliance.Red, null);
-    assertEquals(null, hubActive);
+  void hubActiveShouldBeTrueByDefault() {
+    Boolean hubActive =
+        RobotUtils.isHubActiveForAlliance(Optional.of(Alliance.Red), Alliance.Red, null);
+    assertEquals(true, hubActive);
   }
 }

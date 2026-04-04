@@ -1,0 +1,59 @@
+flowchart TD
+
+classDef input fill:#FFDB80,stroke:#FFF,color:#5E1C00,stroke-width:10px, scale: 1,font-size:40;
+classDef action fill:#CCEDE4,stroke:#FFF,color:#384541,font-size:30,stroke-width:4px;
+classDef decision fill:#A1CF99,stroke:#FFF,color:#41593E,stroke-width:7px,font-size:23,scale: 1;
+classDef output fill:#FFB67A,stroke:#FFF,color:#5E1C00,stroke-width:10px,font-size:35;
+
+    rightBumper[Right Bumper]:::input
+     ----> SHOOT_AT_HUB(Super structure state set to shoot at hub):::action;
+    SHOOT_AT_HUB--> HUB[Targets Hub]:::action;
+    SHOOT_AT_HUB --> INTERNAL_SHOOT_AT_HUB(Internal  super state set shoot at hub):::action
+    -->|shares code with passing state, different targets| SHOOTER_STATE_MACHINE_SHOOTING(Shooter state set to shooting):::action;
+    INTERNAL_SHOOT_AT_HUB --> isShooterStateFireing{Is shooter state Fireing?}:::decision
+    -->|yes| isFiringSS(Indexer state set to indexing, Hopper roller state set to rolling):::action;
+    isShooterStateFireing -->|no| isntFiringSS[Indexer state is off, Hopper roller state set to unjamming]:::output
+    SHOOTER_STATE_MACHINE_SHOOTING --> canFire{are conditions met to shoot at target}:::decision
+    canFire --> |yes| SHOOTER_FIREING(Shooter state set to fireing):::action ---> SHOOTING_AIMING_KICKING
+    canFire --> |no| cantFireCheck{Are subsystems ready}:::decision
+    -->|yes| SHOOTER_AIMED(Shooter state set to aimed):::action;
+    cantFireCheck --> |no| SHOOTER_PREPARING_TO_FIRE(Shooter state set to prepare to fire):::action-->
+    SHOOTER_AIMED --> KICKING_AND_AIMING(Flywheel kicker state set to kick, hood state set to aiming):::action
+    -->SHOOTER_STATE_MACHINE_SHOOTING
+    isFiringSS--> SHOOTING_AIMING_KICKING(Flywheel state set to shooting, hood state set to aiming, flywheel kicker state set to kicking):::action;
+    SHOOTING_AIMING_KICKING --> isFlywheelAtGoalSetpoint{Is flywheel speed at setpoint given by shot calculator?}:::decision
+    -->|yes| FLYWHEEL_AT_SETPOINT[Flywheel holds velocity currently running]:::output
+    isFlywheelAtGoalSetpoint --> |no| SETINGVELOCITYOFFLYWHEEL[Flywheel velocity changes to meet setpoint]:::output
+    SHOOTING_AIMING_KICKING --> HOOD_AIMING[Sets hood to angle provided by shot calculator]:::output
+    SHOOTING_AIMING_KICKING --> FLYWHEEL_KICKING{Is flywheel kicker speed at setpoint given by shot calculator?}:::decision
+    -->|yes| FLYWHEEL_KICKER_AT_SETPOINT[Flywheel kicker holds velocity currently running]:::output
+    FLYWHEEL_KICKING --> |no| SETINGVELOCITYOFFLYWHEELKICKER[Flywheel kicker velocity changes to meet setpoint]:::output
+    KICKING_AND_AIMING-->HOOD_AIMING
+    KICKING_AND_AIMING --> FLYWHEEL_KICKING
+
+    rightTrigger[Right Trigger]:::input
+    --> AUTO_CYCLE_SHOOTING_AND_AGITATING(Super state set to auto cycle shooting, the intake state is set to agitating):::action;
+    AUTO_CYCLE_SHOOTING_AND_AGITATING --> agitateAtSetPoint{Is the the intake at a setpoint position ?}:::decision
+    agitateAtSetPoint --> |no| AGITATION_NOT_AT_SETPOINT[Intake continues to agitate in current direction, checks position to see if at setpoint and change state]:::output --> agitateAtSetPoint
+    agitateAtSetPoint --> |yes| AGITATION_AT_SETPOINT[Checks if the intake is at the high or low setpoint and toggles the setpoint to the inverse of the current setpoint]:::output
+    AUTO_CYCLE_SHOOTING_AND_AGITATING --> TARGET_AUTO{Targets the hub or the outpost from position on the field}:::decision
+    TARGET_AUTO ---> |hub| SHOOT_AT_HUB
+    TARGET_AUTO --> |Outpost| SHOOT_AT_OUTPOST(Sets target to hub):::action
+    --> PASSING(Shooter state set to passing):::action -->isShooterStateFireing
+
+    b[B button]:::input
+    ----> SHOOT_AT_OUTPOST
+
+    leftBumper[Left Bumper]:::input
+    --> INTAKING(Intake state set to intaking):::action
+    -->INTAKE_ROLLER_INTAKING(Intake roller state set to intaking):::action;
+    INTAKING-->INTAKE_PIVOT_DEPLOYED(Intake pivot state set to deployed):::action
+     --> intakePivotRPM(Intake pivot set to RPM of 3500 if not the woodbot, otherwise its set to a dutycycle of 0.7):::action;
+    INTAKE_ROLLER_INTAKING --> setIntakeRollerToSetpoint[Intake roller position is set to a setpoint]:::output
+
+    leftTrigger[Left Trigger]:::input
+    -->INTAKE_STATE_AGITATING(Intake state set to agitate):::action
+    -->agitateAtSetPoint
+
+    linkStyle 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,4 stroke:#grey,stroke-width:4px,color:white,background-color:white;
+    

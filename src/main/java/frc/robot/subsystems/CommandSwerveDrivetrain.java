@@ -18,18 +18,24 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.util.sendable.Sendable;
+import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.Constants;
 import frc.robot.generated.WoodBotDrivetrain.TunerSwerveDrivetrain;
 import frc.robot.subsystems.Vision.VisionMeasurement;
-import frc.robot.utils.FieldVisualizer;
+import frc.robot.utils.AllianceFlipUtil;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.DoubleSupplier;
@@ -44,14 +50,26 @@ import org.littletonrobotics.junction.Logger;
  * https://v6.docs.ctr-electronics.com/en/stable/docs/tuner/tuner-swerve/index.html
  */
 public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Subsystem {
+  private LinearVelocity maxSpeed = Constants.getMaxSpeed();
+  private AngularVelocity maxAngularVelocity = Constants.getMaxAngularVelocity();
+  private boolean isDefenseMode = false;
   private static final double kSimLoopPeriod = 0.004; // 4 ms
   private Notifier m_simNotifier = null;
   private double m_lastSimTime;
   private static final String SUBSYSTEM_NAME = "Swerve/";
   private final SwerveRequest xOutReq = new SwerveRequest.SwerveDriveBrake();
+  private final Field2d field = new Field2d();
 
   // Keep track of when vision measurements are added for logging context
   private boolean hasVisionMeasurements = false;
+
+  // Lazily-cached state copy. Invalidated once per cycle via clearCachedState() in
+  // preSchedulerUpdate(), then populated on first access via getCachedState().
+  // This ensures at most one getStateCopy() allocation per scheduler cycle.
+  private SwerveDriveState cachedState;
+
+  // Commanded speeds for shoot-on-the-move compensation (tracks what we tell the robot to do)
+  private ChassisSpeeds commandedSpeeds = new ChassisSpeeds();
 
   /* Blue alliance sees forward as 0 degrees (toward red alliance wall) */
   private static final Rotation2d kBlueAlliancePerspectiveRotation = Rotation2d.kZero;
@@ -72,19 +90,84 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   private final SwerveRequest.SysIdSwerveRotation m_rotationCharacterization =
       new SwerveRequest.SysIdSwerveRotation();
   private final DriveRequestType m_driveRequestType = DriveRequestType.Velocity;
-  // TODO refactor into a constants file
-  public static final LinearVelocity maxSpeed = MetersPerSecond.of(4.69);
-  public static final AngularVelocity maxAngularVelocity = RevolutionsPerSecond.of(4.0);
 
   // Heading controller PID gains (from example code)
-  private static final double HEADING_KP = 6.0;
+  private static final double HEADING_KP = 15.0;
+  // Ki is intentionally 0 — heading error naturally bleeds off as the robot moves.
+  // Integrator windup during long auto paths or sustained tracking can cause overshoot.
   private static final double HEADING_KI = 0.00;
-  private static final double HEADING_KD = 0.005;
+  // Current Kd is near-zero and provides almost no damping. Recommended starting point
+  // is ~0.1 (= KP/60), tunable up to ~0.3 before gyro noise begins to amplify.
+  // Example: private static final double HEADING_KD = 0.1;
+  private static final double HEADING_KD = 1.0; // 1.0 Kd is prob the highest we should go
+  // IZone is only relevant if Ki > 0. If Ki is ever enabled, a reasonable starting
+  // value is ~0.17 rad (~10°) — small enough to only integrate near the setpoint.
+  // Example: private static final double HEADING_I_ZONE = Math.toRadians(10.0);
   private static final double HEADING_I_ZONE = 0.0;
-  private static final double HEADING_TOLERANCE_RAD = Math.toRadians(3.0);
+  private static final double HEADING_TOLERANCE_RAD = Math.toRadians(1.5);
+  // Extra heading tolerance granted per m/s of translational speed.
+  // Compensates for the PID steady-state tracking lag when the heading setpoint moves
+  // (setpoint rate ≈ v/d rad/s; lag ≈ rate/KP). Tunable — start at ~5°/m/s.
+  private static final double HEADING_SPEED_TOLERANCE_RAD_PER_MPS = Math.toRadians(1.0);
+
+  // Maximum translational speed while using field-centric facing angle (fraction of maxSpeed).
+  // Limits how much shoot-on-the-move compensation is needed.
+  private static final double FACING_ANGLE_MAX_SPEED_FRACTION = 0.5;
+
+  // Heading lock state for driver-assist toggle
+  private boolean headingLockEnabled = false;
+  private double currentTargetAngle = 0.0;
+  private boolean headingControllerActive =
+      false; // Tracks if facing-angle request has been applied
+  private static final double SNAP_THRESHOLD = 0.3; // High tolerance to prevent accidental presses
+
+  private enum SnapDirection {
+    NONE,
+    UP,
+    DOWN,
+    LEFT,
+    RIGHT
+  }
+
+  private SnapDirection previousSnapDirection = SnapDirection.NONE;
+
+  // Called once per scheduler cycle from fieldOrientedDriveCommand to update the snap target.
+  // Kept outside the applyRequest lambda so it runs exactly once per cycle regardless of
+  // how many times the request supplier is invoked.
+  private void updateSnapAngle(double rightX, double rightY) {
+    boolean yDominant = Math.abs(rightY) >= Math.abs(rightX);
+    boolean pushUp = yDominant && rightY < -SNAP_THRESHOLD;
+    boolean pushDown = yDominant && rightY > SNAP_THRESHOLD;
+    boolean pushRight = !yDominant && rightX > SNAP_THRESHOLD;
+    boolean pushLeft = !yDominant && rightX < -SNAP_THRESHOLD;
+
+    SnapDirection currentSnapDirection;
+    if (pushUp) currentSnapDirection = SnapDirection.UP;
+    else if (pushDown) currentSnapDirection = SnapDirection.DOWN;
+    else if (pushRight) currentSnapDirection = SnapDirection.RIGHT;
+    else if (pushLeft) currentSnapDirection = SnapDirection.LEFT;
+    else currentSnapDirection = SnapDirection.NONE;
+
+    if (currentSnapDirection == previousSnapDirection) return;
+    previousSnapDirection = currentSnapDirection;
+
+    // Blue-perspective base angles flipped automatically for Red via AllianceFlipUtil:
+    //   up=0°, down=180°, right=270°, left=90°
+    switch (currentSnapDirection) {
+      case UP ->
+          currentTargetAngle = AllianceFlipUtil.apply(Rotation2d.fromDegrees(0.0)).getDegrees();
+      case DOWN ->
+          currentTargetAngle = AllianceFlipUtil.apply(Rotation2d.fromDegrees(180.0)).getDegrees();
+      case RIGHT ->
+          currentTargetAngle = AllianceFlipUtil.apply(Rotation2d.fromDegrees(270.0)).getDegrees();
+      case LEFT ->
+          currentTargetAngle = AllianceFlipUtil.apply(Rotation2d.fromDegrees(90.0)).getDegrees();
+      case NONE -> {}
+    }
+  }
 
   // Field-centric facing angle request for hub tracking
-  private final SwerveRequest.FieldCentricFacingAngle m_faceHubRequest =
+  private final SwerveRequest.FieldCentricFacingAngle angleFacingRequest =
       new SwerveRequest.FieldCentricFacingAngle()
           .withDeadband(maxSpeed.in(MetersPerSecond) * 0.01)
           .withRotationalDeadband(0.0)
@@ -97,21 +180,49 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             .withDeadband(maxSpeed.in(MetersPerSecond) * 0.01)
             .withRotationalDeadband(maxAngularVelocity.in(RadiansPerSecond) * 0.01)
             .withDriveRequestType(m_driveRequestType);
+    double defenseModeRotationScaler = 1.25;
+    double defenseModeTranslationScaler = 0.75;
     return this.applyRequest(
-        () ->
-            drive
-                .withVelocityX(
-                    Math.pow(driveCont.getLeftY(), 3)
-                        * maxSpeed.in(MetersPerSecond)
-                        * -1.0) // Drive forward with negative Y (forward)
-                .withVelocityY(
-                    Math.pow(driveCont.getLeftX(), 3)
-                        * maxSpeed.in(MetersPerSecond)
-                        * -1.0) // Drive left with negative X (left)
-                .withRotationalRate(
-                    Math.pow(driveCont.getRightX(), 2)
-                        * (maxAngularVelocity.in(RadiansPerSecond) / 2.0)
-                        * -Math.signum(driveCont.getRightX())) // Drive
+        () -> {
+          double velXMps = Math.pow(driveCont.getLeftY(), 3) * maxSpeed.in(MetersPerSecond) * -1.0;
+          double velYMps = Math.pow(driveCont.getLeftX(), 3) * maxSpeed.in(MetersPerSecond) * -1.0;
+          double omegaRps =
+              Math.pow(driveCont.getRightX(), 2)
+                  * (maxAngularVelocity.in(RadiansPerSecond) / 2.0)
+                  * -Math.signum(driveCont.getRightX());
+          if (isDefenseMode) {
+            velXMps *= defenseModeTranslationScaler;
+            velYMps *= defenseModeTranslationScaler;
+            omegaRps *= defenseModeRotationScaler;
+          }
+          // Store as robot-relative to match getVelocity() convention.
+          // Operator-perspective velocities are converted to field-relative via
+          // alliance flip, then to robot-relative via fromFieldRelativeSpeeds.
+          boolean isBlueAlliance =
+              DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue;
+          commandedSpeeds =
+              ChassisSpeeds.fromFieldRelativeSpeeds(
+                  isBlueAlliance ? velXMps : -velXMps,
+                  isBlueAlliance ? velYMps : -velYMps,
+                  headingLockEnabled && headingControllerActive
+                      ? angleFacingRequest.HeadingController.getLastAppliedOutput()
+                      : omegaRps,
+                  getPosition().getRotation());
+
+          if (headingLockEnabled) {
+            updateSnapAngle(driveCont.getRightX(), driveCont.getRightY());
+            headingControllerActive = true; // Mark that we've applied the facing-angle request
+            return angleFacingRequest
+                .withVelocityX(isBlueAlliance ? velXMps : -velXMps)
+                .withVelocityY(isBlueAlliance ? velYMps : -velYMps)
+                .withTargetDirection(Rotation2d.fromDegrees(currentTargetAngle));
+          }
+
+          return drive
+              .withVelocityX(velXMps) // Drive forward with negative Y (forward)
+              .withVelocityY(velYMps) // Drive left with negative X (left)
+              .withRotationalRate(omegaRps); // Drive
+        }
         // counterclockwise
         // with negative X
         // (left)
@@ -124,35 +235,44 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
           .withRotationalDeadband(maxAngularVelocity.in(RadiansPerSecond) * 0.01)
           .withDriveRequestType(m_driveRequestType);
 
-  public void fieldOrientedDrive(CommandXboxController driveCont) {
-    FIELD_CENTRIC_DRIVE.ForwardPerspective = ForwardPerspectiveValue.OperatorPerspective;
-    this.setControl(
-        FIELD_CENTRIC_DRIVE
-            .withVelocityX(
-                Math.pow(driveCont.getLeftY(), 3)
-                    * maxSpeed.in(MetersPerSecond)
-                    * -1.0) // Drive forward with negative Y (forward)
-            .withVelocityY(
-                Math.pow(driveCont.getLeftX(), 3)
-                    * maxSpeed.in(MetersPerSecond)
-                    * -1.0) // Drive left with negative X (left)
-            .withRotationalRate(
-                Math.pow(driveCont.getRightX(), 2)
-                    * (maxAngularVelocity.in(RadiansPerSecond) / 2.0)
-                    * -Math.signum(driveCont.getRightX())) // Drive
-        // counterclockwise
-        // with negative X
-        // (left)
-        );
+  // defense mode command
+  private void toggleDefenseMode() {
+    isDefenseMode = !isDefenseMode;
+  }
+
+  public Command toggleDefenseModeCmd() {
+    return this.runOnce(() -> toggleDefenseMode());
   }
 
   // Xout Command
   public void xOut() {
+    commandedSpeeds.vxMetersPerSecond = 0.0;
+    commandedSpeeds.vyMetersPerSecond = 0.0;
+    commandedSpeeds.omegaRadiansPerSecond = 0.0;
     this.setControl(xOutReq);
   }
 
   public Command xOutCmd() {
-    return this.applyRequest(() -> xOutReq);
+    return this.run(() -> xOut());
+  }
+
+  public Command toggleHeadingLockCommand() {
+    return new InstantCommand(
+        () -> {
+          headingLockEnabled = !headingLockEnabled;
+          headingControllerActive = false; // Reset so we know when fresh data is available
+          if (headingLockEnabled) {
+            // Initialize to nearest 90° angle when enabling
+            double currentDegrees = getRotation2d().getDegrees();
+            currentDegrees = ((currentDegrees % 360) + 360) % 360;
+            currentTargetAngle = Math.round(currentDegrees / 90.0) * 90.0;
+            if (currentTargetAngle >= 360) currentTargetAngle = 0;
+          }
+        });
+  }
+
+  public boolean isHeadingLockEnabled() {
+    return headingLockEnabled;
   }
 
   /**
@@ -168,33 +288,56 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
       DoubleSupplier velocityXSupplier,
       DoubleSupplier velocityYSupplier,
       Supplier<Rotation2d> headingSupplier) {
+    double speedCapMps = maxSpeed.in(MetersPerSecond) * FACING_ANGLE_MAX_SPEED_FRACTION;
+    // Tracks whether the heading controller has produced at least one output for this
+    // command schedule. Reset in finallyDo so each new schedule starts clean.
+    boolean[] controllerHasRun = {false};
     return this.applyRequest(
-        () ->
-            m_faceHubRequest
-                .withVelocityX(
-                    DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
-                        ? velocityXSupplier.getAsDouble()
-                        : -velocityXSupplier.getAsDouble())
-                .withVelocityY(
-                    DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
-                        ? velocityYSupplier.getAsDouble()
-                        : -velocityYSupplier.getAsDouble())
-                .withTargetDirection(headingSupplier.get()));
-  }
+            () -> {
+              double rawVelXMps = velocityXSupplier.getAsDouble();
+              double rawVelYMps = velocityYSupplier.getAsDouble();
 
-  public void faceAngleWhileDriving(double velocityX, double velocityY, Rotation2d heading) {
-    this.setControl(
-        m_faceHubRequest
-            .withVelocityX(
-                DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
-                    ? velocityX
-                    : -velocityX)
-            .withVelocityY(
-                DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
-                    ? velocityY
-                    : -velocityY)
-            .withTargetDirection(heading)
-            .withDeadband(maxSpeed.in(MetersPerSecond) * 0.01));
+              // Clamp the velocity vector magnitude to the speed cap
+              double rawSpeedMps = Math.hypot(rawVelXMps, rawVelYMps);
+              if (rawSpeedMps > speedCapMps) {
+                double scale = speedCapMps / rawSpeedMps;
+                rawVelXMps *= scale;
+                rawVelYMps *= scale;
+              }
+
+              // Gate on controllerHasRun to avoid consuming stale output on the first cycle
+              // after the controller was reset (getLastAppliedOutput() returns 0 until the
+              // facing-angle request has been applied at least once).
+              double omegaRps =
+                  controllerHasRun[0]
+                      ? angleFacingRequest.HeadingController.getLastAppliedOutput()
+                      : 0.0;
+              controllerHasRun[0] = true;
+
+              // Store as robot-relative to match getVelocity() convention.
+              // Convert operator-perspective to field-relative (alliance flip),
+              // then field-relative to robot-relative.
+              boolean isBlueAlliance =
+                  DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue;
+              commandedSpeeds =
+                  ChassisSpeeds.fromFieldRelativeSpeeds(
+                      isBlueAlliance ? rawVelXMps : -rawVelXMps,
+                      isBlueAlliance ? rawVelYMps : -rawVelYMps,
+                      omegaRps,
+                      getPosition().getRotation());
+
+              // Pass operator-perspective values — CTRE applies operator perspective
+              // internally via setOperatorPerspectiveForward
+              return angleFacingRequest
+                  .withVelocityX(isBlueAlliance ? rawVelXMps : -rawVelXMps)
+                  .withVelocityY(isBlueAlliance ? rawVelYMps : -rawVelYMps)
+                  .withTargetDirection(headingSupplier.get());
+            })
+        .finallyDo(
+            () -> {
+              angleFacingRequest.HeadingController.reset();
+              controllerHasRun[0] = false; // Reset so next schedule starts clean
+            });
   }
 
   /**
@@ -210,13 +353,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         () -> Math.pow(driveCont.getLeftY(), 3) * maxSpeed.in(MetersPerSecond) * -1.0,
         () -> Math.pow(driveCont.getLeftX(), 3) * maxSpeed.in(MetersPerSecond) * -1.0,
         headingSupplier);
-  }
-
-  public void faceAngleWhileDriving(CommandXboxController driveCont, Rotation2d heading) {
-    faceAngleWhileDriving(
-        Math.pow(driveCont.getLeftY(), 3) * maxSpeed.in(MetersPerSecond) * -1.0,
-        Math.pow(driveCont.getLeftX(), 3) * maxSpeed.in(MetersPerSecond) * -1.0,
-        heading);
   }
 
   /*
@@ -293,15 +429,69 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     super(drivetrainConstants, modules);
     // Registers the subsystem so periodic runs
     CommandScheduler.getInstance().registerSubsystem(this);
-    m_faceHubRequest.HeadingController.setPID(HEADING_KP, HEADING_KI, HEADING_KD);
-    m_faceHubRequest.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
-    m_faceHubRequest.HeadingController.setIZone(HEADING_I_ZONE);
-    m_faceHubRequest.HeadingController.setTolerance(HEADING_TOLERANCE_RAD);
-    m_faceHubRequest.ForwardPerspective = ForwardPerspectiveValue.BlueAlliance;
+    angleFacingRequest.HeadingController.setPID(HEADING_KP, HEADING_KI, HEADING_KD);
+    angleFacingRequest.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
+    angleFacingRequest.HeadingController.setIZone(HEADING_I_ZONE);
+    angleFacingRequest.HeadingController.setTolerance(HEADING_TOLERANCE_RAD);
+    angleFacingRequest.ForwardPerspective = ForwardPerspectiveValue.BlueAlliance;
     if (Utils.isSimulation()) {
       startSimThread();
     }
     configureAutoBuilder();
+    SmartDashboard.putData("Field", field);
+    SmartDashboard.putData(
+        "Swerve Drive",
+        new Sendable() {
+          @Override
+          public void initSendable(SendableBuilder builder) {
+            builder.setSmartDashboardType("SwerveDrive");
+
+            // Use cached state from periodic() to avoid multiple getStateCopy() calls
+            // Front Left (Module 0)
+            builder.addDoubleProperty(
+                "Front Left Angle",
+                () -> cachedState != null ? cachedState.ModuleStates[0].angle.getRadians() : 0.0,
+                null);
+            builder.addDoubleProperty(
+                "Front Left Velocity",
+                () -> cachedState != null ? cachedState.ModuleStates[0].speedMetersPerSecond : 0.0,
+                null);
+
+            // Front Right (Module 1)
+            builder.addDoubleProperty(
+                "Front Right Angle",
+                () -> cachedState != null ? cachedState.ModuleStates[1].angle.getRadians() : 0.0,
+                null);
+            builder.addDoubleProperty(
+                "Front Right Velocity",
+                () -> cachedState != null ? cachedState.ModuleStates[1].speedMetersPerSecond : 0.0,
+                null);
+
+            // Back Left (Module 2)
+            builder.addDoubleProperty(
+                "Back Left Angle",
+                () -> cachedState != null ? cachedState.ModuleStates[2].angle.getRadians() : 0.0,
+                null);
+            builder.addDoubleProperty(
+                "Back Left Velocity",
+                () -> cachedState != null ? cachedState.ModuleStates[2].speedMetersPerSecond : 0.0,
+                null);
+
+            // Back Right (Module 3)
+            builder.addDoubleProperty(
+                "Back Right Angle",
+                () -> cachedState != null ? cachedState.ModuleStates[3].angle.getRadians() : 0.0,
+                null);
+            builder.addDoubleProperty(
+                "Back Right Velocity",
+                () -> cachedState != null ? cachedState.ModuleStates[3].speedMetersPerSecond : 0.0,
+                null);
+
+            // Robot angle
+            builder.addDoubleProperty(
+                "Robot Angle", () -> getCachedState().Pose.getRotation().getRadians(), null);
+          }
+        });
   }
 
   /**
@@ -331,31 +521,46 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
    *     theta]ᵀ, with units in meters and radians
    * @param modules Constants for each specific module
    */
+  // PathPlanner AutoBuilder PID gains
+  private static final double PP_TRANSLATION_KP = 11.0;
+
+  private static final double PP_TRANSLATION_KI = 0.0;
+  private static final double PP_TRANSLATION_KD = 0.0;
+  private static final double PP_ROTATION_KP = 8.0;
+  private static final double PP_ROTATION_KI = 0.0;
+  private static final double PP_ROTATION_KD = 0.0;
+
   private void configureAutoBuilder() {
     try {
-      var config = RobotConfig.fromGUISettings();
+      RobotConfig config;
+      // TODO rework this so it's unified with the top level robot builder class
+      if (Constants.getRobotType() == Constants.RobotType.WOODBOT) {
+        config = Constants.WoodBotConstants.createPathPlannerConfig();
+      } else {
+        config = RobotConfig.fromGUISettings();
+      }
 
       AutoBuilder.configure(
-          () -> getStateCopy().Pose, // Supplier of current robot pose
+          this::getPosition, // Supplier of current robot pose (uses cached state)
           this::resetPose, // Consumer for seeding pose against auto
-          () -> getStateCopy().Speeds, // Supplier of current robot speeds
+          this::getVelocity, // Supplier of current robot speeds (uses cached state)
           // Consumer of ChassisSpeeds and feedforwards to drive the robot
-          (speeds, feedforwards) ->
-              setControl(
-                  m_pathApplyRobotSpeeds
-                      .withSpeeds(ChassisSpeeds.discretize(speeds, 0.020))
-                      .withWheelForceFeedforwardsX(feedforwards.robotRelativeForcesXNewtons())
-                      .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons())
-                      .withDriveRequestType(m_driveRequestType)),
+          (speeds, feedforwards) -> {
+            setCommandedSpeeds(speeds);
+            setControl(
+                m_pathApplyRobotSpeeds
+                    .withSpeeds(ChassisSpeeds.discretize(speeds, 0.020))
+                    .withWheelForceFeedforwardsX(feedforwards.robotRelativeForcesXNewtons())
+                    .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons())
+                    .withDriveRequestType(m_driveRequestType));
+          },
           new PPHolonomicDriveController(
-              // PID constants for translation
-              new PIDConstants(11, 0, 0),
-              // PID constants for rotation
-              new PIDConstants(8, 0, 0)),
+              new PIDConstants(PP_TRANSLATION_KP, PP_TRANSLATION_KI, PP_TRANSLATION_KD),
+              new PIDConstants(PP_ROTATION_KP, PP_ROTATION_KI, PP_ROTATION_KD)),
           config,
           // Assume the path needs to be flipped for Red vs Blue, this is normally the
           // case
-          () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
+          () -> false,
           this // Subsystem for requirements
           );
     } catch (Exception ex) {
@@ -364,12 +569,63 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     }
   }
 
+  /**
+   * Returns the lazily-cached swerve state for this scheduler cycle. On the first call after {@link
+   * #clearCachedState()}, this calls {@link #getStateCopy()} once and caches the result. All
+   * subsequent calls in the same cycle return the cached instance with zero allocation.
+   *
+   * @return the cached {@link SwerveDriveState}
+   */
+  public SwerveDriveState getCachedState() {
+    if (cachedState == null) {
+      cachedState = this.getStateCopy();
+    }
+    return cachedState;
+  }
+
+  /**
+   * Invalidates the cached swerve state so the next {@link #getCachedState()} call fetches a fresh
+   * copy. Called once per scheduler cycle from {@link
+   * frc.robot.RobotContainer#preSchedulerUpdate()}.
+   */
+  public void clearCachedState() {
+    cachedState = null;
+  }
+
   public Pose2d getPose2d() {
-    return this.getStateCopy().Pose;
+    return getCachedState().Pose;
   }
 
   public Rotation2d getRotation2d() {
-    return getPose2d().getRotation();
+    return getCachedState().Pose.getRotation();
+  }
+
+  /**
+   * Returns whether the heading controller is aligned to its target angle within a speed-scaled
+   * tolerance. Uses the {@link com.ctre.phoenix6.swerve.utility.PhoenixPIDController#atSetpoint()}
+   * method on the facing-angle request's heading controller.
+   *
+   * <p>The tolerance grows with translational speed to account for the PID steady-state tracking
+   * lag: when the robot moves, the heading setpoint changes at roughly {@code v/d} rad/s, producing
+   * a lag of {@code (v/d)/KP} rad. Adding {@link #HEADING_SPEED_TOLERANCE_RAD_PER_MPS} per m/s
+   * compensates for this so the robot can fire during shoot-on-the-move.
+   *
+   * <p>Note: This only returns meaningful results while a {@link
+   * SwerveRequest.FieldCentricFacingAngle} request is actively being applied (e.g., during
+   * faceAngleWhileDriving). Before the first PID calculation, this returns false.
+   *
+   * @return true if the heading error is within the speed-scaled tolerance
+   */
+  public boolean isAlignedToTarget() {
+    ChassisSpeeds speeds = getVelocity();
+    double speedMps = Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond);
+    double dynamicToleranceRad =
+        HEADING_TOLERANCE_RAD + speedMps * HEADING_SPEED_TOLERANCE_RAD_PER_MPS;
+    Logger.recordOutput(
+        SUBSYSTEM_NAME + "DynamicHeadingToleranceDeg", Math.toDegrees(dynamicToleranceRad));
+
+    angleFacingRequest.HeadingController.setTolerance(dynamicToleranceRad);
+    return angleFacingRequest.HeadingController.atSetpoint();
   }
 
   /**
@@ -401,11 +657,11 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   }
 
   public double getAngle() {
-    return this.getRotation2d().getDegrees();
+    return getRotation2d().getDegrees();
   }
 
   public double getAngularRate() {
-    return Math.toDegrees(this.getStateCopy().Speeds.omegaRadiansPerSecond);
+    return Math.toDegrees(getVelocity().omegaRadiansPerSecond);
   }
 
   public void zero() {
@@ -450,15 +706,16 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
   @Override
   public void periodic() {
-    // Current pose includes vision fusion when vision measurements are added
-    Logger.recordOutput(SUBSYSTEM_NAME + "CurrentPose", this.getStateCopy().Pose);
-    Logger.recordOutput(SUBSYSTEM_NAME + "Rotation2d", this.getStateCopy().RawHeading);
-    Logger.recordOutput(SUBSYSTEM_NAME + "CurrentState", this.getStateCopy().ModuleStates);
-    Logger.recordOutput(SUBSYSTEM_NAME + "TargetState", this.getStateCopy().ModuleTargets);
-    Logger.recordOutput(SUBSYSTEM_NAME + "Using Vision", hasVisionMeasurements);
+    SwerveDriveState state = getCachedState();
 
-    // Update field visualizations (hub points, line from robot to hub, etc.)
-    FieldVisualizer.update(this.getStateCopy().Pose);
+    field.setRobotPose(state.Pose);
+
+    Logger.recordOutput(SUBSYSTEM_NAME + "CurrentPose", state.Pose);
+    Logger.recordOutput(SUBSYSTEM_NAME + "Rotation2d", state.RawHeading);
+    Logger.recordOutput(SUBSYSTEM_NAME + "CurrentState", state.ModuleStates);
+    Logger.recordOutput(SUBSYSTEM_NAME + "TargetState", state.ModuleTargets);
+    Logger.recordOutput(SUBSYSTEM_NAME + "Using Vision", hasVisionMeasurements);
+    Logger.recordOutput(SUBSYSTEM_NAME + "Is Defense Mode", isDefenseMode);
 
     // Log whether vision measurements have been applied (useful for analysis)
     /*
@@ -526,7 +783,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
    * @return the current {@link Pose2d} of the robot
    */
   public Pose2d getPosition() {
-    return this.getStateCopy().Pose;
+    return getCachedState().Pose;
   }
 
   /**
@@ -535,7 +792,26 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
    * @return the current {@link ChassisSpeeds} of the robot
    */
   public ChassisSpeeds getVelocity() {
-    return this.getStateCopy().Speeds;
+    return getCachedState().Speeds;
+  }
+
+  /**
+   * Returns the commanded chassis speeds of the robot (what the drivetrain is being told to do).
+   * This is less noisy than measured velocities for shoot-on-the-move compensation.
+   *
+   * @return the commanded {@link ChassisSpeeds} of the robot
+   */
+  public ChassisSpeeds getCommandedVelocity() {
+    return commandedSpeeds;
+  }
+
+  /**
+   * Sets the commanded chassis speeds. Called internally when applying drive requests.
+   *
+   * @param speeds the commanded chassis speeds
+   */
+  private void setCommandedSpeeds(ChassisSpeeds speeds) {
+    this.commandedSpeeds = speeds;
   }
 
   /**

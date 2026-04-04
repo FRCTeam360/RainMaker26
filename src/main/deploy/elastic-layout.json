@@ -1,0 +1,89 @@
+{
+  "version": 1.0,
+  "grid_size": 128,
+  "tabs": [
+    {
+      "name": "Teleoperated",
+      "grid_layout": {
+        "layouts": [],
+        "containers": [
+          {
+            "title": "limelight-right",
+            "x": 0.0,
+            "y": 256.0,
+            "width": 512.0,
+            "height": 384.0,
+            "type": "Camera Stream",
+            "properties": {
+              "topic": "/CameraPublisher/limelight-right",
+              "period": 0.06,
+              "rotation_turns": 0
+            }
+          },
+          {
+            "title": "Auto Chooser",
+            "x": 0.0,
+            "y": 0.0,
+            "width": 512.0,
+            "height": 128.0,
+            "type": "ComboBox Chooser",
+            "properties": {
+              "topic": "/SmartDashboard/Auto Chooser",
+              "period": 0.06,
+              "sort_options": false
+            }
+          },
+          {
+            "title": "Can Score in Hub",
+            "x": 512.0,
+            "y": 0.0,
+            "width": 512.0,
+            "height": 640.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/SmartDashboard/Can Score in Hub",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "Time Left in Phase",
+            "x": 1024.0,
+            "y": 0.0,
+            "width": 512.0,
+            "height": 640.0,
+            "type": "Match Time",
+            "properties": {
+              "topic": "/SmartDashboard/Time Left in Phase",
+              "period": 0.06,
+              "data_type": "double",
+              "time_display_mode": "Minutes and Seconds",
+              "red_start_time": 20,
+              "yellow_start_time": 30
+            }
+          },
+          {
+            "title": "Match Time",
+            "x": 0.0,
+            "y": 128.0,
+            "width": 512.0,
+            "height": 128.0,
+            "type": "Match Time",
+            "properties": {
+              "topic": "/SmartDashboard/Match Time",
+              "period": 0.033,
+              "data_type": "double",
+              "time_display_mode": "Minutes and Seconds",
+              "red_start_time": 15,
+              "yellow_start_time": 30
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
