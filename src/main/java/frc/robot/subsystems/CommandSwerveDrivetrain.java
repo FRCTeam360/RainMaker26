@@ -290,10 +290,16 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     double omegaRps = angleFacingRequest.HeadingController.getLastAppliedOutput();
 
-    // Store as robot-relative to match getVelocity() convention.
+    // Only include heading correction omega in commandedSpeeds when the driver is actively
+    // translating. When stationary, omega from the PID should not influence shoot-on-the-move
+    // compensation in ShotCalculator.
+    boolean isTranslating = Math.hypot(fieldRelativeVelXMps, fieldRelativeVelYMps) > 0.0;
     commandedSpeeds =
         ChassisSpeeds.fromFieldRelativeSpeeds(
-            fieldRelativeVelXMps, fieldRelativeVelYMps, omegaRps, getPosition().getRotation());
+            fieldRelativeVelXMps,
+            fieldRelativeVelYMps,
+            isTranslating ? omegaRps : 0.0,
+            getPosition().getRotation());
 
     this.setControl(
         angleFacingRequest
