@@ -14,6 +14,8 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.utils.FieldConstants;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -131,8 +133,8 @@ public class Vision extends SubsystemBase {
       Logger.processInputs("Limelight: " + key, input.clone());
     }
 
-    for (String key : visionInputs.keySet()) {
-      VisionIOInputsAutoLogged input = visionInputs.get(key);
+    for (Map.Entry<String, VisionIOInputsAutoLogged> entry : visionInputs.entrySet()) {
+      VisionIOInputsAutoLogged input = entry.getValue();
 
       // Count total detections (pose updates attempted)
       if (input.poseUpdated) {
@@ -149,10 +151,7 @@ public class Vision extends SubsystemBase {
       double timestamp = input.timestampSeconds;
 
       // Skip measurements that are not with in the field boundary
-      if (pose.getX() < 0.0
-          || pose.getX() > Constants.FIELD_LAYOUT.getFieldLength()
-          || pose.getY() < 0.0
-          || pose.getY() > Constants.FIELD_LAYOUT.getFieldWidth()) {
+      if (isPoseOutOfBounds(pose)) {
         rejectedMeasurements++;
         continue;
       }
@@ -209,5 +208,12 @@ public class Vision extends SubsystemBase {
   public Command consumeVisionMeasurements(
       Consumer<List<VisionMeasurement>> visionMeasurementConsumer) {
     return run(() -> visionMeasurementConsumer.accept(acceptedMeasurements));
+  }
+
+  public static boolean isPoseOutOfBounds(Pose2d pose) {
+    return pose.getX() < 0.0
+        || pose.getX() > FieldConstants.fieldLength
+        || pose.getY() < 0.0
+        || pose.getY() > FieldConstants.fieldWidth;
   }
 }

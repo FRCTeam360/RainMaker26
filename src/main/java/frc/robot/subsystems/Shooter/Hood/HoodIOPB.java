@@ -7,9 +7,10 @@ package frc.robot.subsystems.Shooter.Hood;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.Slot0Configs;
-import com.ctre.phoenix6.configs.TalonFXSConfiguration;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
-import com.ctre.phoenix6.hardware.TalonFXS;
+import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.util.Units;
@@ -22,24 +23,25 @@ import frc.robot.Constants;
 public class HoodIOPB implements HoodIO {
   private static final double GEAR_RATIO = 3.0 / 1.0 * 170.0 / 10.0;
   // 1/3 * 170/10
-  private static final double KP = 300.0;
+  private static final double KP = 750.0;
   private static final double KI = 0.0;
   private static final double KD = 0.0;
   private static final double KA = 0.0;
   private static final double KG = 0.01; // .15
   private static final double KS = 0.2;
   private static final double KV = 0.0;
-  private static final double FORWARD_SOFT_LIMIT_DEGREES = 47.0;
+  private static final double FORWARD_SOFT_LIMIT_DEGREES = 42.0;
   private static final double STATOR_CURRENT_LIMIT_AMPS = 60.0;
   private static final double SUPPLY_CURRENT_LIMIT_AMPS = 25.0;
   private static final double MOTION_MAGIC_ACCELERATION_RPS2 = 4.0;
   private static final double MOTION_MAGIC_CRUISE_VELOCITY_RPS = 2.0;
   private static final double MOTION_MAGIC_JERK_RPS3 = 1200.0;
-  private final TalonFXS hoodMotor =
-      new TalonFXS(Constants.PracticeBotConstants.HOOD_ID, Constants.PracticeBotConstants.CANBUS);
-  private final TalonFXSConfiguration config = new TalonFXSConfiguration();
+  private final TalonFX hoodMotor =
+      new TalonFX(Constants.PracticeBotConstants.HOOD_ID, Constants.PracticeBotConstants.CANBUS);
+  private final TalonFXConfiguration config = new TalonFXConfiguration();
 
   private final MotionMagicVoltage motionMagicPosition = new MotionMagicVoltage(0);
+  private final PositionVoltage positionVoltage = new PositionVoltage(0);
 
   private final StatusSignal<Angle> positionSignal;
   private final StatusSignal<AngularVelocity> velocitySignal;
@@ -61,7 +63,7 @@ public class HoodIOPB implements HoodIO {
     slot0Configs.kS = KS;
     slot0Configs.kV = KV;
 
-    config.ExternalFeedback.SensorToMechanismRatio = GEAR_RATIO;
+    config.Feedback.SensorToMechanismRatio = GEAR_RATIO;
 
     config.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
     config.SoftwareLimitSwitch.ForwardSoftLimitThreshold =
@@ -96,14 +98,13 @@ public class HoodIOPB implements HoodIO {
     setZero();
   }
 
-  /**
-   * Sets the hood position.
-   *
-   * @param positionDegrees target position in degrees
-   */
-  public void setPosition(double positionDegrees) {
+  public void setPositionSmooth(double positionDegrees) {
     hoodMotor.setControl(
         motionMagicPosition.withPosition(Units.degreesToRotations(positionDegrees)));
+  }
+
+  public void setPositionAggressive(double positionDegrees) {
+    hoodMotor.setControl(positionVoltage.withPosition(Units.degreesToRotations(positionDegrees)));
   }
 
   public void updateInputs(HoodIOInputs inputs) {
