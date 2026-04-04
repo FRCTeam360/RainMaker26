@@ -126,9 +126,9 @@ public class BLineAutos {
                                 return passCalculator.calculateShot().targetHeading();
                               }
                               return hubShotCalculator.calculateShot().targetHeading();
-                            }))
-                    .andThen(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING))
-                    .andThen(superStructure.setStateCommand(SuperWantedStates.DEFAULT))),
+                            })))
+            .andThen(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING))
+            .andThen(superStructure.setStateCommand(SuperWantedStates.DEFAULT)),
         "shoot at hub");
   }
 
