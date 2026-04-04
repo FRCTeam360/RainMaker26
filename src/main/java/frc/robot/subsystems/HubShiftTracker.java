@@ -15,7 +15,6 @@ public class HubShiftTracker {
   private enum MatchPhase {
     AUTO,
     TELEOP,
-    ENDGAME,
     DISABLED
   }
 
@@ -44,11 +43,7 @@ public class HubShiftTracker {
     } else if (DriverStation.isAutonomous()) {
       currentPhase = MatchPhase.AUTO;
     } else if (DriverStation.isTeleop()) {
-      if (matchTime >= RobotUtils.ENDGAME_START_SECONDS) {
-        currentPhase = MatchPhase.TELEOP;
-      } else {
-        currentPhase = MatchPhase.ENDGAME;
-      }
+      currentPhase = MatchPhase.TELEOP;
     }
     weAreAutoWinner = RobotUtils.isAutoWinner();
 
@@ -79,8 +74,6 @@ public class HubShiftTracker {
         return matchTime;
       case TELEOP:
         return getTimeUntilNextShiftBoundary(matchTime, weAreAutoWinner);
-      case ENDGAME:
-        return matchTime;
       default:
         return 0.0;
     }
