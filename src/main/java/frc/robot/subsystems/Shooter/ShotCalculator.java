@@ -42,6 +42,8 @@ public class ShotCalculator {
   private final String logTimeOfFlightSecs;
   private final String logIsValid;
   private final String logRobotSpeeds;
+  private final String logCurrentHeadingDeg;
+  private final String logHeadingErrorDeg;
 
   private double minDistanceMeters = 0.0;
   private double maxDistanceMeters = Double.MAX_VALUE;
@@ -114,6 +116,8 @@ public class ShotCalculator {
     this.logTimeOfFlightSecs = basePath + "/timeOfFlightSecs";
     this.logIsValid = basePath + "/isValid";
     this.logRobotSpeeds = basePath + "/robotSpeeds";
+    this.logCurrentHeadingDeg = basePath + "/currentHeadingDeg";
+    this.logHeadingErrorDeg = basePath + "/headingErrorDeg";
   }
 
   private ShootingParams cachedShootingParams = null;
@@ -229,6 +233,11 @@ public class ShotCalculator {
     Logger.recordOutput(logTargetFlywheelSpeed, flywheelSpeed);
     Logger.recordOutput(logTargetHoodAngle, hoodAngle);
     Logger.recordOutput(logTargetHeading, targetHeading);
+    double currentHeadingDeg = robotPosition.getRotation().getDegrees();
+    Logger.recordOutput(logCurrentHeadingDeg, currentHeadingDeg);
+    Logger.recordOutput(
+        logHeadingErrorDeg,
+        Math.IEEEremainder(targetHeading.getDegrees() - currentHeadingDeg, 360.0));
     Logger.recordOutput(logLookaheadPose, new Pose2d(lookaheadPosition, targetHeading));
     Logger.recordOutput(logRobotCenterLookahead, new Pose2d(robotCenterLookahead, targetHeading));
     Logger.recordOutput(logTimeOfFlightSecs, timeOfFlightSecs);
