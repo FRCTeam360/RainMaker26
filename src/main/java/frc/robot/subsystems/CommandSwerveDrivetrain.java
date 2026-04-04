@@ -119,7 +119,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   // Translation: maxSpeed m/s per second → reaches full speed in ~1 s from rest
   private static final double TRANSLATION_SLEW_RATE_MPS_PER_S = 8.0;
   // Rotation: maxAngularVelocity rad/s per second → reaches full rotation in ~1 s from rest
-  private static final double ROTATION_SLEW_RATE_RPS_PER_S = 10.0;
+  private static final double ROTATION_SLEW_RATE_RPS_PER_S = 1000000000.0;
 
   // Deadbands for swerve drive requests (1% of max speed/angular velocity)
   private static final double TRANSLATION_DEADBAND_FRACTION = 0.01;
