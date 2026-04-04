@@ -93,7 +93,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
   // Heading controller PID gains (from example code)
   private static final double HEADING_KP = 15.0;
-  private static final double HEADING_KI = 0.2;
+  private static final double HEADING_KI = 0.0;
   private static final double HEADING_KD = 1.0; // 1.0 Kd is prob the highest we should go
   private static final double HEADING_I_ZONE = Math.toRadians(10.0);
   private static final double HEADING_TOLERANCE_RAD = Math.toRadians(3.0);
