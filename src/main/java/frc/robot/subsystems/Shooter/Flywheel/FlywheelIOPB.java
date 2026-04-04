@@ -78,6 +78,8 @@ public class FlywheelIOPB implements FlywheelIO {
     rightConfig.TorqueCurrent.PeakForwardTorqueCurrent = MAX_POSITIVE_TORQUE_CURRENT;
     rightConfig.TorqueCurrent.PeakReverseTorqueCurrent = MAX_NEGATIVE_TORQUE_CURRENT;
 
+    rightConfig.Voltage.PeakReverseVoltage = -2;
+
     leftConfig = rightConfig.clone();
     // do not edit right configs after cloning
     leftConfig.MotorOutput.withInverted(InvertedValue.Clockwise_Positive);
