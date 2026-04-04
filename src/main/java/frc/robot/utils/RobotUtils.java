@@ -7,7 +7,7 @@ import java.io.File;
 import java.util.Optional;
 
 public class RobotUtils {
-  private static final double SHIFT_GRACE_PERIOD_SECONDS = 2.0;
+  private static final double SHIFT_GRACE_PERIOD_SECONDS = 3.0;
   private static final double INDEXER_TO_FLYWHEEL_SECONDS = 0.4;
   private static final double HUB_TO_SENSOR_SECONDS = 2.0;
 
