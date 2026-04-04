@@ -33,6 +33,7 @@ public class FlywheelIOPB implements FlywheelIO {
   private static final double MAX_NEGATIVE_TORQUE_CURRENT = -200.0;
   private static final double MAX_POSITIVE_TORQUE_CURRENT = STATOR_CURRENT_LIMIT_AMPS;
   private static final double SUPPLY_CURRENT_LIMIT_AMPS = 60.0;
+  private static final double PEAK_REVERSE_VOLTAGE_VOLTS = -2.0;
 
   private final TalonFX[] motors = {
     new TalonFX(PracticeBotConstants.FLYWHEEL_RIGHT_ID, PracticeBotConstants.CANBUS),
@@ -78,7 +79,7 @@ public class FlywheelIOPB implements FlywheelIO {
     rightConfig.TorqueCurrent.PeakForwardTorqueCurrent = MAX_POSITIVE_TORQUE_CURRENT;
     rightConfig.TorqueCurrent.PeakReverseTorqueCurrent = MAX_NEGATIVE_TORQUE_CURRENT;
 
-    rightConfig.Voltage.PeakReverseVoltage = -2;
+    rightConfig.Voltage.PeakReverseVoltage = PEAK_REVERSE_VOLTAGE_VOLTS;
 
     leftConfig = rightConfig.clone();
     // do not edit right configs after cloning
