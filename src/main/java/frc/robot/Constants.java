@@ -263,7 +263,9 @@ public final class Constants {
 
     // === FLYWHEEL KICKER ===
     public static final int FLYWHEEL_KICKER_ID = 20;
-    public static final int FLYWHEEL_KICKER_SENSOR_ID = 21;
+
+    // === HOPPER SENSOR ===
+    public static final int HOPPER_SENSOR_ID = 21;
 
     // === HOPPER ===
     public static final int HOPPER_ROLLER_ID = 22;
@@ -282,7 +284,7 @@ public final class Constants {
 
     // === MAXIMUMS ===
     public static final LinearVelocity maxSpeed = MetersPerSecond.of(4.69);
-    public static final AngularVelocity maxAngularVelocity = RevolutionsPerSecond.of(4.0);
+    public static final AngularVelocity maxAngularVelocity = RevolutionsPerSecond.of(2.5);
 
     static {
       shotHoodAngleMap.put(6.0, 16.0);
