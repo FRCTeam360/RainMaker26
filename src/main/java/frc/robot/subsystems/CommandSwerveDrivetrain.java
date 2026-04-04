@@ -94,9 +94,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   // Heading controller PID gains (from example code)
   private static final double HEADING_KP = 15.0;
   private static final double HEADING_KI = 0.2;
-  // Current Kd is near-zero and provides almost no damping. Recommended starting point
-  // is ~0.1 (= KP/60), tunable up to ~0.3 before gyro noise begins to amplify.
-  // Example: private static final double HEADING_KD = 0.1;
   private static final double HEADING_KD = 1.0; // 1.0 Kd is prob the highest we should go
   private static final double HEADING_I_ZONE = Math.toRadians(10.0);
   private static final double HEADING_TOLERANCE_RAD = Math.toRadians(3.0);
