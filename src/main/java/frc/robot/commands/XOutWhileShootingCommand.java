@@ -92,7 +92,7 @@ public class XOutWhileShootingCommand extends Command {
     double commandedSpeedMps = Math.hypot(vx, vy);
     boolean hasDriverInput =
         commandedSpeedMps
-            > CommandSwerveDrivetrain.maxSpeed.in(MetersPerSecond) * DRIVER_INPUT_THRESHOLD;
+            > drivetrain.maxSpeed.in(MetersPerSecond) * DRIVER_INPUT_THRESHOLD;
 
     if (isXOuted) {
       // Heading controller is stale while x-outed, so check alignment manually

@@ -50,7 +50,7 @@ import org.littletonrobotics.junction.Logger;
  * https://v6.docs.ctr-electronics.com/en/stable/docs/tuner/tuner-swerve/index.html
  */
 public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Subsystem {
-  private LinearVelocity maxSpeed = Constants.getMaxSpeed();
+  public LinearVelocity maxSpeed = Constants.getMaxSpeed();
   private AngularVelocity maxAngularVelocity = Constants.getMaxAngularVelocity();
   private boolean isDefenseMode = false;
   private static final double kSimLoopPeriod = 0.004; // 4 ms
