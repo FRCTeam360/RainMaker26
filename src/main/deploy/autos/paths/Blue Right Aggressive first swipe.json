@@ -14,37 +14,37 @@
     },
     {
       "type": "event_trigger",
-      "t_ratio": 0.11115313860104215,
+      "t_ratio": 0.11115313860104216,
       "lib_key": "intake"
     },
     {
       "type": "translation",
-      "x_meters": 7.203481770917952,
-      "y_meters": 0.9594322177091801,
+      "x_meters": 6.633538635255889,
+      "y_meters": 0.6459634930950466,
       "intermediate_handoff_radius_meters": 0.25
     },
     {
       "type": "rotation",
       "rotation_radians": 1.5707963267948966,
-      "t_ratio": 0.4964867351633089,
+      "t_ratio": 0.4964867351633088,
       "profiled_rotation": true
     },
     {
       "type": "translation",
-      "x_meters": 8.529424955320875,
-      "y_meters": 2.1990585377741674,
+      "x_meters": 8.38693917140536,
+      "y_meters": 2.29879858651503,
       "intermediate_handoff_radius_meters": 0.49999999999999994
     },
     {
       "type": "rotation",
       "rotation_radians": 3.5779249665883754,
-      "t_ratio": 0.9817418643947512,
+      "t_ratio": 0.9817418643947516,
       "profiled_rotation": true
     },
     {
       "type": "translation",
-      "x_meters": 7.504352705117791,
-      "y_meters": 3.2819504955320875,
+      "x_meters": 7.390364077985378,
+      "y_meters": 3.410187701056053,
       "intermediate_handoff_radius_meters": 0.2
     },
     {
@@ -98,6 +98,11 @@
         "value": 6.0,
         "start_ordinal": 2,
         "end_ordinal": 4
+      },
+      {
+        "value": 6.0,
+        "start_ordinal": 0,
+        "end_ordinal": 0
       }
     ]
   }
