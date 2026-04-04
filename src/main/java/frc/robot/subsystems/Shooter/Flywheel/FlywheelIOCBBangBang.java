@@ -59,7 +59,6 @@ public class FlywheelIOCBBangBang implements FlywheelIO {
   private static final double SUPPLY_CURRENT_LIMIT_AMPS = 70.0;
   private static final double GEAR_RATIO = 1.0;
   private final TalonFX[] motors;
-  private final int rightMotorId;
   private TalonFXConfiguration rightConfig = new TalonFXConfiguration();
   private TalonFXConfiguration leftConfig = new TalonFXConfiguration();
 
@@ -84,7 +83,6 @@ public class FlywheelIOCBBangBang implements FlywheelIO {
 
   /** Constructs the comp bot flywheel IO and configures both TalonFX motors. */
   public FlywheelIOCBBangBang() {
-    this.rightMotorId = Constants.CompBotConstants.FLYWHEEL_RIGHT_ID;
     motors =
         new TalonFX[] {
           new TalonFX(
@@ -144,7 +142,8 @@ public class FlywheelIOCBBangBang implements FlywheelIO {
     motors[0].getConfigurator().apply(rightConfig);
     motors[0].setNeutralMode(NeutralModeValue.Coast);
 
-    motors[1].setControl(new Follower(this.rightMotorId, MotorAlignmentValue.Opposed));
+    motors[1].setControl(
+        new Follower(Constants.CompBotConstants.FLYWHEEL_RIGHT_ID, MotorAlignmentValue.Opposed));
 
     rightStatorCurrentSignal = motors[0].getStatorCurrent();
     rightSupplyCurrentSignal = motors[0].getSupplyCurrent();

@@ -19,7 +19,6 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import frc.robot.Constants;
-import frc.robot.subsystems.Shooter.Hood.HoodIO.HoodIOInputs;
 
 public class HoodIOCB implements HoodIO {
   private static final double GEAR_RATIO = 3.0 / 1.0 * 170.0 / 10.0;
