@@ -14,6 +14,7 @@ import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.util.Units;
@@ -93,7 +94,7 @@ public class IntakePivotIOCB implements IntakePivotIO {
 
     config.Voltage.PeakForwardVoltage = PEAK_FORWARD_VOLTAGE;
     config.Voltage.PeakReverseVoltage = PEAK_REVERSE_VOLTAGE;
-    // TODO: GRAVITY TYPE COSINE / ARM
+    slot0Configs.GravityType = GravityTypeValue.Arm_Cosine;
     config.Feedback.SensorToMechanismRatio = GEAR_RATIO;
     config.MotorOutput.withInverted(InvertedValue.Clockwise_Positive);
 

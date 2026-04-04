@@ -38,7 +38,6 @@ import frc.robot.subsystems.HopperRoller.HopperRollerIOPB;
 import frc.robot.subsystems.HopperRoller.HopperRollerIOSim;
 import frc.robot.subsystems.HopperSensor.HopperSensor;
 import frc.robot.subsystems.HopperSensor.HopperSensorIOCANRange;
-import frc.robot.subsystems.HopperSensor.HopperSensorIOCB;
 import frc.robot.subsystems.HopperSensor.HopperSensorIONoop;
 import frc.robot.subsystems.Indexer.Indexer;
 import frc.robot.subsystems.Indexer.IndexerIOCB;
@@ -302,7 +301,11 @@ public class RobotContainer {
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOCB());
         intakePivot = new IntakePivot(new IntakePivotIOCB());
         hopperRoller = new HopperRoller(new HopperRollerIOCB());
-        hopperSensor = new HopperSensor(new HopperSensorIOCB());
+        hopperSensor =
+            new HopperSensor(
+                new HopperSensorIOCANRange(
+                    Constants.CompBotConstants.HOPPER_SENSOR_ID,
+                    Constants.CompBotConstants.CANBUS));
 
         robotShootingInfo =
             new RobotShootingInfo(
