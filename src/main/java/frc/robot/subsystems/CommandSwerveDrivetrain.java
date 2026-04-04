@@ -617,7 +617,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   private static final double BLINE_ROTATION_KP = 3.0;
   private static final double BLINE_ROTATION_KI = 0.0;
   private static final double BLINE_ROTATION_KD = 0.0;
-  private static final double BLINE_CROSS_TRACK_KP = 2.0;
+  private static final double BLINE_CROSS_TRACK_KP = 2.5;
   private static final double BLINE_CROSS_TRACK_KI = 0.0;
   private static final double BLINE_CROSS_TRACK_KD = 0.0;
 
