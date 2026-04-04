@@ -115,12 +115,11 @@ public class RobotUtils {
     return activeHub;
   }
 
-  public static MatchTimeframe currentMatchShiftTime(
-      double gameTime, boolean isTele) {
+  public static MatchTimeframe currentMatchShiftTime(double gameTime, boolean isTele) {
     if (!isTele) {
       return MatchTimeframe.AUTO;
     }
-    
+
     if (gameTime <= 30.0) {
       return MatchTimeframe.ENDGAME;
     } else if (gameTime <= 55.0) {
@@ -130,7 +129,7 @@ public class RobotUtils {
     } else if (gameTime <= 105.0) {
       return MatchTimeframe.SHIFT_2;
     } else if (gameTime <= 130.0) {
-      return MatchTimeframe.SHIFT_1; 
+      return MatchTimeframe.SHIFT_1;
     }
   }
 
