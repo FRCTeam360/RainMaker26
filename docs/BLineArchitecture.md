@@ -66,21 +66,61 @@ factory.path("START_CENTER_HUB")
 - Y-axis mirror applied via field-width arithmetic on waypoints (stays in factory, not in path files)
 
 #### Defining an Auto (proposed API)
+
+**The core workflow: author paths in the GUI, compose once in code, get all 4 variants automatically.**
+
+##### Example 1: Simple 2-path auto
 ```java
-// Defined ONCE in BLineAutos, using factory helpers:
-Command middleStandard(BLineAutoFactory f) {
+// Step 1: Author 2 paths in BLine GUI (stored as files on disk)
+//   - "Aggressive First Swipe.path"
+//   - "Aggressive Second Swipe.path"
+//
+// Step 2: Define the auto ONCE using path file names:
+Command aggressiveSwipe(BLineAutoFactory f) {
     return Commands.sequence(
-        f.pathWithIntake("NO_STOP_MIDDLE_1"),
+        f.pathWithIntake("Aggressive First Swipe"),
         f.shootAtHub(),
-        f.pathWithImmediateIntake("NO_STOP_MIDDLE_2"),
+        f.pathWithImmediateIntake("Aggressive Second Swipe"),
         f.shootAtHub()
     );
 }
 
-// Registration — all 4 variants from one call:
+// Step 3: Register — all 4 variants generated automatically:
+BLineAutoFactory.registerAll(chooser, "Aggressive Swipe", this::aggressiveSwipe,
+    drivetrain, superStructure, hubShotCalculator, passCalculator);
+```
+
+**Result in auto chooser:**
+```
+[BLine] MASTER Red Right Aggressive Swipe
+[BLine] MIRRORED Red Left Aggressive Swipe
+[BLine] FLIPPED Blue Right Aggressive Swipe
+[BLine] FLIPPED MIRRORED Blue Left Aggressive Swipe
+```
+
+Each variant automatically applies the correct transformation to the path files — **you never manually write `flippedAggressiveSwipe()` or `mirroredAggressiveSwipe()` methods**.
+
+##### Example 2: Complex multi-path auto
+```java
+// 3 paths authored in GUI: "NO_STOP_MIDDLE_1", "NO_STOP_MIDDLE_2", "NO_STOP_MIDDLE_3"
+Command middleStandard(BLineAutoFactory f) {
+    return Commands.sequence(
+        Commands.waitSeconds(1.0),
+        f.defaultCmd(),
+        f.pathWithIntake("NO_STOP_MIDDLE_1"),
+        f.shootAtHub(),
+        f.pathWithImmediateIntake("NO_STOP_MIDDLE_2"),
+        f.shootAtHub(),
+        f.pathWithImmediateIntake("NO_STOP_MIDDLE_3"),
+        f.shootAtHub()
+    );
+}
+
 BLineAutoFactory.registerAll(chooser, "Middle Standard", this::middleStandard,
     drivetrain, superStructure, hubShotCalculator, passCalculator);
 ```
+
+**No `BLinePaths.java` needed** — all path geometry lives in GUI-authored files. The factory handles loading and transforming them at runtime.
 
 #### `registerAll()` Internally
 ```
@@ -140,6 +180,13 @@ docs/
 - GUI editing is faster for iterating trajectory geometry during practice
 - Decouples path tuning from code changes (no recompile needed to tweak a path)
 - Mirrors PathPlanner's workflow — reduces mental overhead
+- **Enables the core workflow:** author 2-3 path files in the GUI, compose them with commands in one method, automatically get all 4 field variants
+
+**Why factory-generate variants instead of manual methods?**
+- **Eliminates duplication:** currently have 4 near-identical methods per auto (e.g., `masterRedRightMiddleStandard`, `mirroredRedLeftMiddleStandard`, `flippedBlueRightMiddleStandard`, `flippedMirroredBlueLeftMiddleStandard`)
+- **Single source of truth:** changing an auto's command sequence requires editing one method, not four
+- **Scales better:** adding a new auto requires one method + one `registerAll()` call, not four copied methods
+- **Mirrors PathPlanner's pattern:** both systems now have "define once, get all 4 sides" semantics
 
 **Why not Python scripts for BLine variants?**
 - BLine paths aren't JSON — they're a different format without an established offline toolchain
@@ -152,10 +199,32 @@ docs/
 - The factory handles both independently and combined
 
 ### 7. Migration Path from Current Code
-1. Delete `BLinePaths.java` — path geometry moves to GUI-authored files
-2. Create `BLineAutoFactory.java` with Transform enum and path loading
-3. Rewrite `BLineAutos.java` — replace 4 variants per auto with 1 method + `registerAll()`
-4. Verify all 4 chooser entries appear per auto in Shuffleboard/Elastic
+
+**Current state (before factory):**
+- `BLineAutos.java` has 4 manually-written methods per auto: `masterRedRightMiddleStandard()`, `mirroredRedLeftMiddleStandard()`, `flippedBlueRightMiddleStandard()`, `flippedMirroredBlueLeftMiddleStandard()`
+- `BLinePaths.java` contains hardcoded path geometry in Java code (coordinate arrays)
+- `registerPathPlannerAutos()` manually registers all 4 variants by calling each method
+- Adding a new auto requires copying/pasting 4 methods and renaming them
+
+**Target state (with factory):**
+- One method per auto (e.g., `aggressiveSwipe(BLineAutoFactory f)`)
+- All path geometry authored in BLine GUI, stored as files
+- `BLineAutoFactory.registerAll()` generates all 4 variants automatically
+- Adding a new auto: author paths in GUI, write one method, call `registerAll()`
+
+**Migration steps:**
+1. **Delete `BLinePaths.java`** — path geometry moves to GUI-authored files (already done for some autos like "Blue Right Aggressive first swipe")
+2. **Create `BLineAutoFactory.java`** with Transform enum and path loading
+3. **Rewrite `BLineAutos.java`**:
+   - Replace 4 manual variant methods with 1 factory-based method per auto
+   - Remove `registerPathPlannerAutos()` — replaced by `registerAll()` calls
+   - Keep `registerAutos()` for experimental/test autos
+4. **Verify** all 4 chooser entries appear per auto in Shuffleboard/Elastic
+
+**What happens to the old manual methods?**
+- The 11 methods in `registerPathPlannerAutos()` (`masterRedRightMiddleStandard`, `mirroredRedLeftMiddleStandard`, etc.) are **deleted entirely** — the factory replaces them.
+- If you want to archive them temporarily, move them to a comment block or a separate `BLineAutosArchive.java` file before deletion.
+- They are not needed after the factory is implemented — `registerAll()` generates equivalent commands dynamically.
 
 ---
 
