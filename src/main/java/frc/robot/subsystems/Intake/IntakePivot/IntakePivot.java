@@ -15,7 +15,7 @@ public class IntakePivot extends SubsystemBase {
   // Constants
   private static final double STOWED_POSITION_DEGREES = 0.0;
   private static final double DEPLOYED_POSITION_DEGREES = 97.0;
-  private static final double AGITATE_LOW_UPPER_POSITION_DEGREES = 80.0;
+  private static final double AGITATE_LOW_UPPER_POSITION_DEGREES = 75.0;
   private static final double AGITATE_LOW_LOWER_POSITION_DEGREES = 90.0;
 
   private static final double AGITATE_HIGH_UPPER_POSITION_DEGREES = 40.0;
