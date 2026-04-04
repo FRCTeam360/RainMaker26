@@ -13,7 +13,7 @@ public class ControllerHelper {
 
   /**
    * Modifies the axis directly from a controller so that it is correct, with a deadband, scaled,
-   * inverted, and clipped.
+   * and clipped.
    *
    * @param value Raw value read from controller axis to be modified.
    * @param scale The amount you want to scale the axis by.
@@ -26,7 +26,7 @@ public class ControllerHelper {
     return scale * Math.copySign((clippedValue * clippedValue * clippedValue), value);
   }
 
-  public static double modifyAxisCubed(double value, double scale) {
+  public static double modifyAxisSquared(double value, double scale) {
     double clippedValue = MathUtil.applyDeadband(value, DEADBAND);
 
     // Square the clipped value (preserving the sign) and return it.

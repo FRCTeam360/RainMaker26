@@ -130,11 +130,11 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     return this.applyRequest(
         () -> {
           double velXMps =
-              ControllerHelper.modifyAxisCubic(driveCont.getLeftY(), maxSpeed.in(MetersPerSecond));
+              -ControllerHelper.modifyAxisCubic(driveCont.getLeftY(), maxSpeed.in(MetersPerSecond));
           double velYMps =
-              ControllerHelper.modifyAxisCubic(driveCont.getLeftX(), maxSpeed.in(MetersPerSecond));
+              -ControllerHelper.modifyAxisCubic(driveCont.getLeftX(), maxSpeed.in(MetersPerSecond));
           double omegaRps =
-              -ControllerHelper.modifyAxisCubed(
+              -ControllerHelper.modifyAxisSquared(
                   driveCont.getRightX(), maxAngularVelocity.in(RadiansPerSecond) / 2.0);
           // Store as robot-relative to match getVelocity() convention.
           // Operator-perspective velocities are converted to field-relative via
@@ -231,8 +231,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   public Command faceAngleWhileDrivingCommand(
       CommandXboxController driveCont, Supplier<Rotation2d> headingSupplier) {
     return faceAngleWhileDrivingCommand(
-        () -> ControllerHelper.modifyAxisCubic(driveCont.getLeftY(), maxSpeed.in(MetersPerSecond)),
-        () -> ControllerHelper.modifyAxisCubic(driveCont.getLeftX(), maxSpeed.in(MetersPerSecond)),
+        () -> -ControllerHelper.modifyAxisCubic(driveCont.getLeftY(), maxSpeed.in(MetersPerSecond)),
+        () -> -ControllerHelper.modifyAxisCubic(driveCont.getLeftX(), maxSpeed.in(MetersPerSecond)),
         headingSupplier);
   }
 
