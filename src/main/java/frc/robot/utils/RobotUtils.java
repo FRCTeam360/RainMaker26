@@ -8,6 +8,7 @@ import java.util.Optional;
 
 public class RobotUtils {
   private static final double SHIFT_GRACE_PERIOD_SECONDS = 2.0;
+  private static final double HUB_TO_SENSOR_SECONDS = 1.0;
 
   public static final double TRANSITION_END_SECONDS = 130;
   public static final double SHIFT_1_END_SECONDS = 105;
