@@ -113,22 +113,19 @@ public class IntakePivot extends SubsystemBase {
           double lowerTarget = getAgitateLowerPosition();
           double target = agitateTargetHigh ? upperTarget : lowerTarget;
           boolean atTarget = atSetpoint(target);
-          if (previousState == IntakePivotInternalStates.MOVING_TO_SETPOINT && atTarget) {
-            currentState =
-                agitateTargetHigh
-                    ? IntakePivotInternalStates.SWITCHING_AGITATE_TARGET_LOW
-                    : IntakePivotInternalStates.SWITCHING_AGITATE_TARGET_HIGH;
-          } else if (currentState == IntakePivotInternalStates.SWITCHING_AGITATE_TARGET_HIGH) {
+          if (currentState == IntakePivotInternalStates.SWITCHING_AGITATE_TARGET_HIGH) {
             agitateTargetHigh = true;
             currentState = IntakePivotInternalStates.AT_SETPOINT;
           } else if (currentState == IntakePivotInternalStates.SWITCHING_AGITATE_TARGET_LOW) {
             agitateTargetHigh = false;
             currentState = IntakePivotInternalStates.AT_SETPOINT;
-          } else {
+          } else if (atTarget) {
             currentState =
-                atTarget
-                    ? IntakePivotInternalStates.AT_SETPOINT
-                    : IntakePivotInternalStates.MOVING_TO_SETPOINT;
+                agitateTargetHigh
+                    ? IntakePivotInternalStates.SWITCHING_AGITATE_TARGET_LOW
+                    : IntakePivotInternalStates.SWITCHING_AGITATE_TARGET_HIGH;
+          } else {
+            currentState = IntakePivotInternalStates.MOVING_TO_SETPOINT;
           }
           break;
         }
@@ -147,23 +144,20 @@ public class IntakePivot extends SubsystemBase {
             double dipTarget = getProgressiveDipTarget();
             double target = agitateTargetHigh ? dipTarget : stepTarget;
             boolean atTarget = atSetpoint(target);
-            if (previousState == IntakePivotInternalStates.MOVING_TO_SETPOINT && atTarget) {
-              currentState =
-                  agitateTargetHigh
-                      ? IntakePivotInternalStates.SWITCHING_AGITATE_TARGET_LOW
-                      : IntakePivotInternalStates.SWITCHING_AGITATE_TARGET_HIGH;
-            } else if (currentState == IntakePivotInternalStates.SWITCHING_AGITATE_TARGET_HIGH) {
+            if (currentState == IntakePivotInternalStates.SWITCHING_AGITATE_TARGET_HIGH) {
               agitateTargetHigh = true;
               currentState = IntakePivotInternalStates.AT_SETPOINT;
             } else if (currentState == IntakePivotInternalStates.SWITCHING_AGITATE_TARGET_LOW) {
               agitateTargetHigh = false;
               progressiveCycleCount++;
               currentState = IntakePivotInternalStates.AT_SETPOINT;
-            } else {
+            } else if (atTarget) {
               currentState =
-                  atTarget
-                      ? IntakePivotInternalStates.AT_SETPOINT
-                      : IntakePivotInternalStates.MOVING_TO_SETPOINT;
+                  agitateTargetHigh
+                      ? IntakePivotInternalStates.SWITCHING_AGITATE_TARGET_LOW
+                      : IntakePivotInternalStates.SWITCHING_AGITATE_TARGET_HIGH;
+            } else {
+              currentState = IntakePivotInternalStates.MOVING_TO_SETPOINT;
             }
           }
           break;
