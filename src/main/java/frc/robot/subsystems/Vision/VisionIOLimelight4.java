@@ -47,6 +47,15 @@ public class VisionIOLimelight4 extends VisionIOLimelightBase {
   }
 
   @Override
+  public void updateInputs(VisionIOInputs inputs) {
+    super.updateInputs(inputs);
+
+    LimelightHelpers.IMUData imuData = LimelightHelpers.getIMUData(getName());
+    inputs.imuRollDeg = imuData.Roll;
+    inputs.imuPitchDeg = imuData.Pitch;
+  }
+
+  @Override
   public void enableIMUSeeding() {
     LimelightHelpers.SetIMUMode(getName(), IMU_MODE_EXTERNAL_SEED);
   }

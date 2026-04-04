@@ -6,10 +6,13 @@ package frc.robot.subsystems.Vision;
 
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import frc.robot.utils.FieldConstants;
 import frc.robot.utils.LimelightHelpers;
+import frc.robot.utils.LimelightHelpers.LimelightResults;
+import frc.robot.utils.LimelightHelpers.LimelightTarget_Fiducial;
 import frc.robot.utils.LimelightHelpers.PoseEstimate;
 import frc.robot.utils.LimelightHelpers.RawFiducial;
 import java.util.Optional;
@@ -120,6 +123,43 @@ public abstract class VisionIOLimelightBase implements VisionIO {
 
     inputs.targetCount = targetCount;
     inputs.poseUpdated = true;
+
+    // Populate nearest tag observed roll/pitch from full JSON results
+    updateNearestTagOrientation(inputs, poseEstimate);
+  }
+
+  /**
+   * Reads per-tag 6-DOF poses from the Limelight JSON results and populates the nearest detected
+   * tag's observed roll and pitch in robot space.
+   */
+  private void updateNearestTagOrientation(VisionIOInputs inputs, PoseEstimate poseEstimate) {
+    if (poseEstimate.rawFiducials.length == 0) return;
+
+    // Find the nearest tag ID from the lightweight RawFiducial data
+    int nearestTagId = -1;
+    double nearestDistance = Double.MAX_VALUE;
+    for (RawFiducial fiducial : poseEstimate.rawFiducials) {
+      if (fiducial.distToRobot < nearestDistance) {
+        nearestDistance = fiducial.distToRobot;
+        nearestTagId = fiducial.id;
+      }
+    }
+
+    if (nearestTagId == -1) return;
+
+    // Get the full JSON results for per-tag 6-DOF pose data
+    LimelightResults results = LimelightHelpers.getLatestResults(name);
+    if (results == null || results.targets_Fiducials == null) return;
+
+    for (LimelightTarget_Fiducial target : results.targets_Fiducials) {
+      if ((int) target.fiducialID == nearestTagId) {
+        Pose3d tagPoseInRobotSpace = target.getTargetPose_RobotSpace();
+        Rotation3d rotation = tagPoseInRobotSpace.getRotation();
+        inputs.nearestTagObservedRollDeg = Math.toDegrees(rotation.getX());
+        inputs.nearestTagObservedPitchDeg = Math.toDegrees(rotation.getY());
+        return;
+      }
+    }
   }
 
   private Optional<PoseEstimate> getMegatag2PoseEst() {

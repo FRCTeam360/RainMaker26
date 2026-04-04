@@ -30,6 +30,14 @@ public interface VisionIO {
     public double[] distancesToTargets = new double[MAX_TAGS];
     public Pose3d[] tagPoses = initTagPoses();
 
+    // Limelight 4 internal IMU orientation (degrees)
+    public double imuRollDeg = 0.0;
+    public double imuPitchDeg = 0.0;
+
+    // Nearest detected tag's observed roll and pitch in robot space (degrees)
+    public double nearestTagObservedRollDeg = 0.0;
+    public double nearestTagObservedPitchDeg = 0.0;
+
     private static Pose3d[] initTagPoses() {
       Pose3d[] poses = new Pose3d[MAX_TAGS];
       for (int i = 0; i < MAX_TAGS; i++) {
