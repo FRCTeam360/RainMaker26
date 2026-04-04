@@ -41,7 +41,6 @@ public class SuperStructure extends SubsystemBase {
   private final Hood hood;
   private final IntakePivot intakePivot;
   private final HopperRoller hopperRoller;
-  private final HopperSensor hopperSensor;
   private final ShooterStateMachine shooterStateMachine;
   private final IntakeStateMachine intakeStateMachine;
   private final TargetSelectionStateMachine targetSelectionStateMachine;
@@ -113,7 +112,6 @@ public class SuperStructure extends SubsystemBase {
     this.hood = hood;
     this.intakePivot = intakePivot;
     this.hopperRoller = hopperRoller;
-    this.hopperSensor = hopperSensor;
     this.hubShotCalculator = hubShotCalculator;
     this.robotPoseSupplier = robotPoseSupplier;
     this.robotToShooter = robotToShooter;
