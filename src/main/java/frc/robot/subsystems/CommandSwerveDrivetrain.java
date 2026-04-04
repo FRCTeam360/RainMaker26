@@ -276,68 +276,85 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   }
 
   /**
-   * Creates a command that drives the robot in field-centric mode while continuously rotating to
-   * face the hub center. The heading controller automatically adjusts the robot's rotation to
-   * always point toward the hub as the robot moves around the field.
+   * Drives the robot in field-centric mode while continuously rotating to face the given heading.
+   * Velocities are field-relative (already alliance-flipped by the caller). The caller is
+   * responsible for resetting the heading controller when done.
    *
-   * @param velocityXSupplier Supplier for X velocity (field-relative, forward positive) in m/s
-   * @param velocityYSupplier Supplier for Y velocity (field-relative, left positive) in m/s
-   * @return Command that drives while facing the hub
+   * @param fieldRelativeVelXMps X velocity in m/s (field-relative, already alliance-flipped)
+   * @param fieldRelativeVelYMps Y velocity in m/s (field-relative, already alliance-flipped)
+   * @param targetHeading The target heading to face
+   */
+  public void faceAngleWhileDriving(
+      double fieldRelativeVelXMps, double fieldRelativeVelYMps, Rotation2d targetHeading) {
+    double speedCapMps = maxSpeed.in(MetersPerSecond) * FACING_ANGLE_MAX_SPEED_FRACTION;
+
+    // Clamp the velocity vector magnitude to the speed cap
+    double rawSpeedMps = Math.hypot(fieldRelativeVelXMps, fieldRelativeVelYMps);
+    if (rawSpeedMps > speedCapMps) {
+      double scale = speedCapMps / rawSpeedMps;
+      fieldRelativeVelXMps *= scale;
+      fieldRelativeVelYMps *= scale;
+    }
+
+    double omegaRps = angleFacingRequest.HeadingController.getLastAppliedOutput();
+
+    // Store as robot-relative to match getVelocity() convention.
+    commandedSpeeds =
+        ChassisSpeeds.fromFieldRelativeSpeeds(
+            fieldRelativeVelXMps, fieldRelativeVelYMps, omegaRps, getPosition().getRotation());
+
+    this.setControl(
+        angleFacingRequest
+            .withVelocityX(fieldRelativeVelXMps)
+            .withVelocityY(fieldRelativeVelYMps)
+            .withTargetDirection(targetHeading));
+  }
+
+  /**
+   * Creates a command that drives the robot in field-centric mode while continuously rotating to
+   * face the given heading.
+   *
+   * @param velocityXSupplier Supplier for X velocity (operator-perspective, forward positive) in
+   *     m/s
+   * @param velocityYSupplier Supplier for Y velocity (operator-perspective, left positive) in m/s
+   * @param headingSupplier Supplier for the target heading
+   * @return Command that drives while facing the heading
    */
   public Command faceAngleWhileDrivingCommand(
       DoubleSupplier velocityXSupplier,
       DoubleSupplier velocityYSupplier,
       Supplier<Rotation2d> headingSupplier) {
-    double speedCapMps = maxSpeed.in(MetersPerSecond) * FACING_ANGLE_MAX_SPEED_FRACTION;
-    // Tracks whether the heading controller has produced at least one output for this
-    // command schedule. Reset in finallyDo so each new schedule starts clean.
+    // Tracks whether the heading controller has produced at least one output.
+    // Reset in end action so each new schedule starts clean.
     boolean[] controllerHasRun = {false};
-    return this.applyRequest(
-            () -> {
-              double rawVelXMps = velocityXSupplier.getAsDouble();
-              double rawVelYMps = velocityYSupplier.getAsDouble();
+    return this.runEnd(
+        () -> {
+          double rawVelXMps = velocityXSupplier.getAsDouble();
+          double rawVelYMps = velocityYSupplier.getAsDouble();
 
-              // Clamp the velocity vector magnitude to the speed cap
-              double rawSpeedMps = Math.hypot(rawVelXMps, rawVelYMps);
-              if (rawSpeedMps > speedCapMps) {
-                double scale = speedCapMps / rawSpeedMps;
-                rawVelXMps *= scale;
-                rawVelYMps *= scale;
-              }
+          boolean isBlueAlliance =
+              DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue;
+          double fieldVelXMps = isBlueAlliance ? rawVelXMps : -rawVelXMps;
+          double fieldVelYMps = isBlueAlliance ? rawVelYMps : -rawVelYMps;
 
-              // Gate on controllerHasRun to avoid consuming stale output on the first cycle
-              // after the controller was reset (getLastAppliedOutput() returns 0 until the
-              // facing-angle request has been applied at least once).
-              double omegaRps =
-                  controllerHasRun[0]
-                      ? angleFacingRequest.HeadingController.getLastAppliedOutput()
-                      : 0.0;
-              controllerHasRun[0] = true;
+          // Gate on controllerHasRun to avoid consuming stale output on the first cycle
+          // after the controller was reset (getLastAppliedOutput() returns 0 until the
+          // facing-angle request has been applied at least once).
+          if (!controllerHasRun[0]) {
+            controllerHasRun[0] = true;
+            // Zero out omega for the first cycle — faceAngleWhileDriving will read
+            // getLastAppliedOutput() which is stale until the request runs once.
+            commandedSpeeds =
+                ChassisSpeeds.fromFieldRelativeSpeeds(
+                    fieldVelXMps, fieldVelYMps, 0.0, getPosition().getRotation());
+          }
 
-              // Store as robot-relative to match getVelocity() convention.
-              // Convert operator-perspective to field-relative (alliance flip),
-              // then field-relative to robot-relative.
-              boolean isBlueAlliance =
-                  DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue;
-              commandedSpeeds =
-                  ChassisSpeeds.fromFieldRelativeSpeeds(
-                      isBlueAlliance ? rawVelXMps : -rawVelXMps,
-                      isBlueAlliance ? rawVelYMps : -rawVelYMps,
-                      omegaRps,
-                      getPosition().getRotation());
-
-              // Pass operator-perspective values — CTRE applies operator perspective
-              // internally via setOperatorPerspectiveForward
-              return angleFacingRequest
-                  .withVelocityX(isBlueAlliance ? rawVelXMps : -rawVelXMps)
-                  .withVelocityY(isBlueAlliance ? rawVelYMps : -rawVelYMps)
-                  .withTargetDirection(headingSupplier.get());
-            })
-        .finallyDo(
-            () -> {
-              angleFacingRequest.HeadingController.reset();
-              controllerHasRun[0] = false; // Reset so next schedule starts clean
-            });
+          faceAngleWhileDriving(fieldVelXMps, fieldVelYMps, headingSupplier.get());
+        },
+        () -> {
+          angleFacingRequest.HeadingController.reset();
+          controllerHasRun[0] = false;
+        });
   }
 
   /**

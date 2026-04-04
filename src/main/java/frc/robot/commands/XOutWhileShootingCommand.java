@@ -91,8 +91,7 @@ public class XOutWhileShootingCommand extends Command {
     double vy = velocityYSupplier.getAsDouble();
     double commandedSpeedMps = Math.hypot(vx, vy);
     boolean hasDriverInput =
-        commandedSpeedMps
-            > drivetrain.maxSpeed.in(MetersPerSecond) * DRIVER_INPUT_THRESHOLD;
+        commandedSpeedMps > drivetrain.maxSpeed.in(MetersPerSecond) * DRIVER_INPUT_THRESHOLD;
 
     if (isXOuted) {
       // Heading controller is stale while x-outed, so check alignment manually
