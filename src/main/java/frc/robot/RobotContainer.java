@@ -7,17 +7,12 @@ package frc.robot;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
 import com.ctre.phoenix6.swerve.SwerveRequest;
-import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.FollowPathCommand;
-import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -90,10 +85,8 @@ import frc.robot.utils.CommandLogger;
 import frc.robot.utils.FieldConstants;
 import frc.robot.utils.PathProvider;
 import frc.robot.utils.PositionUtils;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -431,7 +424,7 @@ public class RobotContainer {
 
     PathPlannerLogging.setLogTargetPoseCallback(
         pose -> Logger.recordOutput("Swerve/TargetPathPose", pose));
-      
+
     CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
     // Uncomment this if pathplanner starts to suck on loading
     // CommandScheduler.getInstance().schedule(PathfindingCommand.warmupCommand());

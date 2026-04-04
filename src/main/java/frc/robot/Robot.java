@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.commands.PathPlannerAuto;
 import edu.wpi.first.net.WebServer;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -15,11 +17,9 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.utils.RobotUtils;
-
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedPowerDistribution;
 import org.littletonrobotics.junction.LoggedRobot;
@@ -27,9 +27,6 @@ import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
-
-import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.commands.PathPlannerAuto;
 
 /**
  * The methods in this class are called automatically corresponding to each mode, as described in
@@ -129,7 +126,7 @@ public class Robot extends LoggedRobot {
   @Override
   public void disabledPeriodic() {
     if (DriverStation.isDSAttached()) {
-      if (DriverStation.getAlliance() != lastAllianceState){
+      if (DriverStation.getAlliance() != lastAllianceState) {
 
         lastAllianceState = DriverStation.getAlliance();
         RobotContainer.autoChooser.close();
