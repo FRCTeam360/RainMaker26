@@ -90,7 +90,6 @@ import frc.robot.utils.CommandLogger;
 import frc.robot.utils.FieldConstants;
 import frc.robot.utils.PathProvider;
 import frc.robot.utils.PositionUtils;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -438,12 +437,12 @@ public class RobotContainer {
 
     for (String autoName : autoNames) {
       if (DriverStation.getAlliance() == Optional.of(Alliance.Red)) {
-        if (autoName.contains("Red")){
+        if (autoName.contains("Red")) {
           PathPlannerAuto auto = new PathPlannerAuto(autoName);
           chooser.addOption(auto.getName(), auto);
         }
       } else if (DriverStation.getAlliance() == Optional.of(Alliance.Blue)) {
-        if (autoName.contains("Blue")){
+        if (autoName.contains("Blue")) {
           PathPlannerAuto auto = new PathPlannerAuto(autoName);
           chooser.addOption(auto.getName(), auto);
         }
