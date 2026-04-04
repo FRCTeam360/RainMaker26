@@ -398,7 +398,9 @@ public final class Constants {
 
     // === FLYWHEEL KICKER ===
     public static final int FLYWHEEL_KICKER_ID = 21;
-    public static final int FLYWHEEL_KICKER_SENSOR_ID = 22;
+
+    // === HOPPER SENSOR ===
+    public static final int HOPPER_SENSOR_ID = 22;
 
     // === HOPPER ===
     public static final int HOPPER_ROLLER_ID = 23;
@@ -406,9 +408,6 @@ public final class Constants {
 
     // === HOOD ===
     public static final int HOOD_ID = 25;
-
-    // === HOPPER SENSOR ===
-    public static final int HOPPER_SENSOR_ID = 26;
 
     // === LIMELIGHT ===
     public static final String LIMELIGHT_RIGHT = "limelight-right";
