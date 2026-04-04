@@ -116,8 +116,7 @@ public class XOutWhileAligningCommand extends Command {
         break;
 
       case X_OUT:
-        double headingErrorRad =
-            heading.minus(drivetrain.getRotation2d()).getRadians();
+        double headingErrorRad = heading.minus(drivetrain.getRotation2d()).getRadians();
         // TODO: Verify and tune this tolerance on the real robot. Intentionally uses the
         // static (tighter) tolerance rather than the dynamic one because the robot is
         // stationary while x-outed, so there is no speed-based reason to widen it.
