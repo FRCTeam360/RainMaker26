@@ -1,5 +1,6 @@
 package frc.robot.utils;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.robot.Constants;
 import java.io.File;
@@ -59,6 +60,18 @@ public class RobotUtils {
     }
     // called when no data was received from driver station
     return null;
+  }
+
+  /**
+   * Returns whether our alliance won the autonomous period.
+   *
+   * @return true if our alliance is the auto winner, false otherwise (including if alliance or game
+   *     message is unavailable)
+   */
+  public static boolean isAutoWinner() {
+    Alliance autoWinner = getAutoWinner(DriverStation.getGameSpecificMessage());
+    Optional<Alliance> alliance = DriverStation.getAlliance();
+    return alliance.isPresent() && autoWinner == alliance.get();
   }
 
   /**
