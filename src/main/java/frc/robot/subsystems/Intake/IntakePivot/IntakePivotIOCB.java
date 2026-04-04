@@ -12,6 +12,7 @@ import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -52,6 +53,7 @@ public class IntakePivotIOCB implements IntakePivotIO {
 
   private final DutyCycleOut dutyCycleOut = new DutyCycleOut(0);
   private final MotionMagicVoltage motionMagicPosition = new MotionMagicVoltage(0.0);
+  private final PositionVoltage positionVoltage = new PositionVoltage(0.0);
   private final TalonFXConfiguration config = new TalonFXConfiguration();
   private NeutralModeValue neutralMode = NeutralModeValue.Brake;
 
@@ -132,6 +134,15 @@ public class IntakePivotIOCB implements IntakePivotIO {
   public void setPosition(double positionDegrees) {
     intakePivot.setControl(
         motionMagicPosition.withPosition(Units.degreesToRotations(positionDegrees)));
+  }
+
+  public void setPositionSmooth(double positionDegrees) {
+    intakePivot.setControl(
+        motionMagicPosition.withPosition(Units.degreesToRotations(positionDegrees)));
+  }
+
+  public void setPositionAggressive(double positionDegrees) {
+    intakePivot.setControl(positionVoltage.withPosition(Units.degreesToRotations(positionDegrees)));
   }
 
   public void setDutyCycle(double value) {

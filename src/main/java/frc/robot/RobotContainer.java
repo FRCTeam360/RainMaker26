@@ -38,6 +38,7 @@ import frc.robot.subsystems.HopperRoller.HopperRollerIOPB;
 import frc.robot.subsystems.HopperRoller.HopperRollerIOSim;
 import frc.robot.subsystems.HopperSensor.HopperSensor;
 import frc.robot.subsystems.HopperSensor.HopperSensorIOCANRange;
+import frc.robot.subsystems.HopperSensor.HopperSensorIOCB;
 import frc.robot.subsystems.HopperSensor.HopperSensorIONoop;
 import frc.robot.subsystems.Indexer.Indexer;
 import frc.robot.subsystems.Indexer.IndexerIOCB;
@@ -223,57 +224,7 @@ public class RobotContainer {
                 WoodBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond),
                 0);
         break;
-      case COMPBOT:
-        drivetrain = CompBotDrivetrain.createDrivetrain();
-        climber = new Climber(new ClimberIOCB());
-        flywheel = new Flywheel(new FlywheelIOCBBangBang());
-        hood = new Hood(new HoodIOCB());
-        indexer = new Indexer(new IndexerIOCB());
-        vision =
-            new Vision(
-                Map.ofEntries(
-                    Map.entry(
-                        Constants.CompBotConstants.LIMELIGHT_RIGHT,
-                        new VisionIOLimelight4(
-                            Constants.CompBotConstants.LIMELIGHT_RIGHT,
-                            () -> drivetrain.getAngle(),
-                            () -> drivetrain.getAngularRate(),
-                            true)),
-                    Map.entry(
-                        Constants.CompBotConstants.LIMELIGHT_LEFT,
-                        new VisionIOLimelight4(
-                            Constants.CompBotConstants.LIMELIGHT_LEFT,
-                            () -> drivetrain.getAngle(),
-                            () -> drivetrain.getAngularRate(),
-                            true))));
-        intakeRoller = new IntakeRoller(new IntakeRollerIOCB());
-        flywheelKicker = new FlywheelKicker(new FlywheelKickerIOCB());
-        intakePivot = new IntakePivot(new IntakePivotIOCB());
-        hopperRoller = new HopperRoller(new HopperRollerIOCB());
-
-        robotShootingInfo =
-            new RobotShootingInfo(
-                Constants.CompBotConstants.shotHoodAngleMap,
-                Constants.CompBotConstants.shotFlywheelSpeedMap,
-                Constants.CompBotConstants.timeOfFlightMap,
-                ShooterConstants.COMPBOT_TO_SHOOTER,
-                Constants.CompBotConstants.MIN_SHOT_DISTANCE_METERS,
-                Constants.CompBotConstants.MAX_SHOT_DISTANCE_METERS,
-                CompBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond),
-                0);
-        robotPassingInfo =
-            new RobotShootingInfo(
-                Constants.CompBotConstants.passHoodAngleMap,
-                Constants.CompBotConstants.passFlywheelSpeedMap,
-                Constants.CompBotConstants.timeOfFlightMap,
-                ShooterConstants.COMPBOT_TO_SHOOTER,
-                Constants.CompBotConstants.MIN_PASS_DISTANCE_METERS,
-                Constants.CompBotConstants.MAX_PASS_DISTANCE_METERS,
-                CompBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond),
-                0);
-        break;
       case PRACTICEBOT:
-      default:
         drivetrain = PracticeBotDrivetrain.createDrivetrain();
         climber = new Climber(new ClimberIONoop());
         flywheel = new Flywheel(new FlywheelIOPBBangBang());
@@ -321,6 +272,57 @@ public class RobotContainer {
                 Constants.PracticeBotConstants.MIN_PASS_DISTANCE_METERS,
                 Constants.PracticeBotConstants.MAX_PASS_DISTANCE_METERS,
                 PracticeBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond),
+                0);
+        break;
+      case COMPBOT:
+      default:
+        drivetrain = CompBotDrivetrain.createDrivetrain();
+        climber = new Climber(new ClimberIOCB());
+        flywheel = new Flywheel(new FlywheelIOCBBangBang());
+        hood = new Hood(new HoodIOCB());
+        indexer = new Indexer(new IndexerIOCB());
+        vision =
+            new Vision(
+                Map.ofEntries(
+                    Map.entry(
+                        Constants.CompBotConstants.LIMELIGHT_RIGHT,
+                        new VisionIOLimelight4(
+                            Constants.CompBotConstants.LIMELIGHT_RIGHT,
+                            () -> drivetrain.getAngle(),
+                            () -> drivetrain.getAngularRate(),
+                            true)),
+                    Map.entry(
+                        Constants.CompBotConstants.LIMELIGHT_LEFT,
+                        new VisionIOLimelight4(
+                            Constants.CompBotConstants.LIMELIGHT_LEFT,
+                            () -> drivetrain.getAngle(),
+                            () -> drivetrain.getAngularRate(),
+                            true))));
+        intakeRoller = new IntakeRoller(new IntakeRollerIOCB());
+        flywheelKicker = new FlywheelKicker(new FlywheelKickerIOCB());
+        intakePivot = new IntakePivot(new IntakePivotIOCB());
+        hopperRoller = new HopperRoller(new HopperRollerIOCB());
+        hopperSensor = new HopperSensor(new HopperSensorIOCB());
+
+        robotShootingInfo =
+            new RobotShootingInfo(
+                Constants.CompBotConstants.shotHoodAngleMap,
+                Constants.CompBotConstants.shotFlywheelSpeedMap,
+                Constants.CompBotConstants.timeOfFlightMap,
+                ShooterConstants.COMPBOT_TO_SHOOTER,
+                Constants.CompBotConstants.MIN_SHOT_DISTANCE_METERS,
+                Constants.CompBotConstants.MAX_SHOT_DISTANCE_METERS,
+                CompBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond),
+                0);
+        robotPassingInfo =
+            new RobotShootingInfo(
+                Constants.CompBotConstants.passHoodAngleMap,
+                Constants.CompBotConstants.passFlywheelSpeedMap,
+                Constants.CompBotConstants.timeOfFlightMap,
+                ShooterConstants.COMPBOT_TO_SHOOTER,
+                Constants.CompBotConstants.MIN_PASS_DISTANCE_METERS,
+                Constants.CompBotConstants.MAX_PASS_DISTANCE_METERS,
+                CompBotDrivetrain.kSpeedAt12Volts.in(MetersPerSecond),
                 0);
         break;
     }

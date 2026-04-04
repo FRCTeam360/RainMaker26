@@ -10,6 +10,7 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXSConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFXS;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -19,6 +20,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import frc.robot.Constants;
+import frc.robot.subsystems.Shooter.Hood.HoodIO.HoodIOInputs;
 
 public class HoodIOCB implements HoodIO {
   private static final double GEAR_RATIO = 3.0 / 1.0 * 170.0 / 10.0;
@@ -40,6 +42,7 @@ public class HoodIOCB implements HoodIO {
   private final TalonFXSConfiguration config = new TalonFXSConfiguration();
 
   private final MotionMagicVoltage motionMagicPosition = new MotionMagicVoltage(0);
+  private final PositionVoltage positionVoltage = new PositionVoltage(0);
 
   private final StatusSignal<Angle> positionSignal;
   private final StatusSignal<AngularVelocity> velocitySignal;
@@ -110,6 +113,15 @@ public class HoodIOCB implements HoodIO {
   public void setPosition(double positionDegrees) {
     hoodMotor.setControl(
         motionMagicPosition.withPosition(Units.degreesToRotations(positionDegrees)));
+  }
+
+  public void setPositionSmooth(double positionDegrees) {
+    hoodMotor.setControl(
+        motionMagicPosition.withPosition(Units.degreesToRotations(positionDegrees)));
+  }
+
+  public void setPositionAggressive(double positionDegrees) {
+    hoodMotor.setControl(positionVoltage.withPosition(Units.degreesToRotations(positionDegrees)));
   }
 
   public void updateInputs(HoodIOInputs inputs) {

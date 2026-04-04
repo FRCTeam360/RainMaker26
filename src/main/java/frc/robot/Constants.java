@@ -401,6 +401,9 @@ public final class Constants {
     // === HOOD ===
     public static final int HOOD_ID = 25;
 
+    // === HOPPER SENSOR ===
+    public static final int HOPPER_SENSOR_ID = 26;
+
     // === LIMELIGHT ===
     public static final String LIMELIGHT_RIGHT = "limelight-right";
     public static final String LIMELIGHT_LEFT = "limelight-left";
