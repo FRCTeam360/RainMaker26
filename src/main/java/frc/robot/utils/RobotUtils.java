@@ -25,6 +25,7 @@ public class RobotUtils {
 
   public enum MatchTimeframe {
     AUTO,
+    TRANSITION,
     SHIFT_1,
     SHIFT_2,
     SHIFT_3,
@@ -131,6 +132,7 @@ public class RobotUtils {
     } else if (gameTime <= 130.0) {
       return MatchTimeframe.SHIFT_1;
     }
+    return MatchTimeframe.TRANSITION;
   }
 
   /**
