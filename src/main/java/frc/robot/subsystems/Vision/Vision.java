@@ -13,7 +13,7 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.utils.FieldConstants;
+import frc.robot.Constants;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -114,10 +114,8 @@ public class Vision extends SubsystemBase {
     // Clear previous measurements to prevent unbounded growth
     acceptedMeasurements.clear();
 
-    for (Map.Entry<String, VisionIO> entry : ios.entrySet()) {
-      VisionIO io = entry.getValue();
-      String key = entry.getKey();
-
+    for (String key : ios.keySet()) {
+      VisionIO io = ios.get(key);
       VisionIOInputsAutoLogged input = visionInputs.get(key);
 
       io.updateInputs(input);
@@ -130,12 +128,11 @@ public class Vision extends SubsystemBase {
           input.tagPoses[i] = input.tagPoses[0];
         }
       }
-      Logger.processInputs("Vision: " + key, input);
+      Logger.processInputs("Limelight: " + key, input.clone());
     }
 
-    for (Map.Entry<String, VisionIOInputsAutoLogged> entry : visionInputs.entrySet()) {
-      String key = entry.getKey();
-      VisionIOInputsAutoLogged input = entry.getValue();
+    for (String key : visionInputs.keySet()) {
+      VisionIOInputsAutoLogged input = visionInputs.get(key);
 
       // Count total detections (pose updates attempted)
       if (input.poseUpdated) {
@@ -153,9 +150,9 @@ public class Vision extends SubsystemBase {
 
       // Skip measurements that are not with in the field boundary
       if (pose.getX() < 0.0
-          || pose.getX() > FieldConstants.fieldLength
+          || pose.getX() > Constants.FIELD_LAYOUT.getFieldLength()
           || pose.getY() < 0.0
-          || pose.getY() > FieldConstants.fieldWidth) {
+          || pose.getY() > Constants.FIELD_LAYOUT.getFieldWidth()) {
         rejectedMeasurements++;
         continue;
       }
