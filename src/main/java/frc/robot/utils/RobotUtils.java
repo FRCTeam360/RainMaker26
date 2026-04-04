@@ -23,6 +23,15 @@ public class RobotUtils {
     AUTOWINNER,
   }
 
+  public enum MatchTimeframe {
+    AUTO,
+    SHIFT_1,
+    SHIFT_2,
+    SHIFT_3,
+    SHIFT_4,
+    ENDGAME,
+  }
+
   public static boolean isUsbWriteable() {
     File usb = new File(Constants.IOConstants.USB_ROOT_DIRECTORY);
     if (usb.exists() && usb.isDirectory()) {
@@ -104,6 +113,25 @@ public class RobotUtils {
       }
     }
     return activeHub;
+  }
+
+  public static MatchTimeframe currentMatchShiftTime(
+      double gameTime, boolean isTele) {
+    if (!isTele) {
+      return MatchTimeframe.AUTO;
+    }
+    
+    if (gameTime <= 30.0) {
+      return MatchTimeframe.ENDGAME;
+    } else if (gameTime <= 55.0) {
+      return MatchTimeframe.SHIFT_4;
+    } else if (gameTime <= 80.0) {
+      return MatchTimeframe.SHIFT_3;
+    } else if (gameTime <= 105.0) {
+      return MatchTimeframe.SHIFT_2;
+    } else if (gameTime <= 130.0) {
+      return MatchTimeframe.SHIFT_1; 
+    }
   }
 
   /**
