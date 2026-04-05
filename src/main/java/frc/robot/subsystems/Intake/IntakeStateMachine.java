@@ -94,9 +94,10 @@ public class IntakeStateMachine {
   public void update() {
     previousState = currentState;
 
-    if (wantedState != IntakeWantedStates.AGITATING) {
-      hopperSensor.setWantedState(HopperSensorWantedStates.LIVE);
-    }
+    hopperSensor.setWantedState(
+        wantedState == IntakeWantedStates.AGITATING
+            ? HopperSensorWantedStates.AGITATING
+            : HopperSensorWantedStates.NOT_AGITATING);
 
     switch (wantedState) {
       case INTAKING:
@@ -106,7 +107,6 @@ public class IntakeStateMachine {
         currentState = IntakeInternalStates.STOWED;
         break;
       case AGITATING:
-        hopperSensor.setWantedState(HopperSensorWantedStates.LATCHED);
         // Failsafe: if sensor is disconnected, default to AGITATING_LOW to avoid over-agitating.
         currentState =
             (hopperSensor.getState() == HopperSensorInternalStates.FULL

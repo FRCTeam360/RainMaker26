@@ -27,16 +27,16 @@ public class HopperSensor extends SubsystemBase {
    * Wanted states for the hopper sensor, controlling how the internal state is updated.
    *
    * <ul>
-   *   <li>{@code OFF} — sensor readings are ignored; internal state remains fixed at HALF_EMPTY.
-   *   <li>{@code LIVE} — internal state mirrors the sensor directly every cycle.
-   *   <li>{@code LATCHED} — internal state is frozen once FULL; only resets to HALF_EMPTY on a
-   *       falling edge (sensor transitions from activated to not activated).
+   *   <li>{@code NOT_AGITATING} — internal state mirrors the sensor directly every cycle (live
+   *       tracking).
+   *   <li>{@code AGITATING} — internal state latches FULL and only resets to HALF_EMPTY on a
+   *       falling edge (sensor transitions from activated to not activated), providing hysteresis
+   *       during agitation.
    * </ul>
    */
   public enum HopperSensorWantedStates {
-    OFF,
-    LIVE,
-    LATCHED
+    NOT_AGITATING,
+    AGITATING
   }
 
   /**
@@ -53,7 +53,7 @@ public class HopperSensor extends SubsystemBase {
   }
 
   // State variables
-  private HopperSensorWantedStates wantedState = HopperSensorWantedStates.LIVE;
+  private HopperSensorWantedStates wantedState = HopperSensorWantedStates.NOT_AGITATING;
   private HopperSensorInternalStates currentState = HopperSensorInternalStates.HALF_EMPTY;
   private HopperSensorInternalStates previousState = HopperSensorInternalStates.HALF_EMPTY;
 
@@ -101,25 +101,23 @@ public class HopperSensor extends SubsystemBase {
 
     debouncedSensorActivated = sensorActivatedDebouncer.calculate(inputs.sensorActivated);
 
-    // Force OFF state if sensor is disconnected (failsafe)
+    // Disconnected sensor forces NOT_AGITATING behavior (failsafe — avoids acting on stale data)
     HopperSensorWantedStates effectiveWantedState =
-        inputs.connected ? wantedState : HopperSensorWantedStates.OFF;
+        inputs.connected ? wantedState : HopperSensorWantedStates.NOT_AGITATING;
 
     switch (effectiveWantedState) {
-      case OFF:
-        // Sensor is disabled or disconnected — internal state remains fixed at HALF_EMPTY.
-        currentState = HopperSensorInternalStates.HALF_EMPTY;
-        break;
-      case LIVE:
-        // Update freely from the sensor every cycle.
+      case NOT_AGITATING:
+        // Mirror sensor directly every cycle.
         currentState =
             debouncedSensorActivated
                 ? HopperSensorInternalStates.FULL
                 : HopperSensorInternalStates.HALF_EMPTY;
         break;
-      case LATCHED:
-        // Latch frozen — only reset to HALF_EMPTY on a falling edge (balls have cleared).
-        if (previousState == HopperSensorInternalStates.FULL && !debouncedSensorActivated) {
+      case AGITATING:
+        // Latch FULL — only reset to HALF_EMPTY on a falling edge (balls have cleared).
+        if (debouncedSensorActivated) {
+          currentState = HopperSensorInternalStates.FULL;
+        } else if (previousState == HopperSensorInternalStates.FULL) {
           currentState = HopperSensorInternalStates.HALF_EMPTY;
         }
         break;
