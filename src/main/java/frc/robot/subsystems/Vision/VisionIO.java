@@ -39,6 +39,10 @@ public interface VisionIO {
     public double nearestTagObservedRollDeg = 0.0;
     public double nearestTagObservedPitchDeg = 0.0;
 
+    // Whether the IMU or tag orientation exceeds acceptable thresholds
+    public boolean imuOrientationExceedsThreshold = false;
+    public boolean tagOrientationExceedsThreshold = false;
+
     private static Pose3d[] initTagPoses() {
       Pose3d[] poses = new Pose3d[MAX_TAGS];
       for (int i = 0; i < MAX_TAGS; i++) {

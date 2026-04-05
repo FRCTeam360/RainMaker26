@@ -23,6 +23,12 @@ import java.util.function.DoubleSupplier;
  * filtering, and MegaTag2 logic.
  */
 public abstract class VisionIOLimelightBase implements VisionIO {
+  /** Maximum acceptable IMU roll or pitch before flagging (degrees). */
+  private static final double IMU_ORIENTATION_THRESHOLD_DEG = 10.0;
+
+  /** Maximum acceptable tag observed roll or pitch before flagging (degrees). */
+  private static final double TAG_ORIENTATION_THRESHOLD_DEG = 10.0;
+
   private final NetworkTable table;
   private final String name;
   protected final DoubleSupplier gyroAngleSupplier;
@@ -126,6 +132,14 @@ public abstract class VisionIOLimelightBase implements VisionIO {
 
     // Populate nearest tag observed roll/pitch from full JSON results
     updateNearestTagOrientation(inputs, poseEstimate);
+
+    // Flag when IMU or tag orientations exceed acceptable thresholds
+    inputs.imuOrientationExceedsThreshold =
+        Math.abs(inputs.imuRollDeg) > IMU_ORIENTATION_THRESHOLD_DEG
+            || Math.abs(inputs.imuPitchDeg) > IMU_ORIENTATION_THRESHOLD_DEG;
+    inputs.tagOrientationExceedsThreshold =
+        Math.abs(inputs.nearestTagObservedRollDeg) > TAG_ORIENTATION_THRESHOLD_DEG
+            || Math.abs(inputs.nearestTagObservedPitchDeg) > TAG_ORIENTATION_THRESHOLD_DEG;
   }
 
   /**
