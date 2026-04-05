@@ -44,7 +44,7 @@ public class IntakeRoller extends SubsystemBase {
     ASSIST_SHOOTING,
     REVERSING,
     JAM_DETECTED,
-    REVERSING_UNJAM
+    UNJAMMING
   }
 
   // State variables
@@ -78,7 +78,7 @@ public class IntakeRoller extends SubsystemBase {
     previousState = currentState;
     switch (wantedState) {
       case INTAKING:
-        if (currentState == IntakeRollerStates.REVERSING_UNJAM) {
+        if (currentState == IntakeRollerStates.UNJAMMING) {
           handleUnjamming();
         } else if (currentState == IntakeRollerStates.JAM_DETECTED) {
           handleJammed();
@@ -109,12 +109,20 @@ public class IntakeRoller extends SubsystemBase {
     }
   }
 
+  /** Minimum reverse velocity (RPM) indicating the jam has cleared during unjamming. */
+  private static final double UNJAM_VELOCITY_THRESHOLD_RPM = -100.0;
+
   /**
-   * Called each cycle while currentState is REVERSING_UNJAM. Waits for the unjam window to expire,
-   * then returns to INTAKING.
+   * Called each cycle while currentState is UNJAMMING. Waits for the unjam window to expire or
+   * until the roller spins up past the reverse velocity threshold (jam cleared), then returns to
+   * INTAKING.
    */
   private void handleUnjamming() {
-    if (unjamTimer.get() >= UNJAM_DURATION_SECONDS) {
+    boolean timerExpired = unjamTimer.get() >= UNJAM_DURATION_SECONDS;
+    boolean jamCleared =
+        inputs.velocity[0] < UNJAM_VELOCITY_THRESHOLD_RPM
+            && inputs.velocity[1] < UNJAM_VELOCITY_THRESHOLD_RPM;
+    if (timerExpired || jamCleared) {
       resetJamState();
       currentState = IntakeRollerStates.INTAKING;
     }
@@ -134,7 +142,7 @@ public class IntakeRoller extends SubsystemBase {
       unjamTimer.stop();
       unjamTimer.reset();
       unjamTimer.start();
-      currentState = IntakeRollerStates.REVERSING_UNJAM;
+      currentState = IntakeRollerStates.UNJAMMING;
     }
   }
 
@@ -156,11 +164,9 @@ public class IntakeRoller extends SubsystemBase {
       case REVERSING:
         reversing();
         break;
-      case REVERSING_UNJAM:
-        unjamming();
-        break;
+      case UNJAMMING:
       case JAM_DETECTED:
-        stop();
+        unjamming();
         break;
       case IDLE:
       default:
