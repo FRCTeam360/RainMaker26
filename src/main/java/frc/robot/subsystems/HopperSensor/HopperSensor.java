@@ -94,7 +94,6 @@ public class HopperSensor extends SubsystemBase {
   private void updateState() {
     previousState = currentState;
 
-    boolean previousDebouncedSensorActivated = debouncedSensorActivated;
     debouncedSensorActivated = sensorActivatedDebouncer.calculate(inputs.sensorActivated);
 
     // Force OFF state if sensor is disconnected (failsafe)
