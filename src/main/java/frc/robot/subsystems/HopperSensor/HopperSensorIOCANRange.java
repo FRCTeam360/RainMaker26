@@ -5,12 +5,12 @@
 package frc.robot.subsystems.HopperSensor;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANrangeConfiguration;
 import com.ctre.phoenix6.hardware.CANrange;
 import com.ctre.phoenix6.signals.UpdateModeValue;
 import edu.wpi.first.units.measure.Distance;
-import frc.robot.Constants;
 
 public class HopperSensorIOCANRange implements HopperSensorIO {
 
@@ -23,14 +23,13 @@ public class HopperSensorIOCANRange implements HopperSensorIO {
   private static final double FOV_RANGE_X_DEGREES = 27.0;
   private static final double FOV_RANGE_Y_DEGREES = 27.0;
 
-  private final CANrange canRange =
-      new CANrange(
-          Constants.PracticeBotConstants.HOPPER_SENSOR_ID, Constants.PracticeBotConstants.CANBUS);
+  private final CANrange canRange;
 
   private final StatusSignal<Distance> distanceSignal;
   private final StatusSignal<Boolean> isDetectedSignal;
 
-  public HopperSensorIOCANRange() {
+  public HopperSensorIOCANRange(int sensorId, CANBus canBus) {
+    canRange = new CANrange(sensorId, canBus);
     CANrangeConfiguration config = new CANrangeConfiguration();
     config.ProximityParams.MinSignalStrengthForValidMeasurement = MIN_SIGNAL_STRENGTH;
     config.ProximityParams.ProximityThreshold = PROXIMITY_THRESHOLD_METERS;
@@ -55,5 +54,6 @@ public class HopperSensorIOCANRange implements HopperSensorIO {
     BaseStatusSignal.refreshAll(distanceSignal, isDetectedSignal);
     inputs.distanceMeters = distanceSignal.getValueAsDouble();
     inputs.sensorActivated = isDetectedSignal.getValue();
+    inputs.connected = distanceSignal.getStatus().isOK() && isDetectedSignal.getStatus().isOK();
   }
 }
