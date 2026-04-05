@@ -176,8 +176,8 @@ public class IntakeStateMachine {
 
   /** Logs the wanted, current, and previous intake states. */
   public void log() {
-    Logger.recordOutput("Superstructure/WantedIntakeState", wantedState);
-    Logger.recordOutput("Superstructure/CurrentIntakeState", currentState);
-    Logger.recordOutput("Superstructure/PreviousIntakeState", previousState);
+    Logger.recordOutput("Superstructure/Intake/WantedState", wantedState);
+    Logger.recordOutput("Superstructure/Intake/CurrentState", currentState);
+    Logger.recordOutput("Superstructure/Intake/PreviousState", previousState);
   }
 }
