@@ -27,12 +27,14 @@ public class HopperSensor extends SubsystemBase {
    * Wanted states for the hopper sensor, controlling how the internal state is updated.
    *
    * <ul>
+   *   <li>{@code OFF} — sensor readings are ignored; internal state remains fixed at HALF_EMPTY.
    *   <li>{@code LIVE} — internal state mirrors the sensor directly every cycle.
-   *   <li>{@code LATCHED} — internal state is frozen once FULL; only resets to NOT_FULL on a
+   *   <li>{@code LATCHED} — internal state is frozen once FULL; only resets to HALF_EMPTY on a
    *       falling edge (sensor transitions from activated to not activated).
    * </ul>
    */
   public enum HopperSensorWantedStates {
+    OFF,
     LIVE,
     LATCHED
   }
@@ -41,19 +43,19 @@ public class HopperSensor extends SubsystemBase {
    * Internal states representing whether balls are currently stacked over the spindexer.
    *
    * <ul>
-   *   <li>{@code NOT_FULL} — no balls detected over the spindexer; agitate at high intensity.
+   *   <li>{@code HALF_EMPTY} — no balls detected over the spindexer; agitate at high intensity.
    *   <li>{@code FULL} — balls detected over the spindexer; back off to low intensity.
    * </ul>
    */
   public enum HopperSensorInternalStates {
-    NOT_FULL,
+    HALF_EMPTY,
     FULL
   }
 
   // State variables
   private HopperSensorWantedStates wantedState = HopperSensorWantedStates.LIVE;
-  private HopperSensorInternalStates currentState = HopperSensorInternalStates.NOT_FULL;
-  private HopperSensorInternalStates previousState = HopperSensorInternalStates.NOT_FULL;
+  private HopperSensorInternalStates currentState = HopperSensorInternalStates.HALF_EMPTY;
+  private HopperSensorInternalStates previousState = HopperSensorInternalStates.HALF_EMPTY;
 
   public HopperSensor(HopperSensorIO io) {
     this.io = io;
@@ -68,6 +70,11 @@ public class HopperSensor extends SubsystemBase {
    */
   public void setWantedState(HopperSensorWantedStates state) {
     wantedState = state;
+  }
+
+  /** Returns the current wanted state of the hopper sensor. */
+  public HopperSensorWantedStates getWantedState() {
+    return wantedState;
   }
 
   /** Returns the current internal state of the hopper sensor. */
@@ -90,18 +97,26 @@ public class HopperSensor extends SubsystemBase {
     boolean previousDebouncedSensorActivated = debouncedSensorActivated;
     debouncedSensorActivated = sensorActivatedDebouncer.calculate(inputs.sensorActivated);
 
-    switch (wantedState) {
+    // Force OFF state if sensor is disconnected (failsafe)
+    HopperSensorWantedStates effectiveWantedState =
+        inputs.connected ? wantedState : HopperSensorWantedStates.OFF;
+
+    switch (effectiveWantedState) {
+      case OFF:
+        // Sensor is disabled or disconnected — internal state remains fixed at HALF_EMPTY.
+        currentState = HopperSensorInternalStates.HALF_EMPTY;
+        break;
       case LIVE:
         // Update freely from the sensor every cycle.
         currentState =
             debouncedSensorActivated
                 ? HopperSensorInternalStates.FULL
-                : HopperSensorInternalStates.NOT_FULL;
+                : HopperSensorInternalStates.HALF_EMPTY;
         break;
       case LATCHED:
-        // Latch frozen — only reset to NOT_FULL on a falling edge (balls have cleared).
+        // Latch frozen — only reset to HALF_EMPTY on a falling edge (balls have cleared).
         if (previousState == HopperSensorInternalStates.FULL && !debouncedSensorActivated) {
-          currentState = HopperSensorInternalStates.NOT_FULL;
+          currentState = HopperSensorInternalStates.HALF_EMPTY;
         }
         break;
     }
@@ -117,5 +132,6 @@ public class HopperSensor extends SubsystemBase {
     Logger.recordOutput("Subsystems/HopperSensor/WantedState", wantedState);
     Logger.recordOutput("Subsystems/HopperSensor/CurrentState", currentState);
     Logger.recordOutput("Subsystems/HopperSensor/PreviousState", previousState);
+    Logger.recordOutput("Subsystems/HopperSensor/Connected", inputs.connected);
   }
 }

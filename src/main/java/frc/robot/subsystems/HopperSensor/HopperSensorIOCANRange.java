@@ -54,5 +54,6 @@ public class HopperSensorIOCANRange implements HopperSensorIO {
     BaseStatusSignal.refreshAll(distanceSignal, isDetectedSignal);
     inputs.distanceMeters = distanceSignal.getValueAsDouble();
     inputs.sensorActivated = isDetectedSignal.getValue();
+    inputs.connected = distanceSignal.getStatus().isOK() && isDetectedSignal.getStatus().isOK();
   }
 }
