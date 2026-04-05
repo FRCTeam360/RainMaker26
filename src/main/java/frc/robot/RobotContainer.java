@@ -26,7 +26,6 @@ import frc.robot.generated.CompBotDrivetrain;
 import frc.robot.generated.PracticeBotDrivetrain;
 import frc.robot.generated.WoodBotDrivetrain;
 import frc.robot.subsystems.Climber.Climber;
-import frc.robot.subsystems.Climber.ClimberIOCB;
 import frc.robot.subsystems.Climber.ClimberIONoop;
 import frc.robot.subsystems.Climber.ClimberIOSim;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
@@ -39,6 +38,7 @@ import frc.robot.subsystems.HopperRoller.HopperRollerIOSim;
 import frc.robot.subsystems.HopperSensor.HopperSensor;
 import frc.robot.subsystems.HopperSensor.HopperSensorIOCANRange;
 import frc.robot.subsystems.HopperSensor.HopperSensorIONoop;
+import frc.robot.subsystems.HopperSensor.HopperSensorIOSim;
 import frc.robot.subsystems.Indexer.Indexer;
 import frc.robot.subsystems.Indexer.IndexerIOCB;
 import frc.robot.subsystems.Indexer.IndexerIOPB;
@@ -154,7 +154,7 @@ public class RobotContainer {
         intakeRoller = new IntakeRoller(new IntakeRollerIOSim());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOSim());
         hopperRoller = new HopperRoller(new HopperRollerIOSim());
-        hopperSensor = new HopperSensor(new HopperSensorIONoop());
+        hopperSensor = new HopperSensor(new HopperSensorIOSim());
 
         robotShootingInfo =
             new RobotShootingInfo(
@@ -280,7 +280,7 @@ public class RobotContainer {
       case COMPBOT:
       default:
         drivetrain = CompBotDrivetrain.createDrivetrain();
-        climber = new Climber(new ClimberIOCB());
+        climber = new Climber(new ClimberIONoop());
         flywheel = new Flywheel(new FlywheelIOCBBangBang());
         hood = new Hood(new HoodIOCB());
         indexer = new Indexer(new IndexerIOCB());
