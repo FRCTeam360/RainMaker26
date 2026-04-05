@@ -242,7 +242,7 @@ public class FlywheelKicker extends SubsystemBase {
   @Override
   public void periodic() {
     io.updateInputs(inputs);
-    Logger.processInputs("FlywheelKicker", inputs);
+    Logger.processInputs("Subsystems/FlywheelKicker", inputs);
 
     if (controlState == ControlState.SUPERSTRUCTURE) {
       updateState();

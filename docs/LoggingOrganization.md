@@ -84,7 +84,6 @@ State machine wanted/current/previous states and their internal logic logs.
 | `Superstructure/StateMachines/Shooter/WantedState` | `ShooterStateMachine.java` |
 | `Superstructure/StateMachines/Shooter/CurrentState` | `ShooterStateMachine.java` |
 | `Superstructure/StateMachines/Shooter/PreviousState` | `ShooterStateMachine.java` |
-| `Superstructure/StateMachines/Shooter/Shooting/FlywheelState` | `ShooterStateMachine.java` |
 | `Superstructure/StateMachines/Shooter/Shooting/FlywheelReady` | `ShooterStateMachine.java` |
 | `Superstructure/StateMachines/Shooter/Shooting/HoodReady` | `ShooterStateMachine.java` |
 | `Superstructure/StateMachines/Shooter/Shooting/DrivetrainAligned` | `ShooterStateMachine.java` |
@@ -170,7 +169,7 @@ Hardware subsystem state. Each subsystem logs its own wanted/current/previous st
 | `Superstructure/Subsystems/FlywheelKicker/ControlState` | `FlywheelKicker.java` |
 | `Superstructure/Subsystems/FlywheelKicker/KickCount` | `FlywheelKicker.java` |
 
-> **Note:** AutoLogged IO inputs for each subsystem are logged via `Logger.processInputs("Superstructure/Subsystems/<Name>", inputs)` — those fields appear under the same folder automatically.
+> **Note:** AutoLogged IO inputs for each subsystem are logged via `Logger.processInputs("Subsystems/<Name>", inputs)` — they appear under `RealInputs/Subsystems/` in AdvantageScope, separate from the `RealOutputs/Superstructure/Subsystems/` state outputs by design.
 
 ---
 

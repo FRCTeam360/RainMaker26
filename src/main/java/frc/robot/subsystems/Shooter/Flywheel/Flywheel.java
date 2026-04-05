@@ -314,7 +314,7 @@ public class Flywheel extends SubsystemBase {
   @Override
   public void periodic() {
     io.updateInputs(inputs);
-    Logger.processInputs("Flywheel", inputs);
+    Logger.processInputs("Subsystems/Flywheel", inputs);
 
     if (controlState == ControlState.SUPERSTRUCTURE) {
       // Update state machine on every cycle to respond to velocity/current state changes

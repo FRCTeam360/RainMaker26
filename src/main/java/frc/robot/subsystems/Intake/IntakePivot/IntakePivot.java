@@ -297,7 +297,7 @@ public class IntakePivot extends SubsystemBase {
   @Override
   public void periodic() {
     io.updateInputs(inputs);
-    Logger.processInputs("IntakePivot", inputs);
+    Logger.processInputs("Subsystems/IntakePivot", inputs);
 
     if (controlState == ControlState.SUPERSTRUCTURE) {
       updateState();

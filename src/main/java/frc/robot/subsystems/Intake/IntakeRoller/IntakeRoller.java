@@ -183,7 +183,7 @@ public class IntakeRoller extends SubsystemBase {
   @Override
   public void periodic() {
     io.updateInputs(inputs);
-    Logger.processInputs("IntakeRoller", inputs);
+    Logger.processInputs("Subsystems/IntakeRoller", inputs);
 
     if (controlState == ControlState.SUPERSTRUCTURE) {
       updateState();

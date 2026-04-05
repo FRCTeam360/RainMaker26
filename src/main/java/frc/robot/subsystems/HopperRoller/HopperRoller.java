@@ -114,7 +114,7 @@ public class HopperRoller extends SubsystemBase {
   @Override
   public void periodic() {
     io.updateInputs(inputs);
-    Logger.processInputs("HopperRoller", inputs);
+    Logger.processInputs("Subsystems/HopperRoller", inputs);
 
     if (controlState == ControlState.SUPERSTRUCTURE) {
       updateState();

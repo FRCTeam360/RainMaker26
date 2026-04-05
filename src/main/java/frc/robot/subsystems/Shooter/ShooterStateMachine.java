@@ -176,9 +176,6 @@ public class ShooterStateMachine {
 
     disturbanceStartTimestampSeconds = Double.NaN;
 
-    Logger.recordOutput("Superstructure/Shooter/Shooting/FlywheelState", flywheelState);
-    // SmartDashboard.putString("Superstructure/Shooter/Shooting/FlywheelState",
-    // flywheelState.toString());
     Logger.recordOutput("Superstructure/Shooter/Shooting/FlywheelReady", flywheelReady);
     SmartDashboard.putBoolean("Superstructure/Shooter/Shooting/FlywheelReady", flywheelReady);
     Logger.recordOutput("Superstructure/Shooter/Shooting/HoodReady", hoodReady);
