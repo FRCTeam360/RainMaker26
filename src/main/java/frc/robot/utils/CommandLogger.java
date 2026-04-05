@@ -16,13 +16,13 @@ public class CommandLogger {
    * @return The provided command with appended logging when the command starts and ends
    */
   public static Command logCommand(Command command, String commandName) {
-    Logger.recordOutput("Command Running: " + commandName, false);
+    Logger.recordOutput("Commands/" + commandName + "/Running", false);
     return command
         .beforeStarting(() -> logCommand(commandName, true))
         .finallyDo(() -> logCommand(commandName, false));
   }
 
   private static void logCommand(String commandName, boolean isRunning) {
-    Logger.recordOutput("Command Running: " + commandName, isRunning);
+    Logger.recordOutput("Commands/" + commandName + "/Running", isRunning);
   }
 }

@@ -92,16 +92,20 @@ public final class Constants {
   }
 
   private static RobotType initRobotType() {
+    if (!Robot.isReal()) { // Check sim first to avoid empty serial address matching COMP
+      robotType = Constants.RobotType.SIM;
+      return robotType;
+    }
+
     String serialAddress = HALUtil.getSerialNumber();
 
     if (serialAddress.equals(SerialAddressConstants.WOOD_SERIAL_ADDRESS)) {
       robotType = Constants.RobotType.WOODBOT;
-    } else if (serialAddress.equals(SerialAddressConstants.COMP_SERIAL_ADDRESS)) {
+    } else if (!SerialAddressConstants.COMP_SERIAL_ADDRESS.isEmpty()
+        && serialAddress.equals(SerialAddressConstants.COMP_SERIAL_ADDRESS)) {
       robotType = Constants.RobotType.COMPBOT;
     } else if (serialAddress.equals(SerialAddressConstants.PRACTICE_SERIAL_ADDRESS)) {
       robotType = Constants.RobotType.PRACTICEBOT;
-    } else if (!Robot.isReal()) { // KEEP AT BOTTOM
-      robotType = Constants.RobotType.SIM;
     } else {
       robotType = Constants.RobotType.COMPBOT;
     }
@@ -571,6 +575,4 @@ public final class Constants {
     public static final String COMP_SERIAL_ADDRESS = "025AE07E";
     public static final String PRACTICE_SERIAL_ADDRESS = "03260AD5";
   }
-
-  public static double loopPeriodSecs; // add value
 }

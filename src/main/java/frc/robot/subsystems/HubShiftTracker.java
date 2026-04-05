@@ -59,9 +59,9 @@ public class HubShiftTracker {
     SmartDashboard.putNumber("Time Left in Phase", primaryTimeLeft);
     SmartDashboard.putBoolean("Auto Winner", weAreAutoWinner);
 
-    Logger.recordOutput("HubShift/Phase", currentPhase.name());
-    Logger.recordOutput("HubShift/TimeLeftInPhase", primaryTimeLeft);
-    Logger.recordOutput("HubShift/AutoWinner", weAreAutoWinner);
+    Logger.recordOutput("Utils/HubShift/Phase", currentPhase.name());
+    Logger.recordOutput("Utils/HubShift/TimeLeftInPhase", primaryTimeLeft);
+    Logger.recordOutput("Utils/HubShift/AutoWinner", weAreAutoWinner);
   }
 
   // -------------------------------------------------------------------------
