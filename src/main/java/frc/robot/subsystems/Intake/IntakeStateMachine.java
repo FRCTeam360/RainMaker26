@@ -1,5 +1,6 @@
 package frc.robot.subsystems.Intake;
 
+import frc.robot.subsystems.HopperSensor.HopperSensor;
 import frc.robot.subsystems.Intake.IntakePivot.IntakePivot;
 import frc.robot.subsystems.Intake.IntakePivot.IntakePivot.IntakePivotWantedStates;
 import frc.robot.subsystems.Intake.IntakeRoller.IntakeRoller;
@@ -22,9 +23,10 @@ public class IntakeStateMachine {
     IDLE,
     INTAKING,
     STOWED,
-    AGITATING,
+    AGITATING_PROGRESSIVE,
     DEPLOYED,
-    REVERSING
+    REVERSING,
+    AGITATING
   }
 
   /** Internal states representing the resolved intake behavior. */
@@ -32,19 +34,28 @@ public class IntakeStateMachine {
     IDLE,
     INTAKING,
     STOWED,
-    AGITATING,
+    AGITATING_LOW,
+    AGITATING_HIGH,
+    AGITATING_PROGRESSIVE,
     DEPLOYED,
     REVERSING
+  }
+
+  private enum BallsOverSpindexerState {
+    FULL,
+    NOT_FULL
   }
 
   // Subsystem refs
   private final IntakeRoller intakeRoller;
   private final IntakePivot intakePivot;
+  private final HopperSensor hopperSensor;
 
   // State variables
   private IntakeWantedStates wantedState = IntakeWantedStates.IDLE;
   private IntakeInternalStates currentState = IntakeInternalStates.IDLE;
   private IntakeInternalStates previousState = IntakeInternalStates.IDLE;
+  private BallsOverSpindexerState overSpindexerState = BallsOverSpindexerState.NOT_FULL;
 
   /**
    * Creates a new IntakeStateMachine.
@@ -52,9 +63,11 @@ public class IntakeStateMachine {
    * @param intakeRoller the intake roller subsystem
    * @param intakePivot the intake pivot subsystem
    */
-  public IntakeStateMachine(IntakeRoller intakeRoller, IntakePivot intakePivot) {
+  public IntakeStateMachine(
+      IntakeRoller intakeRoller, IntakePivot intakePivot, HopperSensor hopperSensor) {
     this.intakeRoller = intakeRoller;
     this.intakePivot = intakePivot;
+    this.hopperSensor = hopperSensor;
   }
 
   /**
@@ -78,6 +91,13 @@ public class IntakeStateMachine {
   public void update() {
     previousState = currentState;
 
+    if (wantedState != IntakeWantedStates.AGITATING) {
+      overSpindexerState =
+          hopperSensor.isActivated()
+              ? BallsOverSpindexerState.FULL
+              : BallsOverSpindexerState.NOT_FULL;
+    }
+
     switch (wantedState) {
       case INTAKING:
         currentState = IntakeInternalStates.INTAKING;
@@ -86,7 +106,26 @@ public class IntakeStateMachine {
         currentState = IntakeInternalStates.STOWED;
         break;
       case AGITATING:
-        currentState = IntakeInternalStates.AGITATING;
+        // set the latching behavior
+        if (currentState == IntakeInternalStates.AGITATING_LOW
+            && hopperSensor.wasPrevActivated()
+            && !hopperSensor.isActivated()) {
+          overSpindexerState = BallsOverSpindexerState.NOT_FULL;
+        }
+
+        // act on the latching behavior
+        if (overSpindexerState == BallsOverSpindexerState.NOT_FULL) {
+          currentState = IntakeInternalStates.AGITATING_HIGH;
+        } else {
+          currentState = IntakeInternalStates.AGITATING_LOW;
+        }
+        break;
+      case AGITATING_PROGRESSIVE:
+        if (intakePivot.getState() == IntakePivot.IntakePivotInternalStates.PROGRESSIVE_COMPLETE) {
+          currentState = IntakeInternalStates.DEPLOYED;
+        } else {
+          currentState = IntakeInternalStates.AGITATING_PROGRESSIVE;
+        }
         break;
       case DEPLOYED:
         currentState = IntakeInternalStates.DEPLOYED;
@@ -114,9 +153,17 @@ public class IntakeStateMachine {
         intakeRoller.setWantedState(IntakeRollerStates.INTAKING);
         intakePivot.setWantedState(IntakePivotWantedStates.DEPLOYED);
         break;
-      case AGITATING:
+      case AGITATING_LOW:
         intakeRoller.setWantedState(IntakeRollerStates.ASSIST_SHOOTING);
-        intakePivot.setWantedState(IntakePivotWantedStates.AGITATE_HOPPER);
+        intakePivot.setWantedState(IntakePivotWantedStates.AGITATE_HOPPER_LOW);
+        break;
+      case AGITATING_HIGH:
+        intakeRoller.setWantedState(IntakeRollerStates.ASSIST_SHOOTING);
+        intakePivot.setWantedState(IntakePivotWantedStates.AGITATE_HOPPER_HIGH);
+        break;
+      case AGITATING_PROGRESSIVE:
+        // intakeRoller.setWantedState(IntakeRollerStates.ASSIST_SHOOTING);
+        intakePivot.setWantedState(IntakePivotWantedStates.AGITATE_PROGRESSIVE);
         break;
       case STOWED:
         intakeRoller.setWantedState(IntakeRollerStates.IDLE);
@@ -138,5 +185,6 @@ public class IntakeStateMachine {
     Logger.recordOutput("Superstructure/WantedIntakeState", wantedState);
     Logger.recordOutput("Superstructure/CurrentIntakeState", currentState);
     Logger.recordOutput("Superstructure/PreviousIntakeState", previousState);
+    Logger.recordOutput("Superstructure/BallsOverHopperState", overSpindexerState);
   }
 }

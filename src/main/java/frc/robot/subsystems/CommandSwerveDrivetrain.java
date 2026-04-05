@@ -50,7 +50,7 @@ import org.littletonrobotics.junction.Logger;
  * https://v6.docs.ctr-electronics.com/en/stable/docs/tuner/tuner-swerve/index.html
  */
 public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Subsystem {
-  private LinearVelocity maxSpeed = Constants.getMaxSpeed();
+  public final LinearVelocity maxSpeed = Constants.getMaxSpeed();
   private AngularVelocity maxAngularVelocity = Constants.getMaxAngularVelocity();
   private boolean isDefenseMode = false;
   private static final double kSimLoopPeriod = 0.004; // 4 ms
@@ -93,18 +93,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
   // Heading controller PID gains (from example code)
   private static final double HEADING_KP = 15.0;
-  // Ki is intentionally 0 — heading error naturally bleeds off as the robot moves.
-  // Integrator windup during long auto paths or sustained tracking can cause overshoot.
-  private static final double HEADING_KI = 0.00;
-  // Current Kd is near-zero and provides almost no damping. Recommended starting point
-  // is ~0.1 (= KP/60), tunable up to ~0.3 before gyro noise begins to amplify.
-  // Example: private static final double HEADING_KD = 0.1;
+  private static final double HEADING_KI = 0.2;
   private static final double HEADING_KD = 1.0; // 1.0 Kd is prob the highest we should go
-  // IZone is only relevant if Ki > 0. If Ki is ever enabled, a reasonable starting
-  // value is ~0.17 rad (~10°) — small enough to only integrate near the setpoint.
-  // Example: private static final double HEADING_I_ZONE = Math.toRadians(10.0);
-  private static final double HEADING_I_ZONE = 0.0;
-  private static final double HEADING_TOLERANCE_RAD = Math.toRadians(1.5);
+  private static final double HEADING_I_ZONE = Math.toRadians(10.0);
+  private static final double HEADING_TOLERANCE_RAD = Math.toRadians(3.0);
   // Extra heading tolerance granted per m/s of translational speed.
   // Compensates for the PID steady-state tracking lag when the heading setpoint moves
   // (setpoint rate ≈ v/d rad/s; lag ≈ rate/KP). Tunable — start at ~5°/m/s.
@@ -188,7 +180,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
           double velYMps = Math.pow(driveCont.getLeftX(), 3) * maxSpeed.in(MetersPerSecond) * -1.0;
           double omegaRps =
               Math.pow(driveCont.getRightX(), 2)
-                  * (maxAngularVelocity.in(RadiansPerSecond) / 2.0)
+                  * (maxAngularVelocity.in(RadiansPerSecond))
                   * -Math.signum(driveCont.getRightX());
           if (isDefenseMode) {
             velXMps *= defenseModeTranslationScaler;
@@ -276,68 +268,69 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   }
 
   /**
-   * Creates a command that drives the robot in field-centric mode while continuously rotating to
-   * face the hub center. The heading controller automatically adjusts the robot's rotation to
-   * always point toward the hub as the robot moves around the field.
+   * Drives the robot in field-centric mode while continuously rotating to face the given heading.
+   * Velocities are field-relative (already alliance-flipped by the caller). The caller is
+   * responsible for resetting the heading controller when done.
    *
-   * @param velocityXSupplier Supplier for X velocity (field-relative, forward positive) in m/s
-   * @param velocityYSupplier Supplier for Y velocity (field-relative, left positive) in m/s
-   * @return Command that drives while facing the hub
+   * @param fieldRelativeVelXMps X velocity in m/s (field-relative, already alliance-flipped)
+   * @param fieldRelativeVelYMps Y velocity in m/s (field-relative, already alliance-flipped)
+   * @param targetHeading The target heading to face
+   */
+  public void faceAngleWhileDriving(
+      double fieldRelativeVelXMps, double fieldRelativeVelYMps, Rotation2d targetHeading) {
+    double speedCapMps = maxSpeed.in(MetersPerSecond) * FACING_ANGLE_MAX_SPEED_FRACTION;
+
+    // Clamp the velocity vector magnitude to the speed cap
+    double rawSpeedMps = Math.hypot(fieldRelativeVelXMps, fieldRelativeVelYMps);
+    if (rawSpeedMps > speedCapMps) {
+      double scale = speedCapMps / rawSpeedMps;
+      fieldRelativeVelXMps *= scale;
+      fieldRelativeVelYMps *= scale;
+    }
+
+    double omegaRps = angleFacingRequest.HeadingController.getLastAppliedOutput();
+
+    // Store as robot-relative to match getVelocity() convention.
+    commandedSpeeds =
+        ChassisSpeeds.fromFieldRelativeSpeeds(
+            fieldRelativeVelXMps, fieldRelativeVelYMps, omegaRps, getPosition().getRotation());
+
+    this.setControl(
+        angleFacingRequest
+            .withVelocityX(fieldRelativeVelXMps)
+            .withVelocityY(fieldRelativeVelYMps)
+            .withTargetDirection(targetHeading));
+  }
+
+  /**
+   * Creates a command that drives the robot in field-centric mode while continuously rotating to
+   * face the given heading.
+   *
+   * @param velocityXSupplier Supplier for X velocity (operator-perspective, forward positive) in
+   *     m/s
+   * @param velocityYSupplier Supplier for Y velocity (operator-perspective, left positive) in m/s
+   * @param headingSupplier Supplier for the target heading
+   * @return Command that drives while facing the heading
    */
   public Command faceAngleWhileDrivingCommand(
       DoubleSupplier velocityXSupplier,
       DoubleSupplier velocityYSupplier,
       Supplier<Rotation2d> headingSupplier) {
-    double speedCapMps = maxSpeed.in(MetersPerSecond) * FACING_ANGLE_MAX_SPEED_FRACTION;
-    // Tracks whether the heading controller has produced at least one output for this
-    // command schedule. Reset in finallyDo so each new schedule starts clean.
-    boolean[] controllerHasRun = {false};
-    return this.applyRequest(
-            () -> {
-              double rawVelXMps = velocityXSupplier.getAsDouble();
-              double rawVelYMps = velocityYSupplier.getAsDouble();
+    return this.runEnd(
+        () -> {
+          double rawVelXMps = velocityXSupplier.getAsDouble();
+          double rawVelYMps = velocityYSupplier.getAsDouble();
 
-              // Clamp the velocity vector magnitude to the speed cap
-              double rawSpeedMps = Math.hypot(rawVelXMps, rawVelYMps);
-              if (rawSpeedMps > speedCapMps) {
-                double scale = speedCapMps / rawSpeedMps;
-                rawVelXMps *= scale;
-                rawVelYMps *= scale;
-              }
+          boolean isBlueAlliance =
+              DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue;
+          double fieldVelXMps = isBlueAlliance ? rawVelXMps : -rawVelXMps;
+          double fieldVelYMps = isBlueAlliance ? rawVelYMps : -rawVelYMps;
 
-              // Gate on controllerHasRun to avoid consuming stale output on the first cycle
-              // after the controller was reset (getLastAppliedOutput() returns 0 until the
-              // facing-angle request has been applied at least once).
-              double omegaRps =
-                  controllerHasRun[0]
-                      ? angleFacingRequest.HeadingController.getLastAppliedOutput()
-                      : 0.0;
-              controllerHasRun[0] = true;
-
-              // Store as robot-relative to match getVelocity() convention.
-              // Convert operator-perspective to field-relative (alliance flip),
-              // then field-relative to robot-relative.
-              boolean isBlueAlliance =
-                  DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue;
-              commandedSpeeds =
-                  ChassisSpeeds.fromFieldRelativeSpeeds(
-                      isBlueAlliance ? rawVelXMps : -rawVelXMps,
-                      isBlueAlliance ? rawVelYMps : -rawVelYMps,
-                      omegaRps,
-                      getPosition().getRotation());
-
-              // Pass operator-perspective values — CTRE applies operator perspective
-              // internally via setOperatorPerspectiveForward
-              return angleFacingRequest
-                  .withVelocityX(isBlueAlliance ? rawVelXMps : -rawVelXMps)
-                  .withVelocityY(isBlueAlliance ? rawVelYMps : -rawVelYMps)
-                  .withTargetDirection(headingSupplier.get());
-            })
-        .finallyDo(
-            () -> {
-              angleFacingRequest.HeadingController.reset();
-              controllerHasRun[0] = false; // Reset so next schedule starts clean
-            });
+          faceAngleWhileDriving(fieldVelXMps, fieldVelYMps, headingSupplier.get());
+        },
+        () -> {
+          angleFacingRequest.HeadingController.reset();
+        });
   }
 
   /**
@@ -626,6 +619,20 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     angleFacingRequest.HeadingController.setTolerance(dynamicToleranceRad);
     return angleFacingRequest.HeadingController.atSetpoint();
+  }
+
+  /** Resets the facing-angle heading controller so it must re-converge from scratch. */
+  public void resetHeadingController() {
+    angleFacingRequest.HeadingController.reset();
+  }
+
+  /**
+   * Returns the configured heading tolerance in radians.
+   *
+   * @return heading tolerance in radians
+   */
+  public double getHeadingToleranceRad() {
+    return HEADING_TOLERANCE_RAD;
   }
 
   public double getAngle() {

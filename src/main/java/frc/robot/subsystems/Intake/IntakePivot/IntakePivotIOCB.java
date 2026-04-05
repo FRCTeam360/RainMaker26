@@ -23,7 +23,7 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import frc.robot.Constants;
 
-public class IntakePivotIOPB implements IntakePivotIO {
+public class IntakePivotIOCB implements IntakePivotIO {
   // TODO: UPDATE GEAR RATIO
   private static final double GEAR_RATIO = 97.5;
   // 80-16 * 52-16 * 40-20 * 36-12
@@ -49,9 +49,7 @@ public class IntakePivotIOPB implements IntakePivotIO {
   private static final double PEAK_FORWARD_VOLTAGE = 12.0;
   private static final double PEAK_REVERSE_VOLTAGE = -12.0;
 
-  private final TalonFX intakePivot =
-      new TalonFX(
-          Constants.PracticeBotConstants.INTAKE_PIVOT_ID, Constants.PracticeBotConstants.CANBUS);
+  private final TalonFX intakePivot;
 
   private final DutyCycleOut dutyCycleOut = new DutyCycleOut(0);
   private final MotionMagicVoltage motionMagicPosition = new MotionMagicVoltage(0.0);
@@ -65,8 +63,11 @@ public class IntakePivotIOPB implements IntakePivotIO {
   private final StatusSignal<Current> supplyCurrentSignal;
   private final StatusSignal<Voltage> motorVoltageSignal;
 
-  /** Creates a new IntakePivotIOPB. */
-  public IntakePivotIOPB() {
+  /** Creates a new IntakePivotIOCB. */
+  public IntakePivotIOCB() {
+    intakePivot =
+        new TalonFX(Constants.CompBotConstants.INTAKE_PIVOT_ID, Constants.CompBotConstants.CANBUS);
+
     // FIXME: NEUTRAL MODE BRAKE
     config.CurrentLimits.StatorCurrentLimit = STATOR_CURRENT_LIMIT_AMPS;
     config.CurrentLimits.SupplyCurrentLimit = SUPPLY_CURRENT_LIMIT_AMPS;

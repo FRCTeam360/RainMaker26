@@ -20,7 +20,7 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import frc.robot.Constants;
 
-public class HoodIOPB implements HoodIO {
+public class HoodIOCB implements HoodIO {
   private static final double GEAR_RATIO = 3.0 / 1.0 * 170.0 / 10.0;
   // 1/3 * 170/10
   private static final double KP = 750.0;
@@ -36,8 +36,7 @@ public class HoodIOPB implements HoodIO {
   private static final double MOTION_MAGIC_ACCELERATION_RPS2 = 4.0;
   private static final double MOTION_MAGIC_CRUISE_VELOCITY_RPS = 2.0;
   private static final double MOTION_MAGIC_JERK_RPS3 = 1200.0;
-  private final TalonFX hoodMotor =
-      new TalonFX(Constants.PracticeBotConstants.HOOD_ID, Constants.PracticeBotConstants.CANBUS);
+  private final TalonFX hoodMotor;
   private final TalonFXConfiguration config = new TalonFXConfiguration();
 
   private final MotionMagicVoltage motionMagicPosition = new MotionMagicVoltage(0);
@@ -53,7 +52,9 @@ public class HoodIOPB implements HoodIO {
     hoodMotor.setPosition(0);
   }
 
-  public HoodIOPB() {
+  public HoodIOCB() {
+    hoodMotor = new TalonFX(Constants.CompBotConstants.HOOD_ID, Constants.CompBotConstants.CANBUS);
+
     Slot0Configs slot0Configs = config.Slot0;
     slot0Configs.kA = KA;
     slot0Configs.kD = KD;

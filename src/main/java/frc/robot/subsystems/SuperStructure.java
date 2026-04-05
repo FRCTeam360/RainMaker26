@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.HopperRoller.HopperRoller;
 import frc.robot.subsystems.HopperRoller.HopperRoller.HopperRollerStates;
+import frc.robot.subsystems.HopperSensor.HopperSensor;
 import frc.robot.subsystems.Indexer.Indexer;
 import frc.robot.subsystems.Indexer.Indexer.IndexerStates;
 import frc.robot.subsystems.Intake.IntakePivot.IntakePivot;
@@ -40,12 +41,14 @@ public class SuperStructure extends SubsystemBase {
   private final Hood hood;
   private final IntakePivot intakePivot;
   private final HopperRoller hopperRoller;
+  private final HopperSensor hopperSensor;
   private final ShooterStateMachine shooterStateMachine;
   private final IntakeStateMachine intakeStateMachine;
   private final TargetSelectionStateMachine targetSelectionStateMachine;
   private final ShotCalculator hubShotCalculator;
   private final Supplier<Pose2d> robotPoseSupplier;
   private final Transform2d robotToShooter;
+  private final double indexerToFlywheelSeconds;
   private final HubShiftTracker hubShiftTracker;
 
   // shooting @ 3 meters
@@ -98,11 +101,13 @@ public class SuperStructure extends SubsystemBase {
       Hood hood,
       IntakePivot intakePivot,
       HopperRoller hopperRoller,
+      HopperSensor hopperSensor,
       ShotCalculator hubShotCalculator,
       ShotCalculator passCalculator,
       BooleanSupplier isAlignedToTarget,
       Supplier<Pose2d> robotPoseSupplier,
-      Transform2d robotToShooter) {
+      Transform2d robotToShooter,
+      double indexerToFlywheelSeconds) {
     this.intakeRoller = intakeRoller;
     this.indexer = indexer;
     this.flywheelKicker = flywheelKicker;
@@ -110,14 +115,16 @@ public class SuperStructure extends SubsystemBase {
     this.hood = hood;
     this.intakePivot = intakePivot;
     this.hopperRoller = hopperRoller;
+    this.hopperSensor = hopperSensor;
     this.hubShotCalculator = hubShotCalculator;
     this.robotPoseSupplier = robotPoseSupplier;
     this.robotToShooter = robotToShooter;
-    this.hubShiftTracker = new HubShiftTracker(hubShotCalculator);
+    this.hubShiftTracker = new HubShiftTracker();
+    this.indexerToFlywheelSeconds = indexerToFlywheelSeconds;
     this.shooterStateMachine =
         new ShooterStateMachine(
             flywheel, hood, flywheelKicker, isAlignedToTarget, this::canShootToTarget);
-    this.intakeStateMachine = new IntakeStateMachine(intakeRoller, intakePivot);
+    this.intakeStateMachine = new IntakeStateMachine(intakeRoller, intakePivot, hopperSensor);
     this.targetSelectionStateMachine =
         new TargetSelectionStateMachine(hubShotCalculator, passCalculator, robotPoseSupplier);
 
@@ -222,7 +229,8 @@ public class SuperStructure extends SubsystemBase {
       shooterStateMachine.setWantedState(ShooterWantedStates.SHOOTING);
     }
 
-    if (shooterStateMachine.getState() == ShooterStates.FIRING) {
+    if (shooterStateMachine.getState() == ShooterStates.FIRING
+        || shooterStateMachine.getState() == ShooterStates.DISTURBED) {
       indexer.setWantedState(IndexerStates.INDEXING);
       hopperRoller.setWantedState(HopperRollerStates.ROLLING);
     } else {
@@ -352,7 +360,10 @@ public class SuperStructure extends SubsystemBase {
     cachedTimeOfFlight = hubShotCalculator.calculateShot().timeOfFlight();
     RobotUtils.ActiveHub shootingPhase =
         RobotUtils.getActiveHubAtShotLanding(
-            DriverStation.getMatchTime(), DriverStation.isTeleop(), cachedTimeOfFlight);
+            DriverStation.getMatchTime(),
+            DriverStation.isTeleop(),
+            cachedTimeOfFlight,
+            indexerToFlywheelSeconds);
 
     // Calculate hub active once per cycle
     cachedHubActive =

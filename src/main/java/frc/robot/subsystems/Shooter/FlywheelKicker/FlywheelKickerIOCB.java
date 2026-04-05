@@ -1,7 +1,5 @@
 package frc.robot.subsystems.Shooter.FlywheelKicker;
 
-// import com.ctre.phoenix6.BaseStatusSignal;
-// import com.ctre.phoenix6.StatusSignal;
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
@@ -12,9 +10,9 @@ import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
-import frc.robot.Constants;
+import frc.robot.Constants.CompBotConstants;
 
-public class FlywheelKickerIOPB implements FlywheelKickerIO {
+public class FlywheelKickerIOCB implements FlywheelKickerIO {
   private static final double GEAR_RATIO = 1.0;
   private static final int STALL_CURRENT_LIMIT_AMPS = 60;
   private static final int FREE_CURRENT_LIMIT_AMPS = 50;
@@ -33,20 +31,20 @@ public class FlywheelKickerIOPB implements FlywheelKickerIO {
   private static final double KV = 0.0017;
   private static final double KS = 0.04;
 
-  private static final double MIN_SIGNAL_STRENGTH = 2000; // unknown unit
-  private static final double PROXIMITY_THRESHOLD_METERS = 0.1;
   private static final double MAX_NEGATIVE_OUTPUT = 0.0;
   private static final double MAX_POSITIVE_OUTPUT = 1.0;
 
-  /** Creates a new FlywheelKickerIOPB. */
-  private final SparkFlex flywheelKickerMotor =
-      new SparkFlex(Constants.PracticeBotConstants.FLYWHEEL_KICKER_ID, MotorType.kBrushless);
+  /** Creates a new FlywheelKickerIOCB. */
+  private final SparkFlex flywheelKickerMotor;
 
-  private final RelativeEncoder encoder = flywheelKickerMotor.getEncoder();
+  private final RelativeEncoder encoder;
   private final SparkFlexConfig sparkFlexConfig = new SparkFlexConfig();
   private final SparkClosedLoopController closedLoopController;
 
-  public FlywheelKickerIOPB() {
+  public FlywheelKickerIOCB() {
+    flywheelKickerMotor = new SparkFlex(CompBotConstants.FLYWHEEL_KICKER_ID, MotorType.kBrushless);
+    encoder = flywheelKickerMotor.getEncoder();
+
     // Configure base motor settings
     sparkFlexConfig.idleMode(IdleMode.kCoast);
     sparkFlexConfig.inverted(false);
