@@ -300,16 +300,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             .withVelocityX(fieldRelativeVelXMps)
             .withVelocityY(fieldRelativeVelYMps)
             .withTargetDirection(targetHeading));
-
-    double positionErrorRad = angleFacingRequest.HeadingController.getPositionError();
-    double velocityErrorRps = angleFacingRequest.HeadingController.getVelocityError();
-    Logger.recordOutput(
-        SUBSYSTEM_NAME + "HeadingPID/OutputRadPerSec",
-        angleFacingRequest.HeadingController.getLastAppliedOutput());
-    Logger.recordOutput(
-        SUBSYSTEM_NAME + "HeadingPID/PTermRadPerSec", HEADING_KP * positionErrorRad);
-    Logger.recordOutput(
-        SUBSYSTEM_NAME + "HeadingPID/DTermRadPerSec", HEADING_KD * velocityErrorRps);
   }
 
   /**
