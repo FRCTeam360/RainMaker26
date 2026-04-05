@@ -87,6 +87,11 @@ public class HopperSensor extends SubsystemBase {
     return inputs.distanceMeters;
   }
 
+  /** Returns whether the sensor is currently connected and reporting valid data. */
+  public boolean isConnected() {
+    return inputs.connected;
+  }
+
   /**
    * Updates the sensor state based on the current wanted state and sensor readings. Called every
    * cycle from periodic().

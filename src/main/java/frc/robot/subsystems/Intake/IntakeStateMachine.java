@@ -107,10 +107,10 @@ public class IntakeStateMachine {
         break;
       case AGITATING:
         hopperSensor.setWantedState(HopperSensorWantedStates.LATCHED);
-        // Failsafe: if sensor is OFF (broken/disabled), default to AGITATING_LOW for safety
+        // Failsafe: if sensor is disconnected, default to AGITATING_LOW to avoid over-agitating.
         currentState =
             (hopperSensor.getState() == HopperSensorInternalStates.FULL
-                    || hopperSensor.getWantedState() == HopperSensorWantedStates.OFF)
+                    || !hopperSensor.isConnected())
                 ? IntakeInternalStates.AGITATING_LOW
                 : IntakeInternalStates.AGITATING_HIGH;
         break;
