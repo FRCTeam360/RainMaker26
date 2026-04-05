@@ -338,7 +338,8 @@ public class RobotContainer {
             .alongWith(
                 drivetrain.faceAngleWhileDrivingCommand(
                     () -> 0, () -> 0, () -> hubShotCalculator.calculateShot().targetHeading()))
-            .finallyDo(() -> superStructure.setWantedSuperState(SuperWantedStates.DEFAULT)));
+            .alongWith(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING))
+            .andThen(superStructure.setStateCommand(SuperWantedStates.DEFAULT)));
 
     configVision();
     configDefaultDrivingCommand();
