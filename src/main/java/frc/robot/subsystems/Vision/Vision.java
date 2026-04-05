@@ -34,11 +34,20 @@ public class Vision extends SubsystemBase {
 
   private final Map<String, String> cachedLogKeys;
 
-  private static final InterpolatingMatrixTreeMap<Double, N3, N1> MEASUREMENT_STD_DEV_DISTANCE_MAP =
-      new InterpolatingMatrixTreeMap<>();
+  private static final double EXPECTED_FORWARD = 0.3;
+  private static final double EXPECTED_SIDE = 0.0;
+  private static final double EXPECTED_UP = 0.5;
+  private static final double EXPECTED_PITCH = -30.0;
+  private static final double EXPECTED_YAW = 0.0;
+  private static final double EXPECTED_ROLL = 0.0;
+  private static final double POS_TOLERANCE_M = 0.05;
+  private static final double ROT_TOLERANCE_DEG = 5.0;
+
+  private static final InterpolatingMatrixTreeMap<Double, N3, N1> MEASUREMENT_STD_DEV_DISTANCE_MAP = new InterpolatingMatrixTreeMap<>();
 
   static {
-    // Very low standard deviations = high confidence = vision dominates pose estimation
+    // Very low standard deviations = high confidence = vision dominates pose
+    // estimation
     // X and Y in meters, rotation in radians
     MEASUREMENT_STD_DEV_DISTANCE_MAP.put(
         0.1,
@@ -47,7 +56,7 @@ public class Vision extends SubsystemBase {
     MEASUREMENT_STD_DEV_DISTANCE_MAP.put(
         8.0,
         VecBuilder.fill(
-            3.0, 3.0, 999999.0)); // Far tags (8 meters):  very low confidence (5 meter cm std dev)
+            3.0, 3.0, 999999.0)); // Far tags (8 meters): very low confidence (5 meter cm std dev)
   }
 
   /** Creates a new Vision. */
@@ -137,6 +146,15 @@ public class Vision extends SubsystemBase {
         }
       }
       Logger.processInputs(cachedLogKeys.get(key), input);
+      if (input.cameraPoseValid) {
+        boolean cameraInPlace = Math.abs(input.cameraPoseForward - EXPECTED_FORWARD) < POS_TOLERANCE_M
+            && Math.abs(input.cameraPoseSide - EXPECTED_SIDE) < POS_TOLERANCE_M
+            && Math.abs(input.cameraPoseUp - EXPECTED_UP) < POS_TOLERANCE_M;
+
+        boolean rotationInPlace = Math.abs(input.cameraPosePitch - EXPECTED_PITCH) < ROT_TOLERANCE_DEG
+            && Math.abs(input.cameraPoseYaw - EXPECTED_YAW) < ROT_TOLERANCE_DEG
+            && Math.abs(input.cameraPoseRoll - EXPECTED_ROLL) < ROT_TOLERANCE_DEG;
+      }
     }
 
     for (Map.Entry<String, VisionIOInputsAutoLogged> entry : visionInputs.entrySet()) {
@@ -200,7 +218,8 @@ public class Vision extends SubsystemBase {
   /**
    * Sets the processing throttle on all vision IO layers.
    *
-   * @param throttle number of frames to skip between processed frames (0 = full speed)
+   * @param throttle number of frames to skip between processed frames (0 = full
+   *                 speed)
    */
   public void setThrottle(int throttle) {
     for (VisionIO io : ios.values()) {

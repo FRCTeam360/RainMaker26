@@ -6,6 +6,8 @@ package frc.robot.subsystems.Vision;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import frc.robot.utils.LimelightHelpers;
+
 import org.littletonrobotics.junction.AutoLog;
 
 public interface VisionIO {
@@ -24,7 +26,16 @@ public interface VisionIO {
     public double timestampSeconds;
     public boolean poseUpdated;
 
-    // Fixed-size arrays (preallocated for max possible tags) to avoid allocations at 50Hz
+    public boolean cameraPoseValid = false;
+    public double cameraPoseForward = 0.0;
+    public double cameraPoseSide = 0.0;
+    public double cameraPoseUp = 0.0;
+    public double cameraPoseRoll = 0.0;
+    public double cameraPosePitch = 0.0;
+    public double cameraPoseYaw = 0.0;
+
+    // Fixed-size arrays (preallocated for max possible tags) to avoid allocations
+    // at 50Hz
     public int targetCount = 0; // Number of valid entries in the arrays below
     public int[] targetIds = new int[MAX_TAGS];
     public double[] distancesToTargets = new double[MAX_TAGS];
@@ -39,26 +50,38 @@ public interface VisionIO {
     }
   }
 
-  default void updateInputs(VisionIOInputs inputs) {}
+  default void updateInputs(VisionIOInputs inputs) {
+  }
 
-  default void setLEDMode(int mode) {}
+  default void setLEDMode(int mode) {
+  }
 
-  default void setPipeline(int pipeline) {}
+  default void setPipeline(int pipeline) {
+  }
 
-  default void takeSnapshot() {}
+  default void takeSnapshot() {
+  }
 
-  default void resetSnapshot() {}
+  default void resetSnapshot() {
+  }
 
-  /** Enables IMU seeding from external orientation data. Only relevant for Limelight 4. */
-  default void enableIMUSeeding() {}
+  /**
+   * Enables IMU seeding from external orientation data. Only relevant for
+   * Limelight 4.
+   */
+  default void enableIMUSeeding() {
+  }
 
   /** Enables IMU assist mode. Only relevant for Limelight 4. */
-  default void enableIMUAssist() {}
+  default void enableIMUAssist() {
+  }
 
   /**
    * Sets the processing throttle. Only relevant for Limelight 4.
    *
-   * @param throttle number of frames to skip between processed frames (0 = full speed)
+   * @param throttle number of frames to skip between processed frames (0 = full
+   *                 speed)
    */
-  default void setThrottle(int throttle) {}
+  default void setThrottle(int throttle) {
+  }
 }
