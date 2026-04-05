@@ -39,6 +39,7 @@ import frc.robot.subsystems.HopperRoller.HopperRollerIOSim;
 import frc.robot.subsystems.HopperSensor.HopperSensor;
 import frc.robot.subsystems.HopperSensor.HopperSensorIOCANRange;
 import frc.robot.subsystems.HopperSensor.HopperSensorIONoop;
+import frc.robot.subsystems.HopperSensor.HopperSensorIOSim;
 import frc.robot.subsystems.Indexer.Indexer;
 import frc.robot.subsystems.Indexer.IndexerIOCB;
 import frc.robot.subsystems.Indexer.IndexerIOPB;
@@ -154,7 +155,8 @@ public class RobotContainer {
         intakeRoller = new IntakeRoller(new IntakeRollerIOSim());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOSim());
         hopperRoller = new HopperRoller(new HopperRollerIOSim());
-        hopperSensor = new HopperSensor(new HopperSensorIONoop());
+        hopperSensorSimIO = new HopperSensorIOSim();
+        hopperSensor = new HopperSensor(hopperSensorSimIO);
 
         robotShootingInfo =
             new RobotShootingInfo(
