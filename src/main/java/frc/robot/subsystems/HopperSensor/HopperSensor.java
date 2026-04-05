@@ -114,10 +114,9 @@ public class HopperSensor extends SubsystemBase {
                 : HopperSensorInternalStates.HALF_EMPTY;
         break;
       case AGITATING:
-        // Latch FULL — only reset to HALF_EMPTY on a falling edge (balls have cleared).
-        if (debouncedSensorActivated) {
-          currentState = HopperSensorInternalStates.FULL;
-        } else if (previousState == HopperSensorInternalStates.FULL) {
+        // One-way latch — only reset FULL to HALF_EMPTY on a falling edge (balls have cleared).
+        // If we entered agitation while HALF_EMPTY, stay HALF_EMPTY (agitate at high intensity).
+        if (previousState == HopperSensorInternalStates.FULL && !debouncedSensorActivated) {
           currentState = HopperSensorInternalStates.HALF_EMPTY;
         }
         break;
