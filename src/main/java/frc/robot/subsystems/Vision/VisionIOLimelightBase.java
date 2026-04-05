@@ -17,8 +17,7 @@ import java.util.Optional;
 import java.util.function.DoubleSupplier;
 
 /**
- * Abstract base class for Limelight vision IO layers. Contains all shared
- * NetworkTables reads, pose
+ * Abstract base class for Limelight vision IO layers. Contains all shared NetworkTables reads, pose
  * filtering, and MegaTag2 logic.
  */
 public abstract class VisionIOLimelightBase implements VisionIO {
@@ -32,12 +31,10 @@ public abstract class VisionIOLimelightBase implements VisionIO {
   /**
    * Creates a new Limelight hardware layer.
    *
-   * @param name                  the NetworkTables name of the Limelight
-   * @param gyroAngleSupplier     supplies the robot's gyro angle in degrees
-   * @param gyroAngleRateSupplier supplies the robot's gyro angular rate in
-   *                              degrees per second
-   * @param acceptMeasurements    whether to process pose estimates from this
-   *                              Limelight
+   * @param name the NetworkTables name of the Limelight
+   * @param gyroAngleSupplier supplies the robot's gyro angle in degrees
+   * @param gyroAngleRateSupplier supplies the robot's gyro angular rate in degrees per second
+   * @param acceptMeasurements whether to process pose estimates from this Limelight
    */
   protected VisionIOLimelightBase(
       String name,
@@ -98,21 +95,19 @@ public abstract class VisionIOLimelightBase implements VisionIO {
     // per, then don't update further
     if (newPoseEstimate.isEmpty()
         || inputs.tv == 0.0
-        || Math.abs(gyroAngleRateSupplier.getAsDouble()) > 720.0)
-      return;
+        || Math.abs(gyroAngleRateSupplier.getAsDouble()) > 720.0) return;
     // if the megatag1 pose estimate has less than 2 tags in it, don't update
     // further
-    if (!newPoseEstimate.get().isMegaTag2)
-      return;
-    if (newPoseEstimate.get().tagCount == 0)
-      return;
+    if (!newPoseEstimate.get().isMegaTag2) return;
+    if (newPoseEstimate.get().tagCount == 0) return;
     if (Math.abs(
-        newPoseEstimate
-            .get().pose
-            .getRotation()
-            .minus(Rotation2d.fromDegrees(gyroAngleSupplier.getAsDouble()))
-            .getDegrees()) > 120.0)
-      return;
+            newPoseEstimate
+                .get()
+                .pose
+                .getRotation()
+                .minus(Rotation2d.fromDegrees(gyroAngleSupplier.getAsDouble()))
+                .getDegrees())
+        > 120.0) return;
 
     PoseEstimate poseEstimate = newPoseEstimate.get();
 
@@ -125,8 +120,7 @@ public abstract class VisionIOLimelightBase implements VisionIO {
       RawFiducial rawFiducial = poseEstimate.rawFiducials[i];
       // if the pose is outside of the field, then skip to the next point
       Optional<Pose3d> tagPose = FieldConstants.FIELD_LAYOUT.getTagPose(rawFiducial.id);
-      if (targetCount >= MAX_TAGS || tagPose.isEmpty())
-        continue;
+      if (targetCount >= MAX_TAGS || tagPose.isEmpty()) continue;
 
       inputs.targetIds[targetCount] = rawFiducial.id;
       inputs.distancesToTargets[targetCount] = rawFiducial.distToRobot;
