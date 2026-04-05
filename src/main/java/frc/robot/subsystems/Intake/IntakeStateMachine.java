@@ -94,8 +94,9 @@ public class IntakeStateMachine {
   public void update() {
     previousState = currentState;
 
-    // Default to LIVE; the AGITATING case overrides this to freeze the latch.
-    hopperSensor.setWantedState(HopperSensorWantedStates.LIVE);
+    if (wantedState != IntakeWantedStates.AGITATING) {
+      hopperSensor.setWantedState(HopperSensorWantedStates.LIVE);
+    }
 
     switch (wantedState) {
       case INTAKING:
