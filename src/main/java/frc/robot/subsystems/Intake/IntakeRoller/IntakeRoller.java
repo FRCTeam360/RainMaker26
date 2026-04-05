@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems.Intake.IntakeRoller;
 
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -12,27 +13,41 @@ import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
 public class IntakeRoller extends SubsystemBase {
-  // Constants
+  // Motor output constants
   private static final double INTAKE_VELOCITY_RPM = 4000.0;
-  private static final double REVERSE_UNJAM_DUTY_CYCLE = -0.5;
+  private static final double WOODBOT_INTAKING_DUTY_CYCLE = 0.7;
   private static final double INTAKING_DUTY_CYCLE = 0.8;
   private static final double SHOOT_ASSIST_DUTY_CYCLE = 0.3;
   private static final double REVERSE_VELOCITY_RPM = -3250.0;
+  private static final double REVERSE_UNJAM_DUTY_CYCLE = -0.5;
+
+  // Jam detection constants
+  private static final double JAM_STATOR_CURRENT_THRESHOLD_AMPS = 50.0;
+  private static final double JAM_VELOCITY_THRESHOLD_RPM = 50.0;
+  private static final double JAM_DURATION_SECONDS = 0.25;
+  private static final double UNJAM_DURATION_SECONDS = 0.15;
+  private static final int MAX_UNJAM_ATTEMPTS = 3;
+
+  /** Minimum reverse velocity (RPM) indicating the jam has cleared during unjamming. */
+  private static final double UNJAM_VELOCITY_THRESHOLD_RPM = -100.0;
 
   // IO fields
   private final IntakeRollerIO io;
   private final IntakeRollerIOInputsAutoLogged inputs = new IntakeRollerIOInputsAutoLogged();
 
-  // Other fields
-  private DoubleSupplier dutyCycleSupplier = () -> INTAKING_DUTY_CYCLE;
+  // Jam tracking fields
+  private final Timer stallTimer = new Timer();
+  private final Timer unjamTimer = new Timer();
+  private int unjamAttempts = 0;
 
   // Enums
   public enum IntakeRollerStates {
     IDLE,
     INTAKING,
     ASSIST_SHOOTING,
-    REVERSING
-    // JAMMED
+    REVERSING,
+    JAM_DETECTED,
+    UNJAMMING
   }
 
   // State variables
@@ -62,33 +77,80 @@ public class IntakeRoller extends SubsystemBase {
     this.controlState = controlState;
   }
 
-  public void setDutyCycleSupplier(DoubleSupplier dutyCycleSupplier) {
-    this.dutyCycleSupplier = dutyCycleSupplier;
-  }
-
   private void updateState() {
     previousState = currentState;
     switch (wantedState) {
       case INTAKING:
-        // if (isJammed()) {
-        //   currentState = IntakeRollerStates.JAMMED;
-        // } else {
-        // }
-        currentState = IntakeRollerStates.INTAKING;
+        if (currentState == IntakeRollerStates.UNJAMMING) {
+          handleUnjamming();
+        } else if (currentState == IntakeRollerStates.JAM_DETECTED) {
+          handleJammed();
+        } else if (isJammed()) {
+          stallTimer.stop();
+          stallTimer.reset();
+          currentState = IntakeRollerStates.JAM_DETECTED;
+        } else {
+          currentState = IntakeRollerStates.INTAKING;
+        }
         break;
       case ASSIST_SHOOTING:
+        resetJamState();
+        unjamAttempts = 0;
         currentState = IntakeRollerStates.ASSIST_SHOOTING;
         break;
       case REVERSING:
+        resetJamState();
+        unjamAttempts = 0;
         currentState = IntakeRollerStates.REVERSING;
         break;
       case IDLE:
       default:
+        resetJamState();
+        unjamAttempts = 0;
         currentState = IntakeRollerStates.IDLE;
         break;
-        // case JAMMED:
-        //   currentState = IntakeRollerStates.JAMMED;
     }
+  }
+
+  /**
+   * Called each cycle while currentState is UNJAMMING. Waits for the unjam window to expire or
+   * until the roller spins up past the reverse velocity threshold (jam cleared), then returns to
+   * INTAKING.
+   */
+  private void handleUnjamming() {
+    boolean timerExpired = unjamTimer.get() >= UNJAM_DURATION_SECONDS;
+    boolean jamCleared =
+        inputs.velocity[0] < UNJAM_VELOCITY_THRESHOLD_RPM
+            && inputs.velocity[1] < UNJAM_VELOCITY_THRESHOLD_RPM;
+    if (timerExpired || jamCleared) {
+      resetJamState();
+      currentState = IntakeRollerStates.INTAKING;
+    }
+  }
+
+  /**
+   * Called each cycle while currentState is JAM_DETECTED. Attempts up to MAX_UNJAM_ATTEMPTS unjam
+   * cycles; gives up and stays stopped if the limit is reached.
+   */
+  private void handleJammed() {
+    if (unjamAttempts >= MAX_UNJAM_ATTEMPTS) {
+      // Give up unjamming — resume intaking and let the driver decide
+      resetJamState();
+      currentState = IntakeRollerStates.INTAKING;
+    } else {
+      unjamAttempts++;
+      unjamTimer.stop();
+      unjamTimer.reset();
+      unjamTimer.start();
+      currentState = IntakeRollerStates.UNJAMMING;
+    }
+  }
+
+  private void resetJamState() {
+    stallTimer.stop();
+    stallTimer.reset();
+    unjamTimer.stop();
+    unjamTimer.reset();
   }
 
   private void applyState() {
@@ -102,12 +164,14 @@ public class IntakeRoller extends SubsystemBase {
       case REVERSING:
         reversing();
         break;
+      case UNJAMMING:
+      case JAM_DETECTED:
+        unjamming();
+        break;
       case IDLE:
       default:
         stop();
         break;
-        // case JAMMED:
-        //   unjamIntake();
     }
   }
 
@@ -119,7 +183,7 @@ public class IntakeRoller extends SubsystemBase {
     if (Constants.getRobotType() != Constants.RobotType.WOODBOT) {
       setVelocity(INTAKE_VELOCITY_RPM);
     } else {
-      setDutyCycle(0.7);
+      setDutyCycle(WOODBOT_INTAKING_DUTY_CYCLE);
     }
   }
 
@@ -127,15 +191,27 @@ public class IntakeRoller extends SubsystemBase {
     setVelocity(REVERSE_VELOCITY_RPM);
   }
 
-  // private void unjamIntake() {
-  //   if (isJammed()) {
-  //     this.setDutyCycle(REVERSE_UNJAM_DUTY_CYCLE);
-  //   }
-  // }
+  private void unjamming() {
+    setDutyCycle(REVERSE_UNJAM_DUTY_CYCLE);
+  }
 
-  // private boolean isJammed() {
-  //   return inputs.supplyCurrent >= JAMMED_SUPPLY_CURRENT_DRAW;
-  // }
+  private boolean isJammed() {
+    boolean highCurrent =
+        inputs.statorCurrent[0] > JAM_STATOR_CURRENT_THRESHOLD_AMPS
+            && inputs.statorCurrent[1] > JAM_STATOR_CURRENT_THRESHOLD_AMPS;
+    boolean lowVelocity =
+        Math.abs(inputs.velocity[0]) < JAM_VELOCITY_THRESHOLD_RPM
+            && Math.abs(inputs.velocity[1]) < JAM_VELOCITY_THRESHOLD_RPM;
+
+    if (highCurrent && lowVelocity) {
+      stallTimer.start();
+    } else {
+      stallTimer.stop();
+      stallTimer.reset();
+    }
+
+    return stallTimer.get() >= JAM_DURATION_SECONDS;
+  }
 
   // IO delegation methods
 
@@ -193,6 +269,7 @@ public class IntakeRoller extends SubsystemBase {
     Logger.recordOutput("Subsystems/IntakeRoller/CurrentState", currentState);
     Logger.recordOutput("Subsystems/IntakeRoller/PreviousState", previousState);
     Logger.recordOutput("Subsystems/IntakeRoller/ControlState", controlState);
-    // Logger.recordOutput("Subsystems/IntakeRoller/PreviousState", isJammed());
+    Logger.recordOutput("Subsystems/IntakeRoller/UnjamAttempts", unjamAttempts);
+    Logger.recordOutput("Subsystems/IntakeRoller/IsJammed", isJammed());
   }
 }
