@@ -51,6 +51,8 @@ public class SuperStructure extends SubsystemBase {
   private final Transform2d robotToShooter;
   private final HubShiftTracker hubShiftTracker;
 
+  private static final double PRE_SHOT_UNJAM_SECONDS = 0.05;
+
   // shooting @ 3 meters
   private static final double HOOD_FORCED_ANGLE = 10.0;
   private static final double FLYWHEEL_FORCED_RPM = 2200.0;
@@ -235,11 +237,12 @@ public class SuperStructure extends SubsystemBase {
       hopperRoller.setWantedState(HopperRollerStates.ROLLING);
     } else if (shooterStateMachine.getState() == ShooterStates.PREPARING_TO_FIRE) {
       preparingToFireTimer.start();
-      if (preparingToFireTimer.hasElapsed(0.05)) {
+      if (preparingToFireTimer.hasElapsed(PRE_SHOT_UNJAM_SECONDS)) {
         indexer.setWantedState(IndexerStates.REVERSING);
         hopperRoller.setWantedState(HopperRollerStates.REVERSING);
       }
     } else {
+      preparingToFireTimer.reset();
       indexer.setWantedState(IndexerStates.OFF);
       hopperRoller.setWantedState(HopperRollerStates.PREVENT_JAM);
     }

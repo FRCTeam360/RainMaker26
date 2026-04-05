@@ -70,6 +70,7 @@ public class HopperRoller extends SubsystemBase {
         break;
       case REVERSING:
         currentState = HopperRollerStates.REVERSING;
+        break;
       case OFF:
       default:
         currentState = HopperRollerStates.OFF;
@@ -90,6 +91,7 @@ public class HopperRoller extends SubsystemBase {
         break;
       case REVERSING:
         setDutyCycle(REVERSING_DUTY_CYCLE);
+        break;
       case OFF:
       default:
         stop();
