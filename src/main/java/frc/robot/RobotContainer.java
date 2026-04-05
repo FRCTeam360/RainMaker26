@@ -453,6 +453,8 @@ public class RobotContainer {
     boolean noLaunchFor500ms = (Timer.getFPGATimestamp() - hopperStalledLastLaunchTime) >= 0.5;
     boolean hopperEmpty =
         hopperSensor.getState() == HopperSensor.HopperSensorInternalStates.HALF_EMPTY;
+    Logger.recordOutput("Auto/ShootAtHub/NoLaunchFor500ms", noLaunchFor500ms);
+    Logger.recordOutput("Auto/ShootAtHub/HopperEmpty", hopperEmpty);
     return hopperEmpty && noLaunchFor500ms;
   }
 
