@@ -72,11 +72,6 @@ public class HopperSensor extends SubsystemBase {
     wantedState = state;
   }
 
-  /** Returns the current wanted state of the hopper sensor. */
-  public HopperSensorWantedStates getWantedState() {
-    return wantedState;
-  }
-
   /** Returns the current internal state of the hopper sensor. */
   public HopperSensorInternalStates getState() {
     return currentState;
