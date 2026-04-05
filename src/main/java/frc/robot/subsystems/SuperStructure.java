@@ -47,6 +47,7 @@ public class SuperStructure extends SubsystemBase {
   private final ShotCalculator hubShotCalculator;
   private final Supplier<Pose2d> robotPoseSupplier;
   private final Transform2d robotToShooter;
+  private final double indexerToFlywheelSeconds;
   private final HubShiftTracker hubShiftTracker;
 
   // shooting @ 3 meters
@@ -104,7 +105,8 @@ public class SuperStructure extends SubsystemBase {
       ShotCalculator passCalculator,
       BooleanSupplier isAlignedToTarget,
       Supplier<Pose2d> robotPoseSupplier,
-      Transform2d robotToShooter) {
+      Transform2d robotToShooter,
+      double indexerToFlywheelSeconds) {
     this.intakeRoller = intakeRoller;
     this.indexer = indexer;
     this.flywheelKicker = flywheelKicker;
@@ -116,6 +118,7 @@ public class SuperStructure extends SubsystemBase {
     this.robotPoseSupplier = robotPoseSupplier;
     this.robotToShooter = robotToShooter;
     this.hubShiftTracker = new HubShiftTracker();
+    this.indexerToFlywheelSeconds = indexerToFlywheelSeconds;
     this.shooterStateMachine =
         new ShooterStateMachine(
             flywheel, hood, flywheelKicker, isAlignedToTarget, this::canShootToTarget);
@@ -355,7 +358,10 @@ public class SuperStructure extends SubsystemBase {
     cachedTimeOfFlight = hubShotCalculator.calculateShot().timeOfFlight();
     RobotUtils.ActiveHub shootingPhase =
         RobotUtils.getActiveHubAtShotLanding(
-            DriverStation.getMatchTime(), DriverStation.isTeleop(), cachedTimeOfFlight);
+            DriverStation.getMatchTime(),
+            DriverStation.isTeleop(),
+            cachedTimeOfFlight,
+            indexerToFlywheelSeconds);
 
     // Calculate hub active once per cycle
     cachedHubActive =

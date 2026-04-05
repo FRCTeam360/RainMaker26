@@ -41,6 +41,7 @@ public final class Constants {
   public static enum RobotType {
     SIM,
     WOODBOT,
+    COMPBOT,
     PRACTICEBOT,
     REPLAY
   }
@@ -57,6 +58,8 @@ public final class Constants {
     switch (getRobotType()) {
       case WOODBOT:
         return WoodBotConstants.maxSpeed;
+      case COMPBOT:
+        return CompBotConstants.maxSpeed;
       case PRACTICEBOT:
         return PracticeBotConstants.maxSpeed;
       case SIM:
@@ -70,6 +73,8 @@ public final class Constants {
     switch (getRobotType()) {
       case WOODBOT:
         return WoodBotConstants.maxAngularVelocity;
+      case COMPBOT:
+        return CompBotConstants.maxAngularVelocity;
       case PRACTICEBOT:
         return PracticeBotConstants.maxAngularVelocity;
       case SIM:
@@ -91,12 +96,14 @@ public final class Constants {
 
     if (serialAddress.equals(SerialAddressConstants.WOOD_SERIAL_ADDRESS)) {
       robotType = Constants.RobotType.WOODBOT;
+    } else if (serialAddress.equals(SerialAddressConstants.COMP_SERIAL_ADDRESS)) {
+      robotType = Constants.RobotType.COMPBOT;
     } else if (serialAddress.equals(SerialAddressConstants.PRACTICE_SERIAL_ADDRESS)) {
       robotType = Constants.RobotType.PRACTICEBOT;
     } else if (!Robot.isReal()) { // KEEP AT BOTTOM
       robotType = Constants.RobotType.SIM;
     } else {
-      robotType = Constants.RobotType.PRACTICEBOT;
+      robotType = Constants.RobotType.COMPBOT;
     }
     return robotType;
   }
@@ -189,6 +196,8 @@ public final class Constants {
     public static final InterpolatingDoubleTreeMap timeOfFlightMap =
         new InterpolatingDoubleTreeMap();
 
+    public static final double INDEXER_TO_FLYWHEEL_SECONDS = 0.4;
+
     public static final double MIN_SHOT_DISTANCE_METERS = 1.0;
     public static final double MAX_SHOT_DISTANCE_METERS = 5.0;
 
@@ -234,6 +243,8 @@ public final class Constants {
         new InterpolatingDoubleTreeMap();
 
     public static final double HOOD_OFFSET = 2.0;
+
+    public static final double INDEXER_TO_FLYWHEEL_SECONDS = 0.4;
 
     public static final double MIN_SHOT_DISTANCE_METERS = 1.25;
     public static final double MAX_SHOT_DISTANCE_METERS = 6.0;
@@ -349,6 +360,108 @@ public final class Constants {
     }
   }
 
+  public static class CompBotConstants {
+    // === SHOT CALCULATOR ===
+    public static final InterpolatingDoubleTreeMap shotHoodAngleMap =
+        new InterpolatingDoubleTreeMap();
+    public static final InterpolatingDoubleTreeMap shotFlywheelSpeedMap =
+        new InterpolatingDoubleTreeMap();
+    public static final InterpolatingDoubleTreeMap passHoodAngleMap =
+        new InterpolatingDoubleTreeMap();
+    public static final InterpolatingDoubleTreeMap passFlywheelSpeedMap =
+        new InterpolatingDoubleTreeMap();
+    public static final InterpolatingDoubleTreeMap timeOfFlightMap =
+        new InterpolatingDoubleTreeMap();
+
+    public static final double HOOD_OFFSET = 2.0;
+
+    public static final double INDEXER_TO_FLYWHEEL_SECONDS = 0.4;
+
+    public static final double MIN_SHOT_DISTANCE_METERS = 1.25;
+    public static final double MAX_SHOT_DISTANCE_METERS = 6.0;
+
+    public static final double MIN_PASS_DISTANCE_METERS = 1.0;
+    public static final double MAX_PASS_DISTANCE_METERS = 12.0;
+
+    // === INTAKE ===
+    public static final int INTAKE_PIVOT_ID = 14;
+    public static final int LEFT_INTAKE_ROLLER_ID = 15;
+    public static final int RIGHT_INTAKE_ROLLER_ID = 16;
+
+    // === CLIMBER ===
+    public static final int CLIMBER_RIGHT_ID = 17;
+
+    // === FLYWHEEL ===
+    public static final int FLYWHEEL_RIGHT_ID = 18;
+    public static final int FLYWHEEL_LEFT_ID = 19;
+
+    // === FLYWHEEL KICKER ===
+    public static final int FLYWHEEL_KICKER_ID = 20;
+
+    // === HOPPER SENSOR ===
+    public static final int HOPPER_SENSOR_ID = 21;
+
+    // === HOPPER ===
+    public static final int HOPPER_ROLLER_ID = 22;
+    public static final int TWINDEXER_ID = 23;
+
+    // === HOOD ===
+    public static final int HOOD_ID = 24;
+
+    // === LIMELIGHT ===
+    public static final String LIMELIGHT_RIGHT = "limelight-right";
+    public static final String LIMELIGHT_LEFT = "limelight-left";
+
+    // === CANBUS ===
+    public static final CANBus CANBUS = new CANBus("Default Name");
+
+    // === MAXIMUMS ===
+    public static final LinearVelocity maxSpeed = MetersPerSecond.of(4.69);
+    public static final AngularVelocity maxAngularVelocity = RevolutionsPerSecond.of(4.0);
+
+    static {
+      shotHoodAngleMap.put(6.0, 16.0);
+      shotHoodAngleMap.put(5.0, 16.0);
+      shotHoodAngleMap.put(4.0, 17.0);
+      shotHoodAngleMap.put(3.5, 16.0);
+      shotHoodAngleMap.put(3.0, 10.0);
+      shotHoodAngleMap.put(2.5, 6.0);
+      shotHoodAngleMap.put(2.0, 3.0);
+      shotHoodAngleMap.put(1.25, 0.0);
+
+      shotFlywheelSpeedMap.put(6.0, 2600.0);
+      shotFlywheelSpeedMap.put(5.0, 2550.0);
+      shotFlywheelSpeedMap.put(4.0, 2500.0);
+      shotFlywheelSpeedMap.put(3.5, 2325.0);
+      shotFlywheelSpeedMap.put(3.0, 2200.0);
+      shotFlywheelSpeedMap.put(2.5, 2100.0);
+      shotFlywheelSpeedMap.put(2.0, 2000.0);
+      shotFlywheelSpeedMap.put(1.25, 1900.0);
+
+      passHoodAngleMap.put(12.0, 35.0);
+      passHoodAngleMap.put(9.0, 40.0);
+      passHoodAngleMap.put(1.0, 40.0);
+      passHoodAngleMap.put(0.0, 40.0);
+
+      passFlywheelSpeedMap.put(12.0, 4500.0);
+      passFlywheelSpeedMap.put(9.0, 3750.0);
+      passFlywheelSpeedMap.put(7.0, 3000.0);
+      passFlywheelSpeedMap.put(5.0, 2200.0);
+      passFlywheelSpeedMap.put(4.0, 2000.0);
+      passFlywheelSpeedMap.put(3.0, 1700.0);
+      passFlywheelSpeedMap.put(2.5, 1500.0);
+      passFlywheelSpeedMap.put(2.0, 1500.0);
+      passFlywheelSpeedMap.put(1.0, 1500.0);
+      passFlywheelSpeedMap.put(0.0, 1500.0);
+
+      timeOfFlightMap.put(0.0, 1.05);
+      timeOfFlightMap.put(1.75, 1.05);
+      timeOfFlightMap.put(2.05, 1.0);
+      timeOfFlightMap.put(3.1, 1.05);
+      timeOfFlightMap.put(4.8, 1.02);
+    }
+  }
+
   public static class SimulationConstants {
     public static final double SIM_TICK_RATE_S = 0.02;
 
@@ -391,6 +504,8 @@ public final class Constants {
         new InterpolatingDoubleTreeMap();
     public static final InterpolatingDoubleTreeMap passTimeOfFlightMap =
         new InterpolatingDoubleTreeMap();
+
+    public static final double INDEXER_TO_FLYWHEEL_SECONDS = 0.4;
 
     public static final double MIN_SHOT_DISTANCE_METERS = 0.0;
     public static final double MAX_SHOT_DISTANCE_METERS = 6.0;
@@ -453,6 +568,7 @@ public final class Constants {
 
   public static final class SerialAddressConstants {
     public static final String WOOD_SERIAL_ADDRESS = "032BE44A";
+    public static final String COMP_SERIAL_ADDRESS = "";
     public static final String PRACTICE_SERIAL_ADDRESS = "03260AD5";
   }
 
