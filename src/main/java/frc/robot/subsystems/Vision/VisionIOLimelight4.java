@@ -53,6 +53,7 @@ public class VisionIOLimelight4 extends VisionIOLimelightBase {
     LimelightHelpers.IMUData imuData = LimelightHelpers.getIMUData(getName());
     inputs.imuRollDeg = imuData.Roll;
     inputs.imuPitchDeg = imuData.Pitch;
+    inputs.imuYawDeg = imuData.Yaw;
   }
 
   @Override

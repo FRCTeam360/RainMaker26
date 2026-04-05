@@ -33,6 +33,7 @@ public interface VisionIO {
     // Limelight 4 internal IMU orientation (degrees)
     public double imuRollDeg = 0.0;
     public double imuPitchDeg = 0.0;
+    public double imuYawDeg = 0.0;
 
     // Nearest detected tag's observed roll and pitch in robot space (degrees)
     public double nearestTagObservedRollDeg = 0.0;
