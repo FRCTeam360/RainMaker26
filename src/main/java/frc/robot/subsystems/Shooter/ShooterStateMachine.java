@@ -159,9 +159,10 @@ public class ShooterStateMachine {
           Timer.getFPGATimestamp() - disturbanceStartTimestampSeconds
               >= DISTURBANCE_TIMEOUT_SECONDS;
 
-      Logger.recordOutput("Superstructure/Shooting/DisturbanceTimedOut", disturbanceTimedOut);
       Logger.recordOutput(
-          "Superstructure/Shooting/DisturbanceWindowSec", DISTURBANCE_TIMEOUT_SECONDS);
+          "Superstructure/Shooter/Shooting/DisturbanceTimedOut", disturbanceTimedOut);
+      Logger.recordOutput(
+          "Superstructure/Shooter/Shooting/DisturbanceWindowSec", DISTURBANCE_TIMEOUT_SECONDS);
 
       if (disturbanceTimedOut) {
         disturbanceStartTimestampSeconds = Double.NaN;
@@ -175,16 +176,17 @@ public class ShooterStateMachine {
 
     disturbanceStartTimestampSeconds = Double.NaN;
 
-    Logger.recordOutput("Superstructure/Shooting/FlywheelState", flywheelState);
-    // SmartDashboard.putString("Superstructure/Shooting/FlywheelState",
+    Logger.recordOutput("Superstructure/Shooter/Shooting/FlywheelState", flywheelState);
+    // SmartDashboard.putString("Superstructure/Shooter/Shooting/FlywheelState",
     // flywheelState.toString());
-    Logger.recordOutput("Superstructure/Shooting/FlywheelReady", flywheelReady);
-    SmartDashboard.putBoolean("Superstructure/Shooting/FlywheelReady", flywheelReady);
-    Logger.recordOutput("Superstructure/Shooting/HoodReady", hoodReady);
-    SmartDashboard.putBoolean("Superstructure/Shooting/HoodReady", hoodReady);
-    Logger.recordOutput("Superstructure/Shooting/DrivetrainAligned", drivetrainAligned);
-    Logger.recordOutput("Superstructure/Shooting/TargetReady", targetReady);
-    SmartDashboard.putBoolean("Superstructure/Shooting/DrivetrainAligned", drivetrainAligned);
+    Logger.recordOutput("Superstructure/Shooter/Shooting/FlywheelReady", flywheelReady);
+    SmartDashboard.putBoolean("Superstructure/Shooter/Shooting/FlywheelReady", flywheelReady);
+    Logger.recordOutput("Superstructure/Shooter/Shooting/HoodReady", hoodReady);
+    SmartDashboard.putBoolean("Superstructure/Shooter/Shooting/HoodReady", hoodReady);
+    Logger.recordOutput("Superstructure/Shooter/Shooting/DrivetrainAligned", drivetrainAligned);
+    Logger.recordOutput("Superstructure/Shooter/Shooting/TargetReady", targetReady);
+    SmartDashboard.putBoolean(
+        "Superstructure/Shooter/Shooting/DrivetrainAligned", drivetrainAligned);
 
     // AIMED requires flywheel and hood to be genuinely at setpoint.
     // Bang-bang oscillations during firing are tolerated to stay in FIRING —
@@ -193,13 +195,13 @@ public class ShooterStateMachine {
     boolean subsystemsReady = flywheelReady && hoodAndDriveReady;
     boolean shouldFire = (flywheelReady || inBangBang) && hoodAndDriveReady && targetReady;
 
-    Logger.recordOutput("Superstructure/Shooting/InBangBang", inBangBang);
-    Logger.recordOutput("Superstructure/Shooting/SubsystemsReady", subsystemsReady);
-    Logger.recordOutput("Superstructure/Shooting/ShouldFire", shouldFire);
-    Logger.recordOutput("Superstructure/Shooting/DisturbanceActive", false);
-    Logger.recordOutput("Superstructure/Shooting/DisturbanceTimedOut", false);
+    Logger.recordOutput("Superstructure/Shooter/Shooting/InBangBang", inBangBang);
+    Logger.recordOutput("Superstructure/Shooter/Shooting/SubsystemsReady", subsystemsReady);
+    Logger.recordOutput("Superstructure/Shooter/Shooting/ShouldFire", shouldFire);
+    Logger.recordOutput("Superstructure/Shooter/Shooting/DisturbanceActive", false);
+    Logger.recordOutput("Superstructure/Shooter/Shooting/DisturbanceTimedOut", false);
     Logger.recordOutput(
-        "Superstructure/Shooting/DisturbanceWindowSec", DISTURBANCE_TIMEOUT_SECONDS);
+        "Superstructure/Shooter/Shooting/DisturbanceWindowSec", DISTURBANCE_TIMEOUT_SECONDS);
 
     if (shouldFire) {
       currentState = ShooterStates.FIRING;
@@ -258,11 +260,11 @@ public class ShooterStateMachine {
 
   /** Logs the wanted, current, and previous shooter states. */
   public void log() {
-    Logger.recordOutput("Superstructure/WantedShooterState", wantedState);
-    SmartDashboard.putString("Superstructure/WantedShooterState", wantedState.toString());
-    Logger.recordOutput("Superstructure/CurrentShooterState", currentState);
-    SmartDashboard.putString("Superstructure/CurrentShooterState", currentState.toString());
-    Logger.recordOutput("Superstructure/PreviousShooterState", previousState);
-    SmartDashboard.putString("Superstructure/PreviousShooterState", previousState.toString());
+    Logger.recordOutput("Superstructure/Shooter/WantedState", wantedState);
+    SmartDashboard.putString("Superstructure/Shooter/WantedState", wantedState.toString());
+    Logger.recordOutput("Superstructure/Shooter/CurrentState", currentState);
+    SmartDashboard.putString("Superstructure/Shooter/CurrentState", currentState.toString());
+    Logger.recordOutput("Superstructure/Shooter/PreviousState", previousState);
+    SmartDashboard.putString("Superstructure/Shooter/PreviousState", previousState.toString());
   }
 }
