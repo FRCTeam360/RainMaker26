@@ -26,7 +26,6 @@ import frc.robot.generated.CompBotDrivetrain;
 import frc.robot.generated.PracticeBotDrivetrain;
 import frc.robot.generated.WoodBotDrivetrain;
 import frc.robot.subsystems.Climber.Climber;
-import frc.robot.subsystems.Climber.ClimberIOCB;
 import frc.robot.subsystems.Climber.ClimberIONoop;
 import frc.robot.subsystems.Climber.ClimberIOSim;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
