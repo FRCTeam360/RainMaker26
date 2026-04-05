@@ -575,6 +575,4 @@ public final class Constants {
     public static final String COMP_SERIAL_ADDRESS = "";
     public static final String PRACTICE_SERIAL_ADDRESS = "03260AD5";
   }
-
-  public static double loopPeriodSecs; // add value
 }
