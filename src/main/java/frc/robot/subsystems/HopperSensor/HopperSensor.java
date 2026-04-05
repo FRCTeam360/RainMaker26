@@ -77,16 +77,6 @@ public class HopperSensor extends SubsystemBase {
     return currentState;
   }
 
-  /** Returns the distance reported by the sensor in meters. */
-  public double getDistanceMeters() {
-    return inputs.distanceMeters;
-  }
-
-  /** Returns whether the sensor is currently connected and reporting valid data. */
-  public boolean isConnected() {
-    return inputs.connected;
-  }
-
   /**
    * Updates the sensor state based on the current wanted state and sensor readings. Called every
    * cycle from periodic().
@@ -94,13 +84,14 @@ public class HopperSensor extends SubsystemBase {
   private void updateState() {
     previousState = currentState;
 
+    if (!inputs.connected) {
+      currentState = HopperSensorInternalStates.FULL;
+      return;
+    }
+
     debouncedSensorActivated = sensorActivatedDebouncer.calculate(inputs.sensorActivated);
 
-    // Disconnected sensor forces NOT_AGITATING behavior (failsafe — avoids acting on stale data)
-    HopperSensorWantedStates effectiveWantedState =
-        inputs.connected ? wantedState : HopperSensorWantedStates.NOT_AGITATING;
-
-    switch (effectiveWantedState) {
+    switch (wantedState) {
       case NOT_AGITATING:
         // Mirror sensor directly every cycle.
         currentState =
