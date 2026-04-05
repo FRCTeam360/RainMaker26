@@ -246,6 +246,7 @@ public class Hood extends SubsystemBase {
     Logger.recordOutput("Superstructure/Subsystems/Hood/PreviousState", previousState);
     Logger.recordOutput("Superstructure/Subsystems/Hood/ControlState", controlState);
     Logger.recordOutput("Superstructure/Subsystems/Hood/IsHoodUp", isHoodUp);
-    SmartDashboard.putString("Superstructure/Subsystems/Hood/CurrentHoodState", currentState.toString());
+    SmartDashboard.putString(
+        "Superstructure/Subsystems/Hood/CurrentHoodState", currentState.toString());
   }
 }

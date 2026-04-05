@@ -307,7 +307,8 @@ public class IntakePivot extends SubsystemBase {
     Logger.recordOutput("Superstructure/Subsystems/IntakePivot/CurrentState", currentState);
     Logger.recordOutput("Superstructure/Subsystems/IntakePivot/PreviousState", previousState);
     Logger.recordOutput("Superstructure/Subsystems/IntakePivot/ControlState", controlState);
-    Logger.recordOutput("Superstructure/Subsystems/IntakePivot/TargetPositionDegrees", getTargetPosition());
+    Logger.recordOutput(
+        "Superstructure/Subsystems/IntakePivot/TargetPositionDegrees", getTargetPosition());
     SmartDashboard.putString(
         "Superstructure/Subsystems/IntakePivot/CurrentIntakePivotState", currentState.toString());
   }
