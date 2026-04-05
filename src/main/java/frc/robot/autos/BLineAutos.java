@@ -315,7 +315,7 @@ public class BLineAutos {
     chooser.addOption("[BLine] Drive Test", followPath(new Path("drive test")));
     chooser.addOption(
         "[BLine] Blue Right Aggressive",
-        pathWithIntake(new Path("Blue Right Aggressive first swipe"))
+        pathWithImmediateIntake(new Path("Blue Right Aggressive first swipe"))
             .andThen(shootAtHub())
             .andThen(pathWithImmediateIntake(new Path("Blue Right Aggressive Second Swipe")))
             .andThen(shootAtHub()));

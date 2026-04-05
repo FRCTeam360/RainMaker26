@@ -20,8 +20,8 @@ public class HopperSensorIOCANRange implements HopperSensorIO {
   private static final double PROXIMITY_HYSTERESIS_METERS = 0.01;
   private static final double FOV_CENTER_X_DEGREES = 0.0;
   private static final double FOV_CENTER_Y_DEGREES = 0.0;
-  private static final double FOV_RANGE_X_DEGREES = 27.0;
-  private static final double FOV_RANGE_Y_DEGREES = 27.0;
+  private static final double FOV_RANGE_X_DEGREES = 10.0;
+  private static final double FOV_RANGE_Y_DEGREES = 10.0;
 
   private final CANrange canRange =
       new CANrange(
@@ -39,7 +39,7 @@ public class HopperSensorIOCANRange implements HopperSensorIO {
     config.FovParams.FOVCenterY = FOV_CENTER_Y_DEGREES;
     config.FovParams.FOVRangeX = FOV_RANGE_X_DEGREES;
     config.FovParams.FOVRangeY = FOV_RANGE_Y_DEGREES;
-    config.ToFParams.withUpdateMode(UpdateModeValue.LongRangeUserFreq);
+    config.ToFParams.withUpdateMode(UpdateModeValue.ShortRange100Hz);
     canRange.getConfigurator().apply(config);
 
     distanceSignal = canRange.getDistance();
