@@ -110,6 +110,11 @@ public class Flywheel extends SubsystemBase {
     return currentState;
   }
 
+  /** Returns the total number of balls launched since the flywheel was constructed. */
+  public long getLaunchCount() {
+    return launchCount;
+  }
+
   /**
    * Sets the wanted state of the flywheel, used by the superstructure.
    *

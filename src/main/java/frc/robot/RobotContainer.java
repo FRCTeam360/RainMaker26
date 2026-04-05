@@ -13,6 +13,7 @@ import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -116,6 +117,10 @@ public class RobotContainer {
 
   private ShotCalculator hubShotCalculator;
   private ShotCalculator passCalculator;
+
+  // State for hopperEmptyAndStalled() — tracks last launch to detect a 0.5s stall
+  private long hopperStalledLastLaunchCount = 0;
+  private double hopperStalledLastLaunchTime = 0.0;
 
   // TODO: refactor to allow for more than 1 drivetrain type
 
@@ -373,10 +378,10 @@ public class RobotContainer {
             indexerToFlywheelSeconds);
     registerPathplannerCommand(
         "basic intake", superStructure.setIntakeStateCommand(IntakeWantedStates.INTAKING));
-    // TODO: add end condition based on state from SuperStructure (based on sensor inputs)
     registerPathplannerCommand(
         "shoot at hub",
         Commands.waitSeconds(4.5)
+            .raceWith(Commands.waitUntil(this::hopperEmptyAndNotShooting))
             .deadlineFor(
                 superStructure
                     .setStateCommand(SuperWantedStates.AUTO_CYCLE_SHOOTING)
@@ -429,6 +434,26 @@ public class RobotContainer {
     CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
     // Uncomment this if pathplanner starts to suck on loading
     // CommandScheduler.getInstance().schedule(PathfindingCommand.warmupCommand());
+  }
+
+  /**
+   * Returns true when the hopper is empty and no ball has been launched for 0.5 seconds. Used as an
+   * early-exit condition for the "shoot at hub" auto command.
+   *
+   * <p>This method is stateful — it tracks the last seen launch count and the timestamp of the last
+   * launch internally. It is intended to be passed as a method reference to {@code
+   * Commands.waitUntil()}.
+   */
+  private boolean hopperEmptyAndNotShooting() {
+    long currentCount = flywheel.getLaunchCount();
+    if (currentCount != hopperStalledLastLaunchCount) {
+      hopperStalledLastLaunchCount = currentCount;
+      hopperStalledLastLaunchTime = Timer.getFPGATimestamp();
+    }
+    boolean noLaunchFor500ms = (Timer.getFPGATimestamp() - hopperStalledLastLaunchTime) >= 0.5;
+    boolean hopperEmpty =
+        hopperSensor.getState() == HopperSensor.HopperSensorInternalStates.HALF_EMPTY;
+    return hopperEmpty && noLaunchFor500ms;
   }
 
   public void registerPathplannerCommand(String name, Command command) {
