@@ -189,10 +189,10 @@ public class IntakeRoller extends SubsystemBase {
       updateState();
       applyState();
     }
-    Logger.recordOutput("Subsystems/IntakeRoller/WantedState", wantedState);
-    Logger.recordOutput("Subsystems/IntakeRoller/CurrentState", currentState);
-    Logger.recordOutput("Subsystems/IntakeRoller/PreviousState", previousState);
-    Logger.recordOutput("Subsystems/IntakeRoller/ControlState", controlState);
-    // Logger.recordOutput("Subsystems/IntakeRoller/PreviousState", isJammed());
+    Logger.recordOutput("Superstructure/Subsystems/IntakeRoller/WantedState", wantedState);
+    Logger.recordOutput("Superstructure/Subsystems/IntakeRoller/CurrentState", currentState);
+    Logger.recordOutput("Superstructure/Subsystems/IntakeRoller/PreviousState", previousState);
+    Logger.recordOutput("Superstructure/Subsystems/IntakeRoller/ControlState", controlState);
+    // Logger.recordOutput("Superstructure/Subsystems/IntakeRoller/IsJammed", isJammed());
   }
 }

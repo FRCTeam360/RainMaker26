@@ -129,8 +129,8 @@ public class Climber extends SubsystemBase {
     updateState();
     applyState();
 
-    Logger.recordOutput("Subsystems/Climber/WantedState", wantedState.toString());
-    Logger.recordOutput("Subsystems/Climber/CurrentState", currentState.toString());
-    Logger.recordOutput("Subsystems/Climber/PreviousState", previousState.toString());
+    Logger.recordOutput("Superstructure/Subsystems/Climber/WantedState", wantedState.toString());
+    Logger.recordOutput("Superstructure/Subsystems/Climber/CurrentState", currentState.toString());
+    Logger.recordOutput("Superstructure/Subsystems/Climber/PreviousState", previousState.toString());
   }
 }

@@ -248,10 +248,10 @@ public class FlywheelKicker extends SubsystemBase {
       updateState();
       applyState();
     }
-    Logger.recordOutput("Subsystems/FlywheelKicker/WantedState", wantedState);
-    Logger.recordOutput("Subsystems/FlywheelKicker/CurrentState", currentState);
-    Logger.recordOutput("Subsystems/FlywheelKicker/PreviousState", previousState);
-    Logger.recordOutput("Subsystems/FlywheelKicker/ControlState", controlState);
-    Logger.recordOutput("Subsystems/FlywheelKicker/KickCount", kickCount);
+    Logger.recordOutput("Superstructure/Subsystems/FlywheelKicker/WantedState", wantedState);
+    Logger.recordOutput("Superstructure/Subsystems/FlywheelKicker/CurrentState", currentState);
+    Logger.recordOutput("Superstructure/Subsystems/FlywheelKicker/PreviousState", previousState);
+    Logger.recordOutput("Superstructure/Subsystems/FlywheelKicker/ControlState", controlState);
+    Logger.recordOutput("Superstructure/Subsystems/FlywheelKicker/KickCount", kickCount);
   }
 }

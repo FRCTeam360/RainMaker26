@@ -120,9 +120,9 @@ public class HopperRoller extends SubsystemBase {
       updateState();
       applyState();
     }
-    Logger.recordOutput("Subsystems/HopperRoller/WantedState", wantedState);
-    Logger.recordOutput("Subsystems/HopperRoller/CurrentState", currentState);
-    Logger.recordOutput("Subsystems/HopperRoller/PreviousState", previousState);
-    Logger.recordOutput("Subsystems/HopperRoller/ControlState", controlState);
+    Logger.recordOutput("Superstructure/Subsystems/HopperRoller/WantedState", wantedState);
+    Logger.recordOutput("Superstructure/Subsystems/HopperRoller/CurrentState", currentState);
+    Logger.recordOutput("Superstructure/Subsystems/HopperRoller/PreviousState", previousState);
+    Logger.recordOutput("Superstructure/Subsystems/HopperRoller/ControlState", controlState);
   }
 }

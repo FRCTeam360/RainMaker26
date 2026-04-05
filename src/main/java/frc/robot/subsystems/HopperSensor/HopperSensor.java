@@ -46,9 +46,9 @@ public class HopperSensor extends SubsystemBase {
     debouncedSensorActivated = sensorActivatedDebouncer.calculate(inputs.sensorActivated);
     Logger.processInputs("HopperSensor", inputs);
     Logger.recordOutput(
-        "Subsystems/HopperSensor/SensorActivatedDebounced", debouncedSensorActivated);
+        "Superstructure/Subsystems/HopperSensor/SensorActivatedDebounced", debouncedSensorActivated);
     Logger.recordOutput(
-        "Subsystems/HopperSensor/PreviousDebouncedSensorActivated",
+        "Superstructure/Subsystems/HopperSensor/PreviousDebouncedSensorActivated",
         previousDebouncedSensorActivated);
   }
 }

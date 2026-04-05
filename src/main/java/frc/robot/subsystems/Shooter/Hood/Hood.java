@@ -241,11 +241,11 @@ public class Hood extends SubsystemBase {
             && getPosition() > HOOD_UP_THRESHOLD);
     hoodUpAlert.set(isHoodUp);
 
-    Logger.recordOutput("Subsystems/Hood/WantedState", wantedState);
-    Logger.recordOutput("Subsystems/Hood/CurrentState", currentState);
-    Logger.recordOutput("Subsystems/Hood/PreviousState", previousState);
-    Logger.recordOutput("Subsystems/Hood/ControlState", controlState);
-    Logger.recordOutput("Subsystems/Hood/IsHoodUp", isHoodUp);
-    SmartDashboard.putString("Subsystems/Hood/CurrentHoodState", currentState.toString());
+    Logger.recordOutput("Superstructure/Subsystems/Hood/WantedState", wantedState);
+    Logger.recordOutput("Superstructure/Subsystems/Hood/CurrentState", currentState);
+    Logger.recordOutput("Superstructure/Subsystems/Hood/PreviousState", previousState);
+    Logger.recordOutput("Superstructure/Subsystems/Hood/ControlState", controlState);
+    Logger.recordOutput("Superstructure/Subsystems/Hood/IsHoodUp", isHoodUp);
+    SmartDashboard.putString("Superstructure/Subsystems/Hood/CurrentHoodState", currentState.toString());
   }
 }
