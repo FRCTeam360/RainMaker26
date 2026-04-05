@@ -37,7 +37,9 @@ public class IntakeStateMachine {
     IDLE,
     INTAKING,
     STOWED,
+    /** Agitating between lower positions — used when balls are stacked over the spindexer. */
     AGITATING_LOW,
+    /** Agitating between higher positions — used when no balls are detected over the spindexer. */
     AGITATING_HIGH,
     AGITATING_PROGRESSIVE,
     DEPLOYED,
