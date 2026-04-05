@@ -155,8 +155,7 @@ public class RobotContainer {
         intakeRoller = new IntakeRoller(new IntakeRollerIOSim());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOSim());
         hopperRoller = new HopperRoller(new HopperRollerIOSim());
-        hopperSensorSimIO = new HopperSensorIOSim();
-        hopperSensor = new HopperSensor(hopperSensorSimIO);
+        hopperSensor = new HopperSensor(new HopperSensorIOSim());
 
         robotShootingInfo =
             new RobotShootingInfo(
