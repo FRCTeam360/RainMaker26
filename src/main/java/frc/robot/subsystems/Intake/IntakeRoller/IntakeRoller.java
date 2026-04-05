@@ -27,6 +27,7 @@ public class IntakeRoller extends SubsystemBase {
   private static final double JAM_DURATION_SECONDS = 0.25;
   private static final double UNJAM_DURATION_SECONDS = 0.15;
   private static final int MAX_UNJAM_ATTEMPTS = 3;
+
   /** Minimum reverse velocity (RPM) indicating the jam has cleared during unjamming. */
   private static final double UNJAM_VELOCITY_THRESHOLD_RPM = -100.0;
 
@@ -110,7 +111,6 @@ public class IntakeRoller extends SubsystemBase {
         break;
     }
   }
-
 
   /**
    * Called each cycle while currentState is UNJAMMING. Waits for the unjam window to expire or
