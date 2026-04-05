@@ -280,7 +280,7 @@ public class RobotContainer {
       case COMPBOT:
       default:
         drivetrain = CompBotDrivetrain.createDrivetrain();
-        climber = new Climber(new ClimberIOCB());
+        climber = new Climber(new ClimberIONoop());
         flywheel = new Flywheel(new FlywheelIOCBBangBang());
         hood = new Hood(new HoodIOCB());
         indexer = new Indexer(new IndexerIOCB());
