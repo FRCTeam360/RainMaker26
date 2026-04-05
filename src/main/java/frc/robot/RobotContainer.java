@@ -639,9 +639,10 @@ public class RobotContainer {
       overrunCount++;
     }
 
-    Logger.recordOutput("LoopTiming/LoopTimeSeconds", loopTimeSeconds);
-    Logger.recordOutput("LoopTiming/Overrun", loopTimeSeconds > LOOP_OVERRUN_THRESHOLD_SECONDS);
-    Logger.recordOutput("LoopTiming/OverrunCount", overrunCount);
+    Logger.recordOutput("Robot/LoopTiming/LoopTimeSeconds", loopTimeSeconds);
+    Logger.recordOutput(
+        "Robot/LoopTiming/Overrun", loopTimeSeconds > LOOP_OVERRUN_THRESHOLD_SECONDS);
+    Logger.recordOutput("Robot/LoopTiming/OverrunCount", overrunCount);
 
     drivetrain.clearCachedState();
     hubShotCalculator.clearShootingParams();

@@ -259,17 +259,17 @@ public class IntakeRoller extends SubsystemBase {
   @Override
   public void periodic() {
     io.updateInputs(inputs);
-    Logger.processInputs("IntakeRoller", inputs);
+    Logger.processInputs("Subsystems/IntakeRoller", inputs);
 
     if (controlState == ControlState.SUPERSTRUCTURE) {
       updateState();
       applyState();
     }
-    Logger.recordOutput("Subsystems/IntakeRoller/WantedState", wantedState);
-    Logger.recordOutput("Subsystems/IntakeRoller/CurrentState", currentState);
-    Logger.recordOutput("Subsystems/IntakeRoller/PreviousState", previousState);
-    Logger.recordOutput("Subsystems/IntakeRoller/ControlState", controlState);
-    Logger.recordOutput("Subsystems/IntakeRoller/UnjamAttempts", unjamAttempts);
-    Logger.recordOutput("Subsystems/IntakeRoller/IsJammed", isJammed());
+    Logger.recordOutput("Superstructure/Subsystems/IntakeRoller/WantedState", wantedState);
+    Logger.recordOutput("Superstructure/Subsystems/IntakeRoller/CurrentState", currentState);
+    Logger.recordOutput("Superstructure/Subsystems/IntakeRoller/PreviousState", previousState);
+    Logger.recordOutput("Superstructure/Subsystems/IntakeRoller/ControlState", controlState);
+    Logger.recordOutput("Superstructure/Subsystems/IntakeRoller/UnjamAttempts", unjamAttempts);
+    Logger.recordOutput("Superstructure/Subsystems/IntakeRoller/IsJammed", isJammed());
   }
 }

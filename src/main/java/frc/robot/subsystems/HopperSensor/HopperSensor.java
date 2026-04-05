@@ -112,13 +112,13 @@ public class HopperSensor extends SubsystemBase {
   @Override
   public void periodic() {
     io.updateInputs(inputs);
-    Logger.processInputs("HopperSensor", inputs);
+    Logger.processInputs("Subsystems/HopperSensor", inputs);
 
     updateState();
 
-    Logger.recordOutput("Subsystems/HopperSensor/WantedState", wantedState);
-    Logger.recordOutput("Subsystems/HopperSensor/CurrentState", currentState);
-    Logger.recordOutput("Subsystems/HopperSensor/PreviousState", previousState);
-    Logger.recordOutput("Subsystems/HopperSensor/Connected", inputs.connected);
+    Logger.recordOutput("Superstructure/Subsystems/HopperSensor/WantedState", wantedState);
+    Logger.recordOutput("Superstructure/Subsystems/HopperSensor/CurrentState", currentState);
+    Logger.recordOutput("Superstructure/Subsystems/HopperSensor/PreviousState", previousState);
+    Logger.recordOutput("Superstructure/Subsystems/HopperSensor/Connected", inputs.connected);
   }
 }
