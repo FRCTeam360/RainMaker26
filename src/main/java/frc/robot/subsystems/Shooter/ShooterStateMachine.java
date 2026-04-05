@@ -214,8 +214,6 @@ public class ShooterStateMachine {
    * Applies the current shooter state to subsystems. Sets flywheel, hood, and flywheel kicker
    * wanted states based on the current state.
    */
-  Timer preShootingUnjamTimer = new Timer();
-
   public void apply() {
     switch (currentState) {
       case PREPARING_TO_FIRE:
@@ -223,16 +221,10 @@ public class ShooterStateMachine {
         flywheel.setWantedState(FlywheelWantedStates.SHOOTING);
         hood.setWantedState(HoodWantedStates.AIMING);
         if (Constants.getRobotType() != Constants.RobotType.WOODBOT) {
-          preShootingUnjamTimer.start();
-          currentState = ShooterStates.UNJAMMING;
-          if (preShootingUnjamTimer.get() > 0.05) {
-            flywheelKicker.setWantedState(FlywheelKickerStates.KICKING);
-          }
+          flywheelKicker.setWantedState(FlywheelKickerStates.KICKING);
         } else {
           flywheelKicker.setWantedState(FlywheelKickerStates.IDLE);
         }
-        preShootingUnjamTimer.stop();
-        preShootingUnjamTimer.reset();
         break;
       case FIRING:
       case DISTURBED:

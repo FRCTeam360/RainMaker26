@@ -15,6 +15,7 @@ public class HopperRoller extends SubsystemBase {
   private static final double ROLLER_DUTY_CYCLE = 0.80;
   private static final double PREVENT_JAM_DUTY_CYCLE = -0.04;
   private static final double UNJAMMING_DUTY_CYCLE = -0.95;
+  private static final double REVERSING_DUTY_CYCLE = -0.5;
 
   // IO fields
   private final HopperRollerIO io;
@@ -25,7 +26,8 @@ public class HopperRoller extends SubsystemBase {
     OFF,
     ROLLING,
     UNJAMMING,
-    PREVENT_JAM
+    PREVENT_JAM,
+    REVERSING
   }
 
   // State variables
@@ -66,6 +68,8 @@ public class HopperRoller extends SubsystemBase {
       case UNJAMMING:
         currentState = HopperRollerStates.UNJAMMING;
         break;
+      case REVERSING:
+        currentState = HopperRollerStates.REVERSING;
       case OFF:
       default:
         currentState = HopperRollerStates.OFF;
@@ -84,6 +88,8 @@ public class HopperRoller extends SubsystemBase {
       case UNJAMMING:
         setDutyCycle(UNJAMMING_DUTY_CYCLE);
         break;
+      case REVERSING:
+        setDutyCycle(REVERSING_DUTY_CYCLE);
       case OFF:
       default:
         stop();
