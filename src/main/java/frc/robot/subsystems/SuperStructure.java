@@ -41,13 +41,13 @@ public class SuperStructure extends SubsystemBase {
   private final Hood hood;
   private final IntakePivot intakePivot;
   private final HopperRoller hopperRoller;
-  private final HopperSensor hopperSensor;
   private final ShooterStateMachine shooterStateMachine;
   private final IntakeStateMachine intakeStateMachine;
   private final TargetSelectionStateMachine targetSelectionStateMachine;
   private final ShotCalculator hubShotCalculator;
   private final Supplier<Pose2d> robotPoseSupplier;
   private final Transform2d robotToShooter;
+  private final double indexerToFlywheelSeconds;
   private final HubShiftTracker hubShiftTracker;
 
   // shooting @ 3 meters
@@ -105,7 +105,8 @@ public class SuperStructure extends SubsystemBase {
       ShotCalculator passCalculator,
       BooleanSupplier isAlignedToTarget,
       Supplier<Pose2d> robotPoseSupplier,
-      Transform2d robotToShooter) {
+      Transform2d robotToShooter,
+      double indexerToFlywheelSeconds) {
     this.intakeRoller = intakeRoller;
     this.indexer = indexer;
     this.flywheelKicker = flywheelKicker;
@@ -113,11 +114,11 @@ public class SuperStructure extends SubsystemBase {
     this.hood = hood;
     this.intakePivot = intakePivot;
     this.hopperRoller = hopperRoller;
-    this.hopperSensor = hopperSensor;
     this.hubShotCalculator = hubShotCalculator;
     this.robotPoseSupplier = robotPoseSupplier;
     this.robotToShooter = robotToShooter;
-    this.hubShiftTracker = new HubShiftTracker(hubShotCalculator);
+    this.hubShiftTracker = new HubShiftTracker();
+    this.indexerToFlywheelSeconds = indexerToFlywheelSeconds;
     this.shooterStateMachine =
         new ShooterStateMachine(
             flywheel, hood, flywheelKicker, isAlignedToTarget, this::canShootToTarget);
@@ -226,7 +227,8 @@ public class SuperStructure extends SubsystemBase {
       shooterStateMachine.setWantedState(ShooterWantedStates.SHOOTING);
     }
 
-    if (shooterStateMachine.getState() == ShooterStates.FIRING) {
+    if (shooterStateMachine.getState() == ShooterStates.FIRING
+        || shooterStateMachine.getState() == ShooterStates.DISTURBED) {
       indexer.setWantedState(IndexerStates.INDEXING);
       hopperRoller.setWantedState(HopperRollerStates.ROLLING);
     } else {
@@ -356,7 +358,10 @@ public class SuperStructure extends SubsystemBase {
     cachedTimeOfFlight = hubShotCalculator.calculateShot().timeOfFlight();
     RobotUtils.ActiveHub shootingPhase =
         RobotUtils.getActiveHubAtShotLanding(
-            DriverStation.getMatchTime(), DriverStation.isTeleop(), cachedTimeOfFlight);
+            DriverStation.getMatchTime(),
+            DriverStation.isTeleop(),
+            cachedTimeOfFlight,
+            indexerToFlywheelSeconds);
 
     // Calculate hub active once per cycle
     cachedHubActive =

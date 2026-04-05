@@ -17,6 +17,9 @@ public class ShooterConstants {
   public static Transform2d PRACTICEBOT_TO_SHOOTER =
       new Transform2d(Units.inchesToMeters(-7.437), 0.0, Rotation2d.k180deg);
 
+  public static Transform2d COMPBOT_TO_SHOOTER =
+      new Transform2d(Units.inchesToMeters(-7.437), 0.0, Rotation2d.k180deg);
+
   public static Transform2d SIM_TO_SHOOTER =
       new Transform2d(Units.inchesToMeters(-7.437), 0.0, Rotation2d.k180deg);
 }

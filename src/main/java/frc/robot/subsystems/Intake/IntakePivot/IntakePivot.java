@@ -15,10 +15,10 @@ public class IntakePivot extends SubsystemBase {
   // Constants
   private static final double STOWED_POSITION_DEGREES = 0.0;
   private static final double DEPLOYED_POSITION_DEGREES = 97.0;
-  private static final double AGITATE_LOW_UPPER_POSITION_DEGREES = 80.0;
+  private static final double AGITATE_LOW_UPPER_POSITION_DEGREES = 75.0;
   private static final double AGITATE_LOW_LOWER_POSITION_DEGREES = 90.0;
 
-  private static final double AGITATE_HIGH_UPPER_POSITION_DEGREES = 40.0;
+  private static final double AGITATE_HIGH_UPPER_POSITION_DEGREES = 30.0;
   private static final double AGITATE_HIGH_LOWER_POSITION_DEGREES = 50.0;
   private static final double TOLERANCE_DEGREES = 2.0;
   private static final double SOFT_LIMIT_PROXIMITY_DEGREES = 5.0;
@@ -297,18 +297,19 @@ public class IntakePivot extends SubsystemBase {
   @Override
   public void periodic() {
     io.updateInputs(inputs);
-    Logger.processInputs("IntakePivot", inputs);
+    Logger.processInputs("Subsystems/IntakePivot", inputs);
 
     if (controlState == ControlState.SUPERSTRUCTURE) {
       updateState();
       applyState();
     }
-    Logger.recordOutput("Subsystems/IntakePivot/WantedState", wantedState);
-    Logger.recordOutput("Subsystems/IntakePivot/CurrentState", currentState);
-    Logger.recordOutput("Subsystems/IntakePivot/PreviousState", previousState);
-    Logger.recordOutput("Subsystems/IntakePivot/ControlState", controlState);
-    Logger.recordOutput("Subsystems/IntakePivot/TargetPositionDegrees", getTargetPosition());
+    Logger.recordOutput("Superstructure/Subsystems/IntakePivot/WantedState", wantedState);
+    Logger.recordOutput("Superstructure/Subsystems/IntakePivot/CurrentState", currentState);
+    Logger.recordOutput("Superstructure/Subsystems/IntakePivot/PreviousState", previousState);
+    Logger.recordOutput("Superstructure/Subsystems/IntakePivot/ControlState", controlState);
+    Logger.recordOutput(
+        "Superstructure/Subsystems/IntakePivot/TargetPositionDegrees", getTargetPosition());
     SmartDashboard.putString(
-        "Subsystems/IntakePivot/CurrentIntakePivotState", currentState.toString());
+        "Superstructure/Subsystems/IntakePivot/CurrentIntakePivotState", currentState.toString());
   }
 }
