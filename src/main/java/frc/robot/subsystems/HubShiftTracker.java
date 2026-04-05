@@ -32,7 +32,7 @@ public class HubShiftTracker {
   public static final double SHIFT_3_END_SECONDS_SHOOTING = 55 + TIME_TO_SCORE;
   public static final double ENDGAME_START_SECONDS_SHOOTING = 30 + TIME_TO_SCORE;
 
-  private enum MatchPhase {
+  public enum MatchPhase {
     AUTO,
     TRANSITION,
     TELEOP,
