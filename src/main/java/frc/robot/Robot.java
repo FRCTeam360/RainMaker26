@@ -112,9 +112,9 @@ public class Robot extends LoggedRobot {
     m_robotContainer.postSchedulerUpdate();
     double t3 = Logger.getTimestamp() / 1.0e6;
 
-    Logger.recordOutput("LoopTiming/PreSchedulerSeconds", t1 - t0);
-    Logger.recordOutput("LoopTiming/SchedulerSeconds", t2 - t1);
-    Logger.recordOutput("LoopTiming/PostSchedulerSeconds", t3 - t2);
+    Logger.recordOutput("Robot/LoopTiming/PreSchedulerSeconds", t1 - t0);
+    Logger.recordOutput("Robot/LoopTiming/SchedulerSeconds", t2 - t1);
+    Logger.recordOutput("Robot/LoopTiming/PostSchedulerSeconds", t3 - t2);
   }
 
   /** This function is called once each time the robot enters Disabled mode. */
@@ -169,10 +169,10 @@ public class Robot extends LoggedRobot {
     }
     double t3 = Logger.getTimestamp() / 1.0e6;
 
-    Logger.recordOutput("AutoInitTiming/OnEnableSeconds", t1 - t0);
-    Logger.recordOutput("AutoInitTiming/GetAutoCommandSeconds", t2 - t1);
-    Logger.recordOutput("AutoInitTiming/ScheduleSeconds", t3 - t2);
-    Logger.recordOutput("AutoInitTiming/TotalSeconds", t3 - t0);
+    Logger.recordOutput("Robot/AutoInitTiming/OnEnableSeconds", t1 - t0);
+    Logger.recordOutput("Robot/AutoInitTiming/GetAutoCommandSeconds", t2 - t1);
+    Logger.recordOutput("Robot/AutoInitTiming/ScheduleSeconds", t3 - t2);
+    Logger.recordOutput("Robot/AutoInitTiming/TotalSeconds", t3 - t0);
   }
 
   /** This function is called periodically during autonomous. */
@@ -196,7 +196,7 @@ public class Robot extends LoggedRobot {
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
-    Logger.recordOutput("AutoWinner", Constants.AUTO_WINNER);
+    Logger.recordOutput("Robot/AutoWinner", Constants.AUTO_WINNER);
     if (Objects.nonNull(Constants.AUTO_WINNER)) {
       SmartDashboard.putString("AutoWinner", Constants.AUTO_WINNER.name());
     }

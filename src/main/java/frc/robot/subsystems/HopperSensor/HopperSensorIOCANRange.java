@@ -15,13 +15,13 @@ import edu.wpi.first.units.measure.Distance;
 public class HopperSensorIOCANRange implements HopperSensorIO {
 
   private static final int SENSOR_UPDATE_FREQUENCY_HZ = 50;
-  private static final int MIN_SIGNAL_STRENGTH = 2000;
-  private static final double PROXIMITY_THRESHOLD_METERS = 0.22;
-  private static final double PROXIMITY_HYSTERESIS_METERS = 0.01;
+  private static final int MIN_SIGNAL_STRENGTH = 5000;
+  private static final double PROXIMITY_THRESHOLD_METERS = 0.5;
+  private static final double PROXIMITY_HYSTERESIS_METERS = 0.05;
   private static final double FOV_CENTER_X_DEGREES = 0.0;
   private static final double FOV_CENTER_Y_DEGREES = 0.0;
-  private static final double FOV_RANGE_X_DEGREES = 27.0;
-  private static final double FOV_RANGE_Y_DEGREES = 27.0;
+  private static final double FOV_RANGE_X_DEGREES = 20.0;
+  private static final double FOV_RANGE_Y_DEGREES = 20.0;
 
   private final CANrange canRange;
 
@@ -38,7 +38,7 @@ public class HopperSensorIOCANRange implements HopperSensorIO {
     config.FovParams.FOVCenterY = FOV_CENTER_Y_DEGREES;
     config.FovParams.FOVRangeX = FOV_RANGE_X_DEGREES;
     config.FovParams.FOVRangeY = FOV_RANGE_Y_DEGREES;
-    config.ToFParams.withUpdateMode(UpdateModeValue.LongRangeUserFreq);
+    config.ToFParams.withUpdateMode(UpdateModeValue.ShortRange100Hz);
     canRange.getConfigurator().apply(config);
 
     distanceSignal = canRange.getDistance();
@@ -54,5 +54,6 @@ public class HopperSensorIOCANRange implements HopperSensorIO {
     BaseStatusSignal.refreshAll(distanceSignal, isDetectedSignal);
     inputs.distanceMeters = distanceSignal.getValueAsDouble();
     inputs.sensorActivated = isDetectedSignal.getValue();
+    inputs.connected = distanceSignal.getStatus().isOK() && isDetectedSignal.getStatus().isOK();
   }
 }

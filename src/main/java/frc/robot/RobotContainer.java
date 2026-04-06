@@ -9,8 +9,6 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.FollowPathCommand;
-import com.pathplanner.lib.util.PathPlannerLogging;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -20,11 +18,11 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.RobotType;
+import frc.robot.autos.BLineAutos;
 import frc.robot.generated.CompBotDrivetrain;
 import frc.robot.generated.PracticeBotDrivetrain;
 import frc.robot.generated.WoodBotDrivetrain;
 import frc.robot.subsystems.Climber.Climber;
-import frc.robot.subsystems.Climber.ClimberIOCB;
 import frc.robot.subsystems.Climber.ClimberIONoop;
 import frc.robot.subsystems.Climber.ClimberIOSim;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
@@ -37,6 +35,7 @@ import frc.robot.subsystems.HopperRoller.HopperRollerIOSim;
 import frc.robot.subsystems.HopperSensor.HopperSensor;
 import frc.robot.subsystems.HopperSensor.HopperSensorIOCANRange;
 import frc.robot.subsystems.HopperSensor.HopperSensorIONoop;
+import frc.robot.subsystems.HopperSensor.HopperSensorIOSim;
 import frc.robot.subsystems.Indexer.Indexer;
 import frc.robot.subsystems.Indexer.IndexerIOCB;
 import frc.robot.subsystems.Indexer.IndexerIOPB;
@@ -97,6 +96,8 @@ import org.littletonrobotics.junction.Logger;
  * subsystems, commands, and trigger mappings) should be declared here.
  */
 public class RobotContainer {
+  private static final double PRE_SHOT_UNJAM_SECONDS = 0.05;
+
   // The robot's subsystems and commands are defined here...
   private CommandSwerveDrivetrain drivetrain;
   public static SendableChooser<Command> autoChooser = new SendableChooser<>();
@@ -110,8 +111,6 @@ public class RobotContainer {
   private HopperSensor hopperSensor;
   private FlywheelKicker flywheelKicker;
   private Climber climber;
-  private BooleanSupplier canShootInHub;
-
   private SuperStructure superStructure;
 
   private ShotCalculator hubShotCalculator;
@@ -124,8 +123,6 @@ public class RobotContainer {
   private final CommandXboxController driverCont = new CommandXboxController(0);
   private final CommandXboxController operatorCont = new CommandXboxController(1);
   private final CommandXboxController testCont1 = new CommandXboxController(5);
-
-  private static final double FLYWHEEL_KICKER_WARMUP_VELOCITY_RPM = 4000.0;
 
   /** Threshold above which a loop cycle is considered an overrun (22ms for a 20ms loop). */
   private static final double LOOP_OVERRUN_THRESHOLD_SECONDS = 0.022;
@@ -156,7 +153,7 @@ public class RobotContainer {
         intakeRoller = new IntakeRoller(new IntakeRollerIOSim());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOSim());
         hopperRoller = new HopperRoller(new HopperRollerIOSim());
-        hopperSensor = new HopperSensor(new HopperSensorIONoop());
+        hopperSensor = new HopperSensor(new HopperSensorIOSim());
 
         robotShootingInfo =
             new RobotShootingInfo(
@@ -282,7 +279,7 @@ public class RobotContainer {
       case COMPBOT:
       default:
         drivetrain = CompBotDrivetrain.createDrivetrain();
-        climber = new Climber(new ClimberIOCB());
+        climber = new Climber(new ClimberIONoop());
         flywheel = new Flywheel(new FlywheelIOCBBangBang());
         hood = new Hood(new HoodIOCB());
         indexer = new Indexer(new IndexerIOCB());
@@ -392,8 +389,8 @@ public class RobotContainer {
                                 return passCalculator.calculateShot().targetHeading();
                               }
                               return hubShotCalculator.calculateShot().targetHeading();
-                            }))
-                    .alongWith(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING)))
+                            })))
+            .alongWith(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING))
             .andThen(superStructure.setStateCommand(SuperWantedStates.DEFAULT)));
     registerPathplannerCommand(
         "stow intake", superStructure.setIntakeStateCommand(IntakeWantedStates.STOWED));
@@ -410,7 +407,8 @@ public class RobotContainer {
             .alongWith(
                 drivetrain.faceAngleWhileDrivingCommand(
                     () -> 0, () -> 0, () -> hubShotCalculator.calculateShot().targetHeading()))
-            .finallyDo(() -> superStructure.setWantedSuperState(SuperWantedStates.DEFAULT)));
+            .alongWith(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING))
+            .andThen(superStructure.setStateCommand(SuperWantedStates.DEFAULT)));
 
     configVision();
     configDefaultDrivingCommand();
@@ -419,11 +417,12 @@ public class RobotContainer {
     // configureFullShootingTestBindings();
     // configureFullShootingTestBindings();
 
-    PathPlannerLogging.setLogActivePathCallback(
-        (poses -> Logger.recordOutput("Swerve/ActivePath", poses.toArray(new Pose2d[0]))));
+    autoChooser = AutoBuilder.buildAutoChooser();
 
-    PathPlannerLogging.setLogTargetPoseCallback(
-        pose -> Logger.recordOutput("Swerve/TargetPathPose", pose));
+    // Register BLine auto variants alongside PathPlanner autos for A/B testing
+    BLineAutos bLineAutos =
+        new BLineAutos(drivetrain, superStructure, hubShotCalculator, passCalculator);
+    bLineAutos.registerAutos(autoChooser);
 
     CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
     // Uncomment this if pathplanner starts to suck on loading
@@ -581,92 +580,6 @@ public class RobotContainer {
     driverCont.y().and(isIndependentMode).whileTrue(hood.zero());
   }
 
-  /** Configures full intake to shooting test bindings for independent mode. */
-  private void configureFullShootingTestBindings() {
-    BooleanSupplier isSuperstructureMode =
-        () -> superStructure.getControlState() == ControlState.SUPERSTRUCTURE;
-    BooleanSupplier isIndependentMode =
-        () -> superStructure.getControlState() == ControlState.INDEPENDENT;
-
-    driverCont.rightTrigger().and(isIndependentMode).whileTrue(flywheel.setVelocityCommand(4000));
-    driverCont
-        .a()
-        .and(isIndependentMode)
-        .whileTrue(
-            indexer
-                .setDutyCycleCommand(() -> 0.75)
-                .alongWith(
-                    hopperRoller.setDutyCycleCommand(0.75),
-                    flywheelKicker.setVelocityCommand(4000.0)));
-    driverCont
-        .b()
-        .and(isIndependentMode)
-        .whileTrue(
-            indexer
-                .setDutyCycleCommand(() -> -0.3)
-                .alongWith(
-                    hopperRoller.setDutyCycleCommand(-0.3),
-                    flywheelKicker.setDutyCycleCommand(-0.3),
-                    intakeRoller.setDutyCycleCommand(-0.2)));
-    driverCont.x().and(isIndependentMode).whileTrue(intakePivot.setPositionCommand(() -> 93.0));
-    driverCont.y().and(isIndependentMode).whileTrue(intakePivot.setPositionCommand(() -> 0.0));
-    driverCont
-        .leftTrigger()
-        .and(isIndependentMode)
-        .whileTrue(intakeRoller.setVelocityCommand(1000.0));
-    driverCont.pov(0).and(isIndependentMode).whileTrue(hood.setPositionCommand(0.0));
-    driverCont.pov(90).and(isIndependentMode).whileTrue(hood.setPositionCommand(15.0));
-    driverCont.pov(180).and(isIndependentMode).whileTrue(hood.setPositionCommand(30.0));
-    driverCont.pov(270).and(isIndependentMode).whileTrue(hood.setPositionCommand(40.0));
-
-    driverCont.back().onTrue(drivetrain.zeroCommand());
-
-    // intake stuff
-    // driverCont
-    //     .axisMagnitudeGreaterThan(5, 0.1)
-    //     .and(isIndependentMode)
-    //     .whileTrue(intakePivot.setDutyCycleCommand(() -> -driverCont.getRightY() * 0.2));
-
-    // driverCont
-    //     .rightBumper()
-    //     .and(isIndependentMode)
-    //     .whileTrue(intakePivot.setPositionCommand(() -> 0.0));
-    // driverCont
-    //     .leftBumper()
-    //     .and(isIndependentMode)
-    //     .whileTrue(intakePivot.setPositionCommand(() -> 90.0));
-    // Intake rollers: A = in, B = out
-    // driverCont.a().and(isIndependentMode).whileTrue(intakeRoller.setDutyCycleCommand(0.2));
-    // driverCont.b().and(isIndependentMode).whileTrue(intakeRoller.setDutyCycleCommand(-0.2));
-  }
-
-  /** Configures climber test bindings for independent mode. */
-  private void configureClimberTestBindings(BooleanSupplier isIndependentMode) {
-    driverCont.x().and(isIndependentMode).whileTrue(climber.setLeftDutyCycleCommand(0.1));
-    driverCont.y().and(isIndependentMode).whileTrue(climber.setRightDutyCycleCommand(0.1));
-  }
-
-  /** Configures intake and intake pivot test bindings for independent mode. */
-  private void configureIntakeTestBindings(BooleanSupplier isIndependentMode) {
-    // Intake pivot: right joystick Y axis controls duty cycle
-    driverCont
-        .axisMagnitudeGreaterThan(5, 0.1)
-        .and(isIndependentMode)
-        .whileTrue(intakePivot.setDutyCycleCommand(() -> -driverCont.getRightY() * 0.2));
-
-    driverCont
-        .rightBumper()
-        .and(isIndependentMode)
-        .whileTrue(intakePivot.setPositionCommand(() -> 0.0));
-    driverCont
-        .leftBumper()
-        .and(isIndependentMode)
-        .whileTrue(intakePivot.setPositionCommand(() -> 90.0));
-    // Intake rollers: A = in, B = out
-    driverCont.a().and(isIndependentMode).whileTrue(intakeRoller.setDutyCycleCommand(0.2));
-    driverCont.b().and(isIndependentMode).whileTrue(intakeRoller.setDutyCycleCommand(-0.2));
-  }
-
   /** Stops all subsystems safely when the robot is disabled. */
   public void onDisable() {
     superStructure.setControlState(ControlState.SUPERSTRUCTURE);
@@ -722,9 +635,10 @@ public class RobotContainer {
       overrunCount++;
     }
 
-    Logger.recordOutput("LoopTiming/LoopTimeSeconds", loopTimeSeconds);
-    Logger.recordOutput("LoopTiming/Overrun", loopTimeSeconds > LOOP_OVERRUN_THRESHOLD_SECONDS);
-    Logger.recordOutput("LoopTiming/OverrunCount", overrunCount);
+    Logger.recordOutput("Robot/LoopTiming/LoopTimeSeconds", loopTimeSeconds);
+    Logger.recordOutput(
+        "Robot/LoopTiming/Overrun", loopTimeSeconds > LOOP_OVERRUN_THRESHOLD_SECONDS);
+    Logger.recordOutput("Robot/LoopTiming/OverrunCount", overrunCount);
 
     drivetrain.clearCachedState();
     hubShotCalculator.clearShootingParams();

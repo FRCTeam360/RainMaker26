@@ -13,6 +13,9 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.util.PathPlannerLogging;
+import edu.wpi.first.math.Pair;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -34,9 +37,12 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
 import frc.robot.generated.WoodBotDrivetrain.TunerSwerveDrivetrain;
+import frc.robot.lib.BLine.FollowPath;
 import frc.robot.subsystems.Vision.VisionMeasurement;
 import frc.robot.utils.AllianceFlipUtil;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
@@ -93,10 +99,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
   // Heading controller PID gains (from example code)
   private static final double HEADING_KP = 15.0;
-  private static final double HEADING_KI = 0.2;
+  private static final double HEADING_KI = 0.1;
   private static final double HEADING_KD = 1.0; // 1.0 Kd is prob the highest we should go
   private static final double HEADING_I_ZONE = Math.toRadians(10.0);
-  private static final double HEADING_TOLERANCE_RAD = Math.toRadians(3.0);
+  private static final double HEADING_TOLERANCE_RAD = Math.toRadians(5.0);
   // Extra heading tolerance granted per m/s of translational speed.
   // Compensates for the PID steady-state tracking lag when the heading setpoint moves
   // (setpoint rate ≈ v/d rad/s; lag ≈ rate/KP). Tunable — start at ~5°/m/s.
@@ -431,6 +437,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
       startSimThread();
     }
     configureAutoBuilder();
+    configureAutoLogging();
     SmartDashboard.putData("Field", field);
     SmartDashboard.putData(
         "Swerve Drive",
@@ -560,6 +567,83 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
       DriverStation.reportError(
           "Failed to load PathPlanner config and configure AutoBuilder", ex.getStackTrace());
     }
+  }
+
+  // Key cache for BLine logging — populated once per unique BLine key, reused every loop.
+  private final Map<String, String> blineKeyCache = new HashMap<>();
+
+  private String blineKey(String rawKey) {
+    return blineKeyCache.computeIfAbsent(
+        rawKey, k -> "Autos/BLine/" + k.replace("FollowPath/", ""));
+  }
+
+  private void configureAutoLogging() {
+    // PathPlanner — log under Autos/PathPlanner/
+    PathPlannerLogging.setLogCurrentPoseCallback(
+        pose -> Logger.recordOutput("Autos/PathPlanner/currentPose", pose));
+    PathPlannerLogging.setLogTargetPoseCallback(
+        pose -> Logger.recordOutput("Autos/PathPlanner/targetPose", pose));
+    PathPlannerLogging.setLogActivePathCallback(
+        path -> Logger.recordOutput("Autos/PathPlanner/activePath", path.toArray(new Pose2d[0])));
+
+    // BLine — log under Autos/BLine/; keys are interned via blineKeyCache on first use
+    FollowPath.setPoseLoggingConsumer(
+        (Pair<String, edu.wpi.first.math.geometry.Pose2d> pair) ->
+            Logger.recordOutput(blineKey(pair.getFirst()), pair.getSecond()));
+    FollowPath.setTranslationListLoggingConsumer(
+        (Pair<String, edu.wpi.first.math.geometry.Translation2d[]> pair) ->
+            Logger.recordOutput(blineKey(pair.getFirst()), pair.getSecond()));
+    FollowPath.setBooleanLoggingConsumer(
+        (Pair<String, Boolean> pair) ->
+            Logger.recordOutput(blineKey(pair.getFirst()), pair.getSecond()));
+    FollowPath.setDoubleLoggingConsumer(
+        (Pair<String, Double> pair) ->
+            Logger.recordOutput(blineKey(pair.getFirst()), pair.getSecond()));
+  }
+
+  // BLine AutoBuilder PID gains — initial values derived from PathPlanner tuning.
+  // Translation/rotation are intentionally lower than PP since BLine's controller
+  // semantics differ (distance-to-goal vs time-parameterized).
+  private static final double BLINE_TRANSLATION_KP = 5.0;
+  private static final double BLINE_TRANSLATION_KI = 0.0;
+  private static final double BLINE_TRANSLATION_KD = 0.0;
+  private static final double BLINE_ROTATION_KP = 3.0;
+  private static final double BLINE_ROTATION_KI = 0.0;
+  private static final double BLINE_ROTATION_KD = 0.0;
+  private static final double BLINE_CROSS_TRACK_KP = 2.5;
+  private static final double BLINE_CROSS_TRACK_KI = 0.0;
+  private static final double BLINE_CROSS_TRACK_KD = 0.0;
+
+  /**
+   * Creates a reusable BLine FollowPath.Builder configured for this drivetrain. The builder can be
+   * used to construct path-following commands via {@code builder.build(path)}.
+   *
+   * @return a configured {@link FollowPath.Builder}
+   */
+  public FollowPath.Builder createBLinePathBuilder() {
+    return new FollowPath.Builder(
+            this,
+            this::getPosition,
+            this::getVelocity,
+            this::driveRobotRelative,
+            new PIDController(BLINE_TRANSLATION_KP, BLINE_TRANSLATION_KI, BLINE_TRANSLATION_KD),
+            new PIDController(BLINE_ROTATION_KP, BLINE_ROTATION_KI, BLINE_ROTATION_KD),
+            new PIDController(BLINE_CROSS_TRACK_KP, BLINE_CROSS_TRACK_KI, BLINE_CROSS_TRACK_KD))
+        .withPoseReset(this::resetPose);
+  }
+
+  /**
+   * Drives the robot with the given robot-relative chassis speeds. Used as the drive consumer for
+   * BLine path following (no feedforwards — BLine doesn't provide them).
+   *
+   * @param speeds robot-relative chassis speeds
+   */
+  public void driveRobotRelative(ChassisSpeeds speeds) {
+    setCommandedSpeeds(speeds);
+    setControl(
+        m_pathApplyRobotSpeeds
+            .withSpeeds(ChassisSpeeds.discretize(speeds, 0.020))
+            .withDriveRequestType(m_driveRequestType));
   }
 
   /**
