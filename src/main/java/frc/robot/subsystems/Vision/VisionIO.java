@@ -43,6 +43,9 @@ public interface VisionIO {
     public boolean imuOrientationExceedsThreshold = false;
     public boolean tagOrientationExceedsThreshold = false;
 
+    // Camera pose relative to the robot center (from Limelight configuration)
+    public Pose3d cameraPoseRobotSpace = new Pose3d();
+
     private static Pose3d[] initTagPoses() {
       Pose3d[] poses = new Pose3d[MAX_TAGS];
       for (int i = 0; i < MAX_TAGS; i++) {

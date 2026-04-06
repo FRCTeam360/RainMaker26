@@ -17,7 +17,6 @@ import frc.robot.utils.LimelightHelpers.PoseEstimate;
 import frc.robot.utils.LimelightHelpers.RawFiducial;
 import java.util.Optional;
 import java.util.function.DoubleSupplier;
-import org.littletonrobotics.junction.Logger;
 
 /**
  * Abstract base class for Limelight vision IO layers. Contains all shared NetworkTables reads, pose
@@ -25,10 +24,10 @@ import org.littletonrobotics.junction.Logger;
  */
 public abstract class VisionIOLimelightBase implements VisionIO {
   /** Maximum acceptable IMU roll or pitch before flagging (degrees). */
-  private static final double IMU_ORIENTATION_THRESHOLD_DEG = 60.0;
+  private static final double IMU_ORIENTATION_THRESHOLD_DEG = 45.0;
 
   /** Maximum acceptable tag observed roll or pitch before flagging (degrees). */
-  private static final double TAG_ORIENTATION_THRESHOLD_DEG = 60.0;
+  private static final double TAG_ORIENTATION_THRESHOLD_DEG = 45.0;
 
   private final NetworkTable table;
   private final String name;
@@ -68,6 +67,11 @@ public abstract class VisionIOLimelightBase implements VisionIO {
     return name;
   }
 
+  /** Returns whether this Limelight has an internal IMU. Override in subclasses with an IMU. */
+  protected boolean hasIMU() {
+    return false;
+  }
+
   @Override
   public void setLEDMode(int mode) {
     table.getEntry("ledMode").setNumber(mode);
@@ -86,12 +90,12 @@ public abstract class VisionIOLimelightBase implements VisionIO {
 
     cameraPoseRobotSpace = pose;
     cameraPoseResolved = true;
-    Logger.recordOutput("Vision/" + name + "/CameraPoseRobotSpace", cameraPoseRobotSpace);
   }
 
   @Override
   public void updateInputs(VisionIOInputs inputs) {
     pollCameraPose();
+    inputs.cameraPoseRobotSpace = cameraPoseRobotSpace;
 
     // Set robot orientation for MegaTag2 (flushed by postSchedulerUpdate)
     LimelightHelpers.SetRobotOrientation_NoFlush(
@@ -159,11 +163,16 @@ public abstract class VisionIOLimelightBase implements VisionIO {
     updateNearestTagOrientation(inputs, poseEstimate);
 
     // Flag when IMU or tag orientations exceed acceptable thresholds
+    // Skip checks if camera pose hasn't been resolved yet
+    if (!cameraPoseResolved) return;
+
     double cameraRollDeg = Math.toDegrees(cameraPoseRobotSpace.getRotation().getX());
     double cameraPitchDeg = Math.toDegrees(cameraPoseRobotSpace.getRotation().getY());
-    inputs.imuOrientationExceedsThreshold =
-        Math.abs(inputs.imuRollDeg - cameraRollDeg) > IMU_ORIENTATION_THRESHOLD_DEG
-            || Math.abs(inputs.imuPitchDeg - cameraPitchDeg) > IMU_ORIENTATION_THRESHOLD_DEG;
+    if (hasIMU()) {
+      inputs.imuOrientationExceedsThreshold =
+          Math.abs(inputs.imuRollDeg - cameraRollDeg) > IMU_ORIENTATION_THRESHOLD_DEG
+              || Math.abs(inputs.imuPitchDeg - cameraPitchDeg) > IMU_ORIENTATION_THRESHOLD_DEG;
+    }
     inputs.tagOrientationExceedsThreshold =
         Math.abs(inputs.nearestTagObservedRollDeg - cameraRollDeg) > TAG_ORIENTATION_THRESHOLD_DEG
             || Math.abs(inputs.nearestTagObservedPitchDeg - cameraPitchDeg)

@@ -47,6 +47,11 @@ public class VisionIOLimelight4 extends VisionIOLimelightBase {
   }
 
   @Override
+  protected boolean hasIMU() {
+    return true;
+  }
+
+  @Override
   public void updateInputs(VisionIOInputs inputs) {
     super.updateInputs(inputs);
 
