@@ -51,7 +51,7 @@ public class SuperStructure extends SubsystemBase {
   private final double indexerToFlywheelSeconds;
   private final HubShiftTracker hubShiftTracker;
 
-  private static final double PRE_SHOT_UNJAM_SECONDS = 0.05;
+  private static final double PRE_SHOT_UNJAM_SECONDS = 0.03;
 
   // shooting @ 3 meters
   private static final double HOOD_FORCED_ANGLE = 10.0;
