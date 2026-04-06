@@ -27,15 +27,20 @@ public class HubShiftTrackerSimplified {
   public static final double SHIFT_TIME_SECONDS = 25;
   public static final double TIME_TO_SCORE_SECONDS = 2.0; // TODO set to real value
   public static final double GRACE_PERIOD_SECONDS = 3.0;
-  public static final double TRANSITION_END_SECONDS_SHOOTING = 130 + TIME_TO_SCORE_SECONDS - GRACE_PERIOD_SECONDS;
+  public static final double TRANSITION_END_SECONDS_SHOOTING =
+      130 + TIME_TO_SCORE_SECONDS - GRACE_PERIOD_SECONDS;
   public static final double SHIFT_1_START_SECONDS_SHOOTING = 130 + TIME_TO_SCORE_SECONDS;
-  public static final double SHIFT_1_END_SECONDS_SHOOTING = 105 + TIME_TO_SCORE_SECONDS - GRACE_PERIOD_SECONDS;
+  public static final double SHIFT_1_END_SECONDS_SHOOTING =
+      105 + TIME_TO_SCORE_SECONDS - GRACE_PERIOD_SECONDS;
   public static final double SHIFT_2_START_SECONDS_SHOOTING = 105 + TIME_TO_SCORE_SECONDS;
-  public static final double SHIFT_2_END_SECONDS_SHOOTING = 80 + TIME_TO_SCORE_SECONDS - GRACE_PERIOD_SECONDS;
+  public static final double SHIFT_2_END_SECONDS_SHOOTING =
+      80 + TIME_TO_SCORE_SECONDS - GRACE_PERIOD_SECONDS;
   public static final double SHIFT_3_START_SECONDS_SHOOTING = 80 + TIME_TO_SCORE_SECONDS;
-  public static final double SHIFT_3_END_SECONDS_SHOOTING = 55 + TIME_TO_SCORE_SECONDS - GRACE_PERIOD_SECONDS;
+  public static final double SHIFT_3_END_SECONDS_SHOOTING =
+      55 + TIME_TO_SCORE_SECONDS - GRACE_PERIOD_SECONDS;
   public static final double ENDGAME_START_SECONDS_SHOOTING = 30 + TIME_TO_SCORE_SECONDS;
-  public static final double ENDGAME_END_SECONDS_SHOOTING = 30 + TIME_TO_SCORE_SECONDS - GRACE_PERIOD_SECONDS;
+  public static final double ENDGAME_END_SECONDS_SHOOTING =
+      30 + TIME_TO_SCORE_SECONDS - GRACE_PERIOD_SECONDS;
 
   // Cached outputs — updated every call to update()
   private MatchPhase currentPhase = MatchPhase.DISABLED;
@@ -96,53 +101,51 @@ public class HubShiftTrackerSimplified {
     }
   }
 
-  public static ShiftValues getTeleopShiftValues(
-    double matchTime,
-    boolean weWonAuto) {
-      ShiftValues values = new ShiftValues(0, MatchPhase.TELEOP, ActiveHub.BOTH, true, matchTime);
-      
-      if (matchTime > TRANSITION_END_SECONDS_SHOOTING) {
-        values.currentPhase = MatchPhase.TRANSITION;
-        values.timeUntilShootingPhaseChange = matchTime - TRANSITION_END_SECONDS_SHOOTING;
+  public static ShiftValues getTeleopShiftValues(double matchTime, boolean weWonAuto) {
+    ShiftValues values = new ShiftValues(0, MatchPhase.TELEOP, ActiveHub.BOTH, true, matchTime);
 
-        if (!weWonAuto) {
-          values.timeUntilShootingPhaseChange += SHIFT_TIME_SECONDS;
-        }
-      } else if (matchTime <= ENDGAME_START_SECONDS_SHOOTING) {
-        values.currentPhase = MatchPhase.ENDGAME;
-        values.timeUntilShootingPhaseChange = matchTime;
+    if (matchTime > TRANSITION_END_SECONDS_SHOOTING) {
+      values.currentPhase = MatchPhase.TRANSITION;
+      values.timeUntilShootingPhaseChange = matchTime - TRANSITION_END_SECONDS_SHOOTING;
+
+      if (!weWonAuto) {
+        values.timeUntilShootingPhaseChange += SHIFT_TIME_SECONDS;
+      }
+    } else if (matchTime <= ENDGAME_START_SECONDS_SHOOTING) {
+      values.currentPhase = MatchPhase.ENDGAME;
+      values.timeUntilShootingPhaseChange = matchTime;
+    } else {
+      values.currentPhase = MatchPhase.TELEOP;
+
+      if (matchTime > SHIFT_1_END_SECONDS_SHOOTING) {
+        values.teleopShiftNumber = 1;
+        values.activeHub = ActiveHub.AUTOLOSER;
+        values.isOurHubActive = !weWonAuto;
+        values.timeUntilShootingPhaseChange = matchTime - SHIFT_1_END_SECONDS_SHOOTING;
+      } else if (matchTime > SHIFT_2_END_SECONDS_SHOOTING) {
+        values.teleopShiftNumber = 2;
+        values.activeHub = ActiveHub.AUTOWINNER;
+        values.isOurHubActive = weWonAuto;
+        values.timeUntilShootingPhaseChange = matchTime - SHIFT_2_END_SECONDS_SHOOTING;
+      } else if (matchTime > SHIFT_3_END_SECONDS_SHOOTING) {
+        values.teleopShiftNumber = 3;
+        values.activeHub = ActiveHub.AUTOLOSER;
+        values.isOurHubActive = !weWonAuto;
+        values.timeUntilShootingPhaseChange = matchTime - SHIFT_3_END_SECONDS_SHOOTING;
       } else {
-        values.currentPhase = MatchPhase.TELEOP;
-
-        if (matchTime > SHIFT_1_END_SECONDS_SHOOTING) {
-          values.teleopShiftNumber = 1;
-          values.activeHub = ActiveHub.AUTOLOSER;
-          values.isOurHubActive = !weWonAuto;
-          values.timeUntilShootingPhaseChange = matchTime - SHIFT_1_END_SECONDS_SHOOTING;
-        } else if (matchTime > SHIFT_2_END_SECONDS_SHOOTING) {
-          values.teleopShiftNumber = 2;
-          values.activeHub = ActiveHub.AUTOWINNER;
-          values.isOurHubActive = weWonAuto;
-          values.timeUntilShootingPhaseChange = matchTime - SHIFT_2_END_SECONDS_SHOOTING;
-        } else if (matchTime > SHIFT_3_END_SECONDS_SHOOTING) {
-          values.teleopShiftNumber = 3;
-          values.activeHub = ActiveHub.AUTOLOSER;
-          values.isOurHubActive = !weWonAuto;
-          values.timeUntilShootingPhaseChange = matchTime - SHIFT_3_END_SECONDS_SHOOTING;
+        values.teleopShiftNumber = 4;
+        values.activeHub = ActiveHub.AUTOWINNER;
+        values.isOurHubActive = weWonAuto;
+        if (weWonAuto) {
+          values.timeUntilShootingPhaseChange =
+              matchTime; // we can score from 4th shift until end of match
         } else {
-          values.teleopShiftNumber = 4;
-          values.activeHub = ActiveHub.AUTOWINNER;
-          values.isOurHubActive = weWonAuto;
-          if (weWonAuto) {
-            values.timeUntilShootingPhaseChange =
-                matchTime; // we can score from 4th shift until end of match
-          } else {
-            values.timeUntilShootingPhaseChange = matchTime - ENDGAME_START_SECONDS_SHOOTING;
-          }
+          values.timeUntilShootingPhaseChange = matchTime - ENDGAME_START_SECONDS_SHOOTING;
         }
       }
+    }
 
-      return values;
+    return values;
   }
 
   /**
