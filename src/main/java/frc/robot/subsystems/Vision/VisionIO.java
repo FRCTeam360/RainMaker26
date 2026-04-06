@@ -12,6 +12,16 @@ public interface VisionIO {
   /** Maximum number of AprilTags that can be tracked simultaneously. */
   public static final int MAX_TAGS = 12;
 
+  /**
+   * Returns the SmartDashboard key for a camera's sticky stop toggle.
+   *
+   * @param cameraName the NetworkTables name of the camera
+   * @return the dashboard key (e.g., "StickyStop/limelight-right")
+   */
+  static String stickyStopDashboardKey(String cameraName) {
+    return "StickyStop/" + cameraName;
+  }
+
   /** Creates a new VisionIO. */
   @AutoLog
   public static class VisionIOInputs {

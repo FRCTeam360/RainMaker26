@@ -24,7 +24,6 @@ import java.util.function.DoubleSupplier;
  * filtering, and MegaTag2 logic.
  */
 public abstract class VisionIOLimelightBase implements VisionIO {
-  private static final String STICKY_STOP_DASHBOARD_PREFIX = "StickyStop/";
 
   private final NetworkTable table;
   private final String name;
@@ -110,7 +109,7 @@ public abstract class VisionIOLimelightBase implements VisionIO {
 
     // Read the dashboard toggle value as an input for replay-safe stickystop reset
     inputs.stickyStopDashboardActive =
-        SmartDashboard.getBoolean(STICKY_STOP_DASHBOARD_PREFIX + name, false);
+        SmartDashboard.getBoolean(VisionIO.stickyStopDashboardKey(name), false);
 
     if (!acceptMeasurements) {
       return;

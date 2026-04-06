@@ -31,8 +31,6 @@ public class Vision extends SubsystemBase {
   /** Maximum acceptable tag observed roll or pitch deviation from camera mount (degrees). */
   private static final double TAG_ORIENTATION_THRESHOLD_DEG = 45.0;
 
-  private static final String STICKY_STOP_DASHBOARD_PREFIX = "StickyStop/";
-
   private final Map<String, VisionIO> ios;
   private int totalDetections = 0;
   private int rejectedMeasurements = 0;
@@ -247,7 +245,7 @@ public class Vision extends SubsystemBase {
     // Publish stickystop status to SmartDashboard for driver display (output only)
     for (String key : stickyStopFlags.keySet()) {
       SmartDashboard.putBoolean(
-          STICKY_STOP_DASHBOARD_PREFIX + key, Boolean.TRUE.equals(stickyStopFlags.get(key)));
+          VisionIO.stickyStopDashboardKey(key), Boolean.TRUE.equals(stickyStopFlags.get(key)));
     }
   }
 
