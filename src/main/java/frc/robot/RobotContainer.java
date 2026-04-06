@@ -10,8 +10,6 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.FollowPathCommand;
-import com.pathplanner.lib.util.PathPlannerLogging;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -22,6 +20,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.RobotType;
+import frc.robot.autos.BLineAutos;
 import frc.robot.generated.CompBotDrivetrain;
 import frc.robot.generated.PracticeBotDrivetrain;
 import frc.robot.generated.WoodBotDrivetrain;
@@ -392,8 +391,8 @@ public class RobotContainer {
                                 return passCalculator.calculateShot().targetHeading();
                               }
                               return hubShotCalculator.calculateShot().targetHeading();
-                            }))
-                    .alongWith(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING)))
+                            })))
+            .alongWith(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING))
             .andThen(superStructure.setStateCommand(SuperWantedStates.DEFAULT)));
     registerPathplannerCommand(
         "stow intake", superStructure.setIntakeStateCommand(IntakeWantedStates.STOWED));
@@ -410,7 +409,8 @@ public class RobotContainer {
             .alongWith(
                 drivetrain.faceAngleWhileDrivingCommand(
                     () -> 0, () -> 0, () -> hubShotCalculator.calculateShot().targetHeading()))
-            .finallyDo(() -> superStructure.setWantedSuperState(SuperWantedStates.DEFAULT)));
+            .alongWith(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING))
+            .andThen(superStructure.setStateCommand(SuperWantedStates.DEFAULT)));
 
     configVision();
     configDefaultDrivingCommand();
@@ -419,13 +419,13 @@ public class RobotContainer {
     // configureFullShootingTestBindings();
     // configureFullShootingTestBindings();
 
-    PathPlannerLogging.setLogActivePathCallback(
-        (poses -> Logger.recordOutput("Swerve/ActivePath", poses.toArray(new Pose2d[0]))));
-
-    PathPlannerLogging.setLogTargetPoseCallback(
-        pose -> Logger.recordOutput("Swerve/TargetPathPose", pose));
-
     autoChooser = AutoBuilder.buildAutoChooser();
+
+    // Register BLine auto variants alongside PathPlanner autos for A/B testing
+    BLineAutos bLineAutos =
+        new BLineAutos(drivetrain, superStructure, hubShotCalculator, passCalculator);
+    bLineAutos.registerAutos(autoChooser);
+
     SmartDashboard.putData("Auto Chooser", autoChooser);
 
     CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
