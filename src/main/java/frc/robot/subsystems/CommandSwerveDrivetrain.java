@@ -31,6 +31,7 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -322,7 +323,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
       DoubleSupplier velocityXSupplier,
       DoubleSupplier velocityYSupplier,
       Supplier<Rotation2d> headingSupplier) {
-    return this.runEnd(
+    return new FunctionalCommand(
+        () -> angleFacingRequest.HeadingController.reset(),
         () -> {
           double rawVelXMps = velocityXSupplier.getAsDouble();
           double rawVelYMps = velocityYSupplier.getAsDouble();
@@ -334,9 +336,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
           faceAngleWhileDriving(fieldVelXMps, fieldVelYMps, headingSupplier.get());
         },
-        () -> {
-          angleFacingRequest.HeadingController.reset();
-        });
+        interrupted -> angleFacingRequest.HeadingController.reset(),
+        () -> false,
+        this);
   }
 
   /**
