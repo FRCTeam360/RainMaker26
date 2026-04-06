@@ -9,6 +9,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.utils.FieldConstants;
 import frc.robot.utils.LimelightHelpers;
 import frc.robot.utils.LimelightHelpers.LimelightResults;
@@ -23,11 +24,7 @@ import java.util.function.DoubleSupplier;
  * filtering, and MegaTag2 logic.
  */
 public abstract class VisionIOLimelightBase implements VisionIO {
-  /** Maximum acceptable IMU roll or pitch before flagging (degrees). */
-  private static final double IMU_ORIENTATION_THRESHOLD_DEG = 45.0;
-
-  /** Maximum acceptable tag observed roll or pitch before flagging (degrees). */
-  private static final double TAG_ORIENTATION_THRESHOLD_DEG = 45.0;
+  private static final String STICKY_STOP_DASHBOARD_PREFIX = "StickyStop/";
 
   private final NetworkTable table;
   private final String name;
@@ -109,6 +106,11 @@ public abstract class VisionIOLimelightBase implements VisionIO {
     inputs.ty = getTYRaw();
     inputs.pipeline = (int) getPipeline();
     inputs.tagID = getAprilTagID();
+    inputs.hasIMU = hasIMU();
+
+    // Read the dashboard toggle value as an input for replay-safe stickystop reset
+    inputs.stickyStopDashboardActive =
+        SmartDashboard.getBoolean(STICKY_STOP_DASHBOARD_PREFIX + name, false);
 
     if (!acceptMeasurements) {
       return;
@@ -161,22 +163,6 @@ public abstract class VisionIOLimelightBase implements VisionIO {
 
     // Populate nearest tag observed roll/pitch from full JSON results
     updateNearestTagOrientation(inputs, poseEstimate);
-
-    // Flag when IMU or tag orientations exceed acceptable thresholds
-    // Skip checks if camera pose hasn't been resolved yet
-    if (!cameraPoseResolved) return;
-
-    double cameraRollDeg = Math.toDegrees(cameraPoseRobotSpace.getRotation().getX());
-    double cameraPitchDeg = Math.toDegrees(cameraPoseRobotSpace.getRotation().getY());
-    if (hasIMU()) {
-      inputs.imuOrientationExceedsThreshold =
-          Math.abs(inputs.imuRollDeg - cameraRollDeg) > IMU_ORIENTATION_THRESHOLD_DEG
-              || Math.abs(inputs.imuPitchDeg - cameraPitchDeg) > IMU_ORIENTATION_THRESHOLD_DEG;
-    }
-    inputs.tagOrientationExceedsThreshold =
-        Math.abs(inputs.nearestTagObservedRollDeg - cameraRollDeg) > TAG_ORIENTATION_THRESHOLD_DEG
-            || Math.abs(inputs.nearestTagObservedPitchDeg - cameraPitchDeg)
-                > TAG_ORIENTATION_THRESHOLD_DEG;
   }
 
   /**

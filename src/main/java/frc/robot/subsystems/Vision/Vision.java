@@ -25,6 +25,14 @@ import java.util.function.Consumer;
 import org.littletonrobotics.junction.Logger;
 
 public class Vision extends SubsystemBase {
+  /** Maximum acceptable IMU roll or pitch deviation from camera mount (degrees). */
+  private static final double IMU_ORIENTATION_THRESHOLD_DEG = 45.0;
+
+  /** Maximum acceptable tag observed roll or pitch deviation from camera mount (degrees). */
+  private static final double TAG_ORIENTATION_THRESHOLD_DEG = 45.0;
+
+  private static final String STICKY_STOP_DASHBOARD_PREFIX = "StickyStop/";
+
   private final Map<String, VisionIO> ios;
   private int totalDetections = 0;
   private int rejectedMeasurements = 0;
@@ -149,6 +157,32 @@ public class Vision extends SubsystemBase {
       String key = entry.getKey();
       VisionIOInputsAutoLogged input = entry.getValue();
 
+      // Check if driver requested stickystop reset via dashboard toggle (replay-safe via inputs)
+      if (Boolean.TRUE.equals(stickyStopFlags.get(key)) && !input.stickyStopDashboardActive) {
+        resetStickyStop(key);
+      }
+
+      // Compute orientation threshold checks from raw inputs (derived values — logged as outputs)
+      double cameraRollDeg = Math.toDegrees(input.cameraPoseRobotSpace.getRotation().getX());
+      double cameraPitchDeg = Math.toDegrees(input.cameraPoseRobotSpace.getRotation().getY());
+
+      boolean imuExceedsThreshold = false;
+      if (input.hasIMU) {
+        imuExceedsThreshold =
+            Math.abs(input.imuRollDeg - cameraRollDeg) > IMU_ORIENTATION_THRESHOLD_DEG
+                || Math.abs(input.imuPitchDeg - cameraPitchDeg) > IMU_ORIENTATION_THRESHOLD_DEG;
+      }
+
+      boolean tagExceedsThreshold =
+          Math.abs(input.nearestTagObservedRollDeg - cameraRollDeg) > TAG_ORIENTATION_THRESHOLD_DEG
+              || Math.abs(input.nearestTagObservedPitchDeg - cameraPitchDeg)
+                  > TAG_ORIENTATION_THRESHOLD_DEG;
+
+      Logger.recordOutput(
+          VISION_LOGGING_PREFIX + key + "/IMUOrientationExceedsThreshold", imuExceedsThreshold);
+      Logger.recordOutput(
+          VISION_LOGGING_PREFIX + key + "/TagOrientationExceedsThreshold", tagExceedsThreshold);
+
       // Count total detections (pose updates attempted)
       if (input.poseUpdated) {
         totalDetections++;
@@ -168,9 +202,7 @@ public class Vision extends SubsystemBase {
       }
 
       // Trigger sticky stop when both thresholds are exceeded while enabled
-      if (input.imuOrientationExceedsThreshold
-          && input.tagOrientationExceedsThreshold
-          && DriverStation.isEnabled()) {
+      if (imuExceedsThreshold && tagExceedsThreshold && DriverStation.isEnabled()) {
         stickyStopFlags.put(key, true);
         rejectedMeasurements++;
         Logger.recordOutput(VISION_LOGGING_PREFIX + key + "/StickyStop", true);
@@ -178,7 +210,7 @@ public class Vision extends SubsystemBase {
       }
 
       // Reject measurements when either threshold is exceeded
-      if (input.imuOrientationExceedsThreshold || input.tagOrientationExceedsThreshold) {
+      if (imuExceedsThreshold || tagExceedsThreshold) {
         rejectedMeasurements++;
         continue;
       }
@@ -212,20 +244,10 @@ public class Vision extends SubsystemBase {
         VISION_LOGGING_PREFIX + "Rejection Rate",
         totalDetections > 0 ? (double) rejectedMeasurements / totalDetections : 0.0);
 
-    // Sync sticky stop flags with SmartDashboard for driver display and reset control.
-    // Drivers can toggle the widget to false in Shuffleboard to reset a sticky-stopped camera.
+    // Publish stickystop status to SmartDashboard for driver display (output only)
     for (String key : stickyStopFlags.keySet()) {
-      String dashboardKey = "StickyStop/" + key;
-      boolean flagActive = Boolean.TRUE.equals(stickyStopFlags.get(key));
-      boolean dashboardValue = SmartDashboard.getBoolean(dashboardKey, flagActive);
-
-      // Driver toggled the widget to false — reset the sticky stop
-      if (flagActive && !dashboardValue) {
-        resetStickyStop(key);
-        flagActive = false;
-      }
-
-      SmartDashboard.putBoolean(dashboardKey, flagActive);
+      SmartDashboard.putBoolean(
+          STICKY_STOP_DASHBOARD_PREFIX + key, Boolean.TRUE.equals(stickyStopFlags.get(key)));
     }
   }
 

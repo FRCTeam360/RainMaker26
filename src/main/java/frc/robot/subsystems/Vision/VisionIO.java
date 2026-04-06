@@ -39,12 +39,14 @@ public interface VisionIO {
     public double nearestTagObservedRollDeg = 0.0;
     public double nearestTagObservedPitchDeg = 0.0;
 
-    // Whether the IMU or tag orientation exceeds acceptable thresholds
-    public boolean imuOrientationExceedsThreshold = false;
-    public boolean tagOrientationExceedsThreshold = false;
+    // Whether this camera has an internal IMU (e.g., Limelight 4)
+    public boolean hasIMU = false;
 
     // Camera pose relative to the robot center (from Limelight configuration)
     public Pose3d cameraPoseRobotSpace = new Pose3d();
+
+    // Current value of the StickyStop dashboard toggle (read from SmartDashboard for replay safety)
+    public boolean stickyStopDashboardActive = false;
 
     private static Pose3d[] initTagPoses() {
       Pose3d[] poses = new Pose3d[MAX_TAGS];
