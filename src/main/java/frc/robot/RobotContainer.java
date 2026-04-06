@@ -559,7 +559,6 @@ public class RobotContainer {
     driverCont.pov(90).and(isIndependentMode).whileTrue(flywheelKicker.setDutyCycleCommand(0.2));
     driverCont.pov(270).and(isIndependentMode).whileTrue(flywheelKicker.setDutyCycleCommand(-0.2));
 
-    // climber
     driverCont.a().and(isIndependentMode).onTrue(intakePivot.setPositionCommand(() -> 96.0));
     driverCont.y().and(isIndependentMode).onTrue(intakePivot.setPositionCommand(() -> 0.0));
 
