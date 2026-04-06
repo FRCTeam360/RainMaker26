@@ -7,6 +7,7 @@ package frc.robot;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
 import com.ctre.phoenix6.swerve.SwerveRequest;
+import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.FollowPathCommand;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -100,7 +101,7 @@ public class RobotContainer {
 
   // The robot's subsystems and commands are defined here...
   private CommandSwerveDrivetrain drivetrain;
-  public static final SendableChooser<Command> autoChooser = new SendableChooser<>();
+  public static SendableChooser<Command> autoChooser = new SendableChooser<>();
   private Flywheel flywheel;
   private Hood hood;
   private Indexer indexer;
