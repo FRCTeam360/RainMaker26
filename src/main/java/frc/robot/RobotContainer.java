@@ -118,8 +118,6 @@ public class RobotContainer {
   private ShotCalculator hubShotCalculator;
   private ShotCalculator passCalculator;
 
-  // TODO: refactor to allow for more than 1 drivetrain type
-
   // Replace with CommandPS4Controller or CommandJoystick if needed
 
   private final CommandXboxController driverCont = new CommandXboxController(0);
@@ -229,7 +227,7 @@ public class RobotContainer {
         flywheel = new Flywheel(new FlywheelIOPBBangBang());
         hood = new Hood(new HoodIOPB());
         indexer = new Indexer(new IndexerIOPB());
-        vision = // TODO ADD OTHER LIMELIGHTS
+        vision =
             new Vision(
                 Map.ofEntries(
                     Map.entry(
@@ -354,7 +352,6 @@ public class RobotContainer {
             drivetrain::getCommandedVelocity,
             robotPassingInfo);
     // Configure the trigger bindings
-    // TODO: Re-enable superStructure construction and PathPlanner commands
 
     superStructure =
         new SuperStructure(
@@ -415,9 +412,6 @@ public class RobotContainer {
     configVision();
     configDefaultDrivingCommand();
     configureBindings();
-    // configureTestBindings();
-    // configureFullShootingTestBindings();
-    // configureFullShootingTestBindings();
 
     autoChooser = AutoBuilder.buildAutoChooser();
 
@@ -576,12 +570,6 @@ public class RobotContainer {
 
     driverCont.start().and(isIndependentMode).whileTrue(flywheel.setDutyCycleCommand(0.2));
     driverCont.back().and(isIndependentMode).whileTrue(hood.zero());
-  }
-
-  void configureHoodTestBindings(BooleanSupplier isIndependentMode) {
-    driverCont.a().and(isIndependentMode).whileTrue(hood.setDutyCycleCommand(0.1));
-    driverCont.b().and(isIndependentMode).whileTrue(hood.setDutyCycleCommand(-0.1));
-    driverCont.y().and(isIndependentMode).whileTrue(hood.zero());
   }
 
   /** Stops all subsystems safely when the robot is disabled. */
