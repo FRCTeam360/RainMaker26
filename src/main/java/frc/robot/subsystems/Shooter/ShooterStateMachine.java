@@ -21,6 +21,7 @@ import org.littletonrobotics.junction.Logger;
 public class ShooterStateMachine {
 
   private static final double DISTURBANCE_TIMEOUT_SECONDS = 0.25;
+  private static final double PRE_SHOT_UNJAM_SECONDS = 0.03;
 
   // Enums
   public enum ShooterWantedStates {
@@ -33,6 +34,7 @@ public class ShooterStateMachine {
 
   public enum ShooterStates {
     PREPARING_TO_FIRE,
+    POOL_BREAK, // timer elapsed, indexer/hopper reversing briefly before shot
     AIMED,
     FIRING,
     DISTURBED,
@@ -55,6 +57,7 @@ public class ShooterStateMachine {
   private ShooterStates currentState = ShooterStates.IDLE;
   private ShooterStates previousState = ShooterStates.IDLE;
   private double disturbanceStartTimestampSeconds = Double.NaN;
+  private final Timer poolBreakTimer = new Timer();
 
   /**
    * Creates a new ShooterStateMachine.
@@ -119,14 +122,20 @@ public class ShooterStateMachine {
         handleShooting(false);
         break;
       case PASSIVE_SHOOTER:
+        poolBreakTimer.stop();
+        poolBreakTimer.reset();
         currentState =
             isInAllianceZone.getAsBoolean() ? ShooterStates.STANDBY : ShooterStates.WAITING;
         break;
       case REVERSING:
+        poolBreakTimer.stop();
+        poolBreakTimer.reset();
         currentState = ShooterStates.UNJAMMING;
         break;
       case IDLE:
       default:
+        poolBreakTimer.stop();
+        poolBreakTimer.reset();
         currentState = ShooterStates.IDLE;
         break;
     }
@@ -201,11 +210,21 @@ public class ShooterStateMachine {
         "Superstructure/Shooter/Shooting/DisturbanceWindowSec", DISTURBANCE_TIMEOUT_SECONDS);
 
     if (shouldFire) {
+      poolBreakTimer.stop();
+      poolBreakTimer.reset();
       currentState = ShooterStates.FIRING;
     } else if (subsystemsReady) {
+      poolBreakTimer.stop();
+      poolBreakTimer.reset();
       currentState = ShooterStates.AIMED;
     } else {
-      currentState = ShooterStates.PREPARING_TO_FIRE;
+      if (!poolBreakTimer.isRunning()) {
+        poolBreakTimer.restart();
+      }
+      currentState =
+          poolBreakTimer.hasElapsed(PRE_SHOT_UNJAM_SECONDS)
+              ? ShooterStates.POOL_BREAK
+              : ShooterStates.PREPARING_TO_FIRE;
     }
   }
 
@@ -217,6 +236,7 @@ public class ShooterStateMachine {
     switch (currentState) {
       case PREPARING_TO_FIRE:
       case AIMED:
+      case POOL_BREAK:
         flywheel.setWantedState(FlywheelWantedStates.SHOOTING);
         hood.setWantedState(HoodWantedStates.AIMING);
         if (Constants.getRobotType() != Constants.RobotType.WOODBOT) {

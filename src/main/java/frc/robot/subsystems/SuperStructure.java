@@ -3,7 +3,6 @@ package frc.robot.subsystems;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -21,7 +20,6 @@ import frc.robot.subsystems.Shooter.Flywheel.Flywheel;
 import frc.robot.subsystems.Shooter.FlywheelKicker.FlywheelKicker;
 import frc.robot.subsystems.Shooter.Hood.Hood;
 import frc.robot.subsystems.Shooter.ShooterStateMachine;
-import frc.robot.subsystems.Shooter.ShooterStateMachine.ShooterStates;
 import frc.robot.subsystems.Shooter.ShooterStateMachine.ShooterWantedStates;
 import frc.robot.subsystems.Shooter.ShotCalculator;
 import frc.robot.subsystems.Shooter.TargetSelectionStateMachine;
@@ -50,8 +48,6 @@ public class SuperStructure extends SubsystemBase {
   private final Transform2d robotToShooter;
   private final double indexerToFlywheelSeconds;
   private final HubShiftTracker hubShiftTracker;
-
-  private static final double PRE_SHOT_UNJAM_SECONDS = 0.03;
 
   // shooting @ 3 meters
   private static final double HOOD_FORCED_ANGLE = 10.0;
@@ -221,8 +217,6 @@ public class SuperStructure extends SubsystemBase {
 
   // Subsystem state helpers
 
-  Timer preparingToFireTimer = new Timer();
-
   private void shooting() {
     if (currentSuperState == SuperInternalStates.FORCED_SHOT) {
       shooterStateMachine.setWantedState(ShooterWantedStates.FORCED_SHOT);
@@ -232,23 +226,20 @@ public class SuperStructure extends SubsystemBase {
       shooterStateMachine.setWantedState(ShooterWantedStates.SHOOTING);
     }
 
-    if (shooterStateMachine.getState() == ShooterStates.FIRING
-        || shooterStateMachine.getState() == ShooterStates.DISTURBED) {
-      indexer.setWantedState(IndexerStates.INDEXING);
-      hopperRoller.setWantedState(HopperRollerStates.ROLLING);
-    } else if (shooterStateMachine.getState() == ShooterStates.PREPARING_TO_FIRE) {
-      if (!preparingToFireTimer.isRunning()) {
-        preparingToFireTimer.restart();
-      }
-      if (preparingToFireTimer.hasElapsed(PRE_SHOT_UNJAM_SECONDS)) {
+    switch (shooterStateMachine.getState()) {
+      case FIRING:
+      case DISTURBED:
+        indexer.setWantedState(IndexerStates.INDEXING);
+        hopperRoller.setWantedState(HopperRollerStates.ROLLING);
+        break;
+      case POOL_BREAK:
         indexer.setWantedState(IndexerStates.REVERSING);
         hopperRoller.setWantedState(HopperRollerStates.REVERSING);
-      }
-    } else {
-      preparingToFireTimer.stop();
-      preparingToFireTimer.reset();
-      indexer.setWantedState(IndexerStates.OFF);
-      hopperRoller.setWantedState(HopperRollerStates.PREVENT_JAM);
+        break;
+      default:
+        indexer.setWantedState(IndexerStates.OFF);
+        hopperRoller.setWantedState(HopperRollerStates.PREVENT_JAM);
+        break;
     }
   }
 
