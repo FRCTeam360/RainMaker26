@@ -100,6 +100,8 @@ import org.littletonrobotics.junction.Logger;
  */
 public class RobotContainer {
   private static final double PRE_SHOT_UNJAM_SECONDS = 0.05;
+  private static final double AUTO_SHOOT_TIMEOUT_SECONDS = 8.0;
+  private static final double AUTO_SHOOT_NO_LAUNCH_TIMEOUT_SECONDS = 0.5;
 
   // The robot's subsystems and commands are defined here...
   private CommandSwerveDrivetrain drivetrain;
@@ -119,7 +121,7 @@ public class RobotContainer {
   private ShotCalculator hubShotCalculator;
   private ShotCalculator passCalculator;
 
-  // State for hopperEmptyAndStalled() — tracks last launch to detect a 0.5s stall
+  // State for hopperEmptyAndNotShooting() — tracks last launch to detect shooting stop.
   private long hopperStalledLastLaunchCount = 0;
   private double hopperStalledLastLaunchTime = 0.0;
 
@@ -381,7 +383,7 @@ public class RobotContainer {
         "basic intake", superStructure.setIntakeStateCommand(IntakeWantedStates.INTAKING));
     registerPathplannerCommand(
         "shoot at hub",
-        Commands.waitSeconds(8)
+        Commands.waitSeconds(AUTO_SHOOT_TIMEOUT_SECONDS)
             .raceWith(Commands.waitUntil(this::hopperEmptyAndNotShooting))
             .deadlineFor(
                 superStructure
@@ -398,6 +400,7 @@ public class RobotContainer {
                               return hubShotCalculator.calculateShot().targetHeading();
                             })))
             .alongWith(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING))
+            .beforeStarting(this::resetHopperEmptyAndNotShootingTracker)
             .andThen(superStructure.setStateCommand(SuperWantedStates.DEFAULT)));
     registerPathplannerCommand(
         "stow intake", superStructure.setIntakeStateCommand(IntakeWantedStates.STOWED));
@@ -439,7 +442,7 @@ public class RobotContainer {
   }
 
   /**
-   * Returns true when the hopper is empty and no ball has been launched for 0.5 seconds. Used as an
+   * Returns true when the hopper is empty and no ball has been launched recently. Used as an
    * early-exit condition for the "shoot at hub" auto command.
    *
    * <p>This method is stateful — it tracks the last seen launch count and the timestamp of the last
@@ -447,18 +450,26 @@ public class RobotContainer {
    * Commands.waitUntil()}.
    */
   private boolean hopperEmptyAndNotShooting() {
+    double nowSeconds = Timer.getFPGATimestamp();
     long currentCount = flywheel.getLaunchCount();
     if (currentCount != hopperStalledLastLaunchCount) {
       hopperStalledLastLaunchCount = currentCount;
-      hopperStalledLastLaunchTime = Timer.getFPGATimestamp();
+      hopperStalledLastLaunchTime = nowSeconds;
     }
-    boolean noLaunchFor1s = (Timer.getFPGATimestamp() - hopperStalledLastLaunchTime) >= 3.0;
-    // boolean hopperEmpty =
-    //     hopperSensor.getState() == HopperSensor.HopperSensorInternalStates.HALF_EMPTY;
-    boolean hopperEmpty = true;
-    Logger.recordOutput("Auto/ShootAtHub/NoLaunchFor1s", noLaunchFor1s);
+    boolean noLaunchForTimeout =
+        (nowSeconds - hopperStalledLastLaunchTime) >= AUTO_SHOOT_NO_LAUNCH_TIMEOUT_SECONDS;
+    boolean hopperEmpty =
+        hopperSensor.getState() == HopperSensor.HopperSensorInternalStates.HALF_EMPTY;
+    Logger.recordOutput("Auto/ShootAtHub/LaunchCount", currentCount);
+    Logger.recordOutput("Auto/ShootAtHub/NoLaunchForTimeout", noLaunchForTimeout);
     Logger.recordOutput("Auto/ShootAtHub/HopperEmpty", hopperEmpty);
-    return hopperEmpty && noLaunchFor1s;
+    return hopperEmpty && noLaunchForTimeout;
+  }
+
+  /** Resets launch-tracking state before each auto shoot-at-hub command run. */
+  private void resetHopperEmptyAndNotShootingTracker() {
+    hopperStalledLastLaunchCount = flywheel.getLaunchCount();
+    hopperStalledLastLaunchTime = Timer.getFPGATimestamp();
   }
 
   public void registerPathplannerCommand(String name, Command command) {
