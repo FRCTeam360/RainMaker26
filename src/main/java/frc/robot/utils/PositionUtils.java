@@ -58,6 +58,8 @@ public class PositionUtils {
           new Translation2d(
               LinesVertical.blueHubCenter, FieldConstants.LinesHorizontal.rightBumpHubSide),
           new Translation2d(0.0, LinesHorizontal.leftBumpHubSide));
+  private static final Translation2d blueHubCenter = Hub.center;
+  private static final Translation2d redHubCenter = Hub.oppCenter;
 
   private PositionUtils() {}
 
