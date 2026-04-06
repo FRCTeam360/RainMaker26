@@ -1,6 +1,8 @@
 package frc.robot.subsystems.Intake;
 
 import frc.robot.subsystems.HopperSensor.HopperSensor;
+import frc.robot.subsystems.HopperSensor.HopperSensor.HopperSensorInternalStates;
+import frc.robot.subsystems.HopperSensor.HopperSensor.HopperSensorWantedStates;
 import frc.robot.subsystems.Intake.IntakePivot.IntakePivot;
 import frc.robot.subsystems.Intake.IntakePivot.IntakePivot.IntakePivotWantedStates;
 import frc.robot.subsystems.Intake.IntakeRoller.IntakeRoller;
@@ -26,6 +28,7 @@ public class IntakeStateMachine {
     AGITATING_PROGRESSIVE,
     DEPLOYED,
     REVERSING,
+    /** Request agitation — SuperStructure resolves this to AGITATING_HIGH or AGITATING_LOW. */
     AGITATING
   }
 
@@ -34,16 +37,13 @@ public class IntakeStateMachine {
     IDLE,
     INTAKING,
     STOWED,
+    /** Agitating between lower positions — used when balls are stacked over the spindexer. */
     AGITATING_LOW,
+    /** Agitating between higher positions — used when no balls are detected over the spindexer. */
     AGITATING_HIGH,
     AGITATING_PROGRESSIVE,
     DEPLOYED,
     REVERSING
-  }
-
-  private enum BallsOverSpindexerState {
-    FULL,
-    NOT_FULL
   }
 
   // Subsystem refs
@@ -55,13 +55,13 @@ public class IntakeStateMachine {
   private IntakeWantedStates wantedState = IntakeWantedStates.IDLE;
   private IntakeInternalStates currentState = IntakeInternalStates.IDLE;
   private IntakeInternalStates previousState = IntakeInternalStates.IDLE;
-  private BallsOverSpindexerState overSpindexerState = BallsOverSpindexerState.NOT_FULL;
 
   /**
    * Creates a new IntakeStateMachine.
    *
    * @param intakeRoller the intake roller subsystem
    * @param intakePivot the intake pivot subsystem
+   * @param hopperSensor the hopper sensor subsystem
    */
   public IntakeStateMachine(
       IntakeRoller intakeRoller, IntakePivot intakePivot, HopperSensor hopperSensor) {
@@ -79,6 +79,11 @@ public class IntakeStateMachine {
     wantedState = state;
   }
 
+  /** Returns the current intake wanted state. */
+  public IntakeWantedStates getWantedState() {
+    return wantedState;
+  }
+
   /** Returns the current intake internal state. */
   public IntakeInternalStates getState() {
     return currentState;
@@ -92,10 +97,7 @@ public class IntakeStateMachine {
     previousState = currentState;
 
     if (wantedState != IntakeWantedStates.AGITATING) {
-      overSpindexerState =
-          hopperSensor.isActivated()
-              ? BallsOverSpindexerState.FULL
-              : BallsOverSpindexerState.NOT_FULL;
+      hopperSensor.setWantedState(HopperSensorWantedStates.NOT_AGITATING);
     }
 
     switch (wantedState) {
@@ -106,19 +108,11 @@ public class IntakeStateMachine {
         currentState = IntakeInternalStates.STOWED;
         break;
       case AGITATING:
-        // set the latching behavior
-        if (currentState == IntakeInternalStates.AGITATING_LOW
-            && hopperSensor.wasPrevActivated()
-            && !hopperSensor.isActivated()) {
-          overSpindexerState = BallsOverSpindexerState.NOT_FULL;
-        }
-
-        // act on the latching behavior
-        if (overSpindexerState == BallsOverSpindexerState.NOT_FULL) {
-          currentState = IntakeInternalStates.AGITATING_HIGH;
-        } else {
-          currentState = IntakeInternalStates.AGITATING_LOW;
-        }
+        hopperSensor.setWantedState(HopperSensorWantedStates.AGITATING);
+        currentState =
+            (hopperSensor.getState() == HopperSensorInternalStates.FULL)
+                ? IntakeInternalStates.AGITATING_LOW
+                : IntakeInternalStates.AGITATING_HIGH;
         break;
       case AGITATING_PROGRESSIVE:
         if (intakePivot.getState() == IntakePivot.IntakePivotInternalStates.PROGRESSIVE_COMPLETE) {
@@ -182,9 +176,8 @@ public class IntakeStateMachine {
 
   /** Logs the wanted, current, and previous intake states. */
   public void log() {
-    Logger.recordOutput("Superstructure/WantedIntakeState", wantedState);
-    Logger.recordOutput("Superstructure/CurrentIntakeState", currentState);
-    Logger.recordOutput("Superstructure/PreviousIntakeState", previousState);
-    Logger.recordOutput("Superstructure/BallsOverHopperState", overSpindexerState);
+    Logger.recordOutput("Superstructure/Intake/WantedState", wantedState);
+    Logger.recordOutput("Superstructure/Intake/CurrentState", currentState);
+    Logger.recordOutput("Superstructure/Intake/PreviousState", previousState);
   }
 }

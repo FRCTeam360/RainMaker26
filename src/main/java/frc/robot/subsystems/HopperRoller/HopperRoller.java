@@ -11,10 +11,11 @@ import org.littletonrobotics.junction.Logger;
 
 public class HopperRoller extends SubsystemBase {
   // Constants
-  private static final double ROLLER_VELOCITY_RPM = 4000.0;
+  private static final double ROLLER_VELOCITY_RPM = 2000.0;
   private static final double ROLLER_DUTY_CYCLE = 0.80;
   private static final double PREVENT_JAM_DUTY_CYCLE = -0.04;
   private static final double UNJAMMING_DUTY_CYCLE = -0.95;
+  private static final double REVERSING_DUTY_CYCLE = -0.5;
 
   // IO fields
   private final HopperRollerIO io;
@@ -25,7 +26,8 @@ public class HopperRoller extends SubsystemBase {
     OFF,
     ROLLING,
     UNJAMMING,
-    PREVENT_JAM
+    PREVENT_JAM,
+    REVERSING
   }
 
   // State variables
@@ -66,6 +68,9 @@ public class HopperRoller extends SubsystemBase {
       case UNJAMMING:
         currentState = HopperRollerStates.UNJAMMING;
         break;
+      case REVERSING:
+        currentState = HopperRollerStates.REVERSING;
+        break;
       case OFF:
       default:
         currentState = HopperRollerStates.OFF;
@@ -83,6 +88,9 @@ public class HopperRoller extends SubsystemBase {
         break;
       case UNJAMMING:
         setDutyCycle(UNJAMMING_DUTY_CYCLE);
+        break;
+      case REVERSING:
+        setDutyCycle(REVERSING_DUTY_CYCLE);
         break;
       case OFF:
       default:
@@ -114,15 +122,15 @@ public class HopperRoller extends SubsystemBase {
   @Override
   public void periodic() {
     io.updateInputs(inputs);
-    Logger.processInputs("HopperRoller", inputs);
+    Logger.processInputs("Subsystems/HopperRoller", inputs);
 
     if (controlState == ControlState.SUPERSTRUCTURE) {
       updateState();
       applyState();
     }
-    Logger.recordOutput("Subsystems/HopperRoller/WantedState", wantedState);
-    Logger.recordOutput("Subsystems/HopperRoller/CurrentState", currentState);
-    Logger.recordOutput("Subsystems/HopperRoller/PreviousState", previousState);
-    Logger.recordOutput("Subsystems/HopperRoller/ControlState", controlState);
+    Logger.recordOutput("Superstructure/Subsystems/HopperRoller/WantedState", wantedState);
+    Logger.recordOutput("Superstructure/Subsystems/HopperRoller/CurrentState", currentState);
+    Logger.recordOutput("Superstructure/Subsystems/HopperRoller/PreviousState", previousState);
+    Logger.recordOutput("Superstructure/Subsystems/HopperRoller/ControlState", controlState);
   }
 }

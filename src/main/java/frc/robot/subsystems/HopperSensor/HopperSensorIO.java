@@ -12,6 +12,7 @@ public interface HopperSensorIO {
   public static class HopperSensorIOInputs {
     public boolean sensorActivated = false;
     public double distanceMeters = 0.0;
+    public boolean connected = false;
   }
 
   public default void updateInputs(HopperSensorIOInputs inputs) {}

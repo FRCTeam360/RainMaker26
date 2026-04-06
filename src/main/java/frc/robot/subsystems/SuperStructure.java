@@ -3,6 +3,7 @@ package frc.robot.subsystems;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -41,14 +42,16 @@ public class SuperStructure extends SubsystemBase {
   private final Hood hood;
   private final IntakePivot intakePivot;
   private final HopperRoller hopperRoller;
-  private final HopperSensor hopperSensor;
   private final ShooterStateMachine shooterStateMachine;
   private final IntakeStateMachine intakeStateMachine;
   private final TargetSelectionStateMachine targetSelectionStateMachine;
   private final ShotCalculator hubShotCalculator;
   private final Supplier<Pose2d> robotPoseSupplier;
   private final Transform2d robotToShooter;
+  private final double indexerToFlywheelSeconds;
   private final HubShiftTracker hubShiftTracker;
+
+  private static final double PRE_SHOT_UNJAM_SECONDS = 0.03;
 
   // shooting @ 3 meters
   private static final double HOOD_FORCED_ANGLE = 10.0;
@@ -105,7 +108,8 @@ public class SuperStructure extends SubsystemBase {
       ShotCalculator passCalculator,
       BooleanSupplier isAlignedToTarget,
       Supplier<Pose2d> robotPoseSupplier,
-      Transform2d robotToShooter) {
+      Transform2d robotToShooter,
+      double indexerToFlywheelSeconds) {
     this.intakeRoller = intakeRoller;
     this.indexer = indexer;
     this.flywheelKicker = flywheelKicker;
@@ -113,11 +117,11 @@ public class SuperStructure extends SubsystemBase {
     this.hood = hood;
     this.intakePivot = intakePivot;
     this.hopperRoller = hopperRoller;
-    this.hopperSensor = hopperSensor;
     this.hubShotCalculator = hubShotCalculator;
     this.robotPoseSupplier = robotPoseSupplier;
     this.robotToShooter = robotToShooter;
-    this.hubShiftTracker = new HubShiftTracker(hubShotCalculator);
+    this.hubShiftTracker = new HubShiftTracker();
+    this.indexerToFlywheelSeconds = indexerToFlywheelSeconds;
     this.shooterStateMachine =
         new ShooterStateMachine(
             flywheel, hood, flywheelKicker, isAlignedToTarget, this::canShootToTarget);
@@ -217,6 +221,8 @@ public class SuperStructure extends SubsystemBase {
 
   // Subsystem state helpers
 
+  Timer preparingToFireTimer = new Timer();
+
   private void shooting() {
     if (currentSuperState == SuperInternalStates.FORCED_SHOT) {
       shooterStateMachine.setWantedState(ShooterWantedStates.FORCED_SHOT);
@@ -226,10 +232,21 @@ public class SuperStructure extends SubsystemBase {
       shooterStateMachine.setWantedState(ShooterWantedStates.SHOOTING);
     }
 
-    if (shooterStateMachine.getState() == ShooterStates.FIRING) {
+    if (shooterStateMachine.getState() == ShooterStates.FIRING
+        || shooterStateMachine.getState() == ShooterStates.DISTURBED) {
       indexer.setWantedState(IndexerStates.INDEXING);
       hopperRoller.setWantedState(HopperRollerStates.ROLLING);
+    } else if (shooterStateMachine.getState() == ShooterStates.PREPARING_TO_FIRE) {
+      if (!preparingToFireTimer.isRunning()) {
+        preparingToFireTimer.restart();
+      }
+      if (preparingToFireTimer.hasElapsed(PRE_SHOT_UNJAM_SECONDS)) {
+        indexer.setWantedState(IndexerStates.REVERSING);
+        hopperRoller.setWantedState(HopperRollerStates.REVERSING);
+      }
     } else {
+      preparingToFireTimer.stop();
+      preparingToFireTimer.reset();
       indexer.setWantedState(IndexerStates.OFF);
       hopperRoller.setWantedState(HopperRollerStates.PREVENT_JAM);
     }
@@ -356,7 +373,10 @@ public class SuperStructure extends SubsystemBase {
     cachedTimeOfFlight = hubShotCalculator.calculateShot().timeOfFlight();
     RobotUtils.ActiveHub shootingPhase =
         RobotUtils.getActiveHubAtShotLanding(
-            DriverStation.getMatchTime(), DriverStation.isTeleop(), cachedTimeOfFlight);
+            DriverStation.getMatchTime(),
+            DriverStation.isTeleop(),
+            cachedTimeOfFlight,
+            indexerToFlywheelSeconds);
 
     // Calculate hub active once per cycle
     cachedHubActive =
