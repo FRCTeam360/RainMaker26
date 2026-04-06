@@ -92,16 +92,20 @@ public final class Constants {
   }
 
   private static RobotType initRobotType() {
+    if (!Robot.isReal()) { // Check sim first to avoid empty serial address matching COMP
+      robotType = Constants.RobotType.SIM;
+      return robotType;
+    }
+
     String serialAddress = HALUtil.getSerialNumber();
 
     if (serialAddress.equals(SerialAddressConstants.WOOD_SERIAL_ADDRESS)) {
       robotType = Constants.RobotType.WOODBOT;
-    } else if (serialAddress.equals(SerialAddressConstants.COMP_SERIAL_ADDRESS)) {
+    } else if (!SerialAddressConstants.COMP_SERIAL_ADDRESS.isEmpty()
+        && serialAddress.equals(SerialAddressConstants.COMP_SERIAL_ADDRESS)) {
       robotType = Constants.RobotType.COMPBOT;
     } else if (serialAddress.equals(SerialAddressConstants.PRACTICE_SERIAL_ADDRESS)) {
       robotType = Constants.RobotType.PRACTICEBOT;
-    } else if (!Robot.isReal()) { // KEEP AT BOTTOM
-      robotType = Constants.RobotType.SIM;
     } else {
       robotType = Constants.RobotType.COMPBOT;
     }
@@ -287,7 +291,7 @@ public final class Constants {
     public static final CANBus CANBUS = new CANBus("Default Name");
 
     // === MAXIMUMS ===
-    public static final LinearVelocity maxSpeed = MetersPerSecond.of(4.69);
+    public static final LinearVelocity maxSpeed = MetersPerSecond.of(4.85);
     public static final AngularVelocity maxAngularVelocity = RevolutionsPerSecond.of(2.5);
 
     static {
@@ -336,14 +340,14 @@ public final class Constants {
       // passFlywheelSpeedMap.put(0.0, 2000.0);
 
       // AGGRESSIVE LOW ANGLE PASS MAP
-      passHoodAngleMap.put(12.0, 35.0);
+      passHoodAngleMap.put(12.0, 40.0);
       passHoodAngleMap.put(9.0, 40.0);
       passHoodAngleMap.put(1.0, 40.0);
       passHoodAngleMap.put(0.0, 40.0);
 
-      passFlywheelSpeedMap.put(12.0, 4500.0);
-      passFlywheelSpeedMap.put(9.0, 3750.0);
-      passFlywheelSpeedMap.put(7.0, 3000.0);
+      passFlywheelSpeedMap.put(12.0, 2800.0);
+      passFlywheelSpeedMap.put(9.0, 2800.0);
+      passFlywheelSpeedMap.put(6.0, 2600.0);
       passFlywheelSpeedMap.put(5.0, 2200.0); // TESTED
       passFlywheelSpeedMap.put(4.0, 2000.0);
       passFlywheelSpeedMap.put(3.0, 1700.0); // TESTED
@@ -416,8 +420,8 @@ public final class Constants {
     public static final CANBus CANBUS = new CANBus("Default Name");
 
     // === MAXIMUMS ===
-    public static final LinearVelocity maxSpeed = MetersPerSecond.of(4.69);
-    public static final AngularVelocity maxAngularVelocity = RevolutionsPerSecond.of(4.0);
+    public static final LinearVelocity maxSpeed = MetersPerSecond.of(4.85);
+    public static final AngularVelocity maxAngularVelocity = RevolutionsPerSecond.of(2.5);
 
     static {
       shotHoodAngleMap.put(6.0, 16.0);
@@ -429,14 +433,14 @@ public final class Constants {
       shotHoodAngleMap.put(2.0, 3.0);
       shotHoodAngleMap.put(1.25, 0.0);
 
-      shotFlywheelSpeedMap.put(6.0, 2600.0);
-      shotFlywheelSpeedMap.put(5.0, 2550.0);
-      shotFlywheelSpeedMap.put(4.0, 2500.0);
-      shotFlywheelSpeedMap.put(3.5, 2325.0);
-      shotFlywheelSpeedMap.put(3.0, 2200.0);
-      shotFlywheelSpeedMap.put(2.5, 2100.0);
-      shotFlywheelSpeedMap.put(2.0, 2000.0);
-      shotFlywheelSpeedMap.put(1.25, 1900.0);
+      shotFlywheelSpeedMap.put(6.0, 2500.0);
+      shotFlywheelSpeedMap.put(5.0, 2450.0);
+      shotFlywheelSpeedMap.put(4.0, 2400.0);
+      shotFlywheelSpeedMap.put(3.5, 2225.0);
+      shotFlywheelSpeedMap.put(3.0, 2100.0);
+      shotFlywheelSpeedMap.put(2.5, 2000.0);
+      shotFlywheelSpeedMap.put(2.0, 1900.0);
+      shotFlywheelSpeedMap.put(1.25, 1800.0);
 
       passHoodAngleMap.put(12.0, 35.0);
       passHoodAngleMap.put(9.0, 40.0);
@@ -568,9 +572,7 @@ public final class Constants {
 
   public static final class SerialAddressConstants {
     public static final String WOOD_SERIAL_ADDRESS = "032BE44A";
-    public static final String COMP_SERIAL_ADDRESS = "";
+    public static final String COMP_SERIAL_ADDRESS = "025AE07E";
     public static final String PRACTICE_SERIAL_ADDRESS = "03260AD5";
   }
-
-  public static double loopPeriodSecs; // add value
 }
