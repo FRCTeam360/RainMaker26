@@ -12,6 +12,7 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.utils.FieldConstants;
@@ -210,6 +211,22 @@ public class Vision extends SubsystemBase {
     Logger.recordOutput(
         VISION_LOGGING_PREFIX + "Rejection Rate",
         totalDetections > 0 ? (double) rejectedMeasurements / totalDetections : 0.0);
+
+    // Sync sticky stop flags with SmartDashboard for driver display and reset control.
+    // Drivers can toggle the widget to false in Shuffleboard to reset a sticky-stopped camera.
+    for (String key : stickyStopFlags.keySet()) {
+      String dashboardKey = "StickyStop/" + key;
+      boolean flagActive = Boolean.TRUE.equals(stickyStopFlags.get(key));
+      boolean dashboardValue = SmartDashboard.getBoolean(dashboardKey, flagActive);
+
+      // Driver toggled the widget to false — reset the sticky stop
+      if (flagActive && !dashboardValue) {
+        resetStickyStop(key);
+        flagActive = false;
+      }
+
+      SmartDashboard.putBoolean(dashboardKey, flagActive);
+    }
   }
 
   /** Resets the sticky stop flag for a specific Limelight, re-enabling pose acceptance. */
