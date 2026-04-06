@@ -11,7 +11,7 @@ import org.littletonrobotics.junction.Logger;
 
 public class HopperSensor extends SubsystemBase {
 
-  private static final double SENSOR_ACTIVATED_DEBOUNCE_SECONDS = 0.2;
+  private static final double SENSOR_ACTIVATED_DEBOUNCE_SECONDS = 0.1;
 
   // IO fields
   private final HopperSensorIO io;
