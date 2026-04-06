@@ -98,6 +98,8 @@ import org.littletonrobotics.junction.Logger;
  * subsystems, commands, and trigger mappings) should be declared here.
  */
 public class RobotContainer {
+  private static final double PRE_SHOT_UNJAM_SECONDS = 0.05;
+
   // The robot's subsystems and commands are defined here...
   private CommandSwerveDrivetrain drivetrain;
   private SendableChooser<Command> autoChooser;
