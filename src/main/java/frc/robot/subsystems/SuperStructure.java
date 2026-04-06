@@ -237,12 +237,15 @@ public class SuperStructure extends SubsystemBase {
       indexer.setWantedState(IndexerStates.INDEXING);
       hopperRoller.setWantedState(HopperRollerStates.ROLLING);
     } else if (shooterStateMachine.getState() == ShooterStates.PREPARING_TO_FIRE) {
-      preparingToFireTimer.start();
+      if (!preparingToFireTimer.isRunning()) {
+        preparingToFireTimer.restart();
+      }
       if (preparingToFireTimer.hasElapsed(PRE_SHOT_UNJAM_SECONDS)) {
         indexer.setWantedState(IndexerStates.REVERSING);
         hopperRoller.setWantedState(HopperRollerStates.REVERSING);
       }
     } else {
+      preparingToFireTimer.stop();
       preparingToFireTimer.reset();
       indexer.setWantedState(IndexerStates.OFF);
       hopperRoller.setWantedState(HopperRollerStates.PREVENT_JAM);
