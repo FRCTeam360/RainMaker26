@@ -172,9 +172,11 @@ public class Vision extends SubsystemBase {
       }
 
       boolean tagExceedsThreshold =
-          Math.abs(input.nearestTagObservedRollDeg - cameraRollDeg) > TAG_ORIENTATION_THRESHOLD_DEG
-              || Math.abs(input.nearestTagObservedPitchDeg - cameraPitchDeg)
-                  > TAG_ORIENTATION_THRESHOLD_DEG;
+          input.targetCount > 0
+              && (Math.abs(input.nearestTagObservedRollDeg - cameraRollDeg)
+                      > TAG_ORIENTATION_THRESHOLD_DEG
+                  || Math.abs(input.nearestTagObservedPitchDeg - cameraPitchDeg)
+                      > TAG_ORIENTATION_THRESHOLD_DEG);
 
       Logger.recordOutput(
           VISION_LOGGING_PREFIX + key + "/IMUOrientationExceedsThreshold", imuExceedsThreshold);
@@ -207,8 +209,8 @@ public class Vision extends SubsystemBase {
         continue;
       }
 
-      // Reject measurements when either threshold is exceeded
-      if (imuExceedsThreshold || tagExceedsThreshold) {
+      // Reject measurements when either threshold is exceeded while enabled
+      if (DriverStation.isEnabled() && (imuExceedsThreshold || tagExceedsThreshold)) {
         rejectedMeasurements++;
         continue;
       }
