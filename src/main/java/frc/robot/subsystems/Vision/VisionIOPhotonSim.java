@@ -10,9 +10,11 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
@@ -29,6 +31,7 @@ import org.photonvision.targeting.PhotonTrackedTarget;
  */
 public class VisionIOPhotonSim implements VisionIO {
 
+  private final String name;
   private final PhotonCamera camera;
   private final PhotonPoseEstimator photonEstimator;
   private final Supplier<Pose2d> robotPoseSupplier;
@@ -40,14 +43,21 @@ public class VisionIOPhotonSim implements VisionIO {
   // Track pipeline (not used in sim but required by interface)
   private int currentPipeline = 0;
 
+  // Tunable for force-triggering stickystop in sim
+  private final LoggedNetworkBoolean forceStickyStop;
+
   /**
    * Creates a new VisionIOPhotonSim.
    *
+   * @param name the map key for this camera (used for dashboard keys and tuning paths)
    * @param robotPoseSupplier Supplier for the simulated robot pose (from drivetrain simulation).
    *     This should be the TRUE simulated pose, not the estimated pose.
    */
-  public VisionIOPhotonSim(Supplier<Pose2d> robotPoseSupplier) {
+  public VisionIOPhotonSim(String name, Supplier<Pose2d> robotPoseSupplier) {
+    this.name = name;
     this.robotPoseSupplier = robotPoseSupplier;
+    this.forceStickyStop =
+        new LoggedNetworkBoolean("/Tuning/Vision/" + name + "/ForceStickyStop", false);
 
     // Create the PhotonCamera with the configured name
     camera = new PhotonCamera(kCameraName);
@@ -94,6 +104,17 @@ public class VisionIOPhotonSim implements VisionIO {
 
   @Override
   public void updateInputs(VisionIOInputs inputs) {
+    // Read dashboard toggle for replay-safe stickystop reset
+    inputs.stickyStopDashboardActive =
+        SmartDashboard.getBoolean(VisionIO.stickyStopDashboardKey(name), false);
+
+    // When force-stickystop is toggled, set both threshold inputs to trigger stickystop in Vision
+    if (forceStickyStop.get()) {
+      inputs.hasIMU = true;
+      inputs.imuRollDeg = 90.0;
+      inputs.nearestTagObservedRollDeg = 90.0;
+    }
+
     // Update the vision simulation with the current robot pose
     Pose2d robotPose = robotPoseSupplier.get();
     visionSim.update(robotPose);

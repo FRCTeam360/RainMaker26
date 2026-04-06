@@ -148,7 +148,9 @@ public class RobotContainer {
         intakePivot = new IntakePivot(new IntakePivotIOSim());
         vision =
             new Vision(
-                Map.of("photonSim", new VisionIOPhotonSim(() -> drivetrain.getState().Pose)));
+                Map.of(
+                    "photonSim",
+                    new VisionIOPhotonSim("photonSim", () -> drivetrain.getState().Pose)));
         flywheel = new Flywheel(new FlywheelIOSim());
         hood = new Hood(new HoodIOSim());
         indexer = new Indexer(new IndexerIOSim());
