@@ -261,10 +261,6 @@ public final class Constants {
     public static final int LEFT_INTAKE_ROLLER_ID = 15;
     public static final int RIGHT_INTAKE_ROLLER_ID = 25;
 
-    // === CLIMBER ===
-    public static final int CLIMBER_RIGHT_ID = 16;
-    public static final int CLIMBER_LEFT_ID = 17;
-
     // === FLYWHEEL ===
     public static final int FLYWHEEL_RIGHT_ID = 18;
     public static final int FLYWHEEL_LEFT_ID = 19;
@@ -392,9 +388,6 @@ public final class Constants {
     public static final int LEFT_INTAKE_ROLLER_ID = 15;
     public static final int RIGHT_INTAKE_ROLLER_ID = 16;
 
-    // === CLIMBER ===
-    public static final int CLIMBER_RIGHT_ID = 17;
-
     // === FLYWHEEL ===
     public static final int FLYWHEEL_RIGHT_ID = 18;
     public static final int FLYWHEEL_LEFT_ID = 19;
@@ -487,9 +480,6 @@ public final class Constants {
 
     // === HOOD ===
     public static final int HOOD_MOTOR = 34;
-
-    // === CLIMBER ===
-    public static final int CLIMBER_MOTOR = 36;
 
     // === MAXIMUMS ===
     public static final LinearVelocity maxSpeed = MetersPerSecond.of(4.69);

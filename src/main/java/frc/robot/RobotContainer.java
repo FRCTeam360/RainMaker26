@@ -24,9 +24,6 @@ import frc.robot.autos.BLineAutos;
 import frc.robot.generated.CompBotDrivetrain;
 import frc.robot.generated.PracticeBotDrivetrain;
 import frc.robot.generated.WoodBotDrivetrain;
-import frc.robot.subsystems.Climber.Climber;
-import frc.robot.subsystems.Climber.ClimberIONoop;
-import frc.robot.subsystems.Climber.ClimberIOSim;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.ControlState;
 import frc.robot.subsystems.HopperRoller.HopperRoller;
@@ -112,7 +109,6 @@ public class RobotContainer {
   private HopperRoller hopperRoller;
   private HopperSensor hopperSensor;
   private FlywheelKicker flywheelKicker;
-  private Climber climber;
   private SuperStructure superStructure;
 
   private ShotCalculator hubShotCalculator;
@@ -144,7 +140,6 @@ public class RobotContainer {
     switch (Constants.getRobotType()) {
       case SIM:
         drivetrain = WoodBotDrivetrain.createDrivetrain();
-        climber = new Climber(new ClimberIOSim());
         intakePivot = new IntakePivot(new IntakePivotIOSim());
         vision =
             new Vision(
@@ -181,7 +176,6 @@ public class RobotContainer {
         break;
       case WOODBOT:
         drivetrain = WoodBotDrivetrain.createDrivetrain();
-        climber = new Climber(new ClimberIONoop());
         flywheel = new Flywheel(new FlywheelIOWBBangBang());
         hood = new Hood(new HoodIOWB());
         indexer = new Indexer(new IndexerIOWB());
@@ -225,7 +219,6 @@ public class RobotContainer {
         break;
       case PRACTICEBOT:
         drivetrain = PracticeBotDrivetrain.createDrivetrain();
-        climber = new Climber(new ClimberIONoop());
         flywheel = new Flywheel(new FlywheelIOPBBangBang());
         hood = new Hood(new HoodIOPB());
         indexer = new Indexer(new IndexerIOPB());
@@ -281,7 +274,6 @@ public class RobotContainer {
       case COMPBOT:
       default:
         drivetrain = CompBotDrivetrain.createDrivetrain();
-        climber = new Climber(new ClimberIONoop());
         flywheel = new Flywheel(new FlywheelIOCBBangBang());
         hood = new Hood(new HoodIOCB());
         indexer = new Indexer(new IndexerIOCB());
@@ -590,7 +582,6 @@ public class RobotContainer {
     superStructure.setWantedSuperState(SuperWantedStates.IDLE);
     superStructure.setIntakeState(IntakeWantedStates.IDLE);
     drivetrain.setControl(new SwerveRequest.Idle());
-    climber.stop();
     flywheel.stop();
     hood.stop();
     intakeRoller.stop();
