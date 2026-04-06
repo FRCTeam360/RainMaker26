@@ -48,6 +48,8 @@ public class IntakePivot extends SubsystemBase {
     IDLE,
     MOVING_TO_SETPOINT,
     AT_SETPOINT,
+    AT_SETPOINT_HIGH,
+    AT_SETPOINT_LOW,
     SWITCHING_AGITATE_TARGET_HIGH,
     SWITCHING_AGITATE_TARGET_LOW,
     PROGRESSIVE_COMPLETE
@@ -120,14 +122,16 @@ public class IntakePivot extends SubsystemBase {
                     : IntakePivotInternalStates.SWITCHING_AGITATE_TARGET_HIGH;
           } else if (currentState == IntakePivotInternalStates.SWITCHING_AGITATE_TARGET_HIGH) {
             agitateTargetHigh = true;
-            currentState = IntakePivotInternalStates.AT_SETPOINT;
+            currentState = IntakePivotInternalStates.AT_SETPOINT_HIGH;
           } else if (currentState == IntakePivotInternalStates.SWITCHING_AGITATE_TARGET_LOW) {
             agitateTargetHigh = false;
-            currentState = IntakePivotInternalStates.AT_SETPOINT;
+            currentState = IntakePivotInternalStates.AT_SETPOINT_LOW;
           } else {
             currentState =
                 atTarget
-                    ? IntakePivotInternalStates.AT_SETPOINT
+                    ? (agitateTargetHigh
+                        ? IntakePivotInternalStates.AT_SETPOINT_HIGH
+                        : IntakePivotInternalStates.AT_SETPOINT_LOW)
                     : IntakePivotInternalStates.MOVING_TO_SETPOINT;
           }
           break;
@@ -154,15 +158,17 @@ public class IntakePivot extends SubsystemBase {
                       : IntakePivotInternalStates.SWITCHING_AGITATE_TARGET_HIGH;
             } else if (currentState == IntakePivotInternalStates.SWITCHING_AGITATE_TARGET_HIGH) {
               agitateTargetHigh = true;
-              currentState = IntakePivotInternalStates.AT_SETPOINT;
+              currentState = IntakePivotInternalStates.AT_SETPOINT_HIGH;
             } else if (currentState == IntakePivotInternalStates.SWITCHING_AGITATE_TARGET_LOW) {
               agitateTargetHigh = false;
               progressiveCycleCount++;
-              currentState = IntakePivotInternalStates.AT_SETPOINT;
+              currentState = IntakePivotInternalStates.AT_SETPOINT_LOW;
             } else {
               currentState =
                   atTarget
-                      ? IntakePivotInternalStates.AT_SETPOINT
+                      ? (agitateTargetHigh
+                          ? IntakePivotInternalStates.AT_SETPOINT_HIGH
+                          : IntakePivotInternalStates.AT_SETPOINT_LOW)
                       : IntakePivotInternalStates.MOVING_TO_SETPOINT;
             }
           }
@@ -190,6 +196,8 @@ public class IntakePivot extends SubsystemBase {
     switch (currentState) {
       case MOVING_TO_SETPOINT:
       case AT_SETPOINT:
+      case AT_SETPOINT_HIGH:
+      case AT_SETPOINT_LOW:
       case SWITCHING_AGITATE_TARGET_HIGH:
       case SWITCHING_AGITATE_TARGET_LOW:
         double target = getTargetPosition() + stallBackoffDegrees;
@@ -309,6 +317,8 @@ public class IntakePivot extends SubsystemBase {
     Logger.recordOutput("Superstructure/Subsystems/IntakePivot/ControlState", controlState);
     Logger.recordOutput(
         "Superstructure/Subsystems/IntakePivot/TargetPositionDegrees", getTargetPosition());
+    Logger.recordOutput(
+        "Superstructure/Subsystems/IntakePivot/ProgressiveCycleCount", progressiveCycleCount);
     SmartDashboard.putString(
         "Superstructure/Subsystems/IntakePivot/CurrentIntakePivotState", currentState.toString());
   }
