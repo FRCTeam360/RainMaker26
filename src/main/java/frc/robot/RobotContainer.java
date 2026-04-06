@@ -99,7 +99,7 @@ import org.littletonrobotics.junction.Logger;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private CommandSwerveDrivetrain drivetrain;
-  public static SendableChooser<Command> autoChooser = new SendableChooser<>();
+  public static final SendableChooser<Command> autoChooser = new SendableChooser<>();
   private Flywheel flywheel;
   private Hood hood;
   private Indexer indexer;
