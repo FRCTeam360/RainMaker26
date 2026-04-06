@@ -104,6 +104,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   private static final double HEADING_KD = 1.0; // 1.0 Kd is prob the highest we should go
   private static final double HEADING_I_ZONE = Math.toRadians(10.0);
   private static final double HEADING_TOLERANCE_RAD = Math.toRadians(5.0);
+  private final double HEADING_INTEGRATOR_MAX_RAD_PER_S =
+      Constants.getMaxAngularVelocity().in(RadiansPerSecond) / 2.0;
   // Extra heading tolerance granted per m/s of translational speed.
   // Compensates for the PID steady-state tracking lag when the heading setpoint moves
   // (setpoint rate ≈ v/d rad/s; lag ≈ rate/KP). Tunable — start at ~5°/m/s.
@@ -261,6 +263,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
           headingLockEnabled = !headingLockEnabled;
           headingControllerActive = false; // Reset so we know when fresh data is available
           if (headingLockEnabled) {
+            angleFacingRequest.HeadingController.reset();
             // Initialize to nearest 90° angle when enabling
             double currentDegrees = getRotation2d().getDegrees();
             currentDegrees = ((currentDegrees % 360) + 360) % 360;
@@ -433,6 +436,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     angleFacingRequest.HeadingController.setPID(HEADING_KP, HEADING_KI, HEADING_KD);
     angleFacingRequest.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
     angleFacingRequest.HeadingController.setIZone(HEADING_I_ZONE);
+    angleFacingRequest.HeadingController.setIntegratorRange(
+        -HEADING_INTEGRATOR_MAX_RAD_PER_S, HEADING_INTEGRATOR_MAX_RAD_PER_S);
     angleFacingRequest.HeadingController.setTolerance(HEADING_TOLERANCE_RAD);
     angleFacingRequest.ForwardPerspective = ForwardPerspectiveValue.BlueAlliance;
     if (Utils.isSimulation()) {
