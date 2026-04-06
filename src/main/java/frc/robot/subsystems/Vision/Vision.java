@@ -10,6 +10,7 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -29,6 +30,9 @@ public class Vision extends SubsystemBase {
   private final Map<String, VisionIOInputsAutoLogged> visionInputs;
   private Timer snapshotTimer = new Timer();
   private List<VisionMeasurement> acceptedMeasurements = new ArrayList<>();
+
+  /** Per-Limelight sticky stop flags. Once set, permanently rejects poses until manually reset. */
+  private final Map<String, Boolean> stickyStopFlags = new HashMap<>();
 
   private final String VISION_LOGGING_PREFIX = "Vision/";
 
@@ -61,6 +65,7 @@ public class Vision extends SubsystemBase {
     cachedLogKeys = new HashMap<>();
     for (String key : visionIos.keySet()) {
       cachedLogKeys.put(key, VISION_LOGGING_PREFIX + key);
+      stickyStopFlags.put(key, false);
     }
     enableIMUSeeding();
   }
@@ -140,6 +145,7 @@ public class Vision extends SubsystemBase {
     }
 
     for (Map.Entry<String, VisionIOInputsAutoLogged> entry : visionInputs.entrySet()) {
+      String key = entry.getKey();
       VisionIOInputsAutoLogged input = entry.getValue();
 
       // Count total detections (pose updates attempted)
@@ -147,8 +153,31 @@ public class Vision extends SubsystemBase {
         totalDetections++;
       }
 
+      // If this Limelight has been sticky-stopped, reject all measurements
+      if (Boolean.TRUE.equals(stickyStopFlags.get(key))) {
+        rejectedMeasurements++;
+        Logger.recordOutput(VISION_LOGGING_PREFIX + key + "/StickyStop", true);
+        continue;
+      }
+
       // skip input if not updated
       if (!input.poseUpdated) {
+        rejectedMeasurements++;
+        continue;
+      }
+
+      // Trigger sticky stop when both thresholds are exceeded while enabled
+      if (input.imuOrientationExceedsThreshold
+          && input.tagOrientationExceedsThreshold
+          && DriverStation.isEnabled()) {
+        stickyStopFlags.put(key, true);
+        rejectedMeasurements++;
+        Logger.recordOutput(VISION_LOGGING_PREFIX + key + "/StickyStop", true);
+        continue;
+      }
+
+      // Reject measurements when either threshold is exceeded
+      if (input.imuOrientationExceedsThreshold || input.tagOrientationExceedsThreshold) {
         rejectedMeasurements++;
         continue;
       }
@@ -181,6 +210,24 @@ public class Vision extends SubsystemBase {
     Logger.recordOutput(
         VISION_LOGGING_PREFIX + "Rejection Rate",
         totalDetections > 0 ? (double) rejectedMeasurements / totalDetections : 0.0);
+  }
+
+  /** Resets the sticky stop flag for a specific Limelight, re-enabling pose acceptance. */
+  public void resetStickyStop(String name) {
+    stickyStopFlags.put(name, false);
+    Logger.recordOutput(VISION_LOGGING_PREFIX + name + "/StickyStop", false);
+  }
+
+  /** Resets all sticky stop flags, re-enabling pose acceptance for all Limelights. */
+  public void resetAllStickyStops() {
+    for (String key : stickyStopFlags.keySet()) {
+      resetStickyStop(key);
+    }
+  }
+
+  /** Returns whether the given Limelight has been sticky-stopped. */
+  public boolean isStickyStopActive(String name) {
+    return Boolean.TRUE.equals(stickyStopFlags.get(name));
   }
 
   /** Enables IMU seeding on all vision IO layers. Call during disabled. */
