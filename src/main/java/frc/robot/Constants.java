@@ -291,7 +291,7 @@ public final class Constants {
     public static final CANBus CANBUS = new CANBus("Default Name");
 
     // === MAXIMUMS ===
-    public static final LinearVelocity maxSpeed = MetersPerSecond.of(4.69);
+    public static final LinearVelocity maxSpeed = MetersPerSecond.of(4.85);
     public static final AngularVelocity maxAngularVelocity = RevolutionsPerSecond.of(2.5);
 
     static {
@@ -420,8 +420,8 @@ public final class Constants {
     public static final CANBus CANBUS = new CANBus("Default Name");
 
     // === MAXIMUMS ===
-    public static final LinearVelocity maxSpeed = MetersPerSecond.of(4.69);
-    public static final AngularVelocity maxAngularVelocity = RevolutionsPerSecond.of(4.0);
+    public static final LinearVelocity maxSpeed = MetersPerSecond.of(4.85);
+    public static final AngularVelocity maxAngularVelocity = RevolutionsPerSecond.of(2.5);
 
     static {
       shotHoodAngleMap.put(6.0, 16.0);
