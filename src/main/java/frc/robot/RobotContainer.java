@@ -381,7 +381,7 @@ public class RobotContainer {
         "basic intake", superStructure.setIntakeStateCommand(IntakeWantedStates.INTAKING));
     registerPathplannerCommand(
         "shoot at hub",
-        Commands.waitSeconds(4.5)
+        Commands.waitSeconds(8)
             .raceWith(Commands.waitUntil(this::hopperEmptyAndNotShooting))
             .deadlineFor(
                 superStructure
@@ -452,12 +452,13 @@ public class RobotContainer {
       hopperStalledLastLaunchCount = currentCount;
       hopperStalledLastLaunchTime = Timer.getFPGATimestamp();
     }
-    boolean noLaunchFor500ms = (Timer.getFPGATimestamp() - hopperStalledLastLaunchTime) >= 0.5;
-    boolean hopperEmpty =
-        hopperSensor.getState() == HopperSensor.HopperSensorInternalStates.HALF_EMPTY;
-    Logger.recordOutput("Auto/ShootAtHub/NoLaunchFor500ms", noLaunchFor500ms);
+    boolean noLaunchFor1s = (Timer.getFPGATimestamp() - hopperStalledLastLaunchTime) >= 3.0;
+    // boolean hopperEmpty =
+    //     hopperSensor.getState() == HopperSensor.HopperSensorInternalStates.HALF_EMPTY;
+    boolean hopperEmpty = true;
+    Logger.recordOutput("Auto/ShootAtHub/NoLaunchFor1s", noLaunchFor1s);
     Logger.recordOutput("Auto/ShootAtHub/HopperEmpty", hopperEmpty);
-    return hopperEmpty && noLaunchFor500ms;
+    return hopperEmpty && noLaunchFor1s;
   }
 
   public void registerPathplannerCommand(String name, Command command) {
