@@ -17,6 +17,7 @@ import frc.robot.utils.LimelightHelpers.PoseEstimate;
 import frc.robot.utils.LimelightHelpers.RawFiducial;
 import java.util.Optional;
 import java.util.function.DoubleSupplier;
+import org.littletonrobotics.junction.Logger;
 
 /**
  * Abstract base class for Limelight vision IO layers. Contains all shared NetworkTables reads, pose
@@ -24,10 +25,10 @@ import java.util.function.DoubleSupplier;
  */
 public abstract class VisionIOLimelightBase implements VisionIO {
   /** Maximum acceptable IMU roll or pitch before flagging (degrees). */
-  private static final double IMU_ORIENTATION_THRESHOLD_DEG = 10.0;
+  private static final double IMU_ORIENTATION_THRESHOLD_DEG = 60.0;
 
   /** Maximum acceptable tag observed roll or pitch before flagging (degrees). */
-  private static final double TAG_ORIENTATION_THRESHOLD_DEG = 10.0;
+  private static final double TAG_ORIENTATION_THRESHOLD_DEG = 60.0;
 
   private final NetworkTable table;
   private final String name;
@@ -35,6 +36,12 @@ public abstract class VisionIOLimelightBase implements VisionIO {
   protected final DoubleSupplier gyroAngleRateSupplier;
 
   private final boolean acceptMeasurements;
+
+  /** Camera pose relative to the robot center, polled until a valid pose is received. */
+  private Pose3d cameraPoseRobotSpace = new Pose3d();
+
+  /** Whether a valid (non-identity) camera pose has been received from the Limelight. */
+  private boolean cameraPoseResolved = false;
 
   /**
    * Creates a new Limelight hardware layer.
@@ -66,8 +73,26 @@ public abstract class VisionIOLimelightBase implements VisionIO {
     table.getEntry("ledMode").setNumber(mode);
   }
 
+  /**
+   * Polls the Limelight for its camera pose in robot space. Once a non-identity pose is received,
+   * it is cached and logged and no further polling occurs.
+   */
+  private void pollCameraPose() {
+    if (cameraPoseResolved) return;
+    if (LimelightHelpers.getHeartbeat(name) == 0.0) return;
+
+    Pose3d pose = LimelightHelpers.getCameraPose3d_RobotSpace(name);
+    if (pose.getTranslation().getNorm() == 0.0 && pose.getRotation().getAngle() == 0.0) return;
+
+    cameraPoseRobotSpace = pose;
+    cameraPoseResolved = true;
+    Logger.recordOutput("Vision/" + name + "/CameraPoseRobotSpace", cameraPoseRobotSpace);
+  }
+
   @Override
   public void updateInputs(VisionIOInputs inputs) {
+    pollCameraPose();
+
     // Set robot orientation for MegaTag2 (flushed by postSchedulerUpdate)
     LimelightHelpers.SetRobotOrientation_NoFlush(
         name, gyroAngleSupplier.getAsDouble(), gyroAngleRateSupplier.getAsDouble(), 0, 0, 0, 0);
@@ -134,12 +159,15 @@ public abstract class VisionIOLimelightBase implements VisionIO {
     updateNearestTagOrientation(inputs, poseEstimate);
 
     // Flag when IMU or tag orientations exceed acceptable thresholds
+    double cameraRollDeg = Math.toDegrees(cameraPoseRobotSpace.getRotation().getX());
+    double cameraPitchDeg = Math.toDegrees(cameraPoseRobotSpace.getRotation().getY());
     inputs.imuOrientationExceedsThreshold =
-        Math.abs(inputs.imuRollDeg) > IMU_ORIENTATION_THRESHOLD_DEG
-            || Math.abs(inputs.imuPitchDeg) > IMU_ORIENTATION_THRESHOLD_DEG;
+        Math.abs(inputs.imuRollDeg - cameraRollDeg) > IMU_ORIENTATION_THRESHOLD_DEG
+            || Math.abs(inputs.imuPitchDeg - cameraPitchDeg) > IMU_ORIENTATION_THRESHOLD_DEG;
     inputs.tagOrientationExceedsThreshold =
-        Math.abs(inputs.nearestTagObservedRollDeg) > TAG_ORIENTATION_THRESHOLD_DEG
-            || Math.abs(inputs.nearestTagObservedPitchDeg) > TAG_ORIENTATION_THRESHOLD_DEG;
+        Math.abs(inputs.nearestTagObservedRollDeg - cameraRollDeg) > TAG_ORIENTATION_THRESHOLD_DEG
+            || Math.abs(inputs.nearestTagObservedPitchDeg - cameraPitchDeg)
+                > TAG_ORIENTATION_THRESHOLD_DEG;
   }
 
   /**
