@@ -105,7 +105,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   private static final double HEADING_I_ZONE = Math.toRadians(10.0);
   private static final double HEADING_TOLERANCE_RAD = Math.toRadians(5.0);
   private final double HEADING_INTEGRATOR_MAX_RAD_PER_S =
-      Constants.getMaxAngularVelocity().in(RadiansPerSecond) / 2.0;
+      Constants.getMaxAngularVelocity().in(RadiansPerSecond) * 0.5;
   // Extra heading tolerance granted per m/s of translational speed.
   // Compensates for the PID steady-state tracking lag when the heading setpoint moves
   // (setpoint rate ≈ v/d rad/s; lag ≈ rate/KP). Tunable — start at ~5°/m/s.
