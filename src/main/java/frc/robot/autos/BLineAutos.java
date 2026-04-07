@@ -130,9 +130,38 @@ public class BLineAutos {
   // Auto routine compositions
   // ─────────────────────────────────────────────────────────────────────────────
 
+  public BLineAuto redRightAggressive() {
+    return new BLineAuto(
+        "[BLine] Red Right Aggressive",
+        pathWithImmediateIntake(new Path("Blue Left Aggressive first swipe"))
+            .andThen(shootAtHub())
+            .andThen(pathWithImmediateIntake(new Path("Blue Right Aggressive Second Swipe")))
+            .andThen(shootAtHub()));
+  }
+
+
+  public BLineAuto redLeftAggressive() {
+    return new BLineAuto(
+        "[BLine] Red Left Aggressive",
+        pathWithImmediateIntake(new Path("Blue Right Aggressive first swipe"))
+            .andThen(shootAtHub())
+            .andThen(pathWithImmediateIntake(new Path("Blue Right Aggressive Second Swipe")))
+            .andThen(shootAtHub()));
+  }
+
   public BLineAuto blueRightAggressive() {
     return new BLineAuto(
         "[BLine] Blue Right Aggressive",
+        pathWithImmediateIntake(new Path("Blue Right Aggressive first swipe"))
+            .andThen(shootAtHub())
+            .andThen(pathWithImmediateIntake(new Path("Blue Right Aggressive Second Swipe")))
+            .andThen(shootAtHub()));
+  }
+
+
+  public BLineAuto blueLeftAggressive() {
+    return new BLineAuto(
+        "[BLine] Blue Left Aggressive",
         pathWithImmediateIntake(new Path("Blue Right Aggressive first swipe"))
             .andThen(shootAtHub())
             .andThen(pathWithImmediateIntake(new Path("Blue Right Aggressive Second Swipe")))
