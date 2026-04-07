@@ -71,7 +71,7 @@ public class BLineAutos {
     return shootAtHubSupplier.get();
   }
 
-/** Shortcut: follow path with intake deployed after a short delay. */
+  /** Shortcut: follow path with intake deployed after a short delay. */
   private Command pathWithIntake(Path path) {
     return followPath(path).deadlineFor(Commands.waitSeconds(0.05).andThen(basicIntake()));
   }

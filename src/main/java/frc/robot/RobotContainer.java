@@ -406,8 +406,7 @@ public class RobotContainer {
     autoChooser = AutoBuilder.buildAutoChooser();
 
     // Register BLine auto variants alongside PathPlanner autos for A/B testing
-    BLineAutos bLineAutos =
-        new BLineAutos(drivetrain, superStructure, this::shootAtHubCommand);
+    BLineAutos bLineAutos = new BLineAutos(drivetrain, superStructure, this::shootAtHubCommand);
     bLineAutos.registerAutos(autoChooser);
 
     SmartDashboard.putData("Auto Chooser", autoChooser);
