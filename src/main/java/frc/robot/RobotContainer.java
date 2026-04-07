@@ -504,18 +504,18 @@ public class RobotContainer {
     driverCont.x().whileTrue(superStructure.setIntakeStateCommand(IntakeWantedStates.REVERSING));
     // TODO: check that this works with just an on false because this will set the intake to idle
     // constantly and that's probably not what we want but it did work on the field
-    driverCont.x().whileFalse(superStructure.setIntakeStateCommand(IntakeWantedStates.IDLE));
+    driverCont.x().onFalse(superStructure.setIntakeStateCommand(IntakeWantedStates.IDLE));
 
     // Left trigger held: agitate. Release: back to intaking.
     if (Constants.getRobotType() == RobotType.WOODBOT) {
       Trigger intakeTrigger = driverCont.leftTrigger().and(isSuperstructureMode);
       intakeTrigger.onTrue(superStructure.setIntakeStateCommand(IntakeWantedStates.INTAKING));
-      intakeTrigger.whileFalse(superStructure.setIntakeStateCommand(IntakeWantedStates.DEPLOYED));
+      intakeTrigger.onFalse(superStructure.setIntakeStateCommand(IntakeWantedStates.DEPLOYED));
 
     } else {
       Trigger intakeTrigger = driverCont.leftBumper().and(isSuperstructureMode);
       intakeTrigger.onTrue(superStructure.setIntakeStateCommand(IntakeWantedStates.INTAKING));
-      intakeTrigger.whileFalse(superStructure.setIntakeStateCommand(IntakeWantedStates.IDLE));
+      intakeTrigger.onFalse(superStructure.setIntakeStateCommand(IntakeWantedStates.IDLE));
 
       Trigger agitateTrigger = driverCont.leftTrigger().and(isSuperstructureMode);
       agitateTrigger.onTrue(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING));
@@ -579,25 +579,25 @@ public class RobotContainer {
   }
 
   Command runSystemsTest() {
-    return Commands.waitSeconds(2.0)
-        .deadlineFor(intakeRoller.setVelocityCommand(3000.0))
+    return Commands.waitSeconds(0.1)
+        .andThen(Commands.waitSeconds(2.0).deadlineFor(intakePivot.setPositionCommand(() -> 96.0)))
+        .andThen(Commands.waitSeconds(2.0).deadlineFor(intakeRoller.setVelocityCommand(3000.0)))
         .andThen(Commands.waitSeconds(2.0).deadlineFor(intakeRoller.setDutyCycleCommand(-0.6)))
-        .andThen(intakeRoller.setDutyCycleCommand(0))
+        .andThen(Commands.waitSeconds(0.1).deadlineFor(intakeRoller.setDutyCycleCommand(0)))
         .andThen(Commands.waitSeconds(2.0).deadlineFor(indexer.setDutyCycleCommand(0.2)))
         .andThen(Commands.waitSeconds(2.0).deadlineFor(indexer.setDutyCycleCommand(-0.2)))
-        .andThen(indexer.setDutyCycleCommand(0))
+        .andThen(Commands.waitSeconds(0.1).deadlineFor(indexer.setDutyCycleCommand(0)))
         .andThen(Commands.waitSeconds(2.0).deadlineFor(hood.setPositionCommand(40.0)))
         .andThen(Commands.waitSeconds(2.0).deadlineFor(hood.setPositionCommand(0.0)))
         .andThen(Commands.waitSeconds(2.0).deadlineFor(flywheelKicker.setDutyCycleCommand(0.2)))
         .andThen(Commands.waitSeconds(2.0).deadlineFor(flywheelKicker.setDutyCycleCommand(-0.2)))
-        .andThen(flywheelKicker.setDutyCycleCommand(0))
-        .andThen(Commands.waitSeconds(2.0).deadlineFor(intakePivot.setPositionCommand(() -> 96.0)))
-        .andThen(Commands.waitSeconds(2.0).deadlineFor(intakePivot.setPositionCommand(() -> 0.0)))
+        .andThen(Commands.waitSeconds(0.1).deadlineFor(flywheelKicker.setDutyCycleCommand(0)))
         .andThen(Commands.waitSeconds(2.0).deadlineFor(hopperRoller.setDutyCycleCommand(0.2)))
         .andThen(Commands.waitSeconds(2.0).deadlineFor(hopperRoller.setDutyCycleCommand(-0.2)))
-        .andThen(hopperRoller.setDutyCycleCommand(0))
+        .andThen(Commands.waitSeconds(0.1).deadlineFor(hopperRoller.setDutyCycleCommand(0)))
         .andThen(Commands.waitSeconds(2.0).deadlineFor(flywheel.setDutyCycleCommand(0.2)))
-        .andThen(flywheel.setDutyCycleCommand(0));
+        .andThen(Commands.waitSeconds(0.1).deadlineFor(flywheel.setDutyCycleCommand(0)))
+        .andThen(Commands.waitSeconds(2.0).deadlineFor(intakePivot.setPositionCommand(() -> 0.0)));
   }
 
   void configureHoodTestBindings(BooleanSupplier isIndependentMode) {
