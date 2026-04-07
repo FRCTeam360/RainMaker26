@@ -64,7 +64,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   private Notifier m_simNotifier = null;
   private double m_lastSimTime;
   private static final String SUBSYSTEM_NAME = "Swerve/";
-  private final SwerveRequest xOutReq = new SwerveRequest.SwerveDriveBrake();
+  private final SwerveRequest xOutReq =
+      new SwerveRequest.SwerveDriveBrake().withDriveRequestType(DriveRequestType.Velocity);
   private final Field2d field = new Field2d();
 
   // Keep track of when vision measurements are added for logging context

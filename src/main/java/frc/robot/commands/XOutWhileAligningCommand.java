@@ -2,6 +2,10 @@ package frc.robot.commands;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+
+import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -27,8 +31,23 @@ public class XOutWhileAligningCommand extends Command {
   /** Minimum commanded velocity (fraction of max speed) to count as driver input. */
   private static final double DRIVER_INPUT_THRESHOLD = 0.05;
 
-  /** Heading tolerance for drivebase alignment checks in this command (tighter than default). */
-  private static final double HEADING_TOLERANCE_RAD = Math.toRadians(1.5);
+  /** Heading tolerance required to enter X_OUT (tight). */
+  private static final double ENTRY_HEADING_TOLERANCE_RAD = Math.toRadians(1.0);
+
+  /** Heading tolerance allowed while in X_OUT before exiting (loose). */
+  private static final double EXIT_HEADING_TOLERANCE_RAD = Math.toRadians(3.0);
+
+  /** Maximum measured angular velocity to allow entry into X_OUT (deg/s). */
+  private static final double ENTRY_ANGULAR_VELOCITY_TOLERANCE_DPS = 5.0;
+
+  /** Maximum measured translational speed to allow entry into X_OUT (m/s). */
+  private static final double ENTRY_LINEAR_VELOCITY_TOLERANCE_MPS = 0.05;
+
+  /** Time the entry condition must be continuously true before transitioning to X_OUT (seconds). */
+  private static final double ENTRY_DEBOUNCE_SECONDS = 0.1;
+
+  /** Time the exit condition must be continuously true before leaving X_OUT (seconds). */
+  private static final double EXIT_DEBOUNCE_SECONDS = 0.1;
 
   private enum State {
     FACING_ANGLE,
@@ -41,6 +60,9 @@ public class XOutWhileAligningCommand extends Command {
   private final Supplier<Rotation2d> headingSupplier;
 
   private State state;
+  private final Debouncer entryDebouncer =
+      new Debouncer(ENTRY_DEBOUNCE_SECONDS, DebounceType.kRising);
+  private final Debouncer exitDebouncer = new Debouncer(EXIT_DEBOUNCE_SECONDS, DebounceType.kRising);
 
   /**
    * Creates a new XOutWhileAligningCommand.
@@ -85,6 +107,8 @@ public class XOutWhileAligningCommand extends Command {
   public void initialize() {
     state = State.FACING_ANGLE;
     drivetrain.resetHeadingController();
+    entryDebouncer.calculate(false);
+    exitDebouncer.calculate(false);
   }
 
   @Override
@@ -114,16 +138,26 @@ public class XOutWhileAligningCommand extends Command {
     switch (state) {
       case FACING_ANGLE:
         double entryErrorRad = heading.minus(drivetrain.getRotation2d()).getRadians();
-        if (!hasDriverInput && Math.abs(entryErrorRad) < HEADING_TOLERANCE_RAD) {
+        ChassisSpeeds measured = drivetrain.getVelocity();
+        boolean robotStationary =
+            Math.abs(drivetrain.getAngularRate()) < ENTRY_ANGULAR_VELOCITY_TOLERANCE_DPS
+                && Math.hypot(measured.vxMetersPerSecond, measured.vyMetersPerSecond)
+                    < ENTRY_LINEAR_VELOCITY_TOLERANCE_MPS;
+        boolean headingAligned =
+            entryDebouncer.calculate(
+                Math.abs(entryErrorRad) < ENTRY_HEADING_TOLERANCE_RAD && robotStationary);
+        exitDebouncer.calculate(false);
+        if (!hasDriverInput && headingAligned) {
           state = State.X_OUT;
         }
         break;
 
       case X_OUT:
         double headingErrorRad = heading.minus(drivetrain.getRotation2d()).getRadians();
-        boolean stillAligned = Math.abs(headingErrorRad) < HEADING_TOLERANCE_RAD;
-
-        if (hasDriverInput || !stillAligned) {
+        boolean headingDrifted =
+            exitDebouncer.calculate(Math.abs(headingErrorRad) >= EXIT_HEADING_TOLERANCE_RAD);
+        entryDebouncer.calculate(false);
+        if (hasDriverInput || headingDrifted) {
           state = State.FACING_ANGLE;
           drivetrain.resetHeadingController();
         }
