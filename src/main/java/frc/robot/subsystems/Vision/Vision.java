@@ -30,7 +30,9 @@ public class Vision extends SubsystemBase {
   private Timer snapshotTimer = new Timer();
   private List<VisionMeasurement> acceptedMeasurements = new ArrayList<>();
 
-  private final String VISION_LOGGING_PREFIX = "Vision: ";
+  private final String VISION_LOGGING_PREFIX = "Vision/";
+
+  private final Map<String, String> cachedLogKeys;
 
   private static final InterpolatingMatrixTreeMap<Double, N3, N1> MEASUREMENT_STD_DEV_DISTANCE_MAP =
       new InterpolatingMatrixTreeMap<>();
@@ -55,6 +57,10 @@ public class Vision extends SubsystemBase {
     visionInputs = new HashMap<>();
     for (String key : visionIos.keySet()) {
       visionInputs.put(key, new VisionIOInputsAutoLogged());
+    }
+    cachedLogKeys = new HashMap<>();
+    for (String key : visionIos.keySet()) {
+      cachedLogKeys.put(key, VISION_LOGGING_PREFIX + key);
     }
     enableIMUSeeding();
   }
@@ -130,11 +136,10 @@ public class Vision extends SubsystemBase {
           input.tagPoses[i] = input.tagPoses[0];
         }
       }
-      Logger.processInputs("Vision: " + key, input);
+      Logger.processInputs(cachedLogKeys.get(key), input);
     }
 
     for (Map.Entry<String, VisionIOInputsAutoLogged> entry : visionInputs.entrySet()) {
-      String key = entry.getKey();
       VisionIOInputsAutoLogged input = entry.getValue();
 
       // Count total detections (pose updates attempted)
@@ -152,10 +157,7 @@ public class Vision extends SubsystemBase {
       double timestamp = input.timestampSeconds;
 
       // Skip measurements that are not with in the field boundary
-      if (pose.getX() < 0.0
-          || pose.getX() > FieldConstants.fieldLength
-          || pose.getY() < 0.0
-          || pose.getY() > FieldConstants.fieldWidth) {
+      if (isPoseOutOfBounds(pose)) {
         rejectedMeasurements++;
         continue;
       }
@@ -212,5 +214,12 @@ public class Vision extends SubsystemBase {
   public Command consumeVisionMeasurements(
       Consumer<List<VisionMeasurement>> visionMeasurementConsumer) {
     return run(() -> visionMeasurementConsumer.accept(acceptedMeasurements));
+  }
+
+  public static boolean isPoseOutOfBounds(Pose2d pose) {
+    return pose.getX() < 0.0
+        || pose.getX() > FieldConstants.fieldLength
+        || pose.getY() < 0.0
+        || pose.getY() > FieldConstants.fieldWidth;
   }
 }

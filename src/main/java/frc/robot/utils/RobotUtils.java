@@ -1,5 +1,6 @@
 package frc.robot.utils;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.robot.Constants;
 import java.io.File;
@@ -7,8 +8,7 @@ import java.util.Optional;
 
 public class RobotUtils {
   private static final double SHIFT_GRACE_PERIOD_SECONDS = 2.0;
-  private static final double INDEXER_TO_FLYWHEEL_SECONDS = 0.4;
-  private static final double HUB_TO_SENSOR_SECONDS = 2.0;
+  private static final double HUB_TO_SENSOR_SECONDS = 1.0;
 
   public static final double TRANSITION_END_SECONDS = 130;
   public static final double SHIFT_1_END_SECONDS = 105;
@@ -62,6 +62,18 @@ public class RobotUtils {
   }
 
   /**
+   * Returns whether our alliance won the autonomous period.
+   *
+   * @return true if our alliance is the auto winner, false otherwise (including if alliance or game
+   *     message is unavailable)
+   */
+  public static boolean isAutoWinner() {
+    Alliance autoWinner = getAutoWinner(DriverStation.getGameSpecificMessage());
+    Optional<Alliance> alliance = DriverStation.getAlliance();
+    return alliance.isPresent() && autoWinner == alliance.get();
+  }
+
+  /**
    * Returns which alliance's hub is active based on the gameTime from DriverStation
    *
    * @param gameTime the gameTime from DriverStation
@@ -70,11 +82,11 @@ public class RobotUtils {
    * @return which hub(s) are currently active
    */
   public static ActiveHub getActiveHubAtShotLanding(
-      double gameTime, Boolean isTele, double timeOfFlight) {
+      double gameTime, Boolean isTele, double timeOfFlight, double indexerToFlywheelSeconds) {
     // gameTime is the getMatchTime() from DriverStation, isTele is the isTeleop() from
     // DriverStation
     ActiveHub activeHub = ActiveHub.BOTH;
-    double timeAtShotLanding = gameTime - (timeOfFlight + INDEXER_TO_FLYWHEEL_SECONDS);
+    double timeAtShotLanding = gameTime - (timeOfFlight + indexerToFlywheelSeconds);
     // Sets phases based on the current time in the game
     if (!isTele) {
       activeHub = ActiveHub.BOTH; // AUTO

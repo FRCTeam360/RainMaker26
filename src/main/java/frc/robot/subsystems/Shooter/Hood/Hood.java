@@ -19,6 +19,9 @@ public class Hood extends SubsystemBase {
   // Constants
   private static final double TOLERANCE = 1.0;
   private static final double HOOD_UP_THRESHOLD = 2.0; // degrees - threshold for "hood is up"
+  private static final double SOFT_LIMIT_PROXIMITY_DEGREES = 5.0;
+  private static final double FORWARD_SOFT_LIMIT_DEGREES = 42.0;
+  private static final double REVERSE_SOFT_LIMIT_DEGREES = 0.0;
 
   // IO fields
   private final HoodIO io;
@@ -111,11 +114,21 @@ public class Hood extends SubsystemBase {
     }
   }
 
+  private boolean isNearSoftLimit(double targetDegrees) {
+    return targetDegrees <= REVERSE_SOFT_LIMIT_DEGREES + SOFT_LIMIT_PROXIMITY_DEGREES
+        || targetDegrees >= FORWARD_SOFT_LIMIT_DEGREES - SOFT_LIMIT_PROXIMITY_DEGREES;
+  }
+
   private void applyState() {
     switch (currentState) {
       case MOVING:
       case AT_SETPOINT:
-        setPosition(hoodAngleSupplier.getAsDouble());
+        double target = hoodAngleSupplier.getAsDouble();
+        if (isNearSoftLimit(target)) {
+          setPositionSmooth(target);
+        } else {
+          setPositionAggressive(target);
+        }
         break;
       case ZEROING:
         moveHoodToZero();
@@ -129,7 +142,7 @@ public class Hood extends SubsystemBase {
 
   // Subsystem state helpers
   private void moveHoodToZero() {
-    setPosition(0.0);
+    setPositionSmooth(0.0);
   }
 
   private void holdShootingPosition() {
@@ -154,8 +167,12 @@ public class Hood extends SubsystemBase {
     io.setDutyCycle(dutyCycle);
   }
 
-  public void setPosition(double position) {
-    io.setPosition(position);
+  public void setPositionSmooth(double position) {
+    io.setPositionSmooth(position);
+  }
+
+  public void setPositionAggressive(double position) {
+    io.setPositionAggressive(position);
   }
 
   public double getPosition() {
@@ -181,7 +198,7 @@ public class Hood extends SubsystemBase {
   }
 
   public Command setPositionCommand(DoubleSupplier position) {
-    return this.run(() -> io.setPosition(position.getAsDouble()));
+    return this.run(() -> io.setPositionSmooth(position.getAsDouble()));
   }
 
   public Command setPositionCommand(double position) {
@@ -210,7 +227,7 @@ public class Hood extends SubsystemBase {
   @Override
   public void periodic() {
     io.updateInputs(inputs);
-    Logger.processInputs("Hood", inputs);
+    Logger.processInputs("Subsystems/Hood", inputs);
 
     if (controlState == ControlState.SUPERSTRUCTURE) {
       updateState();
@@ -224,11 +241,12 @@ public class Hood extends SubsystemBase {
             && getPosition() > HOOD_UP_THRESHOLD);
     hoodUpAlert.set(isHoodUp);
 
-    Logger.recordOutput("Subsystems/Hood/WantedState", wantedState);
-    Logger.recordOutput("Subsystems/Hood/CurrentState", currentState);
-    Logger.recordOutput("Subsystems/Hood/PreviousState", previousState);
-    Logger.recordOutput("Subsystems/Hood/ControlState", controlState);
-    Logger.recordOutput("Subsystems/Hood/IsHoodUp", isHoodUp);
-    SmartDashboard.putString("Subsystems/Hood/CurrentHoodState", currentState.toString());
+    Logger.recordOutput("Superstructure/Subsystems/Hood/WantedState", wantedState);
+    Logger.recordOutput("Superstructure/Subsystems/Hood/CurrentState", currentState);
+    Logger.recordOutput("Superstructure/Subsystems/Hood/PreviousState", previousState);
+    Logger.recordOutput("Superstructure/Subsystems/Hood/ControlState", controlState);
+    Logger.recordOutput("Superstructure/Subsystems/Hood/IsHoodUp", isHoodUp);
+    SmartDashboard.putString(
+        "Superstructure/Subsystems/Hood/CurrentHoodState", currentState.toString());
   }
 }
