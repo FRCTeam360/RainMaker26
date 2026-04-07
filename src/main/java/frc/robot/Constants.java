@@ -424,9 +424,9 @@ public final class Constants {
     public static final AngularVelocity maxAngularVelocity = RevolutionsPerSecond.of(2.5);
 
     static {
-      shotHoodAngleMap.put(6.0, 19.0);
-      shotHoodAngleMap.put(5.0, 19.0);
-      shotHoodAngleMap.put(4.0, 20.0);
+      shotHoodAngleMap.put(6.0, 16.0);
+      shotHoodAngleMap.put(5.0, 16.0);
+      shotHoodAngleMap.put(4.0, 17.0);
       shotHoodAngleMap.put(3.5, 16.0);
       shotHoodAngleMap.put(3.0, 10.0);
       shotHoodAngleMap.put(2.5, 6.0);
@@ -434,10 +434,10 @@ public final class Constants {
       shotHoodAngleMap.put(1.25, 0.0);
 
       shotFlywheelSpeedMap.put(6.0, 2400.0);
-      shotFlywheelSpeedMap.put(5.0, 2425.0);
-      shotFlywheelSpeedMap.put(4.0, 2350.0);
-      shotFlywheelSpeedMap.put(3.5, 2150.0);
-      shotFlywheelSpeedMap.put(3.0, 2075.0);
+      shotFlywheelSpeedMap.put(5.0, 2350.0);
+      shotFlywheelSpeedMap.put(4.0, 2300.0);
+      shotFlywheelSpeedMap.put(3.5, 2125.0);
+      shotFlywheelSpeedMap.put(3.0, 2050.0);
       shotFlywheelSpeedMap.put(2.5, 2000.0);
       shotFlywheelSpeedMap.put(2.0, 1900.0);
       shotFlywheelSpeedMap.put(1.25, 1800.0);
