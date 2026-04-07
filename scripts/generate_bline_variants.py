@@ -10,10 +10,10 @@ Blue Right), produces four variants — one for each corner of the field:
   3. FLIPPED              (rotated 180 degrees: Red <-> Blue)
   4. FLIPPED MIRRORED     (both transforms combined)
 
-Transform math (matches BLinePaths.java):
+Transform math:
   Mirror:  new_x = old_x,                new_y = field_width - old_y,  new_rot = -old_rot
-  Flip:    new_x = field_length - old_x,  new_y = old_y,               new_rot = pi - old_rot
-  Both:    new_x = field_length - old_x,  new_y = field_width - old_y,  new_rot = old_rot - pi
+  Flip:    new_x = field_length - old_x,  new_y = field_width - old_y,  new_rot = old_rot + pi
+  Both:    new_x = field_length - old_x,  new_y = old_y,               new_rot = pi - old_rot
 
 Name transforms swap alliance/side tags to match the existing PathPlanner
 conventions (Red<->Blue, Left<->Right).
@@ -127,24 +127,24 @@ def mirror_rotation(rot_rad):
     return wrap_rotation_rad(-rot_rad)
 
 
-def flip_xy(x, y, field_length):
-    """Flip across X centerline (Red <-> Blue)."""
-    return field_length - x, y
+def flip_xy(x, y, field_length, field_width):
+    """Rotate 180 degrees around field center (Red <-> Blue)."""
+    return field_length - x, field_width - y
 
 
 def flip_rotation(rot_rad):
-    """Flip rotation (reflection across vertical axis: pi - rot)."""
-    return wrap_rotation_rad(math.pi - rot_rad)
+    """Rotate heading by 180 degrees."""
+    return wrap_rotation_rad(rot_rad + math.pi)
 
 
 def flip_mirror_xy(x, y, field_length, field_width):
     """Both flip and mirror."""
-    return field_length - x, field_width - y
+    return field_length - x, y
 
 
 def flip_mirror_rotation(rot_rad):
-    """Both flip and mirror rotation: negate(pi - rot) = rot - pi."""
-    return wrap_rotation_rad(rot_rad - math.pi)
+    """Both flip and mirror rotation: pi - rot."""
+    return wrap_rotation_rad(math.pi - rot_rad)
 
 
 # --- Path element transforms ---
@@ -215,7 +215,7 @@ def generate_variants(paths_dir, path_name, field_length, field_width, dry_run):
         ),
         (
             make_flipped_name(path_name),
-            lambda x, y: flip_xy(x, y, field_length),
+            lambda x, y: flip_xy(x, y, field_length, field_width),
             flip_rotation,
         ),
         (

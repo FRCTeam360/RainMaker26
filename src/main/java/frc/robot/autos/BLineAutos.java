@@ -13,6 +13,7 @@ import frc.robot.subsystems.SuperStructure.SuperInternalStates;
 import frc.robot.subsystems.SuperStructure.SuperWantedStates;
 import frc.robot.utils.CommandLogger;
 import java.util.List;
+import java.util.function.Function;
 
 /**
  * BLine-based autonomous routines. Composes paths from {@link BLinePaths} into full auto commands
@@ -131,22 +132,28 @@ public class BLineAutos {
   // Auto routine compositions
   // ─────────────────────────────────────────────────────────────────────────────
 
-  private BLineAuto buildTwoSwipeAuto(String autoName) {
-    return new BLineAuto(
-        autoName,
-        pathWithImmediateIntake(new Path(autoName + " First Swipe"))
-            .andThen(shootAtHub())
-            .andThen(pathWithImmediateIntake(new Path(autoName + " Second Swipe")))
-            .andThen(shootAtHub()));
+  private Command buildTwoSwipeAuto(String autoName) {
+    return pathWithImmediateIntake(new Path(autoName + " First Swipe"))
+        .andThen(shootAtHub())
+        .andThen(pathWithImmediateIntake(new Path(autoName + " Second Swipe")))
+        .andThen(shootAtHub());
+  }
+
+  private BLineAuto buildAutoOrNone(String autoName, Function<String, Command> commandFactory) {
+    try {
+      return new BLineAuto(autoName, commandFactory.apply(autoName));
+    } catch (Exception ignored) {
+      return new BLineAuto("!!!NO PATH!!! " + autoName, Commands.none());
+    }
   }
 
   /** Builds all BLine auto routines using generated path variants. */
   private List<BLineAuto> buildAutos() {
     return List.of(
-        buildTwoSwipeAuto("Blue Right Aggressive"),
-        buildTwoSwipeAuto("MIRRORED Blue Left Aggressive"),
-        buildTwoSwipeAuto("FLIPPED Red Right Aggressive"),
-        buildTwoSwipeAuto("FLIPPED MIRRORED Red Left Aggressive"));
+        buildAutoOrNone("Blue Right Aggressive", this::buildTwoSwipeAuto),
+        buildAutoOrNone("MIRRORED Blue Left Aggressive", this::buildTwoSwipeAuto),
+        buildAutoOrNone("FLIPPED Red Right Aggressive", this::buildTwoSwipeAuto),
+        buildAutoOrNone("FLIPPED MIRRORED Red Left Aggressive", this::buildTwoSwipeAuto));
   }
 
   // ─────────────────────────────────────────────────────────────────────────────

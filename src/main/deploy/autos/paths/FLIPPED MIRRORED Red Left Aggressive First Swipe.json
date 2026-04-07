@@ -4,7 +4,7 @@
       "type": "waypoint",
       "translation_target": {
         "x_meters": 12.201307879772543,
-        "y_meters": 7.453359057676685,
+        "y_meters": 0.6166409423233157,
         "intermediate_handoff_radius_meters": 0.1
       },
       "rotation_target": {
@@ -20,38 +20,38 @@
     {
       "type": "translation",
       "x_meters": 9.436258277822908,
-      "y_meters": 7.438285085296507,
+      "y_meters": 0.6317149147034931,
       "intermediate_handoff_radius_meters": 0.25
     },
     {
       "type": "rotation",
-      "rotation_radians": -1.5707963267948966,
+      "rotation_radians": 1.5707963267948966,
       "t_ratio": 0.4964867351633086,
       "profiled_rotation": true
     },
     {
       "type": "translation",
       "x_meters": 8.210055142160845,
-      "y_meters": 5.984930089358244,
+      "y_meters": 2.0850699106417565,
       "intermediate_handoff_radius_meters": 0.49999999999999994
     },
     {
       "type": "rotation",
-      "rotation_radians": 0.43633231299858233,
+      "rotation_radians": -0.43633231299858233,
       "t_ratio": 0.981741864394752,
       "profiled_rotation": true
     },
     {
       "type": "translation",
       "x_meters": 8.86466435418359,
-      "y_meters": 4.631315142160844,
+      "y_meters": 3.4386848578391565,
       "intermediate_handoff_radius_meters": 0.2
     },
     {
       "type": "waypoint",
       "translation_target": {
         "x_meters": 10.61922910388059,
-        "y_meters": 5.386489796913078,
+        "y_meters": 2.6835102030869225,
         "intermediate_handoff_radius_meters": 0.2
       },
       "rotation_target": {
@@ -69,11 +69,11 @@
       "type": "waypoint",
       "translation_target": {
         "x_meters": 13.595192380178718,
-        "y_meters": 5.628715629569455,
+        "y_meters": 2.4412843704305454,
         "intermediate_handoff_radius_meters": 0.3
       },
       "rotation_target": {
-        "rotation_radians": 0.7330382858376185,
+        "rotation_radians": -0.7330382858376185,
         "profiled_rotation": true
       }
     }
