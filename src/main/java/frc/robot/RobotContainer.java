@@ -11,6 +11,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.FollowPathCommand;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -100,6 +101,8 @@ import org.littletonrobotics.junction.Logger;
  */
 public class RobotContainer {
   private static final double PRE_SHOT_UNJAM_SECONDS = 0.05;
+  private static final double AUTO_SHOOT_TIMEOUT_SECONDS = 10.0;
+  private static final double AUTO_SHOOT_NO_LAUNCH_TIMEOUT_SECONDS = 0.7;
 
   // The robot's subsystems and commands are defined here...
   private CommandSwerveDrivetrain drivetrain;
@@ -118,6 +121,10 @@ public class RobotContainer {
 
   private ShotCalculator hubShotCalculator;
   private ShotCalculator passCalculator;
+
+  // State for hopperEmptyAndNotShooting() — tracks last launch to detect shooting stop.
+  private long hopperStalledLastLaunchCount = 0;
+  private double hopperStalledLastLaunchTime = 0.0;
 
   // TODO: refactor to allow for more than 1 drivetrain type
 
@@ -230,7 +237,7 @@ public class RobotContainer {
         flywheel = new Flywheel(new FlywheelIOPBBangBang());
         hood = new Hood(new HoodIOPB());
         indexer = new Indexer(new IndexerIOPB());
-        vision = // TODO ADD OTHER LIMELIGHTS
+        vision =
             new Vision(
                 Map.ofEntries(
                     Map.entry(
@@ -355,7 +362,6 @@ public class RobotContainer {
             drivetrain::getCommandedVelocity,
             robotPassingInfo);
     // Configure the trigger bindings
-    // TODO: Re-enable superStructure construction and PathPlanner commands
 
     superStructure =
         new SuperStructure(
@@ -375,10 +381,10 @@ public class RobotContainer {
             indexerToFlywheelSeconds);
     registerPathplannerCommand(
         "basic intake", superStructure.setIntakeStateCommand(IntakeWantedStates.INTAKING));
-    // TODO: add end condition based on state from SuperStructure (based on sensor inputs)
     registerPathplannerCommand(
         "shoot at hub",
-        Commands.waitSeconds(4.5)
+        Commands.waitSeconds(AUTO_SHOOT_TIMEOUT_SECONDS)
+            .raceWith(Commands.waitUntil(this::hopperEmptyAndNotShooting))
             .deadlineFor(
                 superStructure
                     .setStateCommand(SuperWantedStates.AUTO_CYCLE_SHOOTING)
@@ -394,6 +400,7 @@ public class RobotContainer {
                               return hubShotCalculator.calculateShot().targetHeading();
                             })))
             .alongWith(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING))
+            .beforeStarting(this::resetHopperEmptyAndNotShootingTracker)
             .andThen(superStructure.setStateCommand(SuperWantedStates.DEFAULT)));
     registerPathplannerCommand(
         "stow intake", superStructure.setIntakeStateCommand(IntakeWantedStates.STOWED));
@@ -416,9 +423,6 @@ public class RobotContainer {
     configVision();
     configDefaultDrivingCommand();
     configureBindings();
-    // configureTestBindings();
-    // configureFullShootingTestBindings();
-    // configureFullShootingTestBindings();
 
     autoChooser = AutoBuilder.buildAutoChooser();
 
@@ -432,6 +436,37 @@ public class RobotContainer {
     CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
     // Uncomment this if pathplanner starts to suck on loading
     // CommandScheduler.getInstance().schedule(PathfindingCommand.warmupCommand());
+  }
+
+  /**
+   * Returns true when the hopper is empty and no ball has been launched recently. Used as an
+   * early-exit condition for the "shoot at hub" auto command.
+   *
+   * <p>This method is stateful — it tracks the last seen launch count and the timestamp of the last
+   * launch internally. It is intended to be passed as a method reference to {@code
+   * Commands.waitUntil()}.
+   */
+  private boolean hopperEmptyAndNotShooting() {
+    double nowSeconds = Timer.getFPGATimestamp();
+    long currentCount = flywheel.getLaunchCount();
+    if (currentCount != hopperStalledLastLaunchCount) {
+      hopperStalledLastLaunchCount = currentCount;
+      hopperStalledLastLaunchTime = nowSeconds;
+    }
+    boolean noLaunchForTimeout =
+        (nowSeconds - hopperStalledLastLaunchTime) >= AUTO_SHOOT_NO_LAUNCH_TIMEOUT_SECONDS;
+    boolean hopperEmpty =
+        hopperSensor.getState() == HopperSensor.HopperSensorInternalStates.HALF_EMPTY;
+    Logger.recordOutput("Auto/ShootAtHub/LaunchCount", currentCount);
+    Logger.recordOutput("Auto/ShootAtHub/NoLaunchForTimeout", noLaunchForTimeout);
+    Logger.recordOutput("Auto/ShootAtHub/HopperEmpty", hopperEmpty);
+    return hopperEmpty && noLaunchForTimeout;
+  }
+
+  /** Resets launch-tracking state before each auto shoot-at-hub command run. */
+  private void resetHopperEmptyAndNotShootingTracker() {
+    hopperStalledLastLaunchCount = flywheel.getLaunchCount();
+    hopperStalledLastLaunchTime = Timer.getFPGATimestamp();
   }
 
   public void registerPathplannerCommand(String name, Command command) {
@@ -577,13 +612,29 @@ public class RobotContainer {
     driverCont.b().and(isIndependentMode).whileTrue(hopperRoller.setDutyCycleCommand(-0.2));
 
     driverCont.start().and(isIndependentMode).whileTrue(flywheel.setDutyCycleCommand(0.2));
-    driverCont.back().and(isIndependentMode).whileTrue(hood.zero());
+    driverCont.back().and(isIndependentMode).onTrue(runSystemsTest());
   }
 
-  void configureHoodTestBindings(BooleanSupplier isIndependentMode) {
-    driverCont.a().and(isIndependentMode).whileTrue(hood.setDutyCycleCommand(0.1));
-    driverCont.b().and(isIndependentMode).whileTrue(hood.setDutyCycleCommand(-0.1));
-    driverCont.y().and(isIndependentMode).whileTrue(hood.zero());
+  Command runSystemsTest() {
+    return Commands.waitSeconds(0.1)
+        .andThen(Commands.waitSeconds(2.0).deadlineFor(intakePivot.setPositionCommand(() -> 96.0)))
+        .andThen(Commands.waitSeconds(2.0).deadlineFor(intakeRoller.setVelocityCommand(3000.0)))
+        .andThen(Commands.waitSeconds(2.0).deadlineFor(intakeRoller.setDutyCycleCommand(-0.6)))
+        .andThen(Commands.waitSeconds(0.1).deadlineFor(intakeRoller.setDutyCycleCommand(0)))
+        .andThen(Commands.waitSeconds(2.0).deadlineFor(indexer.setDutyCycleCommand(0.2)))
+        .andThen(Commands.waitSeconds(2.0).deadlineFor(indexer.setDutyCycleCommand(-0.2)))
+        .andThen(Commands.waitSeconds(0.1).deadlineFor(indexer.setDutyCycleCommand(0)))
+        .andThen(Commands.waitSeconds(2.0).deadlineFor(hood.setPositionCommand(40.0)))
+        .andThen(Commands.waitSeconds(2.0).deadlineFor(hood.setPositionCommand(0.0)))
+        .andThen(Commands.waitSeconds(2.0).deadlineFor(flywheelKicker.setDutyCycleCommand(0.2)))
+        .andThen(Commands.waitSeconds(2.0).deadlineFor(flywheelKicker.setDutyCycleCommand(-0.2)))
+        .andThen(Commands.waitSeconds(0.1).deadlineFor(flywheelKicker.setDutyCycleCommand(0)))
+        .andThen(Commands.waitSeconds(2.0).deadlineFor(hopperRoller.setDutyCycleCommand(0.2)))
+        .andThen(Commands.waitSeconds(2.0).deadlineFor(hopperRoller.setDutyCycleCommand(-0.2)))
+        .andThen(Commands.waitSeconds(0.1).deadlineFor(hopperRoller.setDutyCycleCommand(0)))
+        .andThen(Commands.waitSeconds(2.0).deadlineFor(flywheel.setDutyCycleCommand(0.2)))
+        .andThen(Commands.waitSeconds(0.1).deadlineFor(flywheel.setDutyCycleCommand(0)))
+        .andThen(Commands.waitSeconds(2.0).deadlineFor(intakePivot.setPositionCommand(() -> 0.0)));
   }
 
   /** Stops all subsystems safely when the robot is disabled. */
