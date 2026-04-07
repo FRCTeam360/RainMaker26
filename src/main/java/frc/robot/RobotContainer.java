@@ -101,7 +101,7 @@ public class RobotContainer {
 
   // The robot's subsystems and commands are defined here...
   private CommandSwerveDrivetrain drivetrain;
-  public static SendableChooser<Command> autoChooser = new SendableChooser<>();
+  private SendableChooser<Command> autoChooser = new SendableChooser<>();
   private Flywheel flywheel;
   private Hood hood;
   private Indexer indexer;
@@ -428,6 +428,10 @@ public class RobotContainer {
     CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
     // Uncomment this if pathplanner starts to suck on loading
     // CommandScheduler.getInstance().schedule(PathfindingCommand.warmupCommand());
+  }
+
+  public void disabledPeriodic() {
+    
   }
 
   public void registerPathplannerCommand(String name, Command command) {

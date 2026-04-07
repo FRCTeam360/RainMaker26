@@ -125,33 +125,7 @@ public class Robot extends LoggedRobot {
 
   @Override
   public void disabledPeriodic() {
-    if (DriverStation.isDSAttached()) {
-      if (!DriverStation.getAlliance().equals(lastAllianceState)) {
-
-        lastAllianceState = DriverStation.getAlliance();
-        RobotContainer.autoChooser.close();
-        RobotContainer.autoChooser = new SendableChooser<>();
-        List<String> autoNames = AutoBuilder.getAllAutoNames();
-
-        for (String autoName : autoNames) {
-          if (lastAllianceState.equals(Optional.of(Alliance.Red))) {
-            if (autoName.contains("Red")) {
-              PathPlannerAuto auto = new PathPlannerAuto(autoName);
-              RobotContainer.autoChooser.addOption(auto.getName(), auto);
-            }
-          } else if (lastAllianceState.equals(Optional.of(Alliance.Blue))) {
-            if (autoName.contains("Blue")) {
-              PathPlannerAuto auto = new PathPlannerAuto(autoName);
-              RobotContainer.autoChooser.addOption(auto.getName(), auto);
-            }
-          } else {
-            PathPlannerAuto auto = new PathPlannerAuto(autoName);
-            RobotContainer.autoChooser.addOption(auto.getName(), auto);
-          }
-        }
-        SmartDashboard.putData("Auto Chooser", RobotContainer.autoChooser);
-      }
-    }
+    m_robotContainer.disabledPeriodic();
   }
 
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
