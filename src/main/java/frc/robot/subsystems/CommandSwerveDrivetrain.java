@@ -99,9 +99,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   private final DriveRequestType m_driveRequestType = DriveRequestType.Velocity;
 
   // Heading controller PID gains (from example code)
-  private static final double HEADING_KP = 15.0;
+  private static final double HEADING_KP = 14.0;
   private static final double HEADING_KI = 0.1;
-  private static final double HEADING_KD = 1.0; // 1.0 Kd is prob the highest we should go
+  private static final double HEADING_KD = 0.5; // 1.0 Kd is prob the highest we should go
   private static final double HEADING_I_ZONE = Math.toRadians(10.0);
   private static final double HEADING_TOLERANCE_RAD = Math.toRadians(5.0);
   private final double HEADING_INTEGRATOR_MAX_RAD_PER_S =
@@ -114,6 +114,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   // Maximum translational speed while using field-centric facing angle (fraction of maxSpeed).
   // Limits how much shoot-on-the-move compensation is needed.
   private static final double FACING_ANGLE_MAX_SPEED_FRACTION = 0.5;
+  private static final double CONTROLLER_DEADBAND = 0.04;
 
   // Heading lock state for driver-assist toggle
   private boolean headingLockEnabled = false;
@@ -170,7 +171,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   // Field-centric facing angle request for hub tracking
   private final SwerveRequest.FieldCentricFacingAngle angleFacingRequest =
       new SwerveRequest.FieldCentricFacingAngle()
-          .withDeadband(maxSpeed.in(MetersPerSecond) * 0.01)
+          .withDeadband(maxSpeed.in(MetersPerSecond) * CONTROLLER_DEADBAND)
           .withRotationalDeadband(0.0)
           .withDriveRequestType(m_driveRequestType); // No deadband for rotation when facing point
 
@@ -178,8 +179,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
       CommandXboxController driveCont) { // field oriented drive command!
     SwerveRequest.FieldCentric drive =
         new SwerveRequest.FieldCentric() // creates a fieldcentric drive
-            .withDeadband(maxSpeed.in(MetersPerSecond) * 0.01)
-            .withRotationalDeadband(maxAngularVelocity.in(RadiansPerSecond) * 0.01)
+            .withDeadband(maxSpeed.in(MetersPerSecond) * CONTROLLER_DEADBAND)
+            .withRotationalDeadband(maxAngularVelocity.in(RadiansPerSecond) * CONTROLLER_DEADBAND)
             .withDriveRequestType(m_driveRequestType);
     double defenseModeRotationScaler = 1.25;
     double defenseModeTranslationScaler = 0.75;
@@ -232,8 +233,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
   private final SwerveRequest.FieldCentric FIELD_CENTRIC_DRIVE =
       new SwerveRequest.FieldCentric()
-          .withDeadband(maxSpeed.in(MetersPerSecond) * 0.01)
-          .withRotationalDeadband(maxAngularVelocity.in(RadiansPerSecond) * 0.01)
+          .withDeadband(maxSpeed.in(MetersPerSecond) * CONTROLLER_DEADBAND)
+          .withRotationalDeadband(maxAngularVelocity.in(RadiansPerSecond) * CONTROLLER_DEADBAND)
           .withDriveRequestType(m_driveRequestType);
 
   // defense mode command
