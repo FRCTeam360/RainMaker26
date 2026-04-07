@@ -380,27 +380,7 @@ public class RobotContainer {
             indexerToFlywheelSeconds);
     registerPathplannerCommand(
         "basic intake", superStructure.setIntakeStateCommand(IntakeWantedStates.INTAKING));
-    registerPathplannerCommand(
-        "shoot at hub",
-        Commands.waitSeconds(AUTO_SHOOT_TIMEOUT_SECONDS)
-            .raceWith(Commands.waitUntil(this::hopperEmptyAndNotShooting))
-            .deadlineFor(
-                superStructure
-                    .setStateCommand(SuperWantedStates.AUTO_CYCLE_SHOOTING)
-                    .alongWith(
-                        drivetrain.faceAngleWhileDrivingCommand(
-                            () -> 0,
-                            () -> 0,
-                            () -> {
-                              if (superStructure.getCurrentSuperState()
-                                  == SuperInternalStates.PASSING) {
-                                return passCalculator.calculateShot().targetHeading();
-                              }
-                              return hubShotCalculator.calculateShot().targetHeading();
-                            })))
-            .alongWith(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING))
-            .beforeStarting(this::resetHopperEmptyAndNotShootingTracker)
-            .andThen(superStructure.setStateCommand(SuperWantedStates.DEFAULT)));
+    registerPathplannerCommand("shoot at hub", shootAtHubCommand());
     registerPathplannerCommand(
         "stow intake", superStructure.setIntakeStateCommand(IntakeWantedStates.STOWED));
     registerPathplannerCommand(
@@ -427,7 +407,7 @@ public class RobotContainer {
 
     // Register BLine auto variants alongside PathPlanner autos for A/B testing
     BLineAutos bLineAutos =
-        new BLineAutos(drivetrain, superStructure, hubShotCalculator, passCalculator);
+        new BLineAutos(drivetrain, superStructure, this::shootAtHubCommand);
     bLineAutos.registerAutos(autoChooser);
 
     SmartDashboard.putData("Auto Chooser", autoChooser);
@@ -460,6 +440,29 @@ public class RobotContainer {
     Logger.recordOutput("Auto/ShootAtHub/NoLaunchForTimeout", noLaunchForTimeout);
     Logger.recordOutput("Auto/ShootAtHub/HopperEmpty", hopperEmpty);
     return hopperEmpty && noLaunchForTimeout;
+  }
+
+  /** Builds the "shoot at hub" command used by both PathPlanner and BLine autos. */
+  public Command shootAtHubCommand() {
+    return Commands.waitSeconds(AUTO_SHOOT_TIMEOUT_SECONDS)
+        .raceWith(Commands.waitUntil(this::hopperEmptyAndNotShooting))
+        .deadlineFor(
+            superStructure
+                .setStateCommand(SuperWantedStates.AUTO_CYCLE_SHOOTING)
+                .alongWith(
+                    drivetrain.faceAngleWhileDrivingCommand(
+                        () -> 0,
+                        () -> 0,
+                        () -> {
+                          if (superStructure.getCurrentSuperState()
+                              == SuperInternalStates.PASSING) {
+                            return passCalculator.calculateShot().targetHeading();
+                          }
+                          return hubShotCalculator.calculateShot().targetHeading();
+                        })))
+        .alongWith(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING))
+        .beforeStarting(this::resetHopperEmptyAndNotShootingTracker)
+        .andThen(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
   }
 
   /** Resets launch-tracking state before each auto shoot-at-hub command run. */
