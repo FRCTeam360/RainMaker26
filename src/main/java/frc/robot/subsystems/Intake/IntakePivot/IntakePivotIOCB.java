@@ -28,16 +28,16 @@ public class IntakePivotIOCB implements IntakePivotIO {
   private static final double GEAR_RATIO = 97.5;
   // 80-16 * 52-16 * 40-20 * 36-12
 
-  private static final double KP = 175.0;
+  private static final double KP = 300.0;
   private static final double KI = 0.0;
-  private static final double KD = 0.0;
+  private static final double KD = 1.0;
   private static final double KA = 0.0;
   private static final double KG = 0.15;
   private static final double KS = 0.35;
   private static final double KV = 0.0;
 
-  private static final double STATOR_CURRENT_LIMIT_AMPS = 120.0;
-  private static final double SUPPLY_CURRENT_LIMIT_AMPS = 30.0;
+  private static final double STATOR_CURRENT_LIMIT_AMPS = 100.0;
+  private static final double SUPPLY_CURRENT_LIMIT_AMPS = 25.0;
 
   private static final double MOTION_MAGIC_ACCELERATION_RPS2 = 3.0;
   private static final double MOTION_MAGIC_CRUISE_VELOCITY_RPS = 1.5;
