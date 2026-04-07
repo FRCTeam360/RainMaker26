@@ -328,7 +328,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
       DoubleSupplier velocityYSupplier,
       Supplier<Rotation2d> headingSupplier) {
     return new FunctionalCommand(
-        () -> angleFacingRequest.HeadingController.reset(),
+        () -> {
+          angleFacingRequest.HeadingController.reset();
+          angleFacingRequest.withTargetDirection(headingSupplier.get());
+        },
         () -> {
           double rawVelXMps = velocityXSupplier.getAsDouble();
           double rawVelYMps = velocityYSupplier.getAsDouble();
