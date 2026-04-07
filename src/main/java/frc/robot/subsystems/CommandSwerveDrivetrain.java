@@ -330,7 +330,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     return new FunctionalCommand(
         () -> {
           angleFacingRequest.HeadingController.reset();
-          angleFacingRequest.withTargetDirection(headingSupplier.get());
+          faceAngleWhileDriving(0, 0, headingSupplier.get());
         },
         () -> {
           double rawVelXMps = velocityXSupplier.getAsDouble();
@@ -790,6 +790,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     Logger.recordOutput(SUBSYSTEM_NAME + "TargetState", state.ModuleTargets);
     Logger.recordOutput(SUBSYSTEM_NAME + "Using Vision", hasVisionMeasurements);
     Logger.recordOutput(SUBSYSTEM_NAME + "Is Defense Mode", isDefenseMode);
+    Logger.recordOutput(
+        SUBSYSTEM_NAME + "HeadingSetpointDeg",
+        Math.toDegrees(angleFacingRequest.HeadingController.getSetpoint()));
 
     // Log whether vision measurements have been applied (useful for analysis)
     /*
