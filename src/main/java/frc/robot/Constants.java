@@ -446,21 +446,21 @@ public final class Constants {
       shotFlywheelSpeedMap.put(2.0, 1875.0);
       shotFlywheelSpeedMap.put(1.25, 1700.0);
 
-      passHoodAngleMap.put(12.0, 35.0);
+      passHoodAngleMap.put(12.0, 40.0);
       passHoodAngleMap.put(9.0, 40.0);
       passHoodAngleMap.put(1.0, 40.0);
       passHoodAngleMap.put(0.0, 40.0);
 
-      passFlywheelSpeedMap.put(12.0, 4500.0);
-      passFlywheelSpeedMap.put(9.0, 3750.0);
-      passFlywheelSpeedMap.put(7.0, 3000.0);
-      passFlywheelSpeedMap.put(5.0, 2200.0);
-      passFlywheelSpeedMap.put(4.0, 2000.0);
-      passFlywheelSpeedMap.put(3.0, 1700.0);
-      passFlywheelSpeedMap.put(2.5, 1500.0);
-      passFlywheelSpeedMap.put(2.0, 1500.0);
-      passFlywheelSpeedMap.put(1.0, 1500.0);
-      passFlywheelSpeedMap.put(0.0, 1500.0);
+      passFlywheelSpeedMap.put(12.0, 3500.0);
+      passFlywheelSpeedMap.put(9.0, 3500.0);
+      passFlywheelSpeedMap.put(7.0, 2800.0);
+      passFlywheelSpeedMap.put(5.0, 2100.0);
+      passFlywheelSpeedMap.put(4.0, 1900.0);
+      passFlywheelSpeedMap.put(3.0, 1600.0);
+      passFlywheelSpeedMap.put(2.5, 1400.0);
+      passFlywheelSpeedMap.put(2.0, 1400.0);
+      passFlywheelSpeedMap.put(1.0, 1400.0);
+      passFlywheelSpeedMap.put(0.0, 1400.0);
 
       timeOfFlightMap.put(0.0, 1.05);
       timeOfFlightMap.put(1.75, 1.05);
