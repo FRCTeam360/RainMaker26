@@ -330,7 +330,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     return new FunctionalCommand(
         () -> {
           angleFacingRequest.HeadingController.reset();
-          faceAngleWhileDriving(0, 0, headingSupplier.get());
+          angleFacingRequest.withTargetDirection(headingSupplier.get());
         },
         () -> {
           double rawVelXMps = velocityXSupplier.getAsDouble();
