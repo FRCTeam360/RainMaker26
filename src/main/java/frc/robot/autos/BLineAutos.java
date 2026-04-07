@@ -7,13 +7,12 @@ import frc.robot.lib.BLine.FollowPath;
 import frc.robot.lib.BLine.Path;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Intake.IntakeStateMachine.IntakeWantedStates;
-import frc.robot.subsystems.Shooter.ShotCalculator;
 import frc.robot.subsystems.SuperStructure;
-import frc.robot.subsystems.SuperStructure.SuperInternalStates;
 import frc.robot.subsystems.SuperStructure.SuperWantedStates;
 import frc.robot.utils.CommandLogger;
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * BLine-based autonomous routines. Composes paths from {@link BLinePaths} into full auto commands
@@ -23,27 +22,21 @@ public class BLineAutos {
 
   private final FollowPath.Builder pathBuilder;
   private final SuperStructure superStructure;
-  private final CommandSwerveDrivetrain drivetrain;
-  private final ShotCalculator hubShotCalculator;
-  private final ShotCalculator passCalculator;
+  private final Supplier<Command> shootAtHubSupplier;
 
   public record BLineAuto(String name, Command auto) {}
 
   /**
    * @param drivetrain the swerve drivetrain subsystem
    * @param superStructure the superstructure subsystem
-   * @param hubShotCalculator calculator for hub shots
-   * @param passCalculator calculator for pass shots
+   * @param shootAtHubSupplier supplier for the shared "shoot at hub" command
    */
   public BLineAutos(
       CommandSwerveDrivetrain drivetrain,
       SuperStructure superStructure,
-      ShotCalculator hubShotCalculator,
-      ShotCalculator passCalculator) {
-    this.drivetrain = drivetrain;
+      Supplier<Command> shootAtHubSupplier) {
     this.superStructure = superStructure;
-    this.hubShotCalculator = hubShotCalculator;
-    this.passCalculator = passCalculator;
+    this.shootAtHubSupplier = shootAtHubSupplier;
     this.pathBuilder = drivetrain.createBLinePathBuilder();
   }
 
@@ -73,42 +66,12 @@ public class BLineAutos {
         superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING), "agitate intake");
   }
 
-  /** The full "shoot at hub" command: 4.5s deadline with auto-cycle shooting + face-angle. */
+  /** The full "shoot at hub" command, shared with PathPlanner autos. */
   private Command shootAtHub() {
-    return loggedCommand(
-        Commands.waitSeconds(4.5)
-            .deadlineFor(
-                superStructure
-                    .setStateCommand(SuperWantedStates.AUTO_CYCLE_SHOOTING)
-                    .alongWith(
-                        drivetrain.faceAngleWhileDrivingCommand(
-                            () -> 0,
-                            () -> 0,
-                            () -> {
-                              if (superStructure.getCurrentSuperState()
-                                  == SuperInternalStates.PASSING) {
-                                return passCalculator.calculateShot().targetHeading();
-                              }
-                              return hubShotCalculator.calculateShot().targetHeading();
-                            })))
-            .alongWith(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING))
-            .andThen(superStructure.setStateCommand(SuperWantedStates.DEFAULT)),
-        "shoot at hub");
+    return shootAtHubSupplier.get();
   }
 
-  /** Shoot without timer — runs until interrupted. */
-  private Command shootWithoutTimer() {
-    return loggedCommand(
-        superStructure
-            .setStateCommand(SuperWantedStates.SHOOT_AT_HUB)
-            .alongWith(
-                drivetrain.faceAngleWhileDrivingCommand(
-                    () -> 0, () -> 0, () -> hubShotCalculator.calculateShot().targetHeading()))
-            .finallyDo(() -> superStructure.setWantedSuperState(SuperWantedStates.DEFAULT)),
-        "shoot without timer");
-  }
-
-  /** Shortcut: follow path with intake deployed after a short delay. */
+/** Shortcut: follow path with intake deployed after a short delay. */
   private Command pathWithIntake(Path path) {
     return followPath(path).deadlineFor(Commands.waitSeconds(0.05).andThen(basicIntake()));
   }
