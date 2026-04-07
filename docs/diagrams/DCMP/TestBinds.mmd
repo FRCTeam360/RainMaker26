@@ -1,0 +1,55 @@
+flowchart TD
+
+classDef input fill:#FFDB80,stroke:#FFF,color:#5E1C00,stroke-width:5px,font-size:30px;
+classDef action fill:#CCEDE4,stroke:#FFF,color:#384541,font-size:25px,stroke-width:3px;
+classDef output fill:#FFB67A,stroke:#FFF,color:#5E1C00,stroke-width:5px,font-size:25px;
+
+leftBumper[Left Bumper + Independent Mode]:::input
+    --> LEFTBUMPER_INTAKE[Set intake roller velocity 3000 RPM]:::output;
+
+rightBumper[Right Bumper + Independent Mode]:::input
+    --> RIGHTBUMPER_OUTTAKE[Set intake roller duty cycle -0.6]:::output;
+
+leftTrigger[Left Trigger + Independent Mode]:::input
+    --> LEFTTRIGGER_INDEXER[Set indexer duty cycle -0.2]:::output;
+
+rightTrigger[Right Trigger + Independent Mode]:::input
+    --> RIGHTTRIGGER_INDEXER[Set indexer duty cycle 0.2]:::output;
+
+aButton[A Button + Independent Mode]:::input
+    --> A_INTAKE_PIVOT[Set intake pivot position 96 deg]:::output;
+
+yButton[Y Button + Independent Mode]:::input
+    --> Y_INTAKE_PIVOT[Set intake pivot position 0 deg]:::output;
+
+xButton[X Button + Independent Mode]:::input
+    --> X_HOPPER[Set hopper roller duty cycle 0.2]:::output;
+
+bButton[B Button + Independent Mode]:::input
+    --> B_HOPPER[Set hopper roller duty cycle -0.2]:::output;
+
+startButton[Start Button + Independent Mode]:::input
+    --> START_FLYWHEEL[Set flywheel duty cycle 0.2]:::output;
+
+backButton[Back Button + Independent Mode]:::input
+    --> BACK_SYSTEMS_TEST[Run full systems test sequence]:::output
+
+%% BACK_SYSTEMS_TEST --> wait01[Wait 0.1 seconds]:::action
+%% wait01 --> intakePivotDeploy[Set intake pivot to 96 deg - 2 seconds]:::output
+%% intakePivotDeploy --> intakeRollerRPM[Set intake roller velocity 3000 RPM - 2 seconds]:::output
+%% intakeRollerRPM --> intakeRollerReverse[Set intake roller duty cycle -0.6 - 2 seconds]:::output
+%% intakeRollerReverse --> intakeRollerStop[Stop intake roller - 0.1 seconds]:::output
+%% intakeRollerStop --> indexerForward[Indexer duty cycle 0.2 - 2 seconds]:::output
+%% indexerForward --> indexerReverse[Indexer duty cycle -0.2 - 2 seconds]:::output
+%% indexerReverse --> indexerStop[Stop indexer - 0.1 seconds]:::output
+%% indexerStop --> hoodUp[Set hood position 40 deg - 2 seconds]:::output
+%% hoodUp --> hoodDown[Set hood position 0 deg - 2 seconds]:::output
+%% hoodDown --> kickerForward[Flywheel kicker duty cycle 0.2 - 2 seconds]:::output
+%% kickerForward --> kickerReverse[Flywheel kicker duty cycle -0.2 - 2 seconds]:::output
+%% kickerReverse --> kickerStop[Stop flywheel kicker - 0.1 seconds]:::output
+%% kickerStop --> hopperForward[Hopper roller duty cycle 0.2 - 2 seconds]:::output
+%% hopperForward --> hopperReverse[Hopper roller duty cycle -0.2 - 2 seconds]:::output
+%% hopperReverse --> hopperStop[Stop hopper roller - 0.1 seconds]:::output
+%% hopperStop --> flywheelForward[Flywheel duty cycle 0.2 - 2 seconds]:::output
+%% flywheelForward --> flywheelStop[Stop flywheel - 0.1 seconds]:::output
+%% flywheelStop --> intakePivotStow[Set intake pivot to 0 deg - 2 seconds]:::output

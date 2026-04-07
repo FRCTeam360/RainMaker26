@@ -1,0 +1,65 @@
+flowchart TD
+
+classDef input fill:#FFDB80,stroke:#FFF,color:#5E1C00,stroke-width:4px,font-size:18;
+classDef action fill:#CCEDE4,stroke:#FFF,color:#384541,stroke-width:2px;
+classDef decision fill:#A1CF99,stroke:#FFF,color:#41593E,stroke-width:3px;
+classDef output fill:#FFB67A,stroke:#FFF,color:#5E1C00,stroke-width:3px;
+
+RB[Right Bumper]:::input --> FS(Forced Shooting):::action --> SS(Shooting State):::action
+
+SS --> isForced{Forced Shooting?}:::decision
+isForced -->|Yes| FIX(Fixed Setpoints):::action --> SF(Shooter Firing):::action
+isForced -->|No| SAH(Shoot At Hub):::action --> IH(Internal Hub State):::action --> SSS(Shooter State Shooting):::action
+
+SSS --> canFire{Can Fire?}:::decision
+canFire -->|Yes| SF --> AK(Aiming + Kicking):::action
+canFire -->|No| ready{Subsystems Ready?}:::decision
+ready -->|Yes| SA(Shooter Aimed):::action --> KAL(Kick + Aim Loop):::action
+ready -->|No| PTF(Preparing To Fire):::action --> SSS
+
+IH --> firingState{Shooter Firing?}:::decision
+firingState -->|Yes| IHA(Index + Hopper Active):::action --> AK
+firingState -->|No| IOHU[Indexer Off + Hopper Unjamming]:::output
+
+AK --> flywheel{Flywheel At Setpoint?}:::decision
+flywheel -->|Yes| HV[Hold Velocity]:::output
+flywheel -->|No| AV[Adjust Velocity]:::output
+
+AK --> SHA[Set Hood Angle]:::output
+
+AK --> kicker{Kicker At Setpoint?}:::decision
+kicker -->|Yes| HKV[Hold Kicker Velocity]:::output
+kicker -->|No| AKV[Adjust Kicker Velocity]:::output
+
+KAL --> AK
+
+RT[Right Trigger]:::input --> AUTO(Auto Cycle Shooting + Agitate):::action
+
+AUTO --> hopper{Hopper Full?}:::decision
+hopper -->|Yes| LA(Low Agitation):::action --> agitate{At Setpoint?}:::decision
+hopper -->|No| HA(High Agitation):::action --> agitate
+
+agitate -->|No| CA[Continue Agitating]:::output --> agitate
+agitate -->|Yes| TS[Toggle Setpoint]:::output
+
+AUTO --> target{Target?}:::decision
+target -->|Hub| SAH
+target -->|Outpost| SAO(Shoot At Outpost):::action --> PS(Passing State):::action --> firingState
+
+B[B Button]:::input --> FTS(Forced Trench Shot):::action --> SS
+
+LB[Left Bumper]:::input --> INT(Intaking):::action
+INT --> RI(Roller In):::action ----> RAS[Roller At Setpoint]:::output
+INT --> PD(Pivot Deployed):::action --> IRPM(Set Intake RPM):::action
+
+LT[Left Trigger]:::input ----> IA(Intake Agitating):::action --> agitate
+
+A[A Button]:::input --> UNJ(Unjamming):::action
+UNJ ----> IRV[Index Reverse]:::output
+UNJ --> HRV[Hopper Reverse]:::output
+UNJ ---> SR(Shooter Reverse):::action
+SR --> FI(Flywheel Idle):::action --> FS2[Flywheel Stopped]:::output
+SR --> HI(Hood Idle):::action --> HS[Hood Stopped]:::output
+SR --> KR(Kicker Reverse):::action --> KRO[Kicker Reverse Output]:::output
+
+X[X Button]:::input --> IR(Intake Reverse):::action --> RRR[Roller Reverse RPM]:::output
