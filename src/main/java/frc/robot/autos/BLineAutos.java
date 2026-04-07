@@ -5,7 +5,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.lib.BLine.FollowPath;
 import frc.robot.lib.BLine.Path;
-import java.util.List;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Intake.IntakeStateMachine.IntakeWantedStates;
 import frc.robot.subsystems.Shooter.ShotCalculator;
@@ -13,6 +12,7 @@ import frc.robot.subsystems.SuperStructure;
 import frc.robot.subsystems.SuperStructure.SuperInternalStates;
 import frc.robot.subsystems.SuperStructure.SuperWantedStates;
 import frc.robot.utils.CommandLogger;
+import java.util.List;
 
 /**
  * BLine-based autonomous routines. Composes paths from {@link BLinePaths} into full auto commands
@@ -131,33 +131,22 @@ public class BLineAutos {
   // Auto routine compositions
   // ─────────────────────────────────────────────────────────────────────────────
 
-  /** Builds all BLine auto routines. */
+  private BLineAuto buildTwoSwipeAuto(String autoName) {
+    return new BLineAuto(
+        autoName,
+        pathWithImmediateIntake(new Path(autoName + " First Swipe"))
+            .andThen(shootAtHub())
+            .andThen(pathWithImmediateIntake(new Path(autoName + " Second Swipe")))
+            .andThen(shootAtHub()));
+  }
+
+  /** Builds all BLine auto routines using generated path variants. */
   private List<BLineAuto> buildAutos() {
     return List.of(
-        new BLineAuto(
-            "[BLine] Red Right Aggressive",
-            pathWithImmediateIntake(new Path("Red Right Aggressive First Swipe"))
-                .andThen(shootAtHub())
-                .andThen(pathWithImmediateIntake(new Path("Red Right Aggressive Second Swipe")))
-                .andThen(shootAtHub())),
-        new BLineAuto(
-            "[BLine] Red Left Aggressive",
-            pathWithImmediateIntake(new Path("Red Left Aggressive First Swipe"))
-                .andThen(shootAtHub())
-                .andThen(pathWithImmediateIntake(new Path("Red Left Aggressive Second Swipe")))
-                .andThen(shootAtHub())),
-        new BLineAuto(
-            "[BLine] Blue Right Aggressive",
-            pathWithImmediateIntake(new Path("Blue Right Aggressive First Swipe"))
-                .andThen(shootAtHub())
-                .andThen(pathWithImmediateIntake(new Path("Blue Right Aggressive Second Swipe")))
-                .andThen(shootAtHub())),
-        new BLineAuto(
-            "[BLine] Blue Left Aggressive",
-            pathWithImmediateIntake(new Path("Blue Left Aggressive First Swipe"))
-                .andThen(shootAtHub())
-                .andThen(pathWithImmediateIntake(new Path("Blue Left Aggressive Second Swipe")))
-                .andThen(shootAtHub())));
+        buildTwoSwipeAuto("Blue Right Aggressive"),
+        buildTwoSwipeAuto("MIRRORED Blue Left Aggressive"),
+        buildTwoSwipeAuto("FLIPPED Red Right Aggressive"),
+        buildTwoSwipeAuto("FLIPPED MIRRORED Red Left Aggressive"));
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
@@ -172,7 +161,7 @@ public class BLineAutos {
    */
   public void registerAutos(SendableChooser<Command> chooser) {
     for (BLineAuto auto : buildAutos()) {
-      chooser.addOption(auto.name, auto.auto);
+      chooser.addOption("[BLine] " + auto.name, auto.auto);
     }
   }
 }
