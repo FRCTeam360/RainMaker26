@@ -504,18 +504,18 @@ public class RobotContainer {
     driverCont.x().whileTrue(superStructure.setIntakeStateCommand(IntakeWantedStates.REVERSING));
     // TODO: check that this works with just an on false because this will set the intake to idle
     // constantly and that's probably not what we want but it did work on the field
-    driverCont.x().whileFalse(superStructure.setIntakeStateCommand(IntakeWantedStates.IDLE));
+    driverCont.x().onFalse(superStructure.setIntakeStateCommand(IntakeWantedStates.IDLE));
 
     // Left trigger held: agitate. Release: back to intaking.
     if (Constants.getRobotType() == RobotType.WOODBOT) {
       Trigger intakeTrigger = driverCont.leftTrigger().and(isSuperstructureMode);
       intakeTrigger.onTrue(superStructure.setIntakeStateCommand(IntakeWantedStates.INTAKING));
-      intakeTrigger.whileFalse(superStructure.setIntakeStateCommand(IntakeWantedStates.DEPLOYED));
+      intakeTrigger.onFalse(superStructure.setIntakeStateCommand(IntakeWantedStates.DEPLOYED));
 
     } else {
       Trigger intakeTrigger = driverCont.leftBumper().and(isSuperstructureMode);
       intakeTrigger.onTrue(superStructure.setIntakeStateCommand(IntakeWantedStates.INTAKING));
-      intakeTrigger.whileFalse(superStructure.setIntakeStateCommand(IntakeWantedStates.IDLE));
+      intakeTrigger.onFalse(superStructure.setIntakeStateCommand(IntakeWantedStates.IDLE));
 
       Trigger agitateTrigger = driverCont.leftTrigger().and(isSuperstructureMode);
       agitateTrigger.onTrue(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING));
