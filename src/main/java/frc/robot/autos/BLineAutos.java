@@ -150,10 +150,10 @@ public class BLineAutos {
   /** Builds all BLine auto routines using generated path variants. */
   private List<BLineAuto> buildAutos() {
     return List.of(
-        buildAutoOrNone("Blue Right Aggressive", this::buildTwoSwipeAuto),
-        buildAutoOrNone("MIRRORED Blue Left Aggressive", this::buildTwoSwipeAuto),
-        buildAutoOrNone("FLIPPED Red Right Aggressive", this::buildTwoSwipeAuto),
-        buildAutoOrNone("FLIPPED MIRRORED Red Left Aggressive", this::buildTwoSwipeAuto));
+        buildAutoOrNone("FLIPPED Blue Right Aggressive", this::buildTwoSwipeAuto),
+        buildAutoOrNone("FLIPPED MIRRORED Blue Left Aggressive", this::buildTwoSwipeAuto),
+        buildAutoOrNone("MASTER Red Right Aggressive", this::buildTwoSwipeAuto),
+        buildAutoOrNone("MIRRORED Red Left Aggressive", this::buildTwoSwipeAuto));
   }
 
   // ─────────────────────────────────────────────────────────────────────────────

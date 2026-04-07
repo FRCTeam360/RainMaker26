@@ -19,7 +19,7 @@ Name transforms swap alliance/side tags to match the existing PathPlanner
 conventions (Red<->Blue, Left<->Right).
 
 Usage:
-  python scripts/generate_bline_variants.py                          # all paths in autos/paths/
+  python scripts/generate_bline_variants.py                          # all MASTER* paths in autos/paths/
   python scripts/generate_bline_variants.py "Blue Right Aggressive first swipe"  # single path
   python scripts/generate_bline_variants.py --dry-run                # preview without writing
 
@@ -31,6 +31,7 @@ import copy
 import json
 import math
 import os
+import re
 import sys
 from pathlib import Path
 
@@ -91,19 +92,25 @@ def swap_side_in_name(name):
     return name
 
 
+def strip_master(name):
+    """Remove 'MASTER' token (case insensitive) and clean extra spaces."""
+    name = re.sub(r"(?i)\bmaster\b", "", name)
+    return " ".join(name.split())
+
+
 def make_mirrored_name(name):
     """MIRRORED prefix + swap Left<->Right."""
-    return "MIRRORED " + swap_side_in_name(name)
+    return "MIRRORED " + strip_master(swap_side_in_name(name))
 
 
 def make_flipped_name(name):
     """FLIPPED prefix + swap Red<->Blue."""
-    return "FLIPPED " + swap_alliance_in_name(name)
+    return "FLIPPED " + strip_master(swap_alliance_in_name(name))
 
 
 def make_flipped_mirrored_name(name):
     """FLIPPED MIRRORED prefix + swap both alliance and side."""
-    return "FLIPPED MIRRORED " + swap_alliance_in_name(swap_side_in_name(name))
+    return "FLIPPED MIRRORED " + strip_master(swap_alliance_in_name(swap_side_in_name(name)))
 
 
 # --- Coordinate transforms ---
@@ -239,11 +246,11 @@ def is_generated_name(name):
 
 
 def discover_master_paths(paths_dir):
-    """Find all non-generated .json path files in the directory."""
+    """Find all .json path files whose names start with 'MASTER'."""
     masters = []
     for f in sorted(paths_dir.glob("*.json")):
         name = f.stem
-        if not is_generated_name(name):
+        if name.startswith("MASTER"):
             masters.append(name)
     return masters
 
@@ -257,7 +264,7 @@ def main():
         nargs="?",
         default=None,
         help="Name of the path to transform (without .json extension). "
-             "If omitted, generates variants for all non-generated paths.",
+             "If omitted, generates variants for all paths prefixed with MASTER.",
     )
     parser.add_argument(
         "--dry-run",
