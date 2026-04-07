@@ -25,6 +25,8 @@ public class BLineAutos {
   private final ShotCalculator hubShotCalculator;
   private final ShotCalculator passCalculator;
 
+  public record BLineAuto(String name, Command auto) {}
+
   /**
    * @param drivetrain the swerve drivetrain subsystem
    * @param superStructure the superstructure subsystem
@@ -128,149 +130,13 @@ public class BLineAutos {
   // Auto routine compositions
   // ─────────────────────────────────────────────────────────────────────────────
 
-  /** MASTER Red Right Middle Standard — the baseline 2-cycle auto. */
-  public Command masterRedRightMiddleStandard() {
-    return Commands.sequence(
-        Commands.waitSeconds(1.0),
-        defaultCmd(),
-        pathWithIntake(BLinePaths.noStopRightRedMiddle1()),
-        shootAtHub(),
-        pathWithImmediateIntake(BLinePaths.noStopRightRedMiddle2()),
-        shootAtHub());
-  }
-
-  /** MASTER Red Right Middle Hawk — aggressive 2-cycle. */
-  public Command masterRedRightMiddleHawk() {
-    return Commands.sequence(
-        defaultCmd(),
-        pathWithIntake(BLinePaths.rightRedMiddleHawk1()),
-        shootAtHub(),
-        pathWithImmediateIntake(BLinePaths.rightRedMiddleHawk2()),
-        shootAtHub());
-  }
-
-  /** MASTER Red Right Middle Hook — standard swipe 2-cycle. */
-  public Command masterRedRightMiddleHook() {
-    return Commands.sequence(
-        defaultCmd(),
-        pathWithIntake(BLinePaths.standardSwipe1()),
-        shootAtHub(),
-        pathWithImmediateIntake(BLinePaths.standardSwipe2()),
-        shootAtHub());
-  }
-
-  /** MASTER Red Right Depot — depot-side auto with shoot-without-timer. */
-  public Command masterRedRightDepot() {
-    return Commands.sequence(
-        defaultCmd(),
-        followPath(BLinePaths.depot1()),
-        Commands.waitSeconds(3.0).deadlineFor(shootWithoutTimer()),
-        pathWithImmediateIntake(BLinePaths.depot2()),
-        followPath(BLinePaths.depot3()),
-        Commands.waitSeconds(5.0).deadlineFor(shootWithoutTimer()));
-  }
-
-  /** MASTER Red Right Trench Middle — complex multi-path auto. */
-  public Command masterRedRightTrenchMiddle() {
-    return Commands.sequence(
-        defaultCmd(),
-        followPath(BLinePaths.redMiddle1())
-            .deadlineFor(Commands.waitSeconds(0.1).andThen(basicIntake()).alongWith(defaultCmd())),
-        pathWithImmediateIntake(BLinePaths.redMiddle2()),
-        pathWithImmediateIntake(BLinePaths.redMiddle3()),
-        shootAtHub(),
-        pathWithImmediateIntake(BLinePaths.redMiddle5()),
-        pathWithImmediateIntake(BLinePaths.redMiddle6()),
-        pathWithImmediateIntake(BLinePaths.redMiddle7()),
-        shootAtHub());
-  }
-
-  // ── MIRRORED (Red Left) auto routines ──
-
-  public Command mirroredRedLeftMiddleStandard() {
-    return Commands.sequence(
-        Commands.waitSeconds(1.0),
-        defaultCmd(),
-        pathWithIntake(BLinePaths.mirroredNoStopLeftRedMiddle1()),
-        shootAtHub(),
-        pathWithImmediateIntake(BLinePaths.mirroredNoStopLeftRedMiddle2()),
-        shootAtHub());
-  }
-
-  public Command mirroredRedLeftMiddleHawk() {
-    return Commands.sequence(
-        defaultCmd(),
-        pathWithIntake(BLinePaths.mirroredLeftRedMiddleHawk1()),
-        shootAtHub(),
-        pathWithImmediateIntake(BLinePaths.mirroredLeftRedMiddleHawk2()),
-        shootAtHub());
-  }
-
-  public Command mirroredRedLeftMiddleHook() {
-    return Commands.sequence(
-        defaultCmd(),
-        pathWithIntake(BLinePaths.mirroredStandardSwipe1()),
-        shootAtHub(),
-        pathWithImmediateIntake(BLinePaths.mirroredStandardSwipe2()),
-        shootAtHub());
-  }
-
-  // ── FLIPPED (Blue Right) auto routines ──
-
-  public Command flippedBlueRightMiddleStandard() {
-    return Commands.sequence(
-        defaultCmd(),
-        pathWithIntake(BLinePaths.flippedNoStopRightBlueMiddle1()),
-        shootAtHub(),
-        pathWithImmediateIntake(BLinePaths.flippedNoStopRightBlueMiddle2()),
-        shootAtHub());
-  }
-
-  public Command flippedBlueRightMiddleHawk() {
-    return Commands.sequence(
-        defaultCmd(),
-        pathWithIntake(BLinePaths.flippedRightBlueMiddleHawk1()),
-        shootAtHub(),
-        pathWithImmediateIntake(BLinePaths.flippedRightBlueMiddleHawk2()),
-        shootAtHub());
-  }
-
-  public Command flippedBlueRightMiddleHook() {
-    return Commands.sequence(
-        defaultCmd(),
-        pathWithIntake(BLinePaths.flippedStandardSwipe1()),
-        shootAtHub(),
-        pathWithImmediateIntake(BLinePaths.flippedStandardSwipe2()),
-        shootAtHub());
-  }
-
-  // ── FLIPPED MIRRORED (Blue Left) auto routines ──
-
-  public Command flippedMirroredBlueLeftMiddleStandard() {
-    return Commands.sequence(
-        defaultCmd(),
-        pathWithIntake(BLinePaths.flippedMirroredNoStopLeftBlueMiddle1()),
-        shootAtHub(),
-        pathWithImmediateIntake(BLinePaths.flippedMirroredNoStopLeftBlueMiddle2()),
-        shootAtHub());
-  }
-
-  public Command flippedMirroredBlueLeftMiddleHawk() {
-    return Commands.sequence(
-        defaultCmd(),
-        pathWithIntake(BLinePaths.flippedMirroredLeftBlueMiddleHawk1()),
-        shootAtHub(),
-        pathWithImmediateIntake(BLinePaths.flippedMirroredLeftBlueMiddleHawk2()),
-        shootAtHub());
-  }
-
-  public Command flippedMirroredBlueLeftMiddleHook() {
-    return Commands.sequence(
-        defaultCmd(),
-        pathWithIntake(BLinePaths.flippedMirroredStandardSwipe1()),
-        shootAtHub(),
-        pathWithImmediateIntake(BLinePaths.flippedMirroredStandardSwipe2()),
-        shootAtHub());
+  public BLineAuto blueRightAggressive() {
+    return new BLineAuto(
+        "[BLine] Blue Right Aggressive",
+        pathWithImmediateIntake(new Path("Blue Right Aggressive first swipe"))
+            .andThen(shootAtHub())
+            .andThen(pathWithImmediateIntake(new Path("Blue Right Aggressive Second Swipe")))
+            .andThen(shootAtHub()));
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
@@ -284,47 +150,10 @@ public class BLineAutos {
    * @param chooser the auto chooser to add options to
    */
   public void registerAutos(SendableChooser<Command> chooser) {
-    // MASTER (Red Right)
-    chooser.addOption("[BLine] MASTER Red Right Middle Standard", masterRedRightMiddleStandard());
-    chooser.addOption("[BLine] MASTER Red Right Middle Hawk", masterRedRightMiddleHawk());
-    chooser.addOption("[BLine] MASTER Red Right Middle Hook", masterRedRightMiddleHook());
-    chooser.addOption("[BLine] MASTER Red Right Depot", masterRedRightDepot());
-    chooser.addOption("[BLine] MASTER Red Right Trench Middle", masterRedRightTrenchMiddle());
-
-    // MIRRORED (Red Left)
-    chooser.addOption("[BLine] MIRRORED Red Left Middle Standard", mirroredRedLeftMiddleStandard());
-    chooser.addOption("[BLine] MIRRORED Red Left Middle Hawk", mirroredRedLeftMiddleHawk());
-    chooser.addOption("[BLine] MIRRORED Red Left Middle Hook", mirroredRedLeftMiddleHook());
-
-    // FLIPPED (Blue Right)
-    chooser.addOption(
-        "[BLine] FLIPPED Blue Right Middle Standard", flippedBlueRightMiddleStandard());
-    chooser.addOption("[BLine] FLIPPED Blue Right Middle Hawk", flippedBlueRightMiddleHawk());
-    chooser.addOption("[BLine] FLIPPED Blue Right Middle Hook", flippedBlueRightMiddleHook());
-
-    // FLIPPED MIRRORED (Blue Left)
-    chooser.addOption(
-        "[BLine] FLIPPED MIRRORED Blue Left Middle Standard",
-        flippedMirroredBlueLeftMiddleStandard());
-    chooser.addOption(
-        "[BLine] FLIPPED MIRRORED Blue Left Middle Hawk", flippedMirroredBlueLeftMiddleHawk());
-    chooser.addOption(
-        "[BLine] FLIPPED MIRRORED Blue Left Middle Hook", flippedMirroredBlueLeftMiddleHook());
-
     // GUI-designed paths (single path per auto for testing)
-    chooser.addOption("[BLine] Drive Test", followPath(new Path("drive test")));
+    BLineAuto blueRightAggressive = blueRightAggressive();
     chooser.addOption(
-        "[BLine] Blue Right Aggressive",
-        pathWithImmediateIntake(new Path("Blue Right Aggressive first swipe"))
-            .andThen(shootAtHub())
-            .andThen(pathWithImmediateIntake(new Path("Blue Right Aggressive Second Swipe")))
-            .andThen(shootAtHub()));
-
-    chooser.addOption(
-        "[BLine] Red Right Aggressive Swipe",
-        pathWithIntake(flippedPath("Blue Right Aggressive first swipe"))
-            .andThen(shootAtHub())
-            .andThen(pathWithImmediateIntake(flippedPath("Blue Right Aggressive Second Swipe")))
-            .andThen(shootAtHub()));
+      blueRightAggressive.name,
+      blueRightAggressive.auto);
   }
 }
