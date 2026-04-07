@@ -12,8 +12,8 @@ Blue Right), produces four variants — one for each corner of the field:
 
 Transform math (matches BLinePaths.java):
   Mirror:  new_x = old_x,                new_y = field_width - old_y,  new_rot = -old_rot
-  Flip:    new_x = field_length - old_x,  new_y = old_y,               new_rot = old_rot + pi
-  Both:    new_x = field_length - old_x,  new_y = field_width - old_y,  new_rot = -(old_rot + pi)
+  Flip:    new_x = field_length - old_x,  new_y = old_y,               new_rot = pi - old_rot
+  Both:    new_x = field_length - old_x,  new_y = field_width - old_y,  new_rot = old_rot - pi
 
 Name transforms swap alliance/side tags to match the existing PathPlanner
 conventions (Red<->Blue, Left<->Right).
@@ -133,8 +133,8 @@ def flip_xy(x, y, field_length):
 
 
 def flip_rotation(rot_rad):
-    """Flip rotation (add pi)."""
-    return wrap_rotation_rad(rot_rad + math.pi)
+    """Flip rotation (reflection across vertical axis: pi - rot)."""
+    return wrap_rotation_rad(math.pi - rot_rad)
 
 
 def flip_mirror_xy(x, y, field_length, field_width):
@@ -143,8 +143,8 @@ def flip_mirror_xy(x, y, field_length, field_width):
 
 
 def flip_mirror_rotation(rot_rad):
-    """Both flip and mirror rotation: negate(rot + pi) = -rot - pi."""
-    return wrap_rotation_rad(-rot_rad - math.pi)
+    """Both flip and mirror rotation: negate(pi - rot) = rot - pi."""
+    return wrap_rotation_rad(rot_rad - math.pi)
 
 
 # --- Path element transforms ---

@@ -37,9 +37,9 @@ final class BLinePaths {
     return new Translation2d(FIELD_LENGTH_METERS - t.getX(), t.getY());
   }
 
-  /** Flips a rotation by 180 degrees (Red → Blue). */
+  /** Reflects a rotation across the vertical axis (Red → Blue): π - rot. */
   static Rotation2d flipRotation(Rotation2d r) {
-    return r.rotateBy(Rotation2d.k180deg);
+    return Rotation2d.k180deg.minus(r);
   }
 
   /** Applies both flip and mirror (Red Right → Blue Left). */

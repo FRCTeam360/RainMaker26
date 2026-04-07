@@ -8,7 +8,7 @@
         "intermediate_handoff_radius_meters": 0.1
       },
       "rotation_target": {
-        "rotation_radians": -0.733038285837619,
+        "rotation_radians": 0.7330382858376185,
         "profiled_rotation": true
       }
     },
@@ -25,7 +25,7 @@
     },
     {
       "type": "rotation",
-      "rotation_radians": 3.1222764733515547,
+      "rotation_radians": -3.1222764733515547,
       "t_ratio": 0.3549689813951283,
       "profiled_rotation": true
     },
@@ -37,7 +37,7 @@
         "intermediate_handoff_radius_meters": 0.25
       },
       "rotation_target": {
-        "rotation_radians": 3.0892327760299634,
+        "rotation_radians": -3.0892327760299634,
         "profiled_rotation": true
       }
     },
@@ -55,13 +55,13 @@
     },
     {
       "type": "rotation",
-      "rotation_radians": 1.3962634015954638,
+      "rotation_radians": -1.3962634015954636,
       "t_ratio": 0.2503161563016596,
       "profiled_rotation": false
     },
     {
       "type": "rotation",
-      "rotation_radians": 1.5707963267948966,
+      "rotation_radians": -1.5707963267948966,
       "t_ratio": 0.9036693358897044,
       "profiled_rotation": true
     },
@@ -85,7 +85,7 @@
     },
     {
       "type": "rotation",
-      "rotation_radians": -1.48352986419518,
+      "rotation_radians": 1.4835298641951802,
       "t_ratio": 0.3357100830815222,
       "profiled_rotation": true
     },
@@ -97,7 +97,7 @@
     },
     {
       "type": "rotation",
-      "rotation_radians": 0.17453292519943275,
+      "rotation_radians": -0.17453292519943275,
       "t_ratio": 0.29101996798808294,
       "profiled_rotation": false
     },
@@ -127,7 +127,7 @@
         "intermediate_handoff_radius_meters": 0.1
       },
       "rotation_target": {
-        "rotation_radians": -0.733038285837619,
+        "rotation_radians": 0.7330382858376185,
         "profiled_rotation": true
       }
     }
