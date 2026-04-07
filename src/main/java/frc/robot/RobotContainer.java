@@ -575,7 +575,29 @@ public class RobotContainer {
     driverCont.b().and(isIndependentMode).whileTrue(hopperRoller.setDutyCycleCommand(-0.2));
 
     driverCont.start().and(isIndependentMode).whileTrue(flywheel.setDutyCycleCommand(0.2));
-    driverCont.back().and(isIndependentMode).whileTrue(hood.zero());
+    driverCont.back().and(isIndependentMode).onTrue(runSystemsTest());
+  }
+
+  Command runSystemsTest() {
+    return Commands.waitSeconds(2.0)
+        .deadlineFor(intakeRoller.setVelocityCommand(3000.0))
+        .andThen(Commands.waitSeconds(2.0).deadlineFor(intakeRoller.setDutyCycleCommand(-0.6)))
+        .andThen(intakeRoller.setDutyCycleCommand(0))
+        .andThen(Commands.waitSeconds(2.0).deadlineFor(indexer.setDutyCycleCommand(0.2)))
+        .andThen(Commands.waitSeconds(2.0).deadlineFor(indexer.setDutyCycleCommand(-0.2)))
+        .andThen(indexer.setDutyCycleCommand(0))
+        .andThen(Commands.waitSeconds(2.0).deadlineFor(hood.setPositionCommand(40.0)))
+        .andThen(Commands.waitSeconds(2.0).deadlineFor(hood.setPositionCommand(0.0)))
+        .andThen(Commands.waitSeconds(2.0).deadlineFor(flywheelKicker.setDutyCycleCommand(0.2)))
+        .andThen(Commands.waitSeconds(2.0).deadlineFor(flywheelKicker.setDutyCycleCommand(-0.2)))
+        .andThen(flywheelKicker.setDutyCycleCommand(0))
+        .andThen(Commands.waitSeconds(2.0).deadlineFor(intakePivot.setPositionCommand(() -> 96.0)))
+        .andThen(Commands.waitSeconds(2.0).deadlineFor(intakePivot.setPositionCommand(() -> 0.0)))
+        .andThen(Commands.waitSeconds(2.0).deadlineFor(hopperRoller.setDutyCycleCommand(0.2)))
+        .andThen(Commands.waitSeconds(2.0).deadlineFor(hopperRoller.setDutyCycleCommand(-0.2)))
+        .andThen(hopperRoller.setDutyCycleCommand(0))
+        .andThen(Commands.waitSeconds(2.0).deadlineFor(flywheel.setDutyCycleCommand(0.2)))
+        .andThen(flywheel.setDutyCycleCommand(0));
   }
 
   void configureHoodTestBindings(BooleanSupplier isIndependentMode) {
