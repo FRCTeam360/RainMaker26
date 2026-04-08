@@ -82,6 +82,7 @@ import frc.robot.subsystems.Vision.VisionIOLimelight3G;
 import frc.robot.subsystems.Vision.VisionIOLimelight4;
 import frc.robot.subsystems.Vision.VisionIOLimelightBase;
 import frc.robot.subsystems.Vision.VisionIOPhotonSim;
+import frc.robot.commands.XOutWhileAligningCommand;
 import frc.robot.utils.AllianceFlipUtil;
 import frc.robot.utils.CommandLogger;
 import frc.robot.utils.FieldConstants;
@@ -120,6 +121,7 @@ public class RobotContainer {
 
   private ShotCalculator hubShotCalculator;
   private ShotCalculator passCalculator;
+  private XOutWhileAligningCommand autoCycleDriveCommand;
 
   // State for hopperEmptyAndNotShooting() — tracks last launch to detect shooting stop.
   private long hopperStalledLastLaunchCount = 0;
@@ -360,6 +362,17 @@ public class RobotContainer {
                     AllianceFlipUtil.apply(FieldConstants.LeftBump.passingPoint)),
             drivetrain::getCommandedVelocity,
             robotPassingInfo);
+    autoCycleDriveCommand =
+        new XOutWhileAligningCommand(
+            drivetrain,
+            driverCont,
+            () -> {
+              if (superStructure.getCurrentSuperState() == SuperInternalStates.PASSING) {
+                return passCalculator.calculateShot().targetHeading();
+              }
+              return hubShotCalculator.calculateShot().targetHeading();
+            });
+
     // Configure the trigger bindings
 
     superStructure =
@@ -514,16 +527,10 @@ public class RobotContainer {
     autoCycleTrigger.whileTrue(
         superStructure
             .setStateCommand(SuperWantedStates.AUTO_CYCLE_SHOOTING)
-            .alongWith(
-                drivetrain.faceAngleWhileDrivingCommand(
-                    driverCont,
-                    () -> {
-                      if (superStructure.getCurrentSuperState() == SuperInternalStates.PASSING) {
-                        return passCalculator.calculateShot().targetHeading();
-                      }
-                      return hubShotCalculator.calculateShot().targetHeading();
-                    }))
+            .alongWith(autoCycleDriveCommand)
             .alongWith(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING)));
+    driverCont.leftStick().and(isSuperstructureMode).onTrue(
+        Commands.runOnce(autoCycleDriveCommand::toggleForceAngle));
     autoCycleTrigger.onFalse(
         superStructure
             .setStateCommand(SuperWantedStates.DEFAULT)
