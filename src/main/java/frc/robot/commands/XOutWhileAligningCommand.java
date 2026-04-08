@@ -38,10 +38,10 @@ public class XOutWhileAligningCommand extends Command {
   private static final double EXIT_HEADING_TOLERANCE_RAD = Math.toRadians(3.0);
 
   /** Maximum measured angular velocity to allow entry into X_OUT (deg/s). */
-  private static final double ENTRY_ANGULAR_VELOCITY_TOLERANCE_DPS = 5.0;
+  private static final double ENTRY_ANGULAR_VELOCITY_TOLERANCE_DPS = 10.0;
 
   /** Maximum measured translational speed to allow entry into X_OUT (m/s). */
-  private static final double ENTRY_LINEAR_VELOCITY_TOLERANCE_MPS = 0.05;
+  private static final double ENTRY_LINEAR_VELOCITY_TOLERANCE_MPS = 0.5;
 
   /** Time the entry condition must be continuously true before transitioning to X_OUT (seconds). */
   private static final double ENTRY_DEBOUNCE_SECONDS = 0.1;
