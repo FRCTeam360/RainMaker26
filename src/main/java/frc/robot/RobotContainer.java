@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.RobotType;
 import frc.robot.autos.BLineAutos;
+import frc.robot.commands.XOutWhileAligningCommand;
 import frc.robot.generated.CompBotDrivetrain;
 import frc.robot.generated.PracticeBotDrivetrain;
 import frc.robot.generated.WoodBotDrivetrain;
@@ -82,7 +83,6 @@ import frc.robot.subsystems.Vision.VisionIOLimelight3G;
 import frc.robot.subsystems.Vision.VisionIOLimelight4;
 import frc.robot.subsystems.Vision.VisionIOLimelightBase;
 import frc.robot.subsystems.Vision.VisionIOPhotonSim;
-import frc.robot.commands.XOutWhileAligningCommand;
 import frc.robot.utils.AllianceFlipUtil;
 import frc.robot.utils.CommandLogger;
 import frc.robot.utils.FieldConstants;
@@ -529,8 +529,10 @@ public class RobotContainer {
             .setStateCommand(SuperWantedStates.AUTO_CYCLE_SHOOTING)
             .alongWith(autoCycleDriveCommand)
             .alongWith(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING)));
-    driverCont.leftStick().and(isSuperstructureMode).onTrue(
-        Commands.runOnce(autoCycleDriveCommand::toggleOverrideXOut));
+    driverCont
+        .leftStick()
+        .and(isSuperstructureMode)
+        .onTrue(Commands.runOnce(autoCycleDriveCommand::toggleOverrideXOut));
     autoCycleTrigger.onFalse(
         superStructure
             .setStateCommand(SuperWantedStates.DEFAULT)

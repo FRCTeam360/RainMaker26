@@ -2,11 +2,10 @@ package frc.robot.commands;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
-
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -29,7 +28,7 @@ public class XOutWhileAligningCommand extends Command {
   private static final String LOG_PREFIX = "Swerve/XOutAligning/";
 
   /** Minimum commanded velocity (fraction of max speed) to count as driver input. */
-  private static final double DRIVER_INPUT_THRESHOLD = 0.05;
+  private static final double DRIVER_INPUT_THRESHOLD = 0.15;
 
   /** Heading tolerance required to enter X_OUT (tight). */
   private static final double ENTRY_HEADING_TOLERANCE_RAD = Math.toRadians(1.0);
@@ -38,10 +37,10 @@ public class XOutWhileAligningCommand extends Command {
   private static final double EXIT_HEADING_TOLERANCE_RAD = Math.toRadians(3.0);
 
   /** Maximum measured angular velocity to allow entry into X_OUT (deg/s). */
-  private static final double ENTRY_ANGULAR_VELOCITY_TOLERANCE_DPS = 5.0;
+  private static final double ENTRY_ANGULAR_VELOCITY_TOLERANCE_DPS = 60.0;
 
   /** Maximum measured translational speed to allow entry into X_OUT (m/s). */
-  private static final double ENTRY_LINEAR_VELOCITY_TOLERANCE_MPS = 0.25;
+  private static final double ENTRY_LINEAR_VELOCITY_TOLERANCE_MPS = 2.5;
 
   /** Time the entry condition must be continuously true before transitioning to X_OUT (seconds). */
   private static final double ENTRY_DEBOUNCE_SECONDS = 0.1;
@@ -63,7 +62,8 @@ public class XOutWhileAligningCommand extends Command {
   private State state;
   private final Debouncer entryDebouncer =
       new Debouncer(ENTRY_DEBOUNCE_SECONDS, DebounceType.kRising);
-  private final Debouncer exitDebouncer = new Debouncer(EXIT_DEBOUNCE_SECONDS, DebounceType.kRising);
+  private final Debouncer exitDebouncer =
+      new Debouncer(EXIT_DEBOUNCE_SECONDS, DebounceType.kRising);
 
   /**
    * Creates a new XOutWhileAligningCommand.
@@ -214,7 +214,9 @@ public class XOutWhileAligningCommand extends Command {
     return state == State.X_OUT;
   }
 
-  /** Toggles override-x-out mode, which suppresses x-out and keeps the robot in face-angle driving. */
+  /**
+   * Toggles override-x-out mode, which suppresses x-out and keeps the robot in face-angle driving.
+   */
   public void toggleOverrideXOut() {
     if (state == State.OVERRIDE_X_OUT) {
       state = State.FACING_ANGLE;
