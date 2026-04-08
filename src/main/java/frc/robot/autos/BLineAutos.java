@@ -97,6 +97,7 @@ public class BLineAutos {
   // ─────────────────────────────────────────────────────────────────────────────
 
   private Command buildTwoSwipeAuto(String autoName) {
+    // TODO URGENT verify if we want the delay in deploying the intake
     return pathWithImmediateIntake(new Path(autoName + " First Swipe"))
         .andThen(shootAtHub())
         .andThen(pathWithImmediateIntake(new Path(autoName + " Second Swipe")))
