@@ -9,9 +9,9 @@
           "data": {
             "commands": [
               {
-                "type": "wait",
+                "type": "path",
                 "data": {
-                  "waitTime": 0.5
+                  "pathName": "New Depot Pickup 1"
                 }
               },
               {
@@ -30,7 +30,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "Red Depot First 1"
+                  "pathName": "New Depot Pickup 2"
                 }
               },
               {
@@ -49,7 +49,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "Red Depot First 2"
+                  "pathName": "New Depot Pickup 3"
                 }
               },
               {
@@ -62,22 +62,9 @@
           }
         },
         {
-          "type": "path",
+          "type": "named",
           "data": {
-            "pathName": "Red Depot First 3"
-          }
-        },
-        {
-          "type": "deadline",
-          "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "shoot without timer"
-                }
-              }
-            ]
+            "name": "shoot without timer"
           }
         }
       ]

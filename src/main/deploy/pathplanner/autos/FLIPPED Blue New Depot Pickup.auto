@@ -11,7 +11,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "Big Swipe 1"
+                  "pathName": "FLIPPED New Depot Pickup 1"
                 }
               },
               {
@@ -28,24 +28,49 @@
           "data": {
             "commands": [
               {
-                "type": "wait",
+                "type": "path",
                 "data": {
-                  "waitTime": 10.0
+                  "pathName": "FLIPPED New Depot Pickup 2"
                 }
               },
               {
                 "type": "named",
                 "data": {
-                  "name": "shoot without timer"
+                  "name": "basic intake"
                 }
               }
             ]
+          }
+        },
+        {
+          "type": "deadline",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "FLIPPED New Depot Pickup 3"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "basic intake"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "shoot without timer"
           }
         }
       ]
     }
   },
   "resetOdom": true,
-  "folder": "MASTER RED RIGHT",
+  "folder": "BLUE RIGHT AUTOS",
   "choreoAuto": false
 }
