@@ -13,6 +13,7 @@ import frc.robot.utils.CommandLogger;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.Logger;
 
 /**
  * BLine-based autonomous routines. Composes paths from {@link BLinePaths} into full auto commands
@@ -105,7 +106,8 @@ public class BLineAutos {
   private BLineAuto buildAutoOrNone(String autoName, Function<String, Command> commandFactory) {
     try {
       return new BLineAuto(autoName, commandFactory.apply(autoName));
-    } catch (Exception ignored) {
+    } catch (Exception e) {
+      Logger.recordOutput("BLineAutos/MissingPaths/" + autoName, e.getMessage());
       return new BLineAuto("!!!NO PATH!!! " + autoName, Commands.none());
     }
   }
