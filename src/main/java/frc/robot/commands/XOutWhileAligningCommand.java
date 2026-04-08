@@ -51,7 +51,7 @@ public class XOutWhileAligningCommand extends Command {
 
   private enum State {
     FACING_ANGLE,
-    FORCE_FACING_ANGLE,
+    OVERRIDE_X_OUT,
     X_OUT
   }
 
@@ -153,7 +153,7 @@ public class XOutWhileAligningCommand extends Command {
         }
         break;
 
-      case FORCE_FACING_ANGLE:
+      case OVERRIDE_X_OUT:
         entryDebouncer.calculate(false);
         exitDebouncer.calculate(false);
         break;
@@ -183,7 +183,7 @@ public class XOutWhileAligningCommand extends Command {
   private void applyState(double vx, double vy, Rotation2d heading) {
     switch (state) {
       case FACING_ANGLE:
-      case FORCE_FACING_ANGLE:
+      case OVERRIDE_X_OUT:
         boolean isBlueAlliance = DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue;
         drivetrain.faceAngleWhileDriving(
             isBlueAlliance ? vx : -vx, isBlueAlliance ? vy : -vy, heading);
@@ -214,12 +214,12 @@ public class XOutWhileAligningCommand extends Command {
     return state == State.X_OUT;
   }
 
-  /** Toggles force-angle mode, which suppresses x-out and keeps the robot in face-angle driving. */
-  public void toggleForceAngle() {
-    if (state == State.FORCE_FACING_ANGLE) {
+  /** Toggles override-x-out mode, which suppresses x-out and keeps the robot in face-angle driving. */
+  public void toggleOverrideXOut() {
+    if (state == State.OVERRIDE_X_OUT) {
       state = State.FACING_ANGLE;
     } else {
-      state = State.FORCE_FACING_ANGLE;
+      state = State.OVERRIDE_X_OUT;
       drivetrain.resetHeadingController();
     }
   }

@@ -530,7 +530,7 @@ public class RobotContainer {
             .alongWith(autoCycleDriveCommand)
             .alongWith(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING)));
     driverCont.leftStick().and(isSuperstructureMode).onTrue(
-        Commands.runOnce(autoCycleDriveCommand::toggleForceAngle));
+        Commands.runOnce(autoCycleDriveCommand::toggleOverrideXOut));
     autoCycleTrigger.onFalse(
         superStructure
             .setStateCommand(SuperWantedStates.DEFAULT)
