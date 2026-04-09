@@ -43,7 +43,6 @@ public class AutoChooser {
   public void update() {
     if (DriverStation.isDSAttached()) {
       if (!DriverStation.getAlliance().equals(lastAllianceState)) {
-
         displayedAutoChooser.close();
 
         for (NamedAuto auto : allAutos) {
