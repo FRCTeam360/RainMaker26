@@ -111,7 +111,7 @@ public class BLineAutos {
   }
 
   /** Builds all BLine auto routines using generated path variants. */
-  public List<NamedAuto> buildAutos() {
+  private List<NamedAuto> buildAutos() {
     return List.of(
         buildAutoOrNone("FLIPPED Blue Right Aggressive", this::buildTwoSwipeAuto),
         buildAutoOrNone("FLIPPED MIRRORED Blue Left Aggressive", this::buildTwoSwipeAuto),
