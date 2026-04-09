@@ -15,12 +15,21 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+/**
+ * Alliance-aware autonomous chooser. Combines PathPlanner and BLine autos into a single list and
+ * filters the displayed options by the current alliance color.
+ */
 public class AutoChooser {
 
-  private final List<NamedAuto> allAutos;
-  private final SendableChooser<Command> displayedAutoChooser = new SendableChooser<>();
-  private Optional<Alliance> lastAllianceState = Optional.empty();
+  private final List<NamedAuto> registeredAutos;
+  private final SendableChooser<Command> chooser = new SendableChooser<>();
+  private Optional<Alliance> previousAlliance = Optional.empty();
 
+  /**
+   * @param drivetrain the swerve drivetrain subsystem
+   * @param superStructure the superstructure subsystem
+   * @param shootAtHubSupplier supplier for the shared "shoot at hub" command
+   */
   public AutoChooser(
       CommandSwerveDrivetrain drivetrain,
       SuperStructure superStructure,
@@ -35,29 +44,30 @@ public class AutoChooser {
     autos.addAll(bLineAutos.getNamedAutos());
 
     autos.sort((a, b) -> a.name().compareToIgnoreCase(b.name()));
-    allAutos = autos;
+    registeredAutos = autos;
 
-    SmartDashboard.putData("Auto Chooser", displayedAutoChooser);
+    SmartDashboard.putData("Auto Chooser", chooser);
   }
 
+  /** Call periodically while disabled to rebuild the chooser when the alliance changes. */
   public void update() {
     Optional<Alliance> currentAlliance =
         DriverStation.isDSAttached() ? DriverStation.getAlliance() : Optional.empty();
-    if (currentAlliance.orElse(null) != lastAllianceState.orElse(null)) {
-      updateAutoChooser(currentAlliance);
+    if (currentAlliance.orElse(null) != previousAlliance.orElse(null)) {
+      rebuildChooser(currentAlliance);
     }
-    lastAllianceState = currentAlliance;
+    previousAlliance = currentAlliance;
   }
 
-  private void updateAutoChooser(Optional<Alliance> currentAlliance) {
-    displayedAutoChooser.close();
+  private void rebuildChooser(Optional<Alliance> alliance) {
+    chooser.close();
 
-    for (NamedAuto auto : allAutos) {
-      if (matchesAlliance(auto.name(), currentAlliance)) {
-        displayedAutoChooser.addOption(auto.name(), auto.auto());
+    for (NamedAuto auto : registeredAutos) {
+      if (matchesAlliance(auto.name(), alliance)) {
+        chooser.addOption(auto.name(), auto.auto());
       }
     }
-    SmartDashboard.putData("Auto Chooser", displayedAutoChooser);
+    SmartDashboard.putData("Auto Chooser", chooser);
   }
 
   private boolean matchesAlliance(String name, Optional<Alliance> alliance) {
@@ -67,7 +77,10 @@ public class AutoChooser {
     return true;
   }
 
+  /**
+   * @return the currently selected autonomous command
+   */
   public Command getSelected() {
-    return displayedAutoChooser.getSelected();
+    return chooser.getSelected();
   }
 }
