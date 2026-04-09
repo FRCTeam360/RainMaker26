@@ -1,5 +1,7 @@
 package frc.robot;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.commands.PathPlannerAuto;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -7,31 +9,31 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.autos.BLineAutos;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
-import frc.robot.subsystems.SuperStructure;
 import frc.robot.subsystems.Shooter.ShotCalculator;
-
+import frc.robot.subsystems.SuperStructure;
 import java.util.List;
 import java.util.Optional;
 
-import javax.security.auth.callback.PasswordCallback;
-
-import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.commands.PathPlannerAuto;
-
 public class AutoChooser {
 
-    public static SendableChooser<Command> ppAutoChooser;
-    public static SendableChooser<Command> displayedAutoChooser = new SendableChooser<>();
-    private Optional<Alliance> lastAllianceState = Optional.empty();
+  public static SendableChooser<Command> ppAutoChooser;
+  public static SendableChooser<Command> displayedAutoChooser = new SendableChooser<>();
+  private Optional<Alliance> lastAllianceState = Optional.empty();
 
-    public AutoChooser (CommandSwerveDrivetrain drivetrain, SuperStructure superStructure, ShotCalculator hubShotCalculator, ShotCalculator passCalculator) {
-      ppAutoChooser = AutoBuilder.buildAutoChooser();
+  public AutoChooser(
+      CommandSwerveDrivetrain drivetrain,
+      SuperStructure superStructure,
+      ShotCalculator hubShotCalculator,
+      ShotCalculator passCalculator) {
+    ppAutoChooser = AutoBuilder.buildAutoChooser();
 
-      SmartDashboard.putData("Auto Chooser",displayedAutoChooser);
-      BLineAutos bLineAutos = new BLineAutos(drivetrain,superStructure,hubShotCalculator,passCalculator);
-      bLineAutos.registerAutos(ppAutoChooser);
-    }
-    public void update (){
+    SmartDashboard.putData("Auto Chooser", displayedAutoChooser);
+    BLineAutos bLineAutos =
+        new BLineAutos(drivetrain, superStructure, hubShotCalculator, passCalculator);
+    bLineAutos.registerAutos(ppAutoChooser);
+  }
+
+  public void update() {
     if (DriverStation.isDSAttached()) {
       if (!DriverStation.getAlliance().equals(lastAllianceState)) {
 

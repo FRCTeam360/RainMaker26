@@ -430,9 +430,7 @@ public class RobotContainer {
     // CommandScheduler.getInstance().schedule(PathfindingCommand.warmupCommand());
   }
 
-  public void disabledPeriodic() {
-    
-  }
+  public void disabledPeriodic() {}
 
   public void registerPathplannerCommand(String name, Command command) {
     if (Objects.nonNull(command)) {
