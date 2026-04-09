@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.autos.BLineAutos;
 import frc.robot.autos.NamedAuto;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
@@ -22,7 +23,7 @@ import java.util.function.Supplier;
 public class AutoChooser {
 
   private final List<NamedAuto> registeredAutos;
-  private final SendableChooser<Command> chooser = new SendableChooser<>();
+  private SendableChooser<Command> chooser = new SendableChooser<>();
   private Optional<Alliance> previousAlliance = Optional.empty();
 
   /**
@@ -46,7 +47,7 @@ public class AutoChooser {
     autos.sort((a, b) -> a.name().compareToIgnoreCase(b.name()));
     registeredAutos = autos;
 
-    SmartDashboard.putData("Auto Chooser", chooser);
+    rebuildChooser(Optional.empty());
   }
 
   /** Call periodically while disabled to rebuild the chooser when the alliance changes. */
@@ -61,6 +62,8 @@ public class AutoChooser {
 
   private void rebuildChooser(Optional<Alliance> alliance) {
     chooser.close();
+    chooser = new SendableChooser<>();
+    chooser.setDefaultOption("None", Commands.none());
 
     for (NamedAuto auto : registeredAutos) {
       if (matchesAlliance(auto.name(), alliance)) {
