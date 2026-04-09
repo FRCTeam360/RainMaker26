@@ -11,7 +11,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "Big Swipe 1"
+                  "pathName": "MIRRORED Big Swipe 1"
                 }
               },
               {
@@ -46,6 +46,6 @@
     }
   },
   "resetOdom": true,
-  "folder": "MASTER RED RIGHT",
+  "folder": "RED LEFT AUTOS",
   "choreoAuto": false
 }
