@@ -41,27 +41,30 @@ public class AutoChooser {
   }
 
   public void update() {
-    if (DriverStation.isDSAttached()) {
-      if (!DriverStation.getAlliance().equals(lastAllianceState)) {
-        displayedAutoChooser.close();
-
-        for (NamedAuto auto : allAutos) {
-          if (lastAllianceState.equals(Optional.of(Alliance.Red))) {
-            if (auto.name().contains("Red")) {
-              displayedAutoChooser.addOption(auto.name(), auto.auto());
-            }
-          } else if (lastAllianceState.equals(Optional.of(Alliance.Blue))) {
-            if (auto.name().contains("Blue")) {
-              displayedAutoChooser.addOption(auto.name(), auto.auto());
-            }
-          } else {
-            displayedAutoChooser.addOption(auto.name(), auto.auto());
-          }
-        }
-        SmartDashboard.putData("Auto Chooser", displayedAutoChooser);
-      }
-      lastAllianceState = DriverStation.getAlliance();
+    Optional<Alliance> currentAlliance =
+        DriverStation.isDSAttached() ? DriverStation.getAlliance() : Optional.empty();
+    if (currentAlliance.orElse(null) != lastAllianceState.orElse(null)) {
+      updateAutoChooser(currentAlliance);
     }
+    lastAllianceState = currentAlliance;
+  }
+
+  private void updateAutoChooser(Optional<Alliance> currentAlliance) {
+    displayedAutoChooser.close();
+
+    for (NamedAuto auto : allAutos) {
+      if (matchesAlliance(auto.name(), currentAlliance)) {
+        displayedAutoChooser.addOption(auto.name(), auto.auto());
+      }
+    }
+    SmartDashboard.putData("Auto Chooser", displayedAutoChooser);
+  }
+
+  private boolean matchesAlliance(String name, Optional<Alliance> alliance) {
+    if (alliance.isEmpty()) return true;
+    if (alliance.get() == Alliance.Red) return name.contains("Red");
+    if (alliance.get() == Alliance.Blue) return name.contains("Blue");
+    return true;
   }
 
   public Command getSelected() {
