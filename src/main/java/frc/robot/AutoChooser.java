@@ -9,27 +9,25 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.autos.BLineAutos;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
-import frc.robot.subsystems.Shooter.ShotCalculator;
 import frc.robot.subsystems.SuperStructure;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 public class AutoChooser {
 
-  public static SendableChooser<Command> ppAutoChooser;
-  public static SendableChooser<Command> displayedAutoChooser = new SendableChooser<>();
+  private static SendableChooser<Command> ppAutoChooser;
+  private static SendableChooser<Command> displayedAutoChooser = new SendableChooser<>();
   private Optional<Alliance> lastAllianceState = Optional.empty();
 
   public AutoChooser(
       CommandSwerveDrivetrain drivetrain,
       SuperStructure superStructure,
-      ShotCalculator hubShotCalculator,
-      ShotCalculator passCalculator) {
+      Supplier<Command> shootAtHubSupplier) {
     ppAutoChooser = AutoBuilder.buildAutoChooser();
 
     SmartDashboard.putData("Auto Chooser", displayedAutoChooser);
-    BLineAutos bLineAutos =
-        new BLineAutos(drivetrain, superStructure, hubShotCalculator, passCalculator);
+    BLineAutos bLineAutos = new BLineAutos(drivetrain, superStructure, shootAtHubSupplier);
     bLineAutos.registerAutos(ppAutoChooser);
   }
 
@@ -60,5 +58,9 @@ public class AutoChooser {
         SmartDashboard.putData("Auto Chooser", displayedAutoChooser);
       }
     }
+  }
+
+  public Command getSelected() {
+    return displayedAutoChooser.getSelected();
   }
 }
