@@ -101,7 +101,7 @@ public class RobotContainer {
 
   // The robot's subsystems and commands are defined here...
   private CommandSwerveDrivetrain drivetrain;
-  private AutoChooser autoChooser;
+  private final AutoChooser autoChooser;
   private Flywheel flywheel;
   private Hood hood;
   private Indexer indexer;

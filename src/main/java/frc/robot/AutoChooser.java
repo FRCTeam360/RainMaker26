@@ -80,10 +80,34 @@ public class AutoChooser {
   }
 
   private boolean matchesAlliance(String name, Optional<Alliance> alliance) {
-    if (alliance.isEmpty()) return true;
-    if (alliance.get() == Alliance.Red) return name.contains("Red");
-    if (alliance.get() == Alliance.Blue) return name.contains("Blue");
-    return true;
+    if (alliance.isEmpty()) {
+      System.out.println("[AutoChooser] No alliance set, allowing: " + name);
+      return true;
+    }
+    boolean mentionsRed = name.contains("Red");
+    boolean mentionsBlue = name.contains("Blue");
+    if (!mentionsRed && !mentionsBlue) {
+      System.out.println("[AutoChooser] Alliance=" + alliance.get() + " | PASS (neutral): " + name);
+      return true;
+    }
+    boolean result;
+    if (alliance.get() == Alliance.Red) {
+      result = mentionsRed;
+    } else {
+      result = mentionsBlue;
+    }
+    System.out.println(
+        "[AutoChooser] Alliance="
+            + alliance.get()
+            + " | mentionsRed="
+            + mentionsRed
+            + " mentionsBlue="
+            + mentionsBlue
+            + " | "
+            + (result ? "PASS" : "FAIL")
+            + ": "
+            + name);
+    return result;
   }
 
   /**
