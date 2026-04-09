@@ -34,6 +34,7 @@ public class AutoChooser {
     BLineAutos bLineAutos = new BLineAutos(drivetrain, superStructure, shootAtHubSupplier);
     autos.addAll(bLineAutos.getNamedAutos());
 
+    autos.sort((a, b) -> a.name().compareToIgnoreCase(b.name()));
     allAutos = autos;
 
     SmartDashboard.putData("Auto Chooser", displayedAutoChooser);
@@ -43,7 +44,6 @@ public class AutoChooser {
     if (DriverStation.isDSAttached()) {
       if (!DriverStation.getAlliance().equals(lastAllianceState)) {
 
-        lastAllianceState = DriverStation.getAlliance();
         displayedAutoChooser.close();
 
         for (NamedAuto auto : allAutos) {
@@ -61,6 +61,7 @@ public class AutoChooser {
         }
         SmartDashboard.putData("Auto Chooser", displayedAutoChooser);
       }
+      lastAllianceState = DriverStation.getAlliance();
     }
   }
 
