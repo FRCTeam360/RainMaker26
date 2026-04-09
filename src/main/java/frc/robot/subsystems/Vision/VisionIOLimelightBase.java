@@ -97,7 +97,7 @@ public abstract class VisionIOLimelightBase implements VisionIO {
                 .getRotation()
                 .minus(Rotation2d.fromDegrees(gyroAngleSupplier.getAsDouble()))
                 .getDegrees())
-        > 45.0) return;
+        > 120.0) return;
 
     PoseEstimate poseEstimate = newPoseEstimate.get();
 
