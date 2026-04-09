@@ -1,6 +1,5 @@
 package frc.robot.autos;
 
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.lib.BLine.FollowPath;
@@ -24,8 +23,6 @@ public class BLineAutos {
   private final FollowPath.Builder pathBuilder;
   private final SuperStructure superStructure;
   private final Supplier<Command> shootAtHubSupplier;
-
-  public record BLineAuto(String name, Command auto) {}
 
   /**
    * @param drivetrain the swerve drivetrain subsystem
@@ -104,17 +101,17 @@ public class BLineAutos {
         .andThen(shootAtHub());
   }
 
-  private BLineAuto buildAutoOrNone(String autoName, Function<String, Command> commandFactory) {
+  private NamedAuto buildAutoOrNone(String autoName, Function<String, Command> commandFactory) {
     try {
-      return new BLineAuto(autoName, commandFactory.apply(autoName));
+      return new NamedAuto(autoName, commandFactory.apply(autoName));
     } catch (Exception e) {
       Logger.recordOutput("BLineAutos/MissingPaths/" + autoName, e.getMessage());
-      return new BLineAuto("!!!NO PATH!!! " + autoName, Commands.none());
+      return new NamedAuto("!!!NO PATH!!! " + autoName, Commands.none());
     }
   }
 
   /** Builds all BLine auto routines using generated path variants. */
-  private List<BLineAuto> buildAutos() {
+  private List<NamedAuto> buildAutos() {
     return List.of(
         buildAutoOrNone("FLIPPED Blue Right Aggressive", this::buildTwoSwipeAuto),
         buildAutoOrNone("FLIPPED MIRRORED Blue Left Aggressive", this::buildTwoSwipeAuto),
@@ -127,14 +124,12 @@ public class BLineAutos {
   // ─────────────────────────────────────────────────────────────────────────────
 
   /**
-   * Registers all BLine auto routines into the given chooser with a [BLine] prefix so they appear
-   * alongside PathPlanner autos for A/B testing.
-   *
-   * @param chooser the auto chooser to add options to
+   * Returns all BLine auto routines as named autos with a [BLine] prefix so they appear alongside
+   * PathPlanner autos for A/B testing.
    */
-  public void registerAutos(SendableChooser<Command> chooser) {
-    for (BLineAuto auto : buildAutos()) {
-      chooser.addOption("[BLine] " + auto.name, auto.auto);
-    }
+  public List<NamedAuto> getNamedAutos() {
+    return buildAutos().stream()
+        .map(auto -> new NamedAuto("[BLine] " + auto.name(), auto.auto()))
+        .toList();
   }
 }

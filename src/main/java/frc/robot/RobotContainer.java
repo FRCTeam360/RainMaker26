@@ -7,13 +7,10 @@ package frc.robot;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
 import com.ctre.phoenix6.swerve.SwerveRequest;
-import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.FollowPathCommand;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -21,7 +18,6 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.RobotType;
-import frc.robot.autos.BLineAutos;
 import frc.robot.generated.CompBotDrivetrain;
 import frc.robot.generated.PracticeBotDrivetrain;
 import frc.robot.generated.WoodBotDrivetrain;
@@ -105,7 +101,7 @@ public class RobotContainer {
 
   // The robot's subsystems and commands are defined here...
   private CommandSwerveDrivetrain drivetrain;
-  private SendableChooser<Command> autoChooser;
+  private final AutoChooser autoChooser;
   private Flywheel flywheel;
   private Hood hood;
   private Indexer indexer;
@@ -403,17 +399,15 @@ public class RobotContainer {
     configDefaultDrivingCommand();
     configureBindings();
 
-    autoChooser = AutoBuilder.buildAutoChooser();
-
-    // Register BLine auto variants alongside PathPlanner autos for A/B testing
-    BLineAutos bLineAutos = new BLineAutos(drivetrain, superStructure, this::shootAtHubCommand);
-    bLineAutos.registerAutos(autoChooser);
-
-    SmartDashboard.putData("Auto Chooser", autoChooser);
+    autoChooser = new AutoChooser(drivetrain, superStructure, this::shootAtHubCommand);
 
     CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
     // Uncomment this if pathplanner starts to suck on loading
     // CommandScheduler.getInstance().schedule(PathfindingCommand.warmupCommand());
+  }
+
+  public void disabledPeriodic() {
+    autoChooser.update();
   }
 
   /**
