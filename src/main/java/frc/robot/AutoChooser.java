@@ -1,6 +1,7 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -71,6 +72,11 @@ public class AutoChooser {
       }
     }
     SmartDashboard.putData("Auto Chooser", chooser);
+    NetworkTableInstance.getDefault()
+        .getTable("SmartDashboard")
+        .getSubTable("Auto Chooser")
+        .getEntry("selected")
+        .setString("None");
   }
 
   private boolean matchesAlliance(String name, Optional<Alliance> alliance) {
