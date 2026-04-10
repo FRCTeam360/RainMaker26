@@ -72,7 +72,8 @@ public class SuperStructure extends SubsystemBase {
     EJECTING,
     UNJAMMING,
     FORCED_SHOT,
-    FORCED_SHOOT_TRENCH
+    FORCED_SHOOT_TRENCH,
+    HOPPER_ROLLER_FORWARD_INDEXER_REVERSE
   }
 
   public enum SuperInternalStates {
@@ -82,7 +83,8 @@ public class SuperStructure extends SubsystemBase {
     PASSING,
     UNJAMMING,
     FORCED_SHOT,
-    FORCED_SHOOT_TRENCH
+    FORCED_SHOOT_TRENCH,
+    HOPPER_ROLLER_FORWARD_INDEXER_REVERSE
   }
 
   // State variables
@@ -189,6 +191,8 @@ public class SuperStructure extends SubsystemBase {
       case FORCED_SHOOT_TRENCH:
         currentSuperState = SuperInternalStates.FORCED_SHOOT_TRENCH;
         break;
+      case HOPPER_ROLLER_FORWARD_INDEXER_REVERSE:
+        currentSuperState = SuperInternalStates.HOPPER_ROLLER_FORWARD_INDEXER_REVERSE;
       case DEFAULT:
       default:
         targetSelectionStateMachine.setWantedState(TargetWantedStates.AUTO);
@@ -213,6 +217,9 @@ public class SuperStructure extends SubsystemBase {
       case FORCED_SHOOT_TRENCH:
         shooting();
         break;
+      case HOPPER_ROLLER_FORWARD_INDEXER_REVERSE:
+        hopperRoller.setWantedState(HopperRollerStates.ROLLING);
+        indexer.setWantedState( IndexerStates.REVERSING);
       case DEFAULT:
         passive_preparing();
         break;
