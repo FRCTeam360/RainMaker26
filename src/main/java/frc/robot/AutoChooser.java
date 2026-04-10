@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.autos.BLineAutos;
 import frc.robot.autos.NamedAuto;
+import frc.robot.autos.NamedAutoWithPose;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.SuperStructure;
 import java.util.ArrayList;
@@ -59,10 +60,10 @@ public class AutoChooser {
     }
 
     BLineAutos bLineAutos = new BLineAutos(drivetrain, superStructure, shootAtHubSupplier);
-    for (NamedAuto bLineAuto : bLineAutos.getNamedAutos()) {
-      // bLineAutos.put TODO: get bLine starting pose
+    for (NamedAutoWithPose bLineAuto : bLineAutos.getNamedAutos()) {
+      autoStartingPoses.put(bLineAuto.name(), bLineAuto.startingPose());
+      autos.add(bLineAuto.toNamedAuto());
     }
-    autos.addAll(bLineAutos.getNamedAutos());
 
     autos.sort((a, b) -> a.name().compareToIgnoreCase(b.name()));
     registeredAutos = autos;
