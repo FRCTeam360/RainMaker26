@@ -97,7 +97,7 @@ import org.littletonrobotics.junction.Logger;
 public class RobotContainer {
   private static final double PRE_SHOT_UNJAM_SECONDS = 0.05;
   private static final double AUTO_SHOOT_TIMEOUT_SECONDS = 10.0;
-  private static final double AUTO_SHOOT_NO_LAUNCH_TIMEOUT_SECONDS = 0.7;
+  private static final double AUTO_SHOOT_NO_LAUNCH_TIMEOUT_SECONDS = 1.0;
 
   // The robot's subsystems and commands are defined here...
   private CommandSwerveDrivetrain drivetrain;
