@@ -1,6 +1,5 @@
 package frc.robot;
 
-import com.fasterxml.jackson.annotation.ObjectIdGenerators.None;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -50,18 +49,18 @@ public class AutoChooser {
     for (String autoName : AutoBuilder.getAllAutoNames()) {
       String displayName = PATH_PLANNER_PREFIX + autoName;
       Command autoCommand = AutoBuilder.buildAuto(autoName);
-      if (autoCommand instanceof PathPlannerAuto auto){
+      if (autoCommand instanceof PathPlannerAuto auto) {
         Pose2d startingPose = auto.getStartingPose();
-        if (startingPose != null){
-            autoStartingPoses.put(displayName, startingPose);
+        if (startingPose != null) {
+          autoStartingPoses.put(displayName, startingPose);
         }
       }
       autos.add(new NamedAuto(displayName, autoCommand));
     }
 
     BLineAutos bLineAutos = new BLineAutos(drivetrain, superStructure, shootAtHubSupplier);
-    for (NamedAuto bLineAuto : bLineAutos.getNamedAutos()){
-     // bLineAutos.put TODO: get bLine starting pose
+    for (NamedAuto bLineAuto : bLineAutos.getNamedAutos()) {
+      // bLineAutos.put TODO: get bLine starting pose
     }
     autos.addAll(bLineAutos.getNamedAutos());
 
@@ -81,7 +80,7 @@ public class AutoChooser {
     previousAlliance = currentAlliance;
   }
 
-private static final NamedAuto NONE_AUTO = new NamedAuto("None", Commands.none());
+  private static final NamedAuto NONE_AUTO = new NamedAuto("None", Commands.none());
 
   private void rebuildChooser(Optional<Alliance> alliance) {
     chooser.close();
@@ -139,11 +138,11 @@ private static final NamedAuto NONE_AUTO = new NamedAuto("None", Commands.none()
     return chooser.getSelected().auto();
   }
 
-  public String getSelectedName(){
+  public String getSelectedName() {
     return chooser.getSelected().name();
   }
 
-  public Optional<Pose2d> getSelectedStartingPose(){
+  public Optional<Pose2d> getSelectedStartingPose() {
     return Optional.ofNullable(autoStartingPoses.get(chooser.getSelected().name()));
   }
 }

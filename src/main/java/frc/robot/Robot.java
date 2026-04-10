@@ -136,6 +136,8 @@ public class Robot extends LoggedRobot {
     }
     double t3 = Logger.getTimestamp() / 1.0e6;
 
+    m_robotContainer.setHasAutoRun(true);
+
     Logger.recordOutput("Robot/AutoInitTiming/OnEnableSeconds", t1 - t0);
     Logger.recordOutput("Robot/AutoInitTiming/GetAutoCommandSeconds", t2 - t1);
     Logger.recordOutput("Robot/AutoInitTiming/ScheduleSeconds", t3 - t2);
