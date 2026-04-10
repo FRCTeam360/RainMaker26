@@ -1,6 +1,8 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.commands.PathPlannerAuto;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -13,7 +15,9 @@ import frc.robot.autos.NamedAuto;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.SuperStructure;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -23,8 +27,11 @@ import java.util.function.Supplier;
  */
 public class AutoChooser {
 
+  private static final String PATHPLANNER_PREFIX = "[PathPlanner] ";
+
   private final List<NamedAuto> registeredAutos;
-  private SendableChooser<Command> chooser = new SendableChooser<>();
+  private final Map<String, Pose2d> autoStartingPoses = new HashMap<>();
+  private SendableChooser<NamedAuto> chooser = new SendableChooser<>();
   private Optional<Alliance> previousAlliance = Optional.empty();
 
   /**
@@ -39,7 +46,15 @@ public class AutoChooser {
     List<NamedAuto> autos = new ArrayList<>();
 
     for (String autoName : AutoBuilder.getAllAutoNames()) {
-      autos.add(new NamedAuto("[PathPlanner] " + autoName, AutoBuilder.buildAuto(autoName)));
+      String displayName = PATHPLANNER_PREFIX + autoName;
+      Command autoCommand = AutoBuilder.buildAuto(autoName);
+      if (autoCommand instanceof PathPlannerAuto ppAuto) {
+        Pose2d startingPose = ppAuto.getStartingPose();
+        if (startingPose != null) {
+          autoStartingPoses.put(displayName, startingPose);
+        }
+      }
+      autos.add(new NamedAuto(displayName, autoCommand));
     }
 
     BLineAutos bLineAutos = new BLineAutos(drivetrain, superStructure, shootAtHubSupplier);
@@ -61,14 +76,16 @@ public class AutoChooser {
     previousAlliance = currentAlliance;
   }
 
+  private static final NamedAuto NONE_AUTO = new NamedAuto("None", Commands.none());
+
   private void rebuildChooser(Optional<Alliance> alliance) {
     chooser.close();
     chooser = new SendableChooser<>();
-    chooser.setDefaultOption("None", Commands.none());
+    chooser.setDefaultOption(NONE_AUTO.name(), NONE_AUTO);
 
     for (NamedAuto auto : registeredAutos) {
       if (matchesAlliance(auto.name(), alliance)) {
-        chooser.addOption(auto.name(), auto.auto());
+        chooser.addOption(auto.name(), auto);
       }
     }
     SmartDashboard.putData("Auto Chooser", chooser);
@@ -111,9 +128,32 @@ public class AutoChooser {
   }
 
   /**
+   * @return the display name of the currently selected auto, or "None" if nothing is selected
+   */
+  public String getSelectedName() {
+    NamedAuto selected = chooser.getSelected();
+    return selected != null ? selected.name() : NONE_AUTO.name();
+  }
+
+  /**
    * @return the currently selected autonomous command
    */
   public Command getSelected() {
-    return chooser.getSelected();
+    NamedAuto selected = chooser.getSelected();
+    return selected != null ? selected.auto() : Commands.none();
+  }
+
+  /**
+   * Returns the starting pose of the currently selected auto, if known. PathPlanner autos provide
+   * this via their path data (alliance-flipped). BLine autos and "None" return empty.
+   *
+   * @return the starting pose, or empty if unavailable
+   */
+  public Optional<Pose2d> getSelectedStartingPose() {
+    NamedAuto selected = chooser.getSelected();
+    if (selected == null || selected == NONE_AUTO) {
+      return Optional.empty();
+    }
+    return Optional.ofNullable(autoStartingPoses.get(selected.name()));
   }
 }

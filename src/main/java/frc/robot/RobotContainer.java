@@ -9,6 +9,7 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.FollowPathCommand;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -85,6 +86,7 @@ import frc.robot.utils.PathProvider;
 import frc.robot.utils.PositionUtils;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -102,6 +104,7 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private CommandSwerveDrivetrain drivetrain;
   private final AutoChooser autoChooser;
+  private String lastSeededAutoName = null;
   private Flywheel flywheel;
   private Hood hood;
   private Indexer indexer;
@@ -408,6 +411,14 @@ public class RobotContainer {
 
   public void disabledPeriodic() {
     autoChooser.update();
+    String selectedName = autoChooser.getSelectedName();
+    if (!selectedName.equals(lastSeededAutoName)) {
+      Optional<Pose2d> startingPose = autoChooser.getSelectedStartingPose();
+      if (startingPose.isPresent()) {
+        drivetrain.resetPose(startingPose.get());
+        lastSeededAutoName = selectedName;
+      }
+    }
   }
 
   /**
@@ -633,6 +644,7 @@ public class RobotContainer {
 
   /** Stops all subsystems safely when the robot is disabled. */
   public void onDisable() {
+    lastSeededAutoName = null;
     superStructure.setControlState(ControlState.SUPERSTRUCTURE);
     superStructure.setWantedSuperState(SuperWantedStates.IDLE);
     superStructure.setIntakeState(IntakeWantedStates.IDLE);
