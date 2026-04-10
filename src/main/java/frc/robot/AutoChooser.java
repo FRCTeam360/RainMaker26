@@ -1,6 +1,9 @@
 package frc.robot;
 
+import com.fasterxml.jackson.annotation.ObjectIdGenerators.None;
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.commands.PathPlannerAuto;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -13,7 +16,9 @@ import frc.robot.autos.NamedAuto;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.SuperStructure;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -23,8 +28,12 @@ import java.util.function.Supplier;
  */
 public class AutoChooser {
 
+  private static final String PATH_PLANNER_PREFIX = "[PathPlanner] ";
+  private static final String B_LINE_PREFIX = "[BLine] ";
+
   private final List<NamedAuto> registeredAutos;
-  private SendableChooser<Command> chooser = new SendableChooser<>();
+  private final Map<String, Pose2d> autoStartingPoses = new HashMap<>();
+  private SendableChooser<NamedAuto> chooser = new SendableChooser<>();
   private Optional<Alliance> previousAlliance = Optional.empty();
 
   /**
@@ -39,10 +48,21 @@ public class AutoChooser {
     List<NamedAuto> autos = new ArrayList<>();
 
     for (String autoName : AutoBuilder.getAllAutoNames()) {
-      autos.add(new NamedAuto("[PathPlanner] " + autoName, AutoBuilder.buildAuto(autoName)));
+      String displayName = PATH_PLANNER_PREFIX + autoName;
+      Command autoCommand = AutoBuilder.buildAuto(autoName);
+      if (autoCommand instanceof PathPlannerAuto auto){
+        Pose2d startingPose = auto.getStartingPose();
+        if (startingPose != null){
+            autoStartingPoses.put(displayName, startingPose);
+        }
+      }
+      autos.add(new NamedAuto(displayName, autoCommand));
     }
 
     BLineAutos bLineAutos = new BLineAutos(drivetrain, superStructure, shootAtHubSupplier);
+    for (NamedAuto bLineAuto : bLineAutos.getNamedAutos()){
+     // bLineAutos.put TODO: get bLine starting pose
+    }
     autos.addAll(bLineAutos.getNamedAutos());
 
     autos.sort((a, b) -> a.name().compareToIgnoreCase(b.name()));
@@ -61,14 +81,16 @@ public class AutoChooser {
     previousAlliance = currentAlliance;
   }
 
+private static final NamedAuto NONE_AUTO = new NamedAuto("None", Commands.none());
+
   private void rebuildChooser(Optional<Alliance> alliance) {
     chooser.close();
     chooser = new SendableChooser<>();
-    chooser.setDefaultOption("None", Commands.none());
+    chooser.setDefaultOption(NONE_AUTO.name(), NONE_AUTO);
 
     for (NamedAuto auto : registeredAutos) {
       if (matchesAlliance(auto.name(), alliance)) {
-        chooser.addOption(auto.name(), auto.auto());
+        chooser.addOption(auto.name(), auto);
       }
     }
     SmartDashboard.putData("Auto Chooser", chooser);
@@ -114,6 +136,14 @@ public class AutoChooser {
    * @return the currently selected autonomous command
    */
   public Command getSelected() {
-    return chooser.getSelected();
+    return chooser.getSelected().auto();
+  }
+
+  public String getSelectedName(){
+    return chooser.getSelected().name();
+  }
+
+  public Optional<Pose2d> getSelectedStartingPose(){
+    return Optional.ofNullable(autoStartingPoses.get(chooser.getSelected().name()));
   }
 }
