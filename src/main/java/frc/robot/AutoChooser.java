@@ -30,6 +30,9 @@ public class AutoChooser {
   private static final String PATHPLANNER_PREFIX = "[PathPlanner] ";
 
   private final List<NamedAuto> registeredAutos;
+  // Keyed by display name. Populated/refreshed in rebuildChooser() after alliance is known,
+  // so PathPlanner's alliance-flip is applied correctly.
+  private final Map<String, PathPlannerAuto> pathPlannerAutos = new HashMap<>();
   private final Map<String, Pose2d> autoStartingPoses = new HashMap<>();
   private SendableChooser<NamedAuto> chooser = new SendableChooser<>();
   private Optional<Alliance> previousAlliance = Optional.empty();
@@ -49,10 +52,7 @@ public class AutoChooser {
       String displayName = PATHPLANNER_PREFIX + autoName;
       Command autoCommand = AutoBuilder.buildAuto(autoName);
       if (autoCommand instanceof PathPlannerAuto ppAuto) {
-        Pose2d startingPose = ppAuto.getStartingPose();
-        if (startingPose != null) {
-          autoStartingPoses.put(displayName, startingPose);
-        }
+        pathPlannerAutos.put(displayName, ppAuto);
       }
       autos.add(new NamedAuto(displayName, autoCommand));
     }
@@ -79,6 +79,15 @@ public class AutoChooser {
   private static final NamedAuto NONE_AUTO = new NamedAuto("None", Commands.none());
 
   private void rebuildChooser(Optional<Alliance> alliance) {
+    autoStartingPoses.clear();
+    pathPlannerAutos.forEach(
+        (displayName, ppAuto) -> {
+          Pose2d pose = ppAuto.getStartingPose();
+          if (pose != null) {
+            autoStartingPoses.put(displayName, pose);
+          }
+        });
+
     chooser.close();
     chooser = new SendableChooser<>();
     chooser.setDefaultOption(NONE_AUTO.name(), NONE_AUTO);
