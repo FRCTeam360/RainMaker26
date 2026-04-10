@@ -29,7 +29,6 @@ import java.util.function.Supplier;
 public class AutoChooser {
 
   private static final String PATH_PLANNER_PREFIX = "[PathPlanner] ";
-  private static final String B_LINE_PREFIX = "[BLine] ";
 
   private final List<NamedAuto> registeredAutos;
   private final Map<String, Pose2d> autoStartingPoses = new HashMap<>();
@@ -137,12 +136,12 @@ public class AutoChooser {
    */
   public Command getSelected() {
     NamedAuto selected = chooser.getSelected();
-    return selected != null ? chooser.getSelected().auto() : NONE_AUTO.auto();
+    return selected != null ? selected.auto() : NONE_AUTO.auto();
   }
 
   public String getSelectedName() {
     NamedAuto selected = chooser.getSelected();
-    return selected != null ? chooser.getSelected().name() : NONE_AUTO.name();
+    return selected != null ? selected.name() : NONE_AUTO.name();
   }
 
   public Optional<Pose2d> getSelectedStartingPose() {
