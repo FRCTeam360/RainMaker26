@@ -135,14 +135,20 @@ public class AutoChooser {
    * @return the currently selected autonomous command
    */
   public Command getSelected() {
-    return chooser.getSelected().auto();
+    NamedAuto selected = chooser.getSelected();
+    return selected != null ? chooser.getSelected().auto() : NONE_AUTO.auto();
   }
 
   public String getSelectedName() {
-    return chooser.getSelected().name();
+    NamedAuto selected = chooser.getSelected();
+    return selected != null ? chooser.getSelected().name() : NONE_AUTO.name();
   }
 
   public Optional<Pose2d> getSelectedStartingPose() {
-    return Optional.ofNullable(autoStartingPoses.get(chooser.getSelected().name()));
+    NamedAuto selected = chooser.getSelected();
+    if (selected == null) {
+      return Optional.empty();
+    }
+    return Optional.ofNullable(autoStartingPoses.get(selected.name()));
   }
 }
