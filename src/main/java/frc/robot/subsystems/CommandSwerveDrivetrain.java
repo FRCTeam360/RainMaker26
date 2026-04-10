@@ -2,7 +2,9 @@ package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.*;
 
+import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.SignalLogger;
+import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
@@ -19,6 +21,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.util.sendable.Sendable;
@@ -70,12 +73,18 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   // Keep track of when vision measurements are added for logging context
   private boolean hasVisionMeasurements = false;
 
-  // Lazily-cached state copy. Invalidated once per cycle via clearCachedState() in
+  // Lazily-cached state copy. Invalidated once per cycle via clearCachedState()
+  // in
   // preSchedulerUpdate(), then populated on first access via getCachedState().
   // This ensures at most one getStateCopy() allocation per scheduler cycle.
   private SwerveDriveState cachedState;
+  private final StatusSignal<Angle> pigeonYaw;
+  private final StatusSignal<Angle> pigeonPitch;
+  private final StatusSignal<Angle> pigeonRoll;
+  private final StatusSignal<AngularVelocity> pigeonAngularVelocityZ;
 
-  // Commanded speeds for shoot-on-the-move compensation (tracks what we tell the robot to do)
+  // Commanded speeds for shoot-on-the-move compensation (tracks what we tell the
+  // robot to do)
   private ChassisSpeeds commandedSpeeds = new ChassisSpeeds();
 
   /* Blue alliance sees forward as 0 degrees (toward red alliance wall) */
@@ -107,11 +116,13 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   private final double HEADING_INTEGRATOR_MAX_RAD_PER_S =
       Constants.getMaxAngularVelocity().in(RadiansPerSecond) * 0.5;
   // Extra heading tolerance granted per m/s of translational speed.
-  // Compensates for the PID steady-state tracking lag when the heading setpoint moves
+  // Compensates for the PID steady-state tracking lag when the heading setpoint
+  // moves
   // (setpoint rate ≈ v/d rad/s; lag ≈ rate/KP). Tunable — start at ~5°/m/s.
   private static final double HEADING_SPEED_TOLERANCE_RAD_PER_MPS = Math.toRadians(1.0);
 
-  // Maximum translational speed while using field-centric facing angle (fraction of maxSpeed).
+  // Maximum translational speed while using field-centric facing angle (fraction
+  // of maxSpeed).
   // Limits how much shoot-on-the-move compensation is needed.
   private static final double FACING_ANGLE_MAX_SPEED_FRACTION = 0.5;
   private static final double CONTROLLER_DEADBAND = 0.04;
@@ -133,8 +144,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
   private SnapDirection previousSnapDirection = SnapDirection.NONE;
 
-  // Called once per scheduler cycle from fieldOrientedDriveCommand to update the snap target.
-  // Kept outside the applyRequest lambda so it runs exactly once per cycle regardless of
+  // Called once per scheduler cycle from fieldOrientedDriveCommand to update the
+  // snap target.
+  // Kept outside the applyRequest lambda so it runs exactly once per cycle
+  // regardless of
   // how many times the request supplier is invoked.
   private void updateSnapAngle(double rightX, double rightY) {
     boolean yDominant = Math.abs(rightY) >= Math.abs(rightX);
@@ -153,8 +166,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     if (currentSnapDirection == previousSnapDirection) return;
     previousSnapDirection = currentSnapDirection;
 
-    // Blue-perspective base angles flipped automatically for Red via AllianceFlipUtil:
-    //   up=0°, down=180°, right=270°, left=90°
+    // Blue-perspective base angles flipped automatically for Red via
+    // AllianceFlipUtil:
+    // up=0°, down=180°, right=270°, left=90°
     switch (currentSnapDirection) {
       case UP ->
           currentTargetAngle = AllianceFlipUtil.apply(Rotation2d.fromDegrees(0.0)).getDegrees();
@@ -444,6 +458,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         -HEADING_INTEGRATOR_MAX_RAD_PER_S, HEADING_INTEGRATOR_MAX_RAD_PER_S);
     angleFacingRequest.HeadingController.setTolerance(HEADING_TOLERANCE_RAD);
     angleFacingRequest.ForwardPerspective = ForwardPerspectiveValue.BlueAlliance;
+    pigeonYaw = getPigeon2().getYaw();
+    pigeonPitch = getPigeon2().getPitch();
+    pigeonRoll = getPigeon2().getRoll();
+    pigeonAngularVelocityZ = getPigeon2().getAngularVelocityZWorld();
     if (Utils.isSimulation()) {
       startSimThread();
     }
@@ -580,7 +598,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     }
   }
 
-  // Key cache for BLine logging — populated once per unique BLine key, reused every loop.
+  // Key cache for BLine logging — populated once per unique BLine key, reused
+  // every loop.
   private final Map<String, String> blineKeyCache = new HashMap<>();
 
   private String blineKey(String rawKey) {
@@ -597,7 +616,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     PathPlannerLogging.setLogActivePathCallback(
         path -> Logger.recordOutput("Autos/PathPlanner/activePath", path.toArray(new Pose2d[0])));
 
-    // BLine — log under Autos/BLine/; keys are interned via blineKeyCache on first use
+    // BLine — log under Autos/BLine/; keys are interned via blineKeyCache on first
+    // use
     FollowPath.setPoseLoggingConsumer(
         (Pair<String, edu.wpi.first.math.geometry.Pose2d> pair) ->
             Logger.recordOutput(blineKey(pair.getFirst()), pair.getSecond()));
@@ -790,6 +810,14 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     Logger.recordOutput(SUBSYSTEM_NAME + "TargetState", state.ModuleTargets);
     Logger.recordOutput(SUBSYSTEM_NAME + "Using Vision", hasVisionMeasurements);
     Logger.recordOutput(SUBSYSTEM_NAME + "Is Defense Mode", isDefenseMode);
+
+    BaseStatusSignal.refreshAll(pigeonYaw, pigeonPitch, pigeonRoll, pigeonAngularVelocityZ);
+    Logger.recordOutput(SUBSYSTEM_NAME + "Pigeon/YawDeg", pigeonYaw.getValueAsDouble());
+    Logger.recordOutput(SUBSYSTEM_NAME + "Pigeon/PitchDeg", pigeonYaw.getValueAsDouble());
+    Logger.recordOutput(SUBSYSTEM_NAME + "Pigeon/RollDeg", pigeonPitch.getValueAsDouble());
+    Logger.recordOutput(
+        SUBSYSTEM_NAME + "Pigeon/AngularVelocityZDegPerSec",
+        pigeonAngularVelocityZ.getValueAsDouble());
     Logger.recordOutput(
         SUBSYSTEM_NAME + "HeadingSetpointDeg",
         Math.toDegrees(angleFacingRequest.HeadingController.getSetpoint()));

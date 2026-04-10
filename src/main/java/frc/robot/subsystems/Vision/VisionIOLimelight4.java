@@ -13,6 +13,10 @@ import java.util.function.DoubleSupplier;
  * and {@link #enableIMUAssist()} overrides.
  */
 public class VisionIOLimelight4 extends VisionIOLimelightBase {
+  @Override
+  protected boolean hasIMU() {
+    return true;
+  }
 
   /** Seeds the LL4 internal IMU from the external gyro (Pigeon). Use while disabled. */
   private static final int IMU_MODE_EXTERNAL_SEED = 1;
@@ -44,6 +48,15 @@ public class VisionIOLimelight4 extends VisionIOLimelightBase {
     LimelightHelpers.SetIMUAssistAlpha(name, IMU_ASSIST_ALPHA);
     LimelightHelpers.SetIMUMode(name, IMU_MODE_EXTERNAL_SEED);
     setThrottle(Constants.DISABLED_THROTTLE_SKIP_FRAMES);
+  }
+
+  @Override
+  public void updateInputs(VisionIOInputs inputs) {
+    super.updateInputs(inputs);
+    LimelightHelpers.IMUData imuData = LimelightHelpers.getIMUData(getName());
+    inputs.yaw = imuData.Yaw;
+    inputs.pitch = imuData.Pitch;
+    inputs.roll = imuData.Roll;
   }
 
   @Override

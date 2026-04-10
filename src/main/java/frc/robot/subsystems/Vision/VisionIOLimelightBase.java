@@ -6,10 +6,13 @@ package frc.robot.subsystems.Vision;
 
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import frc.robot.utils.FieldConstants;
 import frc.robot.utils.LimelightHelpers;
+import frc.robot.utils.LimelightHelpers.LimelightResults;
+import frc.robot.utils.LimelightHelpers.LimelightTarget_Fiducial;
 import frc.robot.utils.LimelightHelpers.PoseEstimate;
 import frc.robot.utils.LimelightHelpers.RawFiducial;
 import java.util.Optional;
@@ -26,6 +29,10 @@ public abstract class VisionIOLimelightBase implements VisionIO {
   protected final DoubleSupplier gyroAngleRateSupplier;
 
   private final boolean acceptMeasurements;
+
+  private Pose3d cameraPoseRobotSpace = new Pose3d();
+
+  private boolean cameraPoseResolved = false;
 
   /**
    * Creates a new Limelight hardware layer.
@@ -52,13 +59,53 @@ public abstract class VisionIOLimelightBase implements VisionIO {
     return name;
   }
 
+  public void pollCameraPose() {
+    if (cameraPoseResolved) return;
+    if (LimelightHelpers.getHeartbeat(name) == 0) return;
+    Pose3d pose = LimelightHelpers.getCameraPose3d_RobotSpace(name);
+    if (pose.getTranslation().getNorm() == 0.0 && pose.getRotation().getAngle() == 0.0) return;
+
+    cameraPoseRobotSpace = pose;
+    cameraPoseResolved = true;
+  }
+
+  private void updateNearestTagOrientation(VisionIOInputs inputs, PoseEstimate poseEstimate) {
+    int nearestTagID = -1;
+    double nearestDistance = Double.MAX_VALUE;
+    for (RawFiducial fiducial : poseEstimate.rawFiducials) {
+      if (fiducial.distToRobot < nearestDistance) {
+        nearestDistance = fiducial.distToRobot;
+        nearestTagID = fiducial.id;
+      }
+    }
+
+    if (nearestTagID == -1) return;
+
+    LimelightResults results = LimelightHelpers.getLatestResults(name);
+    if (results == null || results.targets_Fiducials == null) return;
+
+    for (LimelightTarget_Fiducial target : results.targets_Fiducials) {
+      if ((int) target.fiducialID == nearestTagID) {
+        Pose3d tagPoseInRobotSpace = target.getTargetPose_RobotSpace();
+        Rotation3d rotation = tagPoseInRobotSpace.getRotation();
+        inputs.nearestTagObservedPitchDeg = Math.toDegrees(rotation.getX());
+        inputs.nearestTagObservedRollDeg = Math.toDegrees(rotation.getY());
+      }
+    }
+  }
+
   @Override
   public void setLEDMode(int mode) {
     table.getEntry("ledMode").setNumber(mode);
   }
 
+  protected boolean hasIMU() {
+    return false;
+  }
+
   @Override
   public void updateInputs(VisionIOInputs inputs) {
+    pollCameraPose();
     // Set robot orientation for MegaTag2 (flushed by postSchedulerUpdate)
     LimelightHelpers.SetRobotOrientation_NoFlush(
         name, gyroAngleSupplier.getAsDouble(), gyroAngleRateSupplier.getAsDouble(), 0, 0, 0, 0);
@@ -71,6 +118,7 @@ public abstract class VisionIOLimelightBase implements VisionIO {
     inputs.ty = getTYRaw();
     inputs.pipeline = (int) getPipeline();
     inputs.tagID = getAprilTagID();
+    inputs.hasIMU = hasIMU();
 
     if (!acceptMeasurements) {
       return;
@@ -120,6 +168,7 @@ public abstract class VisionIOLimelightBase implements VisionIO {
 
     inputs.targetCount = targetCount;
     inputs.poseUpdated = true;
+    updateNearestTagOrientation(inputs, poseEstimate);
   }
 
   private Optional<PoseEstimate> getMegatag2PoseEst() {
