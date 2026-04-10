@@ -417,6 +417,8 @@ public class RobotContainer {
       if (startingPose.isPresent()) {
         drivetrain.resetPose(startingPose.get());
         lastSeededAutoName = selectedName;
+      } else {
+        lastSeededAutoName = null;
       }
     }
   }
