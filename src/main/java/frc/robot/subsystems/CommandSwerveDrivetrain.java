@@ -813,8 +813,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     BaseStatusSignal.refreshAll(pigeonYaw, pigeonPitch, pigeonRoll, pigeonAngularVelocityZ);
     Logger.recordOutput(SUBSYSTEM_NAME + "Pigeon/YawDeg", pigeonYaw.getValueAsDouble());
-    Logger.recordOutput(SUBSYSTEM_NAME + "Pigeon/PitchDeg", pigeonYaw.getValueAsDouble());
-    Logger.recordOutput(SUBSYSTEM_NAME + "Pigeon/RollDeg", pigeonPitch.getValueAsDouble());
+    Logger.recordOutput(SUBSYSTEM_NAME + "Pigeon/PitchDeg", pigeonPitch.getValueAsDouble());
+    Logger.recordOutput(SUBSYSTEM_NAME + "Pigeon/RollDeg", pigeonRoll.getValueAsDouble());
     Logger.recordOutput(
         SUBSYSTEM_NAME + "Pigeon/AngularVelocityZDegPerSec",
         pigeonAngularVelocityZ.getValueAsDouble());

@@ -88,8 +88,8 @@ public abstract class VisionIOLimelightBase implements VisionIO {
       if ((int) target.fiducialID == nearestTagID) {
         Pose3d tagPoseInRobotSpace = target.getTargetPose_RobotSpace();
         Rotation3d rotation = tagPoseInRobotSpace.getRotation();
-        inputs.nearestTagObservedPitchDeg = Math.toDegrees(rotation.getX());
-        inputs.nearestTagObservedRollDeg = Math.toDegrees(rotation.getY());
+        inputs.nearestTagObservedPitchDeg = Math.toDegrees(rotation.getY());
+        inputs.nearestTagObservedRollDeg = Math.toDegrees(rotation.getX());
       }
     }
   }
