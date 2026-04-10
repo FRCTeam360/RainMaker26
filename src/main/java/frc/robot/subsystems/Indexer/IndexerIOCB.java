@@ -33,7 +33,7 @@ public class IndexerIOCB implements IndexerIO {
     encoder = indexerMotor.getEncoder();
     sparkMaxConfig.idleMode(IdleMode.kCoast);
     sparkMaxConfig.inverted(false);
-    sparkMaxConfig.smartCurrentLimit(CURRENT_LIMIT_AMPS);
+    sparkMaxConfig.smartCurrentLimit(65, CURRENT_LIMIT_AMPS);
 
     sparkMaxConfig.encoder.positionConversionFactor(1.0 / GEAR_RATIO);
     sparkMaxConfig.encoder.velocityConversionFactor(1.0 / GEAR_RATIO);

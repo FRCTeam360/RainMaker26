@@ -3,51 +3,42 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 12.93758888888889,
-        "y": 2.0276444444444452
+        "x": 0.689,
+        "y": 4.6489
       },
       "prevControl": null,
       "nextControl": {
-        "x": 13.765866666666668,
-        "y": 1.813266666666666
+        "x": 0.689,
+        "y": 4.921744
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 15.899900000000002,
-        "y": 1.784
+        "x": 0.689,
+        "y": 7.3676
       },
       "prevControl": {
-        "x": 15.198300000000001,
-        "y": 1.8132333333333326
+        "x": 0.718233,
+        "y": 7.085011
       },
       "nextControl": null,
       "isLocked": false,
       "linkedName": null
     }
   ],
-  "rotationTargets": [],
-  "constraintZones": [
+  "rotationTargets": [
     {
-      "name": "Constraints Zone",
-      "minWaypointRelativePos": 0.6272952853598014,
-      "maxWaypointRelativePos": 1.0,
-      "constraints": {
-        "maxVelocity": 0.75,
-        "maxAcceleration": 4.0,
-        "maxAngularVelocity": 360.0,
-        "maxAngularAcceleration": 540.0,
-        "nominalVoltage": 12.0,
-        "unlimited": false
-      }
+      "waypointRelativePos": 0.7053941908713701,
+      "rotationDegrees": 111.0
     }
   ],
+  "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 1.25,
+    "maxVelocity": 0.75,
     "maxAcceleration": 4.0,
     "maxAngularVelocity": 360.0,
     "maxAngularAcceleration": 540.0,
@@ -56,13 +47,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": 90.0
   },
   "reversed": false,
-  "folder": null,
+  "folder": "FLIPPED Blue New Depot Pickup",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": 111.0
   },
   "useDefaultConstraints": false
 }
