@@ -13,7 +13,10 @@
     "MIRRORED Red Left Middle Hook",
     "MIRRORED Red Left Middle Standard",
     "FLIPPED Blue New Depot Pickup",
-    "MIRRORED Red Left Big Swipe"
+    "MIRRORED Red Left Big Swipe",
+    "MIRRORED Red Left Middle Stack",
+    "FLIPPED Blue Right Middle Stack",
+    "FLIPPED MIRRORED Blue Left Middle Stack"
   ],
   "autoFolders": [
     "MASTER RED RIGHT",
