@@ -16,7 +16,10 @@
     "MIRRORED Red Left Big Swipe",
     "MIRRORED Red Left Middle Stack",
     "FLIPPED Blue Right Middle Stack",
-    "FLIPPED MIRRORED Blue Left Middle Stack"
+    "FLIPPED MIRRORED Blue Left Middle Stack",
+    "MIRRORED Red Left A3",
+    "FLIPPED Blue Right A3",
+    "FLIPPED MIRRORED Blue Left A3"
   ],
   "autoFolders": [
     "MASTER RED RIGHT",
