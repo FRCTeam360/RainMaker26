@@ -438,7 +438,6 @@ public class RobotContainer {
   /** Builds the "shoot at hub" command used by both PathPlanner and BLine autos. */
   public Command shootAtHubCommand() {
     return Commands.waitSeconds(AUTO_SHOOT_TIMEOUT_SECONDS)
-        .raceWith(Commands.waitUntil(this::hopperEmptyAndNotShooting))
         .deadlineFor(
             superStructure
                 .setStateCommand(SuperWantedStates.AUTO_CYCLE_SHOOTING)
@@ -454,7 +453,6 @@ public class RobotContainer {
                           return hubShotCalculator.calculateShot().targetHeading();
                         })))
         .alongWith(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING))
-        .beforeStarting(this::resetHopperEmptyAndNotShootingTracker)
         .andThen(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
   }
 
