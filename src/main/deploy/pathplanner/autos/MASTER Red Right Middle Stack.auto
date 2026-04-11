@@ -17,15 +17,22 @@
           }
         },
         {
-          "type": "named",
+          "type": "deadline",
           "data": {
-            "name": "basic intake"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 1.5
+            "commands": [
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 1.5
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "basic intake"
+                }
+              }
+            ]
           }
         },
         {
@@ -36,6 +43,12 @@
                 "type": "path",
                 "data": {
                   "pathName": "NoStopMiddle Stack"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "basic intake"
                 }
               }
             ]
