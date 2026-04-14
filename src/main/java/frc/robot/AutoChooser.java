@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.Logger;
 
 /**
  * Alliance-aware autonomous chooser. Combines PathPlanner and BLine autos into a single list and
@@ -54,10 +55,10 @@ public class AutoChooser {
           autoStartingPoses.put(displayName, startingPose);
           autos.add(new NamedAutoWithPose(displayName, autoCommand, startingPose));
         } else {
-          // TODO: add error logging
+          Logger.recordOutput("PathPlannerAutos/MissingStartPose", autoName);
         }
       } else {
-        // TODO: add error logging
+        Logger.recordOutput("PathPlannerAutos/FailedCast", autoName);
       }
     }
 
