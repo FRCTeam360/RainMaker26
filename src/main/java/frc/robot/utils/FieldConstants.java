@@ -105,9 +105,10 @@ public class FieldConstants {
         new Translation2d(topCenterPoint.getX() + width / 2.0, fieldWidth / 2.0 + width / 2.0);
     public static final Translation2d farRightCorner =
         new Translation2d(topCenterPoint.getX() + width / 2.0, fieldWidth / 2.0 - width / 2.0);
-    public static final Translation2d center = 
-        new Translation2d(LinesVertical.hubCenter,
-        (LinesHorizontal.leftBumpHubSide + LinesHorizontal.rightBumpHubSide) / 2);
+    public static final Translation2d center =
+        new Translation2d(
+            LinesVertical.hubCenter,
+            (LinesHorizontal.leftBumpHubSide + LinesHorizontal.rightBumpHubSide) / 2);
     // Relevant reference points on the opposite side
     public static final Translation3d oppTopCenterPoint =
         new Translation3d(
@@ -120,9 +121,10 @@ public class FieldConstants {
         new Translation2d(oppTopCenterPoint.getX() + width / 2.0, fieldWidth / 2.0 + width / 2.0);
     public static final Translation2d oppFarRightCorner =
         new Translation2d(oppTopCenterPoint.getX() + width / 2.0, fieldWidth / 2.0 - width / 2.0);
-    public static final Translation2d oppCenter = 
-        new Translation2d(LinesVertical.oppHubCenter,
-        (LinesHorizontal.leftBumpHubSide + LinesHorizontal.rightBumpHubSide) / 2);
+    public static final Translation2d oppCenter =
+        new Translation2d(
+            LinesVertical.oppHubCenter,
+            (LinesHorizontal.leftBumpHubSide + LinesHorizontal.rightBumpHubSide) / 2);
     // Hub faces
     public static final Pose2d nearFace = FIELD_LAYOUT.getTagPose(26).get().toPose2d();
     public static final Pose2d farFace = FIELD_LAYOUT.getTagPose(20).get().toPose2d();

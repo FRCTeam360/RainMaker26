@@ -119,8 +119,24 @@ public class PositionUtils {
     return result;
   }
 
+  public static boolean isInOppAllianceZone(Pose2d robotPose) {
+    double robotX = robotPose.getX();
+    boolean result;
+    if (AllianceFlipUtil.shouldFlip()) {
+      result = robotX <= getOppAllianceEdge();
+    } else {
+      result = robotX >= getOppAllianceEdge();
+    }
+    Logger.recordOutput("PositionUtils/IsInOppAllianceZone", result);
+    return result;
+  }
+
   private static double getAllianceEdge() {
     return AllianceFlipUtil.applyX(LinesVertical.hubCenter);
+  }
+  
+  private static double getOppAllianceEdge() {
+    return AllianceFlipUtil.applyX(LinesVertical.oppHubCenter);
   }
 
   public static boolean isInPassingZone(Pose2d robotPose, Transform2d robotToShooter) {
@@ -154,6 +170,7 @@ public class PositionUtils {
 
   public static boolean canPass(Pose2d robotPose, Rotation2d shooterRotation) {
     Translation2d start = robotPose.getTranslation();
+    Rotation2d poseToHub;
     double dx = shooterRotation.getCos();
     double dy = shooterRotation.getSin();
     double maxDistance = Double.MAX_VALUE;
@@ -166,6 +183,14 @@ public class PositionUtils {
       maxDistance = Math.min(maxDistance, (FieldConstants.fieldWidth - start.getY()) / dy);
     } else if (dy < 0) {
       maxDistance = Math.min(maxDistance, -start.getY() / dy);
+    }
+    if (DriverStation.getAlliance().isPresent()) {
+      Alliance alliance = DriverStation.getAlliance().get();
+      if (alliance == Alliance.Red) {
+        poseToHub = redHubCenter.minus(robotPose.getTranslation()).getAngle();
+      }
+    } else {
+      poseToHub = blueHubCenter.minus(robotPose.getTranslation()).getAngle();
     }
     Translation2d raycastMax = start.plus(new Translation2d(maxDistance, shooterRotation));
     int length = (int) Math.round(start.getDistance(raycastMax));
