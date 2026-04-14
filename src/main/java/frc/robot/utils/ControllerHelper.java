@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import java.util.function.BooleanSupplier;
 
 public class ControllerHelper {
+  // Credit to 3663 for the helper class
   public static final double DEADBAND = 0.05;
 
   /**
@@ -17,7 +18,7 @@ public class ControllerHelper {
    *
    * @param value Raw value read from controller axis to be modified.
    * @param scale The amount you want to scale the axis by.
-   * @return clipped, scaled, and inverted axis value to use.
+   * @return clipped, and scaled axis value to use.
    */
   public static double modifyAxisCubic(double value, double scale) {
     double clippedValue = MathUtil.applyDeadband(value, DEADBAND);
