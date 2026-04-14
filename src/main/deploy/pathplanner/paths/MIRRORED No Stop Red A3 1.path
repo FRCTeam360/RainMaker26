@@ -16,48 +16,48 @@
     },
     {
       "anchor": {
-        "x": 9.088533,
-        "y": 0.780356
+        "x": 10.306589,
+        "y": 0.829078
       },
       "prevControl": {
-        "x": 9.450711,
-        "y": 0.334598
+        "x": 10.472244,
+        "y": 0.497767
       },
       "nextControl": {
-        "x": 8.581822,
-        "y": 1.404
+        "x": 10.01064,
+        "y": 1.420976
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 9.089,
-        "y": 2.768222
+        "x": 10.160422,
+        "y": 2.953367
       },
       "prevControl": {
-        "x": 8.650768,
-        "y": 2.803996
+        "x": 9.751156,
+        "y": 3.128767
       },
       "nextControl": {
-        "x": 9.566478,
-        "y": 2.729244
+        "x": 10.591269,
+        "y": 2.768718
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 10.6379,
-        "y": 2.534356
+        "x": 11.212822,
+        "y": 2.349211
       },
       "prevControl": {
-        "x": 10.147698,
-        "y": 2.534356
+        "x": 10.72262,
+        "y": 2.349211
       },
       "nextControl": {
-        "x": 10.9887,
-        "y": 2.534356
+        "x": 11.563622,
+        "y": 2.349211
       },
       "isLocked": false,
       "linkedName": null
@@ -78,20 +78,20 @@
   ],
   "rotationTargets": [
     {
-      "waypointRelativePos": 0.3053941908713695,
-      "rotationDegrees": 164.8482
+      "waypointRelativePos": 0.39834024896265546,
+      "rotationDegrees": -176.6233
     },
     {
       "waypointRelativePos": 0.7634854771784232,
-      "rotationDegrees": 117.2729
+      "rotationDegrees": 99.0564
     },
     {
       "waypointRelativePos": 1.4763485477178429,
       "rotationDegrees": 78.4341
     },
     {
-      "waypointRelativePos": 2.390041493775934,
-      "rotationDegrees": 9.6443
+      "waypointRelativePos": 2.356846473029045,
+      "rotationDegrees": -2.6025
     },
     {
       "waypointRelativePos": 3.4987551867219926,
@@ -128,7 +128,7 @@
     "rotation": -23.0255
   },
   "reversed": false,
-  "folder": "MIRRORED Red Left Middle Standard",
+  "folder": "MIRRORED Red Left A3",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 180.0
