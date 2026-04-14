@@ -113,9 +113,9 @@ public class Indexer extends StateMachineSubsystem<IndexerIOInputsAutoLogged, In
 
   @Override
   protected void logOutputs() {
-    Logger.recordOutput("Subsystems/Indexer/WantedState", wantedState);
-    Logger.recordOutput("Subsystems/Indexer/CurrentState", currentState);
-    Logger.recordOutput("Subsystems/Indexer/PreviousState", previousState);
-    Logger.recordOutput("Subsystems/Indexer/ControlState", controlState);
+    Logger.recordOutput("Superstructure/Subsystems/Indexer/WantedState", wantedState);
+    Logger.recordOutput("Superstructure/Subsystems/Indexer/CurrentState", currentState);
+    Logger.recordOutput("Superstructure/Subsystems/Indexer/PreviousState", previousState);
+    Logger.recordOutput("Superstructure/Subsystems/Indexer/ControlState", controlState);
   }
 }
