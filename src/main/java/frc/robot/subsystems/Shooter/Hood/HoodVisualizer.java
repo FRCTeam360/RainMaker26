@@ -65,6 +65,6 @@ public class HoodVisualizer {
     hoodLigament.setAngle(Units.radiansToDegrees(angleRads));
 
     // Log the entire mechanism to AdvantageKit for Advantage Scope visualization
-    Logger.recordOutput("Hood/Mechanism2d", mechanism);
+    Logger.recordOutput("Superstructure/Subsystems/Hood/Mechanism2d", mechanism);
   }
 }

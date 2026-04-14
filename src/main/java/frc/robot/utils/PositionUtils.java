@@ -84,7 +84,7 @@ public class PositionUtils {
     boolean inTrenchXRange = inBlueTrenchX || inRedTrenchX;
 
     boolean result = inTrenchYBand && inTrenchXRange;
-    Logger.recordOutput("PositionUtils/IsInDuckZone", result);
+    Logger.recordOutput("Utils/PositionUtils/IsInDuckZone", result);
     return result;
   }
 
@@ -106,7 +106,7 @@ public class PositionUtils {
     } else {
       result = robotX <= getAllianceEdge();
     }
-    Logger.recordOutput("PositionUtils/IsInAllianceZone", result);
+    Logger.recordOutput("Utils/PositionUtils/IsInAllianceZone", result);
     return result;
   }
 
@@ -154,7 +154,8 @@ public class PositionUtils {
     double distanceToBMeters = robotPose.getTranslation().getDistance(targetB);
 
     Translation2d result = distanceToAMeters <= distanceToBMeters ? targetA : targetB;
-    Logger.recordOutput("PositionUtils/CloserPassTarget", new Pose2d(result, Rotation2d.kZero));
+    Logger.recordOutput(
+        "Utils/PositionUtils/CloserPassTarget", new Pose2d(result, Rotation2d.kZero));
     return result;
   }
 }

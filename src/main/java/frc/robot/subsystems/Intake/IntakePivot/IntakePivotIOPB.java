@@ -11,7 +11,9 @@ import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.util.Units;
@@ -53,6 +55,7 @@ public class IntakePivotIOPB implements IntakePivotIO {
 
   private final DutyCycleOut dutyCycleOut = new DutyCycleOut(0);
   private final MotionMagicVoltage motionMagicPosition = new MotionMagicVoltage(0.0);
+  private final PositionVoltage positionVoltage = new PositionVoltage(0.0);
   private final TalonFXConfiguration config = new TalonFXConfiguration();
   private NeutralModeValue neutralMode = NeutralModeValue.Brake;
 
@@ -86,7 +89,7 @@ public class IntakePivotIOPB implements IntakePivotIO {
 
     config.Voltage.PeakForwardVoltage = PEAK_FORWARD_VOLTAGE;
     config.Voltage.PeakReverseVoltage = PEAK_REVERSE_VOLTAGE;
-    // TODO: GRAVITY TYPE COSINE / ARM
+    slot0Configs.GravityType = GravityTypeValue.Arm_Cosine;
     config.Feedback.SensorToMechanismRatio = GEAR_RATIO;
     config.MotorOutput.withInverted(InvertedValue.Clockwise_Positive);
 
@@ -127,6 +130,15 @@ public class IntakePivotIOPB implements IntakePivotIO {
   public void setPosition(double positionDegrees) {
     intakePivot.setControl(
         motionMagicPosition.withPosition(Units.degreesToRotations(positionDegrees)));
+  }
+
+  public void setPositionSmooth(double positionDegrees) {
+    intakePivot.setControl(
+        motionMagicPosition.withPosition(Units.degreesToRotations(positionDegrees)));
+  }
+
+  public void setPositionAggressive(double positionDegrees) {
+    intakePivot.setControl(positionVoltage.withPosition(Units.degreesToRotations(positionDegrees)));
   }
 
   public void setDutyCycle(double value) {

@@ -67,6 +67,6 @@ public class IntakePivotVisualizer {
     armLigament.setAngle(90.0 - mechanismAngleDegrees);
 
     // Log the entire mechanism to AdvantageKit for Advantage Scope visualization
-    Logger.recordOutput("IntakePivot/Mechanism2d", mechanism);
+    Logger.recordOutput("Superstructure/Subsystems/IntakePivot/Mechanism2d", mechanism);
   }
 }

@@ -11,7 +11,8 @@ import org.littletonrobotics.junction.Logger;
 
 public class Indexer extends StateMachineSubsystem<IndexerIOInputsAutoLogged, IndexerIO> {
   // Constants
-  private static final double INDEXER_VELOCITY_RPM = 4000.0;
+  private static final double INDEXER_VELOCITY_RPM = 3000.0;
+  private static final double INDEXER_DUTY_CYCLE = 0.80;
   private static final double INTAKING_ASSIST_DUTY_CYCLE = -0.15;
   private static final double REVERSING_DUTY_CYCLE = -0.35;
 

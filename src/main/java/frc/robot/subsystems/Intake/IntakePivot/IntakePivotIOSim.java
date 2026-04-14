@@ -12,6 +12,7 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -46,6 +47,7 @@ public class IntakePivotIOSim implements IntakePivotIO {
   // Motor and control
   private final TalonFX motorControllerSim = new TalonFX(SimulationConstants.INTAKE_PIVOT_MOTOR);
   private final PositionVoltage positionRequest = new PositionVoltage(0).withSlot(0);
+  private final MotionMagicVoltage motionMagicRequest = new MotionMagicVoltage(0).withSlot(0);
   private final VelocityVoltage velocityRequest = new VelocityVoltage(0).withSlot(0);
 
   // Simulation
@@ -151,7 +153,16 @@ public class IntakePivotIOSim implements IntakePivotIO {
 
   /** Set position in degrees (matches PB IO) */
   public void setPosition(double positionDegrees) {
-    // Convert degrees to rotations for the sim motor
+    double rotations = positionDegrees / 360.0;
+    motorControllerSim.setControl(positionRequest.withPosition(rotations));
+  }
+
+  public void setPositionSmooth(double positionDegrees) {
+    double rotations = positionDegrees / 360.0;
+    motorControllerSim.setControl(motionMagicRequest.withPosition(rotations));
+  }
+
+  public void setPositionAggressive(double positionDegrees) {
     double rotations = positionDegrees / 360.0;
     motorControllerSim.setControl(positionRequest.withPosition(rotations));
   }

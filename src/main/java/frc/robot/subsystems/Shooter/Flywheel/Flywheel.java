@@ -32,7 +32,7 @@ public class Flywheel extends SubsystemBase {
   /** Velocity tolerance for bang-bang setpoint detection. */
   private static final double TOLERANCE_RPM = 100.0;
 
-  private static final double COAST_CONSTANT_VELOCITY = 1750.0;
+  private static final double COAST_CONSTANT_VELOCITY = 1000.0;
 
   /** Debounce time for shot detection — filters noise from brief velocity dips. */
   private static final double BALL_FIRED_DEBOUNCE_SECONDS = 0.04;
@@ -108,6 +108,11 @@ public class Flywheel extends SubsystemBase {
   /** Returns the current internal state of the flywheel. */
   public FlywheelInternalStates getState() {
     return currentState;
+  }
+
+  /** Returns the total number of balls launched since the flywheel was constructed. */
+  public long getLaunchCount() {
+    return launchCount;
   }
 
   /**
@@ -314,7 +319,7 @@ public class Flywheel extends SubsystemBase {
   @Override
   public void periodic() {
     io.updateInputs(inputs);
-    Logger.processInputs("Flywheel", inputs);
+    Logger.processInputs("Subsystems/Flywheel", inputs);
 
     if (controlState == ControlState.SUPERSTRUCTURE) {
       // Update state machine on every cycle to respond to velocity/current state changes
@@ -322,10 +327,10 @@ public class Flywheel extends SubsystemBase {
       applyState();
     }
 
-    Logger.recordOutput("Subsystems/Flywheel/WantedState", wantedState);
-    Logger.recordOutput("Subsystems/Flywheel/CurrentState", currentState);
-    Logger.recordOutput("Subsystems/Flywheel/PreviousState", previousState);
-    Logger.recordOutput("Subsystems/Flywheel/ControlState", controlState);
-    Logger.recordOutput("Subsystems/Flywheel/LaunchCount", launchCount);
+    Logger.recordOutput("Superstructure/Subsystems/Flywheel/WantedState", wantedState);
+    Logger.recordOutput("Superstructure/Subsystems/Flywheel/CurrentState", currentState);
+    Logger.recordOutput("Superstructure/Subsystems/Flywheel/PreviousState", previousState);
+    Logger.recordOutput("Superstructure/Subsystems/Flywheel/ControlState", controlState);
+    Logger.recordOutput("Superstructure/Subsystems/Flywheel/LaunchCount", launchCount);
   }
 }
