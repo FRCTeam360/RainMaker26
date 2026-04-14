@@ -110,6 +110,11 @@ public class Flywheel extends SubsystemBase {
     return currentState;
   }
 
+  /** Returns the total number of balls launched since the flywheel was constructed. */
+  public long getLaunchCount() {
+    return launchCount;
+  }
+
   /**
    * Sets the wanted state of the flywheel, used by the superstructure.
    *
@@ -314,7 +319,7 @@ public class Flywheel extends SubsystemBase {
   @Override
   public void periodic() {
     io.updateInputs(inputs);
-    Logger.processInputs("Flywheel", inputs);
+    Logger.processInputs("Subsystems/Flywheel", inputs);
 
     if (controlState == ControlState.SUPERSTRUCTURE) {
       // Update state machine on every cycle to respond to velocity/current state changes
@@ -322,10 +327,10 @@ public class Flywheel extends SubsystemBase {
       applyState();
     }
 
-    Logger.recordOutput("Subsystems/Flywheel/WantedState", wantedState);
-    Logger.recordOutput("Subsystems/Flywheel/CurrentState", currentState);
-    Logger.recordOutput("Subsystems/Flywheel/PreviousState", previousState);
-    Logger.recordOutput("Subsystems/Flywheel/ControlState", controlState);
-    Logger.recordOutput("Subsystems/Flywheel/LaunchCount", launchCount);
+    Logger.recordOutput("Superstructure/Subsystems/Flywheel/WantedState", wantedState);
+    Logger.recordOutput("Superstructure/Subsystems/Flywheel/CurrentState", currentState);
+    Logger.recordOutput("Superstructure/Subsystems/Flywheel/PreviousState", previousState);
+    Logger.recordOutput("Superstructure/Subsystems/Flywheel/ControlState", controlState);
+    Logger.recordOutput("Superstructure/Subsystems/Flywheel/LaunchCount", launchCount);
   }
 }

@@ -297,18 +297,19 @@ public class IntakePivot extends SubsystemBase {
   @Override
   public void periodic() {
     io.updateInputs(inputs);
-    Logger.processInputs("IntakePivot", inputs);
+    Logger.processInputs("Subsystems/IntakePivot", inputs);
 
     if (controlState == ControlState.SUPERSTRUCTURE) {
       updateState();
       applyState();
     }
-    Logger.recordOutput("Subsystems/IntakePivot/WantedState", wantedState);
-    Logger.recordOutput("Subsystems/IntakePivot/CurrentState", currentState);
-    Logger.recordOutput("Subsystems/IntakePivot/PreviousState", previousState);
-    Logger.recordOutput("Subsystems/IntakePivot/ControlState", controlState);
-    Logger.recordOutput("Subsystems/IntakePivot/TargetPositionDegrees", getTargetPosition());
+    Logger.recordOutput("Superstructure/Subsystems/IntakePivot/WantedState", wantedState);
+    Logger.recordOutput("Superstructure/Subsystems/IntakePivot/CurrentState", currentState);
+    Logger.recordOutput("Superstructure/Subsystems/IntakePivot/PreviousState", previousState);
+    Logger.recordOutput("Superstructure/Subsystems/IntakePivot/ControlState", controlState);
+    Logger.recordOutput(
+        "Superstructure/Subsystems/IntakePivot/TargetPositionDegrees", getTargetPosition());
     SmartDashboard.putString(
-        "Subsystems/IntakePivot/CurrentIntakePivotState", currentState.toString());
+        "Superstructure/Subsystems/IntakePivot/CurrentIntakePivotState", currentState.toString());
   }
 }

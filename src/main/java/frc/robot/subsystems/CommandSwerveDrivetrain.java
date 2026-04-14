@@ -13,6 +13,9 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.util.PathPlannerLogging;
+import edu.wpi.first.math.Pair;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -28,16 +31,20 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
 import frc.robot.generated.WoodBotDrivetrain.TunerSwerveDrivetrain;
+import frc.robot.lib.BLine.FollowPath;
 import frc.robot.subsystems.Vision.VisionMeasurement;
 import frc.robot.utils.AllianceFlipUtil;
 import frc.robot.utils.ControllerHelper;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
@@ -93,11 +100,13 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   private final DriveRequestType m_driveRequestType = DriveRequestType.Velocity;
 
   // Heading controller PID gains (from example code)
-  private static final double HEADING_KP = 15.0;
-  private static final double HEADING_KI = 0.2;
-  private static final double HEADING_KD = 1.0; // 1.0 Kd is prob the highest we should go
+  private static final double HEADING_KP = 14.0;
+  private static final double HEADING_KI = 0.1;
+  private static final double HEADING_KD = 0.5; // 1.0 Kd is prob the highest we should go
   private static final double HEADING_I_ZONE = Math.toRadians(10.0);
-  private static final double HEADING_TOLERANCE_RAD = Math.toRadians(3.0);
+  private static final double HEADING_TOLERANCE_RAD = Math.toRadians(5.0);
+  private final double HEADING_INTEGRATOR_MAX_RAD_PER_S =
+      Constants.getMaxAngularVelocity().in(RadiansPerSecond) * 0.5;
   // Extra heading tolerance granted per m/s of translational speed.
   // Compensates for the PID steady-state tracking lag when the heading setpoint moves
   // (setpoint rate ≈ v/d rad/s; lag ≈ rate/KP). Tunable — start at ~5°/m/s.
@@ -106,6 +115,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   // Maximum translational speed while using field-centric facing angle (fraction of maxSpeed).
   // Limits how much shoot-on-the-move compensation is needed.
   private static final double FACING_ANGLE_MAX_SPEED_FRACTION = 0.5;
+  private static final double CONTROLLER_DEADBAND = 0.04;
 
   // Heading lock state for driver-assist toggle
   private boolean headingLockEnabled = false;
@@ -162,7 +172,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   // Field-centric facing angle request for hub tracking
   private final SwerveRequest.FieldCentricFacingAngle angleFacingRequest =
       new SwerveRequest.FieldCentricFacingAngle()
-          .withDeadband(maxSpeed.in(MetersPerSecond) * 0.01)
+          .withDeadband(maxSpeed.in(MetersPerSecond) * CONTROLLER_DEADBAND)
           .withRotationalDeadband(0.0)
           .withDriveRequestType(m_driveRequestType); // No deadband for rotation when facing point
 
@@ -170,8 +180,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
       CommandXboxController driveCont) { // field oriented drive command!
     SwerveRequest.FieldCentric drive =
         new SwerveRequest.FieldCentric() // creates a fieldcentric drive
-            .withDeadband(maxSpeed.in(MetersPerSecond) * 0.01)
-            .withRotationalDeadband(maxAngularVelocity.in(RadiansPerSecond) * 0.01)
+            .withDeadband(maxSpeed.in(MetersPerSecond) * CONTROLLER_DEADBAND)
+            .withRotationalDeadband(maxAngularVelocity.in(RadiansPerSecond) * CONTROLLER_DEADBAND)
             .withDriveRequestType(m_driveRequestType);
     double defenseModeRotationScaler = 1.25;
     double defenseModeTranslationScaler = 0.75;
@@ -225,8 +235,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
   private final SwerveRequest.FieldCentric FIELD_CENTRIC_DRIVE =
       new SwerveRequest.FieldCentric()
-          .withDeadband(maxSpeed.in(MetersPerSecond) * 0.01)
-          .withRotationalDeadband(maxAngularVelocity.in(RadiansPerSecond) * 0.01)
+          .withDeadband(maxSpeed.in(MetersPerSecond) * CONTROLLER_DEADBAND)
+          .withRotationalDeadband(maxAngularVelocity.in(RadiansPerSecond) * CONTROLLER_DEADBAND)
           .withDriveRequestType(m_driveRequestType);
 
   // defense mode command
@@ -256,6 +266,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
           headingLockEnabled = !headingLockEnabled;
           headingControllerActive = false; // Reset so we know when fresh data is available
           if (headingLockEnabled) {
+            angleFacingRequest.HeadingController.reset();
             // Initialize to nearest 90° angle when enabling
             double currentDegrees = getRotation2d().getDegrees();
             currentDegrees = ((currentDegrees % 360) + 360) % 360;
@@ -318,7 +329,11 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
       DoubleSupplier velocityXSupplier,
       DoubleSupplier velocityYSupplier,
       Supplier<Rotation2d> headingSupplier) {
-    return this.runEnd(
+    return new FunctionalCommand(
+        () -> {
+          angleFacingRequest.HeadingController.reset();
+          angleFacingRequest.withTargetDirection(headingSupplier.get());
+        },
         () -> {
           double rawVelXMps = velocityXSupplier.getAsDouble();
           double rawVelYMps = velocityYSupplier.getAsDouble();
@@ -330,9 +345,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
           faceAngleWhileDriving(fieldVelXMps, fieldVelYMps, headingSupplier.get());
         },
-        () -> {
-          angleFacingRequest.HeadingController.reset();
-        });
+        interrupted -> angleFacingRequest.HeadingController.reset(),
+        () -> false,
+        this);
   }
 
   /**
@@ -427,12 +442,15 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     angleFacingRequest.HeadingController.setPID(HEADING_KP, HEADING_KI, HEADING_KD);
     angleFacingRequest.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
     angleFacingRequest.HeadingController.setIZone(HEADING_I_ZONE);
+    angleFacingRequest.HeadingController.setIntegratorRange(
+        -HEADING_INTEGRATOR_MAX_RAD_PER_S, HEADING_INTEGRATOR_MAX_RAD_PER_S);
     angleFacingRequest.HeadingController.setTolerance(HEADING_TOLERANCE_RAD);
     angleFacingRequest.ForwardPerspective = ForwardPerspectiveValue.BlueAlliance;
     if (Utils.isSimulation()) {
       startSimThread();
     }
     configureAutoBuilder();
+    configureAutoLogging();
     SmartDashboard.putData("Field", field);
     SmartDashboard.putData(
         "Swerve Drive",
@@ -562,6 +580,83 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
       DriverStation.reportError(
           "Failed to load PathPlanner config and configure AutoBuilder", ex.getStackTrace());
     }
+  }
+
+  // Key cache for BLine logging — populated once per unique BLine key, reused every loop.
+  private final Map<String, String> blineKeyCache = new HashMap<>();
+
+  private String blineKey(String rawKey) {
+    return blineKeyCache.computeIfAbsent(
+        rawKey, k -> "Autos/BLine/" + k.replace("FollowPath/", ""));
+  }
+
+  private void configureAutoLogging() {
+    // PathPlanner — log under Autos/PathPlanner/
+    PathPlannerLogging.setLogCurrentPoseCallback(
+        pose -> Logger.recordOutput("Autos/PathPlanner/currentPose", pose));
+    PathPlannerLogging.setLogTargetPoseCallback(
+        pose -> Logger.recordOutput("Autos/PathPlanner/targetPose", pose));
+    PathPlannerLogging.setLogActivePathCallback(
+        path -> Logger.recordOutput("Autos/PathPlanner/activePath", path.toArray(new Pose2d[0])));
+
+    // BLine — log under Autos/BLine/; keys are interned via blineKeyCache on first use
+    FollowPath.setPoseLoggingConsumer(
+        (Pair<String, edu.wpi.first.math.geometry.Pose2d> pair) ->
+            Logger.recordOutput(blineKey(pair.getFirst()), pair.getSecond()));
+    FollowPath.setTranslationListLoggingConsumer(
+        (Pair<String, edu.wpi.first.math.geometry.Translation2d[]> pair) ->
+            Logger.recordOutput(blineKey(pair.getFirst()), pair.getSecond()));
+    FollowPath.setBooleanLoggingConsumer(
+        (Pair<String, Boolean> pair) ->
+            Logger.recordOutput(blineKey(pair.getFirst()), pair.getSecond()));
+    FollowPath.setDoubleLoggingConsumer(
+        (Pair<String, Double> pair) ->
+            Logger.recordOutput(blineKey(pair.getFirst()), pair.getSecond()));
+  }
+
+  // BLine AutoBuilder PID gains — initial values derived from PathPlanner tuning.
+  // Translation/rotation are intentionally lower than PP since BLine's controller
+  // semantics differ (distance-to-goal vs time-parameterized).
+  private static final double BLINE_TRANSLATION_KP = 5.0;
+  private static final double BLINE_TRANSLATION_KI = 0.0;
+  private static final double BLINE_TRANSLATION_KD = 0.0;
+  private static final double BLINE_ROTATION_KP = 3.0;
+  private static final double BLINE_ROTATION_KI = 0.0;
+  private static final double BLINE_ROTATION_KD = 0.0;
+  private static final double BLINE_CROSS_TRACK_KP = 2.5;
+  private static final double BLINE_CROSS_TRACK_KI = 0.0;
+  private static final double BLINE_CROSS_TRACK_KD = 0.0;
+
+  /**
+   * Creates a reusable BLine FollowPath.Builder configured for this drivetrain. The builder can be
+   * used to construct path-following commands via {@code builder.build(path)}.
+   *
+   * @return a configured {@link FollowPath.Builder}
+   */
+  public FollowPath.Builder createBLinePathBuilder() {
+    return new FollowPath.Builder(
+            this,
+            this::getPosition,
+            this::getVelocity,
+            this::driveRobotRelative,
+            new PIDController(BLINE_TRANSLATION_KP, BLINE_TRANSLATION_KI, BLINE_TRANSLATION_KD),
+            new PIDController(BLINE_ROTATION_KP, BLINE_ROTATION_KI, BLINE_ROTATION_KD),
+            new PIDController(BLINE_CROSS_TRACK_KP, BLINE_CROSS_TRACK_KI, BLINE_CROSS_TRACK_KD))
+        .withPoseReset(this::resetPose);
+  }
+
+  /**
+   * Drives the robot with the given robot-relative chassis speeds. Used as the drive consumer for
+   * BLine path following (no feedforwards — BLine doesn't provide them).
+   *
+   * @param speeds robot-relative chassis speeds
+   */
+  public void driveRobotRelative(ChassisSpeeds speeds) {
+    setCommandedSpeeds(speeds);
+    setControl(
+        m_pathApplyRobotSpeeds
+            .withSpeeds(ChassisSpeeds.discretize(speeds, 0.020))
+            .withDriveRequestType(m_driveRequestType));
   }
 
   /**
@@ -697,6 +792,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     Logger.recordOutput(SUBSYSTEM_NAME + "TargetState", state.ModuleTargets);
     Logger.recordOutput(SUBSYSTEM_NAME + "Using Vision", hasVisionMeasurements);
     Logger.recordOutput(SUBSYSTEM_NAME + "Is Defense Mode", isDefenseMode);
+    Logger.recordOutput(
+        SUBSYSTEM_NAME + "HeadingSetpointDeg",
+        Math.toDegrees(angleFacingRequest.HeadingController.getSetpoint()));
 
     // Log whether vision measurements have been applied (useful for analysis)
     /*

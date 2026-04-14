@@ -14,7 +14,7 @@ import frc.robot.Constants;
 public class IndexerIOPB implements IndexerIO {
   private static final double GEAR_RATIO =
       1.0 / 1.0; // its not very useful to set the output velocity in this system, but its 9.0
-  private static final int CURRENT_LIMIT_AMPS = 50;
+  private static final int FREE_CURRENT_LIMIT_AMPS = 50;
   private static final double KP = 0.0006; // was 0.0003
   private static final double KI = 0.0;
   private static final double KD = 0.0;
@@ -32,7 +32,7 @@ public class IndexerIOPB implements IndexerIO {
   public IndexerIOPB() {
     sparkMaxConfig.idleMode(IdleMode.kCoast);
     sparkMaxConfig.inverted(false);
-    sparkMaxConfig.smartCurrentLimit(CURRENT_LIMIT_AMPS);
+    sparkMaxConfig.smartCurrentLimit(60, FREE_CURRENT_LIMIT_AMPS);
 
     sparkMaxConfig.encoder.positionConversionFactor(1.0 / GEAR_RATIO);
     sparkMaxConfig.encoder.velocityConversionFactor(1.0 / GEAR_RATIO);

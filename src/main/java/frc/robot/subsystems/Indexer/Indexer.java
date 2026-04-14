@@ -12,7 +12,7 @@ import org.littletonrobotics.junction.Logger;
 
 public class Indexer extends SubsystemBase {
   // Constants
-  private static final double INDEXER_VELOCITY_RPM = 4000.0;
+  private static final double INDEXER_VELOCITY_RPM = 3000.0;
   private static final double INDEXER_DUTY_CYCLE = 0.80;
   private static final double INTAKING_ASSIST_DUTY_CYCLE = -0.15;
   private static final double REVERSING_DUTY_CYCLE = -0.35;
@@ -123,15 +123,15 @@ public class Indexer extends SubsystemBase {
   @Override
   public void periodic() {
     io.updateInputs(inputs);
-    Logger.processInputs("Indexer", inputs);
+    Logger.processInputs("Subsystems/Indexer", inputs);
 
     if (controlState == ControlState.SUPERSTRUCTURE) {
       updateState();
       applyState();
     }
-    Logger.recordOutput("Subsystems/Indexer/WantedState", wantedState);
-    Logger.recordOutput("Subsystems/Indexer/CurrentState", currentState);
-    Logger.recordOutput("Subsystems/Indexer/PreviousState", previousState);
-    Logger.recordOutput("Subsystems/Indexer/ControlState", controlState);
+    Logger.recordOutput("Superstructure/Subsystems/Indexer/WantedState", wantedState);
+    Logger.recordOutput("Superstructure/Subsystems/Indexer/CurrentState", currentState);
+    Logger.recordOutput("Superstructure/Subsystems/Indexer/PreviousState", previousState);
+    Logger.recordOutput("Superstructure/Subsystems/Indexer/ControlState", controlState);
   }
 }
