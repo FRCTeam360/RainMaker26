@@ -193,7 +193,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
               -ControllerHelper.modifyAxisCubic(driveCont.getLeftX(), maxSpeed.in(MetersPerSecond));
           double omegaRps =
               -ControllerHelper.modifyAxisSquared(
-                  driveCont.getRightX(), maxAngularVelocity.in(RadiansPerSecond) / 2.0);
+                  driveCont.getRightX(), maxAngularVelocity.in(RadiansPerSecond));
           if (isDefenseMode) {
             velXMps *= defenseModeTranslationScaler;
             velYMps *= defenseModeTranslationScaler;
