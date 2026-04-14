@@ -4,6 +4,9 @@
 
 package frc.robot.subsystems.Vision;
 
+import java.util.Optional;
+import java.util.function.DoubleSupplier;
+
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.NetworkTable;
@@ -12,8 +15,6 @@ import frc.robot.utils.FieldConstants;
 import frc.robot.utils.LimelightHelpers;
 import frc.robot.utils.LimelightHelpers.PoseEstimate;
 import frc.robot.utils.LimelightHelpers.RawFiducial;
-import java.util.Optional;
-import java.util.function.DoubleSupplier;
 
 /**
  * Abstract base class for Limelight vision IO layers. Contains all shared NetworkTables reads, pose
@@ -48,7 +49,7 @@ public abstract class VisionIOLimelightBase implements VisionIO {
   }
 
   /** Returns the NetworkTables name of this Limelight. */
-  protected String getName() {
+  public String getName() {
     return name;
   }
 
