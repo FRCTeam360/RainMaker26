@@ -171,6 +171,9 @@ public class PositionUtils {
   public static boolean canPass(Pose2d robotPose, Rotation2d shooterRotation) {
     Translation2d start = robotPose.getTranslation();
     Rotation2d poseToHub;
+    // in order to get the rotation of the position to a hub, you have to use
+    // poseToHub = where the translation is going to.minus(where the translation is coming
+    // from).getAngle();
     double dx = shooterRotation.getCos();
     double dy = shooterRotation.getSin();
     double maxDistance = Double.MAX_VALUE;
