@@ -15,7 +15,8 @@ import java.util.function.BooleanSupplier;
 import org.littletonrobotics.junction.Logger;
 
 /**
- * Manages the shooter state machine, coordinating the flywheel, hood, and flywheel kicker to
+ * Manages the shooter state machine, coordinating the flywheel, hood, and
+ * flywheel kicker to
  * determine when the shooter is ready to fire.
  */
 public class ShooterStateMachine {
@@ -59,10 +60,11 @@ public class ShooterStateMachine {
   /**
    * Creates a new ShooterStateMachine.
    *
-   * @param flywheel the flywheel subsystem
-   * @param hood the hood subsystem
-   * @param flywheelKicker the flywheel kicker subsystem
-   * @param isAlignedToTarget supplier that returns true when the robot is aligned to the target
+   * @param flywheel          the flywheel subsystem
+   * @param hood              the hood subsystem
+   * @param flywheelKicker    the flywheel kicker subsystem
+   * @param isAlignedToTarget supplier that returns true when the robot is aligned
+   *                          to the target
    */
   public ShooterStateMachine(
       Flywheel flywheel,
@@ -96,16 +98,20 @@ public class ShooterStateMachine {
   }
 
   /**
-   * Updates the shooter state based on wanted state, subsystem readiness, and alignment. Should be
+   * Updates the shooter state based on wanted state, subsystem readiness, and
+   * alignment. Should be
    * called every cycle by the SuperStructure.
    *
-   * <p>Uses the flywheel's internal state transitions to gate firing:
+   * <p>
+   * Uses the flywheel's internal state transitions to gate firing:
    *
    * <ul>
-   *   <li>{@link FlywheelInternalStates#AT_SETPOINT} — flywheel velocity is sustained in tolerance;
-   *       combined with hood and drivetrain readiness, transitions to FIRING
-   *   <li>{@link FlywheelInternalStates#UNDER_SHOOTING} — sustained RPM drop detected from a shot
-   *       passing through; reverts to PREPARING_TO_FIRE to restart the cycle
+   * <li>{@link FlywheelInternalStates#AT_SETPOINT} — flywheel velocity is
+   * sustained in tolerance;
+   * combined with hood and drivetrain readiness, transitions to FIRING
+   * <li>{@link FlywheelInternalStates#UNDER_SHOOTING} — sustained RPM drop
+   * detected from a shot
+   * passing through; reverts to PREPARING_TO_FIRE to restart the cycle
    * </ul>
    */
   public void update() {
@@ -119,8 +125,7 @@ public class ShooterStateMachine {
         handleShooting(false);
         break;
       case PASSIVE_SHOOTER:
-        currentState =
-            isInAllianceZone.getAsBoolean() ? ShooterStates.STANDBY : ShooterStates.WAITING;
+        currentState = isInAllianceZone.getAsBoolean() ? ShooterStates.STANDBY : ShooterStates.WAITING;
         break;
       case REVERSING:
         currentState = ShooterStates.UNJAMMING;
@@ -133,9 +138,11 @@ public class ShooterStateMachine {
   }
 
   /**
-   * Handles the shooting state logic, determining readiness and transitioning states.
+   * Handles the shooting state logic, determining readiness and transitioning
+   * states.
    *
-   * @param isForced if true, bypasses drivetrain alignment and target readiness checks
+   * @param isForced if true, bypasses drivetrain alignment and target readiness
+   *                 checks
    */
   private void handleShooting(boolean isForced) {
     FlywheelInternalStates flywheelState = flywheel.getState();
@@ -145,36 +152,8 @@ public class ShooterStateMachine {
     boolean drivetrainAligned = isForced || isAlignedToTarget.getAsBoolean();
     boolean targetReady = isForced || canShootToTarget.getAsBoolean();
     boolean hoodAndDriveReady = hoodReady && drivetrainAligned;
-    boolean wasFiringOrDisturbed =
-        previousState == ShooterStates.FIRING || previousState == ShooterStates.DISTURBED;
+    boolean wasFiringOrDisturbed = previousState == ShooterStates.FIRING || previousState == ShooterStates.DISTURBED;
     boolean disturbanceActive = wasFiringOrDisturbed && !hoodAndDriveReady;
-
-    if (disturbanceActive) {
-      if (previousState != ShooterStates.DISTURBED
-          || Double.isNaN(disturbanceStartTimestampSeconds)) {
-        disturbanceStartTimestampSeconds = Timer.getFPGATimestamp();
-      }
-
-      boolean disturbanceTimedOut =
-          Timer.getFPGATimestamp() - disturbanceStartTimestampSeconds
-              >= DISTURBANCE_TIMEOUT_SECONDS;
-
-      Logger.recordOutput(
-          "Superstructure/Shooter/Shooting/DisturbanceTimedOut", disturbanceTimedOut);
-      Logger.recordOutput(
-          "Superstructure/Shooter/Shooting/DisturbanceWindowSec", DISTURBANCE_TIMEOUT_SECONDS);
-
-      if (disturbanceTimedOut) {
-        disturbanceStartTimestampSeconds = Double.NaN;
-        currentState = ShooterStates.PREPARING_TO_FIRE;
-      } else {
-        currentState = ShooterStates.DISTURBED;
-      }
-
-      return;
-    }
-
-    disturbanceStartTimestampSeconds = Double.NaN;
 
     Logger.recordOutput("Superstructure/Shooter/Shooting/FlywheelReady", flywheelReady);
     SmartDashboard.putBoolean("Superstructure/Shooter/Shooting/FlywheelReady", flywheelReady);
@@ -200,6 +179,32 @@ public class ShooterStateMachine {
     Logger.recordOutput(
         "Superstructure/Shooter/Shooting/DisturbanceWindowSec", DISTURBANCE_TIMEOUT_SECONDS);
 
+    if (disturbanceActive) {
+      if (previousState != ShooterStates.DISTURBED
+          || Double.isNaN(disturbanceStartTimestampSeconds)) {
+        disturbanceStartTimestampSeconds = Timer.getFPGATimestamp();
+      }
+
+      boolean disturbanceTimedOut = Timer.getFPGATimestamp()
+          - disturbanceStartTimestampSeconds >= DISTURBANCE_TIMEOUT_SECONDS;
+
+      Logger.recordOutput(
+          "Superstructure/Shooter/Shooting/DisturbanceTimedOut", disturbanceTimedOut);
+      Logger.recordOutput(
+          "Superstructure/Shooter/Shooting/DisturbanceWindowSec", DISTURBANCE_TIMEOUT_SECONDS);
+
+      if (disturbanceTimedOut) {
+        disturbanceStartTimestampSeconds = Double.NaN;
+        currentState = ShooterStates.PREPARING_TO_FIRE;
+      } else {
+        currentState = ShooterStates.DISTURBED;
+      }
+
+      return;
+    }
+
+    disturbanceStartTimestampSeconds = Double.NaN;
+
     if (shouldFire) {
       currentState = ShooterStates.FIRING;
     } else if (subsystemsReady) {
@@ -210,7 +215,8 @@ public class ShooterStateMachine {
   }
 
   /**
-   * Applies the current shooter state to subsystems. Sets flywheel, hood, and flywheel kicker
+   * Applies the current shooter state to subsystems. Sets flywheel, hood, and
+   * flywheel kicker
    * wanted states based on the current state.
    */
   public void apply() {
