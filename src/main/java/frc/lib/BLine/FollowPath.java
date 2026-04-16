@@ -1,4 +1,4 @@
-package frc.robot.lib.BLine;
+package frc.lib.BLine;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Pair;
@@ -11,13 +11,13 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Subsystem;
-import frc.robot.lib.BLine.Path.PathElement;
-import frc.robot.lib.BLine.Path.PathElementConstraint;
-import frc.robot.lib.BLine.Path.EventTrigger;
-import frc.robot.lib.BLine.Path.RotationTarget;
-import frc.robot.lib.BLine.Path.RotationTargetConstraint;
-import frc.robot.lib.BLine.Path.TranslationTarget;
-import frc.robot.lib.BLine.Path.TranslationTargetConstraint;
+import frc.lib.BLine.Path.PathElement;
+import frc.lib.BLine.Path.PathElementConstraint;
+import frc.lib.BLine.Path.EventTrigger;
+import frc.lib.BLine.Path.RotationTarget;
+import frc.lib.BLine.Path.RotationTargetConstraint;
+import frc.lib.BLine.Path.TranslationTarget;
+import frc.lib.BLine.Path.TranslationTargetConstraint;
 
 import java.util.ArrayList;
 import java.util.HashMap;

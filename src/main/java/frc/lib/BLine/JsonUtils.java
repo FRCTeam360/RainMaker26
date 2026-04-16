@@ -1,13 +1,13 @@
-package frc.robot.lib.BLine;
+package frc.lib.BLine;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.Filesystem;
-import frc.robot.lib.BLine.Path.PathElement;
-import frc.robot.lib.BLine.Path.EventTrigger;
-import frc.robot.lib.BLine.Path.RotationTarget;
-import frc.robot.lib.BLine.Path.TranslationTarget;
-import frc.robot.lib.BLine.Path.Waypoint;
+import frc.lib.BLine.Path.PathElement;
+import frc.lib.BLine.Path.EventTrigger;
+import frc.lib.BLine.Path.RotationTarget;
+import frc.lib.BLine.Path.TranslationTarget;
+import frc.lib.BLine.Path.Waypoint;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
