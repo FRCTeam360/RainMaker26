@@ -134,7 +134,7 @@ public class PositionUtils {
   private static double getAllianceEdge() {
     return AllianceFlipUtil.applyX(LinesVertical.hubCenter);
   }
-  
+
   private static double getOppAllianceEdge() {
     return AllianceFlipUtil.applyX(LinesVertical.oppHubCenter);
   }
