@@ -609,24 +609,24 @@ public class RobotContainer {
 
   Command runSystemsTest() {
     return Commands.waitSeconds(0.1)
-        .andThen(Commands.waitSeconds(2.0).deadlineFor(intakePivot.setPositionCommand(() -> 96.0)))
-        .andThen(Commands.waitSeconds(2.0).deadlineFor(intakeRoller.setVelocityCommand(3000.0)))
-        .andThen(Commands.waitSeconds(2.0).deadlineFor(intakeRoller.setDutyCycleCommand(-0.6)))
+        .andThen(Commands.waitSeconds(1.0).deadlineFor(intakePivot.setPositionCommand(() -> 96.0)))
+        .andThen(Commands.waitSeconds(1.0).deadlineFor(intakeRoller.setVelocityCommand(3000.0)))
+        .andThen(Commands.waitSeconds(1.0).deadlineFor(intakeRoller.setDutyCycleCommand(-0.6)))
         .andThen(Commands.waitSeconds(0.1).deadlineFor(intakeRoller.setDutyCycleCommand(0)))
-        .andThen(Commands.waitSeconds(2.0).deadlineFor(indexer.setDutyCycleCommand(0.2)))
-        .andThen(Commands.waitSeconds(2.0).deadlineFor(indexer.setDutyCycleCommand(-0.2)))
+        .andThen(Commands.waitSeconds(1.0).deadlineFor(indexer.setDutyCycleCommand(0.2)))
+        .andThen(Commands.waitSeconds(1.0).deadlineFor(indexer.setDutyCycleCommand(-0.2)))
         .andThen(Commands.waitSeconds(0.1).deadlineFor(indexer.setDutyCycleCommand(0)))
-        .andThen(Commands.waitSeconds(2.0).deadlineFor(hood.setPositionCommand(40.0)))
-        .andThen(Commands.waitSeconds(2.0).deadlineFor(hood.setPositionCommand(0.0)))
-        .andThen(Commands.waitSeconds(2.0).deadlineFor(flywheelKicker.setDutyCycleCommand(0.2)))
-        .andThen(Commands.waitSeconds(2.0).deadlineFor(flywheelKicker.setDutyCycleCommand(-0.2)))
+        .andThen(Commands.waitSeconds(1.0).deadlineFor(hood.setPositionCommand(40.0)))
+        .andThen(Commands.waitSeconds(1.0).deadlineFor(hood.setPositionCommand(0.0)))
+        .andThen(Commands.waitSeconds(1.0).deadlineFor(flywheelKicker.setDutyCycleCommand(0.2)))
+        .andThen(Commands.waitSeconds(1.0).deadlineFor(flywheelKicker.setDutyCycleCommand(-0.2)))
         .andThen(Commands.waitSeconds(0.1).deadlineFor(flywheelKicker.setDutyCycleCommand(0)))
-        .andThen(Commands.waitSeconds(2.0).deadlineFor(hopperRoller.setDutyCycleCommand(0.2)))
-        .andThen(Commands.waitSeconds(2.0).deadlineFor(hopperRoller.setDutyCycleCommand(-0.2)))
+        .andThen(Commands.waitSeconds(1.0).deadlineFor(hopperRoller.setDutyCycleCommand(0.2)))
+        .andThen(Commands.waitSeconds(1.0).deadlineFor(hopperRoller.setDutyCycleCommand(-0.2)))
         .andThen(Commands.waitSeconds(0.1).deadlineFor(hopperRoller.setDutyCycleCommand(0)))
-        .andThen(Commands.waitSeconds(2.0).deadlineFor(flywheel.setDutyCycleCommand(0.2)))
+        .andThen(Commands.waitSeconds(1.0).deadlineFor(flywheel.setDutyCycleCommand(0.2)))
         .andThen(Commands.waitSeconds(0.1).deadlineFor(flywheel.setDutyCycleCommand(0)))
-        .andThen(Commands.waitSeconds(2.0).deadlineFor(intakePivot.setPositionCommand(() -> 0.0)));
+        .andThen(Commands.waitSeconds(1.0).deadlineFor(intakePivot.setPositionCommand(() -> 0.0)));
   }
 
   /** Stops all subsystems safely when the robot is disabled. */
