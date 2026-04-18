@@ -11,35 +11,9 @@
           }
         },
         {
-          "type": "deadline",
+          "type": "wait",
           "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "MIRRORED No Stop Left Red Middle 1"
-                }
-              },
-              {
-                "type": "sequential",
-                "data": {
-                  "commands": [
-                    {
-                      "type": "wait",
-                      "data": {
-                        "waitTime": 0.1
-                      }
-                    },
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "basic intake"
-                      }
-                    }
-                  ]
-                }
-              }
-            ]
+            "waitTime": 1.0
           }
         },
         {
@@ -47,12 +21,30 @@
           "data": {
             "commands": [
               {
+                "type": "path",
+                "data": {
+                  "pathName": "MIRRORED No Stop Red A3 1"
+                }
+              },
+              {
                 "type": "named",
                 "data": {
-                  "name": "shoot at hub"
+                  "name": "basic intake"
+                }
+              },
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 0.1
                 }
               }
             ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "shoot at hub"
           }
         },
         {
@@ -75,16 +67,9 @@
           }
         },
         {
-          "type": "deadline",
+          "type": "named",
           "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "shoot at hub"
-                }
-              }
-            ]
+            "name": "shoot at hub"
           }
         }
       ]

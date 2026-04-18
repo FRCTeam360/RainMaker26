@@ -786,12 +786,6 @@ src/main/java/frc/robot/subsystems/
 │       ├── FlywheelKickerIO.java
 │       ├── FlywheelKickerIOPB.java
 │       └── FlywheelKickerIOSim.java
-│
-└── Climber/
-    ├── Climber.java
-    ├── ClimberIO.java
-    ├── ClimberIOPB.java
-    └── ClimberIOSim.java
 ```
 
 ### Naming Conventions

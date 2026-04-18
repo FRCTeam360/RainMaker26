@@ -55,7 +55,7 @@ public abstract class VisionIOLimelightBase implements VisionIO {
   }
 
   /** Returns the NetworkTables name of this Limelight. */
-  protected String getName() {
+  public String getName() {
     return name;
   }
 
