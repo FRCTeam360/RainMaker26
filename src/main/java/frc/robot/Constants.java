@@ -41,6 +41,7 @@ public final class Constants {
   public static enum RobotType {
     SIM,
     WOODBOT,
+    COMPBOT,
     PRACTICEBOT,
     REPLAY
   }
@@ -57,6 +58,8 @@ public final class Constants {
     switch (getRobotType()) {
       case WOODBOT:
         return WoodBotConstants.maxSpeed;
+      case COMPBOT:
+        return CompBotConstants.maxSpeed;
       case PRACTICEBOT:
         return PracticeBotConstants.maxSpeed;
       case SIM:
@@ -70,6 +73,8 @@ public final class Constants {
     switch (getRobotType()) {
       case WOODBOT:
         return WoodBotConstants.maxAngularVelocity;
+      case COMPBOT:
+        return CompBotConstants.maxAngularVelocity;
       case PRACTICEBOT:
         return PracticeBotConstants.maxAngularVelocity;
       case SIM:
@@ -87,16 +92,22 @@ public final class Constants {
   }
 
   private static RobotType initRobotType() {
+    if (!Robot.isReal()) { // Check sim first to avoid empty serial address matching COMP
+      robotType = Constants.RobotType.SIM;
+      return robotType;
+    }
+
     String serialAddress = HALUtil.getSerialNumber();
 
     if (serialAddress.equals(SerialAddressConstants.WOOD_SERIAL_ADDRESS)) {
       robotType = Constants.RobotType.WOODBOT;
+    } else if (!SerialAddressConstants.COMP_SERIAL_ADDRESS.isEmpty()
+        && serialAddress.equals(SerialAddressConstants.COMP_SERIAL_ADDRESS)) {
+      robotType = Constants.RobotType.COMPBOT;
     } else if (serialAddress.equals(SerialAddressConstants.PRACTICE_SERIAL_ADDRESS)) {
       robotType = Constants.RobotType.PRACTICEBOT;
-    } else if (!Robot.isReal()) { // KEEP AT BOTTOM
-      robotType = Constants.RobotType.SIM;
     } else {
-      robotType = Constants.RobotType.PRACTICEBOT;
+      robotType = Constants.RobotType.COMPBOT;
     }
     return robotType;
   }
@@ -189,6 +200,8 @@ public final class Constants {
     public static final InterpolatingDoubleTreeMap timeOfFlightMap =
         new InterpolatingDoubleTreeMap();
 
+    public static final double INDEXER_TO_FLYWHEEL_SECONDS = 0.4;
+
     public static final double MIN_SHOT_DISTANCE_METERS = 1.0;
     public static final double MAX_SHOT_DISTANCE_METERS = 5.0;
 
@@ -235,6 +248,8 @@ public final class Constants {
 
     public static final double HOOD_OFFSET = 2.0;
 
+    public static final double INDEXER_TO_FLYWHEEL_SECONDS = 0.4;
+
     public static final double MIN_SHOT_DISTANCE_METERS = 1.25;
     public static final double MAX_SHOT_DISTANCE_METERS = 6.0;
 
@@ -246,17 +261,15 @@ public final class Constants {
     public static final int LEFT_INTAKE_ROLLER_ID = 15;
     public static final int RIGHT_INTAKE_ROLLER_ID = 25;
 
-    // === CLIMBER ===
-    public static final int CLIMBER_RIGHT_ID = 16;
-    public static final int CLIMBER_LEFT_ID = 17;
-
     // === FLYWHEEL ===
     public static final int FLYWHEEL_RIGHT_ID = 18;
     public static final int FLYWHEEL_LEFT_ID = 19;
 
     // === FLYWHEEL KICKER ===
     public static final int FLYWHEEL_KICKER_ID = 20;
-    public static final int FLYWHEEL_KICKER_SENSOR_ID = 21;
+
+    // === HOPPER SENSOR ===
+    public static final int HOPPER_SENSOR_ID = 21;
 
     // === HOPPER ===
     public static final int HOPPER_ROLLER_ID = 22;
@@ -274,8 +287,8 @@ public final class Constants {
     public static final CANBus CANBUS = new CANBus("Default Name");
 
     // === MAXIMUMS ===
-    public static final LinearVelocity maxSpeed = MetersPerSecond.of(4.69);
-    public static final AngularVelocity maxAngularVelocity = RevolutionsPerSecond.of(4.0);
+    public static final LinearVelocity maxSpeed = MetersPerSecond.of(4.85);
+    public static final AngularVelocity maxAngularVelocity = RevolutionsPerSecond.of(2.5);
 
     static {
       shotHoodAngleMap.put(6.0, 16.0);
@@ -323,14 +336,14 @@ public final class Constants {
       // passFlywheelSpeedMap.put(0.0, 2000.0);
 
       // AGGRESSIVE LOW ANGLE PASS MAP
-      passHoodAngleMap.put(12.0, 35.0);
+      passHoodAngleMap.put(12.0, 40.0);
       passHoodAngleMap.put(9.0, 40.0);
       passHoodAngleMap.put(1.0, 40.0);
       passHoodAngleMap.put(0.0, 40.0);
 
-      passFlywheelSpeedMap.put(12.0, 4500.0);
-      passFlywheelSpeedMap.put(9.0, 3750.0);
-      passFlywheelSpeedMap.put(7.0, 3000.0);
+      passFlywheelSpeedMap.put(12.0, 2800.0);
+      passFlywheelSpeedMap.put(9.0, 2800.0);
+      passFlywheelSpeedMap.put(6.0, 2600.0);
       passFlywheelSpeedMap.put(5.0, 2200.0); // TESTED
       passFlywheelSpeedMap.put(4.0, 2000.0);
       passFlywheelSpeedMap.put(3.0, 1700.0); // TESTED
@@ -338,6 +351,109 @@ public final class Constants {
       passFlywheelSpeedMap.put(2.0, 1500.0);
       passFlywheelSpeedMap.put(1.0, 1500.0);
       passFlywheelSpeedMap.put(0.0, 1500.0);
+
+      timeOfFlightMap.put(0.0, 1.05);
+      timeOfFlightMap.put(1.75, 1.05);
+      timeOfFlightMap.put(2.05, 1.0);
+      timeOfFlightMap.put(3.1, 1.05);
+      timeOfFlightMap.put(4.8, 1.02);
+    }
+  }
+
+  public static class CompBotConstants {
+    // === SHOT CALCULATOR ===
+    public static final InterpolatingDoubleTreeMap shotHoodAngleMap =
+        new InterpolatingDoubleTreeMap();
+    public static final InterpolatingDoubleTreeMap shotFlywheelSpeedMap =
+        new InterpolatingDoubleTreeMap();
+    public static final InterpolatingDoubleTreeMap passHoodAngleMap =
+        new InterpolatingDoubleTreeMap();
+    public static final InterpolatingDoubleTreeMap passFlywheelSpeedMap =
+        new InterpolatingDoubleTreeMap();
+    public static final InterpolatingDoubleTreeMap timeOfFlightMap =
+        new InterpolatingDoubleTreeMap();
+
+    public static final double HOOD_OFFSET = 2.0;
+
+    public static final double INDEXER_TO_FLYWHEEL_SECONDS = 0.4;
+
+    public static final double MIN_SHOT_DISTANCE_METERS = 1.25;
+    public static final double MAX_SHOT_DISTANCE_METERS = 6.0;
+
+    public static final double MIN_PASS_DISTANCE_METERS = 1.0;
+    public static final double MAX_PASS_DISTANCE_METERS = 12.0;
+
+    // === INTAKE ===
+    public static final int INTAKE_PIVOT_ID = 14;
+    public static final int LEFT_INTAKE_ROLLER_ID = 15;
+    public static final int RIGHT_INTAKE_ROLLER_ID = 16;
+
+    // === FLYWHEEL ===
+    public static final int FLYWHEEL_RIGHT_ID = 18;
+    public static final int FLYWHEEL_LEFT_ID = 19;
+
+    // === FLYWHEEL KICKER ===
+    public static final int FLYWHEEL_KICKER_ID = 20;
+
+    // === HOPPER SENSOR ===
+    public static final int HOPPER_SENSOR_ID = 21;
+
+    // === HOPPER ===
+    public static final int HOPPER_ROLLER_ID = 22;
+    public static final int TWINDEXER_ID = 23;
+
+    // === HOOD ===
+    public static final int HOOD_ID = 24;
+
+    // === LIMELIGHT ===
+    public static final String LIMELIGHT_RIGHT = "limelight-right";
+    public static final String LIMELIGHT_LEFT = "limelight-left";
+
+    // === CANBUS ===
+    public static final CANBus CANBUS = new CANBus("Default Name");
+
+    // === MAXIMUMS ===
+    public static final LinearVelocity maxSpeed = MetersPerSecond.of(4.85);
+    public static final AngularVelocity maxAngularVelocity = RevolutionsPerSecond.of(2.5);
+
+    static {
+      shotHoodAngleMap.put(6.0, 14.0);
+      shotHoodAngleMap.put(5.0, 14.0);
+      shotHoodAngleMap.put(4.5, 14.0);
+      shotHoodAngleMap.put(4.0, 16.0);
+
+      shotHoodAngleMap.put(3.5, 13.0);
+      shotHoodAngleMap.put(3.0, 10.0);
+      shotHoodAngleMap.put(2.5, 6.0);
+      shotHoodAngleMap.put(2.0, 3.0);
+      shotHoodAngleMap.put(1.25, 0.0);
+
+      shotFlywheelSpeedMap.put(6.0, 2550.0);
+      shotFlywheelSpeedMap.put(5.0, 2550.0);
+      shotFlywheelSpeedMap.put(4.5, 2550.0);
+      shotFlywheelSpeedMap.put(4.0, 2300.0);
+
+      shotFlywheelSpeedMap.put(3.5, 2150.0);
+      shotFlywheelSpeedMap.put(3.0, 2050.0);
+      shotFlywheelSpeedMap.put(2.5, 1950.0);
+      shotFlywheelSpeedMap.put(2.0, 1875.0);
+      shotFlywheelSpeedMap.put(1.25, 1700.0);
+
+      passHoodAngleMap.put(12.0, 40.0);
+      passHoodAngleMap.put(9.0, 40.0);
+      passHoodAngleMap.put(1.0, 40.0);
+      passHoodAngleMap.put(0.0, 40.0);
+
+      passFlywheelSpeedMap.put(12.0, 3500.0);
+      passFlywheelSpeedMap.put(9.0, 3500.0);
+      passFlywheelSpeedMap.put(7.0, 2800.0);
+      passFlywheelSpeedMap.put(5.0, 2100.0);
+      passFlywheelSpeedMap.put(4.0, 1900.0);
+      passFlywheelSpeedMap.put(3.0, 1600.0);
+      passFlywheelSpeedMap.put(2.5, 1400.0);
+      passFlywheelSpeedMap.put(2.0, 1400.0);
+      passFlywheelSpeedMap.put(1.0, 1400.0);
+      passFlywheelSpeedMap.put(0.0, 1400.0);
 
       timeOfFlightMap.put(0.0, 1.05);
       timeOfFlightMap.put(1.75, 1.05);
@@ -369,9 +485,6 @@ public final class Constants {
     // === HOOD ===
     public static final int HOOD_MOTOR = 34;
 
-    // === CLIMBER ===
-    public static final int CLIMBER_MOTOR = 36;
-
     // === MAXIMUMS ===
     public static final LinearVelocity maxSpeed = MetersPerSecond.of(4.69);
     public static final AngularVelocity maxAngularVelocity = RevolutionsPerSecond.of(4.0);
@@ -389,6 +502,8 @@ public final class Constants {
         new InterpolatingDoubleTreeMap();
     public static final InterpolatingDoubleTreeMap passTimeOfFlightMap =
         new InterpolatingDoubleTreeMap();
+
+    public static final double INDEXER_TO_FLYWHEEL_SECONDS = 0.4;
 
     public static final double MIN_SHOT_DISTANCE_METERS = 0.0;
     public static final double MAX_SHOT_DISTANCE_METERS = 6.0;
@@ -451,8 +566,7 @@ public final class Constants {
 
   public static final class SerialAddressConstants {
     public static final String WOOD_SERIAL_ADDRESS = "032BE44A";
+    public static final String COMP_SERIAL_ADDRESS = "025AE07E";
     public static final String PRACTICE_SERIAL_ADDRESS = "03260AD5";
   }
-
-  public static double loopPeriodSecs; // add value
 }

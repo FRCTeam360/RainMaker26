@@ -1,0 +1,59 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 3.592667,
+        "y": 6.042356
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 2.735156,
+        "y": 5.223822
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 0.689,
+        "y": 4.649
+      },
+      "prevControl": {
+        "x": 1.858333,
+        "y": 4.8244
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": null
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.8000000000000002,
+      "rotationDegrees": 90.0
+    }
+  ],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 1.0,
+    "maxAcceleration": 4.0,
+    "maxAngularVelocity": 360.0,
+    "maxAngularAcceleration": 540.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 111.0
+  },
+  "reversed": false,
+  "folder": "FLIPPED Blue New Depot Pickup",
+  "idealStartingState": {
+    "velocity": 0.0,
+    "rotation": 180.0
+  },
+  "useDefaultConstraints": false
+}

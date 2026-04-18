@@ -4,12 +4,14 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.HopperRoller.HopperRoller;
 import frc.robot.subsystems.HopperRoller.HopperRoller.HopperRollerStates;
+import frc.robot.subsystems.HopperSensor.HopperSensor;
 import frc.robot.subsystems.Indexer.Indexer;
 import frc.robot.subsystems.Indexer.Indexer.IndexerStates;
 import frc.robot.subsystems.Intake.IntakePivot.IntakePivot;
@@ -47,11 +49,16 @@ public class SuperStructure extends SubsystemBase {
   private final ShotCalculator hubShotCalculator;
   private final Supplier<Pose2d> robotPoseSupplier;
   private final Transform2d robotToShooter;
+  private final double indexerToFlywheelSeconds;
   private final HubShiftTracker hubShiftTracker;
+
+  private static final double PRE_SHOT_UNJAM_SECONDS = 0.03;
 
   // shooting @ 3 meters
   private static final double HOOD_FORCED_ANGLE = 10.0;
-  private static final double FLYWHEEL_FORCED_RPM = 2200.0;
+  private static final double FLYWHEEL_FORCED_RPM = 2050.0;
+  private static final double HOOD_FORCED_TRENCH_ANGLE = 10.0;
+  private static final double FLYWHEEL_FORCED_TRENCH_RPM = 2050.0;
 
   // Enums
   public enum SuperWantedStates {
@@ -65,7 +72,8 @@ public class SuperStructure extends SubsystemBase {
     X_OUT,
     EJECTING,
     UNJAMMING,
-    FORCED_SHOT
+    FORCED_SHOT,
+    FORCED_SHOOT_TRENCH
   }
 
   public enum SuperInternalStates {
@@ -74,7 +82,8 @@ public class SuperStructure extends SubsystemBase {
     SHOOTING_AT_HUB,
     PASSING,
     UNJAMMING,
-    FORCED_SHOT
+    FORCED_SHOT,
+    FORCED_SHOOT_TRENCH
   }
 
   // State variables
@@ -95,11 +104,13 @@ public class SuperStructure extends SubsystemBase {
       Hood hood,
       IntakePivot intakePivot,
       HopperRoller hopperRoller,
+      HopperSensor hopperSensor,
       ShotCalculator hubShotCalculator,
       ShotCalculator passCalculator,
       BooleanSupplier isAlignedToTarget,
       Supplier<Pose2d> robotPoseSupplier,
-      Transform2d robotToShooter) {
+      Transform2d robotToShooter,
+      double indexerToFlywheelSeconds) {
     this.intakeRoller = intakeRoller;
     this.indexer = indexer;
     this.flywheelKicker = flywheelKicker;
@@ -110,11 +121,12 @@ public class SuperStructure extends SubsystemBase {
     this.hubShotCalculator = hubShotCalculator;
     this.robotPoseSupplier = robotPoseSupplier;
     this.robotToShooter = robotToShooter;
-    this.hubShiftTracker = new HubShiftTracker(hubShotCalculator);
+    this.hubShiftTracker = new HubShiftTracker();
+    this.indexerToFlywheelSeconds = indexerToFlywheelSeconds;
     this.shooterStateMachine =
         new ShooterStateMachine(
             flywheel, hood, flywheelKicker, isAlignedToTarget, this::canShootToTarget);
-    this.intakeStateMachine = new IntakeStateMachine(intakeRoller, intakePivot);
+    this.intakeStateMachine = new IntakeStateMachine(intakeRoller, intakePivot, hopperSensor);
     this.targetSelectionStateMachine =
         new TargetSelectionStateMachine(hubShotCalculator, passCalculator, robotPoseSupplier);
 
@@ -123,12 +135,18 @@ public class SuperStructure extends SubsystemBase {
           if (currentSuperState == SuperInternalStates.FORCED_SHOT) {
             return FLYWHEEL_FORCED_RPM;
           }
+          if (currentSuperState == SuperInternalStates.FORCED_SHOOT_TRENCH) {
+            return FLYWHEEL_FORCED_TRENCH_RPM;
+          }
           return targetSelectionStateMachine.getActiveCalculator().calculateShot().flywheelSpeed();
         });
     hood.setHoodAngleSupplier(
         () -> {
           if (currentSuperState == SuperInternalStates.FORCED_SHOT) {
             return HOOD_FORCED_ANGLE;
+          }
+          if (currentSuperState == SuperInternalStates.FORCED_SHOOT_TRENCH) {
+            return HOOD_FORCED_TRENCH_ANGLE;
           }
           return targetSelectionStateMachine.getActiveCalculator().calculateShot().hoodAngle();
         });
@@ -169,6 +187,9 @@ public class SuperStructure extends SubsystemBase {
       case FORCED_SHOT:
         currentSuperState = SuperInternalStates.FORCED_SHOT;
         break;
+      case FORCED_SHOOT_TRENCH:
+        currentSuperState = SuperInternalStates.FORCED_SHOOT_TRENCH;
+        break;
       case DEFAULT:
       default:
         targetSelectionStateMachine.setWantedState(TargetWantedStates.AUTO);
@@ -190,6 +211,7 @@ public class SuperStructure extends SubsystemBase {
         unjamming();
         break;
       case FORCED_SHOT:
+      case FORCED_SHOOT_TRENCH:
         shooting();
         break;
       case DEFAULT:
@@ -200,17 +222,32 @@ public class SuperStructure extends SubsystemBase {
 
   // Subsystem state helpers
 
+  Timer preparingToFireTimer = new Timer();
+
   private void shooting() {
     if (currentSuperState == SuperInternalStates.FORCED_SHOT) {
+      shooterStateMachine.setWantedState(ShooterWantedStates.FORCED_SHOT);
+    } else if (currentSuperState == SuperInternalStates.FORCED_SHOOT_TRENCH) {
       shooterStateMachine.setWantedState(ShooterWantedStates.FORCED_SHOT);
     } else {
       shooterStateMachine.setWantedState(ShooterWantedStates.SHOOTING);
     }
 
-    if (shooterStateMachine.getState() == ShooterStates.FIRING) {
+    if (shooterStateMachine.getState() == ShooterStates.FIRING
+        || shooterStateMachine.getState() == ShooterStates.DISTURBED) {
       indexer.setWantedState(IndexerStates.INDEXING);
       hopperRoller.setWantedState(HopperRollerStates.ROLLING);
+    } else if (shooterStateMachine.getState() == ShooterStates.PREPARING_TO_FIRE) {
+      if (!preparingToFireTimer.isRunning()) {
+        preparingToFireTimer.restart();
+      }
+      if (preparingToFireTimer.hasElapsed(PRE_SHOT_UNJAM_SECONDS)) {
+        indexer.setWantedState(IndexerStates.REVERSING);
+        hopperRoller.setWantedState(HopperRollerStates.REVERSING);
+      }
     } else {
+      preparingToFireTimer.stop();
+      preparingToFireTimer.reset();
       indexer.setWantedState(IndexerStates.OFF);
       hopperRoller.setWantedState(HopperRollerStates.PREVENT_JAM);
     }
@@ -340,7 +377,10 @@ public class SuperStructure extends SubsystemBase {
     cachedTimeOfFlight = hubShotCalculator.calculateShot().timeOfFlight();
     RobotUtils.ActiveHub shootingPhase =
         RobotUtils.getActiveHubAtShotLanding(
-            DriverStation.getMatchTime(), DriverStation.isTeleop(), cachedTimeOfFlight);
+            DriverStation.getMatchTime(),
+            DriverStation.isTeleop(),
+            cachedTimeOfFlight,
+            indexerToFlywheelSeconds);
 
     // Calculate hub active once per cycle
     cachedHubActive =

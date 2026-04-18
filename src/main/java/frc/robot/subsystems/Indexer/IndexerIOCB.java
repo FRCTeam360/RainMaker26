@@ -1,0 +1,67 @@
+package frc.robot.subsystems.Indexer;
+
+import com.revrobotics.PersistMode;
+import com.revrobotics.RelativeEncoder;
+import com.revrobotics.ResetMode;
+import com.revrobotics.spark.SparkBase.ControlType;
+import com.revrobotics.spark.SparkClosedLoopController;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkMaxConfig;
+import frc.robot.Constants.CompBotConstants;
+
+public class IndexerIOCB implements IndexerIO {
+  private static final double GEAR_RATIO =
+      1.0 / 1.0; // its not very useful to set the output velocity in this system, but its 9.0
+  private static final int CURRENT_LIMIT_AMPS = 50;
+  private static final double KP = 0.0006; // was 0.0003
+  private static final double KI = 0.0;
+  private static final double KD = 0.0;
+  private static final double KV = 0.0021;
+  private static final double KS = 0.04;
+
+  /** Creates a new IndexerIOCB. */
+  private final SparkMax indexerMotor;
+
+  private final RelativeEncoder encoder;
+  private final SparkMaxConfig sparkMaxConfig = new SparkMaxConfig();
+  private final SparkClosedLoopController closedLoopController;
+
+  public IndexerIOCB() {
+    indexerMotor = new SparkMax(CompBotConstants.TWINDEXER_ID, MotorType.kBrushless);
+    encoder = indexerMotor.getEncoder();
+    sparkMaxConfig.idleMode(IdleMode.kCoast);
+    sparkMaxConfig.inverted(false);
+    sparkMaxConfig.smartCurrentLimit(65, CURRENT_LIMIT_AMPS);
+
+    sparkMaxConfig.encoder.positionConversionFactor(1.0 / GEAR_RATIO);
+    sparkMaxConfig.encoder.velocityConversionFactor(1.0 / GEAR_RATIO);
+
+    sparkMaxConfig.closedLoop.p(KP).i(KI).d(KD);
+    sparkMaxConfig.closedLoop.feedForward.kV(KV).kS(KS);
+    sparkMaxConfig.encoder.uvwMeasurementPeriod(10);
+    sparkMaxConfig.encoder.uvwAverageDepth(2);
+
+    indexerMotor.configure(
+        sparkMaxConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
+    closedLoopController = indexerMotor.getClosedLoopController();
+  }
+
+  public void updateInputs(IndexerIOInputs inputs) {
+    inputs.position = encoder.getPosition();
+    inputs.statorCurrent = indexerMotor.getOutputCurrent();
+    inputs.supplyCurrent = 0;
+    inputs.velocity = encoder.getVelocity();
+    inputs.voltage = indexerMotor.getBusVoltage() * indexerMotor.getAppliedOutput();
+  }
+
+  public void setDutyCycle(double dutyCycle) {
+    indexerMotor.set(dutyCycle);
+  }
+
+  public void setVelocity(double rpm) {
+    closedLoopController.setSetpoint(rpm, ControlType.kVelocity);
+  }
+}
