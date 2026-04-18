@@ -11,6 +11,10 @@ After cloning, follow the steps below to set up the project for the first time:
 - [ ] Install [FRC Game Tools](https://docs.wpilib.org/en/stable/docs/zero-to-robot/step-2/frc-game-tools.html)
 - [ ] Install [WPILib](https://docs.wpilib.org/en/stable/docs/getting-started/getting-started-frc-control-system/wpilib-setup.html)
 - [ ] Open the project in WPILib VSCode, or standard VSCode with the recommended extensions
+- [ ] Enable the shared git hooks (runs `spotlessApply` automatically before each commit):
+  ```sh
+  git config core.hooksPath .githooks
+  ```
 
 ## Commands
 
