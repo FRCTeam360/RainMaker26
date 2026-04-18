@@ -58,8 +58,8 @@ public class PositionUtils {
           new Translation2d(
               LinesVertical.blueHubCenter, FieldConstants.LinesHorizontal.rightBumpHubSide),
           new Translation2d(0.0, LinesHorizontal.leftBumpHubSide));
-  private static final Translation2d blueHubCenter = Hub.center;
-  private static final Translation2d redHubCenter = Hub.oppCenter;
+  private static final Translation2d hubCenter = Hub.topCenterPoint.toTranslation2d();
+  private static final Translation2d oppHubCenter = Hub.oppTopCenterPoint.toTranslation2d();
 
   private PositionUtils() {}
 
@@ -167,10 +167,17 @@ public class PositionUtils {
 
   private static Pose2d[] raycast = new Pose2d[2];
   private static Pose2d[] poseToHub = new Pose2d[2];
+  private static Pose2d[] poseToOppHub = new Pose2d[2];
+  private static Pose2d hubCenterPose = new Pose2d(hubCenter, new Rotation2d(0));
+  private static Pose2d oppHubCenterPose = new Pose2d(oppHubCenter, new Rotation2d(0));
+  private static Rotation2d poseToHubRotation;
+  private static Rotation2d poseToHubVersusShooterRotationDiff;
+  private static Rotation2d poseToOppHubRotation;
+  private static Rotation2d poseToOppHubVersusShooterRotationDiff;
 
   public static boolean canPass(Pose2d robotPose, Rotation2d shooterRotation) {
     Translation2d start = robotPose.getTranslation();
-    Rotation2d poseToHub;
+    Translation2d raycastEnd = new Translation2d();
     // in order to get the rotation of the position to a hub, you have to use
     // poseToHub = where the translation is going to.minus(where the translation is coming
     // from).getAngle();
@@ -187,39 +194,39 @@ public class PositionUtils {
     } else if (dy < 0) {
       maxDistance = Math.min(maxDistance, -start.getY() / dy);
     }
-    if (DriverStation.getAlliance().isPresent()) {
-      Alliance alliance = DriverStation.getAlliance().get();
-      if (alliance == Alliance.Red) {
-        poseToHub = redHubCenter.minus(robotPose.getTranslation()).getAngle();
+    poseToHub[0] = robotPose;
+    poseToOppHub[0] = robotPose;
+    poseToHub[1] = AllianceFlipUtil.apply(hubCenterPose);
+    poseToOppHub[1] = AllianceFlipUtil.apply(oppHubCenterPose);
+    poseToHubRotation =
+        (AllianceFlipUtil.apply(hubCenter)).getAngle().minus(robotPose.getRotation());
+    poseToHubVersusShooterRotationDiff =
+        poseToHubRotation.minus(robotPose.getTranslation().getAngle());
+    poseToOppHubRotation =
+        (AllianceFlipUtil.apply(oppHubCenter)).getAngle().minus(robotPose.getRotation());
+    poseToOppHubVersusShooterRotationDiff =
+        poseToOppHubRotation.minus(robotPose.getTranslation().getAngle());
+    Logger.recordOutput("Raycast/Diff1", poseToHubVersusShooterRotationDiff);
+
+    raycastEnd = start.plus(new Translation2d(maxDistance, shooterRotation));
+    if (poseToHubVersusShooterRotationDiff.getDegrees() <= 20
+        && poseToHubVersusShooterRotationDiff.getDegrees() >= -20) {
+      if (isInOppAllianceZone(robotPose)) {
+        if (poseToOppHubVersusShooterRotationDiff.getDegrees() <= 20
+            && poseToOppHubVersusShooterRotationDiff.getDegrees() >= -20) {
+          raycastEnd = new Translation2d(poseToOppHub[1].getX(), shooterRotation);
+        }
       }
-    } else {
-      poseToHub = blueHubCenter.minus(robotPose.getTranslation()).getAngle();
+      raycastEnd = new Translation2d(poseToHub[1].getX(), shooterRotation);
     }
-    Translation2d raycastMax = start.plus(new Translation2d(maxDistance, shooterRotation));
-    int length = (int) Math.round(start.getDistance(raycastMax));
-    Translation2d raycastEnd = findIntersectionWithHub(start, raycastMax, shooterRotation, length);
     raycast[0] = robotPose;
     raycast[1] = new Pose2d(raycastEnd, shooterRotation);
+    Logger.recordOutput("Raycast/LineToHub", poseToHub);
+    Logger.recordOutput("Raycast/LineToOppHub", poseToOppHub);
     Logger.recordOutput("Raycast/Line", raycast);
-    if (raycastMax == raycastEnd) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  public static Translation2d findIntersectionWithHub(
-      Translation2d start, Translation2d end, Rotation2d rotation, int numberOfPoints) {
-    for (int i = 0; i <= numberOfPoints; i++) {
-      double spotOnLine = (double) i / numberOfPoints;
-      double x = start.getX() + (end.getX() - start.getX()) * spotOnLine;
-      double y = start.getY() + (end.getY() - start.getY()) * spotOnLine;
-      Translation2d point = new Translation2d(x, y);
-      if (blueAllianceHub.contains(point) || redAllianceHub.contains(point)) {
-        return point;
-      }
-    }
-    return end;
+    Logger.recordOutput("Raycast/Hub", hubCenterPose);
+    Logger.recordOutput("Raycast/OppHub", oppHubCenterPose);
+    return true;
   }
 
   /**
