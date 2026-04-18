@@ -235,14 +235,14 @@ public class RobotContainer {
                 Map.ofEntries(
                     Map.entry(
                         Constants.PracticeBotConstants.LIMELIGHT_RIGHT,
-                        new VisionIOLimelight4(
+                        new VisionIOLimelight3G(
                             Constants.PracticeBotConstants.LIMELIGHT_RIGHT,
                             () -> drivetrain.getAngle(),
                             () -> drivetrain.getAngularRate(),
                             true)),
                     Map.entry(
                         Constants.PracticeBotConstants.LIMELIGHT_LEFT,
-                        new VisionIOLimelight4(
+                        new VisionIOLimelight3G(
                             Constants.PracticeBotConstants.LIMELIGHT_LEFT,
                             () -> drivetrain.getAngle(),
                             () -> drivetrain.getAngularRate(),
