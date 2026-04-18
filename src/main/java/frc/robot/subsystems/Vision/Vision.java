@@ -13,8 +13,8 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.utils.FieldConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.utils.FieldConstants;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -179,8 +179,9 @@ public class Vision extends SubsystemBase {
 
     // Log Limelight gyro values
     Logger.recordOutput(VISION_LOGGING_PREFIX + "Gyro Angle Supplier", drivetrain.getAngle());
-    Logger.recordOutput(VISION_LOGGING_PREFIX + "Gyro Angle Rate Supplier", drivetrain.getAngularRate());
-    
+    Logger.recordOutput(
+        VISION_LOGGING_PREFIX + "Gyro Angle Rate Supplier", drivetrain.getAngularRate());
+
     // Log rejection statistics
     Logger.recordOutput(VISION_LOGGING_PREFIX + "Total Detections", totalDetections);
     Logger.recordOutput(VISION_LOGGING_PREFIX + "Rejected Measurements", rejectedMeasurements);
