@@ -4,17 +4,12 @@
 
 package frc.robot;
 
-import java.util.Objects;
-import java.util.function.BooleanSupplier;
-
-import org.littletonrobotics.junction.Logger;
+import static edu.wpi.first.units.Units.MetersPerSecond;
 
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.FollowPathCommand;
-
 import edu.wpi.first.networktables.NetworkTableInstance;
-import static edu.wpi.first.units.Units.MetersPerSecond;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -85,6 +80,9 @@ import frc.robot.utils.CommandLogger;
 import frc.robot.utils.FieldConstants;
 import frc.robot.utils.PathProvider;
 import frc.robot.utils.PositionUtils;
+import java.util.Objects;
+import java.util.function.BooleanSupplier;
+import org.littletonrobotics.junction.Logger;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
