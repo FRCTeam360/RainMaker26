@@ -4,12 +4,17 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.MetersPerSecond;
+import java.util.Objects;
+import java.util.function.BooleanSupplier;
+
+import org.littletonrobotics.junction.Logger;
 
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.FollowPathCommand;
+
 import edu.wpi.first.networktables.NetworkTableInstance;
+import static edu.wpi.first.units.Units.MetersPerSecond;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -80,9 +85,6 @@ import frc.robot.utils.CommandLogger;
 import frc.robot.utils.FieldConstants;
 import frc.robot.utils.PathProvider;
 import frc.robot.utils.PositionUtils;
-import java.util.Objects;
-import java.util.function.BooleanSupplier;
-import org.littletonrobotics.junction.Logger;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -91,9 +93,10 @@ import org.littletonrobotics.junction.Logger;
  * subsystems, commands, and trigger mappings) should be declared here.
  */
 public class RobotContainer {
+  
   private static final double PRE_SHOT_UNJAM_SECONDS = 0.05;
-  private static final double AUTO_SHOOT_TIMEOUT_SECONDS = 10.0;
-  private static final double AUTO_SHOOT_NO_LAUNCH_TIMEOUT_SECONDS = 0.7;
+  private static final double AUTO_SHOOT_TIMEOUT_SECONDS = 5.0;
+  private static final double AUTO_SHOOT_NO_LAUNCH_TIMEOUT_SECONDS = 0.8;
 
   // The robot's subsystems and commands are defined here...
   private CommandSwerveDrivetrain drivetrain;
@@ -414,7 +417,6 @@ public class RobotContainer {
   /** Builds the "shoot at hub" command used by both PathPlanner and BLine autos. */
   public Command shootAtHubCommand() {
     return Commands.waitSeconds(AUTO_SHOOT_TIMEOUT_SECONDS)
-        .raceWith(Commands.waitUntil(this::hopperEmptyAndNotShooting))
         .deadlineFor(
             superStructure
                 .setStateCommand(SuperWantedStates.AUTO_CYCLE_SHOOTING)
@@ -430,7 +432,6 @@ public class RobotContainer {
                           return hubShotCalculator.calculateShot().targetHeading();
                         })))
         .alongWith(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING))
-        .beforeStarting(this::resetHopperEmptyAndNotShootingTracker)
         .andThen(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
   }
 
@@ -574,7 +575,6 @@ public class RobotContainer {
     driverCont.pov(90).and(isIndependentMode).whileTrue(flywheelKicker.setDutyCycleCommand(0.2));
     driverCont.pov(270).and(isIndependentMode).whileTrue(flywheelKicker.setDutyCycleCommand(-0.2));
 
-    // climber
     driverCont.a().and(isIndependentMode).onTrue(intakePivot.setPositionCommand(() -> 96.0));
     driverCont.y().and(isIndependentMode).onTrue(intakePivot.setPositionCommand(() -> 0.0));
 
