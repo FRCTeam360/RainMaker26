@@ -20,7 +20,7 @@ import org.littletonrobotics.junction.Logger;
  */
 public class ShooterStateMachine {
 
-  private static final double DISTURBANCE_TIMEOUT_SECONDS = 0.25;
+  private static final double DISTURBANCE_TIMEOUT_SECONDS = 0.5;
 
   // Enums
   public enum ShooterWantedStates {

@@ -142,11 +142,6 @@ public class IntakePivotIOSim implements IntakePivotIO {
     visualizer.update(intakePivotSim.getAngleRads());
   }
 
-  /**
-   * Set position using PID control with gravity compensation.
-   *
-   * @param positionRotations Target position in rotations
-   */
   public void setZero() {
     motorControllerSim.setPosition(0.0);
   }
@@ -157,11 +152,13 @@ public class IntakePivotIOSim implements IntakePivotIO {
     motorControllerSim.setControl(positionRequest.withPosition(rotations));
   }
 
+  @Override
   public void setPositionSmooth(double positionDegrees) {
     double rotations = positionDegrees / 360.0;
     motorControllerSim.setControl(motionMagicRequest.withPosition(rotations));
   }
 
+  @Override
   public void setPositionAggressive(double positionDegrees) {
     double rotations = positionDegrees / 360.0;
     motorControllerSim.setControl(positionRequest.withPosition(rotations));
