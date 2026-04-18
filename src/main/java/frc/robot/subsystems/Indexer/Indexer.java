@@ -5,21 +5,16 @@
 package frc.robot.subsystems.Indexer;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.subsystems.ControlState;
+import frc.robot.subsystems.StateMachineSubsystem;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
-public class Indexer extends SubsystemBase {
+public class Indexer extends StateMachineSubsystem<IndexerIOInputsAutoLogged, IndexerIO> {
   // Constants
   private static final double INDEXER_VELOCITY_RPM = 3000.0;
   private static final double INDEXER_DUTY_CYCLE = 0.80;
   private static final double INTAKING_ASSIST_DUTY_CYCLE = -0.15;
   private static final double REVERSING_DUTY_CYCLE = -0.35;
-
-  // IO fields
-  private final IndexerIO io;
-  private final IndexerIOInputsAutoLogged inputs = new IndexerIOInputsAutoLogged();
 
   // Enums
   public enum IndexerStates {
@@ -33,13 +28,12 @@ public class Indexer extends SubsystemBase {
   private IndexerStates wantedState = IndexerStates.OFF;
   private IndexerStates currentState = IndexerStates.OFF;
   private IndexerStates previousState = IndexerStates.OFF;
-  private ControlState controlState = ControlState.SUPERSTRUCTURE;
 
   // Constructor
 
   /** Creates a new Indexer. */
   public Indexer(IndexerIO io) {
-    this.io = io;
+    super(io, new IndexerIOInputsAutoLogged());
   }
 
   // State machine methods
@@ -52,11 +46,8 @@ public class Indexer extends SubsystemBase {
     wantedState = state;
   }
 
-  public void setControlState(ControlState controlState) {
-    this.controlState = controlState;
-  }
-
-  private void updateState() {
+  @Override
+  protected void updateState() {
     previousState = currentState;
 
     switch (wantedState) {
@@ -76,7 +67,8 @@ public class Indexer extends SubsystemBase {
     }
   }
 
-  private void applyState() {
+  @Override
+  protected void applyState() {
     switch (currentState) {
       case ASSIST_INTAKING:
         setDutyCycle(INTAKING_ASSIST_DUTY_CYCLE);
@@ -121,14 +113,7 @@ public class Indexer extends SubsystemBase {
   // periodic
 
   @Override
-  public void periodic() {
-    io.updateInputs(inputs);
-    Logger.processInputs("Subsystems/Indexer", inputs);
-
-    if (controlState == ControlState.SUPERSTRUCTURE) {
-      updateState();
-      applyState();
-    }
+  protected void logOutputs() {
     Logger.recordOutput("Superstructure/Subsystems/Indexer/WantedState", wantedState);
     Logger.recordOutput("Superstructure/Subsystems/Indexer/CurrentState", currentState);
     Logger.recordOutput("Superstructure/Subsystems/Indexer/PreviousState", previousState);
