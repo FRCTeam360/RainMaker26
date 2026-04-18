@@ -146,7 +146,8 @@ public class RobotContainer {
         intakePivot = new IntakePivot(new IntakePivotIOSim());
         vision =
             new Vision(
-                Map.of("photonSim", new VisionIOPhotonSim(() -> drivetrain.getState().Pose)),drivetrain);
+                Map.of("photonSim", new VisionIOPhotonSim(() -> drivetrain.getState().Pose)),
+                drivetrain);
         flywheel = new Flywheel(new FlywheelIOSim());
         hood = new Hood(new HoodIOSim());
         indexer = new Indexer(new IndexerIOSim());
@@ -191,7 +192,8 @@ public class RobotContainer {
                             Constants.WoodBotConstants.LIMELIGHT_3,
                             () -> drivetrain.getAngle(),
                             () -> drivetrain.getAngularRate(),
-                            true))),drivetrain);
+                            true))),
+                drivetrain);
         intakeRoller = new IntakeRoller(new IntakeRollerIOWB());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOWB());
         intakePivot = new IntakePivot(new IntakePivotIONoop());
@@ -241,7 +243,8 @@ public class RobotContainer {
                             Constants.PracticeBotConstants.LIMELIGHT_LEFT,
                             () -> drivetrain.getAngle(),
                             () -> drivetrain.getAngularRate(),
-                            true))), drivetrain);
+                            true))),
+                drivetrain);
         intakeRoller = new IntakeRoller(new IntakeRollerIOPB());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOPB());
         intakePivot = new IntakePivot(new IntakePivotIOPB());
@@ -296,7 +299,8 @@ public class RobotContainer {
                             Constants.CompBotConstants.LIMELIGHT_LEFT,
                             () -> drivetrain.getAngle(),
                             () -> drivetrain.getAngularRate(),
-                            true))), drivetrain);
+                            true))),
+                drivetrain);
         intakeRoller = new IntakeRoller(new IntakeRollerIOCB());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOCB());
         intakePivot = new IntakePivot(new IntakePivotIOCB());
