@@ -1,10 +1,5 @@
 package frc.robot.subsystems;
 
-import java.util.function.BooleanSupplier;
-import java.util.function.Supplier;
-
-import org.littletonrobotics.junction.Logger;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -34,6 +29,9 @@ import frc.robot.subsystems.Shooter.TargetSelectionStateMachine.TargetInternalSt
 import frc.robot.subsystems.Shooter.TargetSelectionStateMachine.TargetWantedStates;
 import frc.robot.utils.PositionUtils;
 import frc.robot.utils.RobotUtils;
+import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
+import org.littletonrobotics.junction.Logger;
 
 public class SuperStructure extends SubsystemBase {
   // Fields (subsystem refs, calculators, suppliers)
