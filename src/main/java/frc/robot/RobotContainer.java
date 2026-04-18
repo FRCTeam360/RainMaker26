@@ -641,10 +641,7 @@ public class RobotContainer {
     // Ensures superstructure control mode is active when enabled
     superStructure.setControlState(ControlState.SUPERSTRUCTURE);
     superStructure.setWantedSuperState(SuperWantedStates.DEFAULT);
-    superStructure.setIntakeState(
-        Constants.getRobotType() == RobotType.WOODBOT
-            ? IntakeWantedStates.IDLE
-            : IntakeWantedStates.IDLE);
+    superStructure.setIntakeState(IntakeWantedStates.IDLE);
     onEnableVision();
   }
 
