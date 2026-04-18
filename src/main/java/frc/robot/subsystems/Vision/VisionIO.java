@@ -4,10 +4,9 @@
 
 package frc.robot.subsystems.Vision;
 
-import org.littletonrobotics.junction.AutoLog;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import org.littletonrobotics.junction.AutoLog;
 
 public interface VisionIO {
   /** Maximum number of AprilTags that can be tracked simultaneously. */
