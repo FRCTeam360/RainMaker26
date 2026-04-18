@@ -30,7 +30,7 @@ public class Vision extends SubsystemBase {
   private Timer snapshotTimer = new Timer();
   private List<VisionMeasurement> acceptedMeasurements = new ArrayList<>();
 
-  private final String VISION_LOGGING_PREFIX = "Vision/";
+  private static final String VISION_LOGGING_PREFIX = "Vision/";
 
   private final Map<String, String> cachedLogKeys;
 
