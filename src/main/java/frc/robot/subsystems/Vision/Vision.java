@@ -51,15 +51,18 @@ public class Vision extends SubsystemBase {
   }
 
   /** Creates a new Vision. */
-  public Vision(Map<String, VisionIO> visionIos) {
-    this.ios = visionIos;
+  public Vision(VisionIO... visionIos) {
+    this.ios = new HashMap<>();
+    for (VisionIO io : visionIos) {
+      this.ios.put(io.getName(), io);
+    }
     // Creates the same number of inputs as vision IO layers
     visionInputs = new HashMap<>();
-    for (String key : visionIos.keySet()) {
+    for (String key : ios.keySet()) {
       visionInputs.put(key, new VisionIOInputsAutoLogged());
     }
     cachedLogKeys = new HashMap<>();
-    for (String key : visionIos.keySet()) {
+    for (String key : ios.keySet()) {
       cachedLogKeys.put(key, VISION_LOGGING_PREFIX + key);
     }
     enableIMUSeeding();

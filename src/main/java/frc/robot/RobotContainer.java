@@ -80,7 +80,6 @@ import frc.robot.utils.CommandLogger;
 import frc.robot.utils.FieldConstants;
 import frc.robot.utils.PathProvider;
 import frc.robot.utils.PositionUtils;
-import java.util.Map;
 import java.util.Objects;
 import java.util.function.BooleanSupplier;
 import org.littletonrobotics.junction.Logger;
@@ -92,6 +91,7 @@ import org.littletonrobotics.junction.Logger;
  * subsystems, commands, and trigger mappings) should be declared here.
  */
 public class RobotContainer {
+
   private static final double PRE_SHOT_UNJAM_SECONDS = 0.05;
   private static final double AUTO_SHOOT_TIMEOUT_SECONDS = 5.0;
   private static final double AUTO_SHOOT_NO_LAUNCH_TIMEOUT_SECONDS = 0.8;
@@ -144,9 +144,7 @@ public class RobotContainer {
       case SIM:
         drivetrain = WoodBotDrivetrain.createDrivetrain();
         intakePivot = new IntakePivot(new IntakePivotIOSim());
-        vision =
-            new Vision(
-                Map.of("photonSim", new VisionIOPhotonSim(() -> drivetrain.getState().Pose)));
+        vision = new Vision(new VisionIOPhotonSim(() -> drivetrain.getState().Pose));
         flywheel = new Flywheel(new FlywheelIOSim());
         hood = new Hood(new HoodIOSim());
         indexer = new Indexer(new IndexerIOSim());
@@ -184,14 +182,11 @@ public class RobotContainer {
         indexer = new Indexer(new IndexerIOWB());
         vision =
             new Vision(
-                Map.ofEntries(
-                    Map.entry(
-                        Constants.WoodBotConstants.LIMELIGHT_3,
-                        new VisionIOLimelight3G(
-                            Constants.WoodBotConstants.LIMELIGHT_3,
-                            () -> drivetrain.getAngle(),
-                            () -> drivetrain.getAngularRate(),
-                            true))));
+                ((new VisionIOLimelight3G(
+                    Constants.WoodBotConstants.LIMELIGHT_3,
+                    () -> drivetrain.getAngle(),
+                    () -> drivetrain.getAngularRate(),
+                    true))));
         intakeRoller = new IntakeRoller(new IntakeRollerIOWB());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOWB());
         intakePivot = new IntakePivot(new IntakePivotIONoop());
@@ -227,21 +222,16 @@ public class RobotContainer {
         indexer = new Indexer(new IndexerIOPB());
         vision =
             new Vision(
-                Map.ofEntries(
-                    Map.entry(
-                        Constants.PracticeBotConstants.LIMELIGHT_RIGHT,
-                        new VisionIOLimelight3G(
-                            Constants.PracticeBotConstants.LIMELIGHT_RIGHT,
-                            () -> drivetrain.getAngle(),
-                            () -> drivetrain.getAngularRate(),
-                            true)),
-                    Map.entry(
-                        Constants.PracticeBotConstants.LIMELIGHT_LEFT,
-                        new VisionIOLimelight3G(
-                            Constants.PracticeBotConstants.LIMELIGHT_LEFT,
-                            () -> drivetrain.getAngle(),
-                            () -> drivetrain.getAngularRate(),
-                            true))));
+                ((new VisionIOLimelight3G(
+                    Constants.PracticeBotConstants.LIMELIGHT_RIGHT,
+                    () -> drivetrain.getAngle(),
+                    () -> drivetrain.getAngularRate(),
+                    true))),
+                new VisionIOLimelight3G(
+                    Constants.PracticeBotConstants.LIMELIGHT_LEFT,
+                    () -> drivetrain.getAngle(),
+                    () -> drivetrain.getAngularRate(),
+                    true));
         intakeRoller = new IntakeRoller(new IntakeRollerIOPB());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOPB());
         intakePivot = new IntakePivot(new IntakePivotIOPB());
@@ -282,21 +272,16 @@ public class RobotContainer {
         indexer = new Indexer(new IndexerIOCB());
         vision =
             new Vision(
-                Map.ofEntries(
-                    Map.entry(
-                        Constants.CompBotConstants.LIMELIGHT_RIGHT,
-                        new VisionIOLimelight4(
-                            Constants.CompBotConstants.LIMELIGHT_RIGHT,
-                            () -> drivetrain.getAngle(),
-                            () -> drivetrain.getAngularRate(),
-                            true)),
-                    Map.entry(
-                        Constants.CompBotConstants.LIMELIGHT_LEFT,
-                        new VisionIOLimelight4(
-                            Constants.CompBotConstants.LIMELIGHT_LEFT,
-                            () -> drivetrain.getAngle(),
-                            () -> drivetrain.getAngularRate(),
-                            true))));
+                ((new VisionIOLimelight4(
+                    Constants.CompBotConstants.LIMELIGHT_RIGHT,
+                    () -> drivetrain.getAngle(),
+                    () -> drivetrain.getAngularRate(),
+                    true))),
+                new VisionIOLimelight4(
+                    Constants.CompBotConstants.LIMELIGHT_LEFT,
+                    () -> drivetrain.getAngle(),
+                    () -> drivetrain.getAngularRate(),
+                    true));
         intakeRoller = new IntakeRoller(new IntakeRollerIOCB());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOCB());
         intakePivot = new IntakePivot(new IntakePivotIOCB());
