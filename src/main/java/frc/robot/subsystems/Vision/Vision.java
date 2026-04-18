@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.utils.FieldConstants;
+import frc.robot.subsystems.CommandSwerveDrivetrain;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,6 +24,7 @@ import java.util.function.Consumer;
 import org.littletonrobotics.junction.Logger;
 
 public class Vision extends SubsystemBase {
+  private CommandSwerveDrivetrain drivetrain;
   private final Map<String, VisionIO> ios;
   private int totalDetections = 0;
   private int rejectedMeasurements = 0;
@@ -175,6 +177,10 @@ public class Vision extends SubsystemBase {
       acceptedMeasurements.add(new VisionMeasurement(timestamp, pose, cprStdDevs));
     }
 
+    // Log Limelight gyro values
+    Logger.recordOutput(VISION_LOGGING_PREFIX + "Gyro Angle Supplier", drivetrain.getAngle());
+    Logger.recordOutput(VISION_LOGGING_PREFIX + "Gyro Angle Rate Supplier", drivetrain.getAngularRate());
+    
     // Log rejection statistics
     Logger.recordOutput(VISION_LOGGING_PREFIX + "Total Detections", totalDetections);
     Logger.recordOutput(VISION_LOGGING_PREFIX + "Rejected Measurements", rejectedMeasurements);
