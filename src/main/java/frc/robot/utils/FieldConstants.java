@@ -207,6 +207,13 @@ public class FieldConstants {
         new Translation3d(LinesVertical.hubCenter, fieldWidth, openingHeight);
     public static final Translation3d openingTopRight =
         new Translation3d(LinesVertical.hubCenter, fieldWidth - openingWidth, openingHeight);
+    // Passing point
+
+    // TODO: isolate this to own class in field constants
+    public static final Translation2d passingPoint =
+        new Translation2d(
+                openingTopLeft.getX(), (openingTopLeft.getY() + openingTopRight.getY()) / 2)
+            .plus(new Translation2d(0.3, 0.0));
 
     // Relevant reference points on opposing side
     public static final Translation3d oppOpeningTopLeft =
@@ -230,13 +237,19 @@ public class FieldConstants {
     public static final Translation3d openingTopRight =
         new Translation3d(LinesVertical.hubCenter, 0, openingHeight);
 
+    // TODO: isolate this to own class in field constants
+    public static final Translation2d passingPoint =
+        new Translation2d(
+                openingTopLeft.getX(), (openingTopLeft.getY() + openingTopRight.getY()) / 2)
+            .plus(new Translation2d(0.3, 0.0));
+
     // Relevant reference points on opposing side
     public static final Translation3d oppOpeningTopLeft =
         new Translation3d(LinesVertical.oppHubCenter, openingWidth, openingHeight);
     public static final Translation3d oppOpeningTopRight =
         new Translation3d(LinesVertical.oppHubCenter, 0, openingHeight);
   }
- 
+
   /** Tower related constants */
   public static class Tower {
     // Dimensions

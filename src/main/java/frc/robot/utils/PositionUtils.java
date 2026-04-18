@@ -114,9 +114,9 @@ public class PositionUtils {
     double robotX = robotPose.getX();
     boolean result = false;
     if (AllianceFlipUtil.shouldFlip()) {
-      result = robotX >= getOppAllianceEdge();
-    } else {
       result = robotX <= getOppAllianceEdge();
+    } else {
+      result = robotX >= getOppAllianceEdge();
     }
     Logger.recordOutput("Utils/PositionUtils/IsInOppAllianceZone", result);
     return result;
