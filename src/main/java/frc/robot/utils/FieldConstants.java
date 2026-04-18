@@ -236,7 +236,7 @@ public class FieldConstants {
     public static final Translation3d oppOpeningTopRight =
         new Translation3d(LinesVertical.oppHubCenter, 0, openingHeight);
   }
-
+ 
   /** Tower related constants */
   public static class Tower {
     // Dimensions

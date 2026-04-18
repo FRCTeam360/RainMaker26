@@ -349,11 +349,20 @@ public class RobotContainer {
         new ShotCalculator(
             "PassCalc",
             drivetrain::getPosition,
-            () ->
+            () -> 
+
+            if (PositionUtils.isInOppAllianceZone == true){
+                PositionUtils.getCloserPassTarget(
+                    drivetrain.getPosition(),
+                    AllianceFlipUtil.apply(FieldConstants.RightTrench.passingPoint),
+                    AllianceFlipUtil.apply(FieldConstants.LeftTrench.passingPoint));
+            } else {
                 PositionUtils.getCloserPassTarget(
                     drivetrain.getPosition(),
                     AllianceFlipUtil.apply(FieldConstants.RightBump.passingPoint),
-                    AllianceFlipUtil.apply(FieldConstants.LeftBump.passingPoint)),
+                    AllianceFlipUtil.apply(FieldConstants.LeftBump.passingPoint));
+                  }
+            
             drivetrain::getCommandedVelocity,
             robotPassingInfo);
     // Configure the trigger bindings

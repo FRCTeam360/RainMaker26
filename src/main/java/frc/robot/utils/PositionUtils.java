@@ -110,10 +110,10 @@ public class PositionUtils {
     return result;
   }
 
-  public static boolean isInOppAllianceZone(Pose2d robotPose){
+  public static boolean isInOppAllianceZone(Pose2d robotPose) {
     double robotX = robotPose.getX();
-    boolean result;
-    if (AllianceFlipUtil.shouldFlip()){
+    boolean result = false;
+    if (AllianceFlipUtil.shouldFlip()) {
       result = robotX >= getOppAllianceEdge();
     } else {
       result = robotX <= getOppAllianceEdge();
@@ -126,7 +126,7 @@ public class PositionUtils {
     return AllianceFlipUtil.applyX(LinesVertical.hubCenter);
   }
 
-  private static double getOppAllianceEdge(){
+  private static double getOppAllianceEdge() {
     return AllianceFlipUtil.applyX(LinesVertical.oppHubCenter);
   }
 
