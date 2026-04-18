@@ -194,30 +194,37 @@ public class PositionUtils {
     } else if (dy < 0) {
       maxDistance = Math.min(maxDistance, -start.getY() / dy);
     }
+    if (isInAllianceZone(robotPose)) {
+      hubCenterPose = new Pose2d(AllianceFlipUtil.apply(hubCenter), new Rotation2d(0));
+      oppHubCenterPose = new Pose2d(AllianceFlipUtil.apply(oppHubCenter), new Rotation2d(0));
+    } else {
+      hubCenterPose = new Pose2d(AllianceFlipUtil.apply(hubCenter), new Rotation2d(0));
+      oppHubCenterPose = new Pose2d(AllianceFlipUtil.apply(oppHubCenter), new Rotation2d(0));
+    }
     poseToHub[0] = robotPose;
     poseToOppHub[0] = robotPose;
-    poseToHub[1] = AllianceFlipUtil.apply(hubCenterPose);
-    poseToOppHub[1] = AllianceFlipUtil.apply(oppHubCenterPose);
+    poseToHub[1] = hubCenterPose;
+    poseToOppHub[1] = oppHubCenterPose;
     poseToHubRotation =
         (AllianceFlipUtil.apply(hubCenter)).getAngle().minus(robotPose.getRotation());
+    Logger.recordOutput("Raycast/p2h", poseToHubRotation);
     poseToHubVersusShooterRotationDiff =
         poseToHubRotation.minus(robotPose.getTranslation().getAngle());
     poseToOppHubRotation =
         (AllianceFlipUtil.apply(oppHubCenter)).getAngle().minus(robotPose.getRotation());
     poseToOppHubVersusShooterRotationDiff =
         poseToOppHubRotation.minus(robotPose.getTranslation().getAngle());
-    Logger.recordOutput("Raycast/Diff1", poseToHubVersusShooterRotationDiff);
 
     raycastEnd = start.plus(new Translation2d(maxDistance, shooterRotation));
     if (poseToHubVersusShooterRotationDiff.getDegrees() <= 20
         && poseToHubVersusShooterRotationDiff.getDegrees() >= -20) {
+      raycastEnd = new Translation2d(maxDistance, shooterRotation);
       if (isInOppAllianceZone(robotPose)) {
         if (poseToOppHubVersusShooterRotationDiff.getDegrees() <= 20
             && poseToOppHubVersusShooterRotationDiff.getDegrees() >= -20) {
-          raycastEnd = new Translation2d(poseToOppHub[1].getX(), shooterRotation);
+          raycastEnd = new Translation2d(maxDistance, shooterRotation);
         }
       }
-      raycastEnd = new Translation2d(poseToHub[1].getX(), shooterRotation);
     }
     raycast[0] = robotPose;
     raycast[1] = new Pose2d(raycastEnd, shooterRotation);
