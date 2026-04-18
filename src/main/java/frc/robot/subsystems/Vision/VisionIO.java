@@ -4,9 +4,10 @@
 
 package frc.robot.subsystems.Vision;
 
+import org.littletonrobotics.junction.AutoLog;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
-import org.littletonrobotics.junction.AutoLog;
 
 public interface VisionIO {
   /** Maximum number of AprilTags that can be tracked simultaneously. */
@@ -62,7 +63,5 @@ public interface VisionIO {
    */
   default void setThrottle(int throttle) {}
 
-  default String getName() {
-    return "";
-  }
+  String getName();
 }
