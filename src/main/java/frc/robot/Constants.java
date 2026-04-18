@@ -18,6 +18,7 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import frc.robot.IOConstants.SerialAddressConstants;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -107,6 +108,7 @@ public final class Constants {
       robotType = Constants.RobotType.COMPBOT;
     } else if (serialAddress.equals(SerialAddressConstants.PRACTICE_SERIAL_ADDRESS)) {
       robotType = Constants.RobotType.PRACTICEBOT;
+    } else if (serialAddress.equals(SerialAddressConstants.DEFENSE_SERIAL_ADDRESS)) {
     } else {
       robotType = Constants.RobotType.COMPBOT;
     }
