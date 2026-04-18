@@ -129,9 +129,6 @@ Hardware subsystem state. Each subsystem logs its own wanted/current/previous st
 
 | Key | Source |
 |-----|--------|
-| `Superstructure/Subsystems/Climber/WantedState` | `Climber.java` |
-| `Superstructure/Subsystems/Climber/CurrentState` | `Climber.java` |
-| `Superstructure/Subsystems/Climber/PreviousState` | `Climber.java` |
 | `Superstructure/Subsystems/Indexer/WantedState` | `Indexer.java` |
 | `Superstructure/Subsystems/Indexer/CurrentState` | `Indexer.java` |
 | `Superstructure/Subsystems/Indexer/PreviousState` | `Indexer.java` |

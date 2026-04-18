@@ -1,0 +1,20 @@
+#!/bin/sh
+# Run spotlessApply before committing and re-stage any reformatted files.
+
+cd "$(git rev-parse --show-toplevel)" || exit 1
+
+echo "Running spotlessApply..."
+./gradlew spotlessApply --quiet
+STATUS=$?
+
+if [ $STATUS -ne 0 ]; then
+  echo "spotlessApply failed — aborting commit."
+  exit 1
+fi
+
+# Re-stage any files that spotless reformatted so the commit includes clean code.
+git diff --name-only | while IFS= read -r file; do
+  git add "$file"
+done
+
+exit 0

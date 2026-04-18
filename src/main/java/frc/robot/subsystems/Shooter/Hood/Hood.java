@@ -104,7 +104,7 @@ public class Hood extends SubsystemBase {
         // TODO: keep as is until we are confident with our localization to not default to ducking
         // when in PASSIVE_PREP mode. We currently call this for logging purposes to validate the
         // logic works
-        shouldDuck.getAsBoolean();
+        var unused = shouldDuck.getAsBoolean(); // called for logging side-effects only
         currentState = HoodInternalStates.ZEROING;
         break;
       case IDLE:
