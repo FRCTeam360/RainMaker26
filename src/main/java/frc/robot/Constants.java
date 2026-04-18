@@ -109,6 +109,7 @@ public final class Constants {
     } else if (serialAddress.equals(SerialAddressConstants.PRACTICE_SERIAL_ADDRESS)) {
       robotType = Constants.RobotType.PRACTICEBOT;
     } else if (serialAddress.equals(SerialAddressConstants.DEFENSE_SERIAL_ADDRESS)) {
+      robotType = Constants.RobotType.DEFENSEBOT;
     } else {
       robotType = Constants.RobotType.COMPBOT;
     }
