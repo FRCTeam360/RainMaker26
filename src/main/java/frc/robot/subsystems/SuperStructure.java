@@ -72,7 +72,8 @@ public class SuperStructure extends SubsystemBase {
     EJECTING,
     UNJAMMING,
     FORCED_SHOT,
-    FORCED_SHOOT_TRENCH
+    FORCED_SHOOT_TRENCH,
+    FORCED_PASS
   }
 
   public enum SuperInternalStates {
@@ -82,7 +83,8 @@ public class SuperStructure extends SubsystemBase {
     PASSING,
     UNJAMMING,
     FORCED_SHOT,
-    FORCED_SHOOT_TRENCH
+    FORCED_SHOOT_TRENCH,
+    FORCED_PASS
   }
 
   // State variables
@@ -137,6 +139,9 @@ public class SuperStructure extends SubsystemBase {
           if (currentSuperState == SuperInternalStates.FORCED_SHOOT_TRENCH) {
             return FLYWHEEL_FORCED_TRENCH_RPM;
           }
+          if (currentSuperState == SuperInternalStates.FORCED_PASS) {
+            return FLYWHEEL_FORCED_RPM;
+          }
           return targetSelectionStateMachine.getActiveCalculator().calculateShot().flywheelSpeed();
         });
     hood.setHoodAngleSupplier(
@@ -189,6 +194,10 @@ public class SuperStructure extends SubsystemBase {
       case FORCED_SHOOT_TRENCH:
         currentSuperState = SuperInternalStates.FORCED_SHOOT_TRENCH;
         break;
+      case FORCED_PASS:
+        targetSelectionStateMachine.setWantedState(TargetWantedStates.OUTPOST);
+        currentSuperState = SuperInternalStates.FORCED_PASS;
+        break;
       case DEFAULT:
       default:
         targetSelectionStateMachine.setWantedState(TargetWantedStates.AUTO);
@@ -213,6 +222,9 @@ public class SuperStructure extends SubsystemBase {
       case FORCED_SHOOT_TRENCH:
         shooting();
         break;
+      case FORCED_PASS:
+        shooting();
+        break;
       case DEFAULT:
         passive_preparing();
         break;
@@ -225,6 +237,8 @@ public class SuperStructure extends SubsystemBase {
 
   private void shooting() {
     if (currentSuperState == SuperInternalStates.FORCED_SHOT) {
+      shooterStateMachine.setWantedState(ShooterWantedStates.FORCED_SHOT);
+    } else if (currentSuperState == SuperInternalStates.FORCED_PASS) {
       shooterStateMachine.setWantedState(ShooterWantedStates.FORCED_SHOT);
     } else if (currentSuperState == SuperInternalStates.FORCED_SHOOT_TRENCH) {
       shooterStateMachine.setWantedState(ShooterWantedStates.FORCED_SHOT);
