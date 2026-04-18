@@ -1,5 +1,10 @@
 package frc.robot.subsystems;
 
+import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
+
+import org.littletonrobotics.junction.Logger;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -29,9 +34,6 @@ import frc.robot.subsystems.Shooter.TargetSelectionStateMachine.TargetInternalSt
 import frc.robot.subsystems.Shooter.TargetSelectionStateMachine.TargetWantedStates;
 import frc.robot.utils.PositionUtils;
 import frc.robot.utils.RobotUtils;
-import java.util.function.BooleanSupplier;
-import java.util.function.Supplier;
-import org.littletonrobotics.junction.Logger;
 
 public class SuperStructure extends SubsystemBase {
   // Fields (subsystem refs, calculators, suppliers)
@@ -55,9 +57,9 @@ public class SuperStructure extends SubsystemBase {
 
   // shooting @ 3 meters
   private static final double HOOD_FORCED_ANGLE = 10.0;
-  private static final double FLYWHEEL_FORCED_RPM = 2050.0;
+  private static final double FLYWHEEL_FORCED_RPM = 2200.0;
   private static final double HOOD_FORCED_TRENCH_ANGLE = 10.0;
-  private static final double FLYWHEEL_FORCED_TRENCH_RPM = 2050.0;
+  private static final double FLYWHEEL_FORCED_TRENCH_RPM = 2200.0;
   private static final double HOOD_FORCED_PASS_ANGLE = 10.0; // tune this value
 
   // Enums
