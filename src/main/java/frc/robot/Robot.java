@@ -55,7 +55,7 @@ public class Robot extends LoggedRobot {
       if (RobotUtils.isUsbWriteable()) {
         Logger.addDataReceiver(new WPILOGWriter(Constants.IOConstants.USB_ROOT_DIRECTORY));
       } else {
-        Logger.addDataReceiver(new WPILOGWriter("/home/lvuser/logs"));
+        Logger.addDataReceiver(new WPILOGWriter(Constants.IOConstants.DEFAULT_LOG_DIRECTORY));
       }
       // TODO: Re-enable for practice sessions when live dashboard telemetry is needed
       Logger.addDataReceiver(new NT4Publisher());

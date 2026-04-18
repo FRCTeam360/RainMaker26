@@ -113,6 +113,9 @@ public final class Constants {
   }
 
   public static final class IOConstants {
+
+    // comment
+    public static final String DEFAULT_LOG_DIRECTORY = "/home/lvuser/logs";
     // === USB PATHS ===
     public static final String USB_ROOT_DIRECTORY = "/U";
 
