@@ -14,12 +14,12 @@ public class ShooterConstants {
   public static final double ALLIANCE_PHASE_DURATION_SECONDS = 25.0;
   public static final double ALLIANCE_PHASE_START_MODULO = 5.0;
 
-  public static Transform2d PRACTICEBOT_TO_SHOOTER =
+  public static final Transform2d PRACTICEBOT_TO_SHOOTER =
       new Transform2d(Units.inchesToMeters(-7.437), 0.0, Rotation2d.k180deg);
 
-  public static Transform2d COMPBOT_TO_SHOOTER =
+  public static final Transform2d COMPBOT_TO_SHOOTER =
       new Transform2d(Units.inchesToMeters(-7.437), 0.0, Rotation2d.k180deg);
 
-  public static Transform2d SIM_TO_SHOOTER =
+  public static final Transform2d SIM_TO_SHOOTER =
       new Transform2d(Units.inchesToMeters(-7.437), 0.0, Rotation2d.k180deg);
 }
