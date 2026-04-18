@@ -31,7 +31,7 @@ public class AutomatedTestRobot extends Robot {
       }
       DriverStation.reportError(
           "Unhandled exception: " + throwable.toString(), throwable.getStackTrace());
-      throw new RuntimeException("Unhandled exception: " + throwable.toString());
+      throw new RuntimeException(throwable);
     }
   }
 
