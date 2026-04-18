@@ -4,7 +4,9 @@
 
 package frc.robot.subsystems.Vision;
 
-import static frc.robot.subsystems.Vision.VisionSimConstants.VisionPhotonSim.*;
+import static frc.robot.subsystems.Vision.VisionSimConstants.VisionPhotonSim.kCameraName;
+import static frc.robot.subsystems.Vision.VisionSimConstants.VisionPhotonSim.kRobotToCam;
+import static frc.robot.subsystems.Vision.VisionSimConstants.VisionPhotonSim.kTagLayout;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -228,5 +230,10 @@ public class VisionIOPhotonSim implements VisionIO {
    */
   public PhotonCameraSim getCameraSim() {
     return cameraSim;
+  }
+
+  @Override
+  public String getName() {
+    return "photonSim";
   }
 }
