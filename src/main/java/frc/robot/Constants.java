@@ -566,6 +566,7 @@ public final class Constants {
   }
 
   public static final class SerialAddressConstants {
+    public static final String DEFENSE_SERIAL_ADDRESS = "03126D42";
     public static final String WOOD_SERIAL_ADDRESS = "032BE44A";
     public static final String COMP_SERIAL_ADDRESS = "025AE07E";
     public static final String PRACTICE_SERIAL_ADDRESS = "03260AD5";
