@@ -40,6 +40,7 @@ public final class Constants {
 
   public static enum RobotType {
     SIM,
+    DEFENSEBOT,
     WOODBOT,
     COMPBOT,
     PRACTICEBOT,
