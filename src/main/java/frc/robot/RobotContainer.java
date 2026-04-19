@@ -385,6 +385,18 @@ public class RobotContainer {
                     () -> 0, () -> 0, () -> hubShotCalculator.calculateShot().targetHeading()))
             .alongWith(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING))
             .andThen(superStructure.setStateCommand(SuperWantedStates.DEFAULT)));
+    registerPathplannerCommand(
+        "start shooting while moving",
+        Commands.runOnce(
+                () ->
+                    drivetrain.setAutoRotationOverride(
+                        () -> hubShotCalculator.calculateShot().targetHeading()))
+            .andThen(superStructure.setStateCommand(SuperWantedStates.SHOOT_AT_HUB))
+            .alongWith(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING)));
+    registerPathplannerCommand(
+        "stop shooting while moving",
+        Commands.runOnce(() -> drivetrain.clearAutoRotationOverride())
+            .andThen(superStructure.setStateCommand(SuperWantedStates.DEFAULT)));
 
     configVision();
     configDefaultDrivingCommand();

@@ -731,6 +731,12 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
    * @return true if the heading error is within the speed-scaled tolerance
    */
   public boolean isAlignedToTarget() {
+    // When the auto rotation override is active, check its PID instead of the
+    // facing-angle controller (which isn't being driven during path-following).
+    if (autoRotationTarget.get().isPresent()) {
+      return isAlignedToAutoTarget();
+    }
+
     ChassisSpeeds speeds = getVelocity();
     double speedMps = Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond);
     double dynamicToleranceRad =
