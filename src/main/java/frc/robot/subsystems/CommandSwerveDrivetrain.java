@@ -246,7 +246,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     return this.runOnce(() -> toggleDefenseMode());
   }
 
-  // Xout Command
+  // d Command
   public void xOut() {
     commandedSpeeds.vxMetersPerSecond = 0.0;
     commandedSpeeds.vyMetersPerSecond = 0.0;
