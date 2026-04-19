@@ -138,17 +138,20 @@ public class FlywheelIOCB implements FlywheelIO {
 
   @Override
   public void setSpinupVelocityControl(double velocityRPM) {
-    motors[0].setControl(velocityTorqueCurrent.withVelocity(RPM.of(velocityRPM).in(RotationsPerSecond)));
+    motors[0].setControl(
+        velocityTorqueCurrent.withVelocity(RPM.of(velocityRPM).in(RotationsPerSecond)));
   }
 
   @Override
   public void setHoldVelocityControl(double velocityRPM) {
-    motors[0].setControl(velocityTorqueCurrent.withVelocity(RPM.of(velocityRPM).in(RotationsPerSecond)));
+    motors[0].setControl(
+        velocityTorqueCurrent.withVelocity(RPM.of(velocityRPM).in(RotationsPerSecond)));
   }
 
   @Override
   public void setCoastVelocityControl(double velocityRPM) {
-    motors[0].setControl(velocityTorqueCurrent.withVelocity(RPM.of(velocityRPM).in(RotationsPerSecond)));
+    motors[0].setControl(
+        velocityTorqueCurrent.withVelocity(RPM.of(velocityRPM).in(RotationsPerSecond)));
   }
 
   @Override
