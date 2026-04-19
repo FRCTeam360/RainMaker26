@@ -210,10 +210,10 @@ public class FieldConstants {
     // Passing point
 
     // TODO: isolate this to own class in field constants
-    public static final Translation2d passingPoint =
+    public static final Translation2d middlePassingPoint =
         new Translation2d(
                 openingTopLeft.getX(), (openingTopLeft.getY() + openingTopRight.getY()) / 2)
-            .plus(new Translation2d(0.3, 0.0));
+            .plus(new Translation2d(1.5, 0.0));
 
     // Relevant reference points on opposing side
     public static final Translation3d oppOpeningTopLeft =
@@ -238,10 +238,10 @@ public class FieldConstants {
         new Translation3d(LinesVertical.hubCenter, 0, openingHeight);
 
     // TODO: isolate this to own class in field constants
-    public static final Translation2d passingPoint =
+    public static final Translation2d middlePassingPoint =
         new Translation2d(
                 openingTopLeft.getX(), (openingTopLeft.getY() + openingTopRight.getY()) / 2)
-            .plus(new Translation2d(0.3, 0.0));
+            .plus(new Translation2d(1.5, 0.0));
 
     // Relevant reference points on opposing side
     public static final Translation3d oppOpeningTopLeft =
