@@ -36,7 +36,7 @@ public class FieldConstants {
 
   // Middle Passing Points offsets
   private static final double MID_PASSING_POINT_X_OFFSET_METERS = 1.5;
-  private static final double MID_PASSING_POINT_Y_OFFSET_METERS = 0.45;
+  private static final double MID_PASSING_POINT_Y_OFFSET_METERS = 0.35;
 
   /**
    * Officially defined and relevant vertical lines found on the field (defined by X-axis offset)
