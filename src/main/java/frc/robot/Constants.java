@@ -120,6 +120,27 @@ public final class Constants {
     public static final int PDH_CAN_ID = 1; // REV PDH default CAN ID
   }
 
+  public static final class RaycastingConstants {
+    public static final InterpolatingDoubleTreeMap maxAngleDiffAllowedMap =
+        new InterpolatingDoubleTreeMap();
+
+    static {
+      maxAngleDiffAllowedMap.put(1.5, 27.0);
+      maxAngleDiffAllowedMap.put(2.5, 20.0);
+      maxAngleDiffAllowedMap.put(3.0, 17.0);
+      maxAngleDiffAllowedMap.put(3.5, 15.0);
+      maxAngleDiffAllowedMap.put(4.0, 13.0);
+      maxAngleDiffAllowedMap.put(5.5, 10.5);
+      maxAngleDiffAllowedMap.put(6.5, 8.4);
+      maxAngleDiffAllowedMap.put(7.0, 7.0);
+      maxAngleDiffAllowedMap.put(8.5, 7.6);
+      maxAngleDiffAllowedMap.put(9.0, 5.4);
+      maxAngleDiffAllowedMap.put(10.0, 5.0);
+      maxAngleDiffAllowedMap.put(11.0, 4.6);
+      maxAngleDiffAllowedMap.put(11.5, 4.0);
+    }
+  }
+
   public static final CANBus RIO_CANBUS = new CANBus("rio");
 
   public static class WoodBotConstants {
