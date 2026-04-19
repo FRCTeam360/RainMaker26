@@ -37,7 +37,6 @@ public class IndexerIOWB implements IndexerIO {
     closedLoopController = indexerMotor.getClosedLoopController();
   }
 
-  @Override
   public void updateInputs(IndexerIOInputs inputs) {
     inputs.position = encoder.getPosition();
     inputs.statorCurrent = indexerMotor.getOutputCurrent();
