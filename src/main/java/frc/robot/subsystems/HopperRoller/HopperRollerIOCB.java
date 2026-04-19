@@ -10,6 +10,7 @@ import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkFlex;
+import com.revrobotics.spark.SparkLowLevel;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
@@ -61,6 +62,9 @@ public class HopperRollerIOCB implements HopperRollerIO {
         hopperRollerMotor.getOutputCurrent() * hopperRollerMotor.getAppliedOutput();
     inputs.velocity = encoder.getVelocity();
     inputs.voltage = hopperRollerMotor.getBusVoltage() * hopperRollerMotor.getAppliedOutput();
+
+    SparkLowLevel.PeriodicStatus0 status0 = hopperRollerMotor.getPeriodicStatus0();
+    inputs.motorConnected = status0 != null;
   }
 
   public void setDutyCycle(double dutyCycle) {

@@ -15,6 +15,7 @@ public interface HopperRollerIO {
     public double statorCurrent = 0.0;
     public double velocity = 0.0;
     public double position = 0.0;
+    public boolean motorConnected = true;
   }
 
   public default void updateInputs(HopperRollerIOInputs inputs) {}

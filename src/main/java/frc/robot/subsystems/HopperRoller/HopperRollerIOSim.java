@@ -70,6 +70,7 @@ public class HopperRollerIOSim implements HopperRollerIO {
     inputs.voltage = appliedVoltage;
     inputs.statorCurrent = rollerSim.getCurrentDrawAmps();
     inputs.supplyCurrent = rollerSim.getCurrentDrawAmps();
+    inputs.motorConnected = true;
   }
 
   @Override

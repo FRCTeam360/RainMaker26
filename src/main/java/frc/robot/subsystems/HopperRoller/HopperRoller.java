@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems.HopperRoller;
 
+import edu.wpi.first.wpilibj.Alert;
+import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.ControlState;
@@ -20,6 +22,10 @@ public class HopperRoller extends SubsystemBase {
   // IO fields
   private final HopperRollerIO io;
   private final HopperRollerIOInputsAutoLogged inputs = new HopperRollerIOInputsAutoLogged();
+
+  // Alerts
+  private final Alert motorDisconnectedAlert =
+      new Alert("Hopper roller motor disconnected", AlertType.kError);
 
   // Enums
   public enum HopperRollerStates {
@@ -128,6 +134,8 @@ public class HopperRoller extends SubsystemBase {
       updateState();
       applyState();
     }
+    motorDisconnectedAlert.set(!inputs.motorConnected);
+
     Logger.recordOutput("Superstructure/Subsystems/HopperRoller/WantedState", wantedState);
     Logger.recordOutput("Superstructure/Subsystems/HopperRoller/CurrentState", currentState);
     Logger.recordOutput("Superstructure/Subsystems/HopperRoller/PreviousState", previousState);
