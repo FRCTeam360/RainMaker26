@@ -152,6 +152,7 @@ public class FlywheelIOWB implements FlywheelIO {
     motors[0].set(duty);
   }
 
+  @Override
   public void updateInputs(FlywheelIOInputs inputs) {
     BaseStatusSignal.refreshAll(
         rightStatorCurrentSignal,

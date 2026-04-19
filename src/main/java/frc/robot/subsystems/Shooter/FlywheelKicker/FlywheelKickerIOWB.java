@@ -62,6 +62,7 @@ public class FlywheelKickerIOWB implements FlywheelKickerIO {
     canSensor.optimizeBusUtilization();
   }
 
+  @Override
   public void updateInputs(FlywheelKickerIOInputs inputs) {
     inputs.position = encoder.getPosition();
     inputs.statorCurrent = flywheelKickerMotor.getOutputCurrent();
@@ -76,19 +77,23 @@ public class FlywheelKickerIOWB implements FlywheelKickerIO {
     inputs.sensorActivated = isDetectedSignal.getValue();
   }
 
+  @Override
   public void setDutyCycle(double dutyCycle) {
     flywheelKickerMotor.set(dutyCycle);
   }
 
+  @Override
   public void setVelocity(double rpm) {
     closedLoopController.setSetpoint(rpm, ControlType.kVelocity);
   }
 
+  @Override
   public void setSpinupVelocityControl(double rpm) {
     // WoodBot doesn't have separate configs - use default velocity control
     closedLoopController.setSetpoint(rpm, ControlType.kVelocity);
   }
 
+  @Override
   public void setHoldVelocityControl(double rpm) {
     // WoodBot doesn't have separate configs - use default velocity control
     closedLoopController.setSetpoint(rpm, ControlType.kVelocity);

@@ -23,6 +23,7 @@ public class HoodIOWB implements HoodIO {
   private final SparkMaxConfig sparkMaxConfig = new SparkMaxConfig();
   private final SparkClosedLoopController controller;
 
+  @Override
   public void setZero() {
     encoder.setPosition(0);
   }
@@ -46,14 +47,17 @@ public class HoodIOWB implements HoodIO {
     controller = hoodMotor.getClosedLoopController();
   }
 
+  @Override
   public void setPositionSmooth(double position) {
     controller.setSetpoint(position, ControlType.kPosition);
   }
 
+  @Override
   public void setPositionAggressive(double position) {
     controller.setSetpoint(position, ControlType.kPosition);
   }
 
+  @Override
   public void updateInputs(HoodIOInputs inputs) {
     inputs.position = encoder.getPosition();
     inputs.supplyCurrent = 0;
@@ -62,6 +66,7 @@ public class HoodIOWB implements HoodIO {
     inputs.voltage = hoodMotor.getBusVoltage() * hoodMotor.getAppliedOutput();
   }
 
+  @Override
   public void setDutyCycle(double dutyCycle) {
     hoodMotor.set(dutyCycle);
   }

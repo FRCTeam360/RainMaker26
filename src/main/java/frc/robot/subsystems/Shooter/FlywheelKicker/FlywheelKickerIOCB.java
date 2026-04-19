@@ -85,6 +85,7 @@ public class FlywheelKickerIOCB implements FlywheelKickerIO {
     closedLoopController = flywheelKickerMotor.getClosedLoopController();
   }
 
+  @Override
   public void updateInputs(FlywheelKickerIOInputs inputs) {
     inputs.position = encoder.getPosition();
     inputs.statorCurrent = flywheelKickerMotor.getOutputCurrent();
@@ -95,19 +96,23 @@ public class FlywheelKickerIOCB implements FlywheelKickerIO {
     inputs.sensorActivated = false;
   }
 
+  @Override
   public void setDutyCycle(double dutyCycle) {
     flywheelKickerMotor.set(dutyCycle);
   }
 
+  @Override
   public void setVelocity(double rpm) {
     closedLoopController.setSetpoint(rpm, ControlType.kVelocity);
   }
 
+  @Override
   public void setSpinupVelocityControl(double rpm) {
     // Use Slot 0 for aggressive spinup
     closedLoopController.setSetpoint(rpm, ControlType.kVelocity, ClosedLoopSlot.kSlot0);
   }
 
+  @Override
   public void setHoldVelocityControl(double rpm) {
     // Use Slot 1 for smooth hold
     closedLoopController.setSetpoint(rpm, ControlType.kVelocity, ClosedLoopSlot.kSlot1);

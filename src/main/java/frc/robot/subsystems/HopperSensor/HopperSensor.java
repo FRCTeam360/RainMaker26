@@ -92,20 +92,18 @@ public class HopperSensor extends SubsystemBase {
     debouncedSensorActivated = sensorActivatedDebouncer.calculate(inputs.sensorActivated);
 
     switch (wantedState) {
-      case NOT_AGITATING:
-        // Mirror sensor directly every cycle.
-        currentState =
-            debouncedSensorActivated
-                ? HopperSensorInternalStates.FULL
-                : HopperSensorInternalStates.HALF_EMPTY;
-        break;
-      case AGITATING:
+      case NOT_AGITATING -> // Mirror sensor directly every cycle.
+          currentState =
+              debouncedSensorActivated
+                  ? HopperSensorInternalStates.FULL
+                  : HopperSensorInternalStates.HALF_EMPTY;
+      case AGITATING -> {
         // One-way latch — only reset FULL to HALF_EMPTY on a falling edge (balls have cleared).
         // If we entered agitation while HALF_EMPTY, stay HALF_EMPTY (agitate at high intensity).
         if (previousState == HopperSensorInternalStates.FULL && !debouncedSensorActivated) {
           currentState = HopperSensorInternalStates.HALF_EMPTY;
         }
-        break;
+      }
     }
   }
 

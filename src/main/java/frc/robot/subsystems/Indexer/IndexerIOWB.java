@@ -47,10 +47,12 @@ public class IndexerIOWB implements IndexerIO {
     inputs.voltage = indexerMotor.getBusVoltage() * indexerMotor.getAppliedOutput();
   }
 
+  @Override
   public void setDutyCycle(double dutyCycle) {
     indexerMotor.set(dutyCycle);
   }
 
+  @Override
   public void setVelocity(double rpm) {
     closedLoopController.setSetpoint(rpm, ControlType.kVelocity);
   }

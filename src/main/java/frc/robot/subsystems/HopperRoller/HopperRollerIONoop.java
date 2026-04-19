@@ -5,7 +5,9 @@
 package frc.robot.subsystems.HopperRoller;
 
 public class HopperRollerIONoop implements HopperRollerIO {
+  @Override
   public void setDutyCycle(double dutyCycle) {}
 
+  @Override
   public void setVelocity(double rpm) {}
 }

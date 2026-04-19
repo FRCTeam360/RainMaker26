@@ -94,7 +94,6 @@ import org.littletonrobotics.junction.Logger;
  */
 public class RobotContainer {
 
-  private static final double PRE_SHOT_UNJAM_SECONDS = 0.05;
   private static final double AUTO_SHOOT_TIMEOUT_SECONDS = 5.0;
   private static final double AUTO_SHOOT_NO_LAUNCH_TIMEOUT_SECONDS = 0.8;
 
@@ -124,8 +123,6 @@ public class RobotContainer {
   // Replace with CommandPS4Controller or CommandJoystick if needed
 
   private final CommandXboxController driverCont = new CommandXboxController(0);
-  private final CommandXboxController operatorCont = new CommandXboxController(1);
-  private final CommandXboxController testCont1 = new CommandXboxController(5);
 
   /** Threshold above which a loop cycle is considered an overrun (22ms for a 20ms loop). */
   private static final double LOOP_OVERRUN_THRESHOLD_SECONDS = 0.022;
@@ -187,11 +184,11 @@ public class RobotContainer {
         indexer = new Indexer(new IndexerIOWB());
         vision =
             new Vision(
-                ((new VisionIOLimelight3G(
+                new VisionIOLimelight3G(
                     Constants.WoodBotConstants.LIMELIGHT_3,
                     () -> drivetrain.getAngle(),
                     () -> drivetrain.getAngularRate(),
-                    true))));
+                    true));
         intakeRoller = new IntakeRoller(new IntakeRollerIOWB());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOWB());
         intakePivot = new IntakePivot(new IntakePivotIONoop());
@@ -227,11 +224,11 @@ public class RobotContainer {
         indexer = new Indexer(new IndexerIOPB());
         vision =
             new Vision(
-                ((new VisionIOLimelight3G(
+                new VisionIOLimelight3G(
                     Constants.PracticeBotConstants.LIMELIGHT_RIGHT,
                     () -> drivetrain.getAngle(),
                     () -> drivetrain.getAngularRate(),
-                    true))),
+                    true),
                 new VisionIOLimelight3G(
                     Constants.PracticeBotConstants.LIMELIGHT_LEFT,
                     () -> drivetrain.getAngle(),
@@ -277,11 +274,11 @@ public class RobotContainer {
         indexer = new Indexer(new IndexerIOCB());
         vision =
             new Vision(
-                ((new VisionIOLimelight4(
+                new VisionIOLimelight4(
                     Constants.CompBotConstants.LIMELIGHT_RIGHT,
                     () -> drivetrain.getAngle(),
                     () -> drivetrain.getAngularRate(),
-                    true))),
+                    true),
                 new VisionIOLimelight4(
                     Constants.CompBotConstants.LIMELIGHT_LEFT,
                     () -> drivetrain.getAngle(),

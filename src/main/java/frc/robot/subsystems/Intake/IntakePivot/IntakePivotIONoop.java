@@ -5,17 +5,24 @@
 package frc.robot.subsystems.Intake.IntakePivot;
 
 public class IntakePivotIONoop implements IntakePivotIO {
+  @Override
   public void setZero() {}
 
+  @Override
   public void setPosition(double position) {}
 
+  @Override
   public void setPositionSmooth(double position) {}
 
+  @Override
   public void setPositionAggressive(double position) {}
 
+  @Override
   public void setDutyCycle(double value) {}
 
+  @Override
   public void enableBrakeMode() {}
 
+  @Override
   public void disableBrakeMode() {}
 }

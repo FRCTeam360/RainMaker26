@@ -55,33 +55,23 @@ public final class Constants {
   static RobotType robotType;
 
   public static LinearVelocity getMaxSpeed() {
-    switch (getRobotType()) {
-      case WOODBOT:
-        return WoodBotConstants.maxSpeed;
-      case COMPBOT:
-        return CompBotConstants.maxSpeed;
-      case PRACTICEBOT:
-        return PracticeBotConstants.maxSpeed;
-      case SIM:
-        return SimulationConstants.maxSpeed;
-      default:
-        return PracticeBotConstants.maxSpeed;
-    }
+    return switch (getRobotType()) {
+      case WOODBOT -> WoodBotConstants.maxSpeed;
+      case COMPBOT -> CompBotConstants.maxSpeed;
+      case PRACTICEBOT -> PracticeBotConstants.maxSpeed;
+      case SIM -> SimulationConstants.maxSpeed;
+      default -> PracticeBotConstants.maxSpeed;
+    };
   }
 
   public static AngularVelocity getMaxAngularVelocity() {
-    switch (getRobotType()) {
-      case WOODBOT:
-        return WoodBotConstants.maxAngularVelocity;
-      case COMPBOT:
-        return CompBotConstants.maxAngularVelocity;
-      case PRACTICEBOT:
-        return PracticeBotConstants.maxAngularVelocity;
-      case SIM:
-        return SimulationConstants.maxAngularVelocity;
-      default:
-        return PracticeBotConstants.maxAngularVelocity;
-    }
+    return switch (getRobotType()) {
+      case WOODBOT -> WoodBotConstants.maxAngularVelocity;
+      case COMPBOT -> CompBotConstants.maxAngularVelocity;
+      case PRACTICEBOT -> PracticeBotConstants.maxAngularVelocity;
+      case SIM -> SimulationConstants.maxAngularVelocity;
+      default -> PracticeBotConstants.maxAngularVelocity;
+    };
   }
 
   public static RobotType getRobotType() {

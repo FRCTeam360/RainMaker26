@@ -54,6 +54,7 @@ public class HopperRollerIOCB implements HopperRollerIO {
     closedLoopController = hopperRollerMotor.getClosedLoopController();
   }
 
+  @Override
   public void updateInputs(HopperRollerIOInputs inputs) {
     inputs.position = encoder.getPosition();
     inputs.statorCurrent = hopperRollerMotor.getOutputCurrent();
@@ -63,10 +64,12 @@ public class HopperRollerIOCB implements HopperRollerIO {
     inputs.voltage = hopperRollerMotor.getBusVoltage() * hopperRollerMotor.getAppliedOutput();
   }
 
+  @Override
   public void setDutyCycle(double dutyCycle) {
     hopperRollerMotor.set(dutyCycle);
   }
 
+  @Override
   public void setVelocity(double rpm) {
     closedLoopController.setSetpoint(rpm, ControlType.kVelocity);
   }

@@ -63,14 +63,17 @@ public class IntakeRollerIOCB implements IntakeRollerIO {
     closedLoopController = motorLeft.getClosedLoopController();
   }
 
+  @Override
   public void setDutyCycle(double duty) {
     motorLeft.set(duty);
   }
 
+  @Override
   public void stop() {
     this.setDutyCycle(0.0);
   }
 
+  @Override
   public void setVelocity(double velocity) {
     closedLoopController.setSetpoint(velocity, ControlType.kVelocity);
   }
@@ -84,6 +87,7 @@ public class IntakeRollerIOCB implements IntakeRollerIO {
         pidConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
   }
 
+  @Override
   public void updateInputs(IntakeRollerIOInputs inputs) {
     inputs.position[0] = leftEncoder.getPosition();
     inputs.statorCurrent[0] = motorLeft.getOutputCurrent();

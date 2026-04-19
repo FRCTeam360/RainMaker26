@@ -280,13 +280,13 @@ public class FieldConstants {
     public static final Translation2d leftUpright =
         new Translation2d(
             frontFaceX,
-            (FIELD_LAYOUT.getTagPose(31).get().getY())
+            FIELD_LAYOUT.getTagPose(31).get().getY()
                 + innerOpeningWidth / 2
                 + Units.inchesToMeters(0.75));
     public static final Translation2d rightUpright =
         new Translation2d(
             frontFaceX,
-            (FIELD_LAYOUT.getTagPose(31).get().getY())
+            FIELD_LAYOUT.getTagPose(31).get().getY()
                 - innerOpeningWidth / 2
                 - Units.inchesToMeters(0.75));
 
@@ -296,13 +296,13 @@ public class FieldConstants {
     public static final Translation2d oppLeftUpright =
         new Translation2d(
             fieldLength - frontFaceX,
-            (FIELD_LAYOUT.getTagPose(15).get().getY())
+            FIELD_LAYOUT.getTagPose(15).get().getY()
                 + innerOpeningWidth / 2
                 + Units.inchesToMeters(0.75));
     public static final Translation2d oppRightUpright =
         new Translation2d(
             fieldLength - frontFaceX,
-            (FIELD_LAYOUT.getTagPose(15).get().getY())
+            FIELD_LAYOUT.getTagPose(15).get().getY()
                 - innerOpeningWidth / 2
                 - Units.inchesToMeters(0.75));
   }

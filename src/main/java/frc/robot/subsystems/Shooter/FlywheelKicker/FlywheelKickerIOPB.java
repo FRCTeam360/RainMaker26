@@ -33,8 +33,6 @@ public class FlywheelKickerIOPB implements FlywheelKickerIO {
   private static final double KV = 0.0017;
   private static final double KS = 0.04;
 
-  private static final double MIN_SIGNAL_STRENGTH = 2000; // unknown unit
-  private static final double PROXIMITY_THRESHOLD_METERS = 0.1;
   private static final double MAX_NEGATIVE_OUTPUT = 0.0;
   private static final double MAX_POSITIVE_OUTPUT = 1.0;
 
@@ -87,6 +85,7 @@ public class FlywheelKickerIOPB implements FlywheelKickerIO {
     closedLoopController = flywheelKickerMotor.getClosedLoopController();
   }
 
+  @Override
   public void updateInputs(FlywheelKickerIOInputs inputs) {
     inputs.position = encoder.getPosition();
     inputs.statorCurrent = flywheelKickerMotor.getOutputCurrent();
@@ -97,19 +96,23 @@ public class FlywheelKickerIOPB implements FlywheelKickerIO {
     inputs.sensorActivated = false;
   }
 
+  @Override
   public void setDutyCycle(double dutyCycle) {
     flywheelKickerMotor.set(dutyCycle);
   }
 
+  @Override
   public void setVelocity(double rpm) {
     closedLoopController.setSetpoint(rpm, ControlType.kVelocity);
   }
 
+  @Override
   public void setSpinupVelocityControl(double rpm) {
     // Use Slot 0 for aggressive spinup
     closedLoopController.setSetpoint(rpm, ControlType.kVelocity, ClosedLoopSlot.kSlot0);
   }
 
+  @Override
   public void setHoldVelocityControl(double rpm) {
     // Use Slot 1 for smooth hold
     closedLoopController.setSetpoint(rpm, ControlType.kVelocity, ClosedLoopSlot.kSlot1);

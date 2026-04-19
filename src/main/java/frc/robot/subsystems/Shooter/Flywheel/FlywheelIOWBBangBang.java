@@ -219,6 +219,7 @@ public class FlywheelIOWBBangBang implements FlywheelIO {
   }
 
   /** {@inheritDoc} */
+  @Override
   public void updateInputs(FlywheelIOInputs inputs) {
     BaseStatusSignal.refreshAll(
         rightStatorCurrentSignal,

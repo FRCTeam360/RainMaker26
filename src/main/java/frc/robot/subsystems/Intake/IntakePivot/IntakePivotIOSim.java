@@ -110,6 +110,7 @@ public class IntakePivotIOSim implements IntakePivotIO {
     motorControllerSim.getConfigurator().apply(talonConfig);
   }
 
+  @Override
   public void updateInputs(IntakePivotIOInputs inputs) {
     // Step 1: Get the commanded voltage from motor and apply to simulation
     intakePivotSim.setInput(motorControllerSim.getSimState().getMotorVoltage());
@@ -142,11 +143,13 @@ public class IntakePivotIOSim implements IntakePivotIO {
     visualizer.update(intakePivotSim.getAngleRads());
   }
 
+  @Override
   public void setZero() {
     motorControllerSim.setPosition(0.0);
   }
 
   /** Set position in degrees (matches PB IO) */
+  @Override
   public void setPosition(double positionDegrees) {
     double rotations = positionDegrees / 360.0;
     motorControllerSim.setControl(positionRequest.withPosition(rotations));
