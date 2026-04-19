@@ -213,7 +213,7 @@ public class FieldConstants {
     public static final Translation2d middlePassingPoint =
         new Translation2d(
                 openingTopLeft.getX(), (openingTopLeft.getY() + openingTopRight.getY()) / 2)
-            .plus(new Translation2d(1.5, 0.3));
+            .plus(new Translation2d(1.5, 0.45));
 
     // Relevant reference points on opposing side
     public static final Translation3d oppOpeningTopLeft =
@@ -241,7 +241,7 @@ public class FieldConstants {
     public static final Translation2d middlePassingPoint =
         new Translation2d(
                 openingTopLeft.getX(), (openingTopLeft.getY() + openingTopRight.getY()) / 2)
-            .plus(new Translation2d(1.5, -0.3));
+            .plus(new Translation2d(1.5, -0.45));
 
     // Relevant reference points on opposing side
     public static final Translation3d oppOpeningTopLeft =
