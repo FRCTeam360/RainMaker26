@@ -16,7 +16,6 @@ public class IntakeRoller extends SubsystemBase {
   // Motor output constants
   private static final double INTAKE_VELOCITY_RPM = 4250.0;
   private static final double WOODBOT_INTAKING_DUTY_CYCLE = 0.7;
-  private static final double INTAKING_DUTY_CYCLE = 0.8;
   private static final double SHOOT_ASSIST_DUTY_CYCLE = 0.3;
   private static final double REVERSE_VELOCITY_RPM = -3250.0;
   private static final double REVERSE_UNJAM_DUTY_CYCLE = -0.5;

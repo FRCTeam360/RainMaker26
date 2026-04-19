@@ -50,13 +50,4 @@ final class BLinePaths {
   static Rotation2d flipAndMirrorRotation(Rotation2d r) {
     return mirrorRotation(flipRotation(r));
   }
-
-  // ─────────────────────────────────────────────────────────────────────────────
-  // Rotation constants
-  // ─────────────────────────────────────────────────────────────────────────────
-
-  private static final Rotation2d ROT_0 = Rotation2d.fromDegrees(0);
-  private static final Rotation2d ROT_180 = Rotation2d.fromDegrees(180);
-  private static final Rotation2d ROT_90 = Rotation2d.fromDegrees(90);
-  private static final Rotation2d ROT_NEG_90 = Rotation2d.fromDegrees(-90);
 }

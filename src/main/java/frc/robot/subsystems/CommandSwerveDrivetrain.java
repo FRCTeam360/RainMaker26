@@ -190,7 +190,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
           double velYMps = Math.pow(driveCont.getLeftX(), 3) * maxSpeed.in(MetersPerSecond) * -1.0;
           double omegaRps =
               Math.pow(driveCont.getRightX(), 2)
-                  * (maxAngularVelocity.in(RadiansPerSecond))
+                  * maxAngularVelocity.in(RadiansPerSecond)
                   * -Math.signum(driveCont.getRightX());
           if (isDefenseMode) {
             velXMps *= defenseModeTranslationScaler;
@@ -505,33 +505,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         });
   }
 
-  /**
-   * Constructs a CTRE SwerveDrivetrain using the specified constants.
-   *
-   * <p>This constructs the underlying hardware devices, so users should not construct the devices
-   * themselves. If they need the devices, they can access them through getters in the classes.
-   *
-   * @param drivetrainConstants Drivetrain-wide constants for the swerve drive
-   * @param odometryUpdateFrequency The frequency to run the odometry loop. If unspecified or set to
-   *     0 Hz, this is 250 Hz on CAN FD, and 100 Hz on CAN 2.0.
-   * @param modules Constants for each specific module
-   */
-
-  /**
-   * Constructs a CTRE SwerveDrivetrain using the specified constants.
-   *
-   * <p>This constructs the underlying hardware devices, so users should not construct the devices
-   * themselves. If they need the devices, they can access them through getters in the classes.
-   *
-   * @param drivetrainConstants Drivetrain-wide constants for the swerve drive
-   * @param odometryUpdateFrequency The frequency to run the odometry loop. If unspecified or set to
-   *     0 Hz, this is 250 Hz on CAN FD, and 100 Hz on CAN 2.0.
-   * @param odometryStandardDeviation The standard deviation for odometry calculation in the form
-   *     [x, y, theta]ᵀ, with units in meters and radians
-   * @param visionStandardDeviation The standard deviation for vision calculation in the form [x, y,
-   *     theta]ᵀ, with units in meters and radians
-   * @param modules Constants for each specific module
-   */
   // PathPlanner AutoBuilder PID gains
   private static final double PP_TRANSLATION_KP = 11.0;
 

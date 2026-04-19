@@ -13,7 +13,6 @@ import org.littletonrobotics.junction.Logger;
 public class Indexer extends SubsystemBase {
   // Constants
   private static final double INDEXER_VELOCITY_RPM = 3000.0;
-  private static final double INDEXER_DUTY_CYCLE = 0.80;
   private static final double INTAKING_ASSIST_DUTY_CYCLE = -0.15;
   private static final double REVERSING_DUTY_CYCLE = -0.35;
 
@@ -60,19 +59,11 @@ public class Indexer extends SubsystemBase {
     previousState = currentState;
 
     switch (wantedState) {
-      case ASSIST_INTAKING:
-        currentState = IndexerStates.ASSIST_INTAKING;
-        break;
+      case ASSIST_INTAKING -> currentState = IndexerStates.ASSIST_INTAKING;
 
-      case INDEXING:
-        currentState = IndexerStates.INDEXING;
-        break;
-      case REVERSING:
-        currentState = IndexerStates.REVERSING;
-        break;
-      case OFF:
-        currentState = IndexerStates.OFF;
-        break;
+      case INDEXING -> currentState = IndexerStates.INDEXING;
+      case REVERSING -> currentState = IndexerStates.REVERSING;
+      case OFF -> currentState = IndexerStates.OFF;
     }
   }
 

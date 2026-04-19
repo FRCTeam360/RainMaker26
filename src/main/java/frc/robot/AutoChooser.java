@@ -110,9 +110,7 @@ public class AutoChooser {
     return result;
   }
 
-  /**
-   * @return the currently selected autonomous command
-   */
+  /** return the currently selected autonomous command */
   public Command getSelected() {
     return chooser.getSelected();
   }

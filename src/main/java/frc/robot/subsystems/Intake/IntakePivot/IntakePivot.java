@@ -30,7 +30,6 @@ public class IntakePivot extends SubsystemBase {
   // Stall detection constants
   private static final double STALL_CURRENT_THRESHOLD_AMPS = 40.0;
   private static final double STALL_VELOCITY_THRESHOLD_DPS = 5.0;
-  private static final double STALL_BACKOFF_DEGREES = 10.0;
   // IO fields
   private final IntakePivotIO io;
   private final IntakePivotIOInputsAutoLogged inputs = new IntakePivotIOInputsAutoLogged();
@@ -90,23 +89,22 @@ public class IntakePivot extends SubsystemBase {
   private void updateState() {
     previousState = currentState;
     switch (wantedState) {
-      case STOWED:
+      case STOWED -> {
         progressiveStarted = false;
         if (atSetpoint(STOWED_POSITION_DEGREES)) {
           currentState = IntakePivotInternalStates.AT_SETPOINT;
         } else {
           currentState = IntakePivotInternalStates.MOVING_TO_SETPOINT;
         }
-        break;
-      case DEPLOYED:
+      }
+      case DEPLOYED -> {
         progressiveStarted = false;
         currentState =
             atSetpoint(DEPLOYED_POSITION_DEGREES)
                 ? IntakePivotInternalStates.AT_SETPOINT
                 : IntakePivotInternalStates.MOVING_TO_SETPOINT;
-        break;
-      case AGITATE_HOPPER_LOW:
-      case AGITATE_HOPPER_HIGH:
+      }
+      case AGITATE_HOPPER_LOW, AGITATE_HOPPER_HIGH -> {
         progressiveStarted = false;
         {
           double upperTarget = getAgitateUpperPosition();
@@ -130,49 +128,47 @@ public class IntakePivot extends SubsystemBase {
                     ? IntakePivotInternalStates.AT_SETPOINT
                     : IntakePivotInternalStates.MOVING_TO_SETPOINT;
           }
-          break;
         }
-      case AGITATE_PROGRESSIVE:
-        {
-          if (!progressiveStarted) {
-            progressiveCycleCount = 0;
+      }
+      case AGITATE_PROGRESSIVE -> {
+        if (!progressiveStarted) {
+          progressiveCycleCount = 0;
+          agitateTargetHigh = false;
+          progressiveStarted = true;
+        }
+        double stepTarget = getProgressiveStepTarget();
+        if (stepTarget <= STOWED_POSITION_DEGREES) {
+          progressiveStarted = false;
+          currentState = IntakePivotInternalStates.PROGRESSIVE_COMPLETE;
+        } else {
+          double dipTarget = getProgressiveDipTarget();
+          double target = agitateTargetHigh ? dipTarget : stepTarget;
+          boolean atTarget = atSetpoint(target);
+          if (previousState == IntakePivotInternalStates.MOVING_TO_SETPOINT && atTarget) {
+            currentState =
+                agitateTargetHigh
+                    ? IntakePivotInternalStates.SWITCHING_AGITATE_TARGET_LOW
+                    : IntakePivotInternalStates.SWITCHING_AGITATE_TARGET_HIGH;
+          } else if (currentState == IntakePivotInternalStates.SWITCHING_AGITATE_TARGET_HIGH) {
+            agitateTargetHigh = true;
+            currentState = IntakePivotInternalStates.AT_SETPOINT;
+          } else if (currentState == IntakePivotInternalStates.SWITCHING_AGITATE_TARGET_LOW) {
             agitateTargetHigh = false;
-            progressiveStarted = true;
-          }
-          double stepTarget = getProgressiveStepTarget();
-          if (stepTarget <= STOWED_POSITION_DEGREES) {
-            progressiveStarted = false;
-            currentState = IntakePivotInternalStates.PROGRESSIVE_COMPLETE;
+            progressiveCycleCount++;
+            currentState = IntakePivotInternalStates.AT_SETPOINT;
           } else {
-            double dipTarget = getProgressiveDipTarget();
-            double target = agitateTargetHigh ? dipTarget : stepTarget;
-            boolean atTarget = atSetpoint(target);
-            if (previousState == IntakePivotInternalStates.MOVING_TO_SETPOINT && atTarget) {
-              currentState =
-                  agitateTargetHigh
-                      ? IntakePivotInternalStates.SWITCHING_AGITATE_TARGET_LOW
-                      : IntakePivotInternalStates.SWITCHING_AGITATE_TARGET_HIGH;
-            } else if (currentState == IntakePivotInternalStates.SWITCHING_AGITATE_TARGET_HIGH) {
-              agitateTargetHigh = true;
-              currentState = IntakePivotInternalStates.AT_SETPOINT;
-            } else if (currentState == IntakePivotInternalStates.SWITCHING_AGITATE_TARGET_LOW) {
-              agitateTargetHigh = false;
-              progressiveCycleCount++;
-              currentState = IntakePivotInternalStates.AT_SETPOINT;
-            } else {
-              currentState =
-                  atTarget
-                      ? IntakePivotInternalStates.AT_SETPOINT
-                      : IntakePivotInternalStates.MOVING_TO_SETPOINT;
-            }
+            currentState =
+                atTarget
+                    ? IntakePivotInternalStates.AT_SETPOINT
+                    : IntakePivotInternalStates.MOVING_TO_SETPOINT;
           }
-          break;
         }
-      default:
+      }
+      default -> {
         stallBackoffDegrees = 0.0;
         progressiveStarted = false;
         currentState = IntakePivotInternalStates.IDLE;
-        break;
+      }
     }
   }
 
@@ -241,19 +237,15 @@ public class IntakePivot extends SubsystemBase {
   }
 
   private double getTargetPosition() {
-    switch (wantedState) {
-      case AGITATE_HOPPER_LOW:
-      case AGITATE_HOPPER_HIGH:
-        return agitateTargetHigh ? getAgitateUpperPosition() : getAgitateLowerPosition();
-      case AGITATE_PROGRESSIVE:
-        return agitateTargetHigh ? getProgressiveDipTarget() : getProgressiveStepTarget();
-      case DEPLOYED:
-        return DEPLOYED_POSITION_DEGREES;
-      case STOWED:
-        return STOWED_POSITION_DEGREES;
-      default:
-        return STOWED_POSITION_DEGREES;
-    }
+    return switch (wantedState) {
+      case AGITATE_HOPPER_LOW, AGITATE_HOPPER_HIGH ->
+          agitateTargetHigh ? getAgitateUpperPosition() : getAgitateLowerPosition();
+      case AGITATE_PROGRESSIVE ->
+          agitateTargetHigh ? getProgressiveDipTarget() : getProgressiveStepTarget();
+      case DEPLOYED -> DEPLOYED_POSITION_DEGREES;
+      case STOWED -> STOWED_POSITION_DEGREES;
+      default -> STOWED_POSITION_DEGREES;
+    };
   }
 
   // IO delegation methods

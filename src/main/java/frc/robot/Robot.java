@@ -64,18 +64,16 @@ public class Robot extends LoggedRobot {
     }
 
     switch (Constants.getRobotType()) {
-      case SIM:
-        // Running a physics simulator, log to NT
-        Logger.addDataReceiver(new NT4Publisher());
-        break;
-      case REPLAY:
+      case SIM -> // Running a physics simulator, log to NT
+          Logger.addDataReceiver(new NT4Publisher());
+      case REPLAY -> {
         // Replaying a log, set up replay source
         setUseTiming(false); // Run as fast as possible
         String logPath = LogFileUtil.findReplayLog();
         Logger.setReplaySource(new WPILOGReader(logPath));
         Logger.addDataReceiver(new WPILOGWriter(LogFileUtil.addPathSuffix(logPath, "_sim")));
-        break;
-      default:
+      }
+      default -> {}
     }
 
     Logger.start(); // Start logging! No more data receivers, replay sources, or metadata values may

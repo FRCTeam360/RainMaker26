@@ -69,14 +69,11 @@ public class HubShiftTracker {
   // -------------------------------------------------------------------------
 
   private double computeTimeLeftInPhase(double matchTime, boolean weAreAutoWinner) {
-    switch (currentPhase) {
-      case AUTO:
-        return matchTime;
-      case TELEOP:
-        return getTimeUntilNextShiftBoundary(matchTime, weAreAutoWinner);
-      default:
-        return 0.0;
-    }
+    return switch (currentPhase) {
+      case AUTO -> matchTime;
+      case TELEOP -> getTimeUntilNextShiftBoundary(matchTime, weAreAutoWinner);
+      default -> 0.0;
+    };
   }
 
   private double getTimeUntilNextShiftBoundary(double matchTime, boolean weAreAutoWinner) {

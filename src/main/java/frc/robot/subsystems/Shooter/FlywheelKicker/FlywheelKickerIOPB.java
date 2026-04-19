@@ -33,8 +33,6 @@ public class FlywheelKickerIOPB implements FlywheelKickerIO {
   private static final double KV = 0.0017;
   private static final double KS = 0.04;
 
-  private static final double MIN_SIGNAL_STRENGTH = 2000; // unknown unit
-  private static final double PROXIMITY_THRESHOLD_METERS = 0.1;
   private static final double MAX_NEGATIVE_OUTPUT = 0.0;
   private static final double MAX_POSITIVE_OUTPUT = 1.0;
 

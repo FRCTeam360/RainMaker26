@@ -112,14 +112,14 @@ public class XOutWhileAligningCommand extends Command {
     Logger.recordOutput(LOG_PREFIX + "HasDriverInput", hasDriverInput);
 
     switch (state) {
-      case FACING_ANGLE:
+      case FACING_ANGLE -> {
         double entryErrorRad = heading.minus(drivetrain.getRotation2d()).getRadians();
         if (!hasDriverInput && Math.abs(entryErrorRad) < HEADING_TOLERANCE_RAD) {
           state = State.X_OUT;
         }
-        break;
+      }
 
-      case X_OUT:
+      case X_OUT -> {
         double headingErrorRad = heading.minus(drivetrain.getRotation2d()).getRadians();
         boolean stillAligned = Math.abs(headingErrorRad) < HEADING_TOLERANCE_RAD;
 
@@ -127,7 +127,7 @@ public class XOutWhileAligningCommand extends Command {
           state = State.FACING_ANGLE;
           drivetrain.resetHeadingController();
         }
-        break;
+      }
     }
 
     Logger.recordOutput(LOG_PREFIX + "State", state.name());
@@ -142,15 +142,13 @@ public class XOutWhileAligningCommand extends Command {
    */
   private void applyState(double vx, double vy, Rotation2d heading) {
     switch (state) {
-      case FACING_ANGLE:
+      case FACING_ANGLE -> {
         boolean isBlueAlliance = DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue;
         drivetrain.faceAngleWhileDriving(
             isBlueAlliance ? vx : -vx, isBlueAlliance ? vy : -vy, heading);
-        break;
+      }
 
-      case X_OUT:
-        drivetrain.xOut();
-        break;
+      case X_OUT -> drivetrain.xOut();
     }
   }
 

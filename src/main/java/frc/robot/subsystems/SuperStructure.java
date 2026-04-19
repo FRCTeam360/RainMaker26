@@ -212,26 +212,12 @@ public class SuperStructure extends SubsystemBase {
 
   private void applyStates() {
     switch (currentSuperState) {
-      case IDLE:
-        stopped();
-        break;
-      case SHOOTING_AT_HUB:
-      case PASSING:
-        shooting();
-        break;
-      case UNJAMMING:
-        unjamming();
-        break;
-      case FORCED_SHOT:
-      case FORCED_SHOOT_TRENCH:
-        shooting();
-        break;
-      case FORCED_PASS:
-        shooting();
-        break;
-      case DEFAULT:
-        passive_preparing();
-        break;
+      case IDLE -> stopped();
+      case SHOOTING_AT_HUB, PASSING -> shooting();
+      case UNJAMMING -> unjamming();
+      case FORCED_SHOT, FORCED_SHOOT_TRENCH -> shooting();
+      case FORCED_PASS -> shooting();
+      case DEFAULT -> passive_preparing();
     }
   }
 
@@ -302,16 +288,19 @@ public class SuperStructure extends SubsystemBase {
   private boolean canShootToTarget() {
     if (wantedSuperState == SuperWantedStates.AUTO_CYCLE_SHOOTING) {
       switch (currentSuperState) {
-        case SHOOTING_AT_HUB:
+        case SHOOTING_AT_HUB -> {
           // Allow shooting if explicitly commanded to shoot at hub (manual override)
           // For AUTO_CYCLE_SHOOTING, check if hub is actually active based on game phase
           return canScoreAtHub() && hubShotCalculator.calculateShot().isValid();
-        case PASSING:
+        }
+        case PASSING -> {
           boolean isInPassingZone =
               PositionUtils.isInPassingZone(robotPoseSupplier.get(), robotToShooter);
           return isInPassingZone;
-        default:
+        }
+        default -> {
           return true;
+        }
       }
     }
     return true;

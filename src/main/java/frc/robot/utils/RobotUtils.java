@@ -8,7 +8,6 @@ import java.util.Optional;
 
 public class RobotUtils {
   private static final double SHIFT_GRACE_PERIOD_SECONDS = 2.0;
-  private static final double HUB_TO_SENSOR_SECONDS = 1.0;
 
   public static final double TRANSITION_END_SECONDS = 130;
   public static final double SHIFT_1_END_SECONDS = 105;
@@ -48,14 +47,11 @@ public class RobotUtils {
     // the game specific message tells you which alliance won auto
     if (autoWinner.length() > 0) {
       // checks which hub is open
-      switch (autoWinner.charAt(0)) {
-        case 'B':
-          return Alliance.Blue;
-        case 'R':
-          return Alliance.Red;
-        default:
-          return null;
-      }
+      return switch (autoWinner.charAt(0)) {
+        case 'B' -> Alliance.Blue;
+        case 'R' -> Alliance.Red;
+        default -> null;
+      };
     }
     // called when no data was received from driver station
     return null;
@@ -136,27 +132,30 @@ public class RobotUtils {
         return true;
       }
       switch (gamePhase) {
-          // during auto, transitional phase, and end game
-        case BOTH:
+        case BOTH -> {
           return true;
-          // during alliance shifts 1 and 3:
-        case AUTOLOSER:
+        }
+        case AUTOLOSER -> {
           if (alliance.get() == autoWinner) {
             hubActive = false;
           } else {
             hubActive = true;
           }
           return hubActive;
-          // during alliance shifts 2 and 4:
-        case AUTOWINNER:
+        }
+        case AUTOWINNER -> {
           if (alliance.get() == autoWinner) {
             hubActive = true;
           } else {
             hubActive = false;
           }
           return hubActive;
-        default:
+        }
+        default -> {}
       }
+      // during auto, transitional phase, and end game
+      // during alliance shifts 1 and 3:
+      // during alliance shifts 2 and 4:
     } else {
       // this is called when no alliance has been received from driver station
       return true;
