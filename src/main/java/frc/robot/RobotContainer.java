@@ -535,7 +535,7 @@ public class RobotContainer {
     driverCont.b().whileTrue(superStructure.setStateCommand(SuperWantedStates.FORCED_SHOOT_TRENCH));
     driverCont.b().onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
 
-    driverCont.start().onTrue(drivetrain.xOutCmd());
+    // driverCont.start().onTrue(drivetrain.xOutCmd());
 
     driverCont.x().whileTrue(superStructure.setIntakeStateCommand(IntakeWantedStates.REVERSING));
     // TODO: check that this works with just an on false because this will set the intake to idle
