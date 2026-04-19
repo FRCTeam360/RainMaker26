@@ -18,11 +18,12 @@ java {
 task(eventDeploy) {
     doLast {
         if (project.gradle.startParameter.taskNames.any({ it.toLowerCase().contains("deploy") })) {
-            def branchPrefix = "event"
+            def eventBranchPrefix = "event"
+            def practiceBranchPrefix = "practice"
             def branch = 'git branch --show-current'.execute().text.trim()
             def commitMessage = "Update at '${new Date().toString()}'"
 
-            if (branch.startsWith(branchPrefix)) {
+            if (branch.startsWith(eventBranchPrefix) || branch.startsWith(practiceBranchPrefix)) {
                 exec {
                     workingDir(projectDir)
                     executable 'git'
