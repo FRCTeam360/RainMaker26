@@ -9,6 +9,7 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.FollowPathCommand;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -81,6 +82,7 @@ import frc.robot.utils.FieldConstants;
 import frc.robot.utils.PathProvider;
 import frc.robot.utils.PositionUtils;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -134,6 +136,9 @@ public class RobotContainer {
   private RobotShootingInfo robotShootingInfo;
   private RobotShootingInfo robotPassingInfo;
   private double indexerToFlywheelSeconds;
+
+  private String chosenAutoName = null;
+  private boolean hasAutoRun = false;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -384,7 +389,21 @@ public class RobotContainer {
   }
 
   public void disabledPeriodic() {
-    autoChooser.update();
+    if (!hasAutoRun) {
+      autoChooser.update();
+      String selectedName = autoChooser.getSelectedName();
+      if (!selectedName.equals(chosenAutoName)) {
+        Optional<Pose2d> selectedStartingPose = autoChooser.getSelectedStartingPose();
+        if (selectedStartingPose.isPresent()) {
+          drivetrain.resetPose(selectedStartingPose.get());
+        }
+        chosenAutoName = selectedName;
+      }
+    }
+  }
+
+  public void setHasAutoRun(boolean hasAutoRun) {
+    this.hasAutoRun = hasAutoRun;
   }
 
   /**
