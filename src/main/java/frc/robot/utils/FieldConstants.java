@@ -34,6 +34,10 @@ public class FieldConstants {
   public static final double fieldLength = FIELD_LAYOUT.getFieldLength();
   public static final double fieldWidth = FIELD_LAYOUT.getFieldWidth();
 
+  // Middle Passing Points offsets
+  private static final double midPassingPointXOffset = 1.5;
+  private static final double midPassingPointYOffset = 0.45;
+
   /**
    * Officially defined and relevant vertical lines found on the field (defined by X-axis offset)
    */
@@ -213,7 +217,7 @@ public class FieldConstants {
     public static final Translation2d middlePassingPoint =
         new Translation2d(
                 openingTopLeft.getX(), (openingTopLeft.getY() + openingTopRight.getY()) / 2)
-            .plus(new Translation2d(1.5, 0.45));
+            .plus(new Translation2d(midPassingPointXOffset, midPassingPointYOffset));
 
     // Relevant reference points on opposing side
     public static final Translation3d oppOpeningTopLeft =
@@ -241,7 +245,7 @@ public class FieldConstants {
     public static final Translation2d middlePassingPoint =
         new Translation2d(
                 openingTopLeft.getX(), (openingTopLeft.getY() + openingTopRight.getY()) / 2)
-            .plus(new Translation2d(1.5, -0.45));
+            .plus(new Translation2d(midPassingPointXOffset, -midPassingPointYOffset));
 
     // Relevant reference points on opposing side
     public static final Translation3d oppOpeningTopLeft =
