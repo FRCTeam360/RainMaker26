@@ -291,6 +291,6 @@ tasks.withType(JavaCompile).configureEach {
     options.errorprone {
         disableWarningsInGeneratedCode = true
         // Exclude auto-generated files and vendor utilities we don't own
-        excludedPaths = '.*/BuildConstants\\.java|.*/LimelightHelpers\\.java'
+        excludedPaths = '.*/BuildConstants\\.java|.*/LimelightHelpers\\.java|.*/build/generated/.*'
     }
 }

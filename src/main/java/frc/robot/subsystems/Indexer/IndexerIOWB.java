@@ -37,6 +37,7 @@ public class IndexerIOWB implements IndexerIO {
     closedLoopController = indexerMotor.getClosedLoopController();
   }
 
+  @Override
   public void updateInputs(IndexerIOInputs inputs) {
     inputs.position = encoder.getPosition();
     inputs.statorCurrent = indexerMotor.getOutputCurrent();
@@ -47,10 +48,12 @@ public class IndexerIOWB implements IndexerIO {
     inputs.voltage = indexerMotor.getBusVoltage() * indexerMotor.getAppliedOutput();
   }
 
+  @Override
   public void setDutyCycle(double dutyCycle) {
     indexerMotor.set(dutyCycle);
   }
 
+  @Override
   public void setVelocity(double rpm) {
     closedLoopController.setSetpoint(rpm, ControlType.kVelocity);
   }

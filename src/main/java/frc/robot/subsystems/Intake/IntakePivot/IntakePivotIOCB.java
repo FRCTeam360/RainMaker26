@@ -119,6 +119,7 @@ public class IntakePivotIOCB implements IntakePivotIO {
     intakePivot.optimizeBusUtilization();
   }
 
+  @Override
   public void setZero() {
     intakePivot.setPosition(0.0);
   }
@@ -128,29 +129,35 @@ public class IntakePivotIOCB implements IntakePivotIO {
    *
    * @param positionDegrees target position in degrees
    */
+  @Override
   public void setPosition(double positionDegrees) {
     intakePivot.setControl(
         motionMagicPosition.withPosition(Units.degreesToRotations(positionDegrees)));
   }
 
+  @Override
   public void setPositionSmooth(double positionDegrees) {
     intakePivot.setControl(
         motionMagicPosition.withPosition(Units.degreesToRotations(positionDegrees)));
   }
 
+  @Override
   public void setPositionAggressive(double positionDegrees) {
     intakePivot.setControl(positionVoltage.withPosition(Units.degreesToRotations(positionDegrees)));
   }
 
+  @Override
   public void setDutyCycle(double value) {
     intakePivot.setControl(dutyCycleOut.withOutput(value));
   }
 
+  @Override
   public void enableBrakeMode() {
     neutralMode = NeutralModeValue.Brake;
     intakePivot.setNeutralMode(NeutralModeValue.Brake);
   }
 
+  @Override
   public void disableBrakeMode() {
     neutralMode = NeutralModeValue.Coast;
     intakePivot.setNeutralMode(NeutralModeValue.Coast);
@@ -158,6 +165,7 @@ public class IntakePivotIOCB implements IntakePivotIO {
 
   // TODO: ASK ELECTRICAL FOR A ZEROING BUTTON OR AN ABSOLUTE ENCODER
 
+  @Override
   public void updateInputs(IntakePivotIOInputs inputs) {
     BaseStatusSignal.refreshAll(
         positionSignal,

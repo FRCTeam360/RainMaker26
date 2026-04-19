@@ -48,6 +48,7 @@ public class HoodIOCB implements HoodIO {
   private final StatusSignal<Current> supplyCurrentSignal;
   private final StatusSignal<Voltage> motorVoltageSignal;
 
+  @Override
   public void setZero() {
     hoodMotor.setPosition(0);
   }
@@ -99,15 +100,18 @@ public class HoodIOCB implements HoodIO {
     setZero();
   }
 
+  @Override
   public void setPositionSmooth(double positionDegrees) {
     hoodMotor.setControl(
         motionMagicPosition.withPosition(Units.degreesToRotations(positionDegrees)));
   }
 
+  @Override
   public void setPositionAggressive(double positionDegrees) {
     hoodMotor.setControl(positionVoltage.withPosition(Units.degreesToRotations(positionDegrees)));
   }
 
+  @Override
   public void updateInputs(HoodIOInputs inputs) {
     BaseStatusSignal.refreshAll(
         positionSignal,
@@ -123,6 +127,7 @@ public class HoodIOCB implements HoodIO {
     inputs.voltage = motorVoltageSignal.getValueAsDouble();
   }
 
+  @Override
   public void setDutyCycle(double dutyCycle) {
     hoodMotor.set(dutyCycle);
   }

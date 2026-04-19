@@ -86,6 +86,7 @@ public class FlywheelIOSim implements FlywheelIO {
     motorController.getConfigurator().apply(talonConfig);
   }
 
+  @Override
   public void updateInputs(FlywheelIOInputs inputs) {
     // Step 1: Get the commanded voltage from the single motor controller.
     // The gearbox is modeled as 2x Kraken X60, so this voltage already represents

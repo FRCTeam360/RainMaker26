@@ -98,6 +98,7 @@ public class HoodIOSim implements HoodIO {
     motorControllerSim.getConfigurator().apply(talonConfig);
   }
 
+  @Override
   public void updateInputs(HoodIOInputs inputs) {
     // Step 1: Get the commanded voltage from motor and apply to simulation
     hoodSim.setInput(motorControllerSim.getSimState().getMotorVoltage());
