@@ -30,7 +30,7 @@ public class FlywheelIOCB implements FlywheelIO {
   private static final double STATOR_CURRENT_LIMIT_AMPS = 200.0;
   private static final double MAX_NEGATIVE_TORQUE_CURRENT = -40.0;
   private static final double MAX_POSITIVE_TORQUE_CURRENT = STATOR_CURRENT_LIMIT_AMPS;
-  private static final double SUPPLY_CURRENT_LIMIT_AMPS = 60.0;
+  private static final double SUPPLY_CURRENT_LIMIT_AMPS = 70.0;
   private static final double PEAK_REVERSE_VOLTAGE_VOLTS = -2.0;
 
   private static final double TELEMETRY_UPDATE_FREQUENCY_HZ = 50.0;
