@@ -9,6 +9,7 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.FollowPathCommand;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -80,8 +81,8 @@ import frc.robot.utils.CommandLogger;
 import frc.robot.utils.FieldConstants;
 import frc.robot.utils.PathProvider;
 import frc.robot.utils.PositionUtils;
-import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -92,6 +93,7 @@ import org.littletonrobotics.junction.Logger;
  * subsystems, commands, and trigger mappings) should be declared here.
  */
 public class RobotContainer {
+
   private static final double PRE_SHOT_UNJAM_SECONDS = 0.05;
   private static final double AUTO_SHOOT_TIMEOUT_SECONDS = 5.0;
   private static final double AUTO_SHOOT_NO_LAUNCH_TIMEOUT_SECONDS = 0.8;
@@ -135,6 +137,9 @@ public class RobotContainer {
   private RobotShootingInfo robotPassingInfo;
   private double indexerToFlywheelSeconds;
 
+  private String chosenAutoName = null;
+  private boolean hasAutoRun = false;
+
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Pre-load all PathPlanner path files into memory to avoid disk I/O during auto
@@ -144,9 +149,7 @@ public class RobotContainer {
       case SIM:
         drivetrain = WoodBotDrivetrain.createDrivetrain();
         intakePivot = new IntakePivot(new IntakePivotIOSim());
-        vision =
-            new Vision(
-                Map.of("photonSim", new VisionIOPhotonSim(() -> drivetrain.getState().Pose)));
+        vision = new Vision(new VisionIOPhotonSim(() -> drivetrain.getState().Pose));
         flywheel = new Flywheel(new FlywheelIOSim());
         hood = new Hood(new HoodIOSim());
         indexer = new Indexer(new IndexerIOSim());
@@ -184,14 +187,11 @@ public class RobotContainer {
         indexer = new Indexer(new IndexerIOWB());
         vision =
             new Vision(
-                Map.ofEntries(
-                    Map.entry(
-                        Constants.WoodBotConstants.LIMELIGHT_3,
-                        new VisionIOLimelight3G(
-                            Constants.WoodBotConstants.LIMELIGHT_3,
-                            () -> drivetrain.getAngle(),
-                            () -> drivetrain.getAngularRate(),
-                            true))));
+                ((new VisionIOLimelight3G(
+                    Constants.WoodBotConstants.LIMELIGHT_3,
+                    () -> drivetrain.getAngle(),
+                    () -> drivetrain.getAngularRate(),
+                    true))));
         intakeRoller = new IntakeRoller(new IntakeRollerIOWB());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOWB());
         intakePivot = new IntakePivot(new IntakePivotIONoop());
@@ -227,21 +227,16 @@ public class RobotContainer {
         indexer = new Indexer(new IndexerIOPB());
         vision =
             new Vision(
-                Map.ofEntries(
-                    Map.entry(
-                        Constants.PracticeBotConstants.LIMELIGHT_RIGHT,
-                        new VisionIOLimelight4(
-                            Constants.PracticeBotConstants.LIMELIGHT_RIGHT,
-                            () -> drivetrain.getAngle(),
-                            () -> drivetrain.getAngularRate(),
-                            true)),
-                    Map.entry(
-                        Constants.PracticeBotConstants.LIMELIGHT_LEFT,
-                        new VisionIOLimelight4(
-                            Constants.PracticeBotConstants.LIMELIGHT_LEFT,
-                            () -> drivetrain.getAngle(),
-                            () -> drivetrain.getAngularRate(),
-                            true))));
+                ((new VisionIOLimelight3G(
+                    Constants.PracticeBotConstants.LIMELIGHT_RIGHT,
+                    () -> drivetrain.getAngle(),
+                    () -> drivetrain.getAngularRate(),
+                    true))),
+                new VisionIOLimelight3G(
+                    Constants.PracticeBotConstants.LIMELIGHT_LEFT,
+                    () -> drivetrain.getAngle(),
+                    () -> drivetrain.getAngularRate(),
+                    true));
         intakeRoller = new IntakeRoller(new IntakeRollerIOPB());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOPB());
         intakePivot = new IntakePivot(new IntakePivotIOPB());
@@ -282,21 +277,16 @@ public class RobotContainer {
         indexer = new Indexer(new IndexerIOCB());
         vision =
             new Vision(
-                Map.ofEntries(
-                    Map.entry(
-                        Constants.CompBotConstants.LIMELIGHT_RIGHT,
-                        new VisionIOLimelight4(
-                            Constants.CompBotConstants.LIMELIGHT_RIGHT,
-                            () -> drivetrain.getAngle(),
-                            () -> drivetrain.getAngularRate(),
-                            true)),
-                    Map.entry(
-                        Constants.CompBotConstants.LIMELIGHT_LEFT,
-                        new VisionIOLimelight4(
-                            Constants.CompBotConstants.LIMELIGHT_LEFT,
-                            () -> drivetrain.getAngle(),
-                            () -> drivetrain.getAngularRate(),
-                            true))));
+                ((new VisionIOLimelight4(
+                    Constants.CompBotConstants.LIMELIGHT_RIGHT,
+                    () -> drivetrain.getAngle(),
+                    () -> drivetrain.getAngularRate(),
+                    true))),
+                new VisionIOLimelight4(
+                    Constants.CompBotConstants.LIMELIGHT_LEFT,
+                    () -> drivetrain.getAngle(),
+                    () -> drivetrain.getAngularRate(),
+                    true));
         intakeRoller = new IntakeRoller(new IntakeRollerIOCB());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOCB());
         intakePivot = new IntakePivot(new IntakePivotIOCB());
@@ -341,13 +331,22 @@ public class RobotContainer {
         new ShotCalculator(
             "PassCalc",
             drivetrain::getPosition,
-            () ->
-                PositionUtils.getCloserPassTarget(
+            () -> {
+              if (PositionUtils.isInOppAllianceZone(drivetrain.getPose2d())) {
+                return PositionUtils.getCloserPassTarget(
+                    drivetrain.getPosition(),
+                    AllianceFlipUtil.apply(FieldConstants.RightTrench.middlePassingPoint),
+                    AllianceFlipUtil.apply(FieldConstants.LeftTrench.middlePassingPoint));
+              } else {
+                return PositionUtils.getCloserPassTarget(
                     drivetrain.getPosition(),
                     AllianceFlipUtil.apply(FieldConstants.RightBump.passingPoint),
-                    AllianceFlipUtil.apply(FieldConstants.LeftBump.passingPoint)),
+                    AllianceFlipUtil.apply(FieldConstants.LeftBump.passingPoint));
+              }
+            },
             drivetrain::getCommandedVelocity,
             robotPassingInfo);
+
     // Configure the trigger bindings
 
     superStructure =
@@ -399,7 +398,21 @@ public class RobotContainer {
   }
 
   public void disabledPeriodic() {
-    autoChooser.update();
+    if (!hasAutoRun) {
+      autoChooser.update();
+      String selectedName = autoChooser.getSelectedName();
+      if (!selectedName.equals(chosenAutoName)) {
+        Optional<Pose2d> selectedStartingPose = autoChooser.getSelectedStartingPose();
+        if (selectedStartingPose.isPresent()) {
+          drivetrain.resetPose(selectedStartingPose.get());
+        }
+        chosenAutoName = selectedName;
+      }
+    }
+  }
+
+  public void setHasAutoRun(boolean hasAutoRun) {
+    this.hasAutoRun = hasAutoRun;
   }
 
   /**
@@ -641,10 +654,7 @@ public class RobotContainer {
     // Ensures superstructure control mode is active when enabled
     superStructure.setControlState(ControlState.SUPERSTRUCTURE);
     superStructure.setWantedSuperState(SuperWantedStates.DEFAULT);
-    superStructure.setIntakeState(
-        Constants.getRobotType() == RobotType.WOODBOT
-            ? IntakeWantedStates.IDLE
-            : IntakeWantedStates.IDLE);
+    superStructure.setIntakeState(IntakeWantedStates.IDLE);
     onEnableVision();
   }
 
