@@ -182,6 +182,7 @@ public class PositionUtils {
     double dx = shooterRotation.getCos();
     double dy = shooterRotation.getSin();
     double maxDistance = Double.MAX_VALUE;
+    boolean canPass = true;
     if (dx > 0) {
       maxDistance = Math.min(maxDistance, (FieldConstants.fieldLength - start.getX()) / dx);
     } else if (dx < 0) {
@@ -229,12 +230,14 @@ public class PositionUtils {
         || poseToOppHubVersusShooterRotationDiff >= maxAngleDiffAllowedOppLooped
         || poseToOppHubVersusShooterRotationDiff <= -maxAngleDiffAllowedOppLooped) {
       raycastEnd = start.plus(toOppHub);
+      canPass = false;
     }
     if (poseToHubVersusShooterRotationDiff <= maxAngleDiffAllowed
             && poseToHubVersusShooterRotationDiff >= -maxAngleDiffAllowed
         || poseToHubVersusShooterRotationDiff >= maxAngleDiffAllowedLooped
         || poseToHubVersusShooterRotationDiff <= -maxAngleDiffAllowedLooped) {
       raycastEnd = start.plus(toHub);
+      canPass = false;
     }
     raycast[0] = robotPose;
     raycast[1] = new Pose2d(raycastEnd, shooterRotation);
@@ -245,7 +248,7 @@ public class PositionUtils {
       Logger.recordOutput("Raycast/LineToOppHub", poseToOppHub);
     }
     // Logger.recordOutput("Raycast/Hub", hubCenterPose);
-    return true;
+    return canPass;
   }
 
   /**
