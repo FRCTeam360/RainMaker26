@@ -327,11 +327,11 @@ public class RobotContainer {
             "PassCalc",
             drivetrain::getPosition,
             () -> {
-              if (PositionUtils.isInOppAllianceZone(drivetrain.getPose2d()) == true) {
+              if (PositionUtils.isInOppAllianceZone(drivetrain.getPose2d())) {
                 return PositionUtils.getCloserPassTarget(
                     drivetrain.getPosition(),
-                    AllianceFlipUtil.apply(FieldConstants.RightTrench.passingPoint),
-                    AllianceFlipUtil.apply(FieldConstants.LeftTrench.passingPoint));
+                    AllianceFlipUtil.apply(FieldConstants.RightTrench.middlePassingPoint),
+                    AllianceFlipUtil.apply(FieldConstants.LeftTrench.middlePassingPoint));
               } else {
                 return PositionUtils.getCloserPassTarget(
                     drivetrain.getPosition(),
