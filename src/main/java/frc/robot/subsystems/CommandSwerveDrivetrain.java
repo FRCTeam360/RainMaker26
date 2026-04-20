@@ -256,7 +256,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   }
 
   public Command xOutCmd() {
-    return CommandLogger.logCommand(this.run(() -> this.xOut()), "X_OUT");
+    return CommandLogger.logCommand(this.runEnd(() -> System.out.println("I'm running"), () -> System.out.println("I'm done")), "X_OUT");
   }
 
   public Command toggleHeadingLockCommand() {
