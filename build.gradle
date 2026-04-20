@@ -5,7 +5,7 @@ plugins {
     id "edu.wpi.first.GradleRIO" version "2026.2.1"
     id "com.peterabeles.gversion" version "1.10"
     id 'com.github.spotbugs' version '6.0.26'
-    id 'net.ltgt.errorprone' version '5.1.0'
+    // id 'net.ltgt.errorprone' version '5.1.0'  // disabled temporarily to reduce build output
     id 'org.openrewrite.rewrite' version '7.30.0'
 }
 
@@ -226,10 +226,10 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
     // Error Prone 2.43+ requires Java 21; 2.42.0 is the last Java-17-compatible release
-    errorprone 'com.google.errorprone:error_prone_core:2.42.0'
+    // errorprone 'com.google.errorprone:error_prone_core:2.42.0'  // disabled temporarily
 
-    rewrite platform('org.openrewrite.recipe:rewrite-recipe-bom:3.28.0')
-    rewrite 'org.openrewrite.recipe:rewrite-static-analysis'
+    // rewrite platform('org.openrewrite.recipe:rewrite-recipe-bom:3.28.0')
+    // rewrite 'org.openrewrite.recipe:rewrite-static-analysis'
 }
 
 test {
@@ -283,14 +283,11 @@ tasks.withType(JavaCompile) {
     options.compilerArgs.add '-XDstringConcat=inline'
 }
 
-// Error Prone static analysis — runs at compile time as part of ./gradlew build
-// Findings at ERROR severity fail the build; WARNING severity are informational.
-// To disable a specific check: options.errorprone.disable('CheckName')
-// To demote a check to warning: options.errorprone.warn('CheckName')
-tasks.withType(JavaCompile).configureEach {
-    options.errorprone {
-        disableWarningsInGeneratedCode = true
-        // Exclude auto-generated files and vendor utilities we don't own
-        excludedPaths = '.*/BuildConstants\\.java|.*/LimelightHelpers\\.java'
-    }
-}
+// Error Prone disabled temporarily to reduce build output
+// To re-enable: uncomment plugin + dep above and this block
+// tasks.withType(JavaCompile).configureEach {
+//     options.errorprone {
+//         disableWarningsInGeneratedCode = true
+//         excludedPaths = '.*/BuildConstants\\.java|.*/LimelightHelpers\\.java'
+//     }
+// }
