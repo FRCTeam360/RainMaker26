@@ -572,7 +572,7 @@ public class RobotContainer {
     driverCont.a().onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
 
     // defense mode
-    driverCont.start().onTrue(drivetrain.toggleDefenseModeCmd());
+    // driverCont.start().onTrue(drivetrain.toggleDefenseModeCmd());
 
     // Drivetrain commands
     // driverCont.leftTrigger().whileTrue(drivetrain.faceHubWhileDriving(driverCont));
