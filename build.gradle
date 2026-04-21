@@ -228,8 +228,8 @@ dependencies {
     // Error Prone 2.43+ requires Java 21; 2.42.0 is the last Java-17-compatible release
     // errorprone 'com.google.errorprone:error_prone_core:2.42.0'  // disabled temporarily
 
-    // rewrite platform('org.openrewrite.recipe:rewrite-recipe-bom:3.28.0')
-    // rewrite 'org.openrewrite.recipe:rewrite-static-analysis'
+    rewrite platform('org.openrewrite.recipe:rewrite-recipe-bom:3.28.0')
+    rewrite 'org.openrewrite.recipe:rewrite-static-analysis'
 }
 
 test {
