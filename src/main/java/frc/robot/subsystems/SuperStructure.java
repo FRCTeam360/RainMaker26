@@ -58,7 +58,8 @@ public class SuperStructure extends SubsystemBase {
   private static final double FLYWHEEL_FORCED_RPM = 2050.0;
   private static final double HOOD_FORCED_TRENCH_ANGLE = 10.0;
   private static final double FLYWHEEL_FORCED_TRENCH_RPM = 2050.0;
-  private static final double HOOD_FORCED_PASS_ANGLE = 10.0; // tune this value
+  private static final double HOOD_FORCED_PASS_ANGLE = 30.0; // tune this value
+  private static final double FLYWHEEL_FORCED_PASS_RPM = 2250.0; // tune this value
 
   // Enums
   public enum SuperWantedStates {
@@ -141,7 +142,7 @@ public class SuperStructure extends SubsystemBase {
             return FLYWHEEL_FORCED_TRENCH_RPM;
           }
           if (currentSuperState == SuperInternalStates.FORCED_PASS) {
-            return FLYWHEEL_FORCED_RPM;
+            return FLYWHEEL_FORCED_PASS_RPM;
           }
           return targetSelectionStateMachine.getActiveCalculator().calculateShot().flywheelSpeed();
         });
