@@ -139,11 +139,7 @@ public class ShotCalculator {
     Logger.recordOutput(logCached, false);
 
     Pose2d robotPosition = robotPoseSupplier.get();
-    Pose2d shooterPosition =
-        new Pose2d(
-            robotPosition.getX() + robotToShooter.getX(),
-            robotPosition.getY() + robotToShooter.getY(),
-            Rotation2d.kZero);
+    Pose2d shooterPosition = robotPosition.plus(robotToShooter);
     Translation2d target = targetSupplier.get();
 
     // Compute field-relative shooter velocity for shoot-on-the-move compensation.
@@ -199,8 +195,8 @@ public class ShotCalculator {
     }
     double lookaheadDistanceMeters =
         Math.sqrt(
-            Math.pow(lookaheadPosition[1] - target.getX(), 2)
-                + Math.pow(lookaheadPosition[2] - target.getY(), 2));
+            Math.pow(lookaheadPosition[0] - target.getX(), 2)
+                + Math.pow(lookaheadPosition[1] - target.getY(), 2));
 
     double effectiveDistanceMeters =
         Math.max(minDistanceMeters, Math.min(maxDistanceMeters, lookaheadDistanceMeters));
@@ -210,15 +206,16 @@ public class ShotCalculator {
     // then subtract the shooter's facing angle relative to the robot so the drivetrain
     // orients the shooter toward the target.
     Double[] robotCenterLookahead = {
-      robotPosition.getX() * timeOfFlightSecs, robotPosition.getY() * timeOfFlightSecs
+      robotPosition.getX() + robotFieldVelocity.getX() * timeOfFlightSecs,
+      robotPosition.getY() + robotFieldVelocity.getY() * timeOfFlightSecs
     };
     double angleToTarget =
         Math.atan2(
-            (target.getX() - robotCenterLookahead[0])
+            (target.getY() - robotCenterLookahead[1])
                 / Math.hypot(
                     target.getX() - robotCenterLookahead[0],
                     target.getY() - robotCenterLookahead[1]),
-            (target.getY() - robotCenterLookahead[1])
+            (target.getX() - robotCenterLookahead[0])
                 / Math.hypot(
                     target.getX() - robotCenterLookahead[0],
                     target.getY() - robotCenterLookahead[1]));
