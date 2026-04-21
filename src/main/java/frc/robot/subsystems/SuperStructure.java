@@ -306,9 +306,11 @@ public class SuperStructure extends SubsystemBase {
           // For AUTO_CYCLE_SHOOTING, check if hub is actually active based on game phase
           return canScoreAtHub() && hubShotCalculator.calculateShot().isValid();
         case PASSING:
-          boolean isInPassingZone =
-              PositionUtils.isInPassingZone(robotPoseSupplier.get(), robotToShooter);
-          return isInPassingZone;
+          boolean canPass =
+              PositionUtils.canPass(
+                  robotPoseSupplier.get(),
+                  robotPoseSupplier.get().getRotation().plus(Rotation2d.k180deg));
+          return canPass;
         default:
           return true;
       }
