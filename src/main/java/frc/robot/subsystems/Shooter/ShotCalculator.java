@@ -205,7 +205,7 @@ public class ShotCalculator {
     // First find the field-frame angle from the velocity-compensated robot center to the target,
     // then subtract the shooter's facing angle relative to the robot so the drivetrain
     // orients the shooter toward the target.
-    Double[] robotCenterLookahead = {
+    double[] robotCenterLookahead = {
       robotPosition.getX() + robotFieldVelocity.getX() * timeOfFlightSecs,
       robotPosition.getY() + robotFieldVelocity.getY() * timeOfFlightSecs
     };
