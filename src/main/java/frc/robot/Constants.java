@@ -423,7 +423,7 @@ public final class Constants {
     static {
       shotHoodAngleMap.put(6.0, 16.0);
       shotHoodAngleMap.put(5.0, 16.0);
-      shotHoodAngleMap.put(4.5, 14.0);
+      shotHoodAngleMap.put(4.5, 16.0);
       shotHoodAngleMap.put(4.0, 16.0);
 
       shotHoodAngleMap.put(3.5, 13.0);
