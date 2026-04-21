@@ -421,7 +421,7 @@ public final class Constants {
     public static final AngularVelocity maxAngularVelocity = RevolutionsPerSecond.of(2.5);
 
     static {
-      shotHoodAngleMap.put(6.0, 14.0);
+      shotHoodAngleMap.put(6.0, 16.0);
       shotHoodAngleMap.put(5.0, 14.0);
       shotHoodAngleMap.put(4.5, 14.0);
       shotHoodAngleMap.put(4.0, 16.0);
