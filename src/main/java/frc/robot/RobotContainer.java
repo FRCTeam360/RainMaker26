@@ -45,6 +45,7 @@ import frc.robot.subsystems.Intake.IntakePivot.IntakePivotIOPB;
 import frc.robot.subsystems.Intake.IntakePivot.IntakePivotIOSim;
 import frc.robot.subsystems.Intake.IntakeRoller.IntakeRoller;
 import frc.robot.subsystems.Intake.IntakeRoller.IntakeRollerIOCB;
+import frc.robot.subsystems.Intake.IntakeRoller.IntakeRollerIONoop;
 import frc.robot.subsystems.Intake.IntakeRoller.IntakeRollerIOPB;
 import frc.robot.subsystems.Intake.IntakeRoller.IntakeRollerIOSim;
 import frc.robot.subsystems.Intake.IntakeRoller.IntakeRollerIOWB;
@@ -237,9 +238,9 @@ public class RobotContainer {
                     () -> drivetrain.getAngle(),
                     () -> drivetrain.getAngularRate(),
                     true));
-        intakeRoller = new IntakeRoller(new IntakeRollerIOPB());
+        intakeRoller = new IntakeRoller(new IntakeRollerIONoop());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOPB());
-        intakePivot = new IntakePivot(new IntakePivotIOPB());
+        intakePivot = new IntakePivot(new IntakePivotIONoop());
         hopperRoller = new HopperRoller(new HopperRollerIOPB());
         hopperSensor =
             new HopperSensor(
