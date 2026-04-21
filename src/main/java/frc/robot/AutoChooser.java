@@ -1,6 +1,8 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.commands.PathPlannerAuto;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -9,13 +11,16 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.autos.BLineAutos;
-import frc.robot.autos.NamedAuto;
+import frc.robot.autos.NamedAutoWithPose;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.SuperStructure;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.Logger;
 
 /**
  * Alliance-aware autonomous chooser. Combines PathPlanner and BLine autos into a single list and
@@ -23,8 +28,11 @@ import java.util.function.Supplier;
  */
 public class AutoChooser {
 
-  private final List<NamedAuto> registeredAutos;
-  private SendableChooser<Command> chooser = new SendableChooser<>();
+  private static final String PATH_PLANNER_PREFIX = "[PathPlanner] ";
+
+  private final List<NamedAutoWithPose> registeredAutos;
+  private final Map<String, Pose2d> autoStartingPoses = new HashMap<>();
+  private SendableChooser<NamedAutoWithPose> chooser = new SendableChooser<>();
   private Optional<Alliance> previousAlliance = Optional.empty();
 
   /**
@@ -36,14 +44,29 @@ public class AutoChooser {
       CommandSwerveDrivetrain drivetrain,
       SuperStructure superStructure,
       Supplier<Command> shootAtHubSupplier) {
-    List<NamedAuto> autos = new ArrayList<>();
+    List<NamedAutoWithPose> autos = new ArrayList<>();
 
     for (String autoName : AutoBuilder.getAllAutoNames()) {
-      autos.add(new NamedAuto("[PathPlanner] " + autoName, AutoBuilder.buildAuto(autoName)));
+      String displayName = PATH_PLANNER_PREFIX + autoName;
+      Command autoCommand = AutoBuilder.buildAuto(autoName);
+      if (autoCommand instanceof PathPlannerAuto auto) {
+        Pose2d startingPose = auto.getStartingPose();
+        if (startingPose != null) {
+          autoStartingPoses.put(displayName, startingPose);
+          autos.add(new NamedAutoWithPose(displayName, autoCommand, startingPose));
+        } else {
+          Logger.recordOutput("PathPlannerAutos/MissingStartPose", autoName);
+        }
+      } else {
+        Logger.recordOutput("PathPlannerAutos/FailedCast", autoName);
+      }
     }
 
     BLineAutos bLineAutos = new BLineAutos(drivetrain, superStructure, shootAtHubSupplier);
-    autos.addAll(bLineAutos.getNamedAutos());
+    for (NamedAutoWithPose bLineAuto : bLineAutos.getNamedAutos()) {
+      autoStartingPoses.put(bLineAuto.name(), bLineAuto.startingPose());
+      autos.add(bLineAuto);
+    }
 
     autos.sort((a, b) -> a.name().compareToIgnoreCase(b.name()));
     registeredAutos = autos;
@@ -61,14 +84,17 @@ public class AutoChooser {
     previousAlliance = currentAlliance;
   }
 
+  private static final NamedAutoWithPose NONE_AUTO =
+      new NamedAutoWithPose("None", Commands.none(), new Pose2d());
+
   private void rebuildChooser(Optional<Alliance> alliance) {
     chooser.close();
     chooser = new SendableChooser<>();
-    chooser.setDefaultOption("None", Commands.none());
+    chooser.setDefaultOption(NONE_AUTO.name(), NONE_AUTO);
 
-    for (NamedAuto auto : registeredAutos) {
+    for (NamedAutoWithPose auto : registeredAutos) {
       if (matchesAlliance(auto.name(), alliance)) {
-        chooser.addOption(auto.name(), auto.auto());
+        chooser.addOption(auto.name(), auto);
       }
     }
     SmartDashboard.putData("Auto Chooser", chooser);
@@ -114,6 +140,20 @@ public class AutoChooser {
    * @return the currently selected autonomous command
    */
   public Command getSelected() {
-    return chooser.getSelected();
+    NamedAutoWithPose selected = chooser.getSelected();
+    return selected != null ? selected.auto() : NONE_AUTO.auto();
+  }
+
+  public String getSelectedName() {
+    NamedAutoWithPose selected = chooser.getSelected();
+    return selected != null ? selected.name() : NONE_AUTO.name();
+  }
+
+  public Optional<Pose2d> getSelectedStartingPose() {
+    NamedAutoWithPose selected = chooser.getSelected();
+    if (selected == null) {
+      return Optional.empty();
+    }
+    return Optional.ofNullable(autoStartingPoses.get(selected.name()));
   }
 }

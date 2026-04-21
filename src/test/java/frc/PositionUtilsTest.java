@@ -267,6 +267,76 @@ class PositionUtilsTest {
         "Robot outside red alliance zone should return false");
   }
 
+  @Test
+  void blueFarInOpposingAllianceZone() {
+    DriverStationSim.setAllianceStationId(AllianceStationID.Blue1);
+    DriverStationSim.notifyNewData();
+
+    double redBoundary = AllianceFlipUtil.applyX(LinesVertical.oppAllianceZone);
+    double outsideX = redBoundary + 3.0;
+    assertTrue(
+        PositionUtils.isInOppAllianceZone(poseAt(outsideX, 3.0)),
+        "Robot in opposing alliance zone should return true");
+  }
+
+  @Test
+  void blueOnOpposingAllianceZone() {
+    DriverStationSim.setAllianceStationId(AllianceStationID.Blue1);
+    DriverStationSim.notifyNewData();
+
+    double redBoundary = AllianceFlipUtil.applyX(LinesVertical.oppAllianceZone);
+    assertTrue(
+        PositionUtils.isInOppAllianceZone(poseAt(redBoundary, 3.0)),
+        "Robot in opposing alliance zone should return true");
+  }
+
+  @Test
+  void blueBehindOpposingAllianceZone() {
+    DriverStationSim.setAllianceStationId(AllianceStationID.Blue1);
+    DriverStationSim.notifyNewData();
+
+    double redBoundary = AllianceFlipUtil.applyX(LinesVertical.oppAllianceZone);
+    double outsideX = redBoundary - 3.0;
+    assertFalse(
+        PositionUtils.isInOppAllianceZone(poseAt(outsideX, 3.0)),
+        "Robot in opposing alliance zone should return false");
+  }
+
+  @Test
+  void redFarInOpposingAllianceZone() {
+    DriverStationSim.setAllianceStationId(AllianceStationID.Red1);
+    DriverStationSim.notifyNewData();
+
+    double blueBoundary = AllianceFlipUtil.applyX(LinesVertical.oppAllianceZone);
+    double outsideX = blueBoundary - 3.0;
+    assertTrue(
+        PositionUtils.isInOppAllianceZone(poseAt(outsideX, 3.0)),
+        "Robot in opposing alliance zone should return true");
+  }
+
+  @Test
+  void redOnOpposingAllianceZone() {
+    DriverStationSim.setAllianceStationId(AllianceStationID.Red1);
+    DriverStationSim.notifyNewData();
+
+    double blueBoundary = AllianceFlipUtil.applyX(LinesVertical.oppAllianceZone);
+    assertTrue(
+        PositionUtils.isInOppAllianceZone(poseAt(blueBoundary, 3.0)),
+        "Robot in opposing alliance zone should return true");
+  }
+
+  @Test
+  void redBehindOpposingAllianceZone() {
+    DriverStationSim.setAllianceStationId(AllianceStationID.Red1);
+    DriverStationSim.notifyNewData();
+
+    double blueBoundary = AllianceFlipUtil.applyX(LinesVertical.oppAllianceZone);
+    double outsideX = blueBoundary + 3.0;
+    assertFalse(
+        PositionUtils.isInOppAllianceZone(poseAt(outsideX, 3.0)),
+        "Robot in opposing alliance zone should return false");
+  }
+
   // --- getCloserPassTarget tests ---
 
   private static final Translation2d TARGET_A = new Translation2d(2.0, 3.0);

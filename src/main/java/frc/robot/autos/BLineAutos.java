@@ -1,9 +1,12 @@
 package frc.robot.autos;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.lib.BLine.FollowPath;
 import frc.robot.lib.BLine.Path;
+import frc.robot.lib.BLine.Path.PathElement;
+import frc.robot.lib.BLine.Path.Waypoint;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Intake.IntakeStateMachine.IntakeWantedStates;
 import frc.robot.subsystems.SuperStructure;
@@ -93,25 +96,42 @@ public class BLineAutos {
   // Auto routine compositions
   // ─────────────────────────────────────────────────────────────────────────────
 
-  private Command buildTwoSwipeAuto(String autoName) {
+  private NamedAutoWithPose buildTwoSwipeAuto(String autoName) {
+    Path firstPath = new Path(autoName + " First Swipe");
+    PathElement element = firstPath.getElement(0);
+    Pose2d pose = null;
+    if (element instanceof Waypoint waypoint) {
+      pose =
+          new Pose2d(
+              waypoint.translationTarget().translation(), waypoint.rotationTarget().rotation());
+    } else {
+      throw new IllegalStateException(
+          "bLine auto "
+              + autoName
+              + " first path element is not of type waypoint. Cannot determine starting pose. Check bLine JSON file.");
+    }
     // TODO URGENT verify if we want the delay in deploying the intake
-    return pathWithIntake(new Path(autoName + " First Swipe"))
-        .andThen(shootAtHub())
-        .andThen(pathWithImmediateIntake(new Path(autoName + " Second Swipe")))
-        .andThen(shootAtHub());
+    Command command =
+        pathWithIntake(firstPath)
+            .andThen(shootAtHub())
+            .andThen(pathWithImmediateIntake(new Path(autoName + " Second Swipe")))
+            .andThen(shootAtHub());
+
+    return new NamedAutoWithPose(autoName, command, pose);
   }
 
-  private NamedAuto buildAutoOrNone(String autoName, Function<String, Command> commandFactory) {
+  private NamedAutoWithPose buildAutoOrNone(
+      String autoName, Function<String, NamedAutoWithPose> autoFactory) {
     try {
-      return new NamedAuto(autoName, commandFactory.apply(autoName));
+      return autoFactory.apply(autoName);
     } catch (Exception e) {
       Logger.recordOutput("BLineAutos/MissingPaths/" + autoName, e.getMessage());
-      return new NamedAuto("!!!NO PATH!!! " + autoName, Commands.none());
+      return new NamedAutoWithPose("!!!NO PATH!!! " + autoName, Commands.none(), new Pose2d());
     }
   }
 
   /** Builds all BLine auto routines using generated path variants. */
-  private List<NamedAuto> buildAutos() {
+  private List<NamedAutoWithPose> buildAutos() {
     return List.of(
         buildAutoOrNone("FLIPPED Blue Right Aggressive", this::buildTwoSwipeAuto),
         buildAutoOrNone("FLIPPED MIRRORED Blue Left Aggressive", this::buildTwoSwipeAuto),
@@ -127,9 +147,11 @@ public class BLineAutos {
    * Returns all BLine auto routines as named autos with a [BLine] prefix so they appear alongside
    * PathPlanner autos for A/B testing.
    */
-  public List<NamedAuto> getNamedAutos() {
+  public List<NamedAutoWithPose> getNamedAutos() {
     return buildAutos().stream()
-        .map(auto -> new NamedAuto("[BLine] " + auto.name(), auto.auto()))
+        .map(
+            auto ->
+                new NamedAutoWithPose("[BLine] " + auto.name(), auto.auto(), auto.startingPose()))
         .toList();
   }
 }

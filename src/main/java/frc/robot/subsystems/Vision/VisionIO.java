@@ -61,4 +61,6 @@ public interface VisionIO {
    * @param throttle number of frames to skip between processed frames (0 = full speed)
    */
   default void setThrottle(int throttle) {}
+
+  String getName();
 }

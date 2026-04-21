@@ -55,7 +55,7 @@ public class Robot extends LoggedRobot {
       if (RobotUtils.isUsbWriteable()) {
         Logger.addDataReceiver(new WPILOGWriter(Constants.IOConstants.USB_ROOT_DIRECTORY));
       } else {
-        Logger.addDataReceiver(new WPILOGWriter("/home/lvuser/logs"));
+        Logger.addDataReceiver(new WPILOGWriter(Constants.IOConstants.DEFAULT_LOG_DIRECTORY));
       }
       // TODO: Re-enable for practice sessions when live dashboard telemetry is needed
       Logger.addDataReceiver(new NT4Publisher());
@@ -135,6 +135,8 @@ public class Robot extends LoggedRobot {
       CommandScheduler.getInstance().schedule(m_autonomousCommand);
     }
     double t3 = Logger.getTimestamp() / 1.0e6;
+
+    m_robotContainer.setHasAutoRun(true);
 
     Logger.recordOutput("Robot/AutoInitTiming/OnEnableSeconds", t1 - t0);
     Logger.recordOutput("Robot/AutoInitTiming/GetAutoCommandSeconds", t2 - t1);
