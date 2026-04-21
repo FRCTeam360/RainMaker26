@@ -122,13 +122,13 @@ public class PositionUtils {
 
   public static boolean isInOppAllianceZone(Pose2d robotPose) {
     double robotX = robotPose.getX();
-    boolean result;
+    boolean result = false;
     if (AllianceFlipUtil.shouldFlip()) {
       result = robotX <= getOppAllianceEdge();
     } else {
       result = robotX >= getOppAllianceEdge();
     }
-    Logger.recordOutput("PositionUtils/IsInOppAllianceZone", result);
+    Logger.recordOutput("Utils/PositionUtils/IsInOppAllianceZone", result);
     return result;
   }
 

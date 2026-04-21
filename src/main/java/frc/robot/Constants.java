@@ -113,6 +113,10 @@ public final class Constants {
   }
 
   public static final class IOConstants {
+
+    // === LOGGING PATHS ===
+    public static final String DEFAULT_LOG_DIRECTORY = "/home/lvuser/logs";
+
     // === USB PATHS ===
     public static final String USB_ROOT_DIRECTORY = "/U";
 
@@ -465,9 +469,9 @@ public final class Constants {
       passHoodAngleMap.put(1.0, 40.0);
       passHoodAngleMap.put(0.0, 40.0);
 
-      passFlywheelSpeedMap.put(12.0, 3500.0);
-      passFlywheelSpeedMap.put(9.0, 3500.0);
-      passFlywheelSpeedMap.put(7.0, 2800.0);
+      passFlywheelSpeedMap.put(12.0, 2400.0);
+      passFlywheelSpeedMap.put(9.0, 2400.0);
+      passFlywheelSpeedMap.put(7.0, 2400.0);
       passFlywheelSpeedMap.put(5.0, 2100.0);
       passFlywheelSpeedMap.put(4.0, 1900.0);
       passFlywheelSpeedMap.put(3.0, 1600.0);

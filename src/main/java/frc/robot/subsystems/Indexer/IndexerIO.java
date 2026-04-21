@@ -4,25 +4,10 @@
 
 package frc.robot.subsystems.Indexer;
 
-import org.littletonrobotics.junction.AutoLog;
+import frc.robot.subsystems.StateMachineSubsystemIO;
 
-public interface IndexerIO {
+public interface IndexerIO extends StateMachineSubsystemIO<IndexerIOInputsAutoLogged> {
   /** Creates a new IndexerIO. */
-  @AutoLog
-  public static class IndexerIOInputs {
-    public double voltage = 0.0;
-    public double supplyCurrent = 0.0;
-    public double statorCurrent = 0.0;
-    public double velocity = 0.0;
-    public double position = 0.0;
-    // capacity sensor
-    public boolean sensor = false;
-    public double sensorProximity = 0.0;
-    public boolean sensorActivated = false;
-  }
-
-  public default void updateInputs(IndexerIOInputs inputs) {}
-
   public void setDutyCycle(double dutyCycle);
 
   public void setVelocity(double velocity);
