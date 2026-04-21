@@ -22,6 +22,8 @@ public class Hood extends SubsystemBase {
   private static final double SOFT_LIMIT_PROXIMITY_DEGREES = 5.0;
   private static final double FORWARD_SOFT_LIMIT_DEGREES = 42.0;
   private static final double REVERSE_SOFT_LIMIT_DEGREES = 0.0;
+  private static final double ZEROING_DUTY_CYCLE = -0.05;
+  private static final double ZEROING_STALL_CURRENT_AMPS = 10.0;
 
   // IO fields
   private final HoodIO io;
@@ -131,7 +133,11 @@ public class Hood extends SubsystemBase {
         }
         break;
       case ZEROING:
-        moveHoodToZero();
+        io.setDutyCycle(ZEROING_DUTY_CYCLE);
+        if (inputs.statorCurrent > ZEROING_STALL_CURRENT_AMPS) {
+          io.setZero();
+          currentState = HoodInternalStates.OFF;
+        }
         break;
       case OFF:
       default:

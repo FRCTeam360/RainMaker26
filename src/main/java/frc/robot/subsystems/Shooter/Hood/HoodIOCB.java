@@ -95,8 +95,6 @@ public class HoodIOCB implements HoodIO {
         supplyCurrentSignal,
         motorVoltageSignal);
     hoodMotor.optimizeBusUtilization();
-
-    setZero();
   }
 
   public void setPositionSmooth(double positionDegrees) {
