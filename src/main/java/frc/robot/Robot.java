@@ -129,7 +129,8 @@ public class Robot extends LoggedRobot {
     double t1 = Logger.getTimestamp() / 1.0e6;
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
     double t2 = Logger.getTimestamp() / 1.0e6;
-
+    
+    
     // schedule the autonomous command (example)
     if (m_autonomousCommand != null) {
       CommandScheduler.getInstance().schedule(m_autonomousCommand);
