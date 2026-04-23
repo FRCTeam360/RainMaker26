@@ -16,6 +16,8 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.revrobotics.spark.SparkLowLevel;
+
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -171,5 +173,6 @@ public class IntakePivotIOCB implements IntakePivotIO {
     inputs.voltage = motorVoltageSignal.getValueAsDouble();
     inputs.supplyCurrent = supplyCurrentSignal.getValueAsDouble();
     inputs.brakeMode = neutralMode == NeutralModeValue.Brake;
+    inputs.motorConnected = intakePivot.isConnected();
   }
 }
