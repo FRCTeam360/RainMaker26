@@ -13,4 +13,6 @@ public class IndexerIOInputs {
   public boolean sensor = false;
   public double sensorProximity = 0.0;
   public boolean sensorActivated = false;
+  //motor connection
+  public boolean motorConnected = true;
 }

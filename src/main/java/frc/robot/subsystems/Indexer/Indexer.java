@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems.Indexer;
 
+import edu.wpi.first.wpilibj.Alert;
+import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.StateMachineSubsystem;
 import java.util.function.DoubleSupplier;
@@ -28,6 +30,9 @@ public class Indexer extends StateMachineSubsystem<IndexerIOInputsAutoLogged, In
   private IndexerStates wantedState = IndexerStates.OFF;
   private IndexerStates currentState = IndexerStates.OFF;
   private IndexerStates previousState = IndexerStates.OFF;
+
+  private final Alert motorDisconnectedAlert =
+      new Alert("Indexer motor disconnected", AlertType.kError);
 
   // Constructor
 

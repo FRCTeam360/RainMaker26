@@ -99,6 +99,7 @@ public class IndexerIOSim implements IndexerIO {
     inputs.statorCurrent = indexerSim.getCurrentDrawAmps();
     inputs.supplyCurrent = indexerSim.getCurrentDrawAmps();
     inputs.sensor = false; // Sensor not actively used, ignore for now (defaults to false in Sim)
+    inputs.motorConnected = true;
   }
 
   @Override

@@ -5,6 +5,7 @@ import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkClosedLoopController;
+import com.revrobotics.spark.SparkLowLevel;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
@@ -55,6 +56,8 @@ public class IndexerIOCB implements IndexerIO {
     inputs.supplyCurrent = 0;
     inputs.velocity = encoder.getVelocity();
     inputs.voltage = indexerMotor.getBusVoltage() * indexerMotor.getAppliedOutput();
+    SparkLowLevel.PeriodicStatus0 status0 = indexerMotor.getPeriodicStatus0();
+    inputs.motorConnected = status0 != null;
   }
 
   public void setDutyCycle(double dutyCycle) {
