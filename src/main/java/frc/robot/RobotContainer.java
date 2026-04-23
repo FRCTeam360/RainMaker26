@@ -383,7 +383,6 @@ public class RobotContainer {
             .alongWith(
                 drivetrain.faceAngleWhileDrivingCommand(
                     () -> 0, () -> 0, () -> hubShotCalculator.calculateShot().targetHeading()))
-            .alongWith(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING))
             .andThen(superStructure.setStateCommand(SuperWantedStates.DEFAULT)));
 
     configVision();
@@ -457,7 +456,6 @@ public class RobotContainer {
                           }
                           return hubShotCalculator.calculateShot().targetHeading();
                         })))
-        .alongWith(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING))
         .andThen(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
   }
 
@@ -519,8 +517,7 @@ public class RobotContainer {
                         return passCalculator.calculateShot().targetHeading();
                       }
                       return hubShotCalculator.calculateShot().targetHeading();
-                    }))
-            .alongWith(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING)));
+                    })));
     autoCycleTrigger.onFalse(
         superStructure
             .setStateCommand(SuperWantedStates.DEFAULT)

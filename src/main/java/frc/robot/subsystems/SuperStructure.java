@@ -254,6 +254,7 @@ public class SuperStructure extends SubsystemBase {
         || shooterStateMachine.getState() == ShooterStates.DISTURBED) {
       indexer.setWantedState(IndexerStates.INDEXING);
       hopperRoller.setWantedState(HopperRollerStates.ROLLING);
+      intakeStateMachine.setWantedState(IntakeWantedStates.AGITATING);
     } else if (shooterStateMachine.getState() == ShooterStates.PREPARING_TO_FIRE) {
       if (!preparingToFireTimer.isRunning()) {
         preparingToFireTimer.restart();
