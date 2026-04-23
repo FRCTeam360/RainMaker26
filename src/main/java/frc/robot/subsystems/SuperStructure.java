@@ -20,7 +20,6 @@ import frc.robot.subsystems.Intake.IntakeStateMachine.IntakeWantedStates;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel;
 import frc.robot.subsystems.Shooter.FlywheelKicker.FlywheelKicker;
 import frc.robot.subsystems.Shooter.Hood.Hood;
-import frc.robot.subsystems.Shooter.Hood.Hood.HoodWantedStates;
 import frc.robot.subsystems.Shooter.ShooterStateMachine;
 import frc.robot.subsystems.Shooter.ShooterStateMachine.ShooterStates;
 import frc.robot.subsystems.Shooter.ShooterStateMachine.ShooterWantedStates;
@@ -128,7 +127,13 @@ public class SuperStructure extends SubsystemBase {
     this.indexerToFlywheelSeconds = indexerToFlywheelSeconds;
     this.shooterStateMachine =
         new ShooterStateMachine(
-            flywheel, hood, flywheelKicker, isAlignedToTarget, this::canShootToTarget);
+            flywheel,
+            hood,
+            flywheelKicker,
+            isAlignedToTarget,
+            this::canShootToTarget,
+            robotPoseSupplier,
+            robotToShooter);
     this.intakeStateMachine = new IntakeStateMachine(intakeRoller, intakePivot, hopperSensor);
     this.targetSelectionStateMachine =
         new TargetSelectionStateMachine(hubShotCalculator, passCalculator, robotPoseSupplier);
@@ -233,10 +238,6 @@ public class SuperStructure extends SubsystemBase {
       case DEFAULT:
         passive_preparing();
         break;
-    }
-    if (currentSuperState != SuperInternalStates.FORCED_SHOOT_TRENCH
-        && PositionUtils.isInDuckZone(robotPoseSupplier.get(), robotToShooter)) {
-      hood.setWantedState(HoodWantedStates.DUCKED);
     }
   }
 

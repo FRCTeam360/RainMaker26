@@ -1,5 +1,7 @@
 package frc.robot.subsystems.Shooter;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants;
@@ -11,7 +13,9 @@ import frc.robot.subsystems.Shooter.FlywheelKicker.FlywheelKicker.FlywheelKicker
 import frc.robot.subsystems.Shooter.Hood.Hood;
 import frc.robot.subsystems.Shooter.Hood.Hood.HoodInternalStates;
 import frc.robot.subsystems.Shooter.Hood.Hood.HoodWantedStates;
+import frc.robot.utils.PositionUtils;
 import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
 /**
@@ -21,6 +25,8 @@ import org.littletonrobotics.junction.Logger;
 public class ShooterStateMachine {
 
   private static final double DISTURBANCE_TIMEOUT_SECONDS = 0.5;
+  private final Supplier<Pose2d> robotPoseSupplier;
+  private final Transform2d robotToShooter;
 
   // Enums
   public enum ShooterWantedStates {
@@ -69,12 +75,16 @@ public class ShooterStateMachine {
       Hood hood,
       FlywheelKicker flywheelKicker,
       BooleanSupplier isAlignedToTarget,
-      BooleanSupplier canShootToTarget) {
+      BooleanSupplier canShootToTarget,
+      Supplier<Pose2d> robotPoseSupplier,
+      Transform2d robotToShooter) {
     this.flywheel = flywheel;
     this.hood = hood;
     this.flywheelKicker = flywheelKicker;
     this.isAlignedToTarget = isAlignedToTarget;
     this.canShootToTarget = canShootToTarget;
+    this.robotPoseSupplier = robotPoseSupplier;
+    this.robotToShooter = robotToShooter;
   }
 
   /** Returns the current shooter state. */
@@ -252,6 +262,9 @@ public class ShooterStateMachine {
         hood.setWantedState(HoodWantedStates.IDLE);
         flywheelKicker.setWantedState(FlywheelKickerStates.IDLE);
         break;
+    }
+    if (PositionUtils.isInDuckZone(robotPoseSupplier.get(), robotToShooter)) {
+      hood.setWantedState(HoodWantedStates.DUCKED);
     }
   }
 
