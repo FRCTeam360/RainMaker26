@@ -17,22 +17,15 @@
           }
         },
         {
-          "type": "deadline",
+          "type": "named",
           "data": {
-            "commands": [
-              {
-                "type": "wait",
-                "data": {
-                  "waitTime": 1.5
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "basic intake"
-                }
-              }
-            ]
+            "name": "basic intake"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 1.5
           }
         },
         {
@@ -43,12 +36,6 @@
                 "type": "path",
                 "data": {
                   "pathName": "NoStopMiddle Stack"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "basic intake"
                 }
               }
             ]
@@ -74,7 +61,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "No Stop Right Red Middle Stack 2"
+                  "pathName": "NoStopMiddle Stack 2"
                 }
               },
               {
