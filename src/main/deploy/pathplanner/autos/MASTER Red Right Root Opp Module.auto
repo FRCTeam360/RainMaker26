@@ -30,7 +30,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "FLIPPED Blue Right Root"
+                  "pathName": "Red Right Root"
                 }
               },
               {
@@ -49,7 +49,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "FLIPPED Blue Right Root Safe 1"
+                  "pathName": "Red Right Root Safe 1"
                 }
               },
               {
@@ -68,7 +68,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "FLIPPED Blue Right Root Safe 2"
+                  "pathName": "MIRRORED Red Left Root Safe 2"
                 }
               },
               {
@@ -87,7 +87,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "FLIPPED Blue Right Root Safe 3"
+                  "pathName": "MIRRORED Red Left Root Safe 3"
                 }
               },
               {
@@ -109,6 +109,6 @@
     }
   },
   "resetOdom": true,
-  "folder": "BLUE RIGHT AUTOS",
+  "folder": "MASTER RED RIGHT",
   "choreoAuto": false
 }

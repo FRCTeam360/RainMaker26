@@ -24,25 +24,19 @@
           }
         },
         {
-          "type": "path",
-          "data": {
-            "pathName": "FLIPPED MIRRORED Blue Left Root"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.005
-          }
-        },
-        {
           "type": "deadline",
           "data": {
             "commands": [
               {
                 "type": "path",
                 "data": {
-                  "pathName": "FLIPPED MIRRORED Blue Left Root Safe 1"
+                  "pathName": "FLIPPED MIRRORED Blue Left Root"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "basic intake"
                 }
               }
             ]
@@ -55,7 +49,51 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "FLIPPED MIRRORED Blue Left Root; Safe 2"
+                  "pathName": "FLIPPED MIRRORED Blue Left Root Safe 1"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "basic intake"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "deadline",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "FLIPPED MIRRORED Blue Left Root Safe 2"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "basic intake"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "deadline",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "FLIPPED MIRRORED Blue Left Root Safe 3"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "basic intake"
                 }
               }
             ]

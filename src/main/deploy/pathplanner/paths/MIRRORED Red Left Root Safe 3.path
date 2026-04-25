@@ -3,65 +3,56 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 7.802,
-        "y": 7.601467
+        "x": 10.472,
+        "y": 2.466
       },
       "prevControl": null,
       "nextControl": {
-        "x": 7.996633,
-        "y": 6.889633
+        "x": 11.485667,
+        "y": 2.475889
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 7.558656,
-        "y": 4.551456
+        "x": 13.366344,
+        "y": 2.505122
       },
       "prevControl": {
-        "x": 8.02561,
-        "y": 5.051947
+        "x": 13.055206,
+        "y": 2.505122
       },
       "nextControl": {
-        "x": 7.013167,
-        "y": 3.966789
+        "x": 13.678167,
+        "y": 2.505122
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 6.067756,
+        "x": 13.7074,
         "y": 4.035
       },
       "prevControl": {
-        "x": 7.139644,
-        "y": 4.025256
+        "x": 13.756122,
+        "y": 3.304167
       },
       "nextControl": null,
       "isLocked": false,
       "linkedName": null
     }
   ],
-  "rotationTargets": [
-    {
-      "waypointRelativePos": 0.4946058091286282,
-      "rotationDegrees": -104.9158
-    },
-    {
-      "waypointRelativePos": 1,
-      "rotationDegrees": 180.0
-    }
-  ],
+  "rotationTargets": [],
   "constraintZones": [
     {
       "name": "Constraints Zone",
-      "minWaypointRelativePos": 1.1751861042183624,
-      "maxWaypointRelativePos": 1.7985111662531021,
+      "minWaypointRelativePos": 0.9,
+      "maxWaypointRelativePos": 2.0,
       "constraints": {
         "maxVelocity": 2.0,
-        "maxAcceleration": 6.0,
+        "maxAcceleration": 3.0,
         "maxAngularVelocity": 360.0,
         "maxAngularAcceleration": 540.0,
         "nominalVoltage": 12.0,
@@ -72,7 +63,7 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 4.0,
+    "maxVelocity": 3.0,
     "maxAcceleration": 6.0,
     "maxAngularVelocity": 360.0,
     "maxAngularAcceleration": 540.0,
@@ -81,13 +72,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": -0.0
   },
   "reversed": false,
-  "folder": "FLIPPED MIRRORED Blue Left Root Safe",
+  "folder": "MIRRORED Red Left Root Safe",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -90.0
+    "rotation": -0.0
   },
   "useDefaultConstraints": false
 }
