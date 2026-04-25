@@ -9,6 +9,7 @@ import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.swerve.SwerveRequest.ForwardPerspectiveValue;
+import com.ctre.phoenix6.swerve.utility.PhoenixPIDController;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
@@ -177,8 +178,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
   // PathPlanner rotation override PID — mirrors the facing-angle heading controller
   // so auto paths can aim at a shot calculator target while path-following.
-  private final PIDController ppRotationOverrideController =
-      new PIDController(HEADING_KP, HEADING_KI, HEADING_KD);
+  private final PhoenixPIDController ppRotationOverrideController =
+      new PhoenixPIDController(HEADING_KP, HEADING_KI, HEADING_KD);
 
   // True while the PathPlanner rotation override is registered.
   // Set via setAutoRotationOverride(), cleared via clearAutoRotationOverride().
@@ -462,11 +463,12 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     angleFacingRequest.ForwardPerspective = ForwardPerspectiveValue.BlueAlliance;
 
     // PathPlanner rotation override controller — same tuning as the facing-angle controller.
-    // Tolerance is set per-call in isAlignedToAutoTarget() using a speed-scaled value.
+    // Tolerance is overridden per-call in isAlignedToAutoTarget() using a speed-scaled value.
     ppRotationOverrideController.enableContinuousInput(-Math.PI, Math.PI);
     ppRotationOverrideController.setIZone(HEADING_I_ZONE);
     ppRotationOverrideController.setIntegratorRange(
         -HEADING_INTEGRATOR_MAX_RAD_PER_S, HEADING_INTEGRATOR_MAX_RAD_PER_S);
+    ppRotationOverrideController.setTolerance(HEADING_TOLERANCE_RAD);
 
     if (Utils.isSimulation()) {
       startSimThread();
@@ -770,12 +772,14 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
           Rotation2d target = headingSupplier.get();
           double currentRad = getPosition().getRotation().getRadians();
           double targetRad = target.getRadians();
-          double output = ppRotationOverrideController.calculate(currentRad, targetRad);
+          double output =
+              ppRotationOverrideController.calculate(
+                  currentRad, targetRad, Utils.getCurrentTimeSeconds());
           Logger.recordOutput(
               SUBSYSTEM_NAME + "AutoRotationOverride/TargetDeg", Math.toDegrees(targetRad));
           Logger.recordOutput(
               SUBSYSTEM_NAME + "AutoRotationOverride/ErrorDeg",
-              Math.toDegrees(ppRotationOverrideController.getError()));
+              Math.toDegrees(ppRotationOverrideController.getPositionError()));
           Logger.recordOutput(SUBSYSTEM_NAME + "AutoRotationOverride/OutputRadPerS", output);
           return output;
         });
