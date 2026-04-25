@@ -106,6 +106,7 @@ public abstract class VisionIOLimelightBase implements VisionIO {
   @Override
   public void updateInputs(VisionIOInputs inputs) {
     pollCameraPose();
+    inputs.limelightPose = cameraPoseRobotSpace;
     // Set robot orientation for MegaTag2 (flushed by postSchedulerUpdate)
     LimelightHelpers.SetRobotOrientation_NoFlush(
         name, gyroAngleSupplier.getAsDouble(), gyroAngleRateSupplier.getAsDouble(), 0, 0, 0, 0);
