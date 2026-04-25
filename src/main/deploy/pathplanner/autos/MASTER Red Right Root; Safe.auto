@@ -11,31 +11,19 @@
           }
         },
         {
-          "type": "named",
-          "data": {
-            "name": "shoot at hub"
-          }
-        },
-        {
-          "type": "parallel",
-          "data": {
-            "commands": []
-          }
-        },
-        {
           "type": "deadline",
           "data": {
             "commands": [
               {
-                "type": "path",
+                "type": "wait",
                 "data": {
-                  "pathName": "Red Right Root 2"
+                  "waitTime": 2.0
                 }
               },
               {
                 "type": "named",
                 "data": {
-                  "name": "basic intake"
+                  "name": "shoot without timer"
                 }
               }
             ]
@@ -48,13 +36,26 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "Red Right Root; Safe 1"
+                  "pathName": "Red Right Root 2"
                 }
-              },
+              }
+            ]
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.5
+          }
+        },
+        {
+          "type": "deadline",
+          "data": {
+            "commands": [
               {
-                "type": "named",
+                "type": "path",
                 "data": {
-                  "name": "basic intake"
+                  "pathName": "Red Right Root; Safe 1"
                 }
               }
             ]
@@ -68,12 +69,6 @@
                 "type": "path",
                 "data": {
                   "pathName": "Red Right Root; Safe 2"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "basic intake"
                 }
               }
             ]
