@@ -23,7 +23,9 @@ public interface VisionIO {
     public Pose2d estimatedPose;
     public double timestampSeconds;
     public boolean poseUpdated;
-    public double yaw = 0, pitch = 0, roll = 0;
+    public double imuYawDeg = 0;
+    public double imuPitchDeg = 0;
+    public double imuRollDeg = 0;
     public double nearestTagObservedPitchDeg = 0;
     public double nearestTagObservedRollDeg = 0;
     public Pose3d cameraPose = new Pose3d();

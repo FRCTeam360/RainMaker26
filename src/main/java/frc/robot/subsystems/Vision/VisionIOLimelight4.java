@@ -54,9 +54,9 @@ public class VisionIOLimelight4 extends VisionIOLimelightBase {
   public void updateInputs(VisionIOInputs inputs) {
     super.updateInputs(inputs);
     LimelightHelpers.IMUData imuData = LimelightHelpers.getIMUData(getName());
-    inputs.yaw = imuData.Yaw;
-    inputs.pitch = imuData.Pitch;
-    inputs.roll = imuData.Roll;
+    inputs.imuYawDeg = imuData.Yaw;
+    inputs.imuPitchDeg = imuData.Pitch;
+    inputs.imuRollDeg = imuData.Roll;
   }
 
   @Override
