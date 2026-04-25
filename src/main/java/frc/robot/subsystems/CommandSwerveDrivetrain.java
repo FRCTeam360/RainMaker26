@@ -180,9 +180,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   private final PIDController ppRotationOverrideController =
       new PIDController(HEADING_KP, HEADING_KI, HEADING_KD);
 
-  // When present, the PathPlanner rotation override PID will track this heading.
+  // True while the PathPlanner rotation override is registered.
   // Set via setAutoRotationOverride(), cleared via clearAutoRotationOverride().
-  private Supplier<Optional<Rotation2d>> autoRotationTarget = Optional::empty;
+  private boolean autoRotationActive = false;
 
   // Field-centric facing angle request for hub tracking
   private final SwerveRequest.FieldCentricFacingAngle angleFacingRequest =
@@ -461,12 +461,12 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     angleFacingRequest.HeadingController.setTolerance(HEADING_TOLERANCE_RAD);
     angleFacingRequest.ForwardPerspective = ForwardPerspectiveValue.BlueAlliance;
 
-    // PathPlanner rotation override controller — same tuning as the facing-angle controller
+    // PathPlanner rotation override controller — same tuning as the facing-angle controller.
+    // Tolerance is set per-call in isAlignedToAutoTarget() using a speed-scaled value.
     ppRotationOverrideController.enableContinuousInput(-Math.PI, Math.PI);
     ppRotationOverrideController.setIZone(HEADING_I_ZONE);
     ppRotationOverrideController.setIntegratorRange(
         -HEADING_INTEGRATOR_MAX_RAD_PER_S, HEADING_INTEGRATOR_MAX_RAD_PER_S);
-    ppRotationOverrideController.setTolerance(HEADING_TOLERANCE_RAD);
 
     if (Utils.isSimulation()) {
       startSimThread();
@@ -733,7 +733,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   public boolean isAlignedToTarget() {
     // When the auto rotation override is active, check its PID instead of the
     // facing-angle controller (which isn't being driven during path-following).
-    if (autoRotationTarget.get().isPresent()) {
+    if (autoRotationActive) {
       return isAlignedToAutoTarget();
     }
 
@@ -764,7 +764,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
    */
   public void setAutoRotationOverride(Supplier<Rotation2d> headingSupplier) {
     ppRotationOverrideController.reset();
-    autoRotationTarget = () -> Optional.of(headingSupplier.get());
+    autoRotationActive = true;
     PPHolonomicDriveController.overrideRotationFeedback(
         () -> {
           Rotation2d target = headingSupplier.get();
@@ -787,7 +787,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
    * controller.
    */
   public void clearAutoRotationOverride() {
-    autoRotationTarget = Optional::empty;
+    autoRotationActive = false;
     PPHolonomicDriveController.clearRotationFeedbackOverride();
     ppRotationOverrideController.reset();
     Logger.recordOutput(SUBSYSTEM_NAME + "AutoRotationOverride/Active", false);
@@ -800,7 +800,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
    * @return true if the override is active and aligned, false if inactive or not yet converged
    */
   public boolean isAlignedToAutoTarget() {
-    if (autoRotationTarget.get().isEmpty()) {
+    if (!autoRotationActive) {
       return false;
     }
     ChassisSpeeds speeds = getVelocity();
