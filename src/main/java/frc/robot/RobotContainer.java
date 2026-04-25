@@ -547,7 +547,7 @@ public class RobotContainer {
     forceHubTrigger.onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
 
     // Manual override: force pass to outpost regardless of position
-    driverCont.b().whileTrue(superStructure.setStateCommand(SuperWantedStates.FORCED_SHOOT_TRENCH));
+    driverCont.b().whileTrue(superStructure.setStateCommand(SuperWantedStates.FORCED_PASS));
     driverCont.b().onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
 
     driverCont.start().whileTrue(drivetrain.xOutCmd());
