@@ -5,12 +5,6 @@
     "data": {
       "commands": [
         {
-          "type": "path",
-          "data": {
-            "pathName": "Red Right Root"
-          }
-        },
-        {
           "type": "deadline",
           "data": {
             "commands": [
@@ -30,22 +24,15 @@
           }
         },
         {
-          "type": "deadline",
+          "type": "path",
           "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "Red Right Root 2"
-                }
-              }
-            ]
+            "pathName": "Red Right Root"
           }
         },
         {
           "type": "wait",
           "data": {
-            "waitTime": 0.1
+            "waitTime": 0.005
           }
         },
         {
@@ -55,7 +42,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "Red Right Root; Safe 1"
+                  "pathName": "Red Right Root Safe 1"
                 }
               }
             ]
