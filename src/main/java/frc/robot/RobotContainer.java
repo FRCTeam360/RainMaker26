@@ -9,7 +9,6 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.FollowPathCommand;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Timer;
@@ -41,6 +40,7 @@ import frc.robot.subsystems.Indexer.IndexerIOSim;
 import frc.robot.subsystems.Indexer.IndexerIOWB;
 import frc.robot.subsystems.Intake.IntakePivot.IntakePivot;
 import frc.robot.subsystems.Intake.IntakePivot.IntakePivotIOCB;
+import frc.robot.subsystems.Intake.IntakePivot.IntakePivotIONoop;
 import frc.robot.subsystems.Intake.IntakePivot.IntakePivotIOPB;
 import frc.robot.subsystems.Intake.IntakePivot.IntakePivotIOSim;
 import frc.robot.subsystems.Intake.IntakeRoller.IntakeRoller;
@@ -81,14 +81,10 @@ import frc.robot.utils.CommandLogger;
 import frc.robot.utils.FieldConstants;
 import frc.robot.utils.PathProvider;
 import frc.robot.utils.PositionUtils;
-
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
-
 import org.littletonrobotics.junction.Logger;
-
-import frc.robot.subsystems.Intake.IntakePivot.IntakePivotIONoop;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
