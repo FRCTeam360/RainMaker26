@@ -23,12 +23,6 @@
                       "data": {
                         "waitTime": 0.1
                       }
-                    },
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "basic intake"
-                      }
                     }
                   ]
                 }
@@ -37,16 +31,15 @@
           }
         },
         {
-          "type": "deadline",
+          "type": "named",
           "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "shoot at hub"
-                }
-              }
-            ]
+            "name": "shoot at hub"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "deploy intake"
           }
         },
         {
@@ -62,23 +55,22 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "basic intake"
+                  "name": "deploy intake"
                 }
               }
             ]
           }
         },
         {
-          "type": "deadline",
+          "type": "named",
           "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "shoot at hub"
-                }
-              }
-            ]
+            "name": "shoot at hub"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "deploy intake"
           }
         }
       ]
