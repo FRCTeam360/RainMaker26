@@ -1,0 +1,95 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 13.299336492890996,
+        "y": 5.109644549763032
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 11.375722748815168,
+        "y": 5.496516587677725
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 10.20436018957346,
+        "y": 4.862476303317535
+      },
+      "prevControl": {
+        "x": 10.751405950546426,
+        "y": 5.162895056471622
+      },
+      "nextControl": {
+        "x": 9.657314428600495,
+        "y": 4.5620575501634475
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 8.839561611374409,
+        "y": 5.432037914691943
+      },
+      "prevControl": {
+        "x": 8.913078216359033,
+        "y": 4.6895202043472395
+      },
+      "nextControl": {
+        "x": 8.732097156398106,
+        "y": 6.517428909952606
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 15.126232227488153,
+        "y": 5.560995260663506
+      },
+      "prevControl": {
+        "x": 14.266516587677726,
+        "y": 4.959194312796208
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": null
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 1.1,
+      "rotationDegrees": 180.0
+    },
+    {
+      "waypointRelativePos": 2.339253996447604,
+      "rotationDegrees": 0.0
+    }
+  ],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 4.0,
+    "maxAcceleration": 8.0,
+    "maxAngularVelocity": 360.0,
+    "maxAngularAcceleration": 540.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 47.79270236571344
+  },
+  "reversed": false,
+  "folder": null,
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 180.0
+  },
+  "useDefaultConstraints": true
+}
