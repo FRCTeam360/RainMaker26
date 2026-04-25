@@ -26,7 +26,7 @@ public interface VisionIO {
     public double yaw = 0, pitch = 0, roll = 0;
     public double nearestTagObservedPitchDeg = 0;
     public double nearestTagObservedRollDeg = 0;
-    public Pose3d limelightPose = new Pose3d();
+    public Pose3d cameraPose = new Pose3d();
     public boolean hasIMU = false;
 
     // Fixed-size arrays (preallocated for max possible tags) to avoid allocations at 50Hz
