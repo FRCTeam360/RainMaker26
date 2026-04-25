@@ -57,7 +57,7 @@ public abstract class VisionIOLimelightBase implements VisionIO {
     return name;
   }
 
-  public void pollCameraPose() {
+  private void pollCameraPose() {
     if (cameraPoseResolved) return;
     if (LimelightHelpers.getHeartbeat(name) == 0) return;
     Pose3d pose = LimelightHelpers.getCameraPose3d_RobotSpace(name);
@@ -68,9 +68,6 @@ public abstract class VisionIOLimelightBase implements VisionIO {
   }
 
   private void updateObservedTagOrientation(VisionIOInputs inputs) {
-    // Cheap NT-array path (no JSON dump). Delegates axis decoding to LimelightHelpers.toPose3D
-    // since the public NT-key docs and the helper's index order disagree — the helper is the
-    // authoritative interpretation used elsewhere in the codebase.
     Rotation3d rotation = LimelightHelpers.getTargetPose3d_RobotSpace(name).getRotation();
     inputs.nearestTagObservedRollDeg = Math.toDegrees(rotation.getX());
     inputs.nearestTagObservedPitchDeg = Math.toDegrees(rotation.getY());
