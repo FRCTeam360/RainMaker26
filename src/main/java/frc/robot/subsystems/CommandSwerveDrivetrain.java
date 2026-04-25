@@ -41,6 +41,7 @@ import frc.robot.generated.WoodBotDrivetrain.TunerSwerveDrivetrain;
 import frc.robot.lib.BLine.FollowPath;
 import frc.robot.subsystems.Vision.VisionMeasurement;
 import frc.robot.utils.AllianceFlipUtil;
+import frc.robot.utils.CommandLogger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -262,7 +263,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     return this.runOnce(() -> toggleDefenseMode());
   }
 
-  // Xout Command
+  // X-out Command
   public void xOut() {
     commandedSpeeds.vxMetersPerSecond = 0.0;
     commandedSpeeds.vyMetersPerSecond = 0.0;
@@ -271,7 +272,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   }
 
   public Command xOutCmd() {
-    return this.run(() -> xOut());
+    return CommandLogger.logCommand(this.runEnd(() -> this.xOut(), () -> this.xOut()), "X_OUT");
   }
 
   public Command toggleHeadingLockCommand() {
