@@ -396,7 +396,10 @@ public class RobotContainer {
     registerPathplannerCommand(
         "stop shooting while moving",
         Commands.runOnce(() -> drivetrain.clearAutoRotationOverride())
-            .andThen(superStructure.setStateCommand(SuperWantedStates.DEFAULT)));
+            .andThen(
+                superStructure
+                    .setStateCommand(SuperWantedStates.DEFAULT)
+                    .alongWith(superStructure.setIntakeStateCommand(IntakeWantedStates.DEPLOYED))));
 
     configVision();
     configDefaultDrivingCommand();
