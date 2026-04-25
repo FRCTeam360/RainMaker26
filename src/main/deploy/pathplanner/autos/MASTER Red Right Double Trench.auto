@@ -85,6 +85,6 @@
     }
   },
   "resetOdom": true,
-  "folder": null,
+  "folder": "MASTER RED RIGHT",
   "choreoAuto": false
 }
