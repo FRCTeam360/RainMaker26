@@ -23,6 +23,13 @@ public interface VisionIO {
     public Pose2d estimatedPose;
     public double timestampSeconds;
     public boolean poseUpdated;
+    public double imuYawDeg = 0;
+    public double imuPitchDeg = 0;
+    public double imuRollDeg = 0;
+    public double nearestTagObservedPitchDeg = 0;
+    public double nearestTagObservedRollDeg = 0;
+    public Pose3d cameraPose = new Pose3d();
+    public boolean hasIMU = false;
 
     // Fixed-size arrays (preallocated for max possible tags) to avoid allocations at 50Hz
     public int targetCount = 0; // Number of valid entries in the arrays below

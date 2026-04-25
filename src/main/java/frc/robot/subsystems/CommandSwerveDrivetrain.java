@@ -2,7 +2,9 @@ package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.*;
 
+import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.SignalLogger;
+import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
@@ -19,6 +21,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.util.sendable.Sendable;
@@ -76,6 +79,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   // preSchedulerUpdate(), then populated on first access via getCachedState().
   // This ensures at most one getStateCopy() allocation per scheduler cycle.
   private SwerveDriveState cachedState;
+  private final StatusSignal<Angle> pigeonYaw;
+  private final StatusSignal<Angle> pigeonPitch;
+  private final StatusSignal<Angle> pigeonRoll;
+  private final StatusSignal<AngularVelocity> pigeonAngularVelocityZ;
 
   // Commanded speeds for shoot-on-the-move compensation (tracks what we tell the
   // robot to do)
@@ -468,6 +475,11 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     ppRotationOverrideController.setIZone(HEADING_I_ZONE);
     ppRotationOverrideController.setIntegratorRange(
         -HEADING_INTEGRATOR_MAX_RAD_PER_S, HEADING_INTEGRATOR_MAX_RAD_PER_S);
+
+    pigeonYaw = getPigeon2().getYaw();
+    pigeonPitch = getPigeon2().getPitch();
+    pigeonRoll = getPigeon2().getRoll();
+    pigeonAngularVelocityZ = getPigeon2().getAngularVelocityZWorld();
 
     if (Utils.isSimulation()) {
       startSimThread();
@@ -881,6 +893,14 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     Logger.recordOutput(SUBSYSTEM_NAME + "TargetState", state.ModuleTargets);
     Logger.recordOutput(SUBSYSTEM_NAME + "Using Vision", hasVisionMeasurements);
     Logger.recordOutput(SUBSYSTEM_NAME + "Is Defense Mode", isDefenseMode);
+
+    BaseStatusSignal.refreshAll(pigeonYaw, pigeonPitch, pigeonRoll, pigeonAngularVelocityZ);
+    Logger.recordOutput(SUBSYSTEM_NAME + "Pigeon/YawDeg", pigeonYaw.getValueAsDouble());
+    Logger.recordOutput(SUBSYSTEM_NAME + "Pigeon/PitchDeg", pigeonPitch.getValueAsDouble());
+    Logger.recordOutput(SUBSYSTEM_NAME + "Pigeon/RollDeg", pigeonRoll.getValueAsDouble());
+    Logger.recordOutput(
+        SUBSYSTEM_NAME + "Pigeon/AngularVelocityZDegPerSec",
+        pigeonAngularVelocityZ.getValueAsDouble());
     Logger.recordOutput(
         SUBSYSTEM_NAME + "HeadingSetpointDeg",
         Math.toDegrees(angleFacingRequest.HeadingController.getSetpoint()));
