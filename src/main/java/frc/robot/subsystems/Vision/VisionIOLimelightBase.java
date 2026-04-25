@@ -11,8 +11,6 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import frc.robot.utils.FieldConstants;
 import frc.robot.utils.LimelightHelpers;
-import frc.robot.utils.LimelightHelpers.LimelightResults;
-import frc.robot.utils.LimelightHelpers.LimelightTarget_Fiducial;
 import frc.robot.utils.LimelightHelpers.PoseEstimate;
 import frc.robot.utils.LimelightHelpers.RawFiducial;
 import java.util.Optional;
@@ -69,29 +67,13 @@ public abstract class VisionIOLimelightBase implements VisionIO {
     cameraPoseResolved = true;
   }
 
-  private void updateNearestTagOrientation(VisionIOInputs inputs, PoseEstimate poseEstimate) {
-    int nearestTagID = -1;
-    double nearestDistance = Double.MAX_VALUE;
-    for (RawFiducial fiducial : poseEstimate.rawFiducials) {
-      if (fiducial.distToRobot < nearestDistance) {
-        nearestDistance = fiducial.distToRobot;
-        nearestTagID = fiducial.id;
-      }
-    }
-
-    if (nearestTagID == -1) return;
-
-    LimelightResults results = LimelightHelpers.getLatestResults(name);
-    if (results == null || results.targets_Fiducials == null) return;
-
-    for (LimelightTarget_Fiducial target : results.targets_Fiducials) {
-      if ((int) target.fiducialID == nearestTagID) {
-        Pose3d tagPoseInRobotSpace = target.getTargetPose_RobotSpace();
-        Rotation3d rotation = tagPoseInRobotSpace.getRotation();
-        inputs.nearestTagObservedPitchDeg = Math.toDegrees(rotation.getY());
-        inputs.nearestTagObservedRollDeg = Math.toDegrees(rotation.getX());
-      }
-    }
+  private void updateObservedTagOrientation(VisionIOInputs inputs) {
+    // Cheap NT-array path (no JSON dump). Delegates axis decoding to LimelightHelpers.toPose3D
+    // since the public NT-key docs and the helper's index order disagree — the helper is the
+    // authoritative interpretation used elsewhere in the codebase.
+    Rotation3d rotation = LimelightHelpers.getTargetPose3d_RobotSpace(name).getRotation();
+    inputs.nearestTagObservedRollDeg = Math.toDegrees(rotation.getX());
+    inputs.nearestTagObservedPitchDeg = Math.toDegrees(rotation.getY());
   }
 
   @Override
@@ -169,7 +151,7 @@ public abstract class VisionIOLimelightBase implements VisionIO {
 
     inputs.targetCount = targetCount;
     inputs.poseUpdated = true;
-    updateNearestTagOrientation(inputs, poseEstimate);
+    updateObservedTagOrientation(inputs);
   }
 
   private Optional<PoseEstimate> getMegatag2PoseEst() {
