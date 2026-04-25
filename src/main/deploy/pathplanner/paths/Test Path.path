@@ -37,7 +37,7 @@
       },
       "prevControl": {
         "x": 3.3853262158956112,
-        "y": 0.5436417556346373
+        "y": 0.5436417556346375
       },
       "nextControl": null,
       "isLocked": false,
@@ -47,30 +47,7 @@
   "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [
-    {
-      "name": "start shooting while moving",
-      "waypointRelativePos": 0.3779527559054968,
-      "endWaypointRelativePos": null,
-      "command": {
-        "type": "named",
-        "data": {
-          "name": "start shooting while moving"
-        }
-      }
-    },
-    {
-      "name": "stop shooting while moving",
-      "waypointRelativePos": 1.6017997750281197,
-      "endWaypointRelativePos": null,
-      "command": {
-        "type": "named",
-        "data": {
-          "name": "stop shooting while moving"
-        }
-      }
-    }
-  ],
+  "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 4.0,
     "maxAcceleration": 8.0,
