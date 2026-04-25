@@ -389,6 +389,21 @@ public class RobotContainer {
                   superStructure.setWantedSuperState(SuperWantedStates.DEFAULT);
                   superStructure.setIntakeState(IntakeWantedStates.DEPLOYED);
                 }));
+    registerPathplannerCommand(
+        "start shooting while moving",
+        Commands.runOnce(
+                () ->
+                    drivetrain.setAutoRotationOverride(
+                        () -> hubShotCalculator.calculateShot().targetHeading()))
+            .andThen(superStructure.setStateCommand(SuperWantedStates.SHOOT_AT_HUB))
+            .alongWith(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING)));
+    registerPathplannerCommand(
+        "stop shooting while moving",
+        Commands.runOnce(() -> drivetrain.clearAutoRotationOverride())
+            .andThen(
+                superStructure
+                    .setStateCommand(SuperWantedStates.DEFAULT)
+                    .alongWith(superStructure.setIntakeStateCommand(IntakeWantedStates.DEPLOYED))));
 
     configVision();
     configDefaultDrivingCommand();
@@ -642,6 +657,7 @@ public class RobotContainer {
     superStructure.setControlState(ControlState.SUPERSTRUCTURE);
     superStructure.setWantedSuperState(SuperWantedStates.IDLE);
     superStructure.setIntakeState(IntakeWantedStates.IDLE);
+    drivetrain.clearAutoRotationOverride();
     drivetrain.setControl(new SwerveRequest.Idle());
     flywheel.stop();
     hood.stop();

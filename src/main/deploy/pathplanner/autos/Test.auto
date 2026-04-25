@@ -1,0 +1,31 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "named",
+          "data": {
+            "name": "start shooting while moving"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Test Path"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "stop shooting while moving"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}

@@ -70,12 +70,14 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   // Keep track of when vision measurements are added for logging context
   private boolean hasVisionMeasurements = false;
 
-  // Lazily-cached state copy. Invalidated once per cycle via clearCachedState() in
+  // Lazily-cached state copy. Invalidated once per cycle via clearCachedState()
+  // in
   // preSchedulerUpdate(), then populated on first access via getCachedState().
   // This ensures at most one getStateCopy() allocation per scheduler cycle.
   private SwerveDriveState cachedState;
 
-  // Commanded speeds for shoot-on-the-move compensation (tracks what we tell the robot to do)
+  // Commanded speeds for shoot-on-the-move compensation (tracks what we tell the
+  // robot to do)
   private ChassisSpeeds commandedSpeeds = new ChassisSpeeds();
 
   /* Blue alliance sees forward as 0 degrees (toward red alliance wall) */
@@ -107,11 +109,13 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   private final double HEADING_INTEGRATOR_MAX_RAD_PER_S =
       Constants.getMaxAngularVelocity().in(RadiansPerSecond) * 0.5;
   // Extra heading tolerance granted per m/s of translational speed.
-  // Compensates for the PID steady-state tracking lag when the heading setpoint moves
+  // Compensates for the PID steady-state tracking lag when the heading setpoint
+  // moves
   // (setpoint rate ≈ v/d rad/s; lag ≈ rate/KP). Tunable — start at ~5°/m/s.
   private static final double HEADING_SPEED_TOLERANCE_RAD_PER_MPS = Math.toRadians(1.0);
 
-  // Maximum translational speed while using field-centric facing angle (fraction of maxSpeed).
+  // Maximum translational speed while using field-centric facing angle (fraction
+  // of maxSpeed).
   // Limits how much shoot-on-the-move compensation is needed.
   private static final double FACING_ANGLE_MAX_SPEED_FRACTION = 0.5;
   private static final double CONTROLLER_DEADBAND = 0.04;
@@ -133,8 +137,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
   private SnapDirection previousSnapDirection = SnapDirection.NONE;
 
-  // Called once per scheduler cycle from fieldOrientedDriveCommand to update the snap target.
-  // Kept outside the applyRequest lambda so it runs exactly once per cycle regardless of
+  // Called once per scheduler cycle from fieldOrientedDriveCommand to update the
+  // snap target.
+  // Kept outside the applyRequest lambda so it runs exactly once per cycle
+  // regardless of
   // how many times the request supplier is invoked.
   private void updateSnapAngle(double rightX, double rightY) {
     boolean yDominant = Math.abs(rightY) >= Math.abs(rightX);
@@ -153,8 +159,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     if (currentSnapDirection == previousSnapDirection) return;
     previousSnapDirection = currentSnapDirection;
 
-    // Blue-perspective base angles flipped automatically for Red via AllianceFlipUtil:
-    //   up=0°, down=180°, right=270°, left=90°
+    // Blue-perspective base angles flipped automatically for Red via
+    // AllianceFlipUtil:
+    // up=0°, down=180°, right=270°, left=90°
     switch (currentSnapDirection) {
       case UP ->
           currentTargetAngle = AllianceFlipUtil.apply(Rotation2d.fromDegrees(0.0)).getDegrees();
@@ -167,6 +174,15 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
       case NONE -> {}
     }
   }
+
+  // PathPlanner rotation override PID — mirrors the facing-angle heading controller
+  // so auto paths can aim at a shot calculator target while path-following.
+  private final PIDController ppRotationOverrideController =
+      new PIDController(HEADING_KP, HEADING_KI, HEADING_KD);
+
+  // True while the PathPlanner rotation override is registered.
+  // Set via setAutoRotationOverride(), cleared via clearAutoRotationOverride().
+  private boolean autoRotationActive = false;
 
   // Field-centric facing angle request for hub tracking
   private final SwerveRequest.FieldCentricFacingAngle angleFacingRequest =
@@ -444,6 +460,14 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         -HEADING_INTEGRATOR_MAX_RAD_PER_S, HEADING_INTEGRATOR_MAX_RAD_PER_S);
     angleFacingRequest.HeadingController.setTolerance(HEADING_TOLERANCE_RAD);
     angleFacingRequest.ForwardPerspective = ForwardPerspectiveValue.BlueAlliance;
+
+    // PathPlanner rotation override controller — same tuning as the facing-angle controller.
+    // Tolerance is set per-call in isAlignedToAutoTarget() using a speed-scaled value.
+    ppRotationOverrideController.enableContinuousInput(-Math.PI, Math.PI);
+    ppRotationOverrideController.setIZone(HEADING_I_ZONE);
+    ppRotationOverrideController.setIntegratorRange(
+        -HEADING_INTEGRATOR_MAX_RAD_PER_S, HEADING_INTEGRATOR_MAX_RAD_PER_S);
+
     if (Utils.isSimulation()) {
       startSimThread();
     }
@@ -580,7 +604,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     }
   }
 
-  // Key cache for BLine logging — populated once per unique BLine key, reused every loop.
+  // Key cache for BLine logging — populated once per unique BLine key, reused
+  // every loop.
   private final Map<String, String> blineKeyCache = new HashMap<>();
 
   private String blineKey(String rawKey) {
@@ -597,7 +622,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     PathPlannerLogging.setLogActivePathCallback(
         path -> Logger.recordOutput("Autos/PathPlanner/activePath", path.toArray(new Pose2d[0])));
 
-    // BLine — log under Autos/BLine/; keys are interned via blineKeyCache on first use
+    // BLine — log under Autos/BLine/; keys are interned via blineKeyCache on first
+    // use
     FollowPath.setPoseLoggingConsumer(
         (Pair<String, edu.wpi.first.math.geometry.Pose2d> pair) ->
             Logger.recordOutput(blineKey(pair.getFirst()), pair.getSecond()));
@@ -705,6 +731,12 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
    * @return true if the heading error is within the speed-scaled tolerance
    */
   public boolean isAlignedToTarget() {
+    // When the auto rotation override is active, check its PID instead of the
+    // facing-angle controller (which isn't being driven during path-following).
+    if (autoRotationActive) {
+      return isAlignedToAutoTarget();
+    }
+
     ChassisSpeeds speeds = getVelocity();
     double speedMps = Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond);
     double dynamicToleranceRad =
@@ -719,6 +751,64 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   /** Resets the facing-angle heading controller so it must re-converge from scratch. */
   public void resetHeadingController() {
     angleFacingRequest.HeadingController.reset();
+  }
+
+  /**
+   * Sets the rotation override target for PathPlanner path-following. While set, the PathPlanner
+   * holonomic controller's rotation output is replaced by a PID controller tracking this heading
+   * (similar to how {@link #faceAngleWhileDriving} works for teleop).
+   *
+   * <p>Call {@link #clearAutoRotationOverride()} when done (e.g., in a command's end()).
+   *
+   * @param headingSupplier supplies the target heading each cycle (e.g., from a ShotCalculator)
+   */
+  public void setAutoRotationOverride(Supplier<Rotation2d> headingSupplier) {
+    ppRotationOverrideController.reset();
+    autoRotationActive = true;
+    PPHolonomicDriveController.overrideRotationFeedback(
+        () -> {
+          Rotation2d target = headingSupplier.get();
+          double currentRad = getPosition().getRotation().getRadians();
+          double targetRad = target.getRadians();
+          double output = ppRotationOverrideController.calculate(currentRad, targetRad);
+          Logger.recordOutput(
+              SUBSYSTEM_NAME + "AutoRotationOverride/TargetDeg", Math.toDegrees(targetRad));
+          Logger.recordOutput(
+              SUBSYSTEM_NAME + "AutoRotationOverride/ErrorDeg",
+              Math.toDegrees(ppRotationOverrideController.getError()));
+          Logger.recordOutput(SUBSYSTEM_NAME + "AutoRotationOverride/OutputRadPerS", output);
+          return output;
+        });
+    Logger.recordOutput(SUBSYSTEM_NAME + "AutoRotationOverride/Active", true);
+  }
+
+  /**
+   * Clears the rotation override, returning full rotation control to PathPlanner's built-in
+   * controller.
+   */
+  public void clearAutoRotationOverride() {
+    autoRotationActive = false;
+    PPHolonomicDriveController.clearRotationFeedbackOverride();
+    ppRotationOverrideController.reset();
+    Logger.recordOutput(SUBSYSTEM_NAME + "AutoRotationOverride/Active", false);
+  }
+
+  /**
+   * Returns whether the auto rotation override PID is at its setpoint, using the same speed-scaled
+   * dynamic tolerance as {@link #isAlignedToTarget()}.
+   *
+   * @return true if the override is active and aligned, false if inactive or not yet converged
+   */
+  public boolean isAlignedToAutoTarget() {
+    if (!autoRotationActive) {
+      return false;
+    }
+    ChassisSpeeds speeds = getVelocity();
+    double speedMps = Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond);
+    double dynamicToleranceRad =
+        HEADING_TOLERANCE_RAD + speedMps * HEADING_SPEED_TOLERANCE_RAD_PER_MPS;
+    ppRotationOverrideController.setTolerance(dynamicToleranceRad);
+    return ppRotationOverrideController.atSetpoint();
   }
 
   /**
