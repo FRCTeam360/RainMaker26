@@ -182,6 +182,15 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     }
   }
 
+  // PathPlanner rotation override PID — mirrors the facing-angle heading controller
+  // so auto paths can aim at a shot calculator target while path-following.
+  private final PIDController ppRotationOverrideController =
+      new PIDController(HEADING_KP, HEADING_KI, HEADING_KD);
+
+  // True while the PathPlanner rotation override is registered.
+  // Set via setAutoRotationOverride(), cleared via clearAutoRotationOverride().
+  private boolean autoRotationActive = false;
+
   // Field-centric facing angle request for hub tracking
   private final SwerveRequest.FieldCentricFacingAngle angleFacingRequest =
       new SwerveRequest.FieldCentricFacingAngle()
@@ -458,10 +467,19 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         -HEADING_INTEGRATOR_MAX_RAD_PER_S, HEADING_INTEGRATOR_MAX_RAD_PER_S);
     angleFacingRequest.HeadingController.setTolerance(HEADING_TOLERANCE_RAD);
     angleFacingRequest.ForwardPerspective = ForwardPerspectiveValue.BlueAlliance;
+
+    // PathPlanner rotation override controller — same tuning as the facing-angle controller.
+    // Tolerance is set per-call in isAlignedToAutoTarget() using a speed-scaled value.
+    ppRotationOverrideController.enableContinuousInput(-Math.PI, Math.PI);
+    ppRotationOverrideController.setIZone(HEADING_I_ZONE);
+    ppRotationOverrideController.setIntegratorRange(
+        -HEADING_INTEGRATOR_MAX_RAD_PER_S, HEADING_INTEGRATOR_MAX_RAD_PER_S);
+
     pigeonYaw = getPigeon2().getYaw();
     pigeonPitch = getPigeon2().getPitch();
     pigeonRoll = getPigeon2().getRoll();
     pigeonAngularVelocityZ = getPigeon2().getAngularVelocityZWorld();
+
     if (Utils.isSimulation()) {
       startSimThread();
     }
@@ -725,6 +743,12 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
    * @return true if the heading error is within the speed-scaled tolerance
    */
   public boolean isAlignedToTarget() {
+    // When the auto rotation override is active, check its PID instead of the
+    // facing-angle controller (which isn't being driven during path-following).
+    if (autoRotationActive) {
+      return isAlignedToAutoTarget();
+    }
+
     ChassisSpeeds speeds = getVelocity();
     double speedMps = Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond);
     double dynamicToleranceRad =
@@ -739,6 +763,64 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   /** Resets the facing-angle heading controller so it must re-converge from scratch. */
   public void resetHeadingController() {
     angleFacingRequest.HeadingController.reset();
+  }
+
+  /**
+   * Sets the rotation override target for PathPlanner path-following. While set, the PathPlanner
+   * holonomic controller's rotation output is replaced by a PID controller tracking this heading
+   * (similar to how {@link #faceAngleWhileDriving} works for teleop).
+   *
+   * <p>Call {@link #clearAutoRotationOverride()} when done (e.g., in a command's end()).
+   *
+   * @param headingSupplier supplies the target heading each cycle (e.g., from a ShotCalculator)
+   */
+  public void setAutoRotationOverride(Supplier<Rotation2d> headingSupplier) {
+    ppRotationOverrideController.reset();
+    autoRotationActive = true;
+    PPHolonomicDriveController.overrideRotationFeedback(
+        () -> {
+          Rotation2d target = headingSupplier.get();
+          double currentRad = getPosition().getRotation().getRadians();
+          double targetRad = target.getRadians();
+          double output = ppRotationOverrideController.calculate(currentRad, targetRad);
+          Logger.recordOutput(
+              SUBSYSTEM_NAME + "AutoRotationOverride/TargetDeg", Math.toDegrees(targetRad));
+          Logger.recordOutput(
+              SUBSYSTEM_NAME + "AutoRotationOverride/ErrorDeg",
+              Math.toDegrees(ppRotationOverrideController.getError()));
+          Logger.recordOutput(SUBSYSTEM_NAME + "AutoRotationOverride/OutputRadPerS", output);
+          return output;
+        });
+    Logger.recordOutput(SUBSYSTEM_NAME + "AutoRotationOverride/Active", true);
+  }
+
+  /**
+   * Clears the rotation override, returning full rotation control to PathPlanner's built-in
+   * controller.
+   */
+  public void clearAutoRotationOverride() {
+    autoRotationActive = false;
+    PPHolonomicDriveController.clearRotationFeedbackOverride();
+    ppRotationOverrideController.reset();
+    Logger.recordOutput(SUBSYSTEM_NAME + "AutoRotationOverride/Active", false);
+  }
+
+  /**
+   * Returns whether the auto rotation override PID is at its setpoint, using the same speed-scaled
+   * dynamic tolerance as {@link #isAlignedToTarget()}.
+   *
+   * @return true if the override is active and aligned, false if inactive or not yet converged
+   */
+  public boolean isAlignedToAutoTarget() {
+    if (!autoRotationActive) {
+      return false;
+    }
+    ChassisSpeeds speeds = getVelocity();
+    double speedMps = Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond);
+    double dynamicToleranceRad =
+        HEADING_TOLERANCE_RAD + speedMps * HEADING_SPEED_TOLERANCE_RAD_PER_MPS;
+    ppRotationOverrideController.setTolerance(dynamicToleranceRad);
+    return ppRotationOverrideController.atSetpoint();
   }
 
   /**

@@ -285,8 +285,6 @@ public class SuperStructure extends SubsystemBase {
 
   private void unjamming() {
     indexer.setWantedState(IndexerStates.REVERSING);
-    shooterStateMachine.setWantedState(ShooterWantedStates.REVERSING);
-    hopperRoller.setWantedState(HopperRollerStates.UNJAMMING);
   }
 
   /**

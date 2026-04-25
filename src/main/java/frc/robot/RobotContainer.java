@@ -9,6 +9,7 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.FollowPathCommand;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -81,6 +82,7 @@ import frc.robot.utils.FieldConstants;
 import frc.robot.utils.PathProvider;
 import frc.robot.utils.PositionUtils;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -134,6 +136,9 @@ public class RobotContainer {
   private RobotShootingInfo robotShootingInfo;
   private RobotShootingInfo robotPassingInfo;
   private double indexerToFlywheelSeconds;
+
+  private String chosenAutoName = null;
+  private boolean hasAutoRun = false;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -326,13 +331,22 @@ public class RobotContainer {
         new ShotCalculator(
             "PassCalc",
             drivetrain::getPosition,
-            () ->
-                PositionUtils.getCloserPassTarget(
+            () -> {
+              if (PositionUtils.isInOppAllianceZone(drivetrain.getPose2d())) {
+                return PositionUtils.getCloserPassTarget(
+                    drivetrain.getPosition(),
+                    AllianceFlipUtil.apply(FieldConstants.RightTrench.middlePassingPoint),
+                    AllianceFlipUtil.apply(FieldConstants.LeftTrench.middlePassingPoint));
+              } else {
+                return PositionUtils.getCloserPassTarget(
                     drivetrain.getPosition(),
                     AllianceFlipUtil.apply(FieldConstants.RightBump.passingPoint),
-                    AllianceFlipUtil.apply(FieldConstants.LeftBump.passingPoint)),
+                    AllianceFlipUtil.apply(FieldConstants.LeftBump.passingPoint));
+              }
+            },
             drivetrain::getCommandedVelocity,
             robotPassingInfo);
+
     // Configure the trigger bindings
 
     superStructure =
@@ -371,6 +385,21 @@ public class RobotContainer {
                     () -> 0, () -> 0, () -> hubShotCalculator.calculateShot().targetHeading()))
             .alongWith(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING))
             .andThen(superStructure.setStateCommand(SuperWantedStates.DEFAULT)));
+    registerPathplannerCommand(
+        "start shooting while moving",
+        Commands.runOnce(
+                () ->
+                    drivetrain.setAutoRotationOverride(
+                        () -> hubShotCalculator.calculateShot().targetHeading()))
+            .andThen(superStructure.setStateCommand(SuperWantedStates.SHOOT_AT_HUB))
+            .alongWith(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING)));
+    registerPathplannerCommand(
+        "stop shooting while moving",
+        Commands.runOnce(() -> drivetrain.clearAutoRotationOverride())
+            .andThen(
+                superStructure
+                    .setStateCommand(SuperWantedStates.DEFAULT)
+                    .alongWith(superStructure.setIntakeStateCommand(IntakeWantedStates.DEPLOYED))));
 
     configVision();
     configDefaultDrivingCommand();
@@ -384,7 +413,21 @@ public class RobotContainer {
   }
 
   public void disabledPeriodic() {
-    autoChooser.update();
+    if (!hasAutoRun) {
+      autoChooser.update();
+      String selectedName = autoChooser.getSelectedName();
+      if (!selectedName.equals(chosenAutoName)) {
+        Optional<Pose2d> selectedStartingPose = autoChooser.getSelectedStartingPose();
+        if (selectedStartingPose.isPresent()) {
+          drivetrain.resetPose(selectedStartingPose.get());
+        }
+        chosenAutoName = selectedName;
+      }
+    }
+  }
+
+  public void setHasAutoRun(boolean hasAutoRun) {
+    this.hasAutoRun = hasAutoRun;
   }
 
   /**
@@ -610,6 +653,7 @@ public class RobotContainer {
     superStructure.setControlState(ControlState.SUPERSTRUCTURE);
     superStructure.setWantedSuperState(SuperWantedStates.IDLE);
     superStructure.setIntakeState(IntakeWantedStates.IDLE);
+    drivetrain.clearAutoRotationOverride();
     drivetrain.setControl(new SwerveRequest.Idle());
     flywheel.stop();
     hood.stop();

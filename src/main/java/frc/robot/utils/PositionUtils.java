@@ -110,8 +110,24 @@ public class PositionUtils {
     return result;
   }
 
+  public static boolean isInOppAllianceZone(Pose2d robotPose) {
+    double robotX = robotPose.getX();
+    boolean result = false;
+    if (AllianceFlipUtil.shouldFlip()) {
+      result = robotX <= getOppAllianceEdge();
+    } else {
+      result = robotX >= getOppAllianceEdge();
+    }
+    Logger.recordOutput("Utils/PositionUtils/IsInOppAllianceZone", result);
+    return result;
+  }
+
   private static double getAllianceEdge() {
     return AllianceFlipUtil.applyX(LinesVertical.hubCenter);
+  }
+
+  private static double getOppAllianceEdge() {
+    return AllianceFlipUtil.applyX(LinesVertical.oppHubCenter);
   }
 
   public static boolean isInPassingZone(Pose2d robotPose, Transform2d robotToShooter) {
