@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 13.031426533523536,
-        "y": 6.052
+        "x": 13.031427,
+        "y": 2.018
       },
       "prevControl": null,
       "nextControl": {
-        "x": 13.424811111111111,
-        "y": 6.373666666666667
+        "x": 13.424811,
+        "y": 1.696333
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 12.606277777777777,
-        "y": 7.524
+        "x": 12.606278,
+        "y": 0.546
       },
       "prevControl": {
-        "x": 13.639188888888885,
-        "y": 7.474788888888888
+        "x": 13.639189,
+        "y": 0.595211
       },
       "nextControl": {
-        "x": 11.422806388830981,
-        "y": 7.580384272946424
+        "x": 11.422806,
+        "y": 0.489616
       },
       "isLocked": false,
       "linkedName": null
@@ -33,11 +33,11 @@
     {
       "anchor": {
         "x": 8.621,
-        "y": 7.533
+        "y": 0.537
       },
       "prevControl": {
-        "x": 9.54697777777778,
-        "y": 7.366855555555556
+        "x": 9.546978,
+        "y": 0.703144
       },
       "nextControl": null,
       "isLocked": false,
@@ -63,13 +63,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -90.0
+    "rotation": 90.0
   },
   "reversed": false,
-  "folder": null,
+  "folder": "MIRRORED Red Left Root Safe",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 90.0
+    "rotation": -90.0
   },
   "useDefaultConstraints": false
 }

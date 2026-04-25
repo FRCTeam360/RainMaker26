@@ -3,41 +3,41 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 13.031426533523536,
+        "x": 3.508573,
         "y": 6.052
       },
       "prevControl": null,
       "nextControl": {
-        "x": 13.424811111111111,
-        "y": 6.373666666666667
+        "x": 3.115189,
+        "y": 6.373667
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 12.606277777777777,
+        "x": 3.933722,
         "y": 7.524
       },
       "prevControl": {
-        "x": 13.639188888888885,
-        "y": 7.474788888888888
+        "x": 2.900811,
+        "y": 7.474789
       },
       "nextControl": {
-        "x": 11.422806388830981,
-        "y": 7.580384272946424
+        "x": 5.117194,
+        "y": 7.580384
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 8.621,
+        "x": 7.919,
         "y": 7.533
       },
       "prevControl": {
-        "x": 9.54697777777778,
-        "y": 7.366855555555556
+        "x": 6.993022,
+        "y": 7.366856
       },
       "nextControl": null,
       "isLocked": false,
@@ -47,7 +47,7 @@
   "rotationTargets": [
     {
       "waypointRelativePos": 1.0688796680497938,
-      "rotationDegrees": 180.0
+      "rotationDegrees": 0.0
     }
   ],
   "constraintZones": [],
@@ -66,7 +66,7 @@
     "rotation": -90.0
   },
   "reversed": false,
-  "folder": null,
+  "folder": "FLIPPED MIRRORED Blue Left Root Safe",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 90.0
