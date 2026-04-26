@@ -112,7 +112,13 @@ public class AutoChooser {
       System.out.println("[AutoChooser] No alliance set, adding: " + name);
       return true;
     }
-    double startX = auto.startingPose().getX();
+    Pose2d startingPose = auto.startingPose();
+    double startX = startingPose.getX();
+    double startY = startingPose.getY();
+    if (startX == 0.0 && startY == 0.0) {
+      System.out.println("[AutoChooser] Fallback start pose, adding for both alliances: " + name);
+      return true;
+    }
     double midfield = FieldConstants.fieldLength / 2.0;
     boolean onBlueSide = startX < midfield;
     boolean result = (alliance.get() == Alliance.Blue) ? onBlueSide : !onBlueSide;
