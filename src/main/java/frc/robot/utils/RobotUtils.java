@@ -73,7 +73,7 @@ public class RobotUtils {
     return alliance.isPresent() && autoWinner == alliance.get();
   }
 
-  public static boolean hasSurpassedAutoCheckpoint(double checkpoint) {
+  public static boolean hasAutoCheckpointElapsed(double checkpoint) {
     if (DriverStation.isAutonomousEnabled()) {
       double currentTime = DriverStation.getMatchTime();
       if (currentTime <= checkpoint) {
