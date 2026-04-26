@@ -120,6 +120,30 @@ public class BLineAutos {
     return new NamedAutoWithPose(autoName, command, pose);
   }
 
+  private NamedAutoWithPose buildVRAuto(String autoName) {
+    Path firstPath = new Path(autoName + " 1");
+    PathElement element = firstPath.getElement(0);
+    Pose2d pose = null;
+    if (element instanceof Waypoint waypoint) {
+      pose =
+          new Pose2d(
+              waypoint.translationTarget().translation(), waypoint.rotationTarget().rotation());
+    } else {
+      throw new IllegalStateException(
+          "bLine auto "
+              + autoName
+              + " first path element is not of type waypoint. Cannot determine starting pose. Check bLine JSON file.");
+    }
+    // TODO URGENT verify if we want the delay in deploying the intake
+    Command command =
+        pathWithIntake(firstPath)
+            .andThen(Commands.waitSeconds(1.0))
+            .andThen(pathWithImmediateIntake(new Path(autoName + " 2")))
+            .andThen(shootAtHub());
+
+    return new NamedAutoWithPose(autoName, command, pose);
+  }
+
   private NamedAutoWithPose buildAutoOrNone(
       String autoName, Function<String, NamedAutoWithPose> autoFactory) {
     try {
@@ -136,7 +160,8 @@ public class BLineAutos {
         buildAutoOrNone("FLIPPED Blue Right Aggressive", this::buildTwoSwipeAuto),
         buildAutoOrNone("FLIPPED MIRRORED Blue Left Aggressive", this::buildTwoSwipeAuto),
         buildAutoOrNone("MASTER Red Right Aggressive", this::buildTwoSwipeAuto),
-        buildAutoOrNone("MIRRORED Red Left Aggressive", this::buildTwoSwipeAuto));
+        buildAutoOrNone("MIRRORED Red Left Aggressive", this::buildTwoSwipeAuto),
+        buildAutoOrNone("Red Right BLine VR", this::buildVRAuto));
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
