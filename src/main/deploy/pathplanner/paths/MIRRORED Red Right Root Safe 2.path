@@ -3,42 +3,37 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 8.601,
-        "y": 4.025
+        "x": 10.472244,
+        "y": 4.035
       },
       "prevControl": null,
       "nextControl": {
-        "x": 8.201266666666667,
-        "y": 4.960300000000002
+        "x": 10.4625,
+        "y": 4.512478
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 8.319,
-        "y": 7.211688888888889
+        "x": 10.472,
+        "y": 5.603856
       },
       "prevControl": {
-        "x": 7.967966666666667,
-        "y": 6.616900000000001
+        "x": 10.462256,
+        "y": 5.292033
       },
       "nextControl": null,
       "isLocked": false,
       "linkedName": null
     }
   ],
-  "rotationTargets": [
-    {
-      "waypointRelativePos": 0.45643153526971203,
-      "rotationDegrees": 88.0476427114214
-    }
-  ],
+  "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 3.0,
+    "maxVelocity": 2.5,
     "maxAcceleration": 5.0,
     "maxAngularVelocity": 360.0,
     "maxAngularAcceleration": 540.0,
@@ -47,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 90.0
+    "rotation": 0.0
   },
   "reversed": false,
-  "folder": null,
+  "folder": "MIRRORED Red Left Root Opp Module",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -135.00189313660962
+    "rotation": 0.0
   },
   "useDefaultConstraints": false
 }

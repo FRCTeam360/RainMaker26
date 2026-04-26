@@ -5,9 +5,35 @@
     "data": {
       "commands": [
         {
-          "type": "path",
+          "type": "deadline",
           "data": {
-            "pathName": "30 tall pair-VR 1"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "30 tall pair-VR 1"
+                }
+              },
+              {
+                "type": "sequential",
+                "data": {
+                  "commands": [
+                    {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 0.1
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "basic intake"
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
           }
         },
         {
@@ -17,9 +43,28 @@
           }
         },
         {
-          "type": "path",
+          "type": "deadline",
           "data": {
-            "pathName": "30 tall pair-VR 2"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "30 tall pair-VR 2"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "basic intake"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "shoot at hub"
           }
         }
       ]

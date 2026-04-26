@@ -9,28 +9,15 @@
           "data": {
             "commands": [
               {
-                "type": "path",
+                "type": "wait",
                 "data": {
-                  "pathName": "30 tall pair 1"
+                  "waitTime": 2.0
                 }
               },
               {
-                "type": "sequential",
+                "type": "named",
                 "data": {
-                  "commands": [
-                    {
-                      "type": "wait",
-                      "data": {
-                        "waitTime": 0.1
-                      }
-                    },
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "basic intake"
-                      }
-                    }
-                  ]
+                  "name": "shoot without timer"
                 }
               }
             ]
@@ -43,7 +30,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "30 tall pair 2"
+                  "pathName": "FLIPPED Blue Right Root"
                 }
               },
               {
@@ -56,9 +43,22 @@
           }
         },
         {
-          "type": "wait",
+          "type": "deadline",
           "data": {
-            "waitTime": 1.0
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "FLIPPED Blue Right Root Safe 1"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "basic intake"
+                }
+              }
+            ]
           }
         },
         {
@@ -68,7 +68,26 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "30 tall pair 3"
+                  "pathName": "FLIPPED MIRRORED Blue Left Root Safe 2"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "basic intake"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "deadline",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "FLIPPED MIRRORED Blue Left Root Safe 3"
                 }
               },
               {
@@ -90,6 +109,6 @@
     }
   },
   "resetOdom": true,
-  "folder": "MASTER RED RIGHT",
+  "folder": "BLUE RIGHT AUTOS",
   "choreoAuto": false
 }

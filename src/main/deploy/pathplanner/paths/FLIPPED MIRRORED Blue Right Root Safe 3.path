@@ -3,41 +3,41 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 8.153,
-        "y": 0.771
+        "x": 6.068,
+        "y": 2.466
       },
       "prevControl": null,
       "nextControl": {
-        "x": 9.351433333333336,
-        "y": 0.7616333333333318
+        "x": 5.054333,
+        "y": 2.475889
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 13.0935,
-        "y": 0.771
+        "x": 3.173656,
+        "y": 2.505122
       },
       "prevControl": {
-        "x": 12.051976904984352,
-        "y": 0.7186543519477273
+        "x": 3.484794,
+        "y": 2.505122
       },
       "nextControl": {
-        "x": 13.473533333333334,
-        "y": 0.7900999999999998
+        "x": 2.861833,
+        "y": 2.505122
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 13.229922222222223,
-        "y": 1.287066666666666
+        "x": 2.8326,
+        "y": 4.035
       },
       "prevControl": {
-        "x": 13.429922222222222,
-        "y": 1.1370666666666656
+        "x": 2.783878,
+        "y": 3.304167
       },
       "nextControl": null,
       "isLocked": false,
@@ -48,11 +48,11 @@
   "constraintZones": [
     {
       "name": "Constraints Zone",
-      "minWaypointRelativePos": 0.391066997518611,
-      "maxWaypointRelativePos": 1.0,
+      "minWaypointRelativePos": 0.9,
+      "maxWaypointRelativePos": 2.0,
       "constraints": {
-        "maxVelocity": 3.0,
-        "maxAcceleration": 6.0,
+        "maxVelocity": 2.0,
+        "maxAcceleration": 3.0,
         "maxAngularVelocity": 360.0,
         "maxAngularAcceleration": 540.0,
         "nominalVoltage": 12.0,
@@ -63,8 +63,8 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 4.0,
-    "maxAcceleration": 8.0,
+    "maxVelocity": 3.0,
+    "maxAcceleration": 6.0,
     "maxAngularVelocity": 360.0,
     "maxAngularAcceleration": 540.0,
     "nominalVoltage": 12.0,
@@ -72,13 +72,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -90.0
+    "rotation": 180.0
   },
   "reversed": false,
-  "folder": null,
+  "folder": "FLIPPED MIRRORED Blue Left Root Opp Module",
   "idealStartingState": {
-    "velocity": 0.0,
-    "rotation": -90.0
+    "velocity": 0,
+    "rotation": 180.0
   },
-  "useDefaultConstraints": true
+  "useDefaultConstraints": false
 }
