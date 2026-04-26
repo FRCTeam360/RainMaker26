@@ -138,7 +138,35 @@ public class BLineAutos {
     Command command =
         pathWithIntake(firstPath)
             .andThen(Commands.waitSeconds(1.0))
-            .andThen(pathWithImmediateIntake(new Path(autoName + " 2")))
+            .andThen(pathWithImmediateIntake(new Path(autoName + " 2.2")))
+            .andThen(shootAtHub())
+            .andThen(shootAtHub());
+
+    return new NamedAutoWithPose(autoName, command, pose);
+  }
+
+  private NamedAutoWithPose buildVRPickupAuto(String autoName) {
+    String updatedAutoName = autoName.replace("Pickup ", "");
+    Path firstPath = new Path(updatedAutoName + " 1");
+    PathElement element = firstPath.getElement(0);
+    Pose2d pose = null;
+    if (element instanceof Waypoint waypoint) {
+      pose =
+          new Pose2d(
+              waypoint.translationTarget().translation(), waypoint.rotationTarget().rotation());
+    } else {
+      throw new IllegalStateException(
+          "bLine auto "
+              + autoName
+              + " first path element is not of type waypoint. Cannot determine starting pose. Check bLine JSON file.");
+    }
+    // TODO URGENT verify if we want the delay in deploying the intake
+    Command command =
+        pathWithIntake(firstPath)
+            .andThen(pathWithImmediateIntake(new Path(updatedAutoName + " 2 Turn")))
+            .andThen(pathWithImmediateIntake(new Path(updatedAutoName + " 2")))
+            .andThen(pathWithImmediateIntake(new Path(updatedAutoName + " 3")))
+            .andThen(shootAtHub())
             .andThen(shootAtHub());
 
     return new NamedAutoWithPose(autoName, command, pose);
@@ -161,7 +189,11 @@ public class BLineAutos {
         buildAutoOrNone("FLIPPED MIRRORED Blue Left Aggressive", this::buildTwoSwipeAuto),
         buildAutoOrNone("MASTER Red Right Aggressive", this::buildTwoSwipeAuto),
         buildAutoOrNone("MIRRORED Red Left Aggressive", this::buildTwoSwipeAuto),
-        buildAutoOrNone("Red Right BLine VR", this::buildVRAuto));
+        buildAutoOrNone("MASTER Red Right BLine VR", this::buildVRAuto),
+        buildAutoOrNone("MASTER Red Right BLine Pickup VR", this::buildVRPickupAuto),
+        buildAutoOrNone("FLIPPED Blue Right BLine Pickup VR", this::buildVRPickupAuto),
+        buildAutoOrNone("MIRRORED Red Left BLine Pickup VR", this::buildVRPickupAuto),
+        buildAutoOrNone("FLIPPED MIRRORED Blue Left BLine Pickup VR", this::buildVRPickupAuto));
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
