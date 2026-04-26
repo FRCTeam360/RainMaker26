@@ -14,6 +14,7 @@ import frc.robot.autos.BLineAutos;
 import frc.robot.autos.NamedAutoWithPose;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.SuperStructure;
+import frc.robot.utils.FieldConstants;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -93,7 +94,7 @@ public class AutoChooser {
     chooser.setDefaultOption(NONE_AUTO.name(), NONE_AUTO);
 
     for (NamedAutoWithPose auto : registeredAutos) {
-      if (matchesAlliance(auto.name(), alliance)) {
+      if (matchesAlliance(auto, alliance)) {
         chooser.addOption(auto.name(), auto);
       }
     }
@@ -105,32 +106,27 @@ public class AutoChooser {
         .setString("None");
   }
 
-  private boolean matchesAlliance(String name, Optional<Alliance> alliance) {
+  private boolean matchesAlliance(NamedAutoWithPose auto, Optional<Alliance> alliance) {
+    String name = auto.name();
     if (alliance.isEmpty()) {
-      System.out.println("[AutoChooser] No alliance set, allowing: " + name);
+      System.out.println("[AutoChooser] No alliance set, adding: " + name);
       return true;
     }
-    boolean mentionsRed = name.contains("Red");
-    boolean mentionsBlue = name.contains("Blue");
-    if (!mentionsRed && !mentionsBlue) {
-      System.out.println("[AutoChooser] Alliance=" + alliance.get() + " | PASS (neutral): " + name);
-      return true;
-    }
-    boolean result;
-    if (alliance.get() == Alliance.Red) {
-      result = mentionsRed;
-    } else {
-      result = mentionsBlue;
-    }
+    double startX = auto.startingPose().getX();
+    double midfield = FieldConstants.fieldLength / 2.0;
+    boolean onBlueSide = startX < midfield;
+    boolean result = (alliance.get() == Alliance.Blue) ? onBlueSide : !onBlueSide;
     System.out.println(
         "[AutoChooser] Alliance="
             + alliance.get()
-            + " | mentionsRed="
-            + mentionsRed
-            + " mentionsBlue="
-            + mentionsBlue
+            + " | startX="
+            + startX
+            + " midfield="
+            + midfield
+            + " onBlueSide="
+            + onBlueSide
             + " | "
-            + (result ? "PASS" : "FAIL")
+            + (result ? "ADDED" : "EXCLUDED")
             + ": "
             + name);
     return result;
