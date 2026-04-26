@@ -119,7 +119,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   //     ApplyRobotSpeeds. Reusing HEADING_KP/KD at 5x slower sample rate produces
   //     under-damped, jerky behavior that looks like "P is too high."
   // Start conservative and tune up; do NOT just copy HEADING_* here.
-  private static final double PP_OVERRIDE_KP = 5.0;
+  private static final double PP_OVERRIDE_KP = 8.0;
   private static final double PP_OVERRIDE_KI = 0.0;
   private static final double PP_OVERRIDE_KD = 0.0;
   // Extra heading tolerance granted per m/s of translational speed.
