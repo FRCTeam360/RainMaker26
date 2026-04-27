@@ -5,19 +5,13 @@
     "data": {
       "commands": [
         {
-          "type": "named",
-          "data": {
-            "name": "default"
-          }
-        },
-        {
           "type": "deadline",
           "data": {
             "commands": [
               {
                 "type": "path",
                 "data": {
-                  "pathName": "FLIPPED MIRRORED No Stop Left Blue Middle 1"
+                  "pathName": "Double Trench No Stop Red 1"
                 }
               },
               {
@@ -43,16 +37,9 @@
           }
         },
         {
-          "type": "deadline",
+          "type": "named",
           "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "shoot at hub"
-                }
-              }
-            ]
+            "name": "shoot at hub"
           }
         },
         {
@@ -62,7 +49,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "FLIPPED MIRRORED No Stop Left Blue Middle 2"
+                  "pathName": "Double Trench No Stop Red 2"
                 }
               },
               {
@@ -75,22 +62,15 @@
           }
         },
         {
-          "type": "deadline",
+          "type": "named",
           "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "shoot at hub"
-                }
-              }
-            ]
+            "name": "shoot at hub"
           }
         }
       ]
     }
   },
   "resetOdom": true,
-  "folder": "BLUE LEFT AUTOS",
+  "folder": "MASTER RED RIGHT",
   "choreoAuto": false
 }

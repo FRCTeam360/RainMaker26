@@ -20,7 +20,13 @@
     "MIRRORED Red Left Middle Hook",
     "MIRRORED Red Left Middle Stack",
     "MIRRORED Red Left Middle Standard",
-    "Test"
+    "Test",
+    "MIRRORED Red Left Root Safe",
+    "FLIPPED Blue Right Root Safe",
+    "FLIPPED MIRRORED Blue Left Root Safe",
+    "MIRRORED Red Left Root Opp Module",
+    "FLIPPED Blue Right Root Opp Module",
+    "FLIPPED MIRRORED Blue Left Root Opp Module"
   ],
   "autoFolders": [
     "MASTER RED RIGHT",

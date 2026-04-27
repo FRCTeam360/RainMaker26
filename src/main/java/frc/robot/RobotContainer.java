@@ -384,7 +384,11 @@ public class RobotContainer {
                 drivetrain.faceAngleWhileDrivingCommand(
                     () -> 0, () -> 0, () -> hubShotCalculator.calculateShot().targetHeading()))
             .alongWith(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING))
-            .andThen(superStructure.setStateCommand(SuperWantedStates.DEFAULT)));
+            .handleInterrupt(
+                () -> {
+                  superStructure.setWantedSuperState(SuperWantedStates.DEFAULT);
+                  superStructure.setIntakeState(IntakeWantedStates.DEPLOYED);
+                }));
     registerPathplannerCommand(
         "start shooting while moving",
         Commands.runOnce(

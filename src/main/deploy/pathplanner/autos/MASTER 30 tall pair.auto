@@ -5,19 +5,13 @@
     "data": {
       "commands": [
         {
-          "type": "named",
-          "data": {
-            "name": "default"
-          }
-        },
-        {
           "type": "deadline",
           "data": {
             "commands": [
               {
                 "type": "path",
                 "data": {
-                  "pathName": "FLIPPED MIRRORED No Stop Left Blue Middle 1"
+                  "pathName": "30 tall pair 1"
                 }
               },
               {
@@ -47,22 +41,9 @@
           "data": {
             "commands": [
               {
-                "type": "named",
-                "data": {
-                  "name": "shoot at hub"
-                }
-              }
-            ]
-          }
-        },
-        {
-          "type": "deadline",
-          "data": {
-            "commands": [
-              {
                 "type": "path",
                 "data": {
-                  "pathName": "FLIPPED MIRRORED No Stop Left Blue Middle 2"
+                  "pathName": "30 tall pair 2"
                 }
               },
               {
@@ -75,22 +56,40 @@
           }
         },
         {
+          "type": "wait",
+          "data": {
+            "waitTime": 1.0
+          }
+        },
+        {
           "type": "deadline",
           "data": {
             "commands": [
               {
+                "type": "path",
+                "data": {
+                  "pathName": "30 tall pair 3"
+                }
+              },
+              {
                 "type": "named",
                 "data": {
-                  "name": "shoot at hub"
+                  "name": "basic intake"
                 }
               }
             ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "shoot at hub"
           }
         }
       ]
     }
   },
   "resetOdom": true,
-  "folder": "BLUE LEFT AUTOS",
+  "folder": "MASTER RED RIGHT",
   "choreoAuto": false
 }
