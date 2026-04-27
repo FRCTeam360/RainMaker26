@@ -76,8 +76,8 @@ public class RobotUtils {
   /**
    * Checks whether a time checkpoint has been reached during the autonomous period.
    *
-   * <p>Uses {@link DriverStation#getMatchTime()}, which counts down from 15 seconds. The
-   * checkpoint is considered elapsed when the remaining match time is at or below the given value.
+   * <p>Uses {@link DriverStation#getMatchTime()}, which counts down from 15 seconds. The checkpoint
+   * is considered elapsed when the remaining match time is at or below the given value.
    *
    * @param checkpoint the match time threshold in seconds (e.g., 10.0 means "with 10 seconds
    *     remaining")
