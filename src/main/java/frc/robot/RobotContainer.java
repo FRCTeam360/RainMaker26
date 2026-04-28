@@ -384,7 +384,26 @@ public class RobotContainer {
                 drivetrain.faceAngleWhileDrivingCommand(
                     () -> 0, () -> 0, () -> hubShotCalculator.calculateShot().targetHeading()))
             .alongWith(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING))
-            .andThen(superStructure.setStateCommand(SuperWantedStates.DEFAULT)));
+            .handleInterrupt(
+                () -> {
+                  superStructure.setWantedSuperState(SuperWantedStates.DEFAULT);
+                  superStructure.setIntakeState(IntakeWantedStates.DEPLOYED);
+                }));
+    registerPathplannerCommand(
+        "start shooting while moving",
+        Commands.runOnce(
+                () ->
+                    drivetrain.setAutoRotationOverride(
+                        () -> hubShotCalculator.calculateShot().targetHeading()))
+            .andThen(superStructure.setStateCommand(SuperWantedStates.SHOOT_AT_HUB))
+            .alongWith(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING)));
+    registerPathplannerCommand(
+        "stop shooting while moving",
+        Commands.runOnce(() -> drivetrain.clearAutoRotationOverride())
+            .andThen(
+                superStructure
+                    .setStateCommand(SuperWantedStates.DEFAULT)
+                    .alongWith(superStructure.setIntakeStateCommand(IntakeWantedStates.DEPLOYED))));
 
     configVision();
     configDefaultDrivingCommand();
@@ -532,8 +551,10 @@ public class RobotContainer {
     forceHubTrigger.onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
 
     // Manual override: force pass to outpost regardless of position
-    driverCont.b().whileTrue(superStructure.setStateCommand(SuperWantedStates.FORCED_SHOOT_TRENCH));
+    driverCont.b().whileTrue(superStructure.setStateCommand(SuperWantedStates.FORCED_PASS));
     driverCont.b().onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
+
+    driverCont.start().whileTrue(drivetrain.xOutCmd());
 
     driverCont.x().whileTrue(superStructure.setIntakeStateCommand(IntakeWantedStates.REVERSING));
     // TODO: check that this works with just an on false because this will set the intake to idle
@@ -568,9 +589,6 @@ public class RobotContainer {
 
     driverCont.a().onTrue(superStructure.setStateCommand(SuperWantedStates.UNJAMMING));
     driverCont.a().onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
-
-    // defense mode
-    driverCont.start().onTrue(drivetrain.toggleDefenseModeCmd());
 
     // Drivetrain commands
     // driverCont.leftTrigger().whileTrue(drivetrain.faceHubWhileDriving(driverCont));
@@ -638,6 +656,7 @@ public class RobotContainer {
     superStructure.setControlState(ControlState.SUPERSTRUCTURE);
     superStructure.setWantedSuperState(SuperWantedStates.IDLE);
     superStructure.setIntakeState(IntakeWantedStates.IDLE);
+    drivetrain.clearAutoRotationOverride();
     drivetrain.setControl(new SwerveRequest.Idle());
     flywheel.stop();
     hood.stop();

@@ -2,13 +2,16 @@ package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.*;
 
+import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.SignalLogger;
+import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.swerve.SwerveRequest.ForwardPerspectiveValue;
+import com.ctre.phoenix6.swerve.utility.PhoenixPIDController;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
@@ -19,6 +22,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.util.sendable.Sendable;
@@ -41,6 +45,7 @@ import frc.robot.generated.WoodBotDrivetrain.TunerSwerveDrivetrain;
 import frc.robot.lib.BLine.FollowPath;
 import frc.robot.subsystems.Vision.VisionMeasurement;
 import frc.robot.utils.AllianceFlipUtil;
+import frc.robot.utils.CommandLogger;
 import frc.robot.utils.ControllerHelper;
 import java.util.HashMap;
 import java.util.List;
@@ -71,12 +76,18 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   // Keep track of when vision measurements are added for logging context
   private boolean hasVisionMeasurements = false;
 
-  // Lazily-cached state copy. Invalidated once per cycle via clearCachedState() in
+  // Lazily-cached state copy. Invalidated once per cycle via clearCachedState()
+  // in
   // preSchedulerUpdate(), then populated on first access via getCachedState().
   // This ensures at most one getStateCopy() allocation per scheduler cycle.
   private SwerveDriveState cachedState;
+  private final StatusSignal<Angle> pigeonYaw;
+  private final StatusSignal<Angle> pigeonPitch;
+  private final StatusSignal<Angle> pigeonRoll;
+  private final StatusSignal<AngularVelocity> pigeonAngularVelocityZ;
 
-  // Commanded speeds for shoot-on-the-move compensation (tracks what we tell the robot to do)
+  // Commanded speeds for shoot-on-the-move compensation (tracks what we tell the
+  // robot to do)
   private ChassisSpeeds commandedSpeeds = new ChassisSpeeds();
 
   /* Blue alliance sees forward as 0 degrees (toward red alliance wall) */
@@ -107,12 +118,27 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   private static final double HEADING_TOLERANCE_RAD = Math.toRadians(5.0);
   private final double HEADING_INTEGRATOR_MAX_RAD_PER_S =
       Constants.getMaxAngularVelocity().in(RadiansPerSecond) * 0.5;
+
+  // PathPlanner rotation-override PID gains. Intentionally separate from the teleop
+  // HEADING_* gains because the two controllers run at very different rates:
+  //   - Teleop FieldCentricFacingAngle.HeadingController is invoked from CTRE's
+  //     odometry/swerve thread at ~250 Hz (CAN FD), so high gains stay smooth.
+  //   - The PP rotation override is called from FollowPathCommand.execute() at the
+  //     scheduler rate (~50 Hz), and its omega output is held for a full 20 ms by
+  //     ApplyRobotSpeeds. Reusing HEADING_KP/KD at 5x slower sample rate produces
+  //     under-damped, jerky behavior that looks like "P is too high."
+  // Start conservative and tune up; do NOT just copy HEADING_* here.
+  private static final double PP_OVERRIDE_KP = 8.0;
+  private static final double PP_OVERRIDE_KI = 0.0;
+  private static final double PP_OVERRIDE_KD = 0.0;
   // Extra heading tolerance granted per m/s of translational speed.
-  // Compensates for the PID steady-state tracking lag when the heading setpoint moves
+  // Compensates for the PID steady-state tracking lag when the heading setpoint
+  // moves
   // (setpoint rate ≈ v/d rad/s; lag ≈ rate/KP). Tunable — start at ~5°/m/s.
   private static final double HEADING_SPEED_TOLERANCE_RAD_PER_MPS = Math.toRadians(1.0);
 
-  // Maximum translational speed while using field-centric facing angle (fraction of maxSpeed).
+  // Maximum translational speed while using field-centric facing angle (fraction
+  // of maxSpeed).
   // Limits how much shoot-on-the-move compensation is needed.
   private static final double FACING_ANGLE_MAX_SPEED_FRACTION = 0.5;
   private static final double CONTROLLER_DEADBAND = 0.04;
@@ -134,8 +160,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
   private SnapDirection previousSnapDirection = SnapDirection.NONE;
 
-  // Called once per scheduler cycle from fieldOrientedDriveCommand to update the snap target.
-  // Kept outside the applyRequest lambda so it runs exactly once per cycle regardless of
+  // Called once per scheduler cycle from fieldOrientedDriveCommand to update the
+  // snap target.
+  // Kept outside the applyRequest lambda so it runs exactly once per cycle
+  // regardless of
   // how many times the request supplier is invoked.
   private void updateSnapAngle(double rightX, double rightY) {
     boolean yDominant = Math.abs(rightY) >= Math.abs(rightX);
@@ -154,8 +182,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     if (currentSnapDirection == previousSnapDirection) return;
     previousSnapDirection = currentSnapDirection;
 
-    // Blue-perspective base angles flipped automatically for Red via AllianceFlipUtil:
-    //   up=0°, down=180°, right=270°, left=90°
+    // Blue-perspective base angles flipped automatically for Red via
+    // AllianceFlipUtil:
+    // up=0°, down=180°, right=270°, left=90°
     switch (currentSnapDirection) {
       case UP ->
           currentTargetAngle = AllianceFlipUtil.apply(Rotation2d.fromDegrees(0.0)).getDegrees();
@@ -168,6 +197,17 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
       case NONE -> {}
     }
   }
+
+  // PathPlanner rotation override PID. Uses its own PP_OVERRIDE_* gains rather than
+  // the teleop HEADING_* gains because PathPlanner calls this PID at the 50 Hz
+  // scheduler rate while CTRE drives the teleop facing-angle PID at ~250 Hz; the
+  // same gains feel jerky at 5x slower sample rate. See PP_OVERRIDE_KP comment.
+  private final PhoenixPIDController ppRotationOverrideController =
+      new PhoenixPIDController(PP_OVERRIDE_KP, PP_OVERRIDE_KI, PP_OVERRIDE_KD);
+
+  // True while the PathPlanner rotation override is registered.
+  // Set via setAutoRotationOverride(), cleared via clearAutoRotationOverride().
+  private boolean autoRotationActive = false;
 
   // Field-centric facing angle request for hub tracking
   private final SwerveRequest.FieldCentricFacingAngle angleFacingRequest =
@@ -248,7 +288,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     return this.runOnce(() -> toggleDefenseMode());
   }
 
-  // Xout Command
+  // X-out Command
   public void xOut() {
     commandedSpeeds.vxMetersPerSecond = 0.0;
     commandedSpeeds.vyMetersPerSecond = 0.0;
@@ -257,7 +297,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   }
 
   public Command xOutCmd() {
-    return this.run(() -> xOut());
+    return CommandLogger.logCommand(this.runEnd(() -> this.xOut(), () -> this.xOut()), "X_OUT");
   }
 
   public Command toggleHeadingLockCommand() {
@@ -446,6 +486,24 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         -HEADING_INTEGRATOR_MAX_RAD_PER_S, HEADING_INTEGRATOR_MAX_RAD_PER_S);
     angleFacingRequest.HeadingController.setTolerance(HEADING_TOLERANCE_RAD);
     angleFacingRequest.ForwardPerspective = ForwardPerspectiveValue.BlueAlliance;
+
+    // PathPlanner rotation override controller. Uses PP_OVERRIDE_* gains tuned for
+    // the 50 Hz scheduler-rate sample loop, NOT the HEADING_* gains (those are tuned
+    // for CTRE's 250 Hz facing-angle loop and feel jerky at 5x slower sample rate).
+    // Integrator settings still share the heading-controller bounds since they are
+    // physical limits (max rotation rate / wraparound), not loop-rate sensitive.
+    // Tolerance is overridden per-call in isAlignedToAutoTarget() using a speed-scaled value.
+    ppRotationOverrideController.enableContinuousInput(-Math.PI, Math.PI);
+    ppRotationOverrideController.setIZone(HEADING_I_ZONE);
+    ppRotationOverrideController.setIntegratorRange(
+        -HEADING_INTEGRATOR_MAX_RAD_PER_S, HEADING_INTEGRATOR_MAX_RAD_PER_S);
+    ppRotationOverrideController.setTolerance(HEADING_TOLERANCE_RAD);
+
+    pigeonYaw = getPigeon2().getYaw();
+    pigeonPitch = getPigeon2().getPitch();
+    pigeonRoll = getPigeon2().getRoll();
+    pigeonAngularVelocityZ = getPigeon2().getAngularVelocityZWorld();
+
     if (Utils.isSimulation()) {
       startSimThread();
     }
@@ -582,7 +640,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     }
   }
 
-  // Key cache for BLine logging — populated once per unique BLine key, reused every loop.
+  // Key cache for BLine logging — populated once per unique BLine key, reused
+  // every loop.
   private final Map<String, String> blineKeyCache = new HashMap<>();
 
   private String blineKey(String rawKey) {
@@ -599,7 +658,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     PathPlannerLogging.setLogActivePathCallback(
         path -> Logger.recordOutput("Autos/PathPlanner/activePath", path.toArray(new Pose2d[0])));
 
-    // BLine — log under Autos/BLine/; keys are interned via blineKeyCache on first use
+    // BLine — log under Autos/BLine/; keys are interned via blineKeyCache on first
+    // use
     FollowPath.setPoseLoggingConsumer(
         (Pair<String, edu.wpi.first.math.geometry.Pose2d> pair) ->
             Logger.recordOutput(blineKey(pair.getFirst()), pair.getSecond()));
@@ -707,6 +767,12 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
    * @return true if the heading error is within the speed-scaled tolerance
    */
   public boolean isAlignedToTarget() {
+    // When the auto rotation override is active, check its PID instead of the
+    // facing-angle controller (which isn't being driven during path-following).
+    if (autoRotationActive) {
+      return isAlignedToAutoTarget();
+    }
+
     ChassisSpeeds speeds = getVelocity();
     double speedMps = Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond);
     double dynamicToleranceRad =
@@ -721,6 +787,66 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   /** Resets the facing-angle heading controller so it must re-converge from scratch. */
   public void resetHeadingController() {
     angleFacingRequest.HeadingController.reset();
+  }
+
+  /**
+   * Sets the rotation override target for PathPlanner path-following. While set, the PathPlanner
+   * holonomic controller's rotation output is replaced by a PID controller tracking this heading
+   * (similar to how {@link #faceAngleWhileDriving} works for teleop).
+   *
+   * <p>Call {@link #clearAutoRotationOverride()} when done (e.g., in a command's end()).
+   *
+   * @param headingSupplier supplies the target heading each cycle (e.g., from a ShotCalculator)
+   */
+  public void setAutoRotationOverride(Supplier<Rotation2d> headingSupplier) {
+    ppRotationOverrideController.reset();
+    autoRotationActive = true;
+    PPHolonomicDriveController.overrideRotationFeedback(
+        () -> {
+          Rotation2d target = headingSupplier.get();
+          double currentRad = getPosition().getRotation().getRadians();
+          double targetRad = target.getRadians();
+          double output =
+              ppRotationOverrideController.calculate(
+                  currentRad, targetRad, Utils.getCurrentTimeSeconds());
+          Logger.recordOutput(
+              SUBSYSTEM_NAME + "AutoRotationOverride/TargetDeg", Math.toDegrees(targetRad));
+          Logger.recordOutput(
+              SUBSYSTEM_NAME + "AutoRotationOverride/ErrorDeg",
+              Math.toDegrees(ppRotationOverrideController.getPositionError()));
+          Logger.recordOutput(SUBSYSTEM_NAME + "AutoRotationOverride/OutputRadPerS", output);
+          return output;
+        });
+    Logger.recordOutput(SUBSYSTEM_NAME + "AutoRotationOverride/Active", true);
+  }
+
+  /**
+   * Clears the rotation override, returning full rotation control to PathPlanner's built-in
+   * controller.
+   */
+  public void clearAutoRotationOverride() {
+    autoRotationActive = false;
+    PPHolonomicDriveController.clearRotationFeedbackOverride();
+    ppRotationOverrideController.reset();
+    Logger.recordOutput(SUBSYSTEM_NAME + "AutoRotationOverride/Active", false);
+  }
+
+  /**
+   * Returns whether the auto rotation override PID is at its setpoint, using the same speed-scaled
+   * dynamic tolerance as {@link #isAlignedToTarget()}.
+   *
+   * @return true if the override is active and aligned, false if inactive or not yet converged
+   */
+  public boolean isAlignedToAutoTarget() {
+    if (!autoRotationActive) {
+      return false;
+    }
+    ChassisSpeeds speeds = getVelocity();
+    double speedMps = Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond);
+    double dynamicToleranceRad =
+        HEADING_TOLERANCE_RAD + speedMps * HEADING_SPEED_TOLERANCE_RAD_PER_MPS;
+    ppRotationOverrideController.setTolerance(dynamicToleranceRad);
+    return ppRotationOverrideController.atSetpoint();
   }
 
   /**
@@ -792,6 +918,14 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     Logger.recordOutput(SUBSYSTEM_NAME + "TargetState", state.ModuleTargets);
     Logger.recordOutput(SUBSYSTEM_NAME + "Using Vision", hasVisionMeasurements);
     Logger.recordOutput(SUBSYSTEM_NAME + "Is Defense Mode", isDefenseMode);
+
+    BaseStatusSignal.refreshAll(pigeonYaw, pigeonPitch, pigeonRoll, pigeonAngularVelocityZ);
+    Logger.recordOutput(SUBSYSTEM_NAME + "Pigeon/YawDeg", pigeonYaw.getValueAsDouble());
+    Logger.recordOutput(SUBSYSTEM_NAME + "Pigeon/PitchDeg", pigeonPitch.getValueAsDouble());
+    Logger.recordOutput(SUBSYSTEM_NAME + "Pigeon/RollDeg", pigeonRoll.getValueAsDouble());
+    Logger.recordOutput(
+        SUBSYSTEM_NAME + "Pigeon/AngularVelocityZDegPerSec",
+        pigeonAngularVelocityZ.getValueAsDouble());
     Logger.recordOutput(
         SUBSYSTEM_NAME + "HeadingSetpointDeg",
         Math.toDegrees(angleFacingRequest.HeadingController.getSetpoint()));

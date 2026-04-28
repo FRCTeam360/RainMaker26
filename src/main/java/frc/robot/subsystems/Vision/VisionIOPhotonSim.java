@@ -35,6 +35,9 @@ public class VisionIOPhotonSim implements VisionIO {
   private final PhotonPoseEstimator photonEstimator;
   private final Supplier<Pose2d> robotPoseSupplier;
 
+  private final Pose3d cameraPoseRobotSpace =
+      new Pose3d(kRobotToCam.getTranslation(), kRobotToCam.getRotation());
+
   // Simulation objects
   private final VisionSystemSim visionSim;
   private final PhotonCameraSim cameraSim;
@@ -103,6 +106,7 @@ public class VisionIOPhotonSim implements VisionIO {
     // Assume pose hasn't been updated until we confirm otherwise
     inputs.poseUpdated = false;
     inputs.pipeline = currentPipeline;
+    inputs.cameraPose = cameraPoseRobotSpace;
 
     // Process all unread camera results
     var results = camera.getAllUnreadResults();
