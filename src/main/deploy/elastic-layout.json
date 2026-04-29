@@ -36,9 +36,9 @@
           {
             "title": "Can Score in Hub",
             "x": 512.0,
-            "y": 0.0,
+            "y": 128.0,
             "width": 512.0,
-            "height": 640.0,
+            "height": 512.0,
             "type": "Boolean Box",
             "properties": {
               "topic": "/SmartDashboard/Can Score in Hub",
@@ -80,6 +80,19 @@
               "time_display_mode": "Minutes and Seconds",
               "red_start_time": 15,
               "yellow_start_time": 30
+            }
+          },
+          {
+            "title": "Auto Zone Filter",
+            "x": 512.0,
+            "y": 0.0,
+            "width": 512.0,
+            "height": 128.0,
+            "type": "ComboBox Chooser",
+            "properties": {
+              "topic": "/SmartDashboard/Auto Zone Filter",
+              "period": 0.06,
+              "sort_options": false
             }
           }
         ]
