@@ -2,13 +2,16 @@ package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.*;
 
+import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.SignalLogger;
+import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.swerve.SwerveRequest.ForwardPerspectiveValue;
+import com.ctre.phoenix6.swerve.utility.PhoenixPIDController;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
@@ -19,6 +22,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.util.sendable.Sendable;
@@ -41,6 +45,7 @@ import frc.robot.generated.WoodBotDrivetrain.TunerSwerveDrivetrain;
 import frc.robot.lib.BLine.FollowPath;
 import frc.robot.subsystems.Vision.VisionMeasurement;
 import frc.robot.utils.AllianceFlipUtil;
+import frc.robot.utils.CommandLogger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -75,6 +80,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   // preSchedulerUpdate(), then populated on first access via getCachedState().
   // This ensures at most one getStateCopy() allocation per scheduler cycle.
   private SwerveDriveState cachedState;
+  private final StatusSignal<Angle> pigeonYaw;
+  private final StatusSignal<Angle> pigeonPitch;
+  private final StatusSignal<Angle> pigeonRoll;
+  private final StatusSignal<AngularVelocity> pigeonAngularVelocityZ;
 
   // Commanded speeds for shoot-on-the-move compensation (tracks what we tell the
   // robot to do)
@@ -108,6 +117,19 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   private static final double HEADING_TOLERANCE_RAD = Math.toRadians(5.0);
   private final double HEADING_INTEGRATOR_MAX_RAD_PER_S =
       Constants.getMaxAngularVelocity().in(RadiansPerSecond) * 0.5;
+
+  // PathPlanner rotation-override PID gains. Intentionally separate from the teleop
+  // HEADING_* gains because the two controllers run at very different rates:
+  //   - Teleop FieldCentricFacingAngle.HeadingController is invoked from CTRE's
+  //     odometry/swerve thread at ~250 Hz (CAN FD), so high gains stay smooth.
+  //   - The PP rotation override is called from FollowPathCommand.execute() at the
+  //     scheduler rate (~50 Hz), and its omega output is held for a full 20 ms by
+  //     ApplyRobotSpeeds. Reusing HEADING_KP/KD at 5x slower sample rate produces
+  //     under-damped, jerky behavior that looks like "P is too high."
+  // Start conservative and tune up; do NOT just copy HEADING_* here.
+  private static final double PP_OVERRIDE_KP = 8.0;
+  private static final double PP_OVERRIDE_KI = 0.0;
+  private static final double PP_OVERRIDE_KD = 0.0;
   // Extra heading tolerance granted per m/s of translational speed.
   // Compensates for the PID steady-state tracking lag when the heading setpoint
   // moves
@@ -175,10 +197,12 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     }
   }
 
-  // PathPlanner rotation override PID — mirrors the facing-angle heading controller
-  // so auto paths can aim at a shot calculator target while path-following.
-  private final PIDController ppRotationOverrideController =
-      new PIDController(HEADING_KP, HEADING_KI, HEADING_KD);
+  // PathPlanner rotation override PID. Uses its own PP_OVERRIDE_* gains rather than
+  // the teleop HEADING_* gains because PathPlanner calls this PID at the 50 Hz
+  // scheduler rate while CTRE drives the teleop facing-angle PID at ~250 Hz; the
+  // same gains feel jerky at 5x slower sample rate. See PP_OVERRIDE_KP comment.
+  private final PhoenixPIDController ppRotationOverrideController =
+      new PhoenixPIDController(PP_OVERRIDE_KP, PP_OVERRIDE_KI, PP_OVERRIDE_KD);
 
   // True while the PathPlanner rotation override is registered.
   // Set via setAutoRotationOverride(), cleared via clearAutoRotationOverride().
@@ -262,7 +286,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     return this.runOnce(() -> toggleDefenseMode());
   }
 
-  // Xout Command
+  // X-out Command
   public void xOut() {
     commandedSpeeds.vxMetersPerSecond = 0.0;
     commandedSpeeds.vyMetersPerSecond = 0.0;
@@ -271,7 +295,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   }
 
   public Command xOutCmd() {
-    return this.run(() -> xOut());
+    return CommandLogger.logCommand(this.runEnd(() -> this.xOut(), () -> this.xOut()), "X_OUT");
   }
 
   public Command toggleHeadingLockCommand() {
@@ -461,12 +485,22 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     angleFacingRequest.HeadingController.setTolerance(HEADING_TOLERANCE_RAD);
     angleFacingRequest.ForwardPerspective = ForwardPerspectiveValue.BlueAlliance;
 
-    // PathPlanner rotation override controller — same tuning as the facing-angle controller.
-    // Tolerance is set per-call in isAlignedToAutoTarget() using a speed-scaled value.
+    // PathPlanner rotation override controller. Uses PP_OVERRIDE_* gains tuned for
+    // the 50 Hz scheduler-rate sample loop, NOT the HEADING_* gains (those are tuned
+    // for CTRE's 250 Hz facing-angle loop and feel jerky at 5x slower sample rate).
+    // Integrator settings still share the heading-controller bounds since they are
+    // physical limits (max rotation rate / wraparound), not loop-rate sensitive.
+    // Tolerance is overridden per-call in isAlignedToAutoTarget() using a speed-scaled value.
     ppRotationOverrideController.enableContinuousInput(-Math.PI, Math.PI);
     ppRotationOverrideController.setIZone(HEADING_I_ZONE);
     ppRotationOverrideController.setIntegratorRange(
         -HEADING_INTEGRATOR_MAX_RAD_PER_S, HEADING_INTEGRATOR_MAX_RAD_PER_S);
+    ppRotationOverrideController.setTolerance(HEADING_TOLERANCE_RAD);
+
+    pigeonYaw = getPigeon2().getYaw();
+    pigeonPitch = getPigeon2().getPitch();
+    pigeonRoll = getPigeon2().getRoll();
+    pigeonAngularVelocityZ = getPigeon2().getAngularVelocityZWorld();
 
     if (Utils.isSimulation()) {
       startSimThread();
@@ -770,12 +804,14 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
           Rotation2d target = headingSupplier.get();
           double currentRad = getPosition().getRotation().getRadians();
           double targetRad = target.getRadians();
-          double output = ppRotationOverrideController.calculate(currentRad, targetRad);
+          double output =
+              ppRotationOverrideController.calculate(
+                  currentRad, targetRad, Utils.getCurrentTimeSeconds());
           Logger.recordOutput(
               SUBSYSTEM_NAME + "AutoRotationOverride/TargetDeg", Math.toDegrees(targetRad));
           Logger.recordOutput(
               SUBSYSTEM_NAME + "AutoRotationOverride/ErrorDeg",
-              Math.toDegrees(ppRotationOverrideController.getError()));
+              Math.toDegrees(ppRotationOverrideController.getPositionError()));
           Logger.recordOutput(SUBSYSTEM_NAME + "AutoRotationOverride/OutputRadPerS", output);
           return output;
         });
@@ -880,6 +916,14 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     Logger.recordOutput(SUBSYSTEM_NAME + "TargetState", state.ModuleTargets);
     Logger.recordOutput(SUBSYSTEM_NAME + "Using Vision", hasVisionMeasurements);
     Logger.recordOutput(SUBSYSTEM_NAME + "Is Defense Mode", isDefenseMode);
+
+    BaseStatusSignal.refreshAll(pigeonYaw, pigeonPitch, pigeonRoll, pigeonAngularVelocityZ);
+    Logger.recordOutput(SUBSYSTEM_NAME + "Pigeon/YawDeg", pigeonYaw.getValueAsDouble());
+    Logger.recordOutput(SUBSYSTEM_NAME + "Pigeon/PitchDeg", pigeonPitch.getValueAsDouble());
+    Logger.recordOutput(SUBSYSTEM_NAME + "Pigeon/RollDeg", pigeonRoll.getValueAsDouble());
+    Logger.recordOutput(
+        SUBSYSTEM_NAME + "Pigeon/AngularVelocityZDegPerSec",
+        pigeonAngularVelocityZ.getValueAsDouble());
     Logger.recordOutput(
         SUBSYSTEM_NAME + "HeadingSetpointDeg",
         Math.toDegrees(angleFacingRequest.HeadingController.getSetpoint()));

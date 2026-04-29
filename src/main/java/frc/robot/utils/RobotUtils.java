@@ -87,6 +87,30 @@ public class RobotUtils {
   }
 
   /**
+   * Checks whether a time checkpoint has been reached during the autonomous period.
+   *
+   * <p>Uses {@link DriverStation#getMatchTime()}, which counts down from 15 seconds. The checkpoint
+   * is considered elapsed when the remaining match time is at or below the given value.
+   *
+   * @param checkpoint the match time threshold in seconds (e.g., 10.0 means "with 10 seconds
+   *     remaining")
+   * @return {@code true} if autonomous is enabled and the remaining match time is at or below the
+   *     checkpoint; {@code false} otherwise
+   */
+  public static boolean hasAutoCheckpointElapsed(double checkpoint) {
+    if (DriverStation.isAutonomousEnabled()) {
+      double currentTime = DriverStation.getMatchTime();
+      if (currentTime <= checkpoint) {
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      return false;
+    }
+  }
+
+  /**
    * Returns which alliance's hub is active based on the gameTime from DriverStation
    *
    * @param gameTime the gameTime from DriverStation
