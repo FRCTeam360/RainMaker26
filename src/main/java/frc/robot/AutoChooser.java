@@ -25,8 +25,8 @@ import org.littletonrobotics.junction.Logger;
 
 /**
  * Alliance-aware autonomous chooser. Combines PathPlanner and BLine autos into a single list and
- * filters the displayed options by the current alliance color and the selected field zone (based
- * on each auto's starting Y position).
+ * filters the displayed options by the current alliance color and the selected field zone (based on
+ * each auto's starting Y position).
  */
 public class AutoChooser {
 
@@ -149,7 +149,7 @@ public class AutoChooser {
         .setString("None");
   }
 
-  private boolean matchesAlliance(NamedAutoWithPose auto, Optional<Alliance> alliance) {
+  static boolean matchesAlliance(NamedAutoWithPose auto, Optional<Alliance> alliance) {
     String name = auto.name();
     if (alliance.isEmpty()) {
       System.out.println("[AutoChooser] No alliance set, adding: " + name);
@@ -181,7 +181,7 @@ public class AutoChooser {
     return result;
   }
 
-  private boolean matchesZone(NamedAutoWithPose auto, AutoZone zone, Optional<Alliance> alliance) {
+  static boolean matchesZone(NamedAutoWithPose auto, AutoZone zone, Optional<Alliance> alliance) {
     if (zone == AutoZone.ALL) {
       return true;
     }
@@ -205,7 +205,7 @@ public class AutoChooser {
    * AutoZone}. Boundaries are taken from {@link FieldConstants.LinesHorizontal}; the 12-inch gap
    * between each bump and trench is folded into the trench zone.
    */
-  private static AutoZone determineZone(double startY) {
+  static AutoZone determineZone(double startY) {
     if (startY < FieldConstants.LinesHorizontal.rightBumpRailSide) {
       return AutoZone.RIGHT_TRENCH;
     } else if (startY < FieldConstants.LinesHorizontal.rightBumpHubSide) {
