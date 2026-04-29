@@ -1,0 +1,59 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 8.601,
+        "y": 4.045
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 8.201267,
+        "y": 3.1097
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 8.319,
+        "y": 0.858311
+      },
+      "prevControl": {
+        "x": 7.967967,
+        "y": 1.4531
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": null
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.45643153526971203,
+      "rotationDegrees": -88.0476
+    }
+  ],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 5.0,
+    "maxAngularVelocity": 360.0,
+    "maxAngularAcceleration": 540.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": -90.0
+  },
+  "reversed": false,
+  "folder": "MIRRORED Red Left 30 tall pair",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 135.0019
+  },
+  "useDefaultConstraints": false
+}
