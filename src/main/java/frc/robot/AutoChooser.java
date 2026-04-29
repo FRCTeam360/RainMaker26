@@ -25,16 +25,39 @@ import org.littletonrobotics.junction.Logger;
 
 /**
  * Alliance-aware autonomous chooser. Combines PathPlanner and BLine autos into a single list and
- * filters the displayed options by the current alliance color.
+ * filters the displayed options by the current alliance color and the selected field zone (based on
+ * each auto's starting Y position).
  */
 public class AutoChooser {
 
   private static final String PATH_PLANNER_PREFIX = "[PathPlanner] ";
 
+  /** Field zones used to group autos by their starting Y position. */
+  public enum AutoZone {
+    ALL("All"),
+    LEFT_TRENCH("Left Trench"),
+    LEFT_BUMP("Left Bump"),
+    HUB("Hub"),
+    RIGHT_BUMP("Right Bump"),
+    RIGHT_TRENCH("Right Trench");
+
+    private final String displayName;
+
+    AutoZone(String displayName) {
+      this.displayName = displayName;
+    }
+
+    public String getDisplayName() {
+      return displayName;
+    }
+  }
+
   private final List<NamedAutoWithPose> registeredAutos;
   private final Map<String, Pose2d> autoStartingPoses = new HashMap<>();
   private SendableChooser<NamedAutoWithPose> chooser = new SendableChooser<>();
+  private final SendableChooser<AutoZone> zoneChooser = new SendableChooser<>();
   private Optional<Alliance> previousAlliance = Optional.empty();
+  private AutoZone previousZone = AutoZone.ALL;
 
   /**
    * @param drivetrain the swerve drivetrain subsystem
@@ -72,29 +95,49 @@ public class AutoChooser {
     autos.sort((a, b) -> a.name().compareToIgnoreCase(b.name()));
     registeredAutos = autos;
 
-    rebuildChooser(Optional.empty());
+    for (AutoZone zone : AutoZone.values()) {
+      if (zone == AutoZone.ALL) {
+        zoneChooser.setDefaultOption(zone.getDisplayName(), zone);
+      } else {
+        zoneChooser.addOption(zone.getDisplayName(), zone);
+      }
+    }
+    SmartDashboard.putData("Auto Zone Filter", zoneChooser);
+
+    rebuildChooser(Optional.empty(), AutoZone.ALL);
   }
 
-  /** Call periodically while disabled to rebuild the chooser when the alliance changes. */
+  /**
+   * Call periodically while disabled to rebuild the chooser when the alliance or selected zone
+   * changes.
+   */
   public void update() {
     Optional<Alliance> currentAlliance =
         DriverStation.isDSAttached() ? DriverStation.getAlliance() : Optional.empty();
-    if (currentAlliance.orElse(null) != previousAlliance.orElse(null)) {
-      rebuildChooser(currentAlliance);
+    AutoZone currentZone = zoneChooser.getSelected();
+    if (currentZone == null) {
+      currentZone = AutoZone.ALL;
+    }
+
+    boolean allianceChanged = currentAlliance.orElse(null) != previousAlliance.orElse(null);
+    boolean zoneChanged = currentZone != previousZone;
+    if (allianceChanged || zoneChanged) {
+      rebuildChooser(currentAlliance, currentZone);
     }
     previousAlliance = currentAlliance;
+    previousZone = currentZone;
   }
 
   private static final NamedAutoWithPose NONE_AUTO =
       new NamedAutoWithPose("None", Commands.none(), new Pose2d());
 
-  private void rebuildChooser(Optional<Alliance> alliance) {
+  private void rebuildChooser(Optional<Alliance> alliance, AutoZone zone) {
     chooser.close();
     chooser = new SendableChooser<>();
     chooser.setDefaultOption(NONE_AUTO.name(), NONE_AUTO);
 
     for (NamedAutoWithPose auto : registeredAutos) {
-      if (matchesAlliance(auto, alliance)) {
+      if (matchesAlliance(auto, alliance) && matchesZone(auto, zone, alliance)) {
         chooser.addOption(auto.name(), auto);
       }
     }
@@ -106,7 +149,7 @@ public class AutoChooser {
         .setString("None");
   }
 
-  private boolean matchesAlliance(NamedAutoWithPose auto, Optional<Alliance> alliance) {
+  static boolean matchesAlliance(NamedAutoWithPose auto, Optional<Alliance> alliance) {
     String name = auto.name();
     if (alliance.isEmpty()) {
       System.out.println("[AutoChooser] No alliance set, adding: " + name);
@@ -136,6 +179,44 @@ public class AutoChooser {
             + ": "
             + name);
     return result;
+  }
+
+  static boolean matchesZone(NamedAutoWithPose auto, AutoZone zone, Optional<Alliance> alliance) {
+    if (zone == AutoZone.ALL) {
+      return true;
+    }
+    Pose2d startingPose = auto.startingPose();
+    double startX = startingPose.getX();
+    double startY = startingPose.getY();
+    if (startX == 0.0 && startY == 0.0) {
+      return true;
+    }
+    // Field is rotationally symmetric: flip Y across the field width on Red so that
+    // "Left"/"Right" zones always reflect the driver's perspective.
+    double effectiveY =
+        (alliance.isPresent() && alliance.get() == Alliance.Red)
+            ? FieldConstants.fieldWidth - startY
+            : startY;
+    return determineZone(effectiveY) == zone;
+  }
+
+  /**
+   * Maps a Y coordinate (in blue-perspective field coordinates) to its corresponding {@link
+   * AutoZone}. Boundaries are taken from {@link FieldConstants.LinesHorizontal}; the 12-inch gap
+   * between each bump and trench is folded into the trench zone.
+   */
+  static AutoZone determineZone(double startY) {
+    if (startY < FieldConstants.LinesHorizontal.rightBumpRailSide) {
+      return AutoZone.RIGHT_TRENCH;
+    } else if (startY < FieldConstants.LinesHorizontal.rightBumpHubSide) {
+      return AutoZone.RIGHT_BUMP;
+    } else if (startY <= FieldConstants.LinesHorizontal.leftBumpHubSide) {
+      return AutoZone.HUB;
+    } else if (startY <= FieldConstants.LinesHorizontal.leftBumpRailSide) {
+      return AutoZone.LEFT_BUMP;
+    } else {
+      return AutoZone.LEFT_TRENCH;
+    }
   }
 
   /**
