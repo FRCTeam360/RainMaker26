@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
@@ -306,9 +307,11 @@ public class SuperStructure extends SubsystemBase {
           // For AUTO_CYCLE_SHOOTING, check if hub is actually active based on game phase
           return canScoreAtHub() && hubShotCalculator.calculateShot().isValid();
         case PASSING:
-          boolean isInPassingZone =
-              PositionUtils.isInPassingZone(robotPoseSupplier.get(), robotToShooter);
-          return isInPassingZone;
+          boolean canPass =
+              PositionUtils.canPass(
+                  robotPoseSupplier.get(),
+                  robotPoseSupplier.get().getRotation().plus(Rotation2d.k180deg));
+          return canPass;
         default:
           return true;
       }
@@ -385,6 +388,9 @@ public class SuperStructure extends SubsystemBase {
 
   @Override
   public void periodic() {
+    Pose2d robotPose = robotPoseSupplier.get();
+    // this is just for testing purposes, delete after integrating into passing function
+    PositionUtils.canPass(robotPose, robotPose.getRotation().plus(Rotation2d.k180deg));
     hubShiftTracker.update();
     // Calculate shot and extract time of flight once per cycle
     cachedTimeOfFlight = hubShotCalculator.calculateShot().timeOfFlight();
