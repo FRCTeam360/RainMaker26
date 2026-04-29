@@ -137,7 +137,7 @@ public class AutoChooser {
     chooser.setDefaultOption(NONE_AUTO.name(), NONE_AUTO);
 
     for (NamedAutoWithPose auto : registeredAutos) {
-      if (matchesAlliance(auto, alliance) && matchesZone(auto, zone)) {
+      if (matchesAlliance(auto, alliance) && matchesZone(auto, zone, alliance)) {
         chooser.addOption(auto.name(), auto);
       }
     }
@@ -181,7 +181,7 @@ public class AutoChooser {
     return result;
   }
 
-  private boolean matchesZone(NamedAutoWithPose auto, AutoZone zone) {
+  private boolean matchesZone(NamedAutoWithPose auto, AutoZone zone, Optional<Alliance> alliance) {
     if (zone == AutoZone.ALL) {
       return true;
     }
@@ -191,13 +191,19 @@ public class AutoChooser {
     if (startX == 0.0 && startY == 0.0) {
       return true;
     }
-    return determineZone(startY) == zone;
+    // Field is rotationally symmetric: flip Y across the field width on Red so that
+    // "Left"/"Right" zones always reflect the driver's perspective.
+    double effectiveY =
+        (alliance.isPresent() && alliance.get() == Alliance.Red)
+            ? FieldConstants.fieldWidth - startY
+            : startY;
+    return determineZone(effectiveY) == zone;
   }
 
   /**
-   * Maps a starting Y coordinate to its corresponding {@link AutoZone}. Boundaries are taken from
-   * {@link FieldConstants.LinesHorizontal}; the 12-inch gap between each bump and trench is folded
-   * into the trench zone.
+   * Maps a Y coordinate (in blue-perspective field coordinates) to its corresponding {@link
+   * AutoZone}. Boundaries are taken from {@link FieldConstants.LinesHorizontal}; the 12-inch gap
+   * between each bump and trench is folded into the trench zone.
    */
   private static AutoZone determineZone(double startY) {
     if (startY < FieldConstants.LinesHorizontal.rightBumpRailSide) {
