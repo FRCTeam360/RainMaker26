@@ -6,6 +6,7 @@ package frc.robot.subsystems.Vision;
 
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import frc.robot.utils.FieldConstants;
@@ -26,6 +27,10 @@ public abstract class VisionIOLimelightBase implements VisionIO {
   protected final DoubleSupplier gyroAngleRateSupplier;
 
   private final boolean acceptMeasurements;
+
+  private Pose3d cameraPoseRobotSpace = new Pose3d();
+
+  private boolean cameraPoseResolved = false;
 
   /**
    * Creates a new Limelight hardware layer.
@@ -52,13 +57,35 @@ public abstract class VisionIOLimelightBase implements VisionIO {
     return name;
   }
 
+  private void pollCameraPose() {
+    if (cameraPoseResolved) return;
+    if (LimelightHelpers.getHeartbeat(name) == 0) return;
+    Pose3d pose = LimelightHelpers.getCameraPose3d_RobotSpace(name);
+    if (pose.getTranslation().getNorm() == 0.0 && pose.getRotation().getAngle() == 0.0) return;
+
+    cameraPoseRobotSpace = pose;
+    cameraPoseResolved = true;
+  }
+
+  private void updateObservedTagOrientation(VisionIOInputs inputs) {
+    Rotation3d rotation = LimelightHelpers.getTargetPose3d_RobotSpace(name).getRotation();
+    inputs.nearestTagObservedRollDeg = Math.toDegrees(rotation.getX());
+    inputs.nearestTagObservedPitchDeg = Math.toDegrees(rotation.getY());
+  }
+
   @Override
   public void setLEDMode(int mode) {
     table.getEntry("ledMode").setNumber(mode);
   }
 
+  protected boolean hasIMU() {
+    return false;
+  }
+
   @Override
   public void updateInputs(VisionIOInputs inputs) {
+    pollCameraPose();
+    inputs.cameraPose = cameraPoseRobotSpace;
     // Set robot orientation for MegaTag2 (flushed by postSchedulerUpdate)
     LimelightHelpers.SetRobotOrientation_NoFlush(
         name, gyroAngleSupplier.getAsDouble(), gyroAngleRateSupplier.getAsDouble(), 0, 0, 0, 0);
@@ -71,6 +98,7 @@ public abstract class VisionIOLimelightBase implements VisionIO {
     inputs.ty = getTYRaw();
     inputs.pipeline = (int) getPipeline();
     inputs.tagID = getAprilTagID();
+    inputs.hasIMU = hasIMU();
 
     if (!acceptMeasurements) {
       return;
@@ -120,6 +148,7 @@ public abstract class VisionIOLimelightBase implements VisionIO {
 
     inputs.targetCount = targetCount;
     inputs.poseUpdated = true;
+    updateObservedTagOrientation(inputs);
   }
 
   private Optional<PoseEstimate> getMegatag2PoseEst() {

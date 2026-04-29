@@ -149,6 +149,28 @@ public class ShooterStateMachine {
         previousState == ShooterStates.FIRING || previousState == ShooterStates.DISTURBED;
     boolean disturbanceActive = wasFiringOrDisturbed && !hoodAndDriveReady;
 
+    // AIMED requires flywheel and hood to be genuinely at setpoint.
+    // Bang-bang oscillations during firing are tolerated to stay in FIRING —
+    // only revert when UNDER_SHOOTING signals a sustained RPM drop.
+    boolean inBangBang = wasFiringOrDisturbed && !flywheelUnderShooting;
+    boolean subsystemsReady = flywheelReady && hoodAndDriveReady;
+    boolean shouldFire = (flywheelReady || inBangBang) && hoodAndDriveReady && targetReady;
+
+    Logger.recordOutput("Superstructure/Shooter/Shooting/FlywheelReady", flywheelReady);
+    SmartDashboard.putBoolean("Superstructure/Shooter/Shooting/FlywheelReady", flywheelReady);
+    Logger.recordOutput("Superstructure/Shooter/Shooting/HoodReady", hoodReady);
+    SmartDashboard.putBoolean("Superstructure/Shooter/Shooting/HoodReady", hoodReady);
+    Logger.recordOutput("Superstructure/Shooter/Shooting/DrivetrainAligned", drivetrainAligned);
+    Logger.recordOutput("Superstructure/Shooter/Shooting/TargetReady", targetReady);
+    SmartDashboard.putBoolean(
+        "Superstructure/Shooter/Shooting/DrivetrainAligned", drivetrainAligned);
+
+    Logger.recordOutput("Superstructure/Shooter/Shooting/InBangBang", inBangBang);
+    Logger.recordOutput("Superstructure/Shooter/Shooting/SubsystemsReady", subsystemsReady);
+    Logger.recordOutput("Superstructure/Shooter/Shooting/ShouldFire", shouldFire);
+    Logger.recordOutput(
+        "Superstructure/Shooter/Shooting/DisturbanceWindowSec", DISTURBANCE_TIMEOUT_SECONDS);
+
     if (disturbanceActive) {
       if (previousState != ShooterStates.DISTURBED
           || Double.isNaN(disturbanceStartTimestampSeconds)) {
@@ -159,10 +181,9 @@ public class ShooterStateMachine {
           Timer.getFPGATimestamp() - disturbanceStartTimestampSeconds
               >= DISTURBANCE_TIMEOUT_SECONDS;
 
+      Logger.recordOutput("Superstructure/Shooter/Shooting/DisturbanceActive", disturbanceActive);
       Logger.recordOutput(
           "Superstructure/Shooter/Shooting/DisturbanceTimedOut", disturbanceTimedOut);
-      Logger.recordOutput(
-          "Superstructure/Shooter/Shooting/DisturbanceWindowSec", DISTURBANCE_TIMEOUT_SECONDS);
 
       if (disturbanceTimedOut) {
         disturbanceStartTimestampSeconds = Double.NaN;
@@ -174,31 +195,10 @@ public class ShooterStateMachine {
       return;
     }
 
-    disturbanceStartTimestampSeconds = Double.NaN;
-
-    Logger.recordOutput("Superstructure/Shooter/Shooting/FlywheelReady", flywheelReady);
-    SmartDashboard.putBoolean("Superstructure/Shooter/Shooting/FlywheelReady", flywheelReady);
-    Logger.recordOutput("Superstructure/Shooter/Shooting/HoodReady", hoodReady);
-    SmartDashboard.putBoolean("Superstructure/Shooter/Shooting/HoodReady", hoodReady);
-    Logger.recordOutput("Superstructure/Shooter/Shooting/DrivetrainAligned", drivetrainAligned);
-    Logger.recordOutput("Superstructure/Shooter/Shooting/TargetReady", targetReady);
-    SmartDashboard.putBoolean(
-        "Superstructure/Shooter/Shooting/DrivetrainAligned", drivetrainAligned);
-
-    // AIMED requires flywheel and hood to be genuinely at setpoint.
-    // Bang-bang oscillations during firing are tolerated to stay in FIRING —
-    // only revert when UNDER_SHOOTING signals a sustained RPM drop.
-    boolean inBangBang = wasFiringOrDisturbed && !flywheelUnderShooting;
-    boolean subsystemsReady = flywheelReady && hoodAndDriveReady;
-    boolean shouldFire = (flywheelReady || inBangBang) && hoodAndDriveReady && targetReady;
-
-    Logger.recordOutput("Superstructure/Shooter/Shooting/InBangBang", inBangBang);
-    Logger.recordOutput("Superstructure/Shooter/Shooting/SubsystemsReady", subsystemsReady);
-    Logger.recordOutput("Superstructure/Shooter/Shooting/ShouldFire", shouldFire);
     Logger.recordOutput("Superstructure/Shooter/Shooting/DisturbanceActive", false);
     Logger.recordOutput("Superstructure/Shooter/Shooting/DisturbanceTimedOut", false);
-    Logger.recordOutput(
-        "Superstructure/Shooter/Shooting/DisturbanceWindowSec", DISTURBANCE_TIMEOUT_SECONDS);
+
+    disturbanceStartTimestampSeconds = Double.NaN;
 
     if (shouldFire) {
       currentState = ShooterStates.FIRING;

@@ -551,8 +551,10 @@ public class RobotContainer {
     forceHubTrigger.onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
 
     // Manual override: force pass to outpost regardless of position
-    driverCont.b().whileTrue(superStructure.setStateCommand(SuperWantedStates.FORCED_SHOOT_TRENCH));
+    driverCont.b().whileTrue(superStructure.setStateCommand(SuperWantedStates.FORCED_PASS));
     driverCont.b().onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
+
+    driverCont.start().whileTrue(drivetrain.xOutCmd());
 
     driverCont.x().whileTrue(superStructure.setIntakeStateCommand(IntakeWantedStates.REVERSING));
     // TODO: check that this works with just an on false because this will set the intake to idle
@@ -587,9 +589,6 @@ public class RobotContainer {
 
     driverCont.a().onTrue(superStructure.setStateCommand(SuperWantedStates.UNJAMMING));
     driverCont.a().onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
-
-    // defense mode
-    driverCont.start().onTrue(drivetrain.toggleDefenseModeCmd());
 
     // Drivetrain commands
     // driverCont.leftTrigger().whileTrue(drivetrain.faceHubWhileDriving(driverCont));
