@@ -139,6 +139,7 @@ public class RobotContainer {
 
   private String chosenAutoName = null;
   private boolean hasAutoRun = false;
+  private Command autoWarmupCommand;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -426,8 +427,33 @@ public class RobotContainer {
           drivetrain.resetPose(selectedStartingPose.get());
         }
         chosenAutoName = selectedName;
+        scheduleAutoWarmup();
       }
     }
+  }
+
+  /**
+   * Runs the selected auto end-to-end during disabled to JIT-compile its hot paths, then resets
+   * subsystems back to default. The reset is appended in a sequential composition so it runs after
+   * the auto without altering the auto's own behavior.
+   */
+  private void scheduleAutoWarmup() {
+    if (autoWarmupCommand != null) {
+      autoWarmupCommand.cancel();
+    }
+    Command selectedAuto = autoChooser.getSelected();
+    Command resetToDefault =
+        Commands.runOnce(
+            () -> {
+              superStructure.setWantedSuperState(SuperWantedStates.DEFAULT);
+              superStructure.setIntakeState(IntakeWantedStates.IDLE);
+            });
+    autoWarmupCommand = Commands.sequence(selectedAuto, resetToDefault).ignoringDisable(true);
+    // Commands.sequence registers the cached auto as composed, which would make
+    // autonomousInit's schedule(cachedAuto) throw. The sequence drives the auto's lifecycle
+    // by direct method calls, so removing it from the composed registry doesn't affect warmup.
+    CommandScheduler.getInstance().removeComposedCommand(selectedAuto);
+    CommandScheduler.getInstance().schedule(autoWarmupCommand);
   }
 
   public void setHasAutoRun(boolean hasAutoRun) {
@@ -670,6 +696,10 @@ public class RobotContainer {
 
   /** Called when the robot transitions from disabled to an enabled mode. */
   public void onEnable() {
+    if (autoWarmupCommand != null) {
+      autoWarmupCommand.cancel();
+      autoWarmupCommand = null;
+    }
     // Ensures superstructure control mode is active when enabled
     superStructure.setControlState(ControlState.SUPERSTRUCTURE);
     superStructure.setWantedSuperState(SuperWantedStates.DEFAULT);
