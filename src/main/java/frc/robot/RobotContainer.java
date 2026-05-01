@@ -440,8 +440,12 @@ public class RobotContainer {
   private void scheduleAutoWarmup() {
     if (autoWarmupCommand != null) {
       autoWarmupCommand.cancel();
+      autoWarmupCommand = null;
     }
     Command selectedAuto = autoChooser.getSelected();
+    if (selectedAuto == null) {
+      return;
+    }
     Command resetToDefault =
         Commands.runOnce(
             () -> {
