@@ -6,6 +6,7 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.Utils;
+import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
@@ -84,6 +85,30 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   private final StatusSignal<Angle> pigeonPitch;
   private final StatusSignal<Angle> pigeonRoll;
   private final StatusSignal<AngularVelocity> pigeonAngularVelocityZ;
+
+  // Direct StatusSignal logging for the swerve drive motors in native units.
+  // Module index order matches the constructor: FrontLeft, FrontRight, BackLeft, BackRight.
+  // Stored as BaseStatusSignal so refreshAll + getValueAsDouble work without generics.
+  // Position/velocity update rates are owned by the odometry thread (~250 Hz on CAN FD);
+  // do not override them here, and do not call optimizeBusUtilization() on these motors.
+  private static final int NUM_DRIVE_MODULES = 4;
+  private static final String[] DRIVE_MODULE_NAMES = {
+    "FrontLeft", "FrontRight", "BackLeft", "BackRight"
+  };
+  private static final int SIGNALS_PER_DRIVE_MOTOR = 7;
+  private final BaseStatusSignal[] drivePositionSignals = new BaseStatusSignal[NUM_DRIVE_MODULES];
+  private final BaseStatusSignal[] driveVelocitySignals = new BaseStatusSignal[NUM_DRIVE_MODULES];
+  private final BaseStatusSignal[] driveMotorVoltageSignals =
+      new BaseStatusSignal[NUM_DRIVE_MODULES];
+  private final BaseStatusSignal[] driveStatorCurrentSignals =
+      new BaseStatusSignal[NUM_DRIVE_MODULES];
+  private final BaseStatusSignal[] driveSupplyCurrentSignals =
+      new BaseStatusSignal[NUM_DRIVE_MODULES];
+  private final BaseStatusSignal[] driveTorqueCurrentSignals =
+      new BaseStatusSignal[NUM_DRIVE_MODULES];
+  private final BaseStatusSignal[] driveDutyCycleSignals = new BaseStatusSignal[NUM_DRIVE_MODULES];
+  private final BaseStatusSignal[] driveMotorSignalsToRefresh =
+      new BaseStatusSignal[NUM_DRIVE_MODULES * SIGNALS_PER_DRIVE_MOTOR];
 
   // Commanded speeds for shoot-on-the-move compensation (tracks what we tell the
   // robot to do)
@@ -502,6 +527,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     pigeonRoll = getPigeon2().getRoll();
     pigeonAngularVelocityZ = getPigeon2().getAngularVelocityZWorld();
 
+    initDriveMotorSignals();
+
     if (Utils.isSimulation()) {
       startSimThread();
     }
@@ -904,6 +931,55 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     return m_sysIdRoutineToApply.dynamic(direction);
   }
 
+  /**
+   * Caches StatusSignal references for each drive motor and builds the combined refresh array.
+   * Called once from the constructor after the super(...) call has constructed the modules.
+   */
+  private void initDriveMotorSignals() {
+    for (int i = 0; i < NUM_DRIVE_MODULES; i++) {
+      TalonFX drive = getModule(i).getDriveMotor();
+      drivePositionSignals[i] = drive.getPosition();
+      driveVelocitySignals[i] = drive.getVelocity();
+      driveMotorVoltageSignals[i] = drive.getMotorVoltage();
+      driveStatorCurrentSignals[i] = drive.getStatorCurrent();
+      driveSupplyCurrentSignals[i] = drive.getSupplyCurrent();
+      driveTorqueCurrentSignals[i] = drive.getTorqueCurrent();
+      driveDutyCycleSignals[i] = drive.getDutyCycle();
+
+      int base = i * SIGNALS_PER_DRIVE_MOTOR;
+      driveMotorSignalsToRefresh[base] = drivePositionSignals[i];
+      driveMotorSignalsToRefresh[base + 1] = driveVelocitySignals[i];
+      driveMotorSignalsToRefresh[base + 2] = driveMotorVoltageSignals[i];
+      driveMotorSignalsToRefresh[base + 3] = driveStatorCurrentSignals[i];
+      driveMotorSignalsToRefresh[base + 4] = driveSupplyCurrentSignals[i];
+      driveMotorSignalsToRefresh[base + 5] = driveTorqueCurrentSignals[i];
+      driveMotorSignalsToRefresh[base + 6] = driveDutyCycleSignals[i];
+    }
+  }
+
+  /**
+   * Refreshes and logs the drive motors' direct StatusSignal outputs in native units. Position is
+   * in mechanism rotations, velocity in rotations per second, voltage in volts, currents in amps,
+   * and duty cycle is unitless (-1 to 1).
+   */
+  private void logDriveMotorSignals() {
+    BaseStatusSignal.refreshAll(driveMotorSignalsToRefresh);
+    for (int i = 0; i < NUM_DRIVE_MODULES; i++) {
+      String prefix = SUBSYSTEM_NAME + "DriveMotors/" + DRIVE_MODULE_NAMES[i] + "/";
+      Logger.recordOutput(prefix + "PositionRotations", drivePositionSignals[i].getValueAsDouble());
+      Logger.recordOutput(prefix + "VelocityRotPerSec", driveVelocitySignals[i].getValueAsDouble());
+      Logger.recordOutput(
+          prefix + "MotorVoltageVolts", driveMotorVoltageSignals[i].getValueAsDouble());
+      Logger.recordOutput(
+          prefix + "StatorCurrentAmps", driveStatorCurrentSignals[i].getValueAsDouble());
+      Logger.recordOutput(
+          prefix + "SupplyCurrentAmps", driveSupplyCurrentSignals[i].getValueAsDouble());
+      Logger.recordOutput(
+          prefix + "TorqueCurrentAmps", driveTorqueCurrentSignals[i].getValueAsDouble());
+      Logger.recordOutput(prefix + "DutyCycle", driveDutyCycleSignals[i].getValueAsDouble());
+    }
+  }
+
   @Override
   public void periodic() {
     SwerveDriveState state = getCachedState();
@@ -924,6 +1000,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     Logger.recordOutput(
         SUBSYSTEM_NAME + "Pigeon/AngularVelocityZDegPerSec",
         pigeonAngularVelocityZ.getValueAsDouble());
+
+    logDriveMotorSignals();
     Logger.recordOutput(
         SUBSYSTEM_NAME + "HeadingSetpointDeg",
         Math.toDegrees(angleFacingRequest.HeadingController.getSetpoint()));
