@@ -3,42 +3,37 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 0.689,
-        "y": 4.6489
+        "x": 15.968,
+        "y": 7.348
       },
       "prevControl": null,
       "nextControl": {
-        "x": 0.689,
-        "y": 4.921744
+        "x": 15.071689,
+        "y": 7.298878
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 0.572,
-        "y": 7.348111
+        "x": 15.130089,
+        "y": 4.756089
       },
       "prevControl": {
-        "x": 0.601233,
-        "y": 7.065522
+        "x": 15.000702,
+        "y": 5.299513
       },
       "nextControl": null,
       "isLocked": false,
       "linkedName": null
     }
   ],
-  "rotationTargets": [
-    {
-      "waypointRelativePos": 0.5178423236514516,
-      "rotationDegrees": 111.0
-    }
-  ],
+  "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 0.75,
+    "maxVelocity": 1.5,
     "maxAcceleration": 4.0,
     "maxAngularVelocity": 360.0,
     "maxAngularAcceleration": 540.0,
@@ -47,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 90.0
+    "rotation": 69.1455
   },
   "reversed": false,
-  "folder": "FLIPPED Blue New Depot Pickup",
+  "folder": "MIRRORED Red New Depot Pickup",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 111.0
+    "rotation": 90.0
   },
   "useDefaultConstraints": false
 }

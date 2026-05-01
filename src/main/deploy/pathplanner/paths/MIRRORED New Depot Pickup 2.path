@@ -3,12 +3,12 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 0.689,
+        "x": 15.851,
         "y": 4.6489
       },
       "prevControl": null,
       "nextControl": {
-        "x": 0.689,
+        "x": 15.851,
         "y": 4.921744
       },
       "isLocked": false,
@@ -16,11 +16,11 @@
     },
     {
       "anchor": {
-        "x": 0.572,
+        "x": 15.968,
         "y": 7.348111
       },
       "prevControl": {
-        "x": 0.601233,
+        "x": 15.938767,
         "y": 7.065522
       },
       "nextControl": null,
@@ -31,7 +31,7 @@
   "rotationTargets": [
     {
       "waypointRelativePos": 0.5178423236514516,
-      "rotationDegrees": 111.0
+      "rotationDegrees": 69.0
     }
   ],
   "constraintZones": [],
@@ -50,10 +50,10 @@
     "rotation": 90.0
   },
   "reversed": false,
-  "folder": "FLIPPED Blue New Depot Pickup",
+  "folder": "MIRRORED Red New Depot Pickup",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 111.0
+    "rotation": 69.0
   },
   "useDefaultConstraints": false
 }
