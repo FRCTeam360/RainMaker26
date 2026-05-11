@@ -46,6 +46,7 @@ import frc.robot.lib.BLine.FollowPath;
 import frc.robot.subsystems.Vision.VisionMeasurement;
 import frc.robot.utils.AllianceFlipUtil;
 import frc.robot.utils.CommandLogger;
+import frc.robot.utils.ControllerHelper;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -226,12 +227,13 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     double defenseModeTranslationScaler = 0.75;
     return this.applyRequest(
         () -> {
-          double velXMps = Math.pow(driveCont.getLeftY(), 3) * maxSpeed.in(MetersPerSecond) * -1.0;
-          double velYMps = Math.pow(driveCont.getLeftX(), 3) * maxSpeed.in(MetersPerSecond) * -1.0;
+          double velXMps =
+              -ControllerHelper.modifyAxisCubic(driveCont.getLeftY(), maxSpeed.in(MetersPerSecond));
+          double velYMps =
+              -ControllerHelper.modifyAxisCubic(driveCont.getLeftX(), maxSpeed.in(MetersPerSecond));
           double omegaRps =
-              Math.pow(driveCont.getRightX(), 2)
-                  * (maxAngularVelocity.in(RadiansPerSecond))
-                  * -Math.signum(driveCont.getRightX());
+              -ControllerHelper.modifyAxisSquared(
+                  driveCont.getRightX(), maxAngularVelocity.in(RadiansPerSecond));
           if (isDefenseMode) {
             velXMps *= defenseModeTranslationScaler;
             velYMps *= defenseModeTranslationScaler;
@@ -398,8 +400,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   public Command faceAngleWhileDrivingCommand(
       CommandXboxController driveCont, Supplier<Rotation2d> headingSupplier) {
     return faceAngleWhileDrivingCommand(
-        () -> Math.pow(driveCont.getLeftY(), 3) * maxSpeed.in(MetersPerSecond) * -1.0,
-        () -> Math.pow(driveCont.getLeftX(), 3) * maxSpeed.in(MetersPerSecond) * -1.0,
+        () -> -ControllerHelper.modifyAxisCubic(driveCont.getLeftY(), maxSpeed.in(MetersPerSecond)),
+        () -> -ControllerHelper.modifyAxisCubic(driveCont.getLeftX(), maxSpeed.in(MetersPerSecond)),
         headingSupplier);
   }
 

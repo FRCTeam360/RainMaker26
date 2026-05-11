@@ -6,6 +6,13 @@
   "configurations": [
     {
       "type": "java",
+      "name": "Main",
+      "request": "launch",
+      "mainClass": "frc.robot.Main",
+      "projectName": "RainMaker26"
+    },
+    {
+      "type": "java",
       "name": "AutomatedTestMain",
       "request": "launch",
       "mainClass": "frc.robot.test.AutomatedTestMain",
