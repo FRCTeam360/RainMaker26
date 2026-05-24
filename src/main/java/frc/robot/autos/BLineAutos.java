@@ -7,10 +7,10 @@ import frc.robot.lib.BLine.FollowPath;
 import frc.robot.lib.BLine.Path;
 import frc.robot.lib.BLine.Path.PathElement;
 import frc.robot.lib.BLine.Path.Waypoint;
-import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Intake.IntakeStateMachine.IntakeWantedStates;
 import frc.robot.subsystems.SuperStructure;
 import frc.robot.subsystems.SuperStructure.SuperWantedStates;
+import frc.robot.subsystems.drive.Drive;
 import frc.robot.utils.CommandLogger;
 import java.util.List;
 import java.util.function.Function;
@@ -33,9 +33,7 @@ public class BLineAutos {
    * @param shootAtHubSupplier supplier for the shared "shoot at hub" command
    */
   public BLineAutos(
-      CommandSwerveDrivetrain drivetrain,
-      SuperStructure superStructure,
-      Supplier<Command> shootAtHubSupplier) {
+      Drive drivetrain, SuperStructure superStructure, Supplier<Command> shootAtHubSupplier) {
     this.superStructure = superStructure;
     this.shootAtHubSupplier = shootAtHubSupplier;
     this.pathBuilder = drivetrain.createBLinePathBuilder();

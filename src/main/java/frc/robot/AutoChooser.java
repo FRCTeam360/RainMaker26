@@ -12,8 +12,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.autos.BLineAutos;
 import frc.robot.autos.NamedAutoWithPose;
-import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.SuperStructure;
+import frc.robot.subsystems.drive.Drive;
 import frc.robot.utils.FieldConstants;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -65,9 +65,7 @@ public class AutoChooser {
    * @param shootAtHubSupplier supplier for the shared "shoot at hub" command
    */
   public AutoChooser(
-      CommandSwerveDrivetrain drivetrain,
-      SuperStructure superStructure,
-      Supplier<Command> shootAtHubSupplier) {
+      Drive drivetrain, SuperStructure superStructure, Supplier<Command> shootAtHubSupplier) {
     List<NamedAutoWithPose> autos = new ArrayList<>();
 
     for (String autoName : AutoBuilder.getAllAutoNames()) {

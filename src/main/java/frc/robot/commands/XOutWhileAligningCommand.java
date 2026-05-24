@@ -7,7 +7,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.drive.Drive;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
@@ -35,7 +35,7 @@ public class XOutWhileAligningCommand extends Command {
     X_OUT
   }
 
-  private final CommandSwerveDrivetrain drivetrain;
+  private final Drive drivetrain;
   private final DoubleSupplier velocityXSupplier;
   private final DoubleSupplier velocityYSupplier;
   private final Supplier<Rotation2d> headingSupplier;
@@ -52,7 +52,7 @@ public class XOutWhileAligningCommand extends Command {
    * @param headingSupplier Supplier for the target heading to face
    */
   public XOutWhileAligningCommand(
-      CommandSwerveDrivetrain drivetrain,
+      Drive drivetrain,
       DoubleSupplier velocityXSupplier,
       DoubleSupplier velocityYSupplier,
       Supplier<Rotation2d> headingSupplier) {
@@ -71,9 +71,7 @@ public class XOutWhileAligningCommand extends Command {
    * @param headingSupplier Supplier for the target heading to face
    */
   public XOutWhileAligningCommand(
-      CommandSwerveDrivetrain drivetrain,
-      CommandXboxController driveCont,
-      Supplier<Rotation2d> headingSupplier) {
+      Drive drivetrain, CommandXboxController driveCont, Supplier<Rotation2d> headingSupplier) {
     this(
         drivetrain,
         () -> Math.pow(driveCont.getLeftY(), 3) * drivetrain.maxSpeed.in(MetersPerSecond) * -1.0,

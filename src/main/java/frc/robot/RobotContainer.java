@@ -6,7 +6,6 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
-import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.FollowPathCommand;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -21,8 +20,8 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.RobotType;
 import frc.robot.generated.CompBotDrivetrain;
 import frc.robot.generated.PracticeBotDrivetrain;
+import frc.robot.generated.TunerConstants;
 import frc.robot.generated.WoodBotDrivetrain;
-import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.ControlState;
 import frc.robot.subsystems.HopperRoller.HopperRoller;
 import frc.robot.subsystems.HopperRoller.HopperRollerIOCB;
@@ -76,6 +75,11 @@ import frc.robot.subsystems.Vision.VisionIOLimelight3G;
 import frc.robot.subsystems.Vision.VisionIOLimelight4;
 import frc.robot.subsystems.Vision.VisionIOLimelightBase;
 import frc.robot.subsystems.Vision.VisionIOPhotonSim;
+import frc.robot.subsystems.drive.Drive;
+import frc.robot.subsystems.drive.GyroIO;
+import frc.robot.subsystems.drive.GyroIOPigeon2;
+import frc.robot.subsystems.drive.ModuleIOSim;
+import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.utils.AllianceFlipUtil;
 import frc.robot.utils.CommandLogger;
 import frc.robot.utils.FieldConstants;
@@ -99,7 +103,7 @@ public class RobotContainer {
   private static final double AUTO_SHOOT_NO_LAUNCH_TIMEOUT_SECONDS = 0.8;
 
   // The robot's subsystems and commands are defined here...
-  private CommandSwerveDrivetrain drivetrain;
+  private Drive drivetrain;
   private final AutoChooser autoChooser;
   private Flywheel flywheel;
   private Hood hood;
@@ -147,9 +151,15 @@ public class RobotContainer {
 
     switch (Constants.getRobotType()) {
       case SIM:
-        drivetrain = WoodBotDrivetrain.createDrivetrain();
+        drivetrain =
+            new Drive(
+                new GyroIO() {},
+                new ModuleIOSim(TunerConstants.FrontLeft),
+                new ModuleIOSim(TunerConstants.FrontRight),
+                new ModuleIOSim(TunerConstants.BackLeft),
+                new ModuleIOSim(TunerConstants.BackRight));
         intakePivot = new IntakePivot(new IntakePivotIOSim());
-        vision = new Vision(new VisionIOPhotonSim(() -> drivetrain.getState().Pose));
+        vision = new Vision(new VisionIOPhotonSim(() -> drivetrain.getPose()));
         flywheel = new Flywheel(new FlywheelIOSim());
         hood = new Hood(new HoodIOSim());
         indexer = new Indexer(new IndexerIOSim());
@@ -181,7 +191,13 @@ public class RobotContainer {
         indexerToFlywheelSeconds = Constants.SimulationConstants.INDEXER_TO_FLYWHEEL_SECONDS;
         break;
       case WOODBOT:
-        drivetrain = WoodBotDrivetrain.createDrivetrain();
+        drivetrain =
+            new Drive(
+                new GyroIOPigeon2(),
+                new ModuleIOTalonFX(TunerConstants.FrontLeft),
+                new ModuleIOTalonFX(TunerConstants.FrontRight),
+                new ModuleIOTalonFX(TunerConstants.BackLeft),
+                new ModuleIOTalonFX(TunerConstants.BackRight));
         flywheel = new Flywheel(new FlywheelIOWBBangBang());
         hood = new Hood(new HoodIOWB());
         indexer = new Indexer(new IndexerIOWB());
@@ -221,7 +237,13 @@ public class RobotContainer {
         indexerToFlywheelSeconds = Constants.WoodBotConstants.INDEXER_TO_FLYWHEEL_SECONDS;
         break;
       case PRACTICEBOT:
-        drivetrain = PracticeBotDrivetrain.createDrivetrain();
+        drivetrain =
+            new Drive(
+                new GyroIOPigeon2(),
+                new ModuleIOTalonFX(TunerConstants.FrontLeft),
+                new ModuleIOTalonFX(TunerConstants.FrontRight),
+                new ModuleIOTalonFX(TunerConstants.BackLeft),
+                new ModuleIOTalonFX(TunerConstants.BackRight));
         flywheel = new Flywheel(new FlywheelIOPBBangBang());
         hood = new Hood(new HoodIOPB());
         indexer = new Indexer(new IndexerIOPB());
@@ -271,7 +293,13 @@ public class RobotContainer {
         break;
       case COMPBOT:
       default:
-        drivetrain = CompBotDrivetrain.createDrivetrain();
+        drivetrain =
+            new Drive(
+                new GyroIOPigeon2(),
+                new ModuleIOTalonFX(TunerConstants.FrontLeft),
+                new ModuleIOTalonFX(TunerConstants.FrontRight),
+                new ModuleIOTalonFX(TunerConstants.BackLeft),
+                new ModuleIOTalonFX(TunerConstants.BackRight));
         flywheel = new Flywheel(new FlywheelIOCBBangBang());
         hood = new Hood(new HoodIOCB());
         indexer = new Indexer(new IndexerIOCB());
@@ -657,7 +685,7 @@ public class RobotContainer {
     superStructure.setWantedSuperState(SuperWantedStates.IDLE);
     superStructure.setIntakeState(IntakeWantedStates.IDLE);
     drivetrain.clearAutoRotationOverride();
-    drivetrain.setControl(new SwerveRequest.Idle());
+    drivetrain.stop();
     flywheel.stop();
     hood.stop();
     intakeRoller.stop();
@@ -708,7 +736,7 @@ public class RobotContainer {
         "Robot/LoopTiming/Overrun", loopTimeSeconds > LOOP_OVERRUN_THRESHOLD_SECONDS);
     Logger.recordOutput("Robot/LoopTiming/OverrunCount", overrunCount);
 
-    drivetrain.clearCachedState();
+    // Drive no longer uses cached state - odometry is updated in periodic()
     hubShotCalculator.clearShootingParams();
     // hubShotCalculator.calculateShot();
     passCalculator.clearShootingParams();
