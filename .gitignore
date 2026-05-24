@@ -191,7 +191,7 @@ compile_commands.json
 .~lock.*
 
 # claude files
-.claude/
+.claude/settings.local.json
 
 # Version file
 src/main/java/frc/robot/BuildConstants.java
