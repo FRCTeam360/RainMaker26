@@ -32,11 +32,11 @@
     },
     {
       "anchor": {
-        "x": 2.8326,
+        "x": 2.04,
         "y": 4.035
       },
       "prevControl": {
-        "x": 2.783878,
+        "x": 1.991278,
         "y": 4.765833
       },
       "nextControl": null,
@@ -75,7 +75,7 @@
     "rotation": 180.0
   },
   "reversed": false,
-  "folder": "FLIPPED Blue Right Root Opp Module",
+  "folder": "FLIPPED MIRRORED Blue Left Root Safe",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 180.0

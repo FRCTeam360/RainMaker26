@@ -64,7 +64,7 @@ public class CompBotDrivetrain {
       new TalonFXConfiguration()
           .withCurrentLimits(
               new CurrentLimitsConfigs()
-                  .withSupplyCurrentLimit(Amps.of(60))
+                  .withSupplyCurrentLimit(Amps.of(80))
                   .withSupplyCurrentLimitEnable(true));
 
   private static final TalonFXConfiguration steerInitialConfigs =

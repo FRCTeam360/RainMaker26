@@ -3,12 +3,12 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 6.067756,
+        "x": 5.94,
         "y": 4.035
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.0775,
+        "x": 5.949744,
         "y": 4.512478
       },
       "isLocked": false,
@@ -45,7 +45,7 @@
     "rotation": 180.0
   },
   "reversed": false,
-  "folder": "FLIPPED Blue Right Root Opp Module",
+  "folder": "FLIPPED MIRRORED Blue Left Root Safe",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 180.0
