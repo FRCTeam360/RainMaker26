@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 
 public class TestShooterStateMachine {
   @Test
-  void TestSetWantedStateAndUpdate() {
+  void TestSetWantedStateAndStandbyVersusWaiting() {
     ShooterStateMachine testShooterStateMachine =
         new ShooterStateMachine(null, null, null, null, null);
     testShooterStateMachine.setIsInAllianceZoneSupplier(() -> true);
@@ -20,5 +20,9 @@ public class TestShooterStateMachine {
     testShooterStateMachine.setWantedState(ShooterWantedStates.PASSIVE_SHOOTER);
     testShooterStateMachine.update();
     assertEquals(ShooterStates.WAITING, testShooterStateMachine.getState());
+  }
+  @Test
+  void test2() {
+    //add tests for handleShooting and apply
   }
 }
