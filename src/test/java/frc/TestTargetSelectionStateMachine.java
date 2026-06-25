@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test;
 
 public class TestTargetSelectionStateMachine {
   @Test
-  void ShouldReturnPassCalculator() {
+  void TestWhichShotCalcIsReturnedBasedOnCurrentState() {
     final InterpolatingDoubleTreeMap interpolatingTreeMapTestZero =
         new InterpolatingDoubleTreeMap();
     interpolatingTreeMapTestZero.put(1.0, 0.0);
@@ -31,18 +31,29 @@ public class TestTargetSelectionStateMachine {
             0.0,
             0.0,
             0);
+    ShotCalculator hubCalculator =
+        new ShotCalculator(
+            "testHubCalc",
+            // public Pose2d(double x, double y, Rotation2d rotation)
+            () -> new Pose2d(1.0, 0.0, new Rotation2d()),
+            () -> new Translation2d(),
+            () -> new ChassisSpeeds(),
+            RobotShootingInfo);
     ShotCalculator passCalculator =
         new ShotCalculator(
-            "test",
+            "testPassCalc",
             // public Pose2d(double x, double y, Rotation2d rotation)
             () -> new Pose2d(1.0, 0.0, new Rotation2d()),
             () -> new Translation2d(),
             () -> new ChassisSpeeds(),
             RobotShootingInfo);
     TargetSelectionStateMachine testTargetSelectionStateMachine =
-        new TargetSelectionStateMachine(null, passCalculator, null);
+        new TargetSelectionStateMachine(hubCalculator, passCalculator, null);
     testTargetSelectionStateMachine.setWantedState(TargetWantedStates.PASS);
     testTargetSelectionStateMachine.update();
     assertEquals(passCalculator, testTargetSelectionStateMachine.getActiveCalculator());
+    testTargetSelectionStateMachine.setWantedState(TargetWantedStates.HUB);
+    testTargetSelectionStateMachine.update();
+    assertEquals(hubCalculator, testTargetSelectionStateMachine.getActiveCalculator());
   }
 }
