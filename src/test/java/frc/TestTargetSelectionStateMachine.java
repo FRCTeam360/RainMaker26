@@ -11,10 +11,20 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.robot.subsystems.Shooter.ShotCalculator;
 import frc.robot.subsystems.Shooter.ShotCalculator.RobotShootingInfo;
 import frc.robot.subsystems.Shooter.TargetSelectionStateMachine;
+import frc.robot.subsystems.Shooter.TargetSelectionStateMachine.TargetInternalStates;
 import frc.robot.subsystems.Shooter.TargetSelectionStateMachine.TargetWantedStates;
 import org.junit.jupiter.api.Test;
 
 public class TestTargetSelectionStateMachine {
+  @Test
+  void TestSetWantedStateAndUpdate() {
+    TargetSelectionStateMachine testTargetSelectionStateMachine =
+        new TargetSelectionStateMachine(null, null, null);
+    testTargetSelectionStateMachine.setWantedState(TargetWantedStates.PASS);
+    testTargetSelectionStateMachine.update();
+    assertEquals(TargetInternalStates.PASSING, testTargetSelectionStateMachine.getState());
+  }
+
   @Test
   void TestWhichShotCalcIsReturnedBasedOnCurrentState() {
     final InterpolatingDoubleTreeMap interpolatingTreeMapTestZero =
