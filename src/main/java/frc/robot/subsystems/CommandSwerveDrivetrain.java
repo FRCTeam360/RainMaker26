@@ -22,6 +22,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearVelocity;
@@ -46,6 +47,8 @@ import frc.robot.lib.BLine.FollowPath;
 import frc.robot.subsystems.Vision.VisionMeasurement;
 import frc.robot.utils.AllianceFlipUtil;
 import frc.robot.utils.CommandLogger;
+import frc.robot.utils.simulation.MapleSimSwerveDrivetrain;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -954,7 +957,27 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     }
   }
 
-  private void startSimThread() {
+  private MapleSimSwerveDrivetrain mapleSimSwerveDrivetrain = null;
+private void startSimThread() {
+    mapleSimSwerveDrivetrain = new MapleSimSwerveDrivetrain(
+            Seconds.of(kSimLoopPeriod),
+            // TODO: modify the following constants according to your robot
+            Pounds.of(145), // robot weight
+            Inches.of(35.75), // bumper length
+            Inches.of(35.75), // bumper width
+            DCMotor.getKrakenX60(1), // drive motor type
+            DCMotor.getFalcon500(1), // steer motor type
+            1.2, // wheel COF
+            getModuleLocations(),
+            getPigeon2(),
+            getModules(),
+            TunerConstants.FrontLeft,
+            TunerConstants.FrontRight,
+            TunerConstants.BackLeft,
+            TunerConstants.BackRight);
+    /* Run simulation at a faster rate so PID gains behave more reasonably */
+    m_simNotifier = new Notifier(mapleSimSwerveDrivetrain::update);
+    m_simNotifier.startPeriodic(kSimLoopPeriod);
     // prevents the method from running multiple times
     if (m_simNotifier != null) {
       return;
