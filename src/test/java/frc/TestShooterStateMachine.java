@@ -21,8 +21,4 @@ public class TestShooterStateMachine {
     testShooterStateMachine.update();
     assertEquals(ShooterStates.WAITING, testShooterStateMachine.getState());
   }
-  @Test
-  void test2() {
-    //add tests for handleShooting and apply
-  }
 }
