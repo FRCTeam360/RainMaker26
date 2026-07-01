@@ -15,7 +15,7 @@ Create a new doc under `docs/` matching one of this repo's three existing doc ty
 | `core_architecture` | Explains a structural pattern used across the codebase (how subsystems/IO/state machines are organized) | `docs/core_archictecture/` (keep the existing typo — renaming breaks links) | `PascalCase.md` | `SubsystemArchitecture.md` |
 | `implementation_plan` | A concrete plan to implement a specific feature/issue, with file-by-file changes | `docs/implementation_plans/` | `kebab-case-implementation-plan.md`, reference the issue number in the title if one exists | `alerts-implementation-plan.md` |
 
-Before writing, grep the relevant source files (`Grep`/`Glob`) so the doc's code examples and API references are accurate to the current codebase, not guessed.
+Before writing, check the `docs-index` skill's table for an existing doc covering the same topic — if one is close, propose extending it instead of creating a near-duplicate. Then grep the relevant source files (`Grep`/`Glob`) so the doc's code examples and API references are accurate to the current codebase, not guessed.
 
 ## Template: advanced_topic
 
@@ -203,4 +203,4 @@ Used by: [list of subsystems]
 
 - Save to the path determined above.
 - Report the file path and a one-line summary of what was written back to the user.
-- Do not add the new doc to any index/README unless one already exists and already lists sibling docs of the same type.
+- Add a row for the new doc to the table in `.claude/skills/docs-index/SKILL.md` under the matching section, so the index stays current.
