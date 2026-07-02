@@ -17,6 +17,7 @@ public class TestShooterStateMachine {
     testShooterStateMachine.update();
     assertEquals(ShooterStates.STANDBY, testShooterStateMachine.getState());
   }
+
   @Test
   void TestSetWantedStateWaiting() {
     ShooterStateMachine testShooterStateMachine =
@@ -26,5 +27,5 @@ public class TestShooterStateMachine {
     testShooterStateMachine.update();
     assertEquals(ShooterStates.WAITING, testShooterStateMachine.getState());
   }
-  //put stuff for more states ig
+  // put stuff for more states ig
 }
