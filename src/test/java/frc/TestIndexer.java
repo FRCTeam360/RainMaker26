@@ -11,7 +11,7 @@ public class TestIndexer {
 
   private static class RecordingIndexerIO implements IndexerIO {
     private double lastDutyCycle = Double.NaN;
-    private double lastVelocityRpm = Double.NaN;
+    private double lastVelocityRPM = Double.NaN;
 
     @Override
     public void setDutyCycle(double dutyCycle) {
@@ -20,7 +20,7 @@ public class TestIndexer {
 
     @Override
     public void setVelocity(double velocity) {
-      lastVelocityRpm = velocity;
+      lastVelocityRPM = velocity;
     }
   }
 
@@ -29,11 +29,11 @@ public class TestIndexer {
       super(io);
     }
 
-    public void runUpdateStateForTest() {
+    public void updateStateTest() {
       super.updateState();
     }
 
-    public void runApplyStateForTest() {
+    public void applyStateTest() {
       super.applyState();
     }
   }
@@ -44,11 +44,11 @@ public class TestIndexer {
     TestableIndexer indexer = new TestableIndexer(io);
 
     indexer.setWantedState(IndexerStates.INDEXING);
-    indexer.runUpdateStateForTest();
-    indexer.runApplyStateForTest();
+    indexer.updateStateTest();
+    indexer.applyStateTest();
 
     assertEquals(IndexerStates.INDEXING, indexer.getState());
-    assertEquals(3000.0, io.lastVelocityRpm);
+    assertEquals(3000.0, io.lastVelocityRPM);
   }
 
   @Test
@@ -57,8 +57,8 @@ public class TestIndexer {
     TestableIndexer indexer = new TestableIndexer(io);
 
     indexer.setWantedState(IndexerStates.ASSIST_INTAKING);
-    indexer.runUpdateStateForTest();
-    indexer.runApplyStateForTest();
+    indexer.updateStateTest();
+    indexer.applyStateTest();
 
     assertEquals(IndexerStates.ASSIST_INTAKING, indexer.getState());
     assertEquals(-0.15, io.lastDutyCycle);
@@ -70,8 +70,8 @@ public class TestIndexer {
     TestableIndexer indexer = new TestableIndexer(io);
 
     indexer.setWantedState(IndexerStates.REVERSING);
-    indexer.runUpdateStateForTest();
-    indexer.runApplyStateForTest();
+    indexer.updateStateTest();
+    indexer.applyStateTest();
 
     assertEquals(IndexerStates.REVERSING, indexer.getState());
     assertEquals(-0.35, io.lastDutyCycle);
@@ -83,8 +83,8 @@ public class TestIndexer {
     TestableIndexer indexer = new TestableIndexer(io);
 
     indexer.setWantedState(IndexerStates.OFF);
-    indexer.runUpdateStateForTest();
-    indexer.runApplyStateForTest();
+    indexer.updateStateTest();
+    indexer.applyStateTest();
 
     assertEquals(IndexerStates.OFF, indexer.getState());
     assertEquals(0.0, io.lastDutyCycle);
