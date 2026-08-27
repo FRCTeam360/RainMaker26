@@ -14,13 +14,13 @@ public class TargetSelectionStateMachine {
   // Enums
   public enum TargetWantedStates {
     HUB, // Force hub (manual override)
-    OUTPOST, // Force outpost (manual override)
+    PASS, // Force pass (manual override)
     AUTO // Auto-select based on alliance zone position
   }
 
   public enum TargetInternalStates {
-    AT_HUB,
-    AT_OUTPOST
+    SCORING,
+    PASSING
   }
 
   // Dependencies
@@ -30,8 +30,8 @@ public class TargetSelectionStateMachine {
 
   // State variables
   private TargetWantedStates wantedState = TargetWantedStates.AUTO;
-  private TargetInternalStates currentState = TargetInternalStates.AT_HUB;
-  private TargetInternalStates previousState = TargetInternalStates.AT_HUB;
+  private TargetInternalStates currentState = TargetInternalStates.SCORING;
+  private TargetInternalStates previousState = TargetInternalStates.SCORING;
 
   /**
    * Creates a new TargetSelectionStateMachine.
@@ -69,7 +69,7 @@ public class TargetSelectionStateMachine {
    * @return the outpost calculator when targeting outpost, hub calculator otherwise
    */
   public ShotCalculator getActiveCalculator() {
-    if (currentState == TargetInternalStates.AT_OUTPOST) {
+    if (currentState == TargetInternalStates.PASSING) {
       return passCalculator;
     }
     return hubShotCalculator;
@@ -85,17 +85,17 @@ public class TargetSelectionStateMachine {
 
     switch (wantedState) {
       case HUB:
-        currentState = TargetInternalStates.AT_HUB;
+        currentState = TargetInternalStates.SCORING;
         break;
-      case OUTPOST:
-        currentState = TargetInternalStates.AT_OUTPOST;
+      case PASS:
+        currentState = TargetInternalStates.PASSING;
         break;
       case AUTO:
       default:
         if (PositionUtils.isInAllianceZone(robotPoseSupplier.get())) {
-          currentState = TargetInternalStates.AT_HUB;
+          currentState = TargetInternalStates.SCORING;
         } else {
-          currentState = TargetInternalStates.AT_OUTPOST;
+          currentState = TargetInternalStates.PASSING;
         }
         break;
     }

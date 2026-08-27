@@ -176,12 +176,12 @@ public class SuperStructure extends SubsystemBase {
         currentSuperState = SuperInternalStates.SHOOTING_AT_HUB;
         break;
       case SHOOT_AT_OUTPOST:
-        targetSelectionStateMachine.setWantedState(TargetWantedStates.OUTPOST);
+        targetSelectionStateMachine.setWantedState(TargetWantedStates.PASS);
         currentSuperState = SuperInternalStates.PASSING;
         break;
       case AUTO_CYCLE_SHOOTING:
         targetSelectionStateMachine.setWantedState(TargetWantedStates.AUTO);
-        if (targetSelectionStateMachine.getState() == TargetInternalStates.AT_HUB) {
+        if (targetSelectionStateMachine.getState() == TargetInternalStates.SCORING) {
           currentSuperState = SuperInternalStates.SHOOTING_AT_HUB;
         } else {
           currentSuperState = SuperInternalStates.PASSING;
@@ -200,7 +200,7 @@ public class SuperStructure extends SubsystemBase {
         currentSuperState = SuperInternalStates.FORCED_SHOOT_TRENCH;
         break;
       case FORCED_PASS:
-        targetSelectionStateMachine.setWantedState(TargetWantedStates.OUTPOST);
+        targetSelectionStateMachine.setWantedState(TargetWantedStates.PASS);
         currentSuperState = SuperInternalStates.FORCED_PASS;
         break;
       case DEFAULT:
