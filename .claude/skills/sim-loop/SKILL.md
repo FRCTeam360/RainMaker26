@@ -27,7 +27,7 @@ Use this when a change can be judged from sim telemetry: autos, superstructure s
 ```bash
 S=.claude/skills/sim-loop/scripts/simctl
 $S build [--tests]                  # gradle jar (+ unit tests); log at build/sim-runs/last-build.log
-$S scenario <file.json> [--no-build] [--keep-running]   # the whole loop step; exit 0 PASS / 1 FAIL / 2 infra
+$S scenario <file.json> [--no-build] [--keep-running] [--auto NAME]   # the whole loop step; exit 0 PASS / 1 FAIL / 2 infra
 $S start [--restart] | stop | status
 $S ds --mode auto|teleop|test|disabled [--alliance red1] [--game-data R] [--hold SECONDS]
 $S autos                            # chooser options
@@ -49,7 +49,12 @@ Run it in the foreground with a timeout of about 2× the scenario length plus 60
 
 ## Scenario format
 
-Examples are in `scenarios/`. `auto-smoke.json` covers auto; `teleop-drive.json` covers joystick input.
+Examples are in `scenarios/`:
+- `auto-smoke.json`: the auto drives, shoots, and nothing errors.
+- `auto-duration.json`: does the auto finish inside 15 s? Auto stays enabled for 25 s so an overrun shows its real finish time. It reads `Robot/AutoCommandRunning`.
+- `teleop-drive.json`: joystick input moves the robot.
+
+Pass `--auto "<name>"` to run any scenario with a different auto (names come from `simctl autos`).
 
 ```json
 {

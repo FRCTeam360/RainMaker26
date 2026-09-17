@@ -8,7 +8,7 @@
   autos                               list auto chooser options
   select-auto NAME                    pick an auto in the chooser
   logscan   [--run-dir DIR]           summarize errors/exceptions in the sim console log
-  scenario  FILE.json [--no-build] [--keep-running]
+  scenario  FILE.json [--no-build] [--keep-running] [--auto NAME]
             build → start → record WPILOG → run phases while evaluating checks → scan
             console → stop → write report.json. Exit 0 = PASS, 1 = FAIL, 2 = infra error.
 
@@ -272,10 +272,12 @@ def logscan(run_dir: Path, max_lines: int = 30) -> dict:
 # ── Scenario ─────────────────────────────────────────────────────────────────
 
 
-def run_scenario(path: Path, no_build: bool, keep_running: bool) -> int:
+def run_scenario(path: Path, no_build: bool, keep_running: bool, auto: str | None = None) -> int:
     spec = json.loads(path.read_text())
+    if auto:
+        spec["auto"] = auto
     run_dir = RUNS / f"{dt.datetime.now():%Y%m%d-%H%M%S}-{path.stem}"
-    report = {"scenario": str(path), "run_dir": str(run_dir), "git": git_state()}
+    report = {"scenario": str(path), "auto": spec.get("auto"), "run_dir": str(run_dir), "git": git_state()}
 
     if not no_build and not build(tests=spec.get("run_unit_tests", False)):
         return 2
@@ -331,7 +333,7 @@ def run_scenario(path: Path, no_build: bool, keep_running: bool) -> int:
                   wpilog=str(run_dir / "telemetry.wpilog"))
     (run_dir / "report.json").write_text(json.dumps(report, indent=2, default=str))
 
-    print(f"\n=== scenario {path.stem} ===")
+    print(f"\n=== scenario {path.stem}" + (f" — {spec['auto']}" if spec.get("auto") else "") + " ===")
     ok = ntlive.print_results(results)
     if scan["lines"]:
         print("console errors (first unique lines):")
@@ -366,6 +368,7 @@ def main():
     p = sub.add_parser("logscan"); p.add_argument("--run-dir")
     p = sub.add_parser("scenario"); p.add_argument("file")
     p.add_argument("--no-build", action="store_true"); p.add_argument("--keep-running", action="store_true")
+    p.add_argument("--auto", help="override the scenario's auto chooser selection")
     a = ap.parse_args()
 
     if a.cmd == "build":
@@ -400,7 +403,7 @@ def main():
                                                          max(RUNS.glob("2*"), key=os.path.getmtime))
         print(json.dumps(logscan(run_dir), indent=2))
     elif a.cmd == "scenario":
-        return run_scenario(Path(a.file), a.no_build, a.keep_running)
+        return run_scenario(Path(a.file), a.no_build, a.keep_running, a.auto)
     return 0
 
 

@@ -1,0 +1,20 @@
+{
+  "description": "Does the selected auto finish inside the 15 s autonomous period? Auto stays enabled for 25 s so an overrun shows its real finish time. Override the auto with: simctl scenario auto-duration.json --auto \"<name>\"",
+  "alliance": "blue1",
+  "auto": "[PathPlanner] FLIPPED Blue Right Double Trench",
+  "settle_seconds": 2,
+  "phases": [
+    {"mode": "auto", "seconds": 25},
+    {"mode": "disabled", "seconds": 1}
+  ],
+  "checks": [
+    {"name": "auto command starts", "kind": "eventually", "within": 1,
+     "expr": "v('RealOutputs/Robot/AutoCommandRunning')"},
+    {"name": "auto finishes within 15 s", "kind": "eventually", "after": 1, "within": 15,
+     "expr": "not v('RealOutputs/Robot/AutoCommandRunning')"},
+    {"name": "actual auto finish time (info)", "kind": "eventually", "after": 1, "within": 25,
+     "expr": "not v('RealOutputs/Robot/AutoCommandRunning')"},
+    {"name": "robot loop stays under 100 ms", "kind": "always", "after": 3,
+     "expr": "v('RealOutputs/LoggedRobot/FullCycleMS') < 100"}
+  ]
+}

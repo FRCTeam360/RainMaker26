@@ -108,6 +108,10 @@ public class Robot extends LoggedRobot {
     Logger.recordOutput("Robot/LoopTiming/PreSchedulerSeconds", t1 - t0);
     Logger.recordOutput("Robot/LoopTiming/SchedulerSeconds", t2 - t1);
     Logger.recordOutput("Robot/LoopTiming/PostSchedulerSeconds", t3 - t2);
+    // Lets log/sim analysis see exactly when the selected auto finishes or is cancelled
+    Logger.recordOutput(
+        "Robot/AutoCommandRunning",
+        m_autonomousCommand != null && m_autonomousCommand.isScheduled());
   }
 
   /** This function is called once each time the robot enters Disabled mode. */
