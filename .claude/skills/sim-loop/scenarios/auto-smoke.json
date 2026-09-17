@@ -1,0 +1,27 @@
+{
+  "description": "Blue-right Double Trench auto: robot drives, shoots at the hub, and nothing errors.",
+  "alliance": "blue1",
+  "game_data": "",
+  "auto": "[PathPlanner] FLIPPED Blue Right Double Trench",
+  "settle_seconds": 2,
+  "run_unit_tests": false,
+  "max_console_errors": 0,
+  "phases": [
+    {"mode": "auto", "seconds": 15},
+    {"mode": "disabled", "seconds": 1}
+  ],
+  "checks": [
+    {"name": "robot drives at least 1 m", "kind": "eventually", "within": 15,
+     "expr": "dist(v('RealOutputs/Swerve/CurrentPose'), start('RealOutputs/Swerve/CurrentPose')) > 1.0"},
+    {"name": "shooter reaches FIRING during auto", "kind": "eventually", "within": 15,
+     "expr": "v('RealOutputs/Superstructure/Shooter/CurrentState') == 'FIRING'"},
+    {"name": "robot is shooting at the hub within 8 s", "kind": "eventually", "within": 8,
+     "expr": "v('RealOutputs/Superstructure/CurrentSuperState') == 'SHOOTING_AT_HUB'"},
+    {"name": "no AdvantageKit error alerts", "kind": "never",
+     "expr": "len(v('RealOutputs/Alerts/errors')) > 0"},
+    {"name": "no PathPlanner errors", "kind": "never",
+     "expr": "len(v('RealOutputs/PathPlanner/errors')) > 0"},
+    {"name": "robot loop stays under 100 ms after startup", "kind": "always", "after": 3,
+     "expr": "v('RealOutputs/LoggedRobot/FullCycleMS') < 100"}
+  ]
+}

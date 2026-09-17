@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+exec "$(dirname "$0")/../../live-telemetry/scripts/py" "$(dirname "$0")/simctl.py" "$@"

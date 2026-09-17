@@ -1,0 +1,20 @@
+{
+  "description": "Teleop: push the driver left stick forward for 3 s, the robot must translate; release, it must stop.",
+  "alliance": "blue1",
+  "phases": [
+    {"mode": "teleop", "seconds": 1,
+     "joysticks": [{"port": 0, "axes": [0, 0, 0, 0, 0, 0], "buttons": [false, false, false, false, false, false, false, false, false, false]}]},
+    {"mode": "teleop", "seconds": 3,
+     "joysticks": [{"port": 0, "axes": [0, -0.8, 0, 0, 0, 0], "buttons": [false, false, false, false, false, false, false, false, false, false]}]},
+    {"mode": "teleop", "seconds": 2,
+     "joysticks": [{"port": 0, "axes": [0, 0, 0, 0, 0, 0], "buttons": [false, false, false, false, false, false, false, false, false, false]}]}
+  ],
+  "checks": [
+    {"name": "stick forward moves the robot > 1 m", "kind": "eventually", "after": 1, "within": 4,
+     "expr": "dist(v('RealOutputs/Swerve/CurrentPose'), start('RealOutputs/Swerve/CurrentPose')) > 1.0"},
+    {"name": "robot is stopped after stick release", "kind": "final",
+     "expr": "abs(v('RealOutputs/ShotCalculator/HubShotCalc/robotSpeeds::vx')) + abs(v('RealOutputs/ShotCalculator/HubShotCalc/robotSpeeds::vy')) < 0.1"},
+    {"name": "robot loop stays under 100 ms", "kind": "always", "after": 1,
+     "expr": "v('RealOutputs/LoggedRobot/FullCycleMS') < 100"}
+  ]
+}

@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# Runs python inside the repo-local sim tooling venv (build/simtools-venv), creating it on first use.
+set -euo pipefail
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../.." && pwd)"
+VENV="$REPO_ROOT/build/simtools-venv"
+if [[ ! -x "$VENV/bin/python" ]]; then
+  echo "[py] creating $VENV" >&2
+  python3 -m venv "$VENV"
+  "$VENV/bin/pip" install -q --disable-pip-version-check pyntcore websockets >&2
+fi
+exec "$VENV/bin/python" "$@"
