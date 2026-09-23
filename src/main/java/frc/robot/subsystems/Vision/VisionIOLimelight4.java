@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems.Vision;
 
+import edu.wpi.first.math.geometry.Transform3d;
 import frc.robot.Constants;
 import frc.robot.utils.LimelightHelpers;
 import java.util.function.DoubleSupplier;
@@ -38,13 +39,16 @@ public class VisionIOLimelight4 extends VisionIOLimelightBase {
    * @param gyroAngleSupplier supplies the robot's gyro angle in degrees
    * @param gyroAngleRateSupplier supplies the robot's gyro angular rate in degrees per second
    * @param acceptMeasurements whether to process pose estimates from this Limelight
+   * @param robotToCamera the camera mount transform (camera position and orientation in robot
+   *     space)
    */
   public VisionIOLimelight4(
       String name,
       DoubleSupplier gyroAngleSupplier,
       DoubleSupplier gyroAngleRateSupplier,
-      boolean acceptMeasurements) {
-    super(name, gyroAngleSupplier, gyroAngleRateSupplier, acceptMeasurements);
+      boolean acceptMeasurements,
+      Transform3d robotToCamera) {
+    super(name, gyroAngleSupplier, gyroAngleRateSupplier, acceptMeasurements, robotToCamera);
     LimelightHelpers.SetIMUAssistAlpha(name, IMU_ASSIST_ALPHA);
     LimelightHelpers.SetIMUMode(name, IMU_MODE_EXTERNAL_SEED);
     setThrottle(Constants.DISABLED_THROTTLE_SKIP_FRAMES);
