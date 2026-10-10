@@ -16,16 +16,16 @@
     },
     {
       "anchor": {
-        "x": 1.916622,
-        "y": 6.763444
+        "x": 1.658345,
+        "y": 7.250257
       },
       "prevControl": {
-        "x": 1.896791,
-        "y": 6.465982
+        "x": 1.638514,
+        "y": 6.952795
       },
       "nextControl": {
-        "x": 1.9556,
-        "y": 7.348111
+        "x": 1.697323,
+        "y": 7.834924
       },
       "isLocked": false,
       "linkedName": null
@@ -161,7 +161,7 @@
       "maxWaypointRelativePos": 2.112158808933007,
       "constraints": {
         "maxVelocity": 2.0,
-        "maxAcceleration": 8.0,
+        "maxAcceleration": 6.0,
         "maxAngularVelocity": 360.0,
         "maxAngularAcceleration": 540.0,
         "nominalVoltage": 12.0,
@@ -197,7 +197,7 @@
     "rotation": 158.4986
   },
   "reversed": false,
-  "folder": "FLIPPED MIRRORED Blue Left A3",
+  "folder": "FLIPPED MIRRORED Blue Left Middle Standard",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 156.9745
