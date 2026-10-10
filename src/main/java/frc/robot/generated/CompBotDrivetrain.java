@@ -150,6 +150,8 @@ public class CompBotDrivetrain {
 
   private static final Distance kFrontLeftXPos = Inches.of(9.875);
   private static final Distance kFrontLeftYPos = Inches.of(11.875);
+  private static final Distance kFrontLeftXPos = Inches.of(10);
+  private static final Distance kFrontLeftYPos = Inches.of(12);
 
   // Front Right
   private static final int kFrontRightDriveMotorId = 3;
