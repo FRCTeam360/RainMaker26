@@ -59,6 +59,7 @@ public class HopperRollerIOPB implements HopperRollerIO {
         hopperRollerMotor.getOutputCurrent() * hopperRollerMotor.getAppliedOutput();
     inputs.velocity = encoder.getVelocity();
     inputs.voltage = hopperRollerMotor.getBusVoltage() * hopperRollerMotor.getAppliedOutput();
+    inputs.connected = !hopperRollerMotor.hasActiveFault();
   }
 
   public void setDutyCycle(double dutyCycle) {

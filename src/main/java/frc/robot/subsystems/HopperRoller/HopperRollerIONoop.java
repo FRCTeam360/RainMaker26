@@ -8,4 +8,8 @@ public class HopperRollerIONoop implements HopperRollerIO {
   public void setDutyCycle(double dutyCycle) {}
 
   public void setVelocity(double rpm) {}
+
+  public void updateInputs(HopperRollerIOInputs inputs) {
+    inputs.connected = true;
+  }
 }
