@@ -120,6 +120,7 @@ public class HoodIOSim implements HoodIO {
     inputs.voltage = motorControllerSim.getSimState().getMotorVoltage();
     inputs.statorCurrent = motorControllerSim.getStatorCurrent().getValueAsDouble();
     inputs.supplyCurrent = motorControllerSim.getSupplyCurrent().getValueAsDouble();
+    inputs.connected = true;
 
     // Step 6: Update visualization (sim only)
     visualizer.update(hoodSim.getAngleRads());
