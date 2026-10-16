@@ -5,6 +5,8 @@
 package frc.robot.subsystems.Intake.IntakePivot;
 
 public class IntakePivotIONoop implements IntakePivotIO {
+  public boolean connected = true;
+
   public void setZero() {}
 
   public void setPosition(double position) {}

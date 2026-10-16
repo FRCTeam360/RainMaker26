@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems.Intake.IntakePivot;
 
+import edu.wpi.first.wpilibj.Alert;
+import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -34,6 +36,9 @@ public class IntakePivot extends SubsystemBase {
   // IO fields
   private final IntakePivotIO io;
   private final IntakePivotIOInputsAutoLogged inputs = new IntakePivotIOInputsAutoLogged();
+
+  private final Alert motorDisconnected =
+      new Alert("IntakePivot motor disconnected!", AlertType.kError);
 
   public enum IntakePivotWantedStates {
     IDLE,
@@ -311,5 +316,6 @@ public class IntakePivot extends SubsystemBase {
         "Superstructure/Subsystems/IntakePivot/TargetPositionDegrees", getTargetPosition());
     SmartDashboard.putString(
         "Superstructure/Subsystems/IntakePivot/CurrentIntakePivotState", currentState.toString());
+    motorDisconnected.set(!inputs.connected);
   }
 }

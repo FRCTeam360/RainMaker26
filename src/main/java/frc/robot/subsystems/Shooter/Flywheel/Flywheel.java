@@ -6,6 +6,8 @@ package frc.robot.subsystems.Shooter.Flywheel;
 
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
+import edu.wpi.first.wpilibj.Alert;
+import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -46,6 +48,11 @@ public class Flywheel extends SubsystemBase {
   private final FlywheelIOInputsAutoLogged inputs = new FlywheelIOInputsAutoLogged();
 
   private DoubleSupplier shootVelocitySupplier = () -> 0.0;
+
+  private final Alert rightMotorDisconnected =
+      new Alert("Right flywheel motor disconnected!", AlertType.kError);
+  private final Alert leftMotorDisconnected =
+      new Alert("Left flywheel motor disconnected!", AlertType.kError);
 
   /** Wanted states set by the superstructure to command the flywheel. */
   public enum FlywheelWantedStates {
@@ -332,5 +339,7 @@ public class Flywheel extends SubsystemBase {
     Logger.recordOutput("Superstructure/Subsystems/Flywheel/PreviousState", previousState);
     Logger.recordOutput("Superstructure/Subsystems/Flywheel/ControlState", controlState);
     Logger.recordOutput("Superstructure/Subsystems/Flywheel/LaunchCount", launchCount);
+    rightMotorDisconnected.set(!inputs.connected[0]);
+    leftMotorDisconnected.set(!inputs.connected[1]);
   }
 }
