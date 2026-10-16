@@ -4,8 +4,6 @@
 
 package frc.robot.subsystems.HopperRoller;
 
-import edu.wpi.first.wpilibj.Alert;
-import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.ControlState;
@@ -37,8 +35,6 @@ public class HopperRoller extends SubsystemBase {
   private HopperRollerStates currentState = HopperRollerStates.OFF;
   private HopperRollerStates previousState = HopperRollerStates.OFF;
   private ControlState controlState = ControlState.SUPERSTRUCTURE;
-
-  private final Alert motorDisconnected = new Alert("Motor disconnected", AlertType.kError);
 
   // Constructor
   public HopperRoller(HopperRollerIO io) {
@@ -126,7 +122,6 @@ public class HopperRoller extends SubsystemBase {
   @Override
   public void periodic() {
     io.updateInputs(inputs);
-    motorDisconnected.set(!inputs.connected);
     Logger.processInputs("Subsystems/HopperRoller", inputs);
 
     if (controlState == ControlState.SUPERSTRUCTURE) {
