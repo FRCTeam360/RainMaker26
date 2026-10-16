@@ -60,6 +60,7 @@ public class HoodIOWB implements HoodIO {
     inputs.statorCurrent = hoodMotor.getOutputCurrent();
     inputs.velocity = encoder.getVelocity();
     inputs.voltage = hoodMotor.getBusVoltage() * hoodMotor.getAppliedOutput();
+    // TODO: Update when we get rev heartbeat figured out
     inputs.connected = true;
   }
 

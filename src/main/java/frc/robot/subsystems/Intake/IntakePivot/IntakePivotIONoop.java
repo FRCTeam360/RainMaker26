@@ -5,8 +5,6 @@
 package frc.robot.subsystems.Intake.IntakePivot;
 
 public class IntakePivotIONoop implements IntakePivotIO {
-  public boolean connected = true;
-
   public void setZero() {}
 
   public void setPosition(double position) {}
@@ -20,4 +18,9 @@ public class IntakePivotIONoop implements IntakePivotIO {
   public void enableBrakeMode() {}
 
   public void disableBrakeMode() {}
+
+  @Override
+  public void updateInputs(IntakePivotIOInputs inputs) {
+    inputs.connected = true;
+  }
 }
