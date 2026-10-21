@@ -18,4 +18,9 @@ public class IntakePivotIONoop implements IntakePivotIO {
   public void enableBrakeMode() {}
 
   public void disableBrakeMode() {}
+
+  @Override
+  public void updateInputs(IntakePivotIOInputs inputs) {
+    inputs.connected = true;
+  }
 }

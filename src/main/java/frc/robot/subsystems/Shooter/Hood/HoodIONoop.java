@@ -1,6 +1,8 @@
 package frc.robot.subsystems.Shooter.Hood;
 
 public class HoodIONoop implements HoodIO {
+  public boolean connected = true;
+
   public void setZero() {}
 
   public void setDutyCycle(double dutyCycle) {}

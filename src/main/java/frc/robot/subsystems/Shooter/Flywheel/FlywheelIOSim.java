@@ -137,6 +137,8 @@ public class FlywheelIOSim implements FlywheelIO {
     inputs.statorCurrents[1] = statorCurrent;
     inputs.supplyCurrents[0] = supplyCurrent;
     inputs.supplyCurrents[1] = supplyCurrent;
+    inputs.connected[0] = true;
+    inputs.connected[1] = true;
   }
 
   @Override

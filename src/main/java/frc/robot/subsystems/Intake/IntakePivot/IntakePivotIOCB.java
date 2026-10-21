@@ -171,5 +171,12 @@ public class IntakePivotIOCB implements IntakePivotIO {
     inputs.voltage = motorVoltageSignal.getValueAsDouble();
     inputs.supplyCurrent = supplyCurrentSignal.getValueAsDouble();
     inputs.brakeMode = neutralMode == NeutralModeValue.Brake;
+    inputs.connected =
+        BaseStatusSignal.isAllGood(
+            positionSignal,
+            velocitySignal,
+            statorCurrentSignal,
+            supplyCurrentSignal,
+            motorVoltageSignal);
   }
 }
