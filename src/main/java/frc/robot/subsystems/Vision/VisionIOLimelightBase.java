@@ -7,6 +7,8 @@ package frc.robot.subsystems.Vision;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import frc.robot.utils.FieldConstants;
@@ -39,17 +41,31 @@ public abstract class VisionIOLimelightBase implements VisionIO {
    * @param gyroAngleSupplier supplies the robot's gyro angle in degrees
    * @param gyroAngleRateSupplier supplies the robot's gyro angular rate in degrees per second
    * @param acceptMeasurements whether to process pose estimates from this Limelight
+   * @param robotToCamera the camera mount transform (camera position and orientation in robot
+   *     space)
    */
   protected VisionIOLimelightBase(
       String name,
       DoubleSupplier gyroAngleSupplier,
       DoubleSupplier gyroAngleRateSupplier,
-      boolean acceptMeasurements) {
+      boolean acceptMeasurements,
+      Transform3d robotToCamera) {
     table = NetworkTableInstance.getDefault().getTable(name);
     this.name = name;
     this.gyroAngleSupplier = gyroAngleSupplier;
     this.gyroAngleRateSupplier = gyroAngleRateSupplier;
     this.acceptMeasurements = acceptMeasurements;
+
+    // Push the camera mount transform to the Limelight so that robot code is the single
+    // source of truth for the camera pose (overrides any value set in the web UI)
+    LimelightHelpers.setCameraPose_RobotSpace(
+        name,
+        robotToCamera.getX(),
+        robotToCamera.getY(),
+        robotToCamera.getZ(),
+        Units.radiansToDegrees(robotToCamera.getRotation().getX()),
+        Units.radiansToDegrees(robotToCamera.getRotation().getY()),
+        Units.radiansToDegrees(robotToCamera.getRotation().getZ()));
   }
 
   /** Returns the NetworkTables name of this Limelight. */

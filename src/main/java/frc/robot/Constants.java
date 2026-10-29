@@ -12,7 +12,10 @@ import com.pathplanner.lib.config.RobotConfig;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.hal.HALUtil;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -148,6 +151,12 @@ public final class Constants {
     // === LIMELIGHT ===
     public static final String LIMELIGHT_3 = "limelight";
     public static final String LIMELIGHT_4 = "limelight-two";
+
+    // Camera mount transforms (meters, robot-space: +X forward, +Y left, +Z up)
+    // TODO: measure actual WoodBot camera mount position before deploying
+    public static final Transform3d LIMELIGHT_3_TRANSFORM =
+        new Transform3d(
+            new Translation3d(0.28, 0.0, 0.55), new Rotation3d(0, Math.toRadians(-25), 0));
 
     // === MAXIMUMS ===
     public static final LinearVelocity maxSpeed = MetersPerSecond.of(4.85);
@@ -287,6 +296,15 @@ public final class Constants {
     public static final String LIMELIGHT_RIGHT = "limelight-right";
     public static final String LIMELIGHT_LEFT = "limelight-left";
 
+    // Camera mount transforms (meters, robot-space: +X forward, +Y left, +Z up)
+    // TODO: measure actual PracticeBot camera mount positions before deploying
+    public static final Transform3d LIMELIGHT_RIGHT_TRANSFORM =
+        new Transform3d(
+            new Translation3d(0.28, -0.22, 0.55), new Rotation3d(0, Math.toRadians(-25), 0));
+    public static final Transform3d LIMELIGHT_LEFT_TRANSFORM =
+        new Transform3d(
+            new Translation3d(0.28, 0.22, 0.55), new Rotation3d(0, Math.toRadians(-25), 0));
+
     // === CANBUS ===
     public static final CANBus CANBUS = new CANBus("Default Name");
 
@@ -412,6 +430,15 @@ public final class Constants {
     // === LIMELIGHT ===
     public static final String LIMELIGHT_RIGHT = "limelight-right";
     public static final String LIMELIGHT_LEFT = "limelight-left";
+
+    // Camera mount transforms (meters, robot-space: +X forward, +Y left, +Z up)
+    // TODO: measure actual CompBot camera mount positions before deploying
+    public static final Transform3d LIMELIGHT_RIGHT_TRANSFORM =
+        new Transform3d(
+            new Translation3d(0.28, -0.22, 0.55), new Rotation3d(0, Math.toRadians(-25), 0));
+    public static final Transform3d LIMELIGHT_LEFT_TRANSFORM =
+        new Transform3d(
+            new Translation3d(0.28, 0.22, 0.55), new Rotation3d(0, Math.toRadians(-25), 0));
 
     // === CANBUS ===
     public static final CANBus CANBUS = new CANBus("Default Name");
