@@ -10,7 +10,7 @@ public class HoodIONoop implements HoodIO {
   public void setPositionAggressive(double position) {}
 
   @Override
-  public void updateInputs(HoodIOInputs inputs){
+  public void updateInputs(HoodIOInputs inputs) {
     inputs.connected = true;
   }
 }
