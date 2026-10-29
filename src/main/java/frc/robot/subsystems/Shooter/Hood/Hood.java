@@ -95,7 +95,7 @@ public class Hood extends SubsystemBase {
     this.shouldDuck = shouldDuck;
   }
 
-  private void updateState() {
+  protected void updateState() {
     previousState = currentState;
 
     switch (wantedState) {
@@ -121,7 +121,7 @@ public class Hood extends SubsystemBase {
         || targetDegrees >= FORWARD_SOFT_LIMIT_DEGREES - SOFT_LIMIT_PROXIMITY_DEGREES;
   }
 
-  private void applyState() {
+  protected void applyState() {
     switch (currentState) {
       case MOVING:
       case AT_SETPOINT:
