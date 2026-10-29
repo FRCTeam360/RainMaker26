@@ -137,6 +137,7 @@ public class IntakePivotIOSim implements IntakePivotIO {
     inputs.voltage = motorControllerSim.getSimState().getMotorVoltage();
     inputs.statorCurrent = motorControllerSim.getStatorCurrent().getValueAsDouble();
     inputs.supplyCurrent = motorControllerSim.getSupplyCurrent().getValueAsDouble();
+    inputs.connected = true;
 
     // Step 6: Update visualization (sim only)
     visualizer.update(intakePivotSim.getAngleRads());

@@ -34,6 +34,8 @@ public class Hood extends SubsystemBase {
   private DoubleSupplier hoodAngleSupplier = () -> 0.0;
   private BooleanSupplier shouldDuck = () -> false;
 
+  private final Alert motorDisconnected = new Alert("Hood motor disconnected!", AlertType.kError);
+
   // Enums
   public enum HoodWantedStates {
     IDLE,
@@ -248,5 +250,6 @@ public class Hood extends SubsystemBase {
     Logger.recordOutput("Superstructure/Subsystems/Hood/IsHoodUp", isHoodUp);
     SmartDashboard.putString(
         "Superstructure/Subsystems/Hood/CurrentHoodState", currentState.toString());
+    motorDisconnected.set(!inputs.connected);
   }
 }

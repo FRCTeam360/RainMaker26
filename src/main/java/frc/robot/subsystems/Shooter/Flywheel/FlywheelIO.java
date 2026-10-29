@@ -18,6 +18,7 @@ public interface FlywheelIO {
     public double[] voltages = new double[MAX_MOTORS];
     public double[] velocities = new double[MAX_MOTORS];
     public double[] positions = new double[MAX_MOTORS];
+    public boolean[] connected = new boolean[MAX_MOTORS];
   }
 
   /**
