@@ -144,7 +144,7 @@ public class ShotCalculator {
 
     // Compute field-relative shooter velocity for shoot-on-the-move compensation.
     // Start with the robot's translational velocity rotated into the field frame,
-    // then add the rotational contribution at the shooter offset from the robot center.
+    // then add the rotational contribution at the shooter offset from the robot center
     ChassisSpeeds robotSpeeds = velocitySupplier.get();
     double currentSpeed =
         Math.sqrt(
@@ -182,18 +182,21 @@ public class ShotCalculator {
     // Iteratively refine: the lookahead distance differs from the initial distance, so the correct
     // TOF is the one consistent with the lookahead it produces (fixed-point convergence).
     double timeOfFlightSecs = timeOfFlightMap.get(shooterToTargetDistanceMeters);
-    Translation2d lookaheadPosition = shooterPosition.getTranslation();
+    double[] lookaheadPosition = {shooterPosition.getX(), shooterPosition.getY()};
     for (int i = 0; i < 10; i++) {
-      lookaheadPosition =
-          shooterPosition
-              .getTranslation()
-              .plus(
-                  new Translation2d(
-                      shooterVelXMps * timeOfFlightSecs, shooterVelYMps * timeOfFlightSecs));
-      double newTof = timeOfFlightMap.get(target.getDistance(lookaheadPosition));
+      lookaheadPosition[0] = shooterPosition.getX() + shooterVelXMps * timeOfFlightSecs;
+      lookaheadPosition[1] = shooterPosition.getY() + shooterVelYMps * timeOfFlightSecs;
+      double newTof =
+          timeOfFlightMap.get(
+              Math.sqrt(
+                  Math.pow(lookaheadPosition[0] - target.getX(), 2)
+                      + Math.pow(lookaheadPosition[1] - target.getY(), 2)));
       timeOfFlightSecs = newTof;
     }
-    double lookaheadDistanceMeters = target.getDistance(lookaheadPosition);
+    double lookaheadDistanceMeters =
+        Math.sqrt(
+            Math.pow(lookaheadPosition[0] - target.getX(), 2)
+                + Math.pow(lookaheadPosition[1] - target.getY(), 2));
 
     double effectiveDistanceMeters =
         Math.max(minDistanceMeters, Math.min(maxDistanceMeters, lookaheadDistanceMeters));
@@ -202,15 +205,21 @@ public class ShotCalculator {
     // First find the field-frame angle from the velocity-compensated robot center to the target,
     // then subtract the shooter's facing angle relative to the robot so the drivetrain
     // orients the shooter toward the target.
-    Translation2d robotCenterLookahead =
-        robotPosition
-            .getTranslation()
-            .plus(
-                new Translation2d(
-                    robotFieldVelocity.getX() * timeOfFlightSecs,
-                    robotFieldVelocity.getY() * timeOfFlightSecs));
-    Rotation2d angleToTarget = target.minus(robotCenterLookahead).getAngle();
-    Rotation2d targetHeading = angleToTarget.minus(robotToShooter.getRotation());
+    double[] robotCenterLookahead = {
+      robotPosition.getX() + robotFieldVelocity.getX() * timeOfFlightSecs,
+      robotPosition.getY() + robotFieldVelocity.getY() * timeOfFlightSecs
+    };
+    double angleToTarget =
+        Math.atan2(
+            (target.getY() - robotCenterLookahead[1])
+                / Math.hypot(
+                    target.getX() - robotCenterLookahead[0],
+                    target.getY() - robotCenterLookahead[1]),
+            (target.getX() - robotCenterLookahead[0])
+                / Math.hypot(
+                    target.getX() - robotCenterLookahead[0],
+                    target.getY() - robotCenterLookahead[1]));
+    Rotation2d targetHeading = new Rotation2d(angleToTarget).minus(robotToShooter.getRotation());
 
     double hoodAngle = shotHoodAngleMap.get(effectiveDistanceMeters);
     double flywheelSpeed =
@@ -238,8 +247,11 @@ public class ShotCalculator {
     Logger.recordOutput(
         logHeadingErrorDeg,
         Math.IEEEremainder(targetHeading.getDegrees() - currentHeadingDeg, 360.0));
-    Logger.recordOutput(logLookaheadPose, new Pose2d(lookaheadPosition, targetHeading));
-    Logger.recordOutput(logRobotCenterLookahead, new Pose2d(robotCenterLookahead, targetHeading));
+    Logger.recordOutput(
+        logLookaheadPose, new Pose2d(lookaheadPosition[0], lookaheadPosition[1], targetHeading));
+    Logger.recordOutput(
+        logRobotCenterLookahead,
+        new Pose2d(robotCenterLookahead[0], robotCenterLookahead[1], targetHeading));
     Logger.recordOutput(logTimeOfFlightSecs, timeOfFlightSecs);
     Logger.recordOutput(logIsValid, isValid);
     Logger.recordOutput(logRobotSpeeds, robotSpeeds);
