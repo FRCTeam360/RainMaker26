@@ -8,4 +8,9 @@ public class HoodIONoop implements HoodIO {
   public void setPositionSmooth(double position) {}
 
   public void setPositionAggressive(double position) {}
+
+  @Override
+  public void updateInputs(HoodIOInputs inputs) {
+    inputs.connected = true;
+  }
 }

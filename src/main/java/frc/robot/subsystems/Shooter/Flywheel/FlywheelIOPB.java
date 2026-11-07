@@ -175,5 +175,19 @@ public class FlywheelIOPB implements FlywheelIO {
     inputs.positions[1] = leftPositionSignal.getValueAsDouble();
     inputs.velocities[1] = RotationsPerSecond.of(leftVelocitySignal.getValueAsDouble()).in(RPM);
     inputs.voltages[1] = leftMotorVoltageSignal.getValueAsDouble();
+    inputs.connected[0] =
+        BaseStatusSignal.isAllGood(
+            rightStatorCurrentSignal,
+            rightSupplyCurrentSignal,
+            rightPositionSignal,
+            rightVelocitySignal,
+            rightMotorVoltageSignal);
+    inputs.connected[1] =
+        BaseStatusSignal.isAllGood(
+            leftStatorCurrentSignal,
+            leftSupplyCurrentSignal,
+            leftPositionSignal,
+            leftVelocitySignal,
+            leftMotorVoltageSignal);
   }
 }

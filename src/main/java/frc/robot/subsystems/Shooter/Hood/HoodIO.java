@@ -16,6 +16,7 @@ public interface HoodIO {
     public double velocity = 0.0;
     public double position = 0.0;
     public double positionRotations = 0.0;
+    public boolean connected = false;
   }
 
   public default void updateInputs(HoodIOInputs inputs) {}

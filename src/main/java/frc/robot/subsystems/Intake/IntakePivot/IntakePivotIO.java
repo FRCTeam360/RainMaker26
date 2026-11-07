@@ -16,6 +16,7 @@ public interface IntakePivotIO {
     public double velocity = 0.0;
     public double position = 0.0;
     public boolean brakeMode = true;
+    public boolean connected = false;
   }
 
   public void setZero();

@@ -121,6 +121,13 @@ public class HoodIOCB implements HoodIO {
     inputs.supplyCurrent = supplyCurrentSignal.getValueAsDouble();
     inputs.velocity = Units.rotationsToDegrees(velocitySignal.getValueAsDouble());
     inputs.voltage = motorVoltageSignal.getValueAsDouble();
+    inputs.connected =
+        BaseStatusSignal.isAllGood(
+            positionSignal,
+            velocitySignal,
+            statorCurrentSignal,
+            supplyCurrentSignal,
+            motorVoltageSignal);
   }
 
   public void setDutyCycle(double dutyCycle) {
