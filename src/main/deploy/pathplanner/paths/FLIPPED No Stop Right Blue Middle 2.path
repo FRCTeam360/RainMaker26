@@ -16,32 +16,32 @@
     },
     {
       "anchor": {
-        "x": 1.916622,
-        "y": 1.306556
+        "x": 1.658345,
+        "y": 0.819743
       },
       "prevControl": {
-        "x": 1.896791,
-        "y": 1.604018
+        "x": 1.578083,
+        "y": 1.106858
       },
       "nextControl": {
-        "x": 1.9556,
-        "y": 0.721889
+        "x": 1.819178,
+        "y": 0.244411
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 3.0957,
-        "y": 0.575722
+        "x": 3.699856,
+        "y": 0.400322
       },
       "prevControl": {
-        "x": 2.540267,
-        "y": 0.624444
+        "x": 3.142329,
+        "y": 0.406959
       },
       "nextControl": {
-        "x": 3.90844,
-        "y": 0.504429
+        "x": 4.518389,
+        "y": 0.390578
       },
       "isLocked": false,
       "linkedName": null
@@ -97,15 +97,15 @@
     {
       "anchor": {
         "x": 7.685333,
-        "y": 2.797456
+        "y": 3.099533
       },
       "prevControl": {
         "x": 7.847223,
-        "y": 3.73282
+        "y": 4.034897
       },
       "nextControl": {
         "x": 7.509933,
-        "y": 1.784033
+        "y": 2.08611
       },
       "isLocked": false,
       "linkedName": null
@@ -131,7 +131,7 @@
     },
     {
       "waypointRelativePos": 2.6132780082987583,
-      "rotationDegrees": 10.764
+      "rotationDegrees": 5.764
     },
     {
       "waypointRelativePos": 3.011618257261416,
@@ -160,8 +160,8 @@
       "minWaypointRelativePos": 0,
       "maxWaypointRelativePos": 2.112158808933007,
       "constraints": {
-        "maxVelocity": 2.0,
-        "maxAcceleration": 8.0,
+        "maxVelocity": 3.0,
+        "maxAcceleration": 6.0,
         "maxAngularVelocity": 360.0,
         "maxAngularAcceleration": 540.0,
         "nominalVoltage": 12.0,
@@ -170,11 +170,11 @@
     },
     {
       "name": "Constraints Zone",
-      "minWaypointRelativePos": 4.3215880893300245,
+      "minWaypointRelativePos": 3.4647482014388444,
       "maxWaypointRelativePos": 6.322580645161285,
       "constraints": {
         "maxVelocity": 2.0,
-        "maxAcceleration": 8.0,
+        "maxAcceleration": 6.0,
         "maxAngularVelocity": 360.0,
         "maxAngularAcceleration": 540.0,
         "nominalVoltage": 12.0,
@@ -197,7 +197,7 @@
     "rotation": -158.4986
   },
   "reversed": false,
-  "folder": "FLIPPED Blue Right A3",
+  "folder": "FLIPPED Blue Right Middle Standard",
   "idealStartingState": {
     "velocity": 0,
     "rotation": -156.9745
