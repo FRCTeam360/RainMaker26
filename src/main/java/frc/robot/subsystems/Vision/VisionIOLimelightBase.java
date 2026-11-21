@@ -13,6 +13,7 @@ import frc.robot.utils.FieldConstants;
 import frc.robot.utils.LimelightHelpers;
 import frc.robot.utils.LimelightHelpers.PoseEstimate;
 import frc.robot.utils.LimelightHelpers.RawFiducial;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.DoubleSupplier;
 
@@ -21,6 +22,9 @@ import java.util.function.DoubleSupplier;
  * filtering, and MegaTag2 logic.
  */
 public abstract class VisionIOLimelightBase implements VisionIO {
+  private static final PoseObservation[] NO_OBSERVATIONS = new PoseObservation[0];
+  private static final int[] NO_TAG_IDS = new int[0];
+
   private final NetworkTable table;
   private final String name;
   protected final DoubleSupplier gyroAngleSupplier;
@@ -53,6 +57,7 @@ public abstract class VisionIOLimelightBase implements VisionIO {
   }
 
   /** Returns the NetworkTables name of this Limelight. */
+  @Override
   public String getName() {
     return name;
   }
@@ -86,18 +91,20 @@ public abstract class VisionIOLimelightBase implements VisionIO {
   public void updateInputs(VisionIOInputs inputs) {
     pollCameraPose();
     inputs.cameraPose = cameraPoseRobotSpace;
+    inputs.connected = LimelightHelpers.getHeartbeat(name) != 0;
     // Set robot orientation for MegaTag2 (flushed by postSchedulerUpdate)
     LimelightHelpers.SetRobotOrientation_NoFlush(
         name, gyroAngleSupplier.getAsDouble(), gyroAngleRateSupplier.getAsDouble(), 0, 0, 0, 0);
 
-    // Assume that the pose hasn't been updated
-    inputs.poseUpdated = false;
+    // Start with no observations until we confirm one is valid
+    inputs.poseObservations = NO_OBSERVATIONS;
+    inputs.tagIds = NO_TAG_IDS;
 
-    inputs.tv = getTV();
-    inputs.tx = getTXRaw();
-    inputs.ty = getTYRaw();
+    inputs.hasTarget = getTV() != 0.0;
+    inputs.txDeg = getTXRaw();
+    inputs.tyDeg = getTYRaw();
     inputs.pipeline = (int) getPipeline();
-    inputs.tagID = getAprilTagID();
+    inputs.primaryTagId = getAprilTagID();
     inputs.hasIMU = hasIMU();
 
     if (!acceptMeasurements) {
@@ -105,17 +112,14 @@ public abstract class VisionIOLimelightBase implements VisionIO {
     }
 
     // Get the pose estimate from limelight helpers
-    Optional<PoseEstimate> newPoseEstimate;
-    // If enabled, get megatag 2 pose
-    newPoseEstimate = getMegatag2PoseEst();
+    Optional<PoseEstimate> newPoseEstimate = getMegatag2PoseEst();
 
     // if the new pose estimate is null or angle rate is greater than 720 degrees
     // per, then don't update further
     if (newPoseEstimate.isEmpty()
-        || inputs.tv == 0.0
+        || !inputs.hasTarget
         || Math.abs(gyroAngleRateSupplier.getAsDouble()) > 720.0) return;
-    // if the megatag1 pose estimate has less than 2 tags in it, don't update
-    // further
+    // Only MegaTag2 poses are accepted
     if (!newPoseEstimate.get().isMegaTag2) return;
     if (newPoseEstimate.get().tagCount == 0) return;
     if (Math.abs(
@@ -129,25 +133,34 @@ public abstract class VisionIOLimelightBase implements VisionIO {
 
     PoseEstimate poseEstimate = newPoseEstimate.get();
 
-    inputs.estimatedPose = poseEstimate.pose;
-    inputs.timestampSeconds = poseEstimate.timestampSeconds;
-
-    // Fill in target information directly into inputs arrays (zero allocation)
-    int targetCount = 0;
-    for (int i = 0; i < poseEstimate.rawFiducials.length; i++) {
-      RawFiducial rawFiducial = poseEstimate.rawFiducials[i];
-      // if the pose is outside of the field, then skip to the next point
+    // Collect observed tags and the closest one (used to scale measurement trust)
+    int[] tagIds = new int[poseEstimate.rawFiducials.length];
+    int tagCount = 0;
+    double closestTagDistance = Double.MAX_VALUE;
+    for (RawFiducial rawFiducial : poseEstimate.rawFiducials) {
       Optional<Pose3d> tagPose = FieldConstants.FIELD_LAYOUT.getTagPose(rawFiducial.id);
-      if (targetCount >= MAX_TAGS || tagPose.isEmpty()) continue;
+      if (tagPose.isEmpty()) continue;
 
-      inputs.targetIds[targetCount] = rawFiducial.id;
-      inputs.distancesToTargets[targetCount] = rawFiducial.distToRobot;
-      inputs.tagPoses[targetCount] = tagPose.get();
-      targetCount++;
+      tagIds[tagCount++] = rawFiducial.id;
+      closestTagDistance = Math.min(closestTagDistance, rawFiducial.distToRobot);
     }
+    if (tagCount == 0) {
+      return;
+    }
+    inputs.tagIds = Arrays.copyOf(tagIds, tagCount);
 
-    inputs.targetCount = targetCount;
-    inputs.poseUpdated = true;
+    double ambiguity = poseEstimate.tagCount == 1 ? poseEstimate.rawFiducials[0].ambiguity : 0.0;
+
+    inputs.poseObservations =
+        new PoseObservation[] {
+          new PoseObservation(
+              poseEstimate.timestampSeconds,
+              new Pose3d(poseEstimate.pose),
+              ambiguity,
+              poseEstimate.tagCount,
+              closestTagDistance,
+              PoseObservationType.MEGATAG_2)
+        };
     updateObservedTagOrientation(inputs);
   }
 

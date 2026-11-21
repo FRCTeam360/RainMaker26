@@ -76,6 +76,7 @@ import frc.robot.subsystems.Vision.VisionIOLimelight3G;
 import frc.robot.subsystems.Vision.VisionIOLimelight4;
 import frc.robot.subsystems.Vision.VisionIOLimelightBase;
 import frc.robot.subsystems.Vision.VisionIOPhotonSim;
+import frc.robot.subsystems.Vision.VisionIOQuestNav;
 import frc.robot.utils.AllianceFlipUtil;
 import frc.robot.utils.CommandLogger;
 import frc.robot.utils.FieldConstants;
@@ -236,7 +237,8 @@ public class RobotContainer {
                     Constants.PracticeBotConstants.LIMELIGHT_LEFT,
                     () -> drivetrain.getAngle(),
                     () -> drivetrain.getAngularRate(),
-                    true));
+                    true),
+                new VisionIOQuestNav());
         intakeRoller = new IntakeRoller(new IntakeRollerIOPB());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOPB());
         intakePivot = new IntakePivot(new IntakePivotIOPB());
@@ -286,7 +288,8 @@ public class RobotContainer {
                     Constants.CompBotConstants.LIMELIGHT_LEFT,
                     () -> drivetrain.getAngle(),
                     () -> drivetrain.getAngularRate(),
-                    true));
+                    true),
+                new VisionIOQuestNav());
         intakeRoller = new IntakeRoller(new IntakeRollerIOCB());
         flywheelKicker = new FlywheelKicker(new FlywheelKickerIOCB());
         intakePivot = new IntakePivot(new IntakePivotIOCB());
@@ -424,6 +427,7 @@ public class RobotContainer {
         Optional<Pose2d> selectedStartingPose = autoChooser.getSelectedStartingPose();
         if (selectedStartingPose.isPresent()) {
           drivetrain.resetPose(selectedStartingPose.get());
+          vision.setPose(selectedStartingPose.get());
         }
         chosenAutoName = selectedName;
       }

@@ -12,6 +12,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -30,6 +31,8 @@ import org.photonvision.targeting.PhotonTrackedTarget;
  * a robot pose supplier to know where the simulated camera is on the field.
  */
 public class VisionIOPhotonSim implements VisionIO {
+  private static final PoseObservation[] NO_OBSERVATIONS = new PoseObservation[0];
+  private static final int[] NO_TAG_IDS = new int[0];
 
   private final PhotonCamera camera;
   private final PhotonPoseEstimator photonEstimator;
@@ -90,11 +93,12 @@ public class VisionIOPhotonSim implements VisionIO {
   }
 
   private void updateInputsWhenNoTargets(VisionIOInputs inputs) {
-    inputs.tv = 0.0;
-    inputs.tx = 0.0;
-    inputs.ty = 0.0;
-    inputs.tagID = -1;
-    inputs.targetCount = 0;
+    inputs.hasTarget = false;
+    inputs.txDeg = 0.0;
+    inputs.tyDeg = 0.0;
+    inputs.primaryTagId = -1;
+    inputs.tagIds = NO_TAG_IDS;
+    inputs.poseObservations = NO_OBSERVATIONS;
   }
 
   @Override
@@ -103,10 +107,11 @@ public class VisionIOPhotonSim implements VisionIO {
     Pose2d robotPose = robotPoseSupplier.get();
     visionSim.update(robotPose);
 
-    // Assume pose hasn't been updated until we confirm otherwise
-    inputs.poseUpdated = false;
+    inputs.connected = true;
     inputs.pipeline = currentPipeline;
     inputs.cameraPose = cameraPoseRobotSpace;
+    inputs.poseObservations = NO_OBSERVATIONS;
+    inputs.tagIds = NO_TAG_IDS;
 
     // Process all unread camera results
     var results = camera.getAllUnreadResults();
@@ -128,14 +133,14 @@ public class VisionIOPhotonSim implements VisionIO {
     }
 
     // We have at least one target
-    inputs.tv = 1.0;
+    inputs.hasTarget = true;
 
     // Get the best target for tx/ty
     PhotonTrackedTarget bestTarget = latestResult.getBestTarget();
     if (bestTarget != null) {
-      inputs.tx = bestTarget.getYaw();
-      inputs.ty = bestTarget.getPitch();
-      inputs.tagID = bestTarget.getFiducialId();
+      inputs.txDeg = bestTarget.getYaw();
+      inputs.tyDeg = bestTarget.getPitch();
+      inputs.primaryTagId = bestTarget.getFiducialId();
     }
 
     // Try to estimate robot pose using multi-tag first, then fall back to single tag
@@ -149,19 +154,17 @@ public class VisionIOPhotonSim implements VisionIO {
     if (visionEst.isPresent()) {
       EstimatedRobotPose est = visionEst.get();
 
-      inputs.estimatedPose = est.estimatedPose.toPose2d();
-      inputs.timestampSeconds = est.timestampSeconds;
-      inputs.poseUpdated = true;
-
-      // Fill in target information directly into inputs arrays (zero allocation)
-      int targetCount = 0;
+      // Fill in target information and find the closest observed tag
+      int[] tagIds = new int[targets.size()];
+      int tagCount = 0;
+      double closestTagDistance = Double.MAX_VALUE;
 
       for (PhotonTrackedTarget target : targets) {
         int tagId = target.getFiducialId();
         Optional<Pose3d> tagPose = kTagLayout.getTagPose(tagId);
 
-        if (targetCount >= MAX_TAGS || tagPose.isEmpty()) continue;
-        inputs.targetIds[targetCount] = tagId;
+        if (tagPose.isEmpty()) continue;
+        tagIds[tagCount++] = tagId;
 
         // Calculate distance from robot to tag
         double distance =
@@ -170,13 +173,24 @@ public class VisionIOPhotonSim implements VisionIO {
                 .toPose2d()
                 .getTranslation()
                 .getDistance(est.estimatedPose.toPose2d().getTranslation());
-        inputs.distancesToTargets[targetCount] = distance;
-
-        inputs.tagPoses[targetCount] = tagPose.get();
-        targetCount++;
+        closestTagDistance = Math.min(closestTagDistance, distance);
       }
 
-      inputs.targetCount = targetCount;
+      if (tagCount == 0) {
+        return;
+      }
+      inputs.tagIds = Arrays.copyOf(tagIds, tagCount);
+
+      inputs.poseObservations =
+          new PoseObservation[] {
+            new PoseObservation(
+                est.timestampSeconds,
+                est.estimatedPose,
+                bestTarget != null ? bestTarget.getPoseAmbiguity() : 0.0,
+                tagCount,
+                closestTagDistance,
+                PoseObservationType.PHOTONVISION)
+          };
 
       // Update the debug field visualization
       getSimDebugField().getObject("VisionEstimation").setPose(est.estimatedPose.toPose2d());

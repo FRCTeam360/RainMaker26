@@ -12,7 +12,10 @@ import com.pathplanner.lib.config.RobotConfig;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.hal.HALUtil;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -37,6 +40,11 @@ public final class Constants {
       AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
 
   public static Alliance AUTO_WINNER;
+
+  // TODO: Measure the Quest headset mount on the robot.
+  // Robot center to Quest headset: X forward, Y left, Z up (meters and radians).
+  public static final Transform3d ROBOT_TO_QUEST =
+      new Transform3d(new Translation3d(0.0, 0.0, 0.0), new Rotation3d(0.0, 0.0, 0.0));
 
   public static enum RobotType {
     SIM,
