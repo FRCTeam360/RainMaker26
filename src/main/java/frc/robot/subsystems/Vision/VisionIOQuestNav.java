@@ -28,6 +28,11 @@ public class VisionIOQuestNav implements VisionIO {
 
   private static final int LOW_BATTERY_THRESHOLD_PERCENT = 20;
 
+  // Placeholder estimate of headset-to-robot latency in seconds. QuestNav does not report a
+  // per-frame latency, so the timestamp is pushed back by this fixed offset (same pattern as the
+  // Limelight latency adjustment). Tune once real latency is measured.
+  private static final double QUEST_LATENCY_SECONDS = 0.05;
+
   private final gg.questnav.questnav.QuestNav questNav = new gg.questnav.questnav.QuestNav();
   private final Transform3d robotToQuest = Constants.ROBOT_TO_QUEST;
 
@@ -47,7 +52,8 @@ public class VisionIOQuestNav implements VisionIO {
     int batteryPercent = questNav.getBatteryPercent().orElse(-1);
 
     trackingLostAlert.set(connected && !tracking);
-    lowBatteryAlert.set(batteryPercent >= 0 && batteryPercent <= LOW_BATTERY_THRESHOLD_PERCENT);
+    lowBatteryAlert.set(
+        connected && batteryPercent >= 0 && batteryPercent <= LOW_BATTERY_THRESHOLD_PERCENT);
 
     inputs.connected = connected;
     inputs.hasTarget = false;
@@ -70,7 +76,12 @@ public class VisionIOQuestNav implements VisionIO {
 
       observations.add(
           new PoseObservation(
-              frame.dataTimestamp(), robotPose, 0.0, 0, 0.0, PoseObservationType.QUESTNAV));
+              frame.dataTimestamp() - QUEST_LATENCY_SECONDS,
+              robotPose,
+              0.0,
+              0,
+              0.0,
+              PoseObservationType.QUESTNAV));
     }
 
     inputs.poseObservations = observations.toArray(new PoseObservation[0]);
