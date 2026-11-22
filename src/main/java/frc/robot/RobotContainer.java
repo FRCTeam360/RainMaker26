@@ -125,7 +125,6 @@ public class RobotContainer {
 
   private final CommandXboxController driverCont = new CommandXboxController(0);
   private final CommandXboxController operatorCont = new CommandXboxController(1);
-  private final CommandXboxController testCont1 = new CommandXboxController(5);
 
   /** Threshold above which a loop cycle is considered an overrun (22ms for a 20ms loop). */
   private static final double LOOP_OVERRUN_THRESHOLD_SECONDS = 0.022;
@@ -585,7 +584,16 @@ public class RobotContainer {
           .onTrue(superStructure.toggleIntakeStateCommand());
     }
 
-    configureIndependentModeBindings(isIndependentMode);
+    new TestBindings(
+            isIndependentMode,
+            intakeRoller,
+            indexer,
+            hood,
+            flywheelKicker,
+            intakePivot,
+            hopperRoller,
+            flywheel)
+        .configure();
 
     driverCont.a().onTrue(superStructure.setStateCommand(SuperWantedStates.UNJAMMING));
     driverCont.a().onFalse(superStructure.setStateCommand(SuperWantedStates.DEFAULT));
@@ -595,60 +603,6 @@ public class RobotContainer {
     driverCont.back().onTrue(drivetrain.zeroCommand());
 
     driverCont.rightStick().onTrue(drivetrain.toggleHeadingLockCommand());
-  }
-
-  /** Configures bindings that are active only in independent (test) mode. */
-  private void configureIndependentModeBindings(BooleanSupplier isIndependentMode) {
-    driverCont
-        .leftBumper()
-        .and(isIndependentMode)
-        .whileTrue(intakeRoller.setVelocityCommand(3000.0));
-    driverCont
-        .rightBumper()
-        .and(isIndependentMode)
-        .whileTrue(intakeRoller.setDutyCycleCommand(-0.6));
-    driverCont.rightTrigger().and(isIndependentMode).whileTrue(indexer.setDutyCycleCommand(0.2));
-    driverCont.leftTrigger().and(isIndependentMode).whileTrue(indexer.setDutyCycleCommand(-0.2));
-
-    // driverCont.a().and(isIndependentMode).whileTrue(indexer.setDutyCycleCommand(0.5));
-
-    // hood bindings
-    driverCont.pov(0).and(isIndependentMode).onTrue(hood.setPositionCommand(40.0));
-    driverCont.pov(180).and(isIndependentMode).onTrue(hood.setPositionCommand(0.0));
-
-    driverCont.pov(90).and(isIndependentMode).whileTrue(flywheelKicker.setDutyCycleCommand(0.2));
-    driverCont.pov(270).and(isIndependentMode).whileTrue(flywheelKicker.setDutyCycleCommand(-0.2));
-
-    driverCont.a().and(isIndependentMode).onTrue(intakePivot.setPositionCommand(() -> 96.0));
-    driverCont.y().and(isIndependentMode).onTrue(intakePivot.setPositionCommand(() -> 0.0));
-
-    driverCont.x().and(isIndependentMode).whileTrue(hopperRoller.setDutyCycleCommand(0.2));
-    driverCont.b().and(isIndependentMode).whileTrue(hopperRoller.setDutyCycleCommand(-0.2));
-
-    driverCont.start().and(isIndependentMode).whileTrue(flywheel.setDutyCycleCommand(0.2));
-    driverCont.back().and(isIndependentMode).onTrue(runSystemsTest());
-  }
-
-  Command runSystemsTest() {
-    return Commands.waitSeconds(0.1)
-        .andThen(Commands.waitSeconds(1.0).deadlineFor(intakePivot.setPositionCommand(() -> 96.0)))
-        .andThen(Commands.waitSeconds(1.0).deadlineFor(intakeRoller.setVelocityCommand(3000.0)))
-        .andThen(Commands.waitSeconds(1.0).deadlineFor(intakeRoller.setDutyCycleCommand(-0.6)))
-        .andThen(Commands.waitSeconds(0.1).deadlineFor(intakeRoller.setDutyCycleCommand(0)))
-        .andThen(Commands.waitSeconds(1.0).deadlineFor(indexer.setDutyCycleCommand(0.2)))
-        .andThen(Commands.waitSeconds(1.0).deadlineFor(indexer.setDutyCycleCommand(-0.2)))
-        .andThen(Commands.waitSeconds(0.1).deadlineFor(indexer.setDutyCycleCommand(0)))
-        .andThen(Commands.waitSeconds(1.0).deadlineFor(hood.setPositionCommand(40.0)))
-        .andThen(Commands.waitSeconds(1.0).deadlineFor(hood.setPositionCommand(0.0)))
-        .andThen(Commands.waitSeconds(1.0).deadlineFor(flywheelKicker.setDutyCycleCommand(0.2)))
-        .andThen(Commands.waitSeconds(1.0).deadlineFor(flywheelKicker.setDutyCycleCommand(-0.2)))
-        .andThen(Commands.waitSeconds(0.1).deadlineFor(flywheelKicker.setDutyCycleCommand(0)))
-        .andThen(Commands.waitSeconds(1.0).deadlineFor(hopperRoller.setDutyCycleCommand(0.2)))
-        .andThen(Commands.waitSeconds(1.0).deadlineFor(hopperRoller.setDutyCycleCommand(-0.2)))
-        .andThen(Commands.waitSeconds(0.1).deadlineFor(hopperRoller.setDutyCycleCommand(0)))
-        .andThen(Commands.waitSeconds(1.0).deadlineFor(flywheel.setDutyCycleCommand(0.2)))
-        .andThen(Commands.waitSeconds(0.1).deadlineFor(flywheel.setDutyCycleCommand(0)))
-        .andThen(Commands.waitSeconds(1.0).deadlineFor(intakePivot.setPositionCommand(() -> 0.0)));
   }
 
   /** Stops all subsystems safely when the robot is disabled. */
