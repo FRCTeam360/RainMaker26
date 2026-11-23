@@ -657,20 +657,23 @@ public class RobotContainer {
 
     // Drivetrain commands
     // driverCont.leftTrigger().whileTrue(drivetrain.faceHubWhileDriving(driverCont));
-    driverCont.back().onTrue(drivetrain.zeroCommand());
+
+    // 2025 drivebase: both reset bindings on the d-pad, so the drivetrain can be zeroed
+    // without touching the Quest headset (and the Quest headset can be seeded alone).
+    //   up = drivetrain zero, down = QuestNav seed.
+    if (Constants.getRobotType() == RobotType.DRIVEBASE_2025) {
+      driverCont.povUp().onTrue(drivetrain.zeroCommand());
+      driverCont.povDown().onTrue(seedQuestNavCommand());
+    } else {
+      driverCont.back().onTrue(drivetrain.zeroCommand());
+    }
 
     driverCont.rightStick().onTrue(drivetrain.toggleHeadingLockCommand());
-
-    // 2025 drivebase: seed QuestNav to a fixed corner as a backup (its AprilTag support may
-    // let it self-locate). Runs on the back button alongside the drivetrain zero command.
-    if (Constants.getRobotType() == RobotType.DRIVEBASE_2025) {
-      driverCont.back().onTrue(seedQuestNavCommand());
-    }
   }
 
   /**
-   * Builds the back-button command that seeds the Quest headset at a fixed corner of the field.
-   * QuestNav's AprilTag support may make this unnecessary, so it is only a backup.
+   * Builds the command that seeds the Quest headset at a fixed corner of the field. QuestNav's
+   * AprilTag support may make this unnecessary, so it is only a backup.
    */
   private Command seedQuestNavCommand() {
     return Commands.runOnce(
