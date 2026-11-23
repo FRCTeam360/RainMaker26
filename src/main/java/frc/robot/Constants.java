@@ -51,7 +51,8 @@ public final class Constants {
     WOODBOT,
     COMPBOT,
     PRACTICEBOT,
-    REPLAY
+    REPLAY,
+    DRIVEBASE_2025
   }
 
   /** Frames to skip between processed frames while disabled. Only affects Limelight 4. */
@@ -72,6 +73,8 @@ public final class Constants {
         return PracticeBotConstants.maxSpeed;
       case SIM:
         return SimulationConstants.maxSpeed;
+      case DRIVEBASE_2025:
+        return Drivebase2025Constants.maxSpeed;
       default:
         return PracticeBotConstants.maxSpeed;
     }
@@ -87,6 +90,8 @@ public final class Constants {
         return PracticeBotConstants.maxAngularVelocity;
       case SIM:
         return SimulationConstants.maxAngularVelocity;
+      case DRIVEBASE_2025:
+        return Drivebase2025Constants.maxAngularVelocity;
       default:
         return PracticeBotConstants.maxAngularVelocity;
     }
@@ -114,6 +119,8 @@ public final class Constants {
       robotType = Constants.RobotType.COMPBOT;
     } else if (serialAddress.equals(SerialAddressConstants.PRACTICE_SERIAL_ADDRESS)) {
       robotType = Constants.RobotType.PRACTICEBOT;
+    } else if (serialAddress.equals(SerialAddressConstants.DRIVEBASE_2025_SERIAL_ADDRESS)) {
+      robotType = Constants.RobotType.DRIVEBASE_2025;
     } else {
       robotType = Constants.RobotType.COMPBOT;
     }
@@ -576,9 +583,48 @@ public final class Constants {
     public static final int kDriverControllerPort = 0;
   }
 
+  public static class Drivebase2025Constants {
+    // === MAXIMUMS ===
+    // TODO: Tune these once the 2025 drivebase is running. Free speed is ~4.58 m/s at 12 V
+    // (see Drivebase2025.kSpeedAt12Volts); these are conservative starting values.
+    public static final LinearVelocity maxSpeed = MetersPerSecond.of(4.58);
+    public static final AngularVelocity maxAngularVelocity = RevolutionsPerSecond.of(4.0);
+
+    // === CANBUS ===
+    public static final CANBus CANBUS = new CANBus("Default Name");
+
+    // === PLACEHOLDER SHOOTING INFO ===
+    // The 2025 drivebase has no shooter, so these maps are placeholders: the 2025 drivebase
+    // never fires shooting logic. Kept only so the full repo wiring (SuperStructure, shot
+    // calculators) constructs and logs without throwing.
+    public static final InterpolatingDoubleTreeMap shotHoodAngleMap =
+        new InterpolatingDoubleTreeMap();
+    public static final InterpolatingDoubleTreeMap shotFlywheelSpeedMap =
+        new InterpolatingDoubleTreeMap();
+    public static final InterpolatingDoubleTreeMap timeOfFlightMap =
+        new InterpolatingDoubleTreeMap();
+
+    static {
+      shotHoodAngleMap.put(0.0, 0.0);
+      shotFlywheelSpeedMap.put(0.0, 0.0);
+      timeOfFlightMap.put(0.0, 0.0);
+    }
+
+    // === QUESTNAV POSE SEED ===
+    // QuestNav is seeded to a fixed corner as a backup; QuestNav's AprilTag support may let it
+    // self-locate instead. The seed is offset this far in from the far corner edges. TODO:
+    // measure the Quest headset mount on the 2025 drivebase and use its real robot dimensions.
+    public static final double QUEST_SEED_EDGE_MARGIN_METERS = 0.7;
+
+    public static final double SHOOT_MIN_DISTANCE_METERS = 0.0;
+    public static final double SHOOT_MAX_DISTANCE_METERS = 5.0;
+  }
+
   public static final class SerialAddressConstants {
     public static final String WOOD_SERIAL_ADDRESS = "032BE44A";
     public static final String COMP_SERIAL_ADDRESS = "025AE07E";
     public static final String PRACTICE_SERIAL_ADDRESS = "03260AD5";
+    // Serial address of the 2025 drivebase RIO (from the AdvantageKit-Swerve-Training repo).
+    public static final String DRIVEBASE_2025_SERIAL_ADDRESS = "03126D42";
   }
 }

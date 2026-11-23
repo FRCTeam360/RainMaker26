@@ -10,6 +10,7 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.FollowPathCommand;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -20,6 +21,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.RobotType;
 import frc.robot.generated.CompBotDrivetrain;
+import frc.robot.generated.Drivebase2025;
 import frc.robot.generated.PracticeBotDrivetrain;
 import frc.robot.generated.WoodBotDrivetrain;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
@@ -35,6 +37,7 @@ import frc.robot.subsystems.HopperSensor.HopperSensorIONoop;
 import frc.robot.subsystems.HopperSensor.HopperSensorIOSim;
 import frc.robot.subsystems.Indexer.Indexer;
 import frc.robot.subsystems.Indexer.IndexerIOCB;
+import frc.robot.subsystems.Indexer.IndexerIONoop;
 import frc.robot.subsystems.Indexer.IndexerIOPB;
 import frc.robot.subsystems.Indexer.IndexerIOSim;
 import frc.robot.subsystems.Indexer.IndexerIOWB;
@@ -45,22 +48,26 @@ import frc.robot.subsystems.Intake.IntakePivot.IntakePivotIOPB;
 import frc.robot.subsystems.Intake.IntakePivot.IntakePivotIOSim;
 import frc.robot.subsystems.Intake.IntakeRoller.IntakeRoller;
 import frc.robot.subsystems.Intake.IntakeRoller.IntakeRollerIOCB;
+import frc.robot.subsystems.Intake.IntakeRoller.IntakeRollerIONoop;
 import frc.robot.subsystems.Intake.IntakeRoller.IntakeRollerIOPB;
 import frc.robot.subsystems.Intake.IntakeRoller.IntakeRollerIOSim;
 import frc.robot.subsystems.Intake.IntakeRoller.IntakeRollerIOWB;
 import frc.robot.subsystems.Intake.IntakeStateMachine.IntakeWantedStates;
 import frc.robot.subsystems.Shooter.Flywheel.Flywheel;
 import frc.robot.subsystems.Shooter.Flywheel.FlywheelIOCBBangBang;
+import frc.robot.subsystems.Shooter.Flywheel.FlywheelIONoop;
 import frc.robot.subsystems.Shooter.Flywheel.FlywheelIOPBBangBang;
 import frc.robot.subsystems.Shooter.Flywheel.FlywheelIOSim;
 import frc.robot.subsystems.Shooter.Flywheel.FlywheelIOWBBangBang;
 import frc.robot.subsystems.Shooter.FlywheelKicker.FlywheelKicker;
 import frc.robot.subsystems.Shooter.FlywheelKicker.FlywheelKickerIOCB;
+import frc.robot.subsystems.Shooter.FlywheelKicker.FlywheelKickerIONoop;
 import frc.robot.subsystems.Shooter.FlywheelKicker.FlywheelKickerIOPB;
 import frc.robot.subsystems.Shooter.FlywheelKicker.FlywheelKickerIOSim;
 import frc.robot.subsystems.Shooter.FlywheelKicker.FlywheelKickerIOWB;
 import frc.robot.subsystems.Shooter.Hood.Hood;
 import frc.robot.subsystems.Shooter.Hood.HoodIOCB;
+import frc.robot.subsystems.Shooter.Hood.HoodIONoop;
 import frc.robot.subsystems.Shooter.Hood.HoodIOPB;
 import frc.robot.subsystems.Shooter.Hood.HoodIOSim;
 import frc.robot.subsystems.Shooter.Hood.HoodIOWB;
@@ -101,6 +108,7 @@ public class RobotContainer {
 
   // The robot's subsystems and commands are defined here...
   private CommandSwerveDrivetrain drivetrain;
+  // Null when autos are disabled (2025 drivebase).
   private final AutoChooser autoChooser;
   private Flywheel flywheel;
   private Hood hood;
@@ -143,8 +151,11 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    // Pre-load all PathPlanner path files into memory to avoid disk I/O during auto
-    PathProvider.initialize();
+    // Pre-load all PathPlanner path files into memory to avoid disk I/O during auto.
+    // Skipped for the 2025 drivebase, which runs no autos at all.
+    if (Constants.getRobotType() != RobotType.DRIVEBASE_2025) {
+      PathProvider.initialize();
+    }
 
     switch (Constants.getRobotType()) {
       case SIM:
@@ -271,6 +282,45 @@ public class RobotContainer {
                 0);
         indexerToFlywheelSeconds = Constants.PracticeBotConstants.INDEXER_TO_FLYWHEEL_SECONDS;
         break;
+      case DRIVEBASE_2025:
+        // 2025 drivebase test robot: QuestNav-only wiring. Everything else is NOOP IO, and
+        // autos are disabled (see the robot construction below and CommandSwerveDrivetrain).
+        drivetrain = Drivebase2025.createDrivetrain();
+        flywheel = new Flywheel(new FlywheelIONoop());
+        hood = new Hood(new HoodIONoop());
+        indexer = new Indexer(new IndexerIONoop());
+        vision = new Vision(new VisionIOQuestNav());
+        intakeRoller = new IntakeRoller(new IntakeRollerIONoop());
+        flywheelKicker = new FlywheelKicker(new FlywheelKickerIONoop());
+        intakePivot = new IntakePivot(new IntakePivotIONoop());
+        hopperRoller = new HopperRoller(new HopperRollerIONoop());
+        hopperSensor = new HopperSensor(new HopperSensorIONoop());
+
+        // No shooter hardware on this robot: placeholder shooting info keeps the full repo
+        // wiring (SuperStructure, shot calculators) constructing and logging without throwing.
+        // Nothing here is ever fired in this config.
+        robotShootingInfo =
+            new RobotShootingInfo(
+                Constants.Drivebase2025Constants.shotHoodAngleMap,
+                Constants.Drivebase2025Constants.shotFlywheelSpeedMap,
+                Constants.Drivebase2025Constants.timeOfFlightMap,
+                ShooterConstants.SIM_TO_SHOOTER,
+                Constants.Drivebase2025Constants.SHOOT_MIN_DISTANCE_METERS,
+                Constants.Drivebase2025Constants.SHOOT_MAX_DISTANCE_METERS,
+                Drivebase2025.kSpeedAt12Volts.in(MetersPerSecond),
+                0);
+        robotPassingInfo =
+            new RobotShootingInfo(
+                Constants.Drivebase2025Constants.shotHoodAngleMap,
+                Constants.Drivebase2025Constants.shotFlywheelSpeedMap,
+                Constants.Drivebase2025Constants.timeOfFlightMap,
+                ShooterConstants.SIM_TO_SHOOTER,
+                Constants.Drivebase2025Constants.SHOOT_MIN_DISTANCE_METERS,
+                Constants.Drivebase2025Constants.SHOOT_MAX_DISTANCE_METERS,
+                Drivebase2025.kSpeedAt12Volts.in(MetersPerSecond),
+                0);
+        indexerToFlywheelSeconds = 0.0;
+        break;
       case COMPBOT:
       default:
         drivetrain = CompBotDrivetrain.createDrivetrain();
@@ -368,58 +418,69 @@ public class RobotContainer {
             drivetrain::getPosition,
             robotShootingInfo.robotToShooter(),
             indexerToFlywheelSeconds);
-    registerPathplannerCommand(
-        "basic intake", superStructure.setIntakeStateCommand(IntakeWantedStates.INTAKING));
-    registerPathplannerCommand("shoot at hub", shootAtHubCommand());
-    registerPathplannerCommand(
-        "stow intake", superStructure.setIntakeStateCommand(IntakeWantedStates.STOWED));
-    registerPathplannerCommand(
-        "default", superStructure.setStateCommand(SuperWantedStates.DEFAULT));
-    registerPathplannerCommand(
-        "deploy intake", superStructure.setIntakeStateCommand(IntakeWantedStates.DEPLOYED));
-    registerPathplannerCommand(
-        "agitate intake", superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING));
-    registerPathplannerCommand(
-        "shoot without timer",
-        superStructure
-            .setStateCommand(SuperWantedStates.SHOOT_AT_HUB)
-            .alongWith(
-                drivetrain.faceAngleWhileDrivingCommand(
-                    () -> 0, () -> 0, () -> hubShotCalculator.calculateShot().targetHeading()))
-            .alongWith(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING))
-            .handleInterrupt(
-                () -> {
-                  superStructure.setWantedSuperState(SuperWantedStates.DEFAULT);
-                  superStructure.setIntakeState(IntakeWantedStates.DEPLOYED);
-                }));
-    registerPathplannerCommand(
-        "start shooting while moving",
-        Commands.runOnce(
-                () ->
-                    drivetrain.setAutoRotationOverride(
-                        () -> hubShotCalculator.calculateShot().targetHeading()))
-            .andThen(superStructure.setStateCommand(SuperWantedStates.SHOOT_AT_HUB))
-            .alongWith(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING)));
-    registerPathplannerCommand(
-        "stop shooting while moving",
-        Commands.runOnce(() -> drivetrain.clearAutoRotationOverride())
-            .andThen(
-                superStructure
-                    .setStateCommand(SuperWantedStates.DEFAULT)
-                    .alongWith(superStructure.setIntakeStateCommand(IntakeWantedStates.DEPLOYED))));
+    // Autonomous/PathPlanner is disabled entirely for the 2025 drivebase: no NamedCommands.
+    if (Constants.getRobotType() != RobotType.DRIVEBASE_2025) {
+      registerPathplannerCommand(
+          "basic intake", superStructure.setIntakeStateCommand(IntakeWantedStates.INTAKING));
+      registerPathplannerCommand("shoot at hub", shootAtHubCommand());
+      registerPathplannerCommand(
+          "stow intake", superStructure.setIntakeStateCommand(IntakeWantedStates.STOWED));
+      registerPathplannerCommand(
+          "default", superStructure.setStateCommand(SuperWantedStates.DEFAULT));
+      registerPathplannerCommand(
+          "deploy intake", superStructure.setIntakeStateCommand(IntakeWantedStates.DEPLOYED));
+      registerPathplannerCommand(
+          "agitate intake", superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING));
+      registerPathplannerCommand(
+          "shoot without timer",
+          superStructure
+              .setStateCommand(SuperWantedStates.SHOOT_AT_HUB)
+              .alongWith(
+                  drivetrain.faceAngleWhileDrivingCommand(
+                      () -> 0, () -> 0, () -> hubShotCalculator.calculateShot().targetHeading()))
+              .alongWith(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING))
+              .handleInterrupt(
+                  () -> {
+                    superStructure.setWantedSuperState(SuperWantedStates.DEFAULT);
+                    superStructure.setIntakeState(IntakeWantedStates.DEPLOYED);
+                  }));
+      registerPathplannerCommand(
+          "start shooting while moving",
+          Commands.runOnce(
+                  () ->
+                      drivetrain.setAutoRotationOverride(
+                          () -> hubShotCalculator.calculateShot().targetHeading()))
+              .andThen(superStructure.setStateCommand(SuperWantedStates.SHOOT_AT_HUB))
+              .alongWith(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING)));
+      registerPathplannerCommand(
+          "stop shooting while moving",
+          Commands.runOnce(() -> drivetrain.clearAutoRotationOverride())
+              .andThen(
+                  superStructure
+                      .setStateCommand(SuperWantedStates.DEFAULT)
+                      .alongWith(
+                          superStructure.setIntakeStateCommand(IntakeWantedStates.DEPLOYED))));
+    }
 
     configVision();
     configDefaultDrivingCommand();
     configureBindings();
 
-    autoChooser = new AutoChooser(drivetrain, superStructure, this::shootAtHubCommand);
-
-    CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
+    // Autos are disabled for the 2025 drivebase: no AutoChooser, no PathPlanner warmup.
+    if (Constants.getRobotType() != RobotType.DRIVEBASE_2025) {
+      autoChooser = new AutoChooser(drivetrain, superStructure, this::shootAtHubCommand);
+      CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
+    } else {
+      autoChooser = null;
+    }
     // Uncomment this if pathplanner starts to suck on loading
     // CommandScheduler.getInstance().schedule(PathfindingCommand.warmupCommand());
   }
 
   public void disabledPeriodic() {
+    if (autoChooser == null) {
+      return;
+    }
     if (!hasAutoRun) {
       autoChooser.update();
       String selectedName = autoChooser.getSelectedName();
@@ -599,6 +660,30 @@ public class RobotContainer {
     driverCont.back().onTrue(drivetrain.zeroCommand());
 
     driverCont.rightStick().onTrue(drivetrain.toggleHeadingLockCommand());
+
+    // 2025 drivebase: seed QuestNav to a fixed corner as a backup (its AprilTag support may
+    // let it self-locate). Runs on the back button alongside the drivetrain zero command.
+    if (Constants.getRobotType() == RobotType.DRIVEBASE_2025) {
+      driverCont.back().onTrue(seedQuestNavCommand());
+    }
+  }
+
+  /**
+   * Builds the back-button command that seeds the Quest headset at a fixed corner of the field.
+   * QuestNav's AprilTag support may make this unnecessary, so it is only a backup.
+   */
+  private Command seedQuestNavCommand() {
+    return Commands.runOnce(
+            () -> {
+              double seedX =
+                  FieldConstants.fieldLength
+                      - Constants.Drivebase2025Constants.QUEST_SEED_EDGE_MARGIN_METERS;
+              double seedY =
+                  FieldConstants.fieldWidth
+                      - Constants.Drivebase2025Constants.QUEST_SEED_EDGE_MARGIN_METERS;
+              vision.setPose(new Pose2d(seedX, seedY, Rotation2d.kZero));
+            })
+        .ignoringDisable(true);
   }
 
   /** Configures bindings that are active only in independent (test) mode. */
@@ -737,7 +822,10 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    // An example command will be run in autonomous
+    // No autos are run in this config (2025 drivebase) — nothing to schedule.
+    if (autoChooser == null) {
+      return null;
+    }
     return autoChooser.getSelected();
   }
 }
