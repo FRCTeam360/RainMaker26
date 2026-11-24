@@ -625,6 +625,6 @@ public final class Constants {
     public static final String COMP_SERIAL_ADDRESS = "025AE07E";
     public static final String PRACTICE_SERIAL_ADDRESS = "03260AD5";
     // Serial address of the 2025 drivebase RIO (from the AdvantageKit-Swerve-Training repo).
-    public static final String DRIVEBASE_2025_SERIAL_ADDRESS = "03126D42";
+    public static final String DRIVEBASE_2025_SERIAL_ADDRESS = "03126d42";
   }
 }
