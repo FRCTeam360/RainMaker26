@@ -1,0 +1,54 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 3.641388888888889,
+        "y": 5.9643999999999995
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 2.56921364204093,
+        "y": 6.43926034792277
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 2.540266666666667,
+        "y": 6.588044444444445
+      },
+      "prevControl": {
+        "x": 3.175223817867416,
+        "y": 6.26169748723518
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "End Optimistic Path1"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 4.0,
+    "maxAcceleration": 8.0,
+    "maxAngularVelocity": 360.0,
+    "maxAngularAcceleration": 540.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 125.65532809790032
+  },
+  "reversed": false,
+  "folder": null,
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 180.0
+  },
+  "useDefaultConstraints": true
+}
