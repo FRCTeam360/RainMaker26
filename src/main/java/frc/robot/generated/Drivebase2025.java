@@ -149,7 +149,7 @@ public class Drivebase2025 {
   private static final boolean kFrontLeftSteerMotorInverted = false;
   private static final boolean kFrontLeftEncoderInverted = true;
 
-  private static final Distance kFrontLeftXPos = Inches.of(11.375);
+  private static final Distance kFrontLeftXPos = Inches.of(-11.375);
   private static final Distance kFrontLeftYPos = Inches.of(11.375);
 
   // Front Right
@@ -160,7 +160,7 @@ public class Drivebase2025 {
   private static final boolean kFrontRightSteerMotorInverted = false;
   private static final boolean kFrontRightEncoderInverted = true;
 
-  private static final Distance kFrontRightXPos = Inches.of(11.375);
+  private static final Distance kFrontRightXPos = Inches.of(-11.375);
   private static final Distance kFrontRightYPos = Inches.of(-11.375);
 
   // Back Left
@@ -171,7 +171,7 @@ public class Drivebase2025 {
   private static final boolean kBackLeftSteerMotorInverted = false;
   private static final boolean kBackLeftEncoderInverted = true;
 
-  private static final Distance kBackLeftXPos = Inches.of(-11.375);
+  private static final Distance kBackLeftXPos = Inches.of(11.375);
   private static final Distance kBackLeftYPos = Inches.of(11.375);
 
   // Back Right
@@ -182,7 +182,7 @@ public class Drivebase2025 {
   private static final boolean kBackRightSteerMotorInverted = false;
   private static final boolean kBackRightEncoderInverted = true;
 
-  private static final Distance kBackRightXPos = Inches.of(-11.375);
+  private static final Distance kBackRightXPos = Inches.of(11.375);
   private static final Distance kBackRightYPos = Inches.of(-11.375);
 
   public static final SwerveModuleConstants<
