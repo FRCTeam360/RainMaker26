@@ -618,6 +618,51 @@ public final class Constants {
 
     public static final double SHOOT_MIN_DISTANCE_METERS = 0.0;
     public static final double SHOOT_MAX_DISTANCE_METERS = 5.0;
+
+    // === PATHPLANNER CONFIG ===
+    // Geometric values mirror the generated Drivebase2025.java (wheel radius 2 in, drive gearing
+    // 6.746031746031747, module offsets 11.375 in = 0.2886 m). NOTE: in that generated file the
+    // FRONT modules are at NEGATIVE X (front = -X), so the PathPlanner module locations below use
+    // the same sign convention. Verify the physical mounting before driving.
+    public static final double WHEEL_RADIUS_METERS = 0.0508; // 2 inches
+    public static final double MAX_DRIVE_SPEED_MPS = 4.58; // kSpeedAt12Volts
+    public static final double DRIVE_GEARING = 6.746031746031747;
+    public static final double MODULE_OFFSET_METERS = 11.375 * 0.0254; // 11.375 inches
+    public static final double DRIVE_CURRENT_LIMIT_AMPS = 70.0; // supply limit from generated file
+
+    // TODO: Measure the actual robot — these are placeholder starting values for the drivebase.
+    public static final double MASS_KG = 30.0;
+    public static final double MOI = 2.0;
+    public static final double WHEEL_COF = 1.3;
+
+    /**
+     * Creates a hardcoded RobotConfig for the 2025 drivebase.
+     *
+     * <p>Geometric values mirror the generated Drivebase2025.java (note the negative-front-X
+     * convention there). Mass/MOI/COF are placeholders — measure before the real auto runs.
+     *
+     * @return RobotConfig for the 2025 drivebase
+     */
+    public static RobotConfig createPathPlannerConfig() {
+      ModuleConfig moduleConfig =
+          new ModuleConfig(
+              WHEEL_RADIUS_METERS,
+              MAX_DRIVE_SPEED_MPS,
+              WHEEL_COF,
+              DCMotor.getKrakenX60Foc(1),
+              DRIVE_GEARING,
+              DRIVE_CURRENT_LIMIT_AMPS,
+              1);
+
+      return new RobotConfig(
+          MASS_KG,
+          MOI,
+          moduleConfig,
+          new Translation2d(-MODULE_OFFSET_METERS, MODULE_OFFSET_METERS), // Front Left
+          new Translation2d(-MODULE_OFFSET_METERS, -MODULE_OFFSET_METERS), // Front Right
+          new Translation2d(MODULE_OFFSET_METERS, MODULE_OFFSET_METERS), // Back Left
+          new Translation2d(MODULE_OFFSET_METERS, -MODULE_OFFSET_METERS)); // Back Right
+    }
   }
 
   public static final class SerialAddressConstants {

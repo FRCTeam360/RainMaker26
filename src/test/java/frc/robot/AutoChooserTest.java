@@ -9,6 +9,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.AutoChooser.AutoZone;
+import frc.robot.autos.DrivebaseAutos;
 import frc.robot.autos.NamedAutoWithPose;
 import frc.robot.utils.FieldConstants;
 import frc.robot.utils.FieldConstants.LinesHorizontal;
@@ -35,6 +36,12 @@ class AutoChooserTest {
 
   private static NamedAutoWithPose autoAt(double x, double y) {
     return new NamedAutoWithPose("test", Commands.none(), new Pose2d(x, y, new Rotation2d()));
+  }
+
+  /** Drivebase autos ([Drivebase] prefix) are drive-only test routines: shown for any side. */
+  private static NamedAutoWithPose drivebaseAutoAt(double x, double y) {
+    return new NamedAutoWithPose(
+        DrivebaseAutos.AUTO_PREFIX + "test", Commands.none(), new Pose2d(x, y, new Rotation2d()));
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
@@ -177,6 +184,29 @@ class AutoChooserTest {
   void matchesAllianceWithoutAllianceMatchesAny() {
     assertTrue(AutoChooser.matchesAlliance(autoAt(BLUE_X, 4.0), NO_ALLIANCE));
     assertTrue(AutoChooser.matchesAlliance(autoAt(RED_X, 4.0), NO_ALLIANCE));
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Drivebase autos — [Drivebase] prefix bypasses alliance/zone filtering
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  @Test
+  void drivebaseAutoMatchesAllianceRegardlessOfPose() {
+    assertTrue(AutoChooser.matchesAlliance(drivebaseAutoAt(BLUE_X, 4.0), BLUE));
+    assertTrue(AutoChooser.matchesAlliance(drivebaseAutoAt(BLUE_X, 4.0), RED));
+    assertTrue(AutoChooser.matchesAlliance(drivebaseAutoAt(MIDFIELD_X, 4.0), RED));
+    assertTrue(AutoChooser.matchesAlliance(drivebaseAutoAt(MIDFIELD_X, 4.0), BLUE));
+    assertTrue(AutoChooser.matchesAlliance(drivebaseAutoAt(RED_X, 4.0), BLUE));
+    assertTrue(AutoChooser.matchesAlliance(drivebaseAutoAt(RED_X, 4.0), RED));
+  }
+
+  @Test
+  void drivebaseAutoMatchesZoneRegardlessOfPose() {
+    for (AutoZone zone : AutoZone.values()) {
+      if (zone == AutoZone.ALL) continue;
+      assertTrue(AutoChooser.matchesZone(drivebaseAutoAt(MIDFIELD_X, 4.0), zone, BLUE));
+      assertTrue(AutoChooser.matchesZone(drivebaseAutoAt(MIDFIELD_X, 4.0), zone, RED));
+    }
   }
 
   // ─────────────────────────────────────────────────────────────────────────────

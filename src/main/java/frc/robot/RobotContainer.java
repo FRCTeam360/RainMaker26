@@ -108,7 +108,6 @@ public class RobotContainer {
 
   // The robot's subsystems and commands are defined here...
   private CommandSwerveDrivetrain drivetrain;
-  // Null when autos are disabled (2025 drivebase).
   private final AutoChooser autoChooser;
   private Flywheel flywheel;
   private Hood hood;
@@ -151,11 +150,8 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    // Pre-load all PathPlanner path files into memory to avoid disk I/O during auto.
-    // Skipped for the 2025 drivebase, which runs no autos at all.
-    if (Constants.getRobotType() != RobotType.DRIVEBASE_2025) {
-      PathProvider.initialize();
-    }
+    // Pre-load all PathPlanner path files into memory to avoid disk I/O during auto
+    PathProvider.initialize();
 
     switch (Constants.getRobotType()) {
       case SIM:
@@ -283,8 +279,7 @@ public class RobotContainer {
         indexerToFlywheelSeconds = Constants.PracticeBotConstants.INDEXER_TO_FLYWHEEL_SECONDS;
         break;
       case DRIVEBASE_2025:
-        // 2025 drivebase test robot: QuestNav-only wiring. Everything else is NOOP IO, and
-        // autos are disabled (see the robot construction below and CommandSwerveDrivetrain).
+        // 2025 drivebase test robot: QuestNav-only wiring. Everything else is NOOP IO.
         drivetrain = Drivebase2025.createDrivetrain();
         flywheel = new Flywheel(new FlywheelIONoop());
         hood = new Hood(new HoodIONoop());
@@ -418,69 +413,57 @@ public class RobotContainer {
             drivetrain::getPosition,
             robotShootingInfo.robotToShooter(),
             indexerToFlywheelSeconds);
-    // Autonomous/PathPlanner is disabled entirely for the 2025 drivebase: no NamedCommands.
-    if (Constants.getRobotType() != RobotType.DRIVEBASE_2025) {
-      registerPathplannerCommand(
-          "basic intake", superStructure.setIntakeStateCommand(IntakeWantedStates.INTAKING));
-      registerPathplannerCommand("shoot at hub", shootAtHubCommand());
-      registerPathplannerCommand(
-          "stow intake", superStructure.setIntakeStateCommand(IntakeWantedStates.STOWED));
-      registerPathplannerCommand(
-          "default", superStructure.setStateCommand(SuperWantedStates.DEFAULT));
-      registerPathplannerCommand(
-          "deploy intake", superStructure.setIntakeStateCommand(IntakeWantedStates.DEPLOYED));
-      registerPathplannerCommand(
-          "agitate intake", superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING));
-      registerPathplannerCommand(
-          "shoot without timer",
-          superStructure
-              .setStateCommand(SuperWantedStates.SHOOT_AT_HUB)
-              .alongWith(
-                  drivetrain.faceAngleWhileDrivingCommand(
-                      () -> 0, () -> 0, () -> hubShotCalculator.calculateShot().targetHeading()))
-              .alongWith(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING))
-              .handleInterrupt(
-                  () -> {
-                    superStructure.setWantedSuperState(SuperWantedStates.DEFAULT);
-                    superStructure.setIntakeState(IntakeWantedStates.DEPLOYED);
-                  }));
-      registerPathplannerCommand(
-          "start shooting while moving",
-          Commands.runOnce(
-                  () ->
-                      drivetrain.setAutoRotationOverride(
-                          () -> hubShotCalculator.calculateShot().targetHeading()))
-              .andThen(superStructure.setStateCommand(SuperWantedStates.SHOOT_AT_HUB))
-              .alongWith(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING)));
-      registerPathplannerCommand(
-          "stop shooting while moving",
-          Commands.runOnce(() -> drivetrain.clearAutoRotationOverride())
-              .andThen(
-                  superStructure
-                      .setStateCommand(SuperWantedStates.DEFAULT)
-                      .alongWith(
-                          superStructure.setIntakeStateCommand(IntakeWantedStates.DEPLOYED))));
-    }
+    registerPathplannerCommand(
+        "basic intake", superStructure.setIntakeStateCommand(IntakeWantedStates.INTAKING));
+    registerPathplannerCommand("shoot at hub", shootAtHubCommand());
+    registerPathplannerCommand(
+        "stow intake", superStructure.setIntakeStateCommand(IntakeWantedStates.STOWED));
+    registerPathplannerCommand(
+        "default", superStructure.setStateCommand(SuperWantedStates.DEFAULT));
+    registerPathplannerCommand(
+        "deploy intake", superStructure.setIntakeStateCommand(IntakeWantedStates.DEPLOYED));
+    registerPathplannerCommand(
+        "agitate intake", superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING));
+    registerPathplannerCommand(
+        "shoot without timer",
+        superStructure
+            .setStateCommand(SuperWantedStates.SHOOT_AT_HUB)
+            .alongWith(
+                drivetrain.faceAngleWhileDrivingCommand(
+                    () -> 0, () -> 0, () -> hubShotCalculator.calculateShot().targetHeading()))
+            .alongWith(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING))
+            .handleInterrupt(
+                () -> {
+                  superStructure.setWantedSuperState(SuperWantedStates.DEFAULT);
+                  superStructure.setIntakeState(IntakeWantedStates.DEPLOYED);
+                }));
+    registerPathplannerCommand(
+        "start shooting while moving",
+        Commands.runOnce(
+                () ->
+                    drivetrain.setAutoRotationOverride(
+                        () -> hubShotCalculator.calculateShot().targetHeading()))
+            .andThen(superStructure.setStateCommand(SuperWantedStates.SHOOT_AT_HUB))
+            .alongWith(superStructure.setIntakeStateCommand(IntakeWantedStates.AGITATING)));
+    registerPathplannerCommand(
+        "stop shooting while moving",
+        Commands.runOnce(() -> drivetrain.clearAutoRotationOverride())
+            .andThen(
+                superStructure
+                    .setStateCommand(SuperWantedStates.DEFAULT)
+                    .alongWith(superStructure.setIntakeStateCommand(IntakeWantedStates.DEPLOYED))));
 
     configVision();
     configDefaultDrivingCommand();
     configureBindings();
 
-    // Autos are disabled for the 2025 drivebase: no AutoChooser, no PathPlanner warmup.
-    if (Constants.getRobotType() != RobotType.DRIVEBASE_2025) {
-      autoChooser = new AutoChooser(drivetrain, superStructure, this::shootAtHubCommand);
-      CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
-    } else {
-      autoChooser = null;
-    }
+    autoChooser = new AutoChooser(drivetrain, superStructure, this::shootAtHubCommand);
+    CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
     // Uncomment this if pathplanner starts to suck on loading
     // CommandScheduler.getInstance().schedule(PathfindingCommand.warmupCommand());
   }
 
   public void disabledPeriodic() {
-    if (autoChooser == null) {
-      return;
-    }
     if (!hasAutoRun) {
       autoChooser.update();
       String selectedName = autoChooser.getSelectedName();
@@ -488,7 +471,6 @@ public class RobotContainer {
         Optional<Pose2d> selectedStartingPose = autoChooser.getSelectedStartingPose();
         if (selectedStartingPose.isPresent()) {
           drivetrain.resetPose(selectedStartingPose.get());
-          vision.setPose(selectedStartingPose.get());
         }
         chosenAutoName = selectedName;
       }
@@ -825,10 +807,7 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    // No autos are run in this config (2025 drivebase) — nothing to schedule.
-    if (autoChooser == null) {
-      return null;
-    }
+    // An example command will be run in autonomous
     return autoChooser.getSelected();
   }
 }

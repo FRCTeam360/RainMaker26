@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.autos.BLineAutos;
+import frc.robot.autos.DrivebaseAutos;
 import frc.robot.autos.NamedAutoWithPose;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.SuperStructure;
@@ -70,26 +71,36 @@ public class AutoChooser {
       Supplier<Command> shootAtHubSupplier) {
     List<NamedAutoWithPose> autos = new ArrayList<>();
 
-    for (String autoName : AutoBuilder.getAllAutoNames()) {
-      String displayName = PATH_PLANNER_PREFIX + autoName;
-      Command autoCommand = AutoBuilder.buildAuto(autoName);
-      if (autoCommand instanceof PathPlannerAuto auto) {
-        Pose2d startingPose = auto.getStartingPose();
-        if (startingPose != null) {
-          autoStartingPoses.put(displayName, startingPose);
-          autos.add(new NamedAutoWithPose(displayName, autoCommand, startingPose));
-        } else {
-          Logger.recordOutput("PathPlannerAutos/MissingStartPose", autoName);
-        }
-      } else {
-        Logger.recordOutput("PathPlannerAutos/FailedCast", autoName);
+    // The 2025 drivebase is a drive-only QuestNav test robot: it runs only its own drive-only
+    // autos, so the comp-bot autos (PathPlanner/BLine) are skipped entirely. The deploy folder is
+    // left untouched so those autos stay available for the other robot types.
+    if (Constants.getRobotType() == Constants.RobotType.DRIVEBASE_2025) {
+      for (NamedAutoWithPose drivebaseAuto : new DrivebaseAutos(drivetrain).getNamedAutos()) {
+        autoStartingPoses.put(drivebaseAuto.name(), drivebaseAuto.startingPose());
+        autos.add(drivebaseAuto);
       }
-    }
+    } else {
+      for (String autoName : AutoBuilder.getAllAutoNames()) {
+        String displayName = PATH_PLANNER_PREFIX + autoName;
+        Command autoCommand = AutoBuilder.buildAuto(autoName);
+        if (autoCommand instanceof PathPlannerAuto auto) {
+          Pose2d startingPose = auto.getStartingPose();
+          if (startingPose != null) {
+            autoStartingPoses.put(displayName, startingPose);
+            autos.add(new NamedAutoWithPose(displayName, autoCommand, startingPose));
+          } else {
+            Logger.recordOutput("PathPlannerAutos/MissingStartPose", autoName);
+          }
+        } else {
+          Logger.recordOutput("PathPlannerAutos/FailedCast", autoName);
+        }
+      }
 
-    BLineAutos bLineAutos = new BLineAutos(drivetrain, superStructure, shootAtHubSupplier);
-    for (NamedAutoWithPose bLineAuto : bLineAutos.getNamedAutos()) {
-      autoStartingPoses.put(bLineAuto.name(), bLineAuto.startingPose());
-      autos.add(bLineAuto);
+      BLineAutos bLineAutos = new BLineAutos(drivetrain, superStructure, shootAtHubSupplier);
+      for (NamedAutoWithPose bLineAuto : bLineAutos.getNamedAutos()) {
+        autoStartingPoses.put(bLineAuto.name(), bLineAuto.startingPose());
+        autos.add(bLineAuto);
+      }
     }
 
     autos.sort((a, b) -> a.name().compareToIgnoreCase(b.name()));
@@ -151,6 +162,11 @@ public class AutoChooser {
 
   static boolean matchesAlliance(NamedAutoWithPose auto, Optional<Alliance> alliance) {
     String name = auto.name();
+    // Drivebase autos are drive-only QuestNav test routines and don't depend on the starting
+    // alliance side; show them for either alliance.
+    if (name.startsWith(DrivebaseAutos.AUTO_PREFIX)) {
+      return true;
+    }
     if (alliance.isEmpty()) {
       System.out.println("[AutoChooser] No alliance set, adding: " + name);
       return true;
@@ -183,6 +199,10 @@ public class AutoChooser {
 
   static boolean matchesZone(NamedAutoWithPose auto, AutoZone zone, Optional<Alliance> alliance) {
     if (zone == AutoZone.ALL) {
+      return true;
+    }
+    // Drivebase autos start at field center and are alliance/zone-agnostic.
+    if (auto.name().startsWith(DrivebaseAutos.AUTO_PREFIX)) {
       return true;
     }
     Pose2d startingPose = auto.startingPose();

@@ -600,16 +600,13 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   private static final double PP_ROTATION_KD = 0.0;
 
   private void configureAutoBuilder() {
-    // Autonomous and PathPlanner are disabled entirely for the 2025 drivebase — skip the
-    // RobotConfig load and AutoBuilder configuration altogether.
-    if (Constants.getRobotType() == Constants.RobotType.DRIVEBASE_2025) {
-      return;
-    }
     try {
       RobotConfig config;
       // TODO rework this so it's unified with the top level robot builder class
       if (Constants.getRobotType() == Constants.RobotType.WOODBOT) {
         config = Constants.WoodBotConstants.createPathPlannerConfig();
+      } else if (Constants.getRobotType() == Constants.RobotType.DRIVEBASE_2025) {
+        config = Constants.Drivebase2025Constants.createPathPlannerConfig();
       } else {
         config = RobotConfig.fromGUISettings();
       }
